@@ -1,6 +1,7 @@
 {% comment %}
-  ADMIN POWERS — V10 (SECTION FILE)
+  ADMIN POWERS — V11 (SECTION FILE)
   - Self-contained section (no Custom Liquid block needed).
+  - V11: Route all calls to Railway (remove Mechanic URL). Remove credentials:include from fetches.
   - God Mode: Ryan Irwin hardcoded + super-admin tag.
   - QR code, public toggle, invite/remove members.
   - Premium design upgrade.
@@ -356,7 +357,7 @@
     window.SSAP = window.SSAP || {};
     SSAP.collectionHandle = {{ collection_handle | json }};
     SSAP.shopHandle = {{ shop_handle | json }};
-    SSAP.mechanicUrl = "https://webhooks.mechanic.dev/582ce69e-ceda-4086-9416-d0cd52260ce9";
+    SSAP.railwayUrl = "https://studio-uploader-production.up.railway.app";
   </script>
 
   <!-- HERO HEADER -->
@@ -546,7 +547,7 @@
       requested_by_customer_id: {{ customer.id | json }},
       requested_by_email: {{ customer.email | json }}
     }, payload || {});
-    return fetch(SSAP.mechanicUrl, {
+    return fetch(SSAP.railwayUrl + '/api/admin-action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -632,7 +633,7 @@
   document.getElementById('apBtnRemove').addEventListener('click', function(){ handleMemberAction('remove'); });
 
   // ── NUKE STORE ────────────────────────────────────────────
-  var NUKE_BACKEND_URL = 'https://studio-uploader-production.up.railway.app';
+  var NUKE_BACKEND_URL = SSAP.railwayUrl;
   var NUKE_HANDLE = String(SSAP.shopHandle || '');
   var apNukeBtn = document.getElementById('apNukeBtn');
   var apNukeOverlay = document.getElementById('apNukeOverlay');
@@ -680,8 +681,7 @@
     try {
       var res = await fetch(NUKE_BACKEND_URL + '/api/storefront/' + encodeURIComponent(NUKE_HANDLE) + '/nuke', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if(!res.ok){
@@ -704,9 +704,7 @@
       var lastLog = 0;
       var pollInterval = setInterval(async function(){
         try {
-          var pollRes = await fetch(NUKE_BACKEND_URL + '/api/job/' + encodeURIComponent(jobId), {
-            credentials: 'include'
-          });
+          var pollRes = await fetch(NUKE_BACKEND_URL + '/api/job/' + encodeURIComponent(jobId));
           if(!pollRes.ok){ appendNukeLog('Poll error: ' + pollRes.status); return; }
           var job = await pollRes.json();
           var lines = job.log || [];
