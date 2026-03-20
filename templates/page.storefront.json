@@ -1,0 +1,46 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "blocks": {
+        "custom_liquid_rU7fPy": {
+          "type": "custom-liquid",
+          "name": "t:names.custom_liquid",
+          "settings": {
+            "custom_liquid": "{% unless customer %}\n  {% assign return_to = '/pages/request-storefront-form' %}\n\n  <div style=\"max-width:600px;margin:60px auto;text-align:center;\">\n    <h2>You must be signed in to request a storefront</h2>\n    <p>Create an account or sign in to continue.</p>\n\n    <a\n      href=\"/account/login?return_url={{ return_to | url_encode }}\"\n      style=\"display:inline-block;margin-top:20px;padding:12px 20px;border-radius:999px;background:#0b0b0b;color:#fff;font-weight:900;text-decoration:none;\"\n    >\n      Sign in\n    </a>\n  </div>\n{% else %}\n  {%- comment -%} Logged in: show nothing here (form displays below / elsewhere) {%- endcomment -%}\n{% endunless %}"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "custom_liquid_rU7fPy"
+      ],
+      "disabled": true,
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 0
+      }
+    },
+    "request_storefront_form_4t7z6V": {
+      "type": "request-storefront-form",
+      "name": "Store Request Form",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "request_storefront_form_4t7z6V"
+  ]
+}

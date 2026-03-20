@@ -1,0 +1,42 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "custom_css": [
+        "/* Hide the “helper” app block instance of the form on the page */.ss-globo-helper {display: none !important;}"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 80
+      }
+    },
+    "custom_liquid_6izVhc": {
+      "type": "custom-liquid",
+      "name": "t:names.custom_liquid",
+      "settings": {
+        "custom_liquid": "<style>\n  /* --- CONTAINER --- */\n  .ss-about-wrapper {\n    max-width: 800px;\n    margin: 80px auto;\n    padding: 0 24px;\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    color: #111;\n  }\n\n  /* --- HERO SECTION --- */\n  .ss-about-hero {\n    border-bottom: 1px solid #eaeaea;\n    padding-bottom: 40px;\n    margin-bottom: 60px;\n  }\n\n  .ss-about-h1 {\n    font-size: 46px;\n    font-weight: 800;\n    letter-spacing: -1.5px;\n    line-height: 1.1;\n    margin-bottom: 24px;\n    color: #111;\n  }\n\n  .ss-about-lead {\n    font-size: 21px;\n    line-height: 1.6;\n    color: #444;\n    font-weight: 400;\n    max-width: 720px;\n  }\n\n  /* --- THE STORY BLOCKS --- */\n  .ss-story-block {\n    margin-bottom: 70px;\n  }\n\n  .ss-story-h2 {\n    font-size: 22px;\n    font-weight: 700;\n    margin-bottom: 16px;\n    display: flex;\n    align-items: center;\n    gap: 12px;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    color: #111;\n  }\n\n  .ss-story-p {\n    font-size: 17px;\n    line-height: 1.7;\n    color: #555;\n    margin-bottom: 20px;\n  }\n  \n  /* Blockquote for the \"New Guy\" story */\n  .ss-story-quote {\n    border-left: 4px solid #111;\n    padding-left: 24px;\n    font-style: italic;\n    color: #333;\n    margin: 30px 0;\n    font-size: 18px;\n  }\n\n  /* --- THE BADGE ROW --- */\n  .ss-badge-row {\n    display: flex;\n    gap: 12px;\n    margin-top: 40px;\n    flex-wrap: wrap;\n  }\n\n  .ss-status-pill {\n    background: #f3f4f6;\n    border: 1px solid #e5e5e5;\n    padding: 8px 16px;\n    border-radius: 4px; /* More tactical/square */\n    font-size: 12px;\n    font-weight: 700;\n    color: #111;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n  }\n  \n  .ss-highlight {\n    background: #111;\n    color: #fff;\n    border-color: #111;\n  }\n\n  /* --- PRODUCT PHILOSOPHY BOX --- */\n  .ss-philosophy-box {\n    background: #f9fafb;\n    border: 1px solid #e5e5e5;\n    padding: 32px;\n    border-radius: 8px;\n    margin-top: 40px;\n  }\n  \n  .ss-phil-title {\n    font-weight: 700;\n    font-size: 16px;\n    margin-bottom: 12px;\n    text-transform: uppercase;\n  }\n\n  /* --- SIGNATURE BLOCK --- */\n  .ss-signature {\n    margin-top: 80px;\n    padding-top: 40px;\n    border-top: 1px solid #eaeaea;\n  }\n\n  .ss-sig-name {\n    font-family: \"Courier New\", Courier, monospace;\n    font-size: 18px;\n    font-weight: 700;\n    margin-bottom: 4px;\n    color: #111;\n  }\n\n  .ss-sig-title {\n    font-size: 13px;\n    color: #666;\n    text-transform: uppercase;\n    letter-spacing: 1px;\n    font-weight: 600;\n  }\n\n  @media (max-width: 768px) {\n    .ss-about-h1 { font-size: 34px; }\n    .ss-about-lead { font-size: 18px; }\n  }\n</style>\n\n<div class=\"ss-about-wrapper\">\n\n  <div class=\"ss-about-hero\">\n    <h1 class=\"ss-about-h1\">Ingenuity. Grit. And the end of the clipboard.</h1>\n    <p class=\"ss-about-lead\">\n      We built a logistics platform disguised as a print shop. Because coordinating gear for your team shouldn't be the hardest part of the mission.\n    </p>\n    \n    <div class=\"ss-badge-row\">\n      <div class=\"ss-status-pill ss-highlight\">Veteran Owned</div>\n      <div class=\"ss-status-pill\">Est. 2024</div>\n      <div class=\"ss-status-pill\">Operator Built</div>\n    </div>\n  </div>\n\n  <div class=\"ss-story-block\">\n    <h2 class=\"ss-story-h2\">\n      <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"2\"></circle></svg>\n      The \"New Guy\" Problem\n    </h2>\n    <p class=\"ss-story-p\">\n      The idea for this platform didn't start in a boardroom. It started in a platoon.\n    </p>\n    <p class=\"ss-story-p\">\n      I was the \"New Guy\" in my unit. That meant I got the job nobody else wanted: designing the platoon shirts, collecting cash from 20 guys who were flaky or hesitant, and hoping the printer didn't mess it up.\n    </p>\n    <div class=\"ss-story-quote\">\n      It was a chaotic, manual mess. I spent more time chasing twenty-dollar bills than I did preparing for the actual job.\n    </div>\n    <p class=\"ss-story-p\">\n      Years later, I stood on the sidelines of my kids' sports games and saw the \"Team Moms\" suffering through the exact same thing. Spreadsheets, loose cash, wrong sizes, and stress. I realized that whether you are an operator or a parent, <strong>logistics shouldn't be this hard.</strong>\n    </p>\n  </div>\n\n  <div class=\"ss-story-block\">\n    <h2 class=\"ss-story-h2\">\n      <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M12 2v20M2 12h20\"></path></svg>\n      Why \"Stella & Sage\"?\n    </h2>\n    <p class=\"ss-story-p\">\n      Stella and Sage are my daughters' middle names. I built this company for them—not just to provide for their future, but to teach them a lesson I learned over 18 years in Naval Special Warfare:\n    </p>\n    <p class=\"ss-story-p\">\n      <strong>With minimal tools, ingenuity, and grit, you can solve almost any problem.</strong>\n    </p>\n    <p class=\"ss-story-p\">\n      We don't just print shirts. We build infrastructure that solves problems for teams, squads, and families.\n    </p>\n  </div>\n\n  <div class=\"ss-story-block\">\n    <h2 class=\"ss-story-h2\">\n      <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path></svg>\n      The Gear Standard\n    </h2>\n    <p class=\"ss-story-p\">\n      I am an avid believer in comfort. If a piece of gear isn't functional <em>and</em> comfortable, it doesn't make the cut. Every item in our catalog is something I have personally ordered, tested, and worn.\n    </p>\n    \n    <div class=\"ss-philosophy-box\">\n      <div class=\"ss-phil-title\">How we select gear:</div>\n      <p class=\"ss-story-p\" style=\"margin-bottom:10px;\">\n        <strong>1. The Premium Tier:</strong> The items with a higher price tag are there for a reason. I didn't skimp on quality. These are the hoodies I wear at home and the tees I train in.\n      </p>\n      <p class=\"ss-story-p\" style=\"margin-bottom:0;\">\n        <strong>2. The Practice Tier:</strong> We also offer cost-effective options specifically for kids. These are meant to be run in, grass-stained, and ruined at practice. It’s okay if they get destroyed—they were only $20.\n      </p>\n    </div>\n  </div>\n\n  <div class=\"ss-signature\">\n    <div class=\"ss-sig-name\">Ryan Irwin</div>\n    <div class=\"ss-sig-title\">Naval Special Warfare Operator // Founder</div>\n  </div>\n\n</div>",
+        "color_scheme": "",
+        "section_width": "page-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    }
+  },
+  "order": [
+    "main",
+    "custom_liquid_6izVhc"
+  ]
+}

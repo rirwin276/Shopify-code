@@ -1,0 +1,40 @@
+{%- doc -%}
+  Horizon-safe product card URL helper
+
+  CRITICAL RULES:
+  - Return ONLY product.url (+variant)
+  - DO NOT include collections
+  - DO NOT include store param
+  - DO NOT use `within`
+  - DO NOT return a full collection path
+
+  Horizon will handle routing.
+{%- enddoc -%}
+
+{% liquid
+  assign variant_to_link = product.selected_or_first_available_variant
+  assign combined_listing_count = product.options_with_values | map: 'values' | map: 'product_url' | compact | size
+
+  unless combined_listing_count > 0
+    if product.featured_media
+      for variant in product.variants
+        if variant.featured_media and variant.featured_media.id == product.featured_media.id
+          assign variant_to_link = variant
+          break
+        endif
+      endfor
+    endif
+  endunless
+
+  assign url_out = product.url
+
+  if variant_to_link and variant_to_link.id
+    if url_out contains '?'
+      assign url_out = url_out | append: '&variant=' | append: variant_to_link.id
+    else
+      assign url_out = url_out | append: '?variant=' | append: variant_to_link.id
+    endif
+  endif
+%}
+
+{{- url_out -}}

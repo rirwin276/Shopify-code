@@ -1,0 +1,143 @@
+{% comment %}
+  Private Store Gate
+  - Allow customers tagged:
+      b2b-<store-handle> OR b2b-admin-<store-handle>
+  - store-handle = current page.handle
+  - If no access: show "No access" card with:
+      - Log in (if logged out)
+      - Request access
+      - Back to portal
+{% endcomment %}
+
+{% assign portal_url = '/pages/portal' %}
+{% assign store_handle = page.handle | downcase | strip %}
+
+{% assign member_tag = 'b2b-' | append: store_handle %}
+{% assign admin_tag  = 'b2b-admin-' | append: store_handle %}
+
+{% assign has_access = false %}
+{% assign is_admin = false %}
+
+{% if customer %}
+  {% for tag in customer.tags %}
+    {% assign t = tag | downcase | strip %}
+    {% if t == member_tag %}
+      {% assign has_access = true %}
+    {% endif %}
+    {% if t == admin_tag %}
+      {% assign has_access = true %}
+      {% assign is_admin = true %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{%- comment -%}
+  Request access URL:
+  - Uses Theme Editor setting if provided
+  - Otherwise falls back to contact anchor
+{%- endcomment -%}
+{% assign request_access_url = section.settings.request_access_url | default: '' | strip %}
+{% if request_access_url == blank %}
+  {% assign request_access_url = routes.contact_url | append: '#request-storefront' %}
+{% endif %}
+
+{%- comment -%}
+  Login URL returns back to THIS page after login
+{%- endcomment -%}
+{% assign login_url = routes.account_login_url | append: '?return_url=' | append: request.path | url_encode %}
+
+{% if has_access %}
+  {%- comment -%}
+    Access granted: show nothing. (Gate should be placed at top of template.)
+    We "use" is_admin here so theme-check doesn't warn.
+  {%- endcomment -%}
+  {% if is_admin %}
+    <!-- Admin access granted -->
+  {% endif %}
+{% else %}
+  <section class="ss-gate">
+    <div class="ss-gate__wrap">
+      <div class="ss-gate__card">
+        <h1 class="ss-gate__title">No access to this private store</h1>
+        <p class="ss-gate__sub">
+          If you believe this is an error, request access below.
+        </p>
+
+        <div class="ss-gate__actions">
+          {% if customer %}
+            <a class="ss-gate__link" href="{{ request_access_url }}" target="_blank" rel="noopener">
+              Request access
+            </a>
+            <span class="ss-gate__sep">|</span>
+            <a class="ss-gate__link" href="{{ portal_url }}">
+              Back to portal
+            </a>
+          {% else %}
+            <a class="ss-gate__btn" href="{{ login_url }}">Sign in to your personal shop</a>
+
+            <div class="ss-gate__mini">
+              <a class="ss-gate__link" href="{{ request_access_url }}" target="_blank" rel="noopener">
+                Request access
+              </a>
+              <span class="ss-gate__sep">|</span>
+              <a class="ss-gate__link" href="{{ portal_url }}">
+                Back to portal
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .ss-gate{ padding: 26px 0; }
+    .ss-gate__wrap{ max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+    .ss-gate__card{
+      background:#fff;
+      border:1px solid rgba(0,0,0,.10);
+      border-radius:18px;
+      box-shadow: 0 12px 26px rgba(0,0,0,.06);
+      padding: 18px;
+    }
+    .ss-gate__title{ margin:0 0 8px; font-size: 44px; line-height:1.05; font-weight:900; letter-spacing:-.02em; }
+    .ss-gate__sub{ margin:0 0 14px; color: rgba(0,0,0,.65); font-size: 14px; }
+    .ss-gate__actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .ss-gate__btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight: 900;
+      text-decoration:none;
+      background:#0b0b0b;
+      color:#fff;
+      border:1px solid rgba(183,163,106,.45);
+      white-space: nowrap;
+    }
+    .ss-gate__btn:hover{ opacity:.92; }
+    .ss-gate__mini{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .ss-gate__link{ font-weight: 900; text-decoration:none; color:#0b0b0b; }
+    .ss-gate__link:hover{ text-decoration:underline; }
+    .ss-gate__sep{ color: rgba(0,0,0,.35); }
+    @media (max-width: 900px){
+      .ss-gate__title{ font-size: 34px; }
+    }
+  </style>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Private Store Gate",
+  "settings": [
+    {
+      "type": "text",
+      "id": "request_access_url",
+      "label": "Request access URL (Google Form or Contact anchor)",
+      "default": "/pages/contact#request-storefront"
+    }
+  ],
+  "presets": [
+    { "name": "Private Store Gate" }
+  ]
+}
+{% endschema %}

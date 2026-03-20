@@ -1,0 +1,18 @@
+{% comment %}
+  Dashboard Link (Login-aware)
+  - Logged in → /pages/portal
+  - Logged out → login → return to /pages/portal
+{% endcomment %}
+
+{% assign dashboard_url = '/pages/portal' %}
+
+{% if customer %}
+  <a href="{{ dashboard_url }}" class="nav-dashboard">
+    Dashboard
+  </a>
+{% else %}
+  {% capture encoded %}{{ dashboard_url | url_encode }}{% endcapture %}
+  <a href="{{ routes.account_login_url }}?return_url={{ encoded }}" class="nav-dashboard">
+    Dashboard
+  </a>
+{% endif %}

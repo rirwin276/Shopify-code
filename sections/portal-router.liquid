@@ -1,0 +1,994 @@
+{% comment %}
+  SHOP DASHBOARD / PRIVATE STORE ACCESS HUB (FULL COPY/PASTE)
+
+  Access logic:
+  - Private store access tag: b2b-<store-handle>
+  - Admin ability tag:       b2b-admin-<store-handle>
+
+  Metaobject type (Theme Editor):
+  - storefront (default)
+  Fields:
+  - display_name (text)
+  - logo (image file)
+  - page (page reference)
+  - subtitle (text)
+  - slug (text)
+
+  Auto-open:
+  - If exactly ONE b2b-* store tag, redirect once per session
+  - Bypass: /pages/portal?stay=1
+{% endcomment %}
+
+{%- comment -%}
+  ✅ NEW: Storefront request flow
+  Dashboard request buttons now go to the EXPLAINER page.
+  Explainer page then sends user to the request form page (you set up separately).
+{%- endcomment -%}
+{% assign explainer_url = '/pages/private-storefronts' %}
+{% assign request_url = explainer_url %}
+
+{% assign account_url = routes.account_url %}
+{% assign portal_url = '/pages/portal' %}
+
+{%- comment -%}
+  ✅ FIXED login return:
+  Encode ONLY the return_url value, not the entire string.
+  (New customer accounts safe)
+{%- endcomment -%}
+{% capture encoded_return %}{{ explainer_url | url_encode }}{% endcapture %}
+{% assign login_url = routes.account_login_url | append: '?return_url=' | append: encoded_return %}
+
+{% assign has_storefront = false %}
+{% assign requested_badge = false %}
+{% assign storefront_tags = '' %}
+
+{% assign store_count = 0 %}
+{% assign admin_count = 0 %}
+
+{%- comment -%}
+  For per-store admin button:
+  Build a delimiter string like: ||store-handle||store-handle-2||
+{%- endcomment -%}
+{% assign admin_handles = '' %}
+
+{% if customer %}
+  {% for tag in customer.tags %}
+    {% assign tag_down = tag | downcase | strip %}
+
+    {% if tag_down == 'storefront-requested' %}
+      {% assign requested_badge = true %}
+    {% endif %}
+
+    {% if tag_down contains 'b2b-admin-' %}
+      {% assign admin_count = admin_count | plus: 1 %}
+      {% assign ah = tag_down | remove: 'b2b-admin-' | strip %}
+      {% if ah != blank %}
+        {% assign admin_handles = admin_handles | append: '||' | append: ah | append: '||' %}
+      {% endif %}
+    {% endif %}
+
+    {%- comment -%}
+      Admin tags contain "b2b-" too, so exclude them from store counting.
+    {%- endcomment -%}
+    {% if tag_down contains 'b2b-admin-' %}
+      {%- comment -%}skip store counting for admin tags{%- endcomment -%}
+    {% elsif tag_down contains 'b2b-' %}
+      {% assign has_storefront = true %}
+      {% assign storefront_tags = storefront_tags | append: tag_down | append: '||' %}
+      {% assign store_count = store_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% assign request_btn_label = 'Request a private store' %}
+{% if has_storefront %}
+  {% assign request_btn_label = 'Request an additional private store' %}
+{% endif %}
+
+{% assign show_marketing = false %}
+{% if customer and has_storefront == false and requested_badge == false %}
+  {% assign show_marketing = true %}
+{% endif %}
+
+{%- comment -%}
+  Metaobject values:
+  Set metaobject type key in Theme Editor (ex: "storefront").
+  Read: shop.metaobjects[<type>].values
+{%- endcomment -%}
+{% assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip %}
+{% assign store_meta = blank %}
+{% if shop.metaobjects[mo_type] and shop.metaobjects[mo_type].values != blank %}
+  {% assign store_meta = shop.metaobjects[mo_type].values %}
+{% endif %}
+
+{%- comment -%}
+  Forms (editable in Theme Editor)
+{%- endcomment -%}
+{% assign form_access_url = section.settings.form_access_url | default: 'https://docs.google.com/forms/d/e/1FAIpQLSeXyVTcuT6jC_A6ifmTHUe9XfQLylEH0zdLIcSUZfdZeW3qCw/viewform?usp=header' %}
+{% assign form_product_url = section.settings.form_product_url | default: 'https://docs.google.com/forms/d/e/1FAIpQLSfdKoUbbJXkj87NHqU7ULYqSJ2m6IhJcC-rYpBMHB_mm05kmg/viewform?usp=header' %}
+
+{%- comment -%}
+  Who can request adding people:
+  - If customer has ANY b2b-admin-* tag -> allowed
+  - Else if allow_any_member_to_add_people is enabled and user has store -> allowed
+  - Else -> not allowed
+{%- endcomment -%}
+{% assign allow_any_member_to_add_people = section.settings.allow_any_member_to_add_people | default: false %}
+{% assign can_add_people_anywhere = false %}
+{% if customer %}
+  {% if admin_count > 0 %}
+    {% assign can_add_people_anywhere = true %}
+  {% elsif allow_any_member_to_add_people and has_storefront %}
+    {% assign can_add_people_anywhere = true %}
+  {% endif %}
+{% endif %}
+
+{% assign display_name = '' %}
+{% if customer %}
+  {% capture nm %}{{ customer.first_name }} {{ customer.last_name }}{% endcapture %}
+  {% assign display_name = nm | strip %}
+{% endif %}
+
+<section class="ss-portal" data-ss-portal>
+  <div class="ss-wrap">
+
+    <div class="ss-head">
+      <h1 class="ss-h1">Shop Dashboard</h1>
+      <p class="ss-sub">
+        Access your private store(s) for quick reorders. Manage your account, request new items, or request access for additional people.
+      </p>
+    </div>
+
+    {% unless customer %}
+      <div class="ss-card ss-card--hero">
+        <div class="ss-hero-left">
+          <p class="ss-title">Log in to continue</p>
+          <p class="ss-muted">After you sign in, your private store access and reorder links will appear here.</p>
+        </div>
+        <div class="ss-hero-right">
+          <a class="ss-btn ss-btn--solid" href="{{ login_url }}">Log in</a>
+          {%- comment -%} ✅ FIX: Request goes to login then explainer {%- endcomment -%}
+          <a class="ss-btn ss-btn--ghost" href="{{ login_url }}">Request a private store</a>
+        </div>
+      </div>
+
+    {% else %}
+
+      <!-- PROFILE CARD -->
+      <div class="ss-card ss-profile">
+        <div class="ss-profile-left">
+          <div class="ss-avatar" aria-hidden="true">
+            {{ customer.email | slice: 0, 1 | upcase }}
+          </div>
+
+          <div class="ss-profile-meta">
+            <div class="ss-profile-name">
+              {% if display_name != blank %}
+                {{ display_name }}
+              {% else %}
+                {{ customer.email }}
+              {% endif %}
+            </div>
+            <div class="ss-profile-sub">Signed in as {{ customer.email }}</div>
+
+            <div class="ss-badges" style="margin-top:8px;">
+              {% if has_storefront %}
+                <span class="ss-badge"><span class="ss-dot"></span> {{ store_count }} store{% if store_count != 1 %}s{% endif %}</span>
+              {% else %}
+                <span class="ss-badge"><span class="ss-dot"></span> No private store access yet</span>
+              {% endif %}
+
+              {% if admin_count > 0 %}
+                <span class="ss-badge"><span class="ss-dot"></span> Admin on {{ admin_count }} store{% if admin_count != 1 %}s{% endif %}</span>
+              {% endif %}
+
+              {% if requested_badge %}
+                <span class="ss-badge"><span class="ss-dot"></span> Request received — under review</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="ss-profile-right">
+          {%- comment -%} ✅ FIX: Request goes to explainer (not Google form) {%- endcomment -%}
+          <a class="ss-btn ss-btn--ghost" href="{{ request_url }}">{{ request_btn_label }}</a>
+          <a class="ss-btn ss-btn--ghost" href="{{ account_url }}">My Account / Orders</a>
+        </div>
+      </div>
+
+      <!-- YOUR STORES (ABOVE REQUESTS) -->
+      {% if has_storefront %}
+        {% assign tags_array = storefront_tags | split: '||' %}
+
+        <div class="ss-card ss-stores">
+          <div class="ss-stores-head">
+            <div>
+              <p class="ss-title" style="margin:0 0 4px;">Your stores</p>
+              <p class="ss-muted" style="margin:0;">Open a private store to browse approved items and reorder fast.</p>
+            </div>
+          </div>
+
+          {% if store_count > 4 %}
+            <div class="ss-storetools">
+              <input class="ss-storesearch" type="search" placeholder="Search your stores…" data-ss-store-search aria-label="Search your stores">
+              <div class="ss-storecount">Showing <span data-ss-store-visible>{{ store_count }}</span> of {{ store_count }}</div>
+            </div>
+          {% endif %}
+
+          <div class="ss-storegrid-wrap {% if store_count > 4 %}is-scroll{% endif %}">
+            <div class="ss-storegrid" data-ss-storegrid>
+              {% for t in tags_array %}
+                {% if t != blank %}
+                  {% assign handle = t | remove: 'b2b-' | strip %}
+                  {% assign fallback_url = '/pages/' | append: handle %}
+                  {% assign nice_name = handle | replace: '-', ' ' | capitalize %}
+
+                  {% assign tile_logo = blank %}
+                  {% assign tile_name = nice_name %}
+                  {% assign tile_sub = 'Your dedicated reorder page for approved products' %}
+                  {% assign tile_url = fallback_url %}
+
+                  {%- comment -%} per-store admin check (FIXED) {%- endcomment -%}
+                  {% assign tile_is_admin = false %}
+                  {% capture admin_needle %}||{{ handle }}||{% endcapture %}
+                  {% if admin_handles contains admin_needle %}
+                    {% assign tile_is_admin = true %}
+                  {% endif %}
+
+                  {% if store_meta != blank %}
+                    {% for mo in store_meta %}
+                      {% assign mo_page = mo.page.value | default: mo.page %}
+                      {% assign mo_slug = mo.slug.value | default: mo.slug %}
+                      {% assign mo_handle = '' %}
+
+                      {% if mo_page != blank and mo_page.handle != blank %}
+                        {% assign mo_handle = mo_page.handle | downcase | strip %}
+                      {% elsif mo_slug != blank %}
+                        {% assign mo_handle = mo_slug | downcase | strip %}
+                      {% endif %}
+
+                      {% if mo_handle == handle %}
+                        {% assign mo_logo = mo.logo.value | default: mo.logo %}
+                        {% if mo_logo != blank %}{% assign tile_logo = mo_logo %}{% endif %}
+
+                        {% assign mo_name = mo.display_name.value | default: mo.display_name %}
+                        {% if mo_name != blank %}{% assign tile_name = mo_name %}{% endif %}
+
+                        {% assign mo_sub = mo.subtitle.value | default: mo.subtitle %}
+                        {% if mo_sub != blank %}{% assign tile_sub = mo_sub %}{% endif %}
+
+                        {% if mo_page != blank and mo_page.url != blank %}
+                          {% assign tile_url = mo_page.url %}
+                        {% endif %}
+
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+
+                  <div class="ss-storeitem" data-ss-storecard data-search="{{ tile_name | strip | downcase }} {{ tile_sub | strip | downcase }} {{ handle | strip | downcase }}">
+                    <a class="ss-storecard" href="{{ tile_url }}">
+                      <div class="ss-storecard-left">
+                        <div class="ss-storelogo" aria-hidden="true">
+                          {% if tile_logo != blank %}
+                            {{ tile_logo | image_url: width: 260 | image_tag: class: 'ss-storelogo-img', loading: 'lazy', alt: tile_name }}
+                          {% else %}
+                            S&amp;S
+                          {% endif %}
+                        </div>
+
+                        <div class="ss-storetext">
+                          <div class="ss-storename">{{ tile_name }}</div>
+                          <div class="ss-storesub">{{ tile_sub }}</div>
+                        </div>
+                      </div>
+
+                      <div class="ss-storecard-right">
+                        <span class="ss-openpill">Open</span>
+                      </div>
+                    </a>
+
+                    {% if tile_is_admin %}
+                      <a class="ss-adminbtn" href="/pages/admin-powers?store={{ handle | url_encode }}">Admin powers</a>
+                    {% endif %}
+                  </div>
+
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+      {% else %}
+        <div class="ss-card ss-empty">
+          {% if requested_badge %}
+            <p><strong>Request received.</strong> We’re reviewing your details now. Once approved, your private store will appear here automatically.</p>
+          {% else %}
+            <p><strong>No private store access yet.</strong> Request access and we’ll set up your dedicated reorder page.</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- REQUESTS & ACCESS (BELOW STORES) -->
+      <div class="ss-card ss-actions">
+        <div class="ss-actions-head">
+          <p class="ss-title" style="margin:0 0 4px;">Requests &amp; access</p>
+          <p class="ss-muted" style="margin:0;">
+            Request new items for your store, or request access for additional people (admins only by default).
+          </p>
+        </div>
+
+        <div class="ss-actions-grid">
+          <div class="ss-actions-box">
+            <div>
+              <div class="ss-actions-box-title">Need a new product?</div>
+              <div class="ss-actions-box-sub">Request a new item, design, logo update, or reorder option.</div>
+            </div>
+            <div>
+              {% if has_storefront %}
+                <a class="ss-btn ss-btn--solid" href="{{ form_product_url }}" target="_blank" rel="noopener">Request new product</a>
+                <div class="ss-actions-note">We’ll review and add approved items to the correct store.</div>
+              {% else %}
+                <div class="ss-warn">You’ll be able to request products after you’re granted store access.</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="ss-actions-box">
+            <div>
+              <div class="ss-actions-box-title">Add people to a store</div>
+              <div class="ss-actions-box-sub">Request access for teammates, coworkers, or family. We approve additions to keep stores secure.</div>
+            </div>
+            <div>
+              {% if can_add_people_anywhere %}
+                <a class="ss-btn ss-btn--solid" href="{{ form_access_url }}" target="_blank" rel="noopener">Request store access</a>
+                <div class="ss-actions-note">We still approve access before granting tags.</div>
+              {% else %}
+                <div class="ss-warn">To add people, contact your store admin or Stella &amp; Sage.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if show_marketing %}
+        <!-- HOW IT WORKS -->
+        <div class="ss-explainer">
+          <div class="ss-explainer-top">
+            <h2 class="ss-h2">{{ section.settings.how_title }}</h2>
+            <p class="ss-h2-sub">{{ section.settings.how_subtitle }}</p>
+          </div>
+
+          <div class="ss-steps">
+            <div class="ss-step">
+              <div class="ss-step-title">1) {{ section.settings.step1_title }}</div>
+              <div class="ss-step-body">{{ section.settings.step1_body }}</div>
+            </div>
+            <div class="ss-step">
+              <div class="ss-step-title">2) {{ section.settings.step2_title }}</div>
+              <div class="ss-step-body">{{ section.settings.step2_body }}</div>
+            </div>
+            <div class="ss-step">
+              <div class="ss-step-title">3) {{ section.settings.step3_title }}</div>
+              <div class="ss-step-body">{{ section.settings.step3_body }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXAMPLES CAROUSEL -->
+        <div class="ss-carousel" data-ss-carousel>
+          <div class="ss-carousel-head">
+            <h3 class="ss-carousel-title">{{ section.settings.examples_title }}</h3>
+            <p class="ss-carousel-sub">{{ section.settings.examples_subtitle }}</p>
+
+            {% if section.settings.examples_show_cta %}
+              <a class="ss-btn ss-btn--solid ss-carousel-cta" href="{{ request_url }}">
+                {{ section.settings.examples_cta_label }}
+              </a>
+            {% endif %}
+          </div>
+
+          <div class="ss-carousel-shell">
+            <button class="ss-arrow ss-arrow--left" type="button" aria-label="Previous" data-ss-prev>&lsaquo;</button>
+
+            <div class="ss-track" data-ss-track>
+              {% assign slide_count = 0 %}
+              {% for block in section.blocks %}
+                {% if block.type == 'example' %}
+                  {% assign slide_count = slide_count | plus: 1 %}
+                  <div class="ss-slide" data-ss-slide {{ block.shopify_attributes }}>
+                    <div class="ss-slide-inner">
+                      {% if block.settings.image != blank %}
+                        {{ block.settings.image
+                          | image_url: width: 1600
+                          | image_tag:
+                            class: 'ss-slide-img',
+                            loading: 'lazy',
+                            alt: block.settings.alt | default: 'Example branded product'
+                        }}
+                      {% else %}
+                        <div class="ss-slide-placeholder">Add an image</div>
+                      {% endif %}
+
+                      {% if block.settings.caption != blank %}
+                        <div class="ss-slide-cap">{{ block.settings.caption }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+
+              {% if slide_count == 0 %}
+                <div class="ss-slide" data-ss-slide>
+                  <div class="ss-slide-inner">
+                    <div class="ss-slide-placeholder">Add 6 “Example slide” blocks in the Theme Editor</div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+
+            <button class="ss-arrow ss-arrow--right" type="button" aria-label="Next" data-ss-next>&rsaquo;</button>
+          </div>
+
+          <div class="ss-dots" data-ss-dots></div>
+        </div>
+      {% endif %}
+
+      {%- comment -%}
+        AUTO-OPEN:
+        If exactly one b2b-* store tag exists, redirect once per session.
+        Bypass: /pages/portal?stay=1
+      {%- endcomment -%}
+      {% if has_storefront %}
+        {% assign tags_array_autopen = storefront_tags | split: '||' %}
+        {% assign store_count_autopen = 0 %}
+        {% assign only_handle_autopen = '' %}
+
+        {% for t in tags_array_autopen %}
+          {% if t != blank %}
+            {% assign store_count_autopen = store_count_autopen | plus: 1 %}
+            {% if store_count_autopen == 1 %}
+              {% assign only_handle_autopen = t | remove: 'b2b-' | strip %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+
+        {% if store_count_autopen == 1 and only_handle_autopen != blank %}
+          <script>
+            (function(){
+              try {
+                var key = 'ss_portal_autopen_once';
+                if (sessionStorage.getItem(key) === '1') return;
+
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('stay') === '1') return;
+
+                sessionStorage.setItem(key, '1');
+                window.location.href = '/pages/{{ only_handle_autopen }}';
+              } catch(e) {}
+            })();
+          </script>
+        {% endif %}
+      {% endif %}
+
+    {% endunless %}
+
+  </div>
+</section>
+
+<script>
+  (function(){
+    var root = document.querySelector('[data-ss-portal]');
+    if(!root) return;
+
+    /* Carousel */
+    var carousel = root.querySelector('[data-ss-carousel]');
+    if(carousel){
+      var track = carousel.querySelector('[data-ss-track]');
+      if(track){
+        var slides = Array.prototype.slice.call(track.querySelectorAll('[data-ss-slide]'));
+        if(slides.length >= 2){
+          var btnPrev = carousel.querySelector('[data-ss-prev]');
+          var btnNext = carousel.querySelector('[data-ss-next]');
+          var dotsWrap = carousel.querySelector('[data-ss-dots]');
+          var index = 0;
+          var autoplayMs = {{ section.settings.autoplay_ms | default: 4500 }};
+          var autoplay = {{ section.settings.autoplay | default: true | json }};
+          var timer = null;
+
+          function setActive(i){
+            index = (i + slides.length) % slides.length;
+            track.scrollTo({ left: slides[index].offsetLeft, behavior: 'smooth' });
+            updateDots();
+          }
+          function buildDots(){
+            if(!dotsWrap) return;
+            dotsWrap.innerHTML = '';
+            slides.forEach(function(_, i){
+              var b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'ss-dotbtn';
+              b.setAttribute('aria-label', 'Go to slide ' + (i+1));
+              b.addEventListener('click', function(){ stop(); setActive(i); start(); });
+              dotsWrap.appendChild(b);
+            });
+            updateDots();
+          }
+          function updateDots(){
+            if(!dotsWrap) return;
+            var dots = dotsWrap.querySelectorAll('.ss-dotbtn');
+            dots.forEach(function(d, i){
+              if(i === index) d.classList.add('is-active');
+              else d.classList.remove('is-active');
+            });
+          }
+          function next(){ setActive(index + 1); }
+          function prev(){ setActive(index - 1); }
+          function start(){
+            if(!autoplay) return;
+            stop();
+            timer = setInterval(next, Math.max(2500, autoplayMs));
+          }
+          function stop(){
+            if(timer) clearInterval(timer);
+            timer = null;
+          }
+
+          if(btnNext) btnNext.addEventListener('click', function(){ stop(); next(); start(); });
+          if(btnPrev) btnPrev.addEventListener('click', function(){ stop(); prev(); start(); });
+
+          var scrollTimeout = null;
+          track.addEventListener('scroll', function(){
+            if(scrollTimeout) clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(function(){
+              var best = 0, bestDist = Infinity;
+              slides.forEach(function(s, i){
+                var dist = Math.abs(track.scrollLeft - s.offsetLeft);
+                if(dist < bestDist){ bestDist = dist; best = i; }
+              });
+              index = best;
+              updateDots();
+            }, 100);
+          }, { passive: true });
+
+          buildDots();
+          setActive(0);
+          start();
+
+          carousel.addEventListener('mouseenter', stop);
+          carousel.addEventListener('mouseleave', start);
+        }
+      }
+    }
+
+    /* Store search */
+    var searchInput = root.querySelector('[data-ss-store-search]');
+    var visibleCount = root.querySelector('[data-ss-store-visible]');
+    if(searchInput){
+      var cards = Array.prototype.slice.call(root.querySelectorAll('[data-ss-storecard]'));
+      function apply(){
+        var q = (searchInput.value || '').trim().toLowerCase();
+        var shown = 0;
+        cards.forEach(function(card){
+          var hay = (card.getAttribute('data-search') || '');
+          var ok = !q || hay.indexOf(q) !== -1;
+          card.style.display = ok ? '' : 'none';
+          if(ok) shown++;
+        });
+        if(visibleCount) visibleCount.textContent = String(shown);
+      }
+      searchInput.addEventListener('input', apply);
+      apply();
+    }
+  })();
+</script>
+
+<style>
+  .ss-portal{ padding: 18px 0 50px; }
+  .ss-wrap{ max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+  .ss-head{ margin: 10px 0 14px; }
+  .ss-h1{ font-size: 48px; line-height: 1.05; margin: 0 0 8px; font-weight: 900; letter-spacing: -.02em; }
+  .ss-sub{ margin: 0; color: rgba(0,0,0,.65); font-size: 16px; }
+
+  .ss-card{
+    background:#fff;
+    border:1px solid rgba(0,0,0,.10);
+    border-radius:18px;
+    box-shadow: 0 12px 26px rgba(0,0,0,.06);
+    padding: 16px;
+    margin: 14px 0;
+  }
+
+  .ss-card--hero{
+    display:flex;
+    gap: 14px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+
+  .ss-hero-left{ min-width: 240px; flex: 1; }
+  .ss-hero-right{ display:flex; gap: 10px; flex-wrap:wrap; justify-content:flex-end; }
+
+  .ss-title{ margin: 0 0 6px; font-size: 16px; font-weight: 900; }
+  .ss-muted{ margin: 0; color: rgba(0,0,0,.65); font-size: 14px; }
+
+  .ss-badges{ display:flex; gap: 10px; flex-wrap:wrap; }
+  .ss-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border:1px solid rgba(0,0,0,.14);
+    background: rgba(0,0,0,.03);
+    font-weight: 900;
+    font-size: 13px;
+    color: #0b0b0b;
+  }
+  .ss-dot{ width:9px; height:9px; border-radius:99px; background:#0b0b0b; display:inline-block; }
+
+  .ss-btn{
+    display:inline-block;
+    padding: 11px 16px;
+    border-radius: 999px;
+    font-weight: 900;
+    text-decoration:none;
+    border:1px solid rgba(0,0,0,.16);
+    cursor:pointer;
+    white-space: nowrap;
+  }
+  .ss-btn--solid{
+    background:#0b0b0b;
+    color:#fff;
+    border:1px solid rgba(183,163,106,.45);
+  }
+  .ss-btn--ghost{
+    background:#fff;
+    color:#0b0b0b;
+  }
+  .ss-btn:hover{ opacity:.92; }
+
+  /* Profile */
+  .ss-profile{ display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .ss-profile-left{ display:flex; gap:12px; align-items:center; min-width: 260px; flex:1; }
+  .ss-profile-right{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+  .ss-avatar{
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(0,0,0,.06);
+    display:flex; align-items:center; justify-content:center;
+    font-weight: 900; color: rgba(0,0,0,.55);
+    flex:0 0 auto;
+  }
+  .ss-profile-name{ font-weight: 900; font-size: 16px; line-height: 1.2; }
+  .ss-profile-sub{ color: rgba(0,0,0,.65); font-size: 13px; margin-top: 2px; }
+
+  /* Stores */
+  .ss-storetools{
+    display:flex;
+    gap: 12px;
+    align-items:center;
+    justify-content:space-between;
+    margin-top: 12px;
+  }
+  .ss-storesearch{
+    width: 100%;
+    max-width: 420px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.14);
+    background: #fff;
+    font-weight: 800;
+    outline: none;
+  }
+  .ss-storecount{ color: rgba(0,0,0,.60); font-weight: 900; font-size: 13px; }
+
+  .ss-storegrid-wrap{ margin-top: 12px; }
+  .ss-storegrid-wrap.is-scroll{
+    max-height: 560px;
+    overflow: auto;
+    padding-right: 6px;
+  }
+
+  .ss-storegrid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 860px){
+    .ss-storegrid{ grid-template-columns: 1fr 1fr; }
+  }
+
+  .ss-storeitem{ display:flex; flex-direction:column; gap: 10px; }
+
+  .ss-storecard{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(0,0,0,.02);
+    text-decoration:none;
+    color: inherit;
+    transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .ss-storecard:hover{
+    transform: translateY(-1px);
+    background: #fff;
+    box-shadow: 0 12px 24px rgba(0,0,0,.06);
+  }
+
+  .ss-storecard-left{ display:flex; gap:12px; align-items:center; min-width: 240px; flex:1; }
+  .ss-storelogo{
+    width: 52px; height:52px; border-radius: 14px;
+    background: rgba(0,0,0,.06);
+    display:flex; align-items:center; justify-content:center;
+    font-weight: 900; color: rgba(0,0,0,.35);
+    flex:0 0 auto;
+    overflow:hidden;
+  }
+  .ss-storelogo-img{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display:block;
+    background:#fff;
+  }
+  .ss-storetext{ min-width: 0; }
+  .ss-storename{ font-size: 16px; font-weight: 900; line-height: 1.15; }
+  .ss-storesub{ margin-top: 3px; color: rgba(0,0,0,.65); font-size: 13px; line-height: 1.35; }
+
+  .ss-openpill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background:#0b0b0b;
+    color:#fff;
+    font-weight: 900;
+    border: 1px solid rgba(183,163,106,.45);
+    white-space: nowrap;
+  }
+
+  .ss-adminbtn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.16);
+    background: #fff;
+    font-weight: 900;
+    text-decoration:none;
+    color: #0b0b0b;
+    width: fit-content;
+    align-self: flex-end;
+  }
+  .ss-adminbtn:hover{ opacity: .92; }
+
+  /* Forms */
+  .ss-actions-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .ss-actions-box{
+    border:1px solid rgba(0,0,0,.10);
+    border-radius: 16px;
+    background: rgba(0,0,0,.02);
+    padding: 14px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+  .ss-actions-box-title{ font-weight: 900; font-size: 16px; }
+  .ss-actions-box-sub{ color: rgba(0,0,0,.65); font-size: 13px; line-height: 1.45; }
+  .ss-actions-note{ color: rgba(0,0,0,.55); font-size: 12px; line-height: 1.4; margin-top: 8px; }
+  .ss-warn{
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.12);
+    background: rgba(0,0,0,.03);
+    font-weight: 900;
+    color: rgba(0,0,0,.65);
+    font-size: 13px;
+  }
+  @media (max-width: 800px){
+    .ss-actions-grid{ grid-template-columns: 1fr; }
+  }
+
+  /* Marketing + carousel (kept) */
+  .ss-explainer{ margin: 8px 0 10px; text-align: center; }
+  .ss-explainer-top{ margin-bottom: 14px; }
+  .ss-h2{ margin: 10px 0 6px; font-size: 44px; font-weight: 900; letter-spacing: -.02em; }
+  .ss-h2-sub{ margin: 0; color: rgba(0,0,0,.65); font-size: 16px; }
+
+  .ss-steps{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .ss-step{
+    background:#fff;
+    border:1px solid rgba(0,0,0,.10);
+    border-radius: 18px;
+    box-shadow: 0 10px 22px rgba(0,0,0,.05);
+    padding: 16px;
+    text-align: left;
+  }
+  .ss-step-title{ font-weight: 900; margin-bottom: 6px; }
+  .ss-step-body{ color: rgba(0,0,0,.70); font-size: 14px; line-height: 1.4; }
+
+  .ss-carousel{
+    margin: 18px 0 10px;
+    border: 1px solid rgba(0,0,0,.10);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 12px 26px rgba(0,0,0,.06);
+    overflow: hidden;
+  }
+  .ss-carousel-head{ padding: 16px 16px 10px; text-align: left; }
+  .ss-carousel-title{ margin: 0 0 6px; font-size: 20px; font-weight: 900; letter-spacing: -.01em; }
+  .ss-carousel-sub{ margin: 0; color: rgba(0,0,0,.65); font-size: 14px; }
+  .ss-carousel-cta{ margin-top: 12px; }
+
+  .ss-carousel-shell{ position: relative; padding: 8px 44px 10px; }
+
+  .ss-track{
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 2px 10px;
+  }
+  .ss-track::-webkit-scrollbar{ display:none; }
+
+  .ss-slide{ scroll-snap-align: center; flex: 0 0 82%; }
+  @media (min-width: 900px){ .ss-slide{ flex: 0 0 52%; } }
+
+  .ss-slide-inner{
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(0,0,0,.03);
+  }
+  .ss-slide-img{
+    width: 100%;
+    height: 340px;
+    object-fit: cover;
+    display: block;
+    background: rgba(0,0,0,.06);
+  }
+  @media (max-width: 600px){ .ss-slide-img{ height: 260px; } }
+
+  .ss-slide-cap{
+    padding: 10px 12px;
+    font-weight: 800;
+    font-size: 13px;
+    color: rgba(0,0,0,.72);
+    background: #fff;
+  }
+
+  .ss-slide-placeholder{
+    height: 320px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color: rgba(0,0,0,.45);
+    font-weight: 900;
+    padding: 18px;
+    text-align: center;
+  }
+
+  .ss-arrow{
+    position:absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.14);
+    background: #fff;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 10px 18px rgba(0,0,0,.08);
+  }
+  .ss-arrow--left{ left: 10px; }
+  .ss-arrow--right{ right: 10px; }
+  .ss-arrow:hover{ opacity: .92; }
+
+  .ss-dots{ display:flex; gap: 8px; justify-content:center; padding: 0 0 14px; }
+  .ss-dotbtn{
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.22);
+    background: rgba(0,0,0,.10);
+    cursor: pointer;
+    padding: 0;
+  }
+  .ss-dotbtn.is-active{ background: rgba(0,0,0,.78); }
+
+  .ss-empty p{ margin: 0; color: rgba(0,0,0,.65); font-size: 14px; }
+
+  @media (max-width: 900px){
+    .ss-h1{ font-size: 40px; }
+    .ss-h2{ font-size: 34px; }
+    .ss-steps{ grid-template-columns: 1fr; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Shop Dashboard",
+  "settings": [
+    { "type": "text", "id": "metaobject_type", "label": "Metaobject type key (for logos/names)", "default": "storefront" },
+
+    { "type": "header", "content": "Requests & access (Forms)" },
+    {
+      "type": "text",
+      "id": "form_access_url",
+      "label": "Store access request form URL",
+      "default": "https://docs.google.com/forms/d/e/1FAIpQLSeXyVTcuT6jC_A6ifmTHUe9XfQLylEH0zdLIcSUZfdZeW3qCw/viewform?usp=header"
+    },
+    {
+      "type": "text",
+      "id": "form_product_url",
+      "label": "New product request form URL",
+      "default": "https://docs.google.com/forms/d/e/1FAIpQLSfdKoUbbJXkj87NHqU7ULYqSJ2m6IhJcC-rYpBMHB_mm05kmg/viewform?usp=header"
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_any_member_to_add_people",
+      "label": "Allow any store member to request adding people (not just admins)",
+      "default": false
+    },
+
+    { "type": "text", "id": "how_title", "label": "How it works title", "default": "How Private Stores Work" },
+    { "type": "text", "id": "how_subtitle", "label": "How it works subtitle", "default": "Fast setup. Simple ordering. Easy reorders." },
+
+    { "type": "text", "id": "step1_title", "label": "Step 1 title", "default": "Request Access" },
+    { "type": "text", "id": "step1_body", "label": "Step 1 text", "default": "Tell us what you need—logo, items, quantities, and timeline." },
+
+    { "type": "text", "id": "step2_title", "label": "Step 2 title", "default": "We Build Your Private Store" },
+    { "type": "text", "id": "step2_body", "label": "Step 2 text", "default": "We set up your dedicated reorder page with approved products and options." },
+
+    { "type": "text", "id": "step3_title", "label": "Step 3 title", "default": "Order & Reorder Anytime" },
+    { "type": "text", "id": "step3_body", "label": "Step 3 text", "default": "Log in and reorder anytime—no back-and-forth needed." },
+
+    { "type": "text", "id": "examples_title", "label": "Examples carousel title", "default": "Examples of what a private store can include" },
+    { "type": "text", "id": "examples_subtitle", "label": "Examples carousel subtitle", "default": "A few examples of personalized products and branded ordering." },
+
+    { "type": "checkbox", "id": "examples_show_cta", "label": "Show CTA button under carousel header", "default": true },
+    { "type": "text", "id": "examples_cta_label", "label": "CTA button label", "default": "Request a private store" },
+
+    { "type": "checkbox", "id": "autoplay", "label": "Autoplay carousel", "default": true },
+    { "type": "range", "id": "autoplay_ms", "label": "Autoplay speed (ms)", "min": 2500, "max": 9000, "step": 500, "default": 4500 }
+  ],
+  "blocks": [
+    {
+      "type": "example",
+      "name": "Example slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "alt", "label": "Alt text", "default": "Example branded product" },
+        { "type": "text", "id": "caption", "label": "Caption (optional)", "default": "Optional caption" }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    { "name": "Shop Dashboard" }
+  ]
+}
+{% endschema %}

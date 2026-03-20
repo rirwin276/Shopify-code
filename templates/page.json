@@ -1,0 +1,48 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "custom_css": [
+        "/* Hide the “helper” app block instance of the form on the page */.ss-globo-helper {display: none !important;}"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 80
+      }
+    },
+    "studio_shop_hero_hAq4g7": {
+      "type": "studio-shop-hero",
+      "name": "Studio Shop Hero",
+      "settings": {}
+    },
+    "studio_shop_products_takDkP": {
+      "type": "studio-shop-products",
+      "name": "Studio Shop Products",
+      "settings": {}
+    },
+    "studio_shop_story_jjk68x": {
+      "type": "studio-shop-story",
+      "name": "Studio Shop Story",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "studio_shop_hero_hAq4g7",
+    "studio_shop_products_takDkP",
+    "studio_shop_story_jjk68x"
+  ]
+}

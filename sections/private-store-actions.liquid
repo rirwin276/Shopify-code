@@ -1,0 +1,395 @@
+{% comment %}
+  Private Store – Actions (Unified) (FIXED)
+  - One premium card with two actions:
+      1) Request New Product / Design (member-only)
+      2) Add People (Store access request) — controlled by admin tag (or optional member toggle)
+  - Tag rules:
+      Member tag: b2b-<store-handle>
+      Admin tag:  b2b-admin-<store-handle>
+  - Google Forms prefill (optional):
+      - Store Name key (entry.xxxxx)
+      - Requestor Email key (entry.xxxxx)
+    If key left as entry.000000 => treated as "disabled"
+{% endcomment %}
+
+{% assign store_handle = page.handle | downcase | strip %}
+{% assign store_name = page.title | default: store_handle %}
+
+{% assign customer_email = '' %}
+{% if customer %}
+  {% assign customer_email = customer.email | default: '' %}
+{% endif %}
+
+{% assign required_member_tag = 'b2b-' | append: store_handle %}
+{% assign required_admin_tag  = 'b2b-admin-' | append: store_handle %}
+
+{% assign is_store_member = false %}
+{% assign is_store_admin  = false %}
+
+{% if customer %}
+  {% for tag in customer.tags %}
+    {% assign t = tag | downcase | strip %}
+    {% if t == required_member_tag %}
+      {% assign is_store_member = true %}
+    {% endif %}
+    {% if t == required_admin_tag %}
+      {% assign is_store_admin = true %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% assign allow_any_member_to_add_people = section.settings.allow_any_member_to_add_people | default: false %}
+{% assign open_new_tab = section.settings.open_new_tab | default: true %}
+
+{% assign can_request_items = false %}
+{% if customer and is_store_member %}
+  {% assign can_request_items = true %}
+{% endif %}
+
+{% assign can_add_people = false %}
+{% if customer %}
+  {% if is_store_admin %}
+    {% assign can_add_people = true %}
+  {% elsif allow_any_member_to_add_people and is_store_member %}
+    {% assign can_add_people = true %}
+  {% endif %}
+{% endif %}
+
+{%- comment -%}
+  Helper: builds a URL by safely appending parameters.
+  - Works whether base URL already has ? or not
+  - Only adds params when key is present
+{%- endcomment -%}
+{% assign entry_disabled = 'entry.000000' %}
+
+{%- comment -%} FORM 1: New Product {%- endcomment -%}
+{% assign item_form_url = section.settings.item_form_url | default: '' | strip %}
+{% assign item_name_key = section.settings.item_prefill_store_name_key | default: '' | strip %}
+{% assign item_email_key = section.settings.item_prefill_requester_email_key | default: '' | strip %}
+
+{% if item_name_key == entry_disabled %}{% assign item_name_key = '' %}{% endif %}
+{% if item_email_key == entry_disabled %}{% assign item_email_key = '' %}{% endif %}
+
+{% assign item_final_url = item_form_url %}
+
+{% if item_form_url != blank %}
+  {% assign item_has_params = false %}
+  {% if item_form_url contains '?' %}{% assign item_has_params = true %}{% endif %}
+
+  {% assign item_append = '' %}
+
+  {% if item_name_key != blank %}
+    {% capture item_append %}{{ item_append }}{{ item_name_key }}={{ store_name | url_encode }}&{% endcapture %}
+  {% endif %}
+
+  {% if item_email_key != blank and customer_email != blank %}
+    {% capture item_append %}{{ item_append }}{{ item_email_key }}={{ customer_email | url_encode }}&{% endcapture %}
+  {% endif %}
+
+  {% assign item_append = item_append | strip %}
+  {% if item_append != blank %}
+    {%- comment -%} remove trailing & {%- endcomment -%}
+    {% assign item_append = item_append | slice: 0, item_append.size | replace_last: '&', '' %}
+
+    {% if item_has_params %}
+      {% assign item_final_url = item_form_url | append: '&' | append: item_append %}
+    {% else %}
+      {% assign item_final_url = item_form_url | append: '?' | append: item_append %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{%- comment -%} FORM 2: Store Access {%- endcomment -%}
+{% assign people_form_url = section.settings.people_form_url | default: '' | strip %}
+{% assign people_name_key = section.settings.people_prefill_store_name_key | default: '' | strip %}
+{% assign people_email_key = section.settings.people_prefill_requester_email_key | default: '' | strip %}
+
+{% if people_name_key == entry_disabled %}{% assign people_name_key = '' %}{% endif %}
+{% if people_email_key == entry_disabled %}{% assign people_email_key = '' %}{% endif %}
+
+{% assign people_final_url = people_form_url %}
+
+{% if people_form_url != blank %}
+  {% assign people_has_params = false %}
+  {% if people_form_url contains '?' %}{% assign people_has_params = true %}{% endif %}
+
+  {% assign people_append = '' %}
+
+  {% if people_name_key != blank %}
+    {% capture people_append %}{{ people_append }}{{ people_name_key }}={{ store_name | url_encode }}&{% endcapture %}
+  {% endif %}
+
+  {% if people_email_key != blank and customer_email != blank %}
+    {% capture people_append %}{{ people_append }}{{ people_email_key }}={{ customer_email | url_encode }}&{% endcapture %}
+  {% endif %}
+
+  {% assign people_append = people_append | strip %}
+  {% if people_append != blank %}
+    {% assign people_append = people_append | slice: 0, people_append.size | replace_last: '&', '' %}
+
+    {% if people_has_params %}
+      {% assign people_final_url = people_form_url | append: '&' | append: people_append %}
+    {% else %}
+      {% assign people_final_url = people_form_url | append: '?' | append: people_append %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+<style>
+  :root{
+    --ss-gold: #b7a36a;
+    --ss-black: #0b0b0b;
+    --ss-muted: rgba(0,0,0,.65);
+    --ss-border: rgba(0,0,0,.10);
+  }
+
+  .ss-actions{ padding: 12px 0 6px; }
+  .ss-actions__wrap{ max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+  .ss-actions__card{
+    background:#fff;
+    border:1px solid var(--ss-border);
+    border-radius:18px;
+    box-shadow: 0 12px 26px rgba(0,0,0,.06);
+    padding: 16px;
+  }
+
+  .ss-actions__kicker{
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ss-muted);
+    margin-bottom: 6px;
+  }
+
+  .ss-actions__title{
+    margin: 0 0 6px;
+    font-size: 22px;
+    line-height: 1.15;
+    font-weight: 900;
+    letter-spacing: -.01em;
+  }
+
+  .ss-actions__sub{
+    margin: 0;
+    color: var(--ss-muted);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .ss-actions__meta{ display:flex; gap: 8px; flex-wrap:wrap; margin-top: 10px; }
+  .ss-actions__pill{
+    display:inline-flex; gap:8px; align-items:center;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border:1px solid rgba(0,0,0,.14);
+    background: rgba(0,0,0,.03);
+    font-weight: 900;
+    font-size: 12px;
+    color: rgba(0,0,0,.75);
+  }
+
+  .ss-actions__grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  @media (max-width: 800px){
+    .ss-actions__grid{ grid-template-columns: 1fr; }
+  }
+
+  .ss-actions__box{
+    border:1px solid rgba(0,0,0,.10);
+    border-radius: 16px;
+    background: rgba(0,0,0,.02);
+    padding: 14px;
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+
+  .ss-actions__boxTitle{
+    margin: 0;
+    font-weight: 900;
+    font-size: 16px;
+  }
+
+  .ss-actions__boxSub{
+    margin: 0;
+    color: var(--ss-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .ss-actions__btnRow{ display:flex; gap: 10px; flex-wrap:wrap; align-items:center; }
+
+  .ss-actions__btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: 14px;
+    text-decoration:none;
+    border:1px solid rgba(183,163,106,.45);
+    background: var(--ss-black);
+    color: #fff;
+    transition: transform .08s ease, opacity .12s ease;
+    white-space: nowrap;
+  }
+  .ss-actions__btn:hover{ opacity:.92; transform: translateY(-1px); }
+
+  .ss-actions__warn{
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.12);
+    background: rgba(0,0,0,.03);
+    font-weight: 900;
+    color: rgba(0,0,0,.65);
+    font-size: 13px;
+  }
+
+  .ss-actions__note{
+    font-size: 12px;
+    color: var(--ss-muted);
+    line-height: 1.4;
+  }
+</style>
+
+<section class="ss-actions" data-ss-actions>
+  <div class="ss-actions__wrap">
+    <div class="ss-actions__card">
+
+      <div class="ss-actions__kicker">{{ section.settings.kicker }}</div>
+      <h2 class="ss-actions__title">{{ section.settings.title }}</h2>
+      <p class="ss-actions__sub">{{ section.settings.subtext }}</p>
+
+      <div class="ss-actions__meta">
+        <span class="ss-actions__pill">Store: <strong>{{ store_name }}</strong></span>
+        {% if customer_email != blank %}
+          <span class="ss-actions__pill">Email: <strong>{{ customer_email }}</strong></span>
+        {% endif %}
+      </div>
+
+      <div class="ss-actions__grid">
+
+        <!-- BOX 1: New product -->
+        <div class="ss-actions__box">
+          <p class="ss-actions__boxTitle">{{ section.settings.item_box_title }}</p>
+          <p class="ss-actions__boxSub">{{ section.settings.item_box_subtext }}</p>
+
+          {% unless customer %}
+            <div class="ss-actions__btnRow">
+              <a class="ss-actions__btn" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">
+                Log in
+              </a>
+            </div>
+            <div class="ss-actions__note">{{ section.settings.note_logged_out }}</div>
+          {% else %}
+            {% if can_request_items %}
+              {% if item_final_url != blank %}
+                <div class="ss-actions__btnRow">
+                  <a class="ss-actions__btn"
+                     href="{{ item_final_url }}"
+                     {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}>
+                    {{ section.settings.item_button_label }}
+                  </a>
+                </div>
+                <div class="ss-actions__note">{{ section.settings.item_note_allowed }}</div>
+              {% else %}
+                <div class="ss-actions__warn">Add your “New product” form URL in this section’s settings.</div>
+              {% endif %}
+            {% else %}
+              <div class="ss-actions__warn">{{ section.settings.note_not_a_member }}</div>
+            {% endif %}
+          {% endunless %}
+        </div>
+
+        <!-- BOX 2: Add people -->
+        <div class="ss-actions__box">
+          <p class="ss-actions__boxTitle">{{ section.settings.people_box_title }}</p>
+          <p class="ss-actions__boxSub">{{ section.settings.people_box_subtext }}</p>
+
+          {% unless customer %}
+            <div class="ss-actions__btnRow">
+              <a class="ss-actions__btn" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">
+                Log in
+              </a>
+            </div>
+            <div class="ss-actions__note">{{ section.settings.note_logged_out }}</div>
+          {% else %}
+            {% if can_add_people %}
+              {% if people_final_url != blank %}
+                <div class="ss-actions__btnRow">
+                  <a class="ss-actions__btn"
+                     href="{{ people_final_url }}"
+                     {% if open_new_tab %}target="_blank" rel="noopener"{% endif %}>
+                    {{ section.settings.people_button_label }}
+                  </a>
+                </div>
+                <div class="ss-actions__note">{{ section.settings.people_note_allowed }}</div>
+              {% else %}
+                <div class="ss-actions__warn">Add your “Store access” form URL in this section’s settings.</div>
+              {% endif %}
+            {% else %}
+              <div class="ss-actions__warn">{{ section.settings.people_note_not_allowed }}</div>
+            {% endif %}
+          {% endunless %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Private Store Actions",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Private store tools" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Requests & access" },
+    { "type": "text", "id": "subtext", "label": "Subtext", "default": "Request new items for your storefront, and (if you’re an admin) request access for additional people. All requests are reviewed to keep your store secure." },
+
+    { "type": "checkbox", "id": "open_new_tab", "label": "Open forms in new tab", "default": true },
+    { "type": "checkbox", "id": "allow_any_member_to_add_people", "label": "Allow any store member to request adding people (not just admins)", "default": false },
+
+    { "type": "text", "id": "note_logged_out", "label": "Note (logged out)", "default": "Log in to request updates for this store." },
+    { "type": "text", "id": "note_not_a_member", "label": "Note (not a member)", "default": "You don’t have access to request changes for this store. Please contact Stella & Sage." },
+
+    { "type": "header", "content": "Request new product / design" },
+    { "type": "text", "id": "item_box_title", "label": "Box title", "default": "Need something added?" },
+    { "type": "text", "id": "item_box_subtext", "label": "Box subtext", "default": "Request a new product type, new design, logo update, or reorder option for this storefront." },
+    { "type": "text", "id": "item_button_label", "label": "Button label", "default": "Request a new item" },
+    { "type": "text", "id": "item_note_allowed", "label": "Note (allowed)", "default": "We’ll review and add approved items to your private store." },
+    {
+      "type": "text",
+      "id": "item_form_url",
+      "label": "New product form URL (public viewform link)",
+      "default": "https://docs.google.com/forms/d/e/1FAIpQLSfdKoUbbJXkj87NHqU7ULYqSJ2m6IhJcC-rYpBMHB_mm05kmg/viewform?usp=header"
+    },
+    { "type": "text", "id": "item_prefill_store_name_key", "label": "Prefill key: Store Name (entry.xxxxx)", "default": "entry.000000" },
+    { "type": "text", "id": "item_prefill_requester_email_key", "label": "Prefill key: Requestor Email (entry.xxxxx)", "default": "entry.000000" },
+
+    { "type": "header", "content": "Add people / access requests" },
+    { "type": "text", "id": "people_box_title", "label": "Box title", "default": "Add teammates or family" },
+    { "type": "text", "id": "people_box_subtext", "label": "Box subtext", "default": "Admins can request access for others. We approve all additions to keep the storefront secure." },
+    { "type": "text", "id": "people_button_label", "label": "Button label", "default": "Request store access" },
+    { "type": "text", "id": "people_note_allowed", "label": "Note (allowed)", "default": "We’ll review the request and grant access if approved." },
+    { "type": "text", "id": "people_note_not_allowed", "label": "Note (not allowed)", "default": "To add people, contact your store admin or Stella & Sage." },
+    {
+      "type": "text",
+      "id": "people_form_url",
+      "label": "Store access form URL (public viewform link)",
+      "default": "https://docs.google.com/forms/d/e/1FAIpQLSeXyVTcuT6jC_A6ifmTHUe9XfQLylEH0zdLIcSUZfdZeW3qCw/viewform?usp=header"
+    },
+    { "type": "text", "id": "people_prefill_store_name_key", "label": "Prefill key: Store Name (entry.xxxxx)", "default": "entry.000000" },
+    { "type": "text", "id": "people_prefill_requester_email_key", "label": "Prefill key: Requestor Email (entry.xxxxx)", "default": "entry.000000" }
+  ],
+  "presets": [
+    { "name": "Private Store Actions" }
+  ]
+}
+{% endschema %}

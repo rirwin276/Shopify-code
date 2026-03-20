@@ -1,0 +1,210 @@
+{% comment %}
+  B2B Seller Dashboard (tag-gated)
+  - Requires login AND at least one customer tag that starts with required_tag_prefix (default: "b2b-")
+  - Shows storefront buttons only when customer has the exact tag_key for that block
+{% endcomment %}
+
+{% assign required_prefix = section.settings.required_tag_prefix | default: 'b2b-' %}
+{% assign required_prefix_down = required_prefix | downcase %}
+{% assign prefix_len = required_prefix_down | size %}
+
+{% assign login_redirect_path = section.settings.login_redirect_path | default: '/pages/seller-dashboard' %}
+
+{% if customer %}
+  {% assign is_logged_in = true %}
+{% else %}
+  {% assign is_logged_in = false %}
+{% endif %}
+
+{% assign has_required_tag = false %}
+{% if is_logged_in and customer.tags.size > 0 %}
+  {% for t in customer.tags %}
+    {% assign t_down = t | downcase %}
+    {% assign t_start = t_down | slice: 0, prefix_len %}
+    {% if t_start == required_prefix_down %}
+      {% assign has_required_tag = true %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if is_logged_in == false %}
+  <script>
+    (function(){
+      var returnUrl = encodeURIComponent("{{ login_redirect_path }}");
+      window.location.href = "{{ routes.account_login_url }}?return_url=" + returnUrl;
+    })();
+  </script>
+
+  <div style="padding: 24px; max-width: 900px; margin: 0 auto;">
+    <h2>Please sign in</h2>
+    <p>You must be signed in to access the Seller Dashboard.</p>
+  </div>
+
+{% elsif has_required_tag == false %}
+
+  <div style="padding: 24px; max-width: 900px; margin: 0 auto;">
+    <h2>Access pending</h2>
+    <p>Your account is signed in, but you’re not approved for a seller dashboard yet.</p>
+    <p>If you just submitted a request, we’ll review it and notify you.</p>
+    <p><a href="/pages/contact">Contact us</a> if you think this is a mistake.</p>
+  </div>
+
+{% else %}
+
+  <style>
+    .b2bDash-wrap{max-width:1100px;margin:0 auto;padding:28px 18px}
+    .b2bDash-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .b2bDash-title{margin:0;font-size:28px;line-height:1.2}
+    .b2bDash-sub{margin:6px 0 0 0;opacity:.8}
+    .b2bDash-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:18px}
+    .b2bDash-card{grid-column:span 12;border:1px solid rgba(0,0,0,.12);border-radius:14px;padding:16px;background:rgba(255,255,255,.7)}
+    @media(min-width: 900px){ .b2bDash-card.half{grid-column:span 6} .b2bDash-card.third{grid-column:span 4} }
+    .b2bDash-card h3{margin:0 0 10px 0;font-size:18px}
+    .b2bDash-kv{display:grid;grid-template-columns:150px 1fr;gap:8px 12px;margin:10px 0 0 0}
+    .b2bDash-kv div{padding:6px 0;border-bottom:1px dashed rgba(0,0,0,.12)}
+    .b2bDash-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    .b2bDash-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.16);text-decoration:none}
+    .b2bDash-btn:hover{transform:translateY(-1px)}
+    .b2bDash-note{margin:8px 0 0 0;opacity:.75;font-size:14px}
+    .b2bDash-tag{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.14);font-size:12px;margin:6px 6px 0 0;opacity:.9}
+  </style>
+
+  <div class="b2bDash-wrap">
+    <div class="b2bDash-head">
+      <div>
+        <h1 class="b2bDash-title">{{ section.settings.heading | escape }}</h1>
+        {% if section.settings.subheading != blank %}
+          <p class="b2bDash-sub">{{ section.settings.subheading | escape }}</p>
+        {% endif %}
+      </div>
+
+      <div class="b2bDash-btns">
+        <a class="b2bDash-btn" href="{{ routes.account_url }}">My account</a>
+        <a class="b2bDash-btn" href="{{ routes.account_logout_url }}">Sign out</a>
+      </div>
+    </div>
+
+    <div class="b2bDash-grid">
+
+      <div class="b2bDash-card half">
+        <h3>Your seller access</h3>
+
+        {% if section.settings.show_customer_details %}
+          <div class="b2bDash-kv">
+            <div><strong>Name</strong></div><div>{{ customer.first_name }} {{ customer.last_name }}</div>
+            <div><strong>Email</strong></div><div>{{ customer.email }}</div>
+          </div>
+        {% endif %}
+
+        <p class="b2bDash-note">Approved seller tags on your account:</p>
+        <div>
+          {% for t in customer.tags %}
+            {% assign t_down = t | downcase %}
+            {% assign t_start = t_down | slice: 0, prefix_len %}
+            {% if t_start == required_prefix_down %}
+              <span class="b2bDash-tag">{{ t }}</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="b2bDash-card half">
+        <h3>Storefront links</h3>
+
+        <div class="b2bDash-btns">
+          {% assign shown_any = false %}
+
+          {% for block in section.blocks %}
+            {% if block.type == 'store_link' %}
+              {% assign tag_key = block.settings.tag_key | strip %}
+              {% if tag_key != blank and customer.tags contains tag_key %}
+                {% assign shown_any = true %}
+                <a class="b2bDash-btn" href="{{ block.settings.url }}">{{ block.settings.label | escape }}</a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          {% if shown_any == false %}
+            <p class="b2bDash-note">No storefront links are configured for your tag(s) yet.</p>
+          {% endif %}
+        </div>
+
+        <p class="b2bDash-note">If a link is missing, message us and we’ll add it.</p>
+      </div>
+
+      <div class="b2bDash-card third">
+        <h3>Requests</h3>
+        <div class="b2bDash-btns">
+          {% for block in section.blocks %}
+            {% if block.type == 'quick_link' and block.settings.url != blank %}
+              {% if block.settings.label contains 'Request' or block.settings.label contains 'request' %}
+                <a class="b2bDash-btn" href="{{ block.settings.url }}">{{ block.settings.label | escape }}</a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+        <p class="b2bDash-note">Request new storefronts, edits, or uploads.</p>
+      </div>
+
+      <div class="b2bDash-card third">
+        <h3>Quick links</h3>
+        <div class="b2bDash-btns">
+          {% for block in section.blocks %}
+            {% if block.type == 'quick_link' and block.settings.url != blank %}
+              {% unless block.settings.label contains 'Request' or block.settings.label contains 'request' %}
+                <a class="b2bDash-btn" href="{{ block.settings.url }}">{{ block.settings.label | escape }}</a>
+              {% endunless %}
+            {% endif %}
+          {% endfor %}
+        </div>
+        <p class="b2bDash-note">Add more buttons in the theme editor.</p>
+      </div>
+
+      <div class="b2bDash-card third">
+        <h3>Support</h3>
+        <div class="b2bDash-btns">
+          <a class="b2bDash-btn" href="/pages/contact">Message Stella &amp; Sage</a>
+        </div>
+        <p class="b2bDash-note">Include your business name + what you need changed.</p>
+      </div>
+
+    </div>
+  </div>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "B2B Seller Dashboard",
+  "settings": [
+    { "type": "text", "id": "required_tag_prefix", "label": "Required customer tag prefix", "default": "b2b-" },
+    { "type": "text", "id": "login_redirect_path", "label": "Return path after login", "default": "/pages/seller-dashboard" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Seller Dashboard" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "Manage your storefront, requests, and quick links." },
+    { "type": "checkbox", "id": "show_customer_details", "label": "Show customer name/email", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "store_link",
+      "name": "Store link",
+      "settings": [
+        { "type": "text", "id": "tag_key", "label": "Customer tag required (exact match)", "default": "b2b-st1-foxtrot" },
+        { "type": "text", "id": "label", "label": "Button label", "default": "My Storefront" },
+        { "type": "url", "id": "url", "label": "Link URL" }
+      ]
+    },
+    {
+      "type": "quick_link",
+      "name": "Quick link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Button label", "default": "Contact support" },
+        { "type": "url", "id": "url", "label": "Link URL" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "B2B Seller Dashboard" }
+  ]
+}
+{% endschema %}

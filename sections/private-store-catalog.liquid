@@ -1,0 +1,100 @@
+{% comment %}
+  Private Store Catalog
+  - Automatically loads products from a collection
+  - Collection handle MUST match page.handle
+  Example:
+    Page: /pages/j-combs
+    Collection handle: j-combs
+{% endcomment %}
+
+{% assign handle = page.handle | downcase | strip %}
+{% assign collection = collections[handle] %}
+
+<section class="ps-catalog">
+  <div class="ps-wrap">
+
+    {% if collection and collection.products_count > 0 %}
+
+      <div class="ps-grid">
+        {% for product in collection.products %}
+          <div class="ps-item">
+            <a href="{{ product.url }}">
+              {{ product.featured_image | image_url: width: 600 | image_tag }}
+            </a>
+
+            <div class="ps-meta">
+              <div class="ps-title">{{ product.title }}</div>
+
+              {% if section.settings.show_price %}
+                <div class="ps-price">{{ product.price | money }}</div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <div class="ps-empty">
+        No products have been added to this store yet.
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<style>
+.ps-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.ps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.ps-item img {
+  width: 100%;
+  border-radius: 14px;
+}
+
+.ps-meta {
+  margin-top: 8px;
+}
+
+.ps-title {
+  font-weight: 700;
+}
+
+.ps-price {
+  color: #555;
+  font-size: 14px;
+}
+
+.ps-empty {
+  padding: 40px;
+  text-align: center;
+  opacity: 0.7;
+}
+</style>
+
+{% schema %}
+{
+  "name": "Private Store Catalog",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show price",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Private Store Catalog"
+    }
+  ]
+}
+{% endschema %}

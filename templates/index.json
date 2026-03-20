@@ -1,0 +1,43 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "custom_liquid_kXiyBF": {
+      "type": "custom-liquid",
+      "name": "t:names.custom_liquid",
+      "settings": {
+        "custom_liquid": "",
+        "color_scheme": "",
+        "section_width": "page-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "landing_dual_hub_rtcYFK": {
+      "type": "landing-dual-hub",
+      "name": "Landing – Dual Hub",
+      "settings": {
+        "kicker": "PERSONAL STORE",
+        "primary_title": "Shop your personal store",
+        "primary_desc": "Log in to access your private storefront dashboard. Store admins can manage access for their group.",
+        "btn_login_label": "Log in to Studio",
+        "btn_request_label": "Request a storefront",
+        "primary_note": "—",
+        "dashboard_image": "shopify://shop_images/Screenshot_2026-01-31_230913.png",
+        "dashboard_url": "/pages/portal",
+        "request_url": "/pages/private-storefronts#request-storefront"
+      }
+    }
+  },
+  "order": [
+    "custom_liquid_kXiyBF",
+    "landing_dual_hub_rtcYFK"
+  ]
+}

@@ -1,0 +1,127 @@
+{% comment %}
+  Demo Store Grid (Section)
+  - Pick a logo (image picker)
+  - Add up to 8 products via blocks
+  - Shows: image, title, price (no add-to-cart)
+  - Badge: "Demo Store Only"
+{% endcomment %}
+
+{% assign logo = section.settings.demo_logo %}
+{% assign title = section.settings.demo_title | default: 'Demo Store' %}
+{% assign badge = section.settings.demo_badge | default: 'Demo Store Only' %}
+{% assign subtitle = section.settings.demo_subtitle | default: "This is a preview example of how your private storefront can look once it’s built." %}
+
+<section class="ds" data-demo-store>
+  <div class="ds-wrap">
+
+    <div class="ds-head">
+      <div class="ds-brand">
+        {% if logo != blank %}
+          <img
+            class="ds-logo"
+            src="{{ logo | image_url: width: 160 }}"
+            alt="{{ title | escape }}"
+            loading="lazy"
+            width="44"
+            height="44"
+          >
+        {% endif %}
+
+        <div class="ds-title">{{ title }}</div>
+        <div class="ds-badge">{{ badge }}</div>
+      </div>
+
+      <div class="ds-sub">{{ subtitle }}</div>
+    </div>
+
+    <div class="ds-grid">
+      {% assign has_any = false %}
+
+      {% for block in section.blocks %}
+        {% if block.type == 'demo_product' and block.settings.product != blank %}
+          {% assign has_any = true %}
+          {% assign p = block.settings.product %}
+
+          <div class="ds-card" {{ block.shopify_attributes }}>
+            <div class="ds-img">
+              {% if p.featured_image %}
+                <img
+                  src="{{ p.featured_image | image_url: width: 800 }}"
+                  alt="{{ p.title | escape }}"
+                  loading="lazy"
+                  width="800"
+                  height="800"
+                >
+              {% else %}
+                <div class="ds-img-empty"></div>
+              {% endif %}
+            </div>
+
+            <div class="ds-info">
+              <div class="ds-name">{{ p.title }}</div>
+              <div class="ds-price">{{ p.price | money }}</div>
+            </div>
+          </div>
+
+        {% endif %}
+      {% endfor %}
+
+      {% unless has_any %}
+        <div class="ds-empty">
+          Demo store products not set yet.<br>
+          Add up to 8 “Demo Product” blocks and pick products in the Theme Editor.
+        </div>
+      {% endunless %}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .ds-wrap{max-width:1100px;margin:0 auto;padding:12px 16px 40px}
+  .ds-head{border:1px solid rgba(0,0,0,.10);border-radius:18px;background:#fff;box-shadow:0 12px 26px rgba(0,0,0,.06);padding:16px;margin:18px 0}
+  .ds-brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .ds-logo{width:44px;height:44px;object-fit:contain;border-radius:10px;border:1px solid rgba(0,0,0,.10);background:#fff;padding:6px}
+  .ds-title{font-weight:900;font-size:20px}
+  .ds-badge{font-weight:900;font-size:12px;border:1px solid rgba(0,0,0,.12);background:rgba(0,0,0,.04);padding:6px 10px;border-radius:999px}
+  .ds-sub{margin-top:8px;color:rgba(0,0,0,.65);font-weight:700}
+
+  .ds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+  .ds-card{border:1px solid rgba(0,0,0,.10);border-radius:16px;background:#fff;overflow:hidden}
+  .ds-img{aspect-ratio:1/1;background:rgba(0,0,0,.03);display:flex;align-items:center;justify-content:center}
+  .ds-img img{width:100%;height:100%;object-fit:cover}
+  .ds-img-empty{width:100%;height:100%}
+
+  .ds-info{padding:12px}
+  .ds-name{font-weight:900;font-size:14px;line-height:1.25}
+  .ds-price{margin-top:6px;color:rgba(0,0,0,.65);font-weight:800}
+
+  .ds-empty{grid-column:1/-1;border:1px solid rgba(0,0,0,.12);border-radius:14px;background:rgba(0,0,0,.02);padding:14px;color:rgba(0,0,0,.72);font-weight:900}
+
+  @media (max-width: 1000px){ .ds-grid{grid-template-columns:repeat(2,1fr)} }
+</style>
+
+{% schema %}
+{
+  "name": "Demo Store Grid",
+  "settings": [
+    { "type": "image_picker", "id": "demo_logo", "label": "Demo store logo" },
+    { "type": "text", "id": "demo_title", "label": "Demo store title", "default": "Demo Store" },
+    { "type": "text", "id": "demo_badge", "label": "Badge text", "default": "Demo Store Only" },
+    { "type": "text", "id": "demo_subtitle", "label": "Subtitle", "default": "This is a preview example of how your private storefront can look once it’s built." }
+  ],
+  "blocks": [
+    {
+      "type": "demo_product",
+      "name": "Demo Product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Choose a product" }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    { "name": "Demo Store Grid" }
+  ]
+}
+{% endschema %}

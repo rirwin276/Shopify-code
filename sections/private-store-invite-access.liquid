@@ -1,0 +1,244 @@
+{% comment %}
+  Private Store – Invite Access (Secure)
+  - Shows "Add someone" button on private store pages
+  - Default: ONLY store-admins can request adds
+  - You still approve by adding tags in Shopify (prevents abuse)
+{% endcomment %}
+
+{% assign form_url = section.settings.form_url | default: '' | strip %}
+
+{% assign org_key = section.settings.prefill_org_name_key | default: '' | strip %}
+{% assign handle_key = section.settings.prefill_store_handle_key | default: '' | strip %}
+{% assign requester_email_key = section.settings.prefill_requester_email_key | default: '' | strip %}
+
+{%- comment -%} Horizon/theme-check won’t allow blank defaults; treat placeholders as blank {%- endcomment -%}
+{% if org_key == 'entry.000000' %}{% assign org_key = '' %}{% endif %}
+{% if handle_key == 'entry.000000' %}{% assign handle_key = '' %}{% endif %}
+{% if requester_email_key == 'entry.000000' %}{% assign requester_email_key = '' %}{% endif %}
+
+{% assign store_handle = page.handle | downcase | strip %}
+{% assign store_name = page.title %}
+
+{% assign customer_email = '' %}
+{% if customer %}
+  {% assign customer_email = customer.email | default: '' %}
+{% endif %}
+
+{%- comment -%}
+  Determine if this customer is allowed to request access adds.
+  Default: must have store-specific admin tag.
+  Admin tag pattern: b2b-admin-<store-handle>
+{%- endcomment -%}
+
+{% assign allow_any_member = section.settings.allow_any_member | default: false %}
+{% assign is_store_admin = false %}
+{% assign is_store_member = false %}
+
+{% assign required_member_tag = 'b2b-' | append: store_handle %}
+{% assign required_admin_tag = 'b2b-admin-' | append: store_handle %}
+
+{% if customer %}
+  {% for t in customer.tags %}
+    {% if t == required_member_tag %}
+      {% assign is_store_member = true %}
+    {% endif %}
+    {% if t == required_admin_tag %}
+      {% assign is_store_admin = true %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% assign can_request_adds = false %}
+{% if customer %}
+  {% if allow_any_member and is_store_member %}
+    {% assign can_request_adds = true %}
+  {% endif %}
+  {% if is_store_admin %}
+    {% assign can_request_adds = true %}
+  {% endif %}
+{% endif %}
+
+{%- comment -%}
+  Build final form link with optional prefill params
+{%- endcomment -%}
+{% assign final_url = form_url %}
+
+{% assign want_prefill = false %}
+{% if org_key != blank %}{% assign want_prefill = true %}{% endif %}
+{% if handle_key != blank %}{% assign want_prefill = true %}{% endif %}
+{% if requester_email_key != blank and customer_email != blank %}{% assign want_prefill = true %}{% endif %}
+
+{% if form_url != blank and want_prefill %}
+  {% capture qs %}
+    usp=pp_url
+    {% if org_key != blank %}&{{ org_key }}={{ store_name | url_encode }}{% endif %}
+    {% if handle_key != blank %}&{{ handle_key }}={{ store_handle | url_encode }}{% endif %}
+    {% if requester_email_key != blank and customer_email != blank %}&{{ requester_email_key }}={{ customer_email | url_encode }}{% endif %}
+  {% endcapture %}
+
+  {% assign qs_clean = qs | strip | replace: ' ', '' | replace: "\n", "" %}
+
+  {% if form_url contains '?' %}
+    {% assign final_url = form_url | append: '&' | append: qs_clean %}
+  {% else %}
+    {% assign final_url = form_url | append: '?' | append: qs_clean %}
+  {% endif %}
+{% endif %}
+
+<section class="ss-invite" data-ss-invite>
+  <div class="ss-invite__wrap">
+    <div class="ss-invite__card">
+      <div class="ss-invite__left">
+        <div class="ss-invite__kicker">{{ section.settings.kicker }}</div>
+        <h2 class="ss-invite__title">{{ section.settings.title }}</h2>
+        <p class="ss-invite__sub">{{ section.settings.subtext }}</p>
+
+        <div class="ss-invite__mini">
+          <span class="ss-invite__pill">Store: <strong>{{ store_name }}</strong></span>
+          <span class="ss-invite__pill">Handle: <strong>{{ store_handle }}</strong></span>
+        </div>
+      </div>
+
+      <div class="ss-invite__right">
+        {% unless customer %}
+          <a class="ss-invite__btn ss-invite__btn--solid"
+             href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">
+            Log in to manage access
+          </a>
+          <div class="ss-invite__note">{{ section.settings.note_logged_out }}</div>
+
+        {% else %}
+          {% if can_request_adds %}
+            {% if final_url != blank %}
+              <a class="ss-invite__btn ss-invite__btn--solid"
+                 href="{{ final_url }}"
+                 {% if section.settings.open_new_tab %}target="_blank" rel="noopener"{% endif %}>
+                {{ section.settings.button_label }}
+              </a>
+              <div class="ss-invite__note">{{ section.settings.note_admin }}</div>
+            {% else %}
+              <div class="ss-invite__warn">Add your Google Form URL in this section’s settings.</div>
+            {% endif %}
+          {% else %}
+            <div class="ss-invite__warn">
+              {{ section.settings.note_not_admin }}
+            </div>
+          {% endif %}
+        {% endunless %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ss-invite{ padding: 10px 0 6px; }
+  .ss-invite__wrap{ max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+  .ss-invite__card{
+    display:flex;
+    gap: 18px;
+    align-items:flex-start;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    background:#fff;
+    border:1px solid rgba(0,0,0,.10);
+    border-radius:18px;
+    box-shadow: 0 12px 26px rgba(0,0,0,.06);
+    padding: 16px;
+  }
+
+  .ss-invite__left{ min-width: 260px; flex: 1; }
+  .ss-invite__right{ min-width: 260px; display:flex; flex-direction:column; gap: 10px; }
+
+  .ss-invite__kicker{
+    display:inline-block;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,.55);
+    margin-bottom: 6px;
+  }
+  .ss-invite__title{
+    margin: 0 0 6px;
+    font-size: 20px;
+    line-height: 1.15;
+    font-weight: 900;
+    letter-spacing: -.01em;
+  }
+  .ss-invite__sub{
+    margin: 0;
+    color: rgba(0,0,0,.65);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .ss-invite__mini{ display:flex; gap: 8px; flex-wrap:wrap; margin-top: 10px; }
+  .ss-invite__pill{
+    display:inline-flex; gap:8px; align-items:center;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border:1px solid rgba(0,0,0,.14);
+    background: rgba(0,0,0,.03);
+    font-weight: 900;
+    font-size: 12px;
+    color: rgba(0,0,0,.75);
+  }
+
+  .ss-invite__btn{
+    display:inline-block;
+    padding: 12px 16px;
+    border-radius: 999px;
+    font-weight: 900;
+    text-decoration:none;
+    border:1px solid rgba(0,0,0,.16);
+    white-space: nowrap;
+    text-align:center;
+  }
+  .ss-invite__btn--solid{
+    background:#0b0b0b;
+    color:#fff;
+    border:1px solid rgba(183,163,106,.45);
+  }
+  .ss-invite__btn:hover{ opacity:.92; }
+
+  .ss-invite__note{ color: rgba(0,0,0,.55); font-size: 12px; line-height: 1.4; }
+
+  .ss-invite__warn{
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.12);
+    background: rgba(0,0,0,.03);
+    font-weight: 900;
+    color: rgba(0,0,0,.65);
+    font-size: 13px;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Invite Access",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Manage access" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Add someone to this store" },
+    { "type": "text", "id": "subtext", "label": "Subtext", "default": "Request access for teammates, coworkers, or family. We approve all additions to keep the store secure." },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Request access for someone" },
+
+    { "type": "text", "id": "form_url", "label": "Google Form URL (public viewform link)", "default": "https://docs.google.com/forms/d/1LhNBjUmextt8HscgciBHPoedCQ_0HvH8dDsrLbHHNsA/viewform" },
+
+    { "type": "checkbox", "id": "open_new_tab", "label": "Open in new tab", "default": true },
+    { "type": "checkbox", "id": "allow_any_member", "label": "Allow any member (not just store admins) to request adds", "default": false },
+
+    { "type": "text", "id": "note_admin", "label": "Note (admin/member)", "default": "We’ll review the request and grant access if approved." },
+    { "type": "text", "id": "note_not_admin", "label": "Note (not allowed)", "default": "To add people, contact your store admin or Stella & Sage." },
+    { "type": "text", "id": "note_logged_out", "label": "Note (logged out)", "default": "Log in to request access changes for this store." },
+
+    { "type": "text", "id": "prefill_org_name_key", "label": "Prefill key: Store Name (entry.xxxxx)", "default": "entry.000000" },
+    { "type": "text", "id": "prefill_store_handle_key", "label": "Prefill key: Store Handle (entry.xxxxx)", "default": "entry.000000" },
+    { "type": "text", "id": "prefill_requester_email_key", "label": "Prefill key: Requestor Email (entry.xxxxx)", "default": "entry.000000" }
+  ],
+  "presets": [
+    { "name": "Invite Access" }
+  ]
+}
+{% endschema %}

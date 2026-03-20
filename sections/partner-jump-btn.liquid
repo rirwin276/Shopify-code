@@ -1,0 +1,67 @@
+{% comment %}
+  PARTNER JUMP BUTTON (LOW & SIMPLE)
+  - Text: "Shop Local"
+  - Position: Hugs the bottom edge (10px).
+{% endcomment %}
+
+{%- assign partners = collection.metafields.custom.assigned_partner.value -%}
+
+{% if partners != blank %}
+  <a href="#local-partners" class="ss-smart-jump">
+    <span class="ss-text">Shop Local ↓</span>
+  </a>
+
+  <style>
+    .ss-smart-jump {
+      text-decoration: none; z-index: 99; cursor: pointer; transition: all 0.3s ease;
+    }
+
+    /* DESKTOP: Clean Text Link */
+    @media (min-width: 769px) {
+      .ss-smart-jump {
+        display: block; text-align: center; color: #555; padding: 10px 0 20px 0; width: fit-content; margin: 0 auto;
+        font-size: 13px; font-weight: 600;
+      }
+      .ss-smart-jump:hover { color: #000; transform: translateY(2px); }
+    }
+
+    /* MOBILE: Slim, Low Bar */
+    @media (max-width: 768px) {
+      .ss-smart-jump {
+        position: fixed;
+        bottom: 10px; /* LOWERED to 10px */
+        left: 50%;
+        transform: translateX(-50%);
+        
+        /* The "Slim" Look */
+        width: auto;
+        min-width: 140px; /* Smaller width since text is shorter */
+        padding: 8px 20px; /* Slimmer padding */
+        
+        /* Frosted Glass Effect */
+        background: rgba(15, 23, 42, 0.9); /* Slightly darker/more opaque for contrast */
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        
+        color: #fff;
+        border-radius: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      
+      .ss-smart-jump:active { transform: translateX(-50%) scale(0.98); }
+    }
+    
+    html { scroll-behavior: smooth; }
+  </style>
+{% endif %}
+
+{% schema %}
+{ "name": "Partner Jump Button", "settings": [], "presets": [{ "name": "Partner Jump Button" }] }
+{% endschema %}

@@ -1,0 +1,240 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "type": "footer",
+  "name": "Footer",
+  "sections": {
+    "custom_liquid_t7rTVH": {
+      "type": "custom-liquid",
+      "name": "t:names.custom_liquid",
+      "settings": {
+        "custom_liquid": "<style>\n  /* --- 1. HIDE THE OLD FOOTER (The Sniper) --- */\n  /* This ensures your theme's default footer disappears so you don't have doubles */\n  .footer, #shopify-section-footer, .site-footer {\n    display: none !important;\n  }\n\n  /* --- 2. THE STUDIO FOOTER STYLES --- */\n  .ss-studio-footer {\n    width: 100%;\n    padding: 24px 40px;\n    background-color: #ffffff; /* Clean White */\n    border-top: 1px solid #e5e5e5; /* Subtle Divider */\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    font-size: 12px;\n    color: #666;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    flex-wrap: wrap;\n    gap: 20px;\n    margin-top: auto;\n  }\n\n  /* Left Side: Copyright & Badge */\n  .ss-footer-left {\n    display: flex;\n    align-items: center;\n    gap: 15px;\n  }\n\n  .ss-badge {\n    background: #f3f4f6;\n    color: #374151;\n    padding: 4px 8px;\n    border-radius: 6px;\n    font-weight: 600;\n    font-size: 10px;\n    letter-spacing: 0.5px;\n    text-transform: uppercase;\n    border: 1px solid #e5e7eb;\n  }\n\n  /* Center: System Status (The \"Tech\" Flex) */\n  .ss-footer-center {\n    display: flex;\n    align-items: center;\n    gap: 6px;\n  }\n  \n  .ss-status-dot {\n    width: 8px;\n    height: 8px;\n    background-color: #10b981; /* Emerald Green */\n    border-radius: 50%;\n    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);\n    animation: pulse 2s infinite;\n  }\n\n  /* Right Side: Links */\n  .ss-footer-right {\n    display: flex;\n    gap: 20px;\n  }\n\n  .ss-footer-link {\n    color: #666;\n    text-decoration: none;\n    transition: color 0.2s ease;\n  }\n\n  .ss-footer-link:hover {\n    color: #000;\n    text-decoration: underline;\n  }\n\n  /* Mobile Stack */\n  @media (max-width: 768px) {\n    .ss-studio-footer {\n      flex-direction: column;\n      text-align: center;\n      padding: 30px 20px;\n    }\n    .ss-footer-left, .ss-footer-right {\n      justify-content: center;\n      flex-wrap: wrap;\n    }\n  }\n\n  @keyframes pulse {\n    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }\n    70% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }\n    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }\n  }\n</style>\n\n<div class=\"ss-studio-footer\">\n  \n  <div class=\"ss-footer-left\">\n    <span>&copy; {{ 'now' | date: \"%Y\" }} Stella & Sage Co.</span>\n    <span class=\"ss-badge\">Studio v2.4</span>\n  </div>\n\n  <div class=\"ss-footer-center\">\n    <div class=\"ss-status-dot\"></div>\n    <span>Systems Operational</span>\n  </div>\n\n  <div class=\"ss-footer-right\">\n    <a href=\"/policies/privacy-policy\" class=\"ss-footer-link\">Privacy</a>\n    <a href=\"/policies/terms-of-service\" class=\"ss-footer-link\">Terms</a>\n    <a href=\"/pages/contact\" class=\"ss-footer-link\">Support</a>\n  </div>\n\n</div>",
+        "color_scheme": "",
+        "section_width": "page-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "divider_4xteMG": {
+      "type": "divider",
+      "name": "t:names.divider_section",
+      "settings": {
+        "color_scheme": "",
+        "section_width": "full-width",
+        "thickness": 1,
+        "corner_radius": "square",
+        "width_percent": 100,
+        "alignment_horizontal": "center",
+        "padding-block-start": 16,
+        "padding-block-end": 16
+      }
+    },
+    "footer_m9NzUG": {
+      "type": "footer",
+      "blocks": {
+        "group_H6VpwJ": {
+          "type": "group",
+          "settings": {
+            "content_direction": "column",
+            "vertical_on_mobile": true,
+            "horizontal_alignment": "flex-start",
+            "vertical_alignment": "center",
+            "align_baseline": false,
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center",
+            "gap": 6,
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "background_media": "none",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "toggle_overlay": false,
+            "overlay_color": "#00000026",
+            "overlay_style": "solid",
+            "gradient_direction": "to top",
+            "link": "",
+            "open_in_new_tab": false,
+            "placeholder": "",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "text_LWt8Pz": {
+              "type": "text",
+              "settings": {
+                "text": "<h2>Join our email list</h2>",
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "h4",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "text_f9CFLH": {
+              "type": "text",
+              "settings": {
+                "text": "<p>Get exclusive deals and early access to new products.</p>",
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "text_LWt8Pz",
+            "text_f9CFLH"
+          ]
+        },
+        "email_signup_crihX7": {
+          "type": "email-signup",
+          "settings": {
+            "width": "fill",
+            "custom_width": 100,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "heading": "",
+            "heading_preset": "h3",
+            "border_style": "all",
+            "border_width": 1,
+            "border_radius": 100,
+            "input_type_preset": "paragraph",
+            "style_class": "button-unstyled",
+            "display_type": "arrow",
+            "label": "Sign up",
+            "integrated_button": true,
+            "button_type_preset": "paragraph",
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "group_H6VpwJ",
+        "email_signup_crihX7"
+      ],
+      "disabled": true,
+      "name": "t:names.footer",
+      "settings": {
+        "section_width": "page-width",
+        "gap": 20,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 30,
+        "padding-block-end": 30
+      }
+    },
+    "footer_utilities_jLGE8U": {
+      "type": "footer-utilities",
+      "blocks": {
+        "footer_copyright_jweRK8": {
+          "type": "footer-copyright",
+          "settings": {
+            "show_powered_by": true,
+            "font_size": "0.75rem",
+            "case": "none"
+          },
+          "blocks": {}
+        },
+        "footer_policy_list_VCdnpa": {
+          "type": "footer-policy-list",
+          "settings": {
+            "font_size": "0.75rem",
+            "case": "none"
+          },
+          "blocks": {}
+        },
+        "social_links_Ew63Kq": {
+          "type": "social-links",
+          "settings": {
+            "facebook_url": "https://www.facebook.com/",
+            "instagram_url": "https://www.instagram.com/",
+            "youtube_url": "https://www.youtube.com/",
+            "tiktok_url": "https://www.tiktok.com/",
+            "twitter_url": "https://x.com/",
+            "threads_url": "",
+            "linkedin_url": "",
+            "bluesky_url": "",
+            "snapchat_url": "",
+            "pinterest_url": "",
+            "tumblr_url": "",
+            "vimeo_url": "",
+            "custom_url": ""
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "footer_copyright_jweRK8",
+        "footer_policy_list_VCdnpa",
+        "social_links_Ew63Kq"
+      ],
+      "disabled": true,
+      "name": "t:names.utilities",
+      "settings": {
+        "section_width": "page-width",
+        "gap": 24,
+        "divider_thickness": 0,
+        "color_scheme": "",
+        "padding-block-start": 20,
+        "padding-block-end": 48
+      }
+    }
+  },
+  "order": [
+    "custom_liquid_t7rTVH",
+    "divider_4xteMG",
+    "footer_m9NzUG",
+    "footer_utilities_jLGE8U"
+  ]
+}

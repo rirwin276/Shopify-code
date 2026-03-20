@@ -1,0 +1,315 @@
+{% comment %}
+  TEMPLATE: page.maker-hub.liquid
+  - Theme: Dark Mode (Ops Interface)
+  - Layout: High-Density "Flight Strips" for volume management.
+  - Features: Sorting UI, Capacity Locks, Vacation Mode Explainer.
+{% endcomment %}
+
+<div class="mh-app">
+  
+  {% comment %} SECURITY GATE {% endcomment %}
+  {% unless customer and customer.tags contains 'seller' %}
+    <div class="mh-gate">
+      <div class="mh-gate-box">
+        <div class="mh-lock-icon">🔒</div>
+        <h1>Restricted Access</h1>
+        <p>This terminal is for authorized Hamaker Partners only.</p>
+        <div class="mh-gate-actions">
+           <a href="{{ routes.account_login_url }}" class="mh-btn-primary">Log In</a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+  
+    {% comment %} --- HEADER SECTION --- {% endcomment %}
+    <header class="mh-header">
+      <div class="mh-identity">
+        <div class="mh-logo-mark">H</div>
+        <div>
+          <h1 class="mh-h1">Production Terminal</h1>
+          <p class="mh-sub">Operator: <span class="mh-user">{{ customer.first_name }} {{ customer.last_name }}</span></p>
+        </div>
+      </div>
+
+      <div class="mh-header-controls">
+        <div class="mh-toggle-group">
+          <div class="mh-toggle-label">
+            <span>Accepting Orders</span>
+            <small>Turn off to pause your shop immediately.</small>
+          </div>
+          <label class="mh-switch">
+            <input type="checkbox" checked>
+            <span class="mh-slider"></span>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    {% comment %} --- METRICS & CAPACITY --- {% endcomment %}
+    <section class="mh-control-deck">
+      
+      <div class="mh-card mh-capacity">
+        <div class="mh-card-head">
+          <span>Weekly Throughput</span>
+          <span class="mh-badge-tier">Level 1 Seller</span>
+        </div>
+        <div class="mh-select-wrap">
+          <select class="mh-select">
+            <option value="5">5 Items (Light)</option>
+            <option value="10" selected>10 Items (Standard)</option>
+            <option value="20" disabled>🔒 20 Items (Locked - 30 Days)</option>
+            <option value="50" disabled>🔒 50 Items (Locked - Pro)</option>
+          </select>
+          <div class="mh-progress-wrap">
+            <div class="mh-progress-bar" style="width: 30%"></div>
+          </div>
+          <div class="mh-progress-text">3 / 10 Slots Filled</div>
+        </div>
+      </div>
+
+      <div class="mh-stats-row">
+        <div class="mh-stat-box">
+          <span class="mh-stat-label">Due This Week</span>
+          <span class="mh-stat-val text-red">5</span>
+        </div>
+        <div class="mh-stat-box">
+          <span class="mh-stat-label">Pending Payout</span>
+          <span class="mh-stat-val">$145.00</span>
+        </div>
+      </div>
+
+    </section>
+
+    {% comment %} --- ORDER LIST (THE FLIGHT STRIPS) --- {% endcomment %}
+    <section class="mh-list-section">
+      
+      <div class="mh-filter-bar">
+        <div class="mh-filters">
+          <button class="mh-filter-btn active">All Active</button>
+          <button class="mh-filter-btn">By Due Date</button>
+          <button class="mh-filter-btn">By Team</button>
+        </div>
+        <div class="mh-search">
+          <input type="text" placeholder="Search Order # or Name..." class="mh-search-input">
+        </div>
+      </div>
+
+      <div class="mh-list-header">
+        <div class="col-main">Item Details</div>
+        <div class="col-meta">Customer / Delivery</div>
+        <div class="col-files">Assets</div>
+        <div class="col-action">Status</div>
+      </div>
+
+      <div class="mh-strip urgent">
+        <div class="mh-strip-main">
+          <div class="mh-thumb">H</div>
+          <div class="mh-info">
+            <div class="mh-order-num">#1024 <span class="mh-tag-team">Santee 10U</span></div>
+            <div class="mh-prod-title">Team Mom Hoodie</div>
+            <div class="mh-specs">L • Navy • Custom: "Coach Sarah"</div>
+          </div>
+        </div>
+        
+        <div class="mh-strip-meta">
+          <div class="mh-customer">Sarah Jenkins</div>
+          <div class="mh-delivery local">
+            <span class="icon">📍</span> Porch Pickup
+          </div>
+          <div class="mh-due text-red">Due: Feb 12 (2 Days)</div>
+        </div>
+
+        <div class="mh-strip-files">
+          <button class="mh-file-pill">⬇ DST</button>
+          <button class="mh-file-pill">⬇ PDF</button>
+        </div>
+
+        <div class="mh-strip-action">
+          <button class="mh-btn-action">Start Job</button>
+        </div>
+      </div>
+
+      <div class="mh-strip">
+        <div class="mh-strip-main">
+          <div class="mh-thumb">T</div>
+          <div class="mh-info">
+            <div class="mh-order-num">#1025 <span class="mh-tag-team">Hamaker Wood</span></div>
+            <div class="mh-prod-title">20oz Yeti Tumbler</div>
+            <div class="mh-specs">Black • Center Engrave</div>
+          </div>
+        </div>
+        
+        <div class="mh-strip-meta">
+          <div class="mh-customer">Ryan Irwin</div>
+          <div class="mh-delivery ship">
+            <span class="icon">📦</span> Shipping
+          </div>
+          <div class="mh-due">Due: Feb 13</div>
+        </div>
+
+        <div class="mh-strip-files">
+          <button class="mh-file-pill">⬇ SVG</button>
+        </div>
+
+        <div class="mh-strip-action">
+          <button class="mh-btn-action">Start Job</button>
+        </div>
+      </div>
+
+      <div class="mh-strip completed">
+        <div class="mh-strip-main">
+          <div class="mh-thumb">C</div>
+          <div class="mh-info">
+            <div class="mh-order-num">#1022 <span class="mh-tag-team">Tigers Baseball</span></div>
+            <div class="mh-prod-title">Flexfit Team Hat</div>
+            <div class="mh-specs">S/M • Black • 3D Puff</div>
+          </div>
+        </div>
+        
+        <div class="mh-strip-meta">
+          <div class="mh-customer">Mike Smith</div>
+          <div class="mh-delivery local">
+            <span class="icon">📍</span> Porch Pickup
+          </div>
+          <div class="mh-due text-green">Ready</div>
+        </div>
+
+        <div class="mh-strip-files">
+           <span class="mh-check">✓</span>
+        </div>
+
+        <div class="mh-strip-action">
+          <button class="mh-btn-done">Ready for Pickup</button>
+        </div>
+      </div>
+
+    </section>
+
+  {% endunless %}
+</div>
+
+<style>
+  /* --- DARK MODE VARIABLES --- */
+  :root {
+    --bg-app: #0f172a;       /* Deep Blue/Black */
+    --bg-card: #1e293b;      /* Lighter Card BG */
+    --bg-strip: #1e293b;
+    --border: #334155;
+    --text-main: #f8fafc;
+    --text-sub: #94a3b8;
+    --accent: #3b82f6;       /* Blue */
+    --accent-glow: rgba(59, 130, 246, 0.5);
+    --success: #10b981;
+    --danger: #ef4444;
+    --gold: #fbbf24;
+  }
+
+  /* RESET */
+  .mh-app { background-color: var(--bg-app); min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; color: var(--text-main); padding: 40px 20px; }
+  
+  /* GATE */
+  .mh-gate { display: flex; justify-content: center; align-items: center; height: 60vh; }
+  .mh-gate-box { background: var(--bg-card); padding: 40px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+  .mh-btn-primary { background: var(--accent); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block; }
+
+  /* HEADER */
+  .mh-header { max-width: 1100px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+  .mh-identity { display: flex; gap: 15px; align-items: center; }
+  .mh-logo-mark { width: 40px; height: 40px; background: var(--text-main); color: var(--bg-app); font-weight: 900; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 20px; }
+  .mh-h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px; }
+  .mh-sub { font-size: 13px; color: var(--text-sub); margin: 0; }
+  .mh-user { color: var(--accent); font-weight: 600; }
+
+  /* TOGGLE GROUP */
+  .mh-toggle-group { display: flex; align-items: center; gap: 15px; text-align: right; }
+  .mh-toggle-label span { display: block; font-size: 14px; font-weight: 700; color: var(--success); }
+  .mh-toggle-label small { display: block; font-size: 11px; color: var(--text-sub); }
+  
+  .mh-switch { position: relative; display: inline-block; width: 46px; height: 26px; }
+  .mh-switch input { opacity: 0; width: 0; height: 0; }
+  .mh-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 34px; }
+  .mh-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .mh-slider { background-color: var(--success); }
+  input:checked + .mh-slider:before { transform: translateX(20px); }
+
+  /* CONTROL DECK (Stats + Capacity) */
+  .mh-control-deck { max-width: 1100px; margin: 0 auto 40px; display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  
+  .mh-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .mh-card-head { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; }
+  .mh-badge-tier { background: rgba(251, 191, 36, 0.1); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+
+  .mh-select-wrap { position: relative; }
+  .mh-select { width: 100%; background: #0f172a; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 6px; margin-bottom: 10px; cursor: pointer; }
+  .mh-progress-wrap { height: 6px; background: #334155; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+  .mh-progress-bar { height: 100%; background: var(--accent); }
+  .mh-progress-text { font-size: 12px; color: var(--text-sub); text-align: right; }
+
+  .mh-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .mh-stat-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .mh-stat-label { font-size: 11px; text-transform: uppercase; color: var(--text-sub); margin-bottom: 5px; }
+  .mh-stat-val { font-size: 24px; font-weight: 800; }
+  .text-red { color: var(--danger); }
+  .text-green { color: var(--success); }
+
+  /* LIST SECTION */
+  .mh-list-section { max-width: 1100px; margin: 0 auto; }
+  
+  .mh-filter-bar { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+  .mh-filters { display: flex; gap: 10px; }
+  .mh-filter-btn { background: transparent; border: 1px solid var(--border); color: var(--text-sub); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+  .mh-filter-btn.active, .mh-filter-btn:hover { background: var(--text-main); color: var(--bg-app); border-color: var(--text-main); }
+  
+  .mh-search-input { background: var(--bg-card); border: 1px solid var(--border); padding: 8px 15px; border-radius: 6px; color: white; width: 250px; }
+
+  /* FLIGHT STRIPS (The Layout) */
+  .mh-list-header { display: grid; grid-template-columns: 3fr 2fr 1fr 1fr; padding: 0 20px 10px; font-size: 11px; text-transform: uppercase; color: var(--text-sub); font-weight: 700; }
+
+  .mh-strip { 
+    display: grid; 
+    grid-template-columns: 3fr 2fr 1fr 1fr; 
+    align-items: center;
+    background: var(--bg-card); 
+    border: 1px solid var(--border); 
+    border-radius: 8px; 
+    padding: 15px 20px; 
+    margin-bottom: 10px; 
+    transition: transform 0.2s;
+  }
+  .mh-strip:hover { transform: translateX(5px); border-color: var(--accent); }
+  .mh-strip.urgent { border-left: 4px solid var(--danger); }
+  .mh-strip.completed { opacity: 0.6; border-left: 4px solid var(--success); }
+
+  .mh-strip-main { display: flex; gap: 15px; align-items: center; }
+  .mh-thumb { width: 40px; height: 40px; background: #334155; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #94a3b8; }
+  
+  .mh-order-num { font-size: 12px; color: var(--accent); font-weight: 700; margin-bottom: 2px; }
+  .mh-tag-team { color: var(--text-sub); font-weight: 400; margin-left: 5px; }
+  .mh-prod-title { font-weight: 700; font-size: 14px; color: white; }
+  .mh-specs { font-size: 12px; color: var(--text-sub); }
+
+  .mh-strip-meta { font-size: 13px; }
+  .mh-customer { font-weight: 600; margin-bottom: 2px; }
+  .mh-delivery { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 5px; margin-bottom: 2px; }
+  .mh-due { font-size: 12px; font-weight: 700; }
+
+  .mh-file-pill { display: block; background: #334155; border: none; color: white; font-size: 10px; padding: 4px 8px; border-radius: 4px; margin-bottom: 5px; cursor: pointer; width: fit-content; }
+  .mh-file-pill:hover { background: var(--accent); }
+
+  .mh-btn-action { width: 100%; background: var(--text-main); color: var(--bg-app); border: none; padding: 8px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 12px; }
+  .mh-btn-done { width: 100%; background: var(--success); color: white; border: none; padding: 8px; border-radius: 6px; font-weight: 700; cursor: default; font-size: 12px; }
+
+  /* MOBILE RESPONSIVE */
+  @media(max-width: 800px) {
+    .mh-control-deck { grid-template-columns: 1fr; }
+    .mh-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .mh-toggle-group { width: 100%; justify-content: space-between; text-align: left; }
+    
+    /* COLLAPSE STRIPS TO CARDS ON MOBILE */
+    .mh-list-header { display: none; }
+    .mh-strip { grid-template-columns: 1fr; gap: 15px; padding: 20px; }
+    .mh-strip-meta { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 10px 0; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
+    .mh-strip-files { display: flex; gap: 10px; }
+    .mh-btn-action { padding: 12px; font-size: 14px; }
+  }
+</style>

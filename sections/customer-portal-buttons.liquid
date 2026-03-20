@@ -1,0 +1,58 @@
+{% assign portal_return_to = '/pages/portal' | url_encode %}
+
+{% if customer %}
+
+  <div style="max-width:1100px;margin:28px auto;padding:0 16px;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+
+      {% if customer.tags contains 'hamakercww' %}
+        <a href="/pages/hamaker-custom-woodworking"
+           style="display:inline-block;padding:14px 18px;border-radius:10px;background:#111;color:#fff;text-decoration:none;font-weight:700;">
+          Shop Hamaker Custom Woodworking
+        </a>
+      {% endif %}
+
+      {%- comment -%}
+      ADD MORE COMPANIES LATER (copy/paste one block per company)
+
+      {% if customer.tags contains 'acme' %}
+        <a href="/pages/acme-custom-woodworking"
+           style="display:inline-block;padding:14px 18px;border-radius:10px;background:#111;color:#fff;text-decoration:none;font-weight:700;">
+          Shop Acme
+        </a>
+      {% endif %}
+      {%- endcomment -%}
+
+    </div>
+  </div>
+
+{% else %}
+
+  <div style="max-width:1100px;margin:28px auto;padding:0 16px;text-align:center;">
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+
+      <!-- Existing customers -->
+      <a href="/customer_authentication/login?return_to={{ portal_return_to }}"
+         style="display:inline-block;padding:14px 20px;border-radius:10px;background:#111;color:#fff;text-decoration:none;font-weight:700;">
+        Existing customer? Sign in
+      </a>
+
+      <!-- New businesses -->
+      <a href="/pages/contact"
+         style="display:inline-block;padding:14px 20px;border-radius:10px;border:2px solid #111;color:#111;text-decoration:none;font-weight:700;background:#fff;">
+        Request a private storefront
+      </a>
+
+    </div>
+  </div>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "Customer Portal Buttons",
+  "presets": [
+    { "name": "Customer Portal Buttons" }
+  ]
+}
+{% endschema %}

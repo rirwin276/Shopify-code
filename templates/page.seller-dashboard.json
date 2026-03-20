@@ -1,0 +1,86 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 80
+      }
+    },
+    "shop_dashboard_storefront_tiles_hhkzVH": {
+      "type": "shop-dashboard-storefront-tiles",
+      "name": "Storefront tiles",
+      "settings": {
+        "show_loaded_banner": true,
+        "debug_mode": false,
+        "heading": "Your Storefronts",
+        "subheading": "Select a storefront to manage or shop.",
+        "max_width": 1220,
+        "padding_y": 24,
+        "columns_desktop": 3,
+        "columns_tablet": 2,
+        "storefront_base_url": "/pages/custom-shop",
+        "admin_powers_url": "/pages/admin-powers",
+        "admin_powers_label": "Admin Powers",
+        "admin_tag_prefix": "storefront-admin--",
+        "member_tag_prefix": "storefront-member--",
+        "show_status_badge": true,
+        "show_role_badge": true,
+        "show_handle_line": false,
+        "logo_placeholder_text": "LOGO",
+        "logo_fit": "cover",
+        "logo_aspect_ratio": "16/9",
+        "card_bg": "#ffffff",
+        "button_bg": "#111111",
+        "button_text": "#ffffff",
+        "secondary_button_bg": "#ffffff",
+        "secondary_button_text": "#111111",
+        "open_button_label": "Open storefront",
+        "empty_title": "No storefronts yet",
+        "empty_text": "Once you’re added to a storefront, it will appear here.",
+        "request_storefront_url": "",
+        "request_storefront_label": "Request a storefront",
+        "login_title": "Sign in to view your storefronts",
+        "login_text": "You must be signed in to see the storefronts you have access to.",
+        "login_button_label": "Sign in",
+        "show_missing_metaobject_note": true,
+        "missing_metaobject_text": "This storefront record isn’t readable on the storefront yet. (Usually: Storefront API access off, entry not Active, or you're not logged in as the tagged customer.)",
+        "enable_remove_store": false,
+        "remove_store_label": "Remove store",
+        "remove_modal_title": "Remove storefront access?",
+        "remove_confirm_label": "Yes, remove me",
+        "remove_cancel_label": "Cancel",
+        "remove_store_webhook_url": "—"
+      }
+    },
+    "custom_liquid_CHiwhX": {
+      "type": "custom-liquid",
+      "name": "t:names.custom_liquid",
+      "settings": {
+        "custom_liquid": "{%- liquid\n  assign request_url = routes.contact_url\n  assign portal_fallback_url = '/pages/b2b-portal'\n\n  assign is_logged_in = false\n  if customer\n    assign is_logged_in = true\n  endif\n\n  assign has_storefront = false\n  assign storefront_tag = ''\n  assign storefront_url = ''\n\n  if is_logged_in\n    for t in customer.tags\n      if t contains 'b2b-'\n        assign has_storefront = true\n        assign storefront_tag = t\n        break\n      endif\n    endfor\n  endif\n\n  if has_storefront\n    assign storefront_handle = storefront_tag | remove: 'b2b-' | strip | handleize\n    assign storefront_url = '/pages/' | append: storefront_handle\n  endif\n-%}\n\n<div class=\"ss-dash\">\n  <div class=\"ss-dash__inner\">\n    <h1 class=\"ss-dash__title\">Shop Dashboard</h1>\n    <p class=\"ss-dash__sub\">Retail shopping is always available. If you have a private storefront, access it here.</p>\n\n    {% if is_logged_in %}\n      {% if has_storefront %}\n        <div class=\"ss-card\">\n          <div class=\"ss-card__title\">Your private storefront</div>\n          <p class=\"ss-card__text\">Open your storefront, or manage access and requests.</p>\n          <div class=\"ss-actions\">\n            <a class=\"ss-btn\" href=\"{{ storefront_url }}\">Open storefront</a>\n            <a class=\"ss-btn ss-btn--ghost\" href=\"{{ request_url }}\">Request changes</a>\n          </div>\n        </div>\n      {% else %}\n        <div class=\"ss-card\">\n          <div class=\"ss-card__title\">No storefront assigned yet</div>\n          <p class=\"ss-card__text\">Request a private branded storefront and we’ll set it up for your team or business.</p>\n          <div class=\"ss-actions\">\n            <a class=\"ss-btn\" href=\"{{ request_url }}\">Request a storefront</a>\n            <a class=\"ss-btn ss-btn--ghost\" href=\"/collections/all\">Shop retail</a>\n          </div>\n        </div>\n      {% endif %}\n\n      <div class=\"ss-grid\">\n        <a class=\"ss-tile\" href=\"/account/orders\">\n          <div class=\"ss-tile__title\">Orders</div>\n          <div class=\"ss-tile__desc\">Track & reorder</div>\n        </a>\n        <a class=\"ss-tile\" href=\"/account/addresses\">\n          <div class=\"ss-tile__title\">Addresses</div>\n          <div class=\"ss-tile__desc\">Shipping info</div>\n        </a>\n        <a class=\"ss-tile\" href=\"/collections/all\">\n          <div class=\"ss-tile__title\">Shop retail</div>\n          <div class=\"ss-tile__desc\">Browse products</div>\n        </a>\n      </div>\n    {% else %}\n      <div class=\"ss-card\">\n        <div class=\"ss-card__title\">Log in to access your dashboard</div>\n        <p class=\"ss-card__text\">After login, we’ll route you to your storefront (if assigned).</p>\n        <div class=\"ss-actions\">\n          <a class=\"ss-btn\" href=\"/account/login?return_url={{ request.path | url_encode }}\">Log in</a>\n          <a class=\"ss-btn ss-btn--ghost\" href=\"{{ request_url }}\">Request a storefront</a>\n        </div>\n      </div>\n    {% endif %}\n  </div>\n</div>\n\n<style>\n  .ss-dash{ padding:28px 16px; }\n  .ss-dash__inner{ max-width:980px; margin:0 auto; }\n  .ss-dash__title{ margin:0 0 6px; }\n  .ss-dash__sub{ margin:0 0 18px; opacity:.78; }\n\n  .ss-card{\n    border:1px solid rgba(0,0,0,.10);\n    background:rgba(0,0,0,.03);\n    border-radius:16px;\n    padding:16px;\n    margin-bottom:16px;\n  }\n  .ss-card__title{ font-weight:650; margin-bottom:6px; }\n  .ss-card__text{ margin:0 0 12px; opacity:.85; }\n\n  .ss-actions{ display:flex; gap:10px; flex-wrap:wrap; }\n  .ss-btn{\n    display:inline-flex; align-items:center; justify-content:center;\n    padding:10px 14px; border-radius:999px;\n    border:1px solid rgba(0,0,0,.35);\n    background:transparent; color:rgba(0,0,0,.92);\n    text-decoration:none;\n    transition:transform .08s ease, border-color .12s ease;\n    white-space:nowrap;\n  }\n  .ss-btn:hover{ transform:translateY(-1px); border-color:rgba(0,0,0,.7); }\n  .ss-btn--ghost{ opacity:.85; }\n\n  .ss-grid{\n    display:grid;\n    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));\n    gap:12px;\n    margin-top:10px;\n  }\n  .ss-tile{\n    display:block;\n    border:1px solid rgba(0,0,0,.10);\n    background:#fff;\n    border-radius:16px;\n    padding:14px;\n    text-decoration:none;\n    color:inherit;\n    transition:transform .08s ease;\n  }\n  .ss-tile:hover{ transform:translateY(-1px); }\n  .ss-tile__title{ font-weight:650; margin-bottom:4px; }\n  .ss-tile__desc{ opacity:.75; font-size:13px; }\n</style>",
+        "color_scheme": "",
+        "section_width": "page-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    }
+  },
+  "order": [
+    "main",
+    "shop_dashboard_storefront_tiles_hhkzVH",
+    "custom_liquid_CHiwhX"
+  ]
+}

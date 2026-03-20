@@ -1,0 +1,161 @@
+{%- comment -%}
+  B2B Portal List (Allowed Storefronts Only)
+
+  Shows only storefronts where:
+    - customer is logged in
+    - and customer.tags contains storefront.access_tag
+      (fallback: "b2b-" + storefront.handle)
+
+  Metaobject definition expected (type: storefront) keys:
+    - display_name (single line text) optional
+    - subtitle (single line text) optional
+    - logo (file/image) optional
+    - page (page reference) optional
+    - slug (single line text) optional
+    - access_tag (single line text) optional
+{%- endcomment -%}
+
+{%- assign login_path = section.settings.login_path | default: '/account/login' -%}
+
+{%- if customer == nil -%}
+  <script>window.location.replace("{{ login_path }}");</script>
+  <noscript><meta http-equiv="refresh" content="0; url={{ login_path }}"></noscript>
+{%- endif -%}
+
+<section style="max-width:1100px;margin:0 auto;padding:36px 16px;">
+  {%- if section.settings.heading != blank -%}
+    <h1 style="margin:0 0 10px;font-size:34px;line-height:1.15;font-weight:800;text-align:center;">
+      {{ section.settings.heading }}
+    </h1>
+  {%- endif -%}
+
+  {%- if section.settings.intro != blank -%}
+    <div style="max-width:820px;margin:0 auto 22px;color:rgba(0,0,0,.75);font-size:16px;line-height:1.5;text-align:center;">
+      {{ section.settings.intro }}
+    </div>
+  {%- endif -%}
+
+  {%- assign storefronts = shop.metaobjects.storefront.values -%}
+  {%- assign shown_count = 0 -%}
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+    {%- for sf in storefronts -%}
+      {%- assign required_tag = 'b2b-' | append: sf.handle -%}
+      {%- if sf.access_tag != blank -%}
+        {%- assign required_tag = sf.access_tag -%}
+      {%- endif -%}
+
+      {%- if customer.tags contains required_tag -%}
+        {%- assign shown_count = shown_count | plus: 1 -%}
+
+        {%- assign link = blank -%}
+        {%- if sf.page != blank -%}
+          {%- assign link = sf.page.url -%}
+        {%- elsif sf.slug != blank -%}
+          {%- assign link = '/pages/' | append: sf.slug -%}
+        {%- else -%}
+          {%- assign link = '/pages/' | append: sf.handle -%}
+        {%- endif -%}
+
+        {%- assign title = sf.display_name -%}
+        {%- if title == blank -%}
+          {%- assign title = sf.handle | replace: '-', ' ' -%}
+        {%- endif -%}
+
+        <a href="{{ link }}"
+           style="display:block;text-decoration:none;color:inherit;border:1px solid rgba(0,0,0,.10);border-radius:14px;padding:16px;background:#fff;">
+          {%- if sf.logo != blank and section.settings.show_logos -%}
+            <div style="display:flex;justify-content:center;margin-bottom:10px;">
+              <img
+                src="{{ sf.logo | image_url: width: 420 }}"
+                alt="{{ title | escape }}"
+                loading="lazy"
+                width="{{ sf.logo.width }}"
+                height="{{ sf.logo.height }}"
+                style="max-width:150px;width:100%;height:auto;display:block;"
+              >
+            </div>
+          {%- endif -%}
+
+          <div style="font-weight:800;font-size:18px;line-height:1.25;text-align:center;">
+            {{ title }}
+          </div>
+
+          {%- if sf.subtitle != blank and section.settings.show_subtitles -%}
+            <div style="margin-top:6px;color:rgba(0,0,0,.72);font-size:14px;line-height:1.35;text-align:center;">
+              {{ sf.subtitle }}
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.show_tag_hint -%}
+            <div style="margin-top:10px;color:rgba(0,0,0,.45);font-size:12px;text-align:center;">
+              Tag: <code style="font-family:ui-monospace,Menlo,Monaco,Consolas,monospace;">{{ required_tag }}</code>
+            </div>
+          {%- endif -%}
+        </a>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  {%- if shown_count == 0 -%}
+    <div style="max-width:760px;margin:18px auto 0;padding:14px 16px;border:1px dashed rgba(0,0,0,.25);border-radius:12px;text-align:center;color:rgba(0,0,0,.7);">
+      No storefronts are available for your account yet.
+      {%- if section.settings.help_text != blank -%}
+        <div style="margin-top:6px;">{{ section.settings.help_text }}</div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "B2B Portal List",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Your Wholesale Storefronts"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Intro text",
+      "default": "<p>Select a storefront below to view products and pricing available to your account.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_logos",
+      "label": "Show logos",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_subtitles",
+      "label": "Show subtitles",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tag_hint",
+      "label": "Show tag hint (debug)",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "login_path",
+      "label": "Login redirect path",
+      "default": "/account/login"
+    },
+    {
+      "type": "richtext",
+      "id": "help_text",
+      "label": "No-access help text",
+      "default": "<p>If you believe this is a mistake, contact us to request access.</p>"
+    }
+  ],
+  "presets": [
+    { "name": "B2B Portal List" }
+  ]
+}
+{% endschema %}

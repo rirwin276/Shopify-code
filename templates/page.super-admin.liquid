@@ -1,0 +1,490 @@
+{% layout none %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stella & Sage — God Mode</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root { 
+    --bg: #0f172a; 
+    --card-bg: #1e293b; 
+    --header-bg: #1e293b;
+    --text: #f8fafc; 
+    --gray: #94a3b8;
+    --border: #334155; 
+    --accent: #3b82f6; 
+    --danger: #ef4444; 
+    --danger-hover: #dc2626;
+    --success: #10b981;
+    --warning: #f59e0b;
+  }
+  
+  * { box-sizing: border-box; }
+  
+  body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    padding: 0; margin: 0; 
+    min-height: 100vh;
+  }
+
+  /* --- LAYOUT --- */
+  .sa-wrapper { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+
+  /* --- SIDEBAR --- */
+  .sa-sidebar {
+    background: var(--card-bg); border-right: 1px solid var(--border);
+    padding: 30px 20px; display: flex; flex-direction: column; gap: 30px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sa-profile { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .sa-avatar {
+    width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+    border: 3px solid var(--accent); margin-bottom: 15px; background: #000;
+  }
+  .sa-sidebar h1 { font-size: 18px; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
+  .sa-sidebar p { color: var(--gray); font-size: 13px; margin: 5px 0 0; }
+  .sa-badge-god { 
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
+    color: white; padding: 4px 10px; border-radius: 20px; 
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    display: inline-block; margin-top: 10px;
+  }
+
+  /* --- TOOLS WIDGETS --- */
+  .sa-widget { margin-bottom: 20px; }
+  .sa-widget h3 { font-size: 11px; text-transform: uppercase; color: var(--gray); margin-bottom: 15px; letter-spacing: 1px; font-weight: 700; }
+  .sa-input-group { margin-bottom: 15px; }
+  .sa-label { display: block; font-size: 11px; color: var(--gray); margin-bottom: 5px; font-weight: 600; }
+  .sa-input { 
+    width: 100%; background: #0f172a; border: 1px solid var(--border); 
+    color: white; padding: 10px; border-radius: 6px; font-size: 13px; 
+    transition: 0.2s;
+  }
+  .sa-input:focus { border-color: var(--accent); outline: none; }
+
+  /* --- BUTTONS --- */
+  .btn { 
+    border: none; cursor: pointer; padding: 10px 16px; border-radius: 6px; 
+    font-size: 12px; font-weight: 600; text-decoration: none; 
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: white; width: 100%; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-glass { background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); }
+  .btn-glass:hover { background: rgba(255,255,255,0.1); border-color: var(--text); }
+  .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
+  .btn-danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
+  .btn-sm { padding: 6px 12px; font-size: 11px; }
+
+  /* --- MAIN CONTENT --- */
+  .sa-main { padding: 40px 50px; overflow-y: auto; }
+  .sa-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+  .sa-search { 
+    background: var(--card-bg); border: 1px solid var(--border); 
+    color: white; padding: 12px 20px; border-radius: 100px; 
+    width: 300px; font-size: 14px;
+  }
+  .sa-search:focus { border-color: var(--accent); outline: none; }
+
+  /* --- STORE CARDS --- */
+  .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+  .store-card {
+    background: var(--card-bg); border: 1px solid var(--border); 
+    border-radius: 12px; padding: 20px; position: relative;
+    transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .store-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+  .store-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+  .store-icon { 
+    width: 40px; height: 40px; background: #334155; 
+    border-radius: 8px; display: flex; align-items: center; justify-content: center; 
+    font-size: 18px; color: var(--gray);
+  }
+  .store-status { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+  .status-active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+  .status-closed { background: rgba(148, 163, 184, 0.1); color: var(--gray); }
+  .status-private { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+  .store-name { font-size: 16px; font-weight: 700; margin: 0 0 5px; color: white; }
+  .store-handle { font-size: 12px; color: var(--gray); font-family: monospace; }
+  .store-actions { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+
+  /* GRAVEYARD SECTION */
+  .graveyard-section { margin-top: 80px; opacity: 0.7; }
+  .graveyard-section:hover { opacity: 1; transition: 0.3s; }
+  .graveyard-title { font-size: 14px; text-transform: uppercase; color: var(--gray); letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; }
+  .modal { 
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    width: 90%; max-width: 600px; background: var(--card-bg); 
+    border: 1px solid var(--border); border-radius: 16px; padding: 0; 
+    max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+  
+  .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.5); }
+  .modal-tabs { display: flex; border-bottom: 1px solid var(--border); background: #0f172a; }
+  .modal-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; color: var(--gray); font-size: 13px; font-weight: 600; transition: 0.2s; }
+  .modal-tab:hover { color: white; background: rgba(255,255,255,0.05); }
+  .modal-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+  
+  .modal-content { padding: 20px; overflow-y: auto; flex: 1; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .modal-row { display: flex; align-items: center; gap: 15px; padding: 12px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; }
+  .modal-img { width: 40px; height: 40px; background: #334155; border-radius: 6px; object-fit: cover; }
+  
+  /* SETTINGS TOGGLE */
+  .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #0f172a; border-radius: 8px; border: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+{% assign is_super = false %}
+{% if customer %}
+  {% if customer.email == 'ryan.irwin@stellaandsagecompany.com' %}{% assign is_super = true %}{% endif %}
+  {% for t in customer.tags %}
+    {% if t contains 'super-admin' %}{% assign is_super = true %}{% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if is_super %}
+  
+  <div class="sa-wrapper">
+    
+    <aside class="sa-sidebar">
+      <div class="sa-profile">
+        <img src="https://cdn.shopify.com/s/files/1/0798/2055/4490/files/freeddy_the_frog.jpg?v=1770183074" class="sa-avatar" width="80" height="80" alt="Super Admin Avatar" loading="lazy">
+        <h1>Super Admin</h1>
+        <div class="sa-badge-god">God Mode Active</div>
+        <p>Logged in as {{ customer.first_name }}</p>
+      </div>
+
+      <div class="sa-widget">
+        <h3><i class="fas fa-tag"></i> Global Price Override</h3>
+        <div class="sa-input-group">
+          <label class="sa-label">Target Tag (Model)</label>
+          <input type="text" id="targetTag" class="sa-input" placeholder="e.g. bella-3006-blk">
+        </div>
+        <div class="sa-input-group">
+          <label class="sa-label">New Price ($)</label>
+          <input type="number" id="newPrice" class="sa-input" placeholder="0.00">
+        </div>
+        <button id="btnUpdatePrice" class="btn btn-primary">Update Prices</button>
+        <div id="priceStatus" style="font-size:11px; margin-top:10px; min-height:15px; text-align:center;"></div>
+      </div>
+
+      <div class="sa-widget">
+        <h3><i class="fas fa-link"></i> Quick Links</h3>
+        <a href="/admin/products" target="_blank" class="btn btn-glass" style="width:100%; margin-bottom:10px;">Shopify Admin</a>
+        <a href="{{ routes.root_url }}pages/portal" class="btn btn-glass" style="width:100%;">Back to Portal</a>
+      </div>
+    </aside>
+
+    <main class="sa-main">
+      <div class="sa-section-header">
+        <div>
+          <h2 style="margin:0;">Store Operations</h2>
+          <p style="color:var(--gray); margin:5px 0 0; font-size:14px;">Manage active storefronts, members, and inventory.</p>
+        </div>
+        <input type="text" id="storeSearch" class="sa-search" placeholder="Search stores..." onkeyup="filterStores()">
+      </div>
+
+      <h3 style="color:var(--text); margin-bottom:20px;">Active Storefronts</h3>
+      <div class="store-grid" id="activeStoreGrid">
+        {% for store in shop.metaobjects.custom_shop.values %}
+          {% unless store.tags contains 'status:closed' %}
+            
+            <div class="store-card" data-name="{{ store.name | downcase }}">
+              <div>
+                <div class="store-header">
+                  <div class="store-icon"><i class="fas fa-store"></i></div>
+                  {% if store.tags contains 'status:private' %}
+                    <span class="store-status status-private">Private</span>
+                  {% else %}
+                    <span class="store-status status-active">Public</span>
+                  {% endif %}
+                </div>
+                <h3 class="store-name">{{ store.name }}</h3>
+                <div class="store-handle">{{ store.system.handle }}</div>
+              </div>
+
+              <div class="store-actions">
+                <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
+                  <i class="fas fa-cog"></i> Manage Store
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.name | escape }}')">
+                  <i class="fas fa-radiation"></i> NUKE
+                </button>
+              </div>
+            </div>
+
+          {% endunless %}
+        {% endfor %}
+      </div>
+
+      <div class="graveyard-section">
+        <h3 class="graveyard-title"><i class="fas fa-archive"></i> Closed Stores (Graveyard)</h3>
+        <div class="store-grid" id="closedStoreGrid">
+          {% for store in shop.metaobjects.custom_shop.values %}
+            {% if store.tags contains 'status:closed' %}
+              <div class="store-card" data-name="{{ store.name | downcase }}" style="border-style:dashed;">
+                <div>
+                  <div class="store-header">
+                    <div class="store-icon"><i class="fas fa-ban"></i></div>
+                    <span class="store-status status-closed">Closed</span>
+                  </div>
+                  <h3 class="store-name" style="color:var(--gray); text-decoration: line-through;">{{ store.name }}</h3>
+                  <div class="store-handle">{{ store.system.handle }}</div>
+                </div>
+                <div class="store-actions">
+                  <span style="font-size:11px; color:var(--gray);">Store Decommissioned</span>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="manageModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="manageTitle" style="margin:0;">Manage Store</h3>
+        <button onclick="closeManage()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">&times;</button>
+      </div>
+      
+      <div class="modal-tabs">
+        <div class="modal-tab active" onclick="switchTab('inventory')">Inventory</div>
+        <div class="modal-tab" onclick="switchTab('members')">Members</div>
+        <div class="modal-tab" onclick="switchTab('settings')">Settings</div>
+      </div>
+
+      <div class="modal-content">
+        <div id="tab-inventory" class="tab-pane active">
+          <div id="inventoryList">Loading...</div>
+        </div>
+
+        <div id="tab-members" class="tab-pane">
+          <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
+            <label class="sa-label">Manage Access</label>
+            <div style="display:flex; gap:10px;">
+              <input type="email" id="memberEmail" class="sa-input" placeholder="user@example.com">
+              <button onclick="handleMember('add')" class="btn btn-primary">Add</button>
+              <button onclick="handleMember('remove')" class="btn btn-danger">Remove</button>
+            </div>
+            <div style="font-size:11px; color:var(--gray); margin-top:5px;">This will tag/untag the customer for this specific store.</div>
+            <div id="memberStatus" style="margin-top:10px; font-weight:bold;"></div>
+          </div>
+        </div>
+
+        <div id="tab-settings" class="tab-pane">
+          <div class="setting-row">
+            <div>
+              <div style="font-weight:700; font-size:14px; color:white;">Store Visibility</div>
+              <div style="font-size:11px; color:var(--gray);">Toggle between Public and Private.</div>
+            </div>
+            <div>
+              <button class="btn btn-glass" onclick="toggleVisibility('public')">Make Public</button>
+              <button class="btn btn-glass" onclick="toggleVisibility('private')">Make Private</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- CONFIGURATION ---
+    const MECHANIC_GOD_URL = "https://webhooks.mechanic.dev/7446a70b-ecd0-43b3-b135-84e390735d64"; 
+    const MECHANIC_MEMBER_URL = "https://webhooks.mechanic.dev/582ce69e-ceda-4086-9416-d0cd52260ce9";
+
+    // STATE
+    let currentStoreTag = "";
+    let currentStoreHandle = "";
+    let currentCollection = "";
+
+    // --- SEARCH FILTER ---
+    function filterStores() {
+      const filter = document.getElementById('storeSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.store-card');
+      cards.forEach(card => {
+        card.style.display = card.getAttribute('data-name').includes(filter) ? "flex" : "none";
+      });
+    }
+
+    // --- MODAL LOGIC ---
+    function openManage(name, collection, handle) {
+      currentStoreTag = name; // Assuming Tag matches Name for now
+      currentStoreHandle = handle;
+      currentCollection = collection;
+      
+      document.getElementById('manageTitle').textContent = "Manage: " + name;
+      document.getElementById('manageModal').style.display = 'block';
+      
+      // Load Inventory by default
+      loadInventory(collection);
+    }
+
+    function closeManage() {
+      document.getElementById('manageModal').style.display = 'none';
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      
+      document.querySelector(`.modal-tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+
+    // --- TAB 1: INVENTORY (AUDIT) ---
+    async function loadInventory(collectionHandle) {
+      const list = document.getElementById('inventoryList');
+      list.innerHTML = '<div style="text-align:center; color:gray;">Scanning inventory...</div>';
+
+      try {
+        const res = await fetch(`/collections/${collectionHandle}/products.json`);
+        const data = await res.json();
+        
+        if(!data.products.length) {
+          list.innerHTML = '<div style="text-align:center; padding:20px;">No products found.</div>';
+          return;
+        }
+
+        let html = '';
+        data.products.forEach(p => {
+          let img = p.images[0] ? p.images[0].src : '';
+          html += `
+            <div class="modal-row" id="row-${p.id}">
+              <img src="${img}" class="modal-img" width="40" height="40">
+              <div style="flex:1;">
+                <div style="font-weight:700; font-size:13px; color:white;">${p.title}</div>
+                <div style="font-size:11px; color:#94a3b8; font-family:monospace;">ID: ${p.id}</div>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="deleteSingleProduct(${p.id})">Delete</button>
+            </div>`;
+        });
+        list.innerHTML = html;
+      } catch(e) {
+        list.innerHTML = '<div style="text-align:center; color:#ef4444;">Error loading collection data.</div>';
+      }
+    }
+
+    // --- TAB 2: MEMBER MANAGEMENT (NEW WEBHOOK) ---
+    async function handleMember(action) {
+      const email = document.getElementById('memberEmail').value;
+      const statusDiv = document.getElementById('memberStatus');
+      
+      if(!email) { alert("Please enter an email address."); return; }
+      
+      statusDiv.textContent = "Processing...";
+      statusDiv.style.color = "var(--warning)";
+
+      // SEND TO NEW WEBHOOK
+      try {
+        await fetch(MECHANIC_MEMBER_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            action: action === 'add' ? 'add_member' : 'remove_member',
+            email: email,
+            store_tag: currentStoreTag
+          })
+        });
+        
+        statusDiv.textContent = action === 'add' ? "Member added successfully." : "Member removed successfully.";
+        statusDiv.style.color = "var(--success)";
+      } catch(e) {
+        statusDiv.textContent = "Error updating member.";
+        statusDiv.style.color = "var(--danger)";
+      }
+    }
+
+    // --- TAB 3: SETTINGS (VISIBILITY) ---
+    async function toggleVisibility(state) {
+      if(!confirm(`Change store to ${state.toUpperCase()}?`)) return;
+      
+      // Sending to GOD MODE webhook to update Store Metaobject
+      try {
+        await fetch(MECHANIC_GOD_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            action: "set_store_visibility",
+            tag: currentStoreTag,
+            visibility: state
+          })
+        });
+        alert(`Command sent. Store is becoming ${state}.`);
+        location.reload();
+      } catch(e) {
+        alert("Error sending command.");
+      }
+    }
+
+    // --- GOD MODE ACTIONS ---
+    async function deleteSingleProduct(id) {
+      if(!confirm("Permanently delete this product?")) return;
+      const row = document.getElementById(`row-${id}`);
+      row.style.opacity = 0.5;
+      
+      await fetch(MECHANIC_GOD_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ action: "delete_product", product_id: id })
+      });
+      
+      row.innerHTML = '<div style="color:#ef4444; font-weight:bold; width:100%; text-align:center;">DELETED</div>';
+    }
+
+    function nukeStore(storeTag) {
+      if(confirm(`⚠️ WARNING: CLOSING STORE '${storeTag}'\n\n1. All products deleted.\n2. All members untagged.\n3. Marked as Closed.\n\nProceed?`)) {
+        if(confirm(`Type OK to confirm deletion of '${storeTag}'.`)) {
+          fetch(MECHANIC_GOD_URL, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: "close_store", confirm: "true", tag: storeTag })
+          }).then(res => {
+             alert("Nuke sequence initiated.");
+             location.reload();
+          });
+        }
+      }
+    }
+
+    // --- GLOBAL PRICE UPDATE ---
+    document.getElementById('btnUpdatePrice').addEventListener('click', async function() {
+      const tag = document.getElementById('targetTag').value;
+      const price = document.getElementById('newPrice').value;
+      if(!confirm(`Update all products tagged '${tag}' to $${price}?`)) return;
+      
+      await fetch(MECHANIC_GOD_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ action: "global_price_update", tag, price })
+      });
+      alert("Update command sent.");
+    });
+
+  </script>
+
+{% else %}
+  <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+    <div style="font-size:40px; margin-bottom:20px;">🔒</div>
+    <h1 style="color:white; margin:0;">Restricted</h1>
+    <a href="{{ routes.root_url }}" style="color:var(--accent); text-decoration:none; font-weight:700; margin-top:20px;">Return Home</a>
+  </div>
+{% endif %}
+
+</body>
+</html>

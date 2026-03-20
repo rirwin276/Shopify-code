@@ -1,0 +1,80 @@
+{% comment %}
+B2B Storefront Hero
+Pulls data from metaobject: shop.metaobjects.storefront[handle]
+Where handle = current page handle (last part of URL)
+{% endcomment %}
+
+{% assign parts = request.path | split: '/' %}
+{% assign page_handle = parts | last %}
+{% assign sf = shop.metaobjects.storefront[page_handle] %}
+
+{% assign heading_text = section.settings.heading %}
+{% assign subheading_text = section.settings.subheading %}
+
+{% assign logo_image = blank %}
+
+{% if sf != blank %}
+  {% if sf.display_name != blank %}
+    {% assign heading_text = sf.display_name %}
+  {% endif %}
+
+  {% if sf.subtitle != blank %}
+    {% assign subheading_text = sf.subtitle %}
+  {% endif %}
+
+  {% if sf.logo != blank and sf.logo.preview_image != blank %}
+    {% assign logo_image = sf.logo.preview_image %}
+  {% endif %}
+{% endif %}
+
+<section style="max-width:1100px;margin:0 auto;padding:42px 16px 18px;text-align:center;">
+
+  {% if logo_image != blank %}
+    <img
+      src="{{ logo_image | image_url: width: 440 }}"
+      alt="{{ heading_text | escape }}"
+      loading="lazy"
+      width="{{ logo_image.width }}"
+height="{{ logo_image.height }}"
+      style="display:block;margin:0 auto 14px;max-width:220px;width:100%;height:auto;"
+    >
+  {% endif %}
+
+  {% if heading_text != blank %}
+    <h1 style="margin:0;font-size:42px;line-height:1.1;font-weight:800;">
+      {{ heading_text }}
+    </h1>
+  {% endif %}
+
+  {% if subheading_text != blank %}
+    <p style="margin:10px auto 0;max-width:760px;color:rgba(0,0,0,.7);font-size:16px;line-height:1.45;">
+      {{ subheading_text }}
+    </p>
+  {% endif %}
+
+</section>
+
+{% schema %}
+{
+  "name": "B2B Storefront Hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Default heading",
+      "default": "Wholesale Storefront"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Default subheading",
+      "default": "Private wholesale pricing and custom ordering."
+    }
+  ],
+  "presets": [
+    {
+      "name": "B2B Storefront Hero"
+    }
+  ]
+}
+{% endschema %}

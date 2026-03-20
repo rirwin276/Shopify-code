@@ -1,0 +1,207 @@
+{% comment %}
+  STELLA & SAGE - ADMIN COMMAND CENTER
+  - Merged "Invite" features with "Production Calibration"
+{% endcomment %}
+
+{%- assign handle = request.query_params.shop | default: request.query_params.store -%}
+{%- assign handle = handle | downcase | strip -%}
+
+{%- style -%}
+  .ap-wrap { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+  .ap-header { margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .ap-h1 { font-size: 32px; font-weight: 800; margin: 0; line-height: 1.2; }
+  
+  /* SPLIT LAYOUT */
+  .ap-layout { display: grid; grid-template-columns: 350px 1fr; gap: 40px; }
+  
+  /* LEFT COLUMN (Invite) */
+  .ap-sidebar { background: #f8f8f8; padding: 25px; border-radius: 16px; height: fit-content; }
+  .ap-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
+  
+  /* RIGHT COLUMN (Products) */
+  .ap-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
+  .ap-tab { padding: 10px 20px; cursor: pointer; font-weight: 700; color: #888; border-bottom: 3px solid transparent; }
+  .ap-tab.is-active { color: #000; border-color: #000; }
+  
+  .ap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; display: none; }
+  .ap-grid.is-active { display: grid; }
+  
+  .ap-card { border: 1px solid #eee; border-radius: 12px; padding: 15px; background: #fff; position: relative; transition: box-shadow 0.2s; }
+  .ap-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+  
+  .ap-img-box { position: relative; height: 260px; background: #f9f9f9; border-radius: 8px; overflow: hidden; margin-bottom: 12px; }
+  .ap-img { width: 100%; height: 100%; object-fit: contain; }
+  
+  .ap-btn { display: block; width: 100%; padding: 12px; text-align: center; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-size: 14px; text-decoration: none;}
+  .ap-btn-primary { background: #000; color: #fff; }
+  .ap-btn-secondary { background: #fff; border: 1px solid #ddd; color: #000; }
+  
+  .ap-status { position: absolute; top: 10px; right: 10px; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; text-transform: uppercase; z-index: 2; }
+  .status-pending { background: #fff3cd; color: #856404; }
+  .status-live { background: #d1e7dd; color: #0f5132; }
+
+  @media(max-width: 900px) { .ap-layout { grid-template-columns: 1fr; } }
+{%- endstyle -%}
+
+<section class="ap-wrap">
+  {% if customer.tags contains 'storefront-admin--' or customer.email contains '@stella' %}
+    
+    <div class="ap-header">
+      <div>
+        <p style="text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: 1px; color: #666; margin-bottom: 5px;">Admin Powers</p>
+        <h1 class="ap-h1">Store: {{ handle | capitalize }}</h1>
+      </div>
+      <div>
+        <a href="/pages/portal" class="ap-btn-secondary" style="padding: 10px 20px;">← Dashboard</a>
+      </div>
+    </div>
+
+    <div class="ap-layout">
+      
+      <div class="ap-sidebar">
+        <h3 style="margin-top:0;">Invite People</h3>
+        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Paste emails to grant immediate access.</p>
+        <textarea class="ap-input" rows="4" placeholder="name@example.com"></textarea>
+        <button class="ap-btn ap-btn-primary">Send Invites</button>
+      </div>
+
+      <div class="ap-content">
+        <div class="ap-tabs">
+          <div class="ap-tab is-active" onclick="switchTab('pending')">Pending Review</div>
+          <div class="ap-tab" onclick="switchTab('approved')">Live on Store</div>
+        </div>
+
+        <div class="ap-grid is-active" id="grid-pending">
+          {% paginate collections[handle].products by 50 %}
+            {% for product in collections[handle].products %}
+              
+              {% comment %} IF NO LOGO POSITION, IT IS PENDING {% endcomment %}
+              {% assign lock_code = product.metafields.custom.logo_position %}
+              
+              {% if lock_code == blank %}
+                <div class="ap-card product-card" 
+                     data-tags="base-gelato" 
+                     data-product-id="{{ product.id }}">
+                     
+                  <span class="ap-status status-pending">Hidden</span>
+                  
+                  <div class="ap-img-box media">
+                    <img src="{{ product.featured_image | image_url: width: 400 }}" 
+                         class="ap-img" 
+                         width="400" 
+                         height="400" 
+                         loading="lazy">
+                  </div>
+                  
+                  <div style="font-weight:700; margin-bottom:4px;">{{ product.title }}</div>
+                  
+                  <button class="ap-btn ap-btn-primary ss-tuner-trigger">
+                    📐 Calibrate & Approve
+                  </button>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endpaginate %}
+          
+          <div id="pending-empty" style="display:none; padding:40px; text-align:center; grid-column: 1/-1; background:#f9f9f9; border-radius:12px;">
+            <h3>🎉 All caught up!</h3>
+            <p>No new products waiting for calibration.</p>
+          </div>
+        </div>
+
+        <div class="ap-grid" id="grid-approved">
+          {% paginate collections[handle].products by 50 %}
+            {% for product in collections[handle].products %}
+              
+              {% assign lock_code = product.metafields.custom.logo_position %}
+              
+              {% if lock_code != blank %}
+                <div class="ap-card product-card" 
+                     data-tags="base-gelato" 
+                     data-logo-lock="{{ lock_code }}">
+                     
+                  <span class="ap-status status-live">Live</span>
+                  
+                  <div class="ap-img-box media">
+                    <img src="{{ product.featured_image | image_url: width: 400 }}" 
+                         class="ap-img" 
+                         width="400" 
+                         height="400" 
+                         loading="lazy">
+                  </div>
+                  
+                  <div style="font-weight:700; margin-bottom:4px;">{{ product.title }}</div>
+                  
+                  <button class="ap-btn ap-btn-secondary ss-tuner-trigger">
+                    ⚙️ Adjust Position
+                  </button>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endpaginate %}
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+    <div style="text-align:center; padding: 100px;">
+      <h1>Access Denied</h1>
+      <p>You do not have permission to manage this store.</p>
+      <a href="/pages/portal" class="ap-btn-primary" style="display:inline-block; width:auto; padding:12px 30px; margin-top:20px;">Back to Dashboard</a>
+    </div>
+  {% endif %}
+</section>
+
+<script>
+  function switchTab(tabName) {
+    document.querySelectorAll('.ap-tab').forEach(t => t.classList.remove('is-active'));
+    document.querySelectorAll('.ap-grid').forEach(g => g.classList.remove('is-active'));
+    
+    event.target.classList.add('is-active');
+    document.getElementById('grid-' + tabName).classList.add('is-active');
+  }
+
+  // Check if pending is empty
+  const pendingGrid = document.getElementById('grid-pending');
+  // Count children minus the 'empty message' div itself
+  const productCount = pendingGrid.querySelectorAll('.ap-card').length;
+  if(productCount === 0) {
+    document.getElementById('pending-empty').style.display = 'block';
+  }
+  
+  // TRIGGER THE TUNER MANUALLY
+  document.addEventListener('click', function(e) {
+    if(e.target.classList.contains('ss-tuner-trigger')) {
+      const card = e.target.closest('.ap-card');
+      
+      // Load Tuner if not loaded
+      if(window.SS && window.SS.tuner) {
+        if(!document.querySelector('.ss-tuner-panel')) {
+           window.SS.tuner.init();
+        }
+        setTimeout(() => {
+            document.querySelector('.ss-tuner-panel').classList.add('is-active');
+            alert("1. Use the panel to position the logo.\n2. Click 'Copy Code'.\n3. Go to Shopify Admin > Products > Metafields > Logo Position.\n4. Paste & Save!");
+        }, 200);
+      } else {
+        alert("Tuner script not loaded. Make sure you added {% raw %}{{ 'ss-visual-tuner.js' | asset_url | script_tag }}{% endraw %} to your theme.liquid");
+      }
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Admin Command Center",
+  "settings": [
+    {
+      "type": "text",
+      "id": "form_access_url",
+      "label": "Store access request form URL"
+    }
+  ],
+  "presets": [
+    { "name": "Admin Command Center" }
+  ]
+}
+{% endschema %}

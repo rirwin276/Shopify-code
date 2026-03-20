@@ -1,0 +1,47 @@
+/* =========================================
+   STELLA & SAGE - PREMIUM FEATURES (Pixel Force)
+   ========================================= */
+
+/* 1. CONTAINER REFERENCE */
+.product-card .media {
+  position: relative !important;
+  overflow: hidden; 
+}
+
+/* 2. LOGO OVERLAY STYLES */
+.ss-logo-overlay {
+  position: absolute !important;
+  
+  /* POSITION: We use PIXELS now to force it down. */
+  /* 120px is roughly the chest area. Increase to 150px to go lower. */
+  top: 60px !important;   
+  
+  /* CENTER IT */
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important; 
+  
+  /* SIZE: 32% of the shirt width */
+  width: 40% !important;          
+  
+  /* VISUALS */
+  z-index: 10;         
+  pointer-events: none; 
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+}
+
+/* 3. BADGE STYLES */
+.ss-badge-content {
+  position: absolute; 
+  top: 10px; left: 10px;
+  background: #000; color: #fff; 
+  padding: 4px 10px; border-radius: 2px; 
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  z-index: 20; pointer-events: none;
+  display: none; 
+}
+.ss-badge-active { display: block !important; }
+
+/* 4. HOVER EFFECT */
+.product-card:hover .ss-logo-overlay {
+  opacity: 0.9;
+}

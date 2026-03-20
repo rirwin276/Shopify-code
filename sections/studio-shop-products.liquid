@@ -1,0 +1,51 @@
+<section class="studio-products">
+  <div class="page-width">
+    {% if collections.all.products_count > 0 %}
+      <ul class="product-grid">
+        {% for product in collections.all.products %}
+          {% unless product.tags contains 'storefront-' %}
+            <li>
+              {% render 'product-card', product: product %}
+            </li>
+          {% endunless %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No products yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+.studio-products {
+  padding: 40px 20px 80px;
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+@media (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Studio Shop Products",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Studio Shop Products"
+    }
+  ]
+}
+{% endschema %}

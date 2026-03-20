@@ -1,0 +1,95 @@
+{% comment %}
+  Storefront Under Construction (FULL REPLACEMENT)
+
+  Access requires customer login + customer tag:
+  - b2b-<page.handle>  OR  b2b-admin-<page.handle>
+
+  It displays:
+  - logo (from metaobject type "custom_shop" by matching entry handle to page.handle)
+  - name
+  - status
+{% endcomment %}
+
+{% assign handle = page.handle | downcase | strip %}
+{% assign member_tag = 'b2b-' | append: handle %}
+{% assign admin_tag = 'b2b-admin-' | append: handle %}
+
+{% unless customer %}
+  <div style="max-width:760px;margin:60px auto;text-align:center;padding:0 16px;">
+    <h1 style="margin:0 0 10px;">Please sign in</h1>
+    <p style="margin:0 0 18px;color:rgba(0,0,0,.65);">You must be signed in to access this private store.</p>
+    <a href="{{ routes.account_login_url | append: '?return_url=' | append: request.path | url_encode }}"
+       style="display:inline-block;padding:12px 18px;border-radius:999px;background:#0b0b0b;color:#fff;font-weight:900;text-decoration:none;">
+      Sign in
+    </a>
+  </div>
+  {% break %}
+{% endunless %}
+
+{% assign allowed = false %}
+{% for t in customer.tags %}
+  {% assign td = t | downcase | strip %}
+  {% if td == member_tag or td == admin_tag %}
+    {% assign allowed = true %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% unless allowed %}
+  <div style="max-width:760px;margin:60px auto;text-align:center;padding:0 16px;">
+    <h1 style="margin:0 0 10px;">Access required</h1>
+    <p style="margin:0 0 18px;color:rgba(0,0,0,.65);">You don’t currently have access to this private store.</p>
+    <a href="/pages/private-storefronts"
+       style="display:inline-block;padding:12px 18px;border-radius:999px;border:1px solid rgba(0,0,0,.18);background:#fff;color:#0b0b0b;font-weight:900;text-decoration:none;">
+      Request access
+    </a>
+  </div>
+  {% break %}
+{% endunless %}
+
+{% assign entry = shop.metaobjects.custom_shop[handle] %}
+{% assign name = handle | replace: '-', ' ' | capitalize %}
+{% assign status = 'under_construction' %}
+{% assign logo = blank %}
+
+{% if entry %}
+  {% assign entry_name = entry.name.value | default: entry.name %}
+  {% if entry_name != blank %}{% assign name = entry_name %}{% endif %}
+
+  {% assign entry_status = entry.status.value | default: entry.status %}
+  {% if entry_status != blank %}{% assign status = entry_status %}{% endif %}
+
+  {% assign entry_logo = entry.logo.value | default: entry.logo %}
+  {% if entry_logo != blank %}{% assign logo = entry_logo %}{% endif %}
+{% endif %}
+
+<div style="max-width:980px;margin:40px auto;padding:0 16px;">
+  <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;border:1px solid rgba(0,0,0,.10);border-radius:18px;padding:18px;box-shadow:0 12px 26px rgba(0,0,0,.06);background:#fff;">
+    <div style="width:78px;height:78px;border-radius:18px;background:rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:900;color:rgba(0,0,0,.35);">
+      {% if logo != blank %}
+        {{ logo | image_url: width: 300 | image_tag: style: 'width:100%;height:100%;object-fit:contain;background:#fff;', alt: name }}
+      {% else %}
+        S&amp;S
+      {% endif %}
+    </div>
+
+    <div style="flex:1;min-width:240px;">
+      <h1 style="margin:0 0 6px;font-size:34px;line-height:1.05;">{{ name }}</h1>
+      {% if status == 'live' %}
+        <p style="margin:0;color:rgba(0,0,0,.65);">This private store is live.</p>
+      {% else %}
+        <p style="margin:0;color:rgba(0,0,0,.65);"><strong>Under Construction</strong> — please allow 24–48 hours for your store products to be added.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Storefront UC",
+  "settings": [],
+  "presets": [
+    { "name": "Storefront UC" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,107 @@
+{%- comment -%}
+  B2B Gate (Dynamic by Storefront Metaobject)
+
+  Looks up storefront metaobject by current page handle (last part of URL):
+    shop.metaobjects.storefront[handle]
+
+  Expected metaobject fields (keys):
+    - access_tag (single line text)   e.g. "b2b-hamaker-custom-woodworking"
+    - approved (true/false) optional (not required for gating, but available)
+    - subtitle (single line text) optional
+
+  Behavior:
+    - Theme editor preview: always allows render, shows a notice box.
+    - Not logged in: redirect to /account/login
+    - Logged in but missing required tag: redirect to /pages/portal
+{%- endcomment -%}
+
+{%- assign portal_path = section.settings.portal_path | default: '/pages/portal' -%}
+
+{%- assign parts = request.path | split: '/' -%}
+{%- assign page_handle = parts | last -%}
+
+{%- assign sf = shop.metaobjects.storefront[page_handle] -%}
+
+{%- comment -%}
+  Determine required tag:
+  1) storefront metaobject access_tag (preferred)
+  2) fallback to "b2b-" + page_handle
+{%- endcomment -%}
+
+{%- assign required_tag = 'b2b-' | append: page_handle -%}
+{%- if sf != blank and sf.access_tag != blank -%}
+  {%- assign required_tag = sf.access_tag -%}
+{%- endif -%}
+
+{%- assign allow_render = false -%}
+
+{%- if request.design_mode -%}
+  {%- assign allow_render = true -%}
+{%- else -%}
+  {%- if customer -%}
+    {%- if customer.tags contains required_tag -%}
+      {%- assign allow_render = true -%}
+    {%- else -%}
+      <script>
+        window.location.replace("{{ portal_path }}");
+      </script>
+      <noscript>
+        <meta http-equiv="refresh" content="0; url={{ portal_path }}">
+      </noscript>
+    {%- endif -%}
+  {%- else -%}
+    <script>
+      window.location.replace("/account/login");
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=/account/login">
+    </noscript>
+  {%- endif -%}
+{%- endif -%}
+
+{%- if allow_render and request.design_mode and section.settings.show_editor_notice -%}
+  <section style="max-width:1100px;margin:14px auto 0;padding:12px 14px;border:1px dashed rgba(200,178,124,.85);background:#faf8f2;border-radius:10px;">
+    <div style="color:rgba(0,0,0,.75);font-size:13px;line-height:1.35;">
+      <strong>Protected Storefront (Editor Preview)</strong><br>
+      Required customer tag:
+      <code style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">{{ required_tag }}</code>
+      &nbsp;&nbsp;•&nbsp;&nbsp;Fallback:
+      <code style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">{{ portal_path }}</code>
+    </div>
+
+    {%- if section.settings.subtitle != blank -%}
+      <div style="margin-top:8px;color:rgba(0,0,0,.7);font-size:14px;line-height:1.45;">
+        {{ section.settings.subtitle }}
+      </div>
+    {%- endif -%}
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "B2B Gate",
+  "settings": [
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle (optional)",
+      "default": "Wholesale access verified."
+    },
+    {
+      "type": "text",
+      "id": "portal_path",
+      "label": "Fallback page path",
+      "default": "/pages/portal"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_editor_notice",
+      "label": "Show notice in theme editor preview",
+      "default": true
+    }
+  ],
+  "presets": [
+    { "name": "B2B Gate" }
+  ]
+}
+{% endschema %}

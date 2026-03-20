@@ -1,0 +1,1217 @@
+{% comment %}
+  STELLA & SAGE — STORE REQUEST FORM (RAILWAY ONLY) — SINGLE PAGE (NO WIZARD)
+  - NO Make.com
+  - Uses Studio Uploader popup editor (iframe modal) for Main + Secondary images
+  - Editor returns session_id + finalize_url via postMessage
+  - Shopify fetches finalize JSON -> fetches final_image_url blob -> injects into <input type="file">
+  - Submit is BLOCKED until Main image is actually saved/injected (photo ready)
+  - On submit: immediately shows the 90s provisioning screen (no “Sending to HQ” phase)
+  - If Railway fails: returns to form and shows the error
+
+  REQUIRED on FastAPI (app.py):
+  - CORS enabled for your Shopify domain(s)
+  - GET /ui supports embed mode + return=postmessage + slot=main|secondary
+  - POST /api/storefront-request accepts fields + files (optional) + *_session_id (optional)
+
+  PATCH:
+  - Supports new app.py finalize contract:
+    POST /finalize/{session_id} => JSON
+    GET  /final-file/{session_id} => actual PNG
+{% endcomment %}
+
+{% schema %}
+{
+  "name": "Store Request Form",
+  "settings": [
+    {
+      "type": "text",
+      "id": "studio_uploader_base_url",
+      "label": "Studio Uploader Base URL (Railway)",
+      "default": "https://studio-uploader-production.up.railway.app"
+    },
+    {
+      "type": "text",
+      "id": "admin_email",
+      "label": "Admin Email (Unlimited Requests)",
+      "default": "ryan.irwin@stellaandsagecompany.com"
+    }
+  ],
+  "presets": [
+    { "name": "Store Request Form (Railway) — Single Page" }
+  ]
+}
+{% endschema %}
+
+{% assign studio_uploader_base_url = section.settings.studio_uploader_base_url | default: "https://studio-uploader-production.up.railway.app" %}
+{% assign admin_email = section.settings.admin_email | default: "ryan.irwin@stellaandsagecompany.com" %}
+
+<div class="sf-container">
+  <div class="sf-header">
+    <h1 class="sf-h1">Request a Storefront</h1>
+    <p class="sf-sub">A few quick details, then we build your private shop.</p>
+  </div>
+
+  <div class="sf-form-wrap">
+
+    {% unless customer %}
+      <div class="sf-gate">
+        <div style="font-size: 40px; margin-bottom: 16px;">🔒</div>
+        <h3 class="sf-gate-title">Member Access Only</h3>
+        <p class="sf-gate-text">You must be logged in to request a new storefront.</p>
+        <div class="sf-gate-btns">
+          <a href="{{ routes.account_login_url }}?return_url={{ request.path }}" class="sf-btn sf-btn--solid">Log In</a>
+          <a href="{{ routes.account_register_url }}?return_url={{ request.path }}" class="sf-btn sf-btn--outline">Create Account</a>
+        </div>
+      </div>
+    {% else %}
+
+      <div id="sf-toast" class="sf-toast sf-hidden" role="status" aria-live="polite">
+        <div class="sf-toast-inner">
+          <div class="sf-toast-msg" id="sf-toast-msg">
+            Please complete the required fields and replace any logo marked <b>Bad</b>.
+          </div>
+          <button type="button" class="sf-toast-x" onclick="sfToastHide()" aria-label="Dismiss">✕</button>
+        </div>
+      </div>
+
+      <div id="sf-error-inline" class="sf-error sf-hidden"></div>
+
+      <form id="sf-request-form" class="sf-form" onsubmit="submitToStudioUploader(event)" novalidate>
+        <input type="hidden" name="customer_id" id="SF_CUST_ID" value="{{ customer.id }}">
+        <input type="hidden" name="customer_email" id="SF_CUST_EMAIL" value="{{ customer.email }}">
+
+        <input type="hidden" name="main_session_id" id="SF_MAIN_SESSION" value="">
+        <input type="hidden" name="secondary_session_id" id="SF_SEC_SESSION" value="">
+
+        <div class="sf-block">
+          <div class="sf-legend">Basics</div>
+
+          <div class="sf-grid">
+            <div class="sf-field">
+              <label class="sf-label" for="OrgType">Organization Type *</label>
+              <select id="OrgType" name="org_type" class="sf-select" required onchange="toggleConditionals()">
+                <option value="" disabled selected>Select an option...</option>
+                <option value="Small Business">Small Business</option>
+                <option value="Sports Team">Sports Team</option>
+                <option value="Military Unit">Military Unit</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="sf-field sf-hidden" id="MilitaryBranch">
+              <label class="sf-label" for="BranchInput">Which Branch? *</label>
+              <select id="BranchInput" name="military_branch" class="sf-select">
+                <option value="" disabled selected>Select Branch...</option>
+                <option value="Army">Army</option>
+                <option value="Navy">Navy</option>
+                <option value="Air Force">Air Force</option>
+                <option value="Marines">Marines</option>
+                <option value="Coast Guard">Coast Guard</option>
+                <option value="Space Force">Space Force</option>
+              </select>
+            </div>
+
+            <div class="sf-field sf-hidden" id="SportType">
+              <label class="sf-label" for="SportInput">Which Sport? *</label>
+              <input type="text" id="SportInput" name="sport_type" class="sf-input" placeholder="e.g. Baseball, Travel Ball">
+            </div>
+
+            <div class="sf-field">
+              <label class="sf-label">Est. Users *</label>
+              <select name="user_count" class="sf-select" required>
+                <option value="" disabled selected>Select...</option>
+                <option value="1-10">1-10 people</option>
+                <option value="11-50">11-50 people</option>
+                <option value="51-200">51-200 people</option>
+                <option value="200+">200+ people</option>
+              </select>
+            </div>
+
+            <div class="sf-field">
+              <label class="sf-label">Duration *</label>
+              <select name="duration" class="sf-select" required>
+                <option value="" disabled selected>Select...</option>
+                <option value="Ongoing">Ongoing (Permanent)</option>
+                <option value="One-time Event">One-time Event / Drop</option>
+                <option value="Seasonal">Seasonal</option>
+              </select>
+            </div>
+
+            <div class="sf-field">
+              <label class="sf-label" for="PrimaryColor">Primary Shirt Color Preference *</label>
+              <select id="PrimaryColor" name="primary_color" class="sf-select" required>
+                <option value="" disabled selected>Select a color...</option>
+                <option value="No preference">No preference</option>
+
+                <option value="" disabled>──────────</option>
+                <option value="Neutral / Earthy">Neutral / Earthy</option>
+                <option value="Black">Black</option>
+                <option value="White">White</option>
+                <option value="Gray">Gray</option>
+                <option value="Charcoal">Charcoal</option>
+                <option value="Navy">Navy</option>
+                <option value="Brown">Brown</option>
+                <option value="Tan / Khaki">Tan / Khaki</option>
+                <option value="Cream / Natural">Cream / Natural</option>
+                <option value="Olive / Military Green">Olive / Military Green</option>
+
+                <option value="" disabled>──────────</option>
+                <option value="Red">Red</option>
+                <option value="Blue">Blue</option>
+                <option value="Green">Green</option>
+                <option value="Orange">Orange</option>
+                <option value="Yellow">Yellow</option>
+                <option value="Purple">Purple</option>
+                <option value="Pink">Pink</option>
+
+                <option value="" disabled>──────────</option>
+                <option value="Light Blue">Light Blue</option>
+                <option value="Royal Blue">Royal Blue</option>
+                <option value="Teal">Teal</option>
+                <option value="Maroon">Maroon</option>
+                <option value="Burgundy">Burgundy</option>
+              </select>
+              <p class="sf-help">This helps us pick your default thumbnail color. You’ll still be able to offer multiple colors later.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="sf-divider"></div>
+
+        <div class="sf-block">
+          <div class="sf-legend">Store</div>
+
+          <div class="sf-field">
+            <label class="sf-label" for="StoreName">Storefront Name *</label>
+            <input
+              type="text"
+              id="StoreName"
+              name="storefront_name"
+              class="sf-input"
+              placeholder="e.g. Hamaker Custom Woodworking"
+              required
+              oninput="generateHandle()"
+              autocomplete="organization"
+            >
+            <p class="sf-help">Proposed Handle: <span id="HandlePreview" class="sf-mono">...</span></p>
+            <input type="hidden" id="HiddenHandle" name="storefront_handle">
+          </div>
+        </div>
+
+        <div class="sf-divider"></div>
+
+        <div class="sf-block">
+          <div class="sf-legend">Logos</div>
+
+          <div class="sf-field">
+            <label class="sf-label">Main Logo (Required) *</label>
+
+            <div class="sf-file-drop" id="MainLogoDrop" onclick="openUploaderModal('main')">
+              <span id="MainLogoText">🪄 Add & edit Main Logo</span>
+              <input
+                type="file"
+                id="MainLogo"
+                name="storefront_logo_file"
+                class="sf-file-input"
+                accept="image/png, image/jpeg, image/webp"
+                required
+              >
+            </div>
+
+            <div class="sf-preview-row sf-hidden" id="MainLogoPreviewRow">
+              <img id="MainLogoPreview" class="sf-preview-img" alt="Main logo preview" width="74" height="74" loading="lazy">
+              <div class="sf-preview-meta">
+                <div class="sf-badge-row">
+                  <span class="sf-badge sf-badge--neutral" id="MainLogoBadge">Checking…</span>
+                </div>
+                <div class="sf-quality-sub" id="MainLogoQualitySub"></div>
+
+                <div class="sf-actions sf-hidden" id="MainLogoActions">
+                  <button type="button" class="sf-action-btn" onclick="return openUploaderModal('main')">Edit</button>
+                  <button type="button" class="sf-action-btn sf-action-btn--ghost" onclick="return clearEdited('main')">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="sf-mini-status sf-hidden" id="MainLogoPending">
+              Saving your image… please wait.
+            </div>
+          </div>
+
+          <div class="sf-field">
+            <label class="sf-label">Secondary Logo (Optional)</label>
+
+            <div class="sf-file-drop sf-file-drop--secondary" id="SecLogoDrop" onclick="openUploaderModal('secondary')">
+              <span id="SecLogoText">🪄 Add & edit Secondary Logo</span>
+              <input
+                type="file"
+                id="SecLogo"
+                name="storefront_logo_secondary"
+                class="sf-file-input"
+                accept="image/png, image/jpeg, image/webp"
+              >
+            </div>
+
+            <div class="sf-preview-row sf-hidden" id="SecLogoPreviewRow">
+              <img id="SecLogoPreview" class="sf-preview-img" alt="Secondary logo preview" width="74" height="74" loading="lazy">
+              <div class="sf-preview-meta">
+                <div class="sf-badge-row">
+                  <span class="sf-badge sf-badge--neutral" id="SecLogoBadge">Checking…</span>
+                </div>
+                <div class="sf-quality-sub" id="SecLogoQualitySub"></div>
+
+                <div class="sf-actions sf-hidden" id="SecLogoActions">
+                  <button type="button" class="sf-action-btn" onclick="return openUploaderModal('secondary')">Edit</button>
+                  <button type="button" class="sf-action-btn sf-action-btn--ghost" onclick="return clearEdited('secondary')">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="sf-mini-status sf-hidden" id="SecLogoPending">
+              Saving your image… please wait.
+            </div>
+          </div>
+
+          <div id="sf-limit-msg" class="sf-error sf-hidden" style="margin-top:16px;">
+            You have reached the limit of 3 requests per day. Please try again tomorrow.
+          </div>
+
+          <div class="sf-submit-row">
+            <button type="submit" id="sf-submit-btn" class="sf-btn sf-btn--solid">Submit Request</button>
+          </div>
+
+          <p class="sf-fineprint">
+            By submitting, you authorize Stella &amp; Sage to create and configure a private storefront for your group.
+          </p>
+        </div>
+      </form>
+
+      <div id="sf-provision" class="sf-hidden sf-provision">
+        <div class="sf-provision-card">
+          <div class="sf-spinner sf-spinner--big"></div>
+          <div class="sf-provision-title">Creating your storefront…</div>
+          <div class="sf-provision-sub">This usually takes about a minute.</div>
+
+          <div class="sf-progress">
+            <div id="sf-progress-bar" class="sf-progress-bar"></div>
+          </div>
+
+          <div id="sf-provision-status" class="sf-status"></div>
+
+          <div class="sf-provision-actions">
+            <button type="button" class="sf-btn sf-btn--outline" onclick="sfCancelProvisioning()">Back</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="sf-uploader-modal" class="sf-modal sf-hidden" aria-hidden="true">
+        <div class="sf-modal-backdrop" onclick="closeUploaderModal()"></div>
+        <div class="sf-modal-card" role="dialog" aria-modal="true" aria-label="Studio Uploader">
+          <div class="sf-modal-top">
+            <div class="sf-modal-title">
+              Studio Uploader
+              <span id="sf-modal-slot" class="sf-modal-chip">main</span>
+            </div>
+            <button type="button" class="sf-modal-x" onclick="closeUploaderModal()" aria-label="Close">✕</button>
+          </div>
+
+          <iframe
+            id="sf-uploader-iframe"
+            class="sf-modal-iframe"
+            src="about:blank"
+            title="Studio Uploader Editor"
+            allow="clipboard-read; clipboard-write"
+          ></iframe>
+
+          <div class="sf-modal-help">
+            Upload your image, do quick edits, then hit <b>Done</b>. This window will close automatically.
+          </div>
+        </div>
+      </div>
+
+    {% endunless %}
+  </div>
+</div>
+
+<script>
+  const SF_UPLOADER_BASE = "{{ studio_uploader_base_url | escape }}".replace(/\/+$/,'');
+  const SF_ADMIN_EMAIL = "{{ admin_email | escape }}".toLowerCase();
+  const SF_USER_EMAIL = ("{{ customer.email | escape }}").toLowerCase();
+  const SF_IS_ADMIN = (SF_USER_EMAIL === SF_ADMIN_EMAIL);
+
+  const sfQualityState = {
+    main: { tier: null, okToSubmit: false, hasFile: false, pending: false },
+    secondary: { tier: null, okToSubmit: true, hasFile: false, pending: false }
+  };
+
+  let sfToastTimer = null;
+  let sfActiveSlot = "main";
+  let sfProvisionTimer = null;
+  let sfProvisionStart = 0;
+  let sfProvisionWasShown = false;
+
+  function sfToastShow(msg) {
+    const t = document.getElementById('sf-toast');
+    const m = document.getElementById('sf-toast-msg');
+    if (m && msg) m.innerHTML = msg;
+    if (!t) return;
+    t.classList.remove('sf-hidden');
+    t.classList.add('sf-toast--show');
+    if (sfToastTimer) clearTimeout(sfToastTimer);
+    sfToastTimer = setTimeout(sfToastHide, 4500);
+  }
+
+  function sfToastHide() {
+    const t = document.getElementById('sf-toast');
+    if (!t) return;
+    t.classList.remove('sf-toast--show');
+    setTimeout(() => t.classList.add('sf-hidden'), 180);
+  }
+
+  window.addEventListener('scroll', () => sfToastHide(), { passive: true });
+  document.addEventListener('input', () => sfToastHide());
+
+  document.addEventListener("DOMContentLoaded", function() {
+    checkRateLimit();
+    wireLiveErrorClearing();
+    generateHandle();
+    toggleConditionals();
+    updateSubmitEnabled();
+  });
+
+  function checkRateLimit() {
+    if (SF_IS_ADMIN) return;
+
+    const MAX_PER_DAY = 3;
+    const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
+
+    let count = localStorage.getItem(STORAGE_KEY) || 0;
+    if (parseInt(count) >= MAX_PER_DAY) {
+      const btn = document.getElementById('sf-submit-btn');
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.innerText = "Daily Limit Reached";
+      }
+      const msg = document.getElementById('sf-limit-msg');
+      if (msg) msg.classList.remove('sf-hidden');
+    }
+  }
+
+  function incrementRateLimit() {
+    const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
+    let count = localStorage.getItem(STORAGE_KEY) || 0;
+    localStorage.setItem(STORAGE_KEY, parseInt(count) + 1);
+  }
+
+  function toggleConditionals() {
+    const type = document.getElementById('OrgType')?.value || "";
+    const mil = document.getElementById('MilitaryBranch');
+    const sport = document.getElementById('SportType');
+    const branchInput = document.getElementById('BranchInput');
+    const sportInput = document.getElementById('SportInput');
+
+    if (mil) mil.classList.add('sf-hidden');
+    if (sport) sport.classList.add('sf-hidden');
+    if (branchInput) branchInput.required = false;
+    if (sportInput) sportInput.required = false;
+
+    if (type === 'Military Unit') {
+      if (mil) mil.classList.remove('sf-hidden');
+      if (branchInput) branchInput.required = true;
+    } else if (type === 'Sports Team') {
+      if (sport) sport.classList.remove('sf-hidden');
+      if (sportInput) sportInput.required = true;
+    }
+  }
+
+  function generateHandle() {
+    const name = (document.getElementById('StoreName')?.value || "").trim();
+    const base = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const custId = (document.getElementById('SF_CUST_ID')?.value || "");
+    const last4 = custId ? custId.toString().slice(-4) : "0000";
+    const handle = base ? (base + "-" + last4) : "";
+
+    const hp = document.getElementById('HandlePreview');
+    const hh = document.getElementById('HiddenHandle');
+    if (hp) hp.innerText = handle || "...";
+    if (hh) hh.value = handle;
+
+    updateSubmitEnabled();
+  }
+
+  function wireLiveErrorClearing() {
+    const form = document.getElementById('sf-request-form');
+    if (!form) return;
+
+    const clearIfValid = (el) => {
+      if (!el || !el.classList) return;
+      if (el.classList.contains('sf-field-error')) {
+        const val = (el.value || '').toString().trim();
+        if (!el.required || val.length > 0) el.classList.remove('sf-field-error');
+      }
+    };
+
+    form.addEventListener('input', (e) => clearIfValid(e.target), { passive: true });
+    form.addEventListener('change', (e) => clearIfValid(e.target), { passive: true });
+  }
+
+  function openUploaderModal(slot) {
+    sfActiveSlot = slot === "secondary" ? "secondary" : "main";
+
+    const modal = document.getElementById("sf-uploader-modal");
+    const iframe = document.getElementById("sf-uploader-iframe");
+    const chip = document.getElementById("sf-modal-slot");
+
+    if (!modal || !iframe) return;
+
+    if (!SF_UPLOADER_BASE) {
+      alert("Studio Uploader URL not configured in section settings.");
+      return;
+    }
+
+    if (chip) chip.textContent = sfActiveSlot;
+
+    const src = SF_UPLOADER_BASE + "/ui?embed=1&return=postmessage&slot=" + encodeURIComponent(sfActiveSlot);
+    iframe.src = src;
+
+    modal.classList.remove("sf-hidden");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeUploaderModal() {
+    const modal = document.getElementById("sf-uploader-modal");
+    const iframe = document.getElementById("sf-uploader-iframe");
+    if (iframe) iframe.src = "about:blank";
+    if (modal) {
+      modal.classList.add("sf-hidden");
+      modal.setAttribute("aria-hidden", "true");
+    }
+    document.body.style.overflow = "";
+  }
+
+  window.addEventListener("message", async (event) => {
+    const msg = event?.data;
+    if (!msg || typeof msg !== "object") return;
+    if (msg.type !== "studio-uploader:done") return;
+
+    try {
+      const allowedOrigin = new URL(SF_UPLOADER_BASE).origin;
+      if (event.origin !== allowedOrigin) return;
+    } catch (e) {
+      return;
+    }
+
+    const slot = (msg.slot === "secondary") ? "secondary" : "main";
+    const finalizeUrl = msg.finalize_url || "";
+    const directFinalImageUrl = msg.final_image_url || "";
+    const sessionId = msg.session_id || "";
+    const filename = msg.filename || (slot === "main" ? "main_logo.png" : "secondary_logo.png");
+    const mime = msg.mime || "image/png";
+
+    if (!finalizeUrl || !sessionId) {
+      console.error("Uploader message missing finalize_url or session_id", msg);
+      sfToastShow("Could not save that image. Please try again.");
+      return;
+    }
+
+    setPending(slot, true);
+
+    try {
+      const finalizeRes = await fetch(finalizeUrl, {
+        method: "POST",
+        headers: { "Accept": "application/json" },
+        cache: "no-store"
+      });
+
+      if (!finalizeRes.ok) {
+        throw new Error("Finalize failed " + finalizeRes.status);
+      }
+
+      const finalizeJson = await finalizeRes.json();
+      if (!finalizeJson || finalizeJson.status !== "ok") {
+        throw new Error("Finalize returned invalid response");
+      }
+
+      let imageUrl = finalizeJson.final_image_url || directFinalImageUrl || "";
+      if (!imageUrl) {
+        throw new Error("Finalize response missing final_image_url");
+      }
+
+      imageUrl = new URL(imageUrl, SF_UPLOADER_BASE).toString();
+
+      const imageRes = await fetch(
+        imageUrl + (imageUrl.includes("?") ? "&" : "?") + "t=" + Date.now(),
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+      if (!imageRes.ok) {
+        throw new Error("Image fetch failed " + imageRes.status);
+      }
+
+      const blob = await imageRes.blob();
+      if (!blob || blob.size === 0) {
+        throw new Error("Image fetch returned empty blob");
+      }
+
+      const file = new File([blob], filename, { type: mime });
+
+      const input = document.getElementById(slot === "main" ? "MainLogo" : "SecLogo");
+      if (input) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+      }
+
+      if (slot === "main") {
+        const hs = document.getElementById("SF_MAIN_SESSION");
+        if (hs) hs.value = sessionId;
+      } else {
+        const hs = document.getElementById("SF_SEC_SESSION");
+        if (hs) hs.value = sessionId;
+      }
+
+      await applyEditedPreview(slot, file);
+      closeUploaderModal();
+    } catch (err) {
+      console.error(err);
+      sfToastShow("Could not save that image. Please try again.");
+    } finally {
+      setPending(slot, false);
+      updateSubmitEnabled();
+    }
+  });
+
+  function setPending(slot, on) {
+    const isMain = (slot === "main");
+    const pendingId = isMain ? "MainLogoPending" : "SecLogoPending";
+    const badgeId = isMain ? "MainLogoBadge" : "SecLogoBadge";
+    const subId = isMain ? "MainLogoQualitySub" : "SecLogoQualitySub";
+
+    if (isMain) sfQualityState.main.pending = !!on;
+    else sfQualityState.secondary.pending = !!on;
+
+    const p = document.getElementById(pendingId);
+    if (p) p.classList.toggle("sf-hidden", !on);
+
+    if (on) {
+      setBadge(badgeId, "neutral", "Saving…");
+      setText(subId, "Please wait until the image is ready.");
+    }
+  }
+
+  async function applyEditedPreview(slot, file) {
+    const isMain = (slot === "main");
+
+    const textId = isMain ? "MainLogoText" : "SecLogoText";
+    const rowId = isMain ? "MainLogoPreviewRow" : "SecLogoPreviewRow";
+    const imgId = isMain ? "MainLogoPreview" : "SecLogoPreview";
+    const badgeId = isMain ? "MainLogoBadge" : "SecLogoBadge";
+    const subId = isMain ? "MainLogoQualitySub" : "SecLogoQualitySub";
+    const actionsId = isMain ? "MainLogoActions" : "SecLogoActions";
+    const dropId = isMain ? "MainLogoDrop" : "SecLogoDrop";
+
+    const labelEl = document.getElementById(textId);
+    if (labelEl) labelEl.innerText = "✅ Ready";
+
+    const dropEl = document.getElementById(dropId);
+    if (dropEl) dropEl.classList.remove("sf-field-error");
+
+    const imgEl = document.getElementById(imgId);
+    if (imgEl && imgEl.dataset.objectUrl) {
+      try { URL.revokeObjectURL(imgEl.dataset.objectUrl); } catch (e) {}
+    }
+
+    const url = URL.createObjectURL(file);
+    if (imgEl) {
+      imgEl.dataset.objectUrl = url;
+      imgEl.src = url;
+    }
+
+    hideEl(rowId, false);
+    hideEl(actionsId, false);
+
+    setBadge(badgeId, "neutral", "Checking…");
+    setText(subId, "");
+
+    const image = new Image();
+    image.onload = async () => {
+      const w = image.naturalWidth || 0;
+      const h = image.naturalHeight || 0;
+      const longest = Math.max(w, h);
+
+      let tier = "good";
+      if (longest >= 3000) tier = "excellent";
+      else if (longest >= 2400) tier = "good";
+      else if (longest >= 1800) tier = "risky";
+      else tier = "bad";
+
+      let headline = "";
+      let sub = "";
+      if (tier === "excellent") {
+        headline = "Excellent";
+        sub = "Awesome — should print great.";
+      } else if (tier === "good") {
+        headline = "Good";
+        sub = "Should print fine.";
+      } else if (tier === "risky") {
+        headline = "Good Enough";
+        sub = "Probably okay for simple logos, but not ideal.";
+      } else {
+        headline = "Bad";
+        sub = "Too low-quality to print cleanly. Please edit again or choose a better file.";
+      }
+
+      setBadge(badgeId, tier, headline);
+      setText(subId, sub);
+
+      if (isMain) {
+        sfQualityState.main.hasFile = true;
+        sfQualityState.main.tier = tier;
+        sfQualityState.main.okToSubmit = (tier !== "bad");
+      } else {
+        sfQualityState.secondary.hasFile = true;
+        sfQualityState.secondary.tier = tier;
+        sfQualityState.secondary.okToSubmit = (tier !== "bad");
+      }
+
+      updateSubmitEnabled();
+    };
+
+    image.onerror = () => {
+      setBadge(badgeId, "bad", "Bad");
+      setText(subId, "Preview failed to load. Please try again.");
+
+      if (isMain) {
+        sfQualityState.main.hasFile = false;
+        sfQualityState.main.tier = "bad";
+        sfQualityState.main.okToSubmit = false;
+      } else {
+        sfQualityState.secondary.hasFile = false;
+        sfQualityState.secondary.tier = "bad";
+        sfQualityState.secondary.okToSubmit = false;
+      }
+
+      updateSubmitEnabled();
+    };
+
+    image.src = url;
+  }
+
+  function clearEdited(slot) {
+    const isMain = (slot === "main");
+    const inputId = isMain ? "MainLogo" : "SecLogo";
+    const previewImgId = isMain ? "MainLogoPreview" : "SecLogoPreview";
+    const input = document.getElementById(inputId);
+
+    if (input) input.value = "";
+
+    const previewImg = document.getElementById(previewImgId);
+    if (previewImg && previewImg.dataset.objectUrl) {
+      try { URL.revokeObjectURL(previewImg.dataset.objectUrl); } catch (e) {}
+      delete previewImg.dataset.objectUrl;
+      previewImg.removeAttribute("src");
+    }
+
+    if (isMain) {
+      sfQualityState.main = { tier: null, okToSubmit: false, hasFile: false, pending: false };
+      hideEl("MainLogoPreviewRow", true);
+      hideEl("MainLogoActions", true);
+      hideEl("MainLogoPending", true);
+      setBadge("MainLogoBadge", "neutral", "Checking…");
+      setText("MainLogoQualitySub", "");
+      const t = document.getElementById("MainLogoText");
+      if (t) t.innerText = "🪄 Add & edit Main Logo";
+      const hs = document.getElementById("SF_MAIN_SESSION");
+      if (hs) hs.value = "";
+    } else {
+      sfQualityState.secondary = { tier: null, okToSubmit: true, hasFile: false, pending: false };
+      hideEl("SecLogoPreviewRow", true);
+      hideEl("SecLogoActions", true);
+      hideEl("SecLogoPending", true);
+      setBadge("SecLogoBadge", "neutral", "Checking…");
+      setText("SecLogoQualitySub", "");
+      const t = document.getElementById("SecLogoText");
+      if (t) t.innerText = "🪄 Add & edit Secondary Logo";
+      const hs = document.getElementById("SF_SEC_SESSION");
+      if (hs) hs.value = "";
+    }
+
+    updateSubmitEnabled();
+    return false;
+  }
+
+  function clearAllFieldErrors() {
+    document.querySelectorAll('.sf-field-error').forEach(el => el.classList.remove('sf-field-error'));
+  }
+
+  function markFieldError(el) {
+    if (!el) return;
+    el.classList.add('sf-field-error');
+  }
+
+  function scrollToFirstError() {
+    const first = document.querySelector('.sf-field-error');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function validateBeforeSubmit() {
+    clearAllFieldErrors();
+    hideInlineError();
+
+    const form = document.getElementById('sf-request-form');
+    if (!form) return true;
+
+    let ok = true;
+
+    const required = form.querySelectorAll('[required]');
+    required.forEach((el) => {
+      if (el.disabled) return;
+      if (el.closest('.sf-hidden')) return;
+
+      const tag = el.tagName.toLowerCase();
+      const val = (el.value || '').toString().trim();
+
+      if (tag === 'select') {
+        if (!el.value) {
+          markFieldError(el);
+          ok = false;
+        }
+      } else if (tag === 'input' || tag === 'textarea') {
+        if (!val) {
+          markFieldError(el);
+          ok = false;
+        }
+      }
+    });
+
+    generateHandle();
+    const handle = (document.getElementById("HiddenHandle")?.value || "").trim();
+    if (!handle) {
+      markFieldError(document.getElementById("StoreName"));
+      ok = false;
+    }
+
+    const mainDrop = document.getElementById("MainLogoDrop");
+    if (!sfQualityState.main.hasFile) {
+      markFieldError(mainDrop);
+      ok = false;
+    } else if (sfQualityState.main.pending) {
+      markFieldError(mainDrop);
+      ok = false;
+      showInlineError("Please wait — your main logo is still saving.");
+    } else if (sfQualityState.main.tier === "bad") {
+      markFieldError(mainDrop);
+      ok = false;
+    }
+
+    const secDrop = document.getElementById("SecLogoDrop");
+    if (sfQualityState.secondary.hasFile) {
+      if (sfQualityState.secondary.pending) {
+        markFieldError(secDrop);
+        ok = false;
+        showInlineError("Please wait — your secondary logo is still saving.");
+      } else if (sfQualityState.secondary.tier === "bad") {
+        markFieldError(secDrop);
+        ok = false;
+      }
+    }
+
+    if (!ok) {
+      sfToastShow();
+      scrollToFirstError();
+    }
+
+    return ok;
+  }
+
+  function updateSubmitEnabled() {
+    const btn = document.getElementById('sf-submit-btn');
+    if (!btn) return;
+
+    const isMainReady = sfQualityState.main.hasFile && !sfQualityState.main.pending && sfQualityState.main.okToSubmit;
+    const isSecOk = (!sfQualityState.secondary.hasFile) || (!sfQualityState.secondary.pending && sfQualityState.secondary.okToSubmit);
+
+    const handle = (document.getElementById("HiddenHandle")?.value || "").trim();
+    const hasHandle = !!handle;
+
+    const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
+    const limited = (!SF_IS_ADMIN && parseInt(localStorage.getItem(STORAGE_KEY) || 0) >= 3);
+
+    const enabled = !limited && isMainReady && isSecOk && hasHandle;
+    btn.disabled = !enabled;
+    btn.style.opacity = enabled ? "1" : "0.6";
+  }
+
+  function startProvisioning90s() {
+    sfProvisionWasShown = true;
+
+    const form = document.getElementById('sf-request-form');
+    const provision = document.getElementById('sf-provision');
+    const statusEl = document.getElementById('sf-provision-status');
+    const bar = document.getElementById('sf-progress-bar');
+    const header = document.querySelector('.sf-header');
+
+    if (header) header.classList.add('sf-hidden');
+    if (form) form.classList.add('sf-hidden');
+    if (provision) provision.classList.remove('sf-hidden');
+
+    if (bar) bar.style.width = '0%';
+    if (statusEl) {
+      statusEl.style.opacity = '0';
+      statusEl.innerHTML = 'Securing request…';
+      setTimeout(() => statusEl.style.opacity = '1', 120);
+    }
+
+    const steps = [
+      { time: 1500,  text: "Securing request…" },
+      { time: 11000, text: "Validating details…" },
+      { time: 24000, text: "Preparing your workspace…" },
+      { time: 40000, text: "Configuring access & admin controls…" },
+      { time: 58000, text: "Uploading assets…" },
+      { time: 72000, text: "Queuing product generation…" },
+      { time: 90000, text: "<b>Success!</b> Redirecting to your dashboard…" }
+    ];
+
+    steps.forEach((s) => {
+      setTimeout(() => {
+        if (!statusEl) return;
+        statusEl.style.opacity = '0';
+        setTimeout(() => {
+          statusEl.innerHTML = s.text;
+          statusEl.style.opacity = '1';
+        }, 260);
+      }, s.time);
+    });
+
+    sfProvisionStart = Date.now();
+    const total = 90000;
+
+    if (sfProvisionTimer) clearInterval(sfProvisionTimer);
+    sfProvisionTimer = setInterval(() => {
+      const pct = Math.min(100, ((Date.now() - sfProvisionStart) / total) * 100);
+      if (bar) bar.style.width = pct.toFixed(2) + '%';
+      if (pct >= 100) {
+        clearInterval(sfProvisionTimer);
+        window.location.href = "/pages/portal";
+      }
+    }, 180);
+  }
+
+  function stopProvisioning() {
+    if (sfProvisionTimer) clearInterval(sfProvisionTimer);
+    sfProvisionTimer = null;
+
+    const provision = document.getElementById('sf-provision');
+    if (provision) provision.classList.add('sf-hidden');
+
+    const header = document.querySelector('.sf-header');
+    if (header) header.classList.remove('sf-hidden');
+
+    const form = document.getElementById('sf-request-form');
+    if (form) form.classList.remove('sf-hidden');
+  }
+
+  function sfCancelProvisioning() {
+    stopProvisioning();
+    const btn = document.getElementById('sf-submit-btn');
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+    }
+  }
+
+  async function submitToStudioUploader(e) {
+    e.preventDefault();
+
+    const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
+    if (!SF_IS_ADMIN && parseInt(localStorage.getItem(STORAGE_KEY) || 0) >= 3) {
+      sfToastShow("Daily limit reached.");
+      return;
+    }
+
+    generateHandle();
+
+    if (!validateBeforeSubmit()) {
+      updateSubmitEnabled();
+      return;
+    }
+
+    if (!SF_UPLOADER_BASE) {
+      alert("Studio Uploader URL not configured in section settings.");
+      return;
+    }
+
+    const btn = document.getElementById('sf-submit-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = "0.85";
+    }
+
+    startProvisioning90s();
+
+    const endpoint = SF_UPLOADER_BASE + "/api/storefront-request";
+    const form = document.getElementById('sf-request-form');
+    const formData = new FormData(form);
+
+    const pcEl = document.getElementById("PrimaryColor");
+    const pcVal = (pcEl && pcEl.value) ? pcEl.value.toString().trim() : "";
+    if (pcVal) {
+      formData.set("primary_color", pcVal);
+    } else {
+      formData.set("primary_color", "No preference");
+      console.warn("PrimaryColor was empty at submit; defaulting to No preference");
+    }
+
+    const mainInput = document.getElementById("MainLogo");
+    const secInput  = document.getElementById("SecLogo");
+
+    if (!mainInput || !mainInput.files || mainInput.files.length === 0 || (mainInput.files[0] && mainInput.files[0].size === 0)) {
+      formData.delete("storefront_logo_file");
+    }
+    if (!secInput || !secInput.files || secInput.files.length === 0 || (secInput.files[0] && secInput.files[0].size === 0)) {
+      formData.delete("storefront_logo_secondary");
+    }
+
+    const ms = (document.getElementById("SF_MAIN_SESSION")?.value || "").trim();
+    const ss = (document.getElementById("SF_SEC_SESSION")?.value || "").trim();
+    if (!ms) formData.delete("main_session_id");
+    if (!ss) formData.delete("secondary_session_id");
+
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        body: formData
+      });
+
+      if (!res.ok) {
+        const t = await res.text().catch(() => "");
+        throw new Error("Uploader returned " + res.status + (t ? (": " + t.slice(0, 240)) : ""));
+      }
+
+      if (!SF_IS_ADMIN) incrementRateLimit();
+    } catch (err) {
+      console.error(err);
+
+      stopProvisioning();
+
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+      }
+
+      showInlineError(
+        "We couldn’t submit your request. " +
+        "Please double-check your details and try again. " +
+        "<br><span style='font-weight:700;'>Reason:</span> " +
+        escapeHtml(err.message || "Unknown error")
+      );
+
+      sfToastShow("Submit failed — please review and try again.");
+      scrollToInlineError();
+      updateSubmitEnabled();
+    }
+  }
+
+  function showInlineError(html) {
+    const el = document.getElementById('sf-error-inline');
+    if (!el) return;
+    el.innerHTML = html || "Something went wrong. Please try again.";
+    el.classList.remove('sf-hidden');
+  }
+
+  function hideInlineError() {
+    const el = document.getElementById('sf-error-inline');
+    if (!el) return;
+    el.classList.add('sf-hidden');
+    el.innerHTML = "";
+  }
+
+  function scrollToInlineError() {
+    const el = document.getElementById('sf-error-inline');
+    if (el && !el.classList.contains('sf-hidden')) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  function escapeHtml(str) {
+    return (str || "").replace(/[&<>"']/g, (m) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  function hideEl(id, hide) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (hide) el.classList.add('sf-hidden');
+    else el.classList.remove('sf-hidden');
+  }
+
+  function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text || "";
+  }
+
+  function setBadge(id, tier, text) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = "sf-badge sf-badge--" + tier;
+    el.innerText = text;
+  }
+</script>
+
+<style>
+  .sf-container { max-width: 720px; margin: 56px auto; padding: 0 18px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .sf-header { text-align: center; margin-bottom: 24px; }
+  .sf-h1 { font-size: 30px; font-weight: 900; margin-bottom: 8px; color: #111; letter-spacing: -0.02em; }
+  .sf-sub { font-size: 15px; color: #666; margin: 0; }
+  .sf-form-wrap { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 20px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); position: relative; }
+
+  .sf-gate { text-align: center; padding: 40px 0; }
+  .sf-gate-title { font-weight: 900; font-size: 24px; margin-bottom: 10px; }
+  .sf-gate-text { margin-bottom: 24px; color: #666; }
+  .sf-gate-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .sf-block { padding: 4px 0; }
+  .sf-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 18px 0; }
+
+  .sf-legend { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; color: #999; margin-bottom: 14px; }
+
+  .sf-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+  @media(max-width: 680px) { .sf-grid { grid-template-columns: 1fr; } }
+
+  .sf-field { margin-bottom: 0; }
+  .sf-label { display: block; font-weight: 800; font-size: 13px; margin-bottom: 8px; color: #333; }
+  .sf-input, .sf-select { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 12px; font-size: 16px; transition: all 0.2s; background: #fafafa; color: #333; }
+  .sf-input:focus, .sf-select:focus { border-color: #111; background: #fff; outline: none; }
+  .sf-help { font-size: 12px; color: #888; margin-top: 6px; }
+  .sf-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #111; background: #eee; padding: 2px 6px; border-radius: 6px; }
+
+  .sf-file-drop { border: 2px dashed #ddd; border-radius: 14px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; position: relative; font-weight: 900; }
+  .sf-file-drop:hover { border-color: #999; background: #f0f0f0; }
+  .sf-file-input { display: none; }
+  .sf-file-drop--secondary { padding: 18px; border-style: solid; border-width: 1px; font-weight: 900; }
+
+  .sf-preview-row { margin-top: 12px; display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid #eee; border-radius: 14px; background: #fafafa; }
+  .sf-preview-img { width: 74px; height: 74px; border-radius: 14px; object-fit: contain; background: #fff; border: 1px solid #e6e6e6; }
+  .sf-preview-meta { flex: 1; }
+
+  .sf-badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .sf-badge { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; font-weight: 900; font-size: 12px; letter-spacing: 0.02em; border: 1px solid rgba(0,0,0,0.08); background: #fff; }
+  .sf-badge--neutral { color: #444; background: #fff; }
+  .sf-badge--excellent { color: #0b2a6b; background: #e8f0ff; border-color: rgba(11,42,107,0.18); }
+  .sf-badge--good      { color: #0f4d2a; background: #e8f8ef; border-color: rgba(15,77,42,0.18); }
+  .sf-badge--risky     { color: #6a4a00; background: #fff6db; border-color: rgba(106,74,0,0.18); }
+  .sf-badge--bad       { color: #7a0b0b; background: #ffe8e8; border-color: rgba(122,11,11,0.18); }
+
+  .sf-quality-sub { font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.35; }
+
+  .sf-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .sf-action-btn {
+    appearance: none;
+    border: 1px solid #ddd;
+    background: #fff;
+    color: #111;
+    font-weight: 900;
+    font-size: 12px;
+    padding: 10px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .08s ease, border-color .2s ease;
+  }
+  .sf-action-btn:hover { border-color: #bbb; transform: translateY(-1px); }
+  .sf-action-btn--ghost { background: transparent; }
+
+  .sf-mini-status {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sf-mini-status::before {
+    content: "";
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(15,23,42,0.18);
+    border-top-color: #0f172a;
+    border-radius: 999px;
+    display: inline-block;
+    animation: sfspin 1s linear infinite;
+  }
+
+  .sf-hidden { display: none !important; }
+
+  .sf-submit-row { margin-top: 18px; }
+  .sf-btn { width: 100%; background: #111; color: #fff; border: none; padding: 14px 16px; border-radius: 999px; font-size: 16px; font-weight: 900; cursor: pointer; transition: transform 0.1s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+  .sf-btn:hover { transform: translateY(-1px); background: #000; color: #fff; }
+  .sf-btn--solid { background:#0f172a; }
+  .sf-btn--outline { background: transparent; border: 1px solid #ddd; color: #111; }
+
+  .sf-fineprint { margin: 14px 0 0; font-size: 12px; color: #94a3b8; text-align: center; line-height: 1.35; }
+
+  .sf-error { background: #fee; color: #c00; padding: 14px 14px; border-radius: 12px; margin-bottom: 16px; text-align: center; font-weight: 800; border: 1px solid rgba(220, 38, 38, 0.18); }
+
+  .sf-field-error { border-color: #dc2626 !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10) !important; background: #fff !important; }
+  .sf-file-drop.sf-field-error { border-color: #dc2626 !important; background: #fff6f6 !important; }
+
+  .sf-toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 9999; width: min(720px, calc(100% - 24px)); pointer-events: none; }
+  .sf-toast-inner { pointer-events: auto; background: #0f172a; color: #fff; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 18px 50px rgba(15,23,42,0.25); opacity: 0; transform: translateY(8px); transition: opacity .16s ease, transform .16s ease; }
+  .sf-toast--show .sf-toast-inner { opacity: 1; transform: translateY(0); }
+  .sf-toast-msg { font-size: 13px; line-height: 1.35; }
+  .sf-toast-x { appearance: none; border: none; background: rgba(255,255,255,0.12); color: #fff; width: 34px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 900; }
+  .sf-toast-x:hover { background: rgba(255,255,255,0.18); }
+
+  .sf-provision { padding: 10px 0 0; }
+  .sf-provision-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 24px; padding: 36px 22px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; }
+  .sf-provision-title { font-size: 18px; font-weight: 900; color: #0f172a; margin: 6px 0 6px; letter-spacing: -0.01em; }
+  .sf-provision-sub { font-size: 13px; color: #64748b; margin-bottom: 18px; }
+  .sf-progress { width: 100%; height: 8px; border-radius: 999px; background: #eef2f7; overflow: hidden; margin: 18px 0 14px; }
+  .sf-progress-bar { width: 0%; height: 100%; background: #0f172a; border-radius: 999px; transition: width .18s linear; }
+  .sf-status { margin-top: 6px; font-size: 13px; color: #64748b; min-height: 24px; transition: opacity .28s ease; opacity: 1; }
+  .sf-status b { color: #10b981; }
+  .sf-spinner { width: 18px; height: 18px; border: 3px solid rgba(15,23,42,0.18); border-top-color: #0f172a; border-radius: 50%; animation: sfspin 1s linear infinite; display: inline-block; vertical-align: middle; }
+  .sf-spinner--big { width: 44px; height: 44px; border-width: 4px; margin: 0 auto 14px; display: block; }
+  @keyframes sfspin { to { transform: rotate(360deg); } }
+
+  .sf-provision-actions { margin-top: 16px; display: flex; justify-content: center; }
+
+  .sf-modal { position: fixed; inset: 0; z-index: 10000; }
+  .sf-modal-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,0.45); backdrop-filter: blur(6px); }
+  .sf-modal-card{
+    position: relative;
+    width: min(1100px, calc(100% - 24px));
+    height: min(680px, calc(100vh - 24px));
+    margin: 12px auto;
+    background: #0b1220;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 25px 90px rgba(0,0,0,0.40);
+    display: flex;
+    flex-direction: column;
+  }
+  .sf-modal-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.10); color: #fff; }
+  .sf-modal-title { font-weight: 900; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+  .sf-modal-chip { display: inline-flex; align-items: center; justify-content: center; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 900; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.14); }
+  .sf-modal-x { appearance: none; border: none; width: 38px; height: 38px; border-radius: 12px; background: rgba(255,255,255,0.10); color: #fff; cursor: pointer; font-size: 16px; font-weight: 900; }
+  .sf-modal-x:hover { background: rgba(255,255,255,0.16); }
+  .sf-modal-iframe { flex: 1; width: 100%; border: 0; background: #0b1220; }
+  .sf-modal-help { padding: 10px 14px; color: rgba(255,255,255,0.72); font-size: 12px; border-top: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.03); }
+
+  @media(max-width: 600px) {
+    .sf-form-wrap { padding: 18px; }
+    .sf-modal-card{
+      width: calc(100% - 16px);
+      height: calc(100vh - 16px);
+      margin: 8px auto;
+      border-radius: 16px;
+    }
+  }
+</style>

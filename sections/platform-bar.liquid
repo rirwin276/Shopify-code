@@ -1,0 +1,114 @@
+{% comment %}
+  SS PLATFORM BAR — SYMMETRICAL LAYOUT
+  - Layout: [Flag] | [VETERAN OWNED & OPERATED] | [Frog]
+  - Features: Double dividers for perfect balance.
+{% endcomment %}
+
+<section class="ss-command-bar">
+  <div class="ss-bar-inner">
+    
+    <div class="ss-badge-container">
+      
+      {%- comment -%} 1. FLAG {%- endcomment -%}
+      <div class="ss-flag-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 32" width="24" height="14">
+          <rect width="60" height="32" fill="#B22234"/>
+          <path d="M0,0H60V4H0z M0,8H60V12H0z M0,16H60V20H0z M0,24H60V28H0z M0,32H60" fill="#FFF"/>
+          <rect width="24" height="18" fill="#3C3B6E"/>
+          <g fill="#FFF">
+            <path d="M2,2l1,3h-2z M6,2l1,3h-2z M10,2l1,3h-2z M14,2l1,3h-2z M18,2l1,3h-2z M22,2l1,3h-2z"/>
+            <path d="M4,5l1,3h-2z M8,5l1,3h-2z M12,5l1,3h-2z M16,5l1,3h-2z M20,5l1,3h-2z"/>
+            <path d="M2,8l1,3h-2z M6,8l1,3h-2z M10,8l1,3h-2z M14,8l1,3h-2z M18,8l1,3h-2z M22,8l1,3h-2z"/>
+            <path d="M4,11l1,3h-2z M8,11l1,3h-2z M12,11l1,3h-2z M16,11l1,3h-2z M20,11l1,3h-2z"/>
+            <path d="M2,14l1,3h-2z M6,14l1,3h-2z M10,14l1,3h-2z M14,14l1,3h-2z M18,14l1,3h-2z M22,14l1,3h-2z"/>
+          </g>
+        </svg>
+      </div>
+
+      {%- comment -%} DIVIDER 1 {%- endcomment -%}
+      <div class="ss-divider"></div>
+
+      {%- comment -%} 2. TEXT {%- endcomment -%}
+      <span class="ss-bar-title">VETERAN OWNED & OPERATED</span>
+
+      {%- comment -%} DIVIDER 2 {%- endcomment -%}
+      <div class="ss-divider"></div>
+
+      {%- comment -%} 3. FROG LOGO {%- endcomment -%}
+      <img src="{{ 'logo_44596abf-d415-4337-93eb-ddfe8ce44003.png' | file_url }}" 
+           alt="{{ shop.name }}" 
+           class="ss-bar-logo"
+           loading="eager"
+           width="30"
+           height="30">
+
+    </div>
+
+  </div>
+</section>
+
+<style>
+  :root {
+    --ss-bar-height: 44px;
+    --ss-glass-bg: #ffffff;
+    --ss-border-color: rgba(0, 0, 0, 0.08);
+    --ss-txt-main: #0f172a;
+  }
+
+  .ss-command-bar {
+    position: relative; z-index: 9999;
+    width: 100%; height: var(--ss-bar-height);
+    background: var(--ss-glass-bg);
+    border-bottom: 1px solid var(--ss-border-color);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .ss-bar-inner {
+    width: 100%; padding: 0 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .ss-badge-container {
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  /* LOGO */
+  .ss-bar-logo {
+    height: 24px; width: auto; display: block;
+  }
+
+  /* DIVIDERS */
+  .ss-divider {
+    width: 1px; height: 16px; background: rgba(0,0,0,0.15);
+  }
+
+  /* FLAG ICON */
+  .ss-flag-icon {
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+  }
+
+  /* TEXT */
+  .ss-bar-title {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 11px; 
+    font-weight: 800; 
+    color: var(--ss-txt-main);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* MOBILE OPTIMIZATION */
+  @media (max-width: 600px) {
+    .ss-bar-title { font-size: 10px; letter-spacing: 0.02em; }
+    .ss-badge-container { gap: 10px; }
+    /* Slightly smaller frog on mobile to keep proportions */
+    .ss-bar-logo { height: 20px; } 
+  }
+</style>
+
+{% schema %}
+{ "name": "Platform Top Bar", "settings": [], "presets": [{ "name": "Platform Top Bar" }] }
+{% endschema %}

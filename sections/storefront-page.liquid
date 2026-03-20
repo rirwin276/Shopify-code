@@ -1,0 +1,216 @@
+{% comment %}
+  Storefront Page (Dynamic)
+  URL: /pages/storefront?shop=<handle>
+
+  Access tags:
+    storefront-member--<handle>
+    storefront-admin--<handle>
+
+  Metaobject:
+    shop.metaobjects.custom_shop[handle]
+    fields: name, logo, status, collection_handle
+{% endcomment %}
+
+{%- assign handle = '' -%}
+{%- assign qs = request.query_string | default: '' -%}
+
+{%- if qs != blank -%}
+  {%- assign pairs = qs | split: '&' -%}
+  {%- for p in pairs -%}
+    {%- assign kv = p | split: '=' -%}
+    {%- assign k = kv[0] | downcase | strip -%}
+    {%- assign v = kv[1] | default: '' | url_decode | downcase | strip -%}
+    {%- if k == 'shop' or k == 'store' -%}
+      {%- assign handle = v -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- capture return_to -%}/pages/storefront?shop={{ handle | url_encode }}{%- endcapture -%}
+
+<section class="sf-wrap">
+
+  {% if customer == nil %}
+    <div class="sf-card">
+      <h1 class="sf-h1">Sign in to access your private store</h1>
+      <p class="sf-sub">You must be logged in to view this storefront.</p>
+      <a class="sf-btn sf-btn--solid" href="{{ routes.account_login_url }}?return_url={{ return_to | url_encode }}">Sign in</a>
+      <div style="margin-top:12px;">
+        <a class="sf-btn sf-btn--ghost" href="/pages/portal">Back to Dashboard</a>
+      </div>
+    </div>
+
+  {% elsif handle == blank %}
+    <div class="sf-card">
+      <h1 class="sf-h1">Store not specified</h1>
+      <p class="sf-sub">Missing the store handle in the URL.</p>
+      <div style="margin-top:12px;">
+        <code style="font-size:12px;opacity:.7;">query_string: {{ request.query_string | escape }}</code>
+      </div>
+      <div style="margin-top:12px;">
+        <a class="sf-btn sf-btn--ghost" href="/pages/portal">Back to Dashboard</a>
+      </div>
+    </div>
+
+  {% else %}
+    {% assign member_tag = 'storefront-member--' | append: handle %}
+    {% assign admin_tag  = 'storefront-admin--'  | append: handle %}
+
+    {% assign has_access = false %}
+    {% if customer.tags contains member_tag or customer.tags contains admin_tag %}
+      {% assign has_access = true %}
+    {% endif %}
+
+    {% if has_access == false %}
+      <div class="sf-card">
+        <h1 class="sf-h1">Access required</h1>
+        <p class="sf-sub">You don’t currently have access to this private store.</p>
+        <a class="sf-btn sf-btn--ghost" href="/pages/portal">Back to Dashboard</a>
+      </div>
+
+    {% else %}
+      {% assign entry = shop.metaobjects.custom_shop[handle] %}
+
+      {% assign store_name = handle | replace: '-', ' ' | capitalize %}
+      {% assign store_status = 'under_construction' %}
+      {% assign logo_obj = blank %}
+      {% assign collection_handle = blank %}
+
+      {% if entry %}
+        {% assign n = entry.name.value | default: entry.name %}
+        {% if n != blank %}{% assign store_name = n %}{% endif %}
+
+        {% assign s = entry.status.value | default: entry.status %}
+        {% if s != blank %}{% assign store_status = s | downcase | strip %}{% endif %}
+
+        {% assign l = entry.logo.value | default: entry.logo %}
+        {% if l != blank %}{% assign logo_obj = l %}{% endif %}
+
+        {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
+        {% if ch != blank %}{% assign collection_handle = ch | downcase | strip %}{% endif %}
+      {% endif %}
+
+      {% assign collection_obj = blank %}
+      {% if collection_handle != blank %}
+        {% assign collection_obj = collections[collection_handle] %}
+      {% endif %}
+
+      <div class="sf-hero sf-card">
+        <div class="sf-hero-left">
+          <div class="sf-logo" aria-hidden="true">
+            {% if logo_obj != blank %}
+              {{ logo_obj | image_url: width: 360 | image_tag: loading: 'lazy', alt: store_name }}
+            {% else %}
+              <span class="sf-fallback">S&amp;S</span>
+            {% endif %}
+          </div>
+
+          <div class="sf-meta">
+            <h1 class="sf-h1" style="margin:0;">{{ store_name }}</h1>
+
+            {% if store_status == 'live' %}
+              <p class="sf-sub">Store is live — shop approved items below.</p>
+            {% else %}
+              <p class="sf-sub">Under Construction — please allow 24–48 hours while we build your private store.</p>
+            {% endif %}
+
+            <div class="sf-actions">
+              <a class="sf-btn sf-btn--ghost" href="/pages/portal">Back to Dashboard</a>
+
+              {% if customer.tags contains admin_tag %}
+                <a class="sf-btn sf-btn--ghost" href="/pages/admin-powers?shop={{ handle | url_encode }}">Admin powers</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if store_status == 'live' %}
+        {% if collection_obj %}
+          <div class="sf-card">
+            <h2 class="sf-h2">Shop approved items</h2>
+
+            <div class="sf-grid">
+              {% for product in collection_obj.products limit: 24 %}
+                <a class="sf-prod" href="{{ product.url }}">
+                  <div class="sf-prodimg">
+                    {% if product.featured_image %}
+                      {{ product.featured_image | image_url: width: 700 | image_tag: loading: 'lazy', alt: product.title }}
+                    {% else %}
+                      <span class="sf-imgfallback">No image</span>
+                    {% endif %}
+                  </div>
+                  <div class="sf-prodmeta">
+                    <div class="sf-prodtitle">{{ product.title }}</div>
+                    <div class="sf-prodprice">{{ product.price | money }}</div>
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+
+            <div style="margin-top:14px;">
+              <a class="sf-btn sf-btn--ghost" href="{{ collection_obj.url }}">View full collection</a>
+            </div>
+          </div>
+        {% else %}
+          <div class="sf-card">
+            <h2 class="sf-h2">Store is live</h2>
+            <p class="sf-sub">
+              Collection not linked yet. Set <strong>collection_handle</strong> on the metaobject (example: <code>mama-shar</code>).
+            </p>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="sf-card">
+          <h2 class="sf-h2">What happens next</h2>
+          <ul class="sf-list">
+            <li>We review the request and confirm access.</li>
+            <li>We build your private products and pricing.</li>
+            <li>When ready, this store will flip to <strong>Live</strong>.</li>
+          </ul>
+        </div>
+      {% endif %}
+
+    {% endif %}
+  {% endif %}
+
+</section>
+
+<style>
+.sf-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+.sf-card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:18px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.05);margin-top:16px}
+.sf-hero-left{display:flex;gap:16px;align-items:center}
+.sf-logo{width:92px;height:92px;border-radius:18px;overflow:hidden;border:1px solid rgba(0,0,0,.1);background:#fff;display:flex;align-items:center;justify-content:center}
+.sf-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.sf-fallback{font-weight:900;opacity:.6}
+.sf-h1{margin:0;font-size:34px;letter-spacing:-.02em}
+.sf-h2{margin:0 0 12px;font-size:18px;font-weight:900}
+.sf-sub{margin:8px 0 0;opacity:.8}
+.sf-actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+.sf-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:999px;text-decoration:none;font-weight:800;border:1px solid rgba(0,0,0,.12)}
+.sf-btn--solid{background:#111;color:#fff;border-color:#111}
+.sf-btn--ghost{background:#fff;color:#111}
+
+.sf-grid{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sf-prod{border:1px solid rgba(0,0,0,.08);border-radius:16px;overflow:hidden;background:rgba(0,0,0,.02);text-decoration:none;color:inherit;display:flex;flex-direction:column}
+.sf-prodimg{aspect-ratio: 4/3; background:#fff; display:flex; align-items:center; justify-content:center}
+.sf-prodimg img{width:100%;height:100%;object-fit:cover;display:block}
+.sf-imgfallback{opacity:.6;font-weight:800}
+.sf-prodmeta{padding:12px}
+.sf-prodtitle{font-weight:900;line-height:1.2}
+.sf-prodprice{margin-top:6px;opacity:.8;font-weight:800}
+
+.sf-list{margin:10px 0 0;padding-left:18px;opacity:.85}
+@media(max-width:900px){.sf-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.sf-hero-left{align-items:flex-start}.sf-h1{font-size:28px}.sf-grid{grid-template-columns:1fr}}
+</style>
+
+{% schema %}
+{
+  "name": "Storefront Page",
+  "settings": [],
+  "presets": [
+    { "name": "Storefront Page" }
+  ]
+}
+{% endschema %}

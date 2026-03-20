@@ -1,0 +1,41 @@
+{% comment %}
+  STELLA & SAGE - DATA LAYER
+  Passes the "Grandma-Proofed" Pixelcut URL to JavaScript.
+{% endcomment %}
+
+<script>
+  window.SS = window.SS || {};
+  window.SS.config = window.SS.config || {};
+
+  {%- if collection and collection.handle -%}
+    {%- assign store_handle = collection.handle -%}
+    
+    {%- comment -%} 
+      Load the metaobject. 
+      Note: We use the system key 'custom_shop' and look up by handle. 
+    {%- endcomment -%}
+    {%- assign store_meta = shop.metaobjects.custom_shop[store_handle] -%}
+    
+    {%- if store_meta -%}
+      window.SS.config.storeHandle = "{{ store_handle }}";
+      
+      {%- comment -%} 
+        PRIORITY 1: The "Logo Clean Url" (Pixelcut transparent PNG).
+        We assume the key is 'logo_clean_url' based on your label.
+      {%- endcomment -%}
+      {%- if store_meta.logo_clean_url != blank -%}
+        window.SS.config.logoUrl = "{{ store_meta.logo_clean_url }}";
+        console.log("[SS-Data] Loaded Clean Pixelcut URL.");
+        
+      {%- comment -%} PRIORITY 2: Fallback to raw upload if Pixelcut failed {%- endcomment -%}
+      {%- elsif store_meta.logo != blank -%}
+        window.SS.config.logoUrl = "{{ store_meta.logo | image_url: width: 600 }}";
+        console.log("[SS-Data] Loaded Raw Logo (Fallback).");
+        
+      {%- else -%}
+        console.log("[SS-Data] No logo found.");
+      {%- endif -%}
+      
+    {%- endif -%}
+  {%- endif -%}
+</script>

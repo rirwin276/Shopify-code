@@ -1,0 +1,42 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "custom_css": [
+        "/* Hide the “helper” app block instance of the form on the page */.ss-globo-helper {display: none !important;}"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 80
+      }
+    },
+    "custom_liquid_JrfRDh": {
+      "type": "custom-liquid",
+      "name": "t:names.custom_liquid",
+      "settings": {
+        "custom_liquid": "<style>\n  /* --- THE CONTAINER --- */\n  .ss-contact-wrapper {\n    max-width: 850px;\n    margin: 80px auto;\n    padding: 0 24px;\n    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif;\n    color: #111;\n  }\n\n  .ss-header-group {\n    margin-bottom: 60px;\n    border-bottom: 1px solid #eaeaea;\n    padding-bottom: 40px;\n  }\n\n  .ss-h1-large {\n    font-size: 42px;\n    font-weight: 800;\n    letter-spacing: -1px;\n    margin: 0 0 16px 0;\n    line-height: 1.1;\n  }\n\n  .ss-sub-text {\n    font-size: 16px;\n    color: #666;\n    max-width: 500px;\n    line-height: 1.6;\n  }\n\n  /* --- THE POWER GRID --- */\n  .ss-power-grid {\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    gap: 32px;\n  }\n\n  .ss-action-card {\n    background: #fff;\n    border: 1px solid #e5e5e5;\n    padding: 40px;\n    border-radius: 0; /* Square edges feel more \"tech\" */\n    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);\n    position: relative;\n    display: flex;\n    flex-direction: column;\n    justify-content: space-between;\n    height: 300px;\n  }\n\n  /* Hover Effect: Lift and Darken Border */\n  .ss-action-card:hover {\n    transform: translateY(-4px);\n    border-color: #000;\n    box-shadow: 0 20px 40px rgba(0,0,0,0.08);\n  }\n\n  /* --- ICONS (SVG) --- */\n  .ss-svg-icon {\n    width: 32px;\n    height: 32px;\n    stroke: #111;\n    stroke-width: 1.5;\n    fill: none;\n    margin-bottom: 24px;\n  }\n\n  .ss-card-head {\n    font-size: 20px;\n    font-weight: 700;\n    margin-bottom: 12px;\n    letter-spacing: -0.5px;\n  }\n\n  .ss-card-body {\n    font-size: 15px;\n    color: #555;\n    line-height: 1.6;\n    margin-bottom: 30px;\n  }\n\n  /* --- BUTTONS --- */\n  .ss-btn-link {\n    font-size: 15px;\n    font-weight: 600;\n    color: #111;\n    text-decoration: none;\n    border-bottom: 2px solid #e5e5e5;\n    padding-bottom: 4px;\n    transition: border-color 0.2s;\n    align-self: flex-start;\n  }\n\n  .ss-action-card:hover .ss-btn-link {\n    border-color: #111;\n  }\n\n  /* --- META INFO (Status) --- */\n  .ss-meta-info {\n    margin-top: 60px;\n    padding-top: 30px;\n    border-top: 1px solid #eaeaea;\n    display: flex;\n    justify-content: space-between;\n    font-size: 13px;\n    color: #888;\n  }\n  \n  .ss-status-live {\n    color: #10b981;\n    font-weight: 600;\n    display: flex;\n    align-items: center;\n    gap: 6px;\n  }\n  \n  .ss-dot {\n    width: 6px; height: 6px; background: #10b981; border-radius: 50%;\n  }\n\n  @media (max-width: 768px) {\n    .ss-power-grid { grid-template-columns: 1fr; }\n    .ss-action-card { height: auto; }\n    .ss-meta-info { flex-direction: column; gap: 10px; }\n  }\n</style>\n\n<div class=\"ss-contact-wrapper\">\n\n  <div class=\"ss-header-group\">\n    <h1 class=\"ss-h1-large\">Support & Access</h1>\n    <p class=\"ss-sub-text\">Route your inquiry to the relevant department. <br>Response times for non-urgent matters average 24 hours.</p>\n  </div>\n\n  <div class=\"ss-power-grid\">\n\n    <div class=\"ss-action-card\">\n      <div>\n        <svg class=\"ss-svg-icon\" viewBox=\"0 0 24 24\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polygon points=\"12 2 2 7 12 12 22 7 12 2\"></polygon><polyline points=\"2 17 12 22 22 17\"></polyline><polyline points=\"2 12 12 17 22 12\"></polyline></svg>\n        <div class=\"ss-card-head\">Launch a Studio</div>\n        <div class=\"ss-card-body\">Initialize a new private storefront for your organization. Request access to the platform infrastructure.</div>\n      </div>\n      <a href=\"/pages/private-storefronts\" class=\"ss-btn-link\">Initialize Request &rarr;</a>\n    </div>\n\n    <div class=\"ss-action-card\">\n      <div>\n        <svg class=\"ss-svg-icon\" viewBox=\"0 0 24 24\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><line x1=\"4.93\" y1=\"4.93\" x2=\"9.17\" y2=\"9.17\"></line><line x1=\"14.83\" y1=\"14.83\" x2=\"19.07\" y2=\"19.07\"></line><line x1=\"14.83\" y1=\"9.17\" x2=\"19.07\" y2=\"4.93\"></line><line x1=\"14.83\" y1=\"9.17\" x2=\"18.36\" y2=\"5.64\"></line><line x1=\"4.93\" y1=\"19.07\" x2=\"9.17\" y2=\"14.83\"></line></svg>\n        <div class=\"ss-card-head\">Client Operations</div>\n        <div class=\"ss-card-body\">Assistance with active orders, logistics, or portal access issues. Direct line to account management.</div>\n      </div>\n      <a href=\"mailto:support@stellaandsage.com\" class=\"ss-btn-link\">Open Support Ticket &rarr;</a>\n    </div>\n\n  </div>\n\n  <div class=\"ss-meta-info\">\n    <span>Direct Inquiry: hello@stellaandsage.com</span>\n    <span class=\"ss-status-live\"><span class=\"ss-dot\"></span> Support Systems Operational</span>\n  </div>\n\n</div>",
+        "color_scheme": "",
+        "section_width": "page-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    }
+  },
+  "order": [
+    "main",
+    "custom_liquid_JrfRDh"
+  ]
+}

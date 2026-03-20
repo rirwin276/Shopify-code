@@ -1,0 +1,43 @@
+<section class="studio-hero">
+  <div class="studio-hero-inner">
+    <h1>Stella & Sage Studio Shop</h1>
+    <p>Custom designs • Ready-to-ship favorites • Made with purpose</p>
+  </div>
+</section>
+
+<style>
+.studio-hero {
+  padding: 80px 20px 60px;
+  background: linear-gradient(180deg, #0f2a1f, #132f24);
+  color: #f5f3ec;
+  text-align: center;
+}
+.studio-hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.studio-hero p {
+  max-width: 620px;
+  margin: 0 auto;
+  font-size: 18px;
+  opacity: 0.9;
+}
+@media (max-width: 768px) {
+  .studio-hero {
+    padding: 60px 16px 40px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Studio Shop Hero",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Studio Shop Hero"
+    }
+  ]
+}
+{% endschema %}

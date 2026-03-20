@@ -1,0 +1,41 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "content_direction": "column",
+        "gap": 35,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 0
+      }
+    },
+    "ss_explainer_page_HDqmFq": {
+      "type": "ss-explainer-page",
+      "name": "Storefront Explainer",
+      "settings": {
+        "title": "What’s a Private Storefront?",
+        "subtitle": "A private storefront is a secure, invite-only shop built for your group—approved members log in, shop approved products, and reorder anytime.",
+        "btn_request": "Request a storefront",
+        "btn_back": "Back to Dashboard",
+        "problem_title": "Fire the \"Middleman\"",
+        "problem_text": "Coordinating group orders is a nightmare of spreadsheets, loose cash, and wrong sizes. Our platform removes you from the transaction entirely.",
+        "access_title": "You control the door.",
+        "access_text": "Whether you need military-grade exclusivity or casual group sharing, we give you the keys."
+      }
+    }
+  },
+  "order": [
+    "main",
+    "ss_explainer_page_HDqmFq"
+  ]
+}

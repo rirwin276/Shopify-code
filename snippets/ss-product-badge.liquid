@@ -1,0 +1,52 @@
+{% comment %}
+  Stella & Sage - Dynamic Status Badge
+  Usage: {% render 'ss-product-badge', product: product %}
+  
+  This snippet creates a hidden container. 
+  The 'gelato-bridge.js' script checks sessionStorage.
+  If the user has personalized this item, JS makes this visible.
+{% endcomment %}
+
+<style>
+  .ss-badge-container {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+    pointer-events: none; /* Let clicks pass through to the image */
+  }
+
+  .ss-badge-content {
+    display: none; /* Hidden by default */
+    background-color: #000000;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  /* The class added by JS to show it */
+  .ss-badge-active {
+    display: block !important;
+    animation: ss-pop-in 0.3s ease-out forwards;
+  }
+
+  @keyframes ss-pop-in {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+</style>
+
+<div 
+  class="ss-badge-container" 
+  data-product-id="{{ product.id }}" 
+  data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+>
+  <span class="ss-badge-content">
+    ✨ Design Saved
+  </span>
+</div>

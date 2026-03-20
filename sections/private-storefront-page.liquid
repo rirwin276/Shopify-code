@@ -1,0 +1,169 @@
+{% comment %}
+  Private Storefront Page (dynamic)
+  URL pattern: /pages/storefront?shop=<handle>
+
+  Access tags:
+    storefront-member--<handle>
+    storefront-admin--<handle>
+
+  Metaobject:
+    shop.metaobjects.custom_shop[handle]
+    fields: name, logo, status, collection_handle
+{% endcomment %}
+
+{% assign handle = request.params.shop | downcase | strip %}
+
+<section class="ps-wrap">
+  {% if customer == nil %}
+    <div class="ps-card">
+      <h1 class="ps-h1">Sign in to access your private store</h1>
+      <p class="ps-sub">You must be logged in to view your private storefront.</p>
+      <a class="ps-btn ps-btn--solid" href="{{ routes.account_login_url | append: '?return_url=' | append: request.path | append: '?shop=' | append: handle | url_encode }}">
+        Sign in
+      </a>
+    </div>
+  {% else %}
+    {% if handle == blank %}
+      <div class="ps-card">
+        <h1 class="ps-h1">Store not found</h1>
+        <p class="ps-sub">Missing store identifier.</p>
+        <a class="ps-btn ps-btn--ghost" href="/pages/portal">Back to Shop Dashboard</a>
+      </div>
+    {% else %}
+
+      {%- assign member_tag = 'storefront-member--' | append: handle -%}
+      {%- assign admin_tag  = 'storefront-admin--'  | append: handle -%}
+
+      {%- assign has_access = false -%}
+      {% if customer.tags contains member_tag or customer.tags contains admin_tag %}
+        {% assign has_access = true %}
+      {% endif %}
+
+      {% if has_access == false %}
+        <div class="ps-card">
+          <h1 class="ps-h1">Access required</h1>
+          <p class="ps-sub">You don’t currently have access to this private store.</p>
+          <a class="ps-btn ps-btn--ghost" href="/pages/portal">Back to Shop Dashboard</a>
+        </div>
+      {% else %}
+
+        {% assign entry = shop.metaobjects.custom_shop[handle] %}
+
+        {% assign store_name = handle | replace: '-', ' ' | capitalize %}
+        {% assign store_status = 'under_construction' %}
+        {% assign logo_obj = blank %}
+        {% assign collection_handle = blank %}
+
+        {% if entry %}
+          {% assign n = entry.name.value | default: entry.name %}
+          {% if n != blank %}{% assign store_name = n %}{% endif %}
+
+          {% assign s = entry.status.value | default: entry.status %}
+          {% if s != blank %}{% assign store_status = s %}{% endif %}
+
+          {% assign l = entry.logo.value | default: entry.logo %}
+          {% if l != blank %}{% assign logo_obj = l %}{% endif %}
+
+          {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
+          {% if ch != blank %}{% assign collection_handle = ch | downcase | strip %}{% endif %}
+        {% endif %}
+
+        <div class="ps-hero">
+          <div class="ps-hero-left">
+            <div class="ps-logo">
+              {% if logo_obj != blank %}
+                {{ logo_obj | image_url: width: 300 | image_tag: loading: 'lazy', alt: store_name }}
+              {% else %}
+                <span class="ps-fallback">S&amp;S</span>
+              {% endif %}
+            </div>
+
+            <div class="ps-meta">
+              <h1 class="ps-h1">{{ store_name }}</h1>
+
+              {% if store_status == 'live' %}
+                <p class="ps-sub">Store is live — shop approved items below.</p>
+              {% else %}
+                <p class="ps-sub">Under Construction — please allow 24–48 hours while we build your private store.</p>
+              {% endif %}
+
+              <div class="ps-actions">
+                <a class="ps-btn ps-btn--ghost" href="/pages/portal">Back to Shop Dashboard</a>
+                <a class="ps-btn ps-btn--ghost" href="{{ routes.account_url }}">My Account</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if store_status == 'live' and collection_handle != blank %}
+          {% assign c = collections[collection_handle] %}
+          {% if c != blank %}
+            <div class="ps-card ps-products">
+              <h2 class="ps-h2">Approved products</h2>
+
+              <div class="ps-grid">
+                {% for product in c.products limit: 24 %}
+                  <a class="ps-product" href="{{ product.url }}">
+                    <div class="ps-product-img">
+                      {% if product.featured_image %}
+                        {{ product.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: product.title }}
+                      {% endif %}
+                    </div>
+                    <div class="ps-product-title">{{ product.title }}</div>
+                    <div class="ps-product-price">{{ product.price | money }}</div>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          {% else %}
+            <div class="ps-card">
+              <h2 class="ps-h2">Almost ready</h2>
+              <p class="ps-sub">This store is marked live, but the linked collection couldn’t be found.</p>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="ps-card">
+            <h2 class="ps-h2">Next steps</h2>
+            <p class="ps-sub">
+              We’ll add approved products to your private store once it’s ready.
+            </p>
+          </div>
+        {% endif %}
+
+      {% endif %}
+    {% endif %}
+  {% endif %}
+</section>
+
+<style>
+  .ps-wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+  .ps-card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.05);margin-top:16px}
+  .ps-hero{margin-top:16px}
+  .ps-hero-left{display:flex;gap:16px;align-items:center}
+  .ps-logo{width:84px;height:84px;border-radius:18px;overflow:hidden;border:1px solid rgba(0,0,0,.1);background:#fff;display:flex;align-items:center;justify-content:center}
+  .ps-logo img{width:100%;height:100%;object-fit:cover;display:block}
+  .ps-fallback{font-weight:900;opacity:.6}
+  .ps-h1{margin:0;font-size:34px;letter-spacing:-.02em}
+  .ps-h2{margin:0 0 10px;font-size:18px;font-weight:900}
+  .ps-sub{margin:8px 0 0;opacity:.8}
+  .ps-actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+  .ps-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:999px;text-decoration:none;font-weight:800;border:1px solid rgba(0,0,0,.12)}
+  .ps-btn--solid{background:#111;color:#fff;border-color:#111}
+  .ps-btn--ghost{background:#fff;color:#111}
+  .ps-products{margin-top:16px}
+  .ps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
+  .ps-product{display:block;text-decoration:none;color:inherit;border:1px solid rgba(0,0,0,.08);border-radius:16px;overflow:hidden;background:rgba(0,0,0,.02)}
+  .ps-product-img{aspect-ratio:1/1;background:#fff}
+  .ps-product-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .ps-product-title{padding:10px 10px 0;font-weight:800;font-size:14px}
+  .ps-product-price{padding:4px 10px 12px;opacity:.8;font-size:13px}
+  @media(max-width:900px){.ps-grid{grid-template-columns:repeat(2,1fr)}.ps-h1{font-size:28px}}
+</style>
+
+{% schema %}
+{
+  "name": "Private Storefront Page",
+  "settings": [],
+  "presets": [{ "name": "Private Storefront Page" }]
+}
+{% endschema %}

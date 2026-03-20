@@ -1,0 +1,131 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 0
+      }
+    },
+    "landing_dual_hub_ezjPEH": {
+      "type": "landing-dual-hub",
+      "blocks": {
+        "slide_FMcikf": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/unisex-tri-blend-t-shirt-clay-triblend-left-front-693b392aecdce.jpg",
+            "alt": "Stella & Sage products",
+            "caption": "—"
+          }
+        },
+        "slide_UT3PxM": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/unisex-columbia-soft-shell-jacket-graphite-front-693e5458ac793.jpg",
+            "alt": "Stella & Sage products",
+            "caption": "—"
+          }
+        },
+        "slide_H3yEm3": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/baby-short-sleeve-bodysuit-white-front-693eeb333aba3.jpg",
+            "alt": "Stella & Sage products",
+            "caption": "—"
+          }
+        },
+        "slide_tUHEVX": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/unisex-tri-blend-t-shirt-tan-triblend-left-front-694790d718ead.jpg",
+            "alt": "Stella & Sage products",
+            "caption": "—"
+          }
+        },
+        "slide_WRqHGr": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/cotton-heritage-m2580-i-unisex-premium-pullover-hoodie-latte-front-6948aeb140cd1.jpg",
+            "alt": "Stella & Sage products",
+            "caption": "—"
+          }
+        },
+        "slide_FVLyx4": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/white-glossy-mug-white-11-oz-handle-on-left-6948b5bab2c79.jpg",
+            "alt": "Stella & Sage products",
+            "caption": "—"
+          }
+        },
+        "slide_aFc9yE": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/unisex-tri-blend-t-shirt-red-triblend-left-front-693e4c92adbbd.jpg",
+            "alt": "Stella & Sage products",
+            "caption": "—"
+          }
+        }
+      },
+      "block_order": [
+        "slide_FMcikf",
+        "slide_UT3PxM",
+        "slide_H3yEm3",
+        "slide_tUHEVX",
+        "slide_WRqHGr",
+        "slide_FVLyx4",
+        "slide_aFc9yE"
+      ],
+      "name": "Landing - Dual Hub",
+      "settings": {
+        "kicker": "PERSONAL STORE",
+        "microcopy": "Secure, invite-only storefront access",
+        "brand_logo": "shopify://shop_images/Stella_and_Sage_logo_ad8727e1-888f-430a-8d78-9fe8dabe1bd8.png",
+        "brand_logo_alt": "Stella & Sage",
+        "primary_title": "Shop your personal store",
+        "primary_desc": "Access your private storefront. If you’re not signed in, you’ll be prompted to log in first.",
+        "btn_shop_label": "Shop your personal store",
+        "btn_request_label": "Request a storefront",
+        "primary_note": "—",
+        "primary_note_fallback": "Use the email you were invited with. You’ll be prompted to log in before accessing your dashboard.",
+        "secondary_header": "Stella & Sage Custom",
+        "secondary_title": "Shop Stella & Sage Custom",
+        "secondary_desc": "Browse our public catalog for custom engraving, gifts, and handmade goods.",
+        "secondary_image": "shopify://shop_images/Mama_Bear_Stanly_Pint_Glass_Succulant.jpg",
+        "btn_custom_label": "Shop Stella & Sage Custom",
+        "secondary_note": "—",
+        "secondary_note_fallback": "Visit our main shop for custom work and best sellers.",
+        "dashboard_url": "/pages/shop-dashboard",
+        "request_url": "/pages/private-storefronts#request-storefront",
+        "custom_shop_url": "/",
+        "max_width": 1200,
+        "pad_y": 28,
+        "pad_x": 16,
+        "radius": 18,
+        "border_opacity": 0.1,
+        "shadow_opacity": 0.1,
+        "ink": "#111111",
+        "muted": "#4f4f4f",
+        "surface": "#ffffff",
+        "accent": "#c9a24b",
+        "accent2": "#2e7d32"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "landing_dual_hub_ezjPEH"
+  ]
+}

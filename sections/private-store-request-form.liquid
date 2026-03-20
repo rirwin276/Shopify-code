@@ -1,0 +1,248 @@
+{% comment %}
+  Request New Product (Google Form Button)
+  - Clean request card for private store pages
+  - Button opens Google Form (or any URL)
+  - Optional prefill via entry keys (Google "Get pre-filled link"):
+      entry.123456=ORG
+      entry.654321=EMAIL
+
+  NOTE: Horizon/theme-check requires text defaults NOT blank.
+  We use placeholder defaults and treat them as "blank" in Liquid.
+{% endcomment %}
+
+{% assign form_url = section.settings.form_url | default: '' | strip %}
+
+{% assign org_key = section.settings.prefill_org_key | default: '' | strip %}
+{% assign email_key = section.settings.prefill_email_key | default: '' | strip %}
+
+{%- comment -%} treat placeholder values as blank {%- endcomment -%}
+{% if org_key == 'entry.000000' %}
+  {% assign org_key = '' %}
+{% endif %}
+{% if email_key == 'entry.000000' %}
+  {% assign email_key = '' %}
+{% endif %}
+
+{% assign org_name = page.title %}
+{% assign customer_email = '' %}
+{% if customer %}
+  {% assign customer_email = customer.email | default: '' %}
+{% endif %}
+
+{%- comment -%}
+  OPTIONAL: Pull display_name from metaobject that matches this page.
+  Match by:
+  - mo.page.handle == page.handle
+  - OR mo.slug == page.handle
+{%- endcomment -%}
+{% assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip %}
+{% if shop.metaobjects[mo_type] and shop.metaobjects[mo_type].values != blank %}
+  {% assign store_meta = shop.metaobjects[mo_type].values %}
+  {% assign handle = page.handle | downcase | strip %}
+  {% for mo in store_meta %}
+    {% assign mo_page = mo.page.value | default: mo.page %}
+    {% assign mo_slug = mo.slug.value | default: mo.slug %}
+    {% assign mo_handle = '' %}
+
+    {% if mo_page != blank and mo_page.handle != blank %}
+      {% assign mo_handle = mo_page.handle | downcase | strip %}
+    {% elsif mo_slug != blank %}
+      {% assign mo_handle = mo_slug | downcase | strip %}
+    {% endif %}
+
+    {% if mo_handle == handle %}
+      {% assign n = mo.display_name.value | default: mo.display_name %}
+      {% if n != blank %}{% assign org_name = n %}{% endif %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{%- comment -%}
+  Decide if we should append prefill params.
+  (No parentheses — Shopify Liquid safe.)
+{%- endcomment -%}
+{% assign want_prefill = false %}
+{% if org_key != blank %}
+  {% assign want_prefill = true %}
+{% endif %}
+{% if email_key != blank and customer_email != blank %}
+  {% assign want_prefill = true %}
+{% endif %}
+
+{% assign final_url = form_url %}
+
+{% if form_url != blank and want_prefill %}
+  {% capture qs %}usp=pp_url{% if org_key != blank %}&{{ org_key }}={{ org_name | url_encode }}{% endif %}{% if email_key != blank and customer_email != blank %}&{{ email_key }}={{ customer_email | url_encode }}{% endif %}{% endcapture %}
+  {% assign qs_clean = qs | strip | replace: ' ', '' | replace: "\n", "" %}
+
+  {% if form_url contains '?' %}
+    {% assign final_url = form_url | append: '&' | append: qs_clean %}
+  {% else %}
+    {% assign final_url = form_url | append: '?' | append: qs_clean %}
+  {% endif %}
+{% endif %}
+
+<section class="ss-req" data-ss-req>
+  <div class="ss-req__wrap">
+    <div class="ss-req__card">
+      <div class="ss-req__left">
+        <div class="ss-req__kicker">{{ section.settings.kicker }}</div>
+        <h2 class="ss-req__title">{{ section.settings.title }}</h2>
+        <p class="ss-req__sub">{{ section.settings.subtext }}</p>
+
+        <ul class="ss-req__list">
+          <li>Add a new product type (shirts, mugs, tumblers, handouts, etc.)</li>
+          <li>Request a new design / logo update</li>
+          <li>Share quantity, deadline, and notes</li>
+        </ul>
+      </div>
+
+      <div class="ss-req__right">
+        {% if final_url != blank %}
+          <a class="ss-req__btn ss-req__btn--solid"
+             href="{{ final_url }}"
+             {% if section.settings.open_new_tab %}target="_blank" rel="noopener"{% endif %}>
+            {{ section.settings.button_label }}
+          </a>
+        {% else %}
+          <div class="ss-req__warn">
+            Add your Google Form URL in this section’s settings.
+          </div>
+        {% endif %}
+
+        <div class="ss-req__meta">
+          <span class="ss-req__pill">Store: <strong>{{ org_name }}</strong></span>
+          {% if customer_email != blank %}
+            <span class="ss-req__pill">Email: <strong>{{ customer_email }}</strong></span>
+          {% endif %}
+        </div>
+
+        {% if section.settings.helper_note != blank %}
+          <div class="ss-req__note">{{ section.settings.helper_note }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ss-req{ padding: 12px 0 6px; }
+  .ss-req__wrap{ max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+  .ss-req__card{
+    display:flex;
+    gap: 18px;
+    align-items:flex-start;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    background:#fff;
+    border:1px solid rgba(0,0,0,.10);
+    border-radius:18px;
+    box-shadow: 0 12px 26px rgba(0,0,0,.06);
+    padding: 16px;
+  }
+
+  .ss-req__left{ min-width: 260px; flex: 1; }
+  .ss-req__right{ min-width: 260px; display:flex; flex-direction:column; gap: 10px; }
+
+  .ss-req__kicker{
+    display:inline-block;
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,.55);
+    margin-bottom: 6px;
+  }
+  .ss-req__title{
+    margin: 0 0 6px;
+    font-size: 22px;
+    line-height: 1.15;
+    font-weight: 900;
+    letter-spacing: -.01em;
+  }
+  .ss-req__sub{
+    margin: 0;
+    color: rgba(0,0,0,.65);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .ss-req__list{
+    margin: 10px 0 0;
+    padding-left: 16px;
+    color: rgba(0,0,0,.65);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .ss-req__btn{
+    display:inline-block;
+    padding: 12px 16px;
+    border-radius: 999px;
+    font-weight: 900;
+    text-decoration:none;
+    border:1px solid rgba(0,0,0,.16);
+    white-space: nowrap;
+    text-align:center;
+  }
+  .ss-req__btn--solid{
+    background:#0b0b0b;
+    color:#fff;
+    border:1px solid rgba(183,163,106,.45);
+  }
+  .ss-req__btn:hover{ opacity:.92; }
+
+  .ss-req__meta{ display:flex; gap: 8px; flex-wrap:wrap; }
+  .ss-req__pill{
+    display:inline-flex; gap:8px; align-items:center;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border:1px solid rgba(0,0,0,.14);
+    background: rgba(0,0,0,.03);
+    font-weight: 900;
+    font-size: 12px;
+    color: rgba(0,0,0,.75);
+  }
+
+  .ss-req__note{
+    color: rgba(0,0,0,.55);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .ss-req__warn{
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.12);
+    background: rgba(0,0,0,.03);
+    font-weight: 900;
+    color: rgba(0,0,0,.65);
+    font-size: 13px;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Request New Product",
+  "settings": [
+    { "type": "text", "id": "metaobject_type", "label": "Metaobject type key", "default": "storefront" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Need something new?" },
+    { "type": "text", "id": "title", "label": "Title", "default": "Request a new item" },
+    { "type": "text", "id": "subtext", "label": "Subtext", "default": "Tell us what you want added to your private store — product type, quantity, deadline, and notes." },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Request a new item" },
+
+    { "type": "text", "id": "form_url", "label": "Google Form URL (public viewform link)", "default": "https://docs.google.com/forms/d/1LhNBjUmextt8HscgciBHPoedCQ_0HvH8dDsrLbHHNsA/viewform" },
+
+    { "type": "text", "id": "prefill_org_key", "label": "Prefill org key (optional, e.g. entry.123456)", "default": "entry.000000" },
+    { "type": "text", "id": "prefill_email_key", "label": "Prefill email key (optional, e.g. entry.654321)", "default": "entry.000000" },
+
+    { "type": "checkbox", "id": "open_new_tab", "label": "Open in new tab", "default": true },
+    { "type": "text", "id": "helper_note", "label": "Helper note (optional)", "default": "We’ll review and add approved items to your private store." }
+  ],
+  "presets": [
+    { "name": "Request New Product" }
+  ]
+}
+{% endschema %}

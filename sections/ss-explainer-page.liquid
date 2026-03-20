@@ -1,0 +1,238 @@
+{% comment %}
+  EXPLAINER PAGE — "DOWN & DIRTY" PROFESSIONAL
+  Focus: Solving the hassle of group orders.
+  - Logic: Smart "Request" button.
+  - If Logged In: Goes straight to Form.
+  - If Logged Out: Goes to Login -> Then automatically redirects to Form.
+{% endcomment %}
+
+{% assign form_page_url = '/pages/request-storefront-form' %}
+{% assign dashboard_url = '/pages/portal' %}
+
+{%- comment -%} SMART LINK LOGIC {%- endcomment -%}
+{%- if customer -%}
+  {%- assign request_cta_url = form_page_url -%}
+{%- else -%}
+  {%- assign encoded_return = form_page_url | url_encode -%}
+  {%- assign request_cta_url = routes.storefront_login_url | append: '?return_to=' | append: encoded_return -%}
+{%- endif -%}
+
+<section class="ssx" data-ss-exp>
+  <div class="ssx-wrap">
+
+    <header class="ssx-hero">
+      <div class="ssx-heroContent">
+        <h1 class="ssx-h1">{{ section.settings.title }}</h1>
+        <p class="ssx-sub">{{ section.settings.subtitle }}</p>
+
+        <div class="ssx-actions">
+          <a class="ssx-btn ssx-btn--solid" href="{{ request_cta_url }}">{{ section.settings.btn_request | escape }}</a>
+          <a class="ssx-btn ssx-btn--ghost" href="{{ dashboard_url }}">{{ section.settings.btn_back | escape }}</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="ssx-sec ssx-problem">
+      <div class="ssx-grid50">
+        <div class="ssx-textBox">
+          <div class="ssx-kicker">The Problem</div>
+          <h2 class="ssx-h2">{{ section.settings.problem_title }}</h2>
+          <p class="ssx-lead">{{ section.settings.problem_text }}</p>
+          <ul class="ssx-checkList">
+            <li>No more chasing people for Venmo payments.</li>
+            <li>No more tallying sizes in spreadsheets.</li>
+            <li>No more "I ordered the wrong size" complaints.</li>
+          </ul>
+        </div>
+        <div class="ssx-cardBox">
+          <div class="ssx-quoteCard">
+            "Finally, I can stop being the unpaid 'T-Shirt Guy' for my unit."
+          </div>
+          <div class="ssx-quoteCard">
+            "The Team Mom retired. Parents order their own gear now."
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ssx-sec">
+      <div class="ssx-secHead">
+        <h2 class="ssx-h2 center-text">Streamlined Process</h2>
+      </div>
+
+      <div class="ssx-steps3">
+        <div class="ssx-step">
+          <div class="ssx-stepNum">01</div>
+          <div class="ssx-stepContent">
+            <h3 class="ssx-h3">Request It</h3>
+            <p>Fill out a simple form. Submit your logo. We set up the backend structure for you.</p>
+          </div>
+        </div>
+        <div class="ssx-step">
+          <div class="ssx-stepNum">02</div>
+          <div class="ssx-stepContent">
+            <h3 class="ssx-h3">We Build It</h3>
+            <p>We create a private collection with your approved gear. No inventory risk. No setup stress.</p>
+          </div>
+        </div>
+        <div class="ssx-step">
+          <div class="ssx-stepNum">03</div>
+          <div class="ssx-stepContent">
+            <h3 class="ssx-h3">You Invite</h3>
+            <p>Send the invite. Members order and pay individually. We ship directly to them.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ssx-sec ssx-access">
+      <div class="ssx-grid50">
+        <div class="ssx-textBox">
+          <div class="ssx-kicker">Security & Access</div>
+          <h2 class="ssx-h2">{{ section.settings.access_title }}</h2>
+          <p class="ssx-lead">{{ section.settings.access_text }}</p>
+        </div>
+        <div class="ssx-accessOptions">
+          <div class="ssx-opt">
+            <div class="ssx-optIcon">🔒</div>
+            <div class="ssx-optBody">
+              <strong>Secure Invite (Email)</strong>
+              <p>Type their email in your dashboard. They get instant access. Best for secure units or exclusive groups.</p>
+            </div>
+          </div>
+          <div class="ssx-opt">
+            <div class="ssx-optIcon">🔗</div>
+            <div class="ssx-optBody">
+              <strong>Direct Link (Easy)</strong>
+              <p>Copy a shareable link. Send it to the group chat. Anyone with the link can join.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<style>
+  .ssx{ padding: 40px 0 80px; }
+  .ssx-wrap{ max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  .center-text{ text-align: center; }
+
+  /* HERO */
+  .ssx-hero{
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(180deg, rgba(0,0,0,.03), transparent);
+    border-radius: 30px;
+    margin-bottom: 50px;
+  }
+  .ssx-h1{
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 950;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin: 0 0 16px;
+    max-width: 20ch;
+    margin-left: auto; margin-right: auto;
+  }
+  .ssx-sub{
+    font-size: 18px;
+    color: rgba(0,0,0,.65);
+    max-width: 65ch;
+    margin: 0 auto 24px;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+  .ssx-actions{ display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .ssx-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding: 14px 24px; border-radius: 999px;
+    font-weight: 800; text-decoration:none;
+    transition: transform .15s ease;
+  }
+  .ssx-btn:hover{ transform: translateY(-2px); }
+  .ssx-btn--solid{ background:#111; color:#fff; }
+  .ssx-btn--ghost{ background:#fff; color:#111; border: 1px solid rgba(0,0,0,.15); }
+
+  /* SECTIONS GENERAL */
+  .ssx-sec{ margin-bottom: 80px; }
+  .ssx-kicker{
+    text-transform: uppercase; letter-spacing: 0.1em;
+    font-size: 12px; font-weight: 800; opacity: 0.6;
+    margin-bottom: 10px;
+  }
+  .ssx-h2{ font-size: 32px; font-weight: 900; margin: 0 0 16px; letter-spacing: -0.02em; }
+  .ssx-lead{ font-size: 17px; line-height: 1.6; color: rgba(0,0,0,.7); margin: 0 0 20px; font-weight: 500; }
+  .ssx-h3{ font-size: 20px; font-weight: 800; margin: 0 0 8px; }
+
+  /* GRID 50/50 */
+  .ssx-grid50{ display:grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+
+  /* CHECKLIST */
+  .ssx-checkList{ list-style: none; padding: 0; margin: 0; }
+  .ssx-checkList li{
+    position: relative; padding-left: 24px; margin-bottom: 10px;
+    font-weight: 700; color: rgba(0,0,0,.8);
+  }
+  .ssx-checkList li::before{
+    content: '✓'; position: absolute; left: 0; color: green; font-weight: 900;
+  }
+
+  /* QUOTE CARDS */
+  .ssx-cardBox{ display:flex; flex-direction: column; gap: 16px; }
+  .ssx-quoteCard{
+    background: #f4f4f4; padding: 20px; border-radius: 16px;
+    font-style: italic; font-weight: 600; color: #444;
+    border-left: 4px solid #111;
+  }
+
+  /* STEPS */
+  .ssx-steps3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; }
+  .ssx-step{
+    background: #fff; border: 1px solid #eee; border-radius: 20px;
+    padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,.04);
+  }
+  .ssx-stepNum{
+    font-size: 40px; font-weight: 900; color: rgba(0,0,0,.08); line-height: 1; margin-bottom: 12px;
+  }
+  .ssx-stepContent p{ margin: 0; opacity: 0.7; font-size: 15px; line-height: 1.5; }
+
+  /* ACCESS OPTIONS */
+  .ssx-accessOptions{ display:flex; flex-direction: column; gap: 16px; }
+  .ssx-opt{
+    display:flex; align-items: flex-start; gap: 16px;
+    background: #fff; padding: 16px; border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.1);
+  }
+  .ssx-optIcon{ font-size: 24px; background: #f0f0f0; width: 44px; height: 44px; display:flex; align-items:center; justify-content:center; border-radius: 12px; }
+  .ssx-optBody p{ margin: 4px 0 0; font-size: 14px; opacity: 0.7; }
+
+  /* MOBILE */
+  @media(max-width: 800px){
+    .ssx-grid50{ grid-template-columns: 1fr; gap: 24px; }
+    .ssx-steps3{ grid-template-columns: 1fr; }
+    .ssx-h1{ font-size: 36px; }
+    .ssx-hero{ padding: 40px 16px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Explainer - Simple",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Main Title", "default": "Stop collecting money. Stop tallying sizes." },
+    { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "The platform built to let the Team Mom, the Unit Supply Guy, and the Office Assistant retire from the custom gear business." },
+    { "type": "text", "id": "btn_request", "label": "CTA Button", "default": "Request a Storefront" },
+    { "type": "text", "id": "btn_back", "label": "Back Button", "default": "Back to Dashboard" },
+
+    { "type": "text", "id": "problem_title", "label": "Problem Title", "default": "Fire the \"Middleman\"" },
+    { "type": "textarea", "id": "problem_text", "label": "Problem Text", "default": "Coordinating group orders is a nightmare of spreadsheets, loose cash, and wrong sizes. Our platform removes you from the transaction entirely." },
+
+    { "type": "text", "id": "access_title", "label": "Access Title", "default": "You control the door." },
+    { "type": "textarea", "id": "access_text", "label": "Access Text", "default": "Whether you need military-grade exclusivity or casual group sharing, we give you the keys." }
+  ],
+  "presets": [ { "name": "Explainer - Simple" } ]
+}
+{% endschema %}

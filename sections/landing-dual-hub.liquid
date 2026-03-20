@@ -1,0 +1,294 @@
+{% comment %}
+  LANDING — TACTICAL DARK HERO (V9) — VIDEO ENABLED
+  - Logic: Added Video Support for the Browser Frame.
+  - Fallback: If no video is uploaded, it reverts to the Screenshot.
+  - FIXED: Now uses 'storefront_login_url' + 'return_to' to correctly redirect to Dashboard.
+  - FIXED: Button label updated to "Log in to View Dashboard".
+{% endcomment %}
+
+{%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
+{%- assign dashboard_return = dashboard_url | url_encode -%}
+
+{%- if customer -%}
+  {%- assign primary_cta_url = dashboard_url -%}
+  {%- assign primary_label = "Open Dashboard" -%}
+  {%- assign primary_micro = "Welcome back, " | append: customer.first_name -%}
+{%- else -%}
+  {%- comment -%} 
+    FIX: Using storefront_login_url + return_to ensures users go 
+    straight to the dashboard, skipping the order history page.
+  {%- endcomment -%}
+  {%- assign primary_cta_url = routes.storefront_login_url | append: '?return_to=' | append: dashboard_return -%}
+  {%- assign primary_label = section.settings.btn_login_label -%}
+  {%- assign primary_micro = section.settings.cta_micro_login -%}
+{%- endif -%}
+
+{%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
+{%- assign request_micro = section.settings.cta_micro_request -%}
+
+<section class="sshub" data-section-id="{{ section.id }}" style="
+  --bg-dark: #0f1115;
+  --bg-card: #181b21;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --accent: #10b981;
+  --border: rgba(255,255,255,0.08);
+">
+  <div class="sshub__gridBg" aria-hidden="true"></div>
+  <div class="sshub__glow" aria-hidden="true"></div>
+
+  <div class="sshub__wrap">
+    
+    <div class="sshub__heroCenter">
+      
+      <div class="sshub__badgeRow">
+        <span class="sshub__pill">
+          <span class="sshub__dot"></span> {{ section.settings.kicker | escape }}
+        </span>
+      </div>
+
+      <h1 class="sshub__h1">{{ section.settings.primary_title | escape }}</h1>
+
+      <p class="sshub__sub">{{ section.settings.primary_desc }}</p>
+
+      <div class="sshub__actions">
+        <div class="sshub__ctaStack">
+          <a class="sshub__btn sshub__btn--primary" href="{{ primary_cta_url }}">
+            {{ primary_label | escape }} <span class="sshub__arrow">→</span>
+          </a>
+          {%- if primary_micro != blank -%}
+            <div class="sshub__ctaMicro">{{ primary_micro }}</div>
+          {%- endif -%}
+        </div>
+
+        <div class="sshub__ctaStack">
+          <a class="sshub__btn sshub__btn--secondary" href="{{ request_url }}">
+            {{ section.settings.btn_request_label | escape }}
+          </a>
+          {%- if request_micro != blank -%}
+            <div class="sshub__ctaMicro">{{ request_micro }}</div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="sshub__fineprint">{{ section.settings.primary_note }}</div>
+    </div>
+
+    <div class="sshub__stage">
+      <div class="sshub__browserFrame">
+        <div class="sshub__browserHeader">
+          <div class="sshub__dots">
+            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+          </div>
+          <div class="sshub__bUrl">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="margin-right:6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            secure.stellaandsage.com/dashboard
+          </div>
+        </div>
+        
+        <div class="sshub__mediaContainer">
+          {% if section.settings.dashboard_video != blank %}
+            {{ section.settings.dashboard_video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, class: 'sshub__screen' }}
+          {% elsif section.settings.dashboard_image != blank %}
+            <img src="{{ section.settings.dashboard_image | image_url: width: 1400 }}" 
+                 class="sshub__screen" 
+                 alt="Studio Dashboard"
+                 loading="eager"
+                 width="{{ section.settings.dashboard_image.width }}"
+                 height="{{ section.settings.dashboard_image.height }}">
+          {% else %}
+            <div class="sshub__placeholder">
+              <div style="font-size:40px; margin-bottom:10px;">🎥</div>
+              <h3 style="color:#fff;">Upload Video or Image</h3>
+              <p>Theme Editor > Landing SaaS > Dashboard Video</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="sshub__trusted">
+      <span class="sshub__trustLabel">TRUSTED BY TEAMS & UNITS ACROSS THE US</span>
+      <div class="sshub__logos">
+        <span class="sshub__logoTxt">YOUTH ATHLETICS</span>
+        <span class="sshub__logoTxt">•</span>
+        <span class="sshub__logoTxt">MILITARY PLATOONS</span>
+        <span class="sshub__logoTxt">•</span>
+        <span class="sshub__logoTxt">FIRST RESPONDERS</span>
+        <span class="sshub__logoTxt">•</span>
+        <span class="sshub__logoTxt">CORPORATE OPS</span>
+      </div>
+    </div>
+
+    <div class="sshub__grid">
+      <div class="sshub__feat">
+        <div class="sshub__iconBox">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <h3 class="sshub__featTitle">Secure & Private</h3>
+        <p class="sshub__featDesc">Invite-only access. The public sees nothing. You control the keys.</p>
+      </div>
+      <div class="sshub__feat">
+        <div class="sshub__iconBox">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        </div>
+        <h3 class="sshub__featTitle">Zero Inventory</h3>
+        <p class="sshub__featDesc">We produce on-demand. Stop buying boxes of shirts that sit in your garage.</p>
+      </div>
+      <div class="sshub__feat">
+        <div class="sshub__iconBox">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+        </div>
+        <h3 class="sshub__featTitle">Operator Built</h3>
+        <p class="sshub__featDesc">Built by active duty for military & teams. We understand logistics.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    .sshub{
+      padding: 80px 20px;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      position: relative;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    .sshub__gridBg{
+      position: absolute; inset: 0;
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 44px 44px;
+      opacity: 0.2;
+      z-index: 0;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 42%, rgba(0,0,0,0) 100%);
+    }
+
+    .sshub__glow{
+      position: absolute; inset: -20% -10% auto -10%; height: 520px;
+      background: radial-gradient(closest-side, rgba(16,185,129,0.12), rgba(16,185,129,0.00) 70%);
+      z-index: 0; pointer-events: none; opacity: 0.9; filter: blur(6px);
+    }
+    
+    .sshub__wrap{ max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+
+    .sshub__heroCenter{ text-align: center; max-width: 860px; margin: 0 auto 50px; }
+
+    .sshub__badgeRow{ display:flex; justify-content:center; margin-bottom: 24px; }
+    .sshub__pill{
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; color: var(--accent);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sshub__dot{ width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
+
+    .sshub__h1{
+      font-size: clamp(42px, 5vw, 72px);
+      line-height: 1.05; font-weight: 800; letter-spacing: -0.03em;
+      margin: 0 0 20px 0; color: #fff;
+    }
+
+    .sshub__sub{
+      font-size: 20px; line-height: 1.5; color: var(--text-muted);
+      margin: 0 auto 32px; max-width: 680px; font-weight: 400;
+    }
+
+    .sshub__actions{ display:flex; gap: 20px; justify-content: center; flex-wrap: wrap; align-items: flex-start; }
+    .sshub__ctaStack{ display:flex; flex-direction: column; align-items: center; gap: 8px; }
+
+    .sshub__btn{
+      padding: 16px 36px; border-radius: 8px; font-weight: 600; text-decoration: none;
+      font-size: 16px; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center;
+      min-width: 220px;
+    }
+    
+    .sshub__btn--primary{ background: #fff; color: #000; }
+    .sshub__btn--primary:hover{ background: #e5e5e5; transform: translateY(-2px); }
+
+    .sshub__btn--secondary{ background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+    .sshub__btn--secondary:hover{ border-color: #fff; background: rgba(255,255,255,0.05); }
+
+    .sshub__ctaMicro{ font-size: 12px; color: rgba(255,255,255,0.4); }
+    .sshub__fineprint{ margin-top: 24px; font-size: 13px; color: var(--text-muted); opacity: 0.5; }
+
+    /* Browser & Video */
+    .sshub__stage{ perspective: 1000px; margin-top: 50px; }
+    .sshub__browserFrame{
+      background: #111; border-radius: 12px 12px 0 0;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 30px 60px -10px rgba(0,0,0,0.5);
+      overflow: hidden; transform: rotateX(2deg); max-width: 1000px; margin: 0 auto;
+    }
+    .sshub__browserHeader{
+      background: #1f2228; border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 12px 16px; display: flex; align-items: center;
+    }
+    .sshub__dots{ display: flex; gap: 6px; margin-right: 16px; }
+    .dot{ width: 10px; height: 10px; border-radius: 50%; }
+    .red{ background:#ff5f57; } .yellow{ background:#ffbd2e; } .green{ background:#28c940; }
+    .sshub__bUrl{
+      background: #000; color: #666; font-size: 11px; padding: 4px 12px;
+      border-radius: 4px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sshub__mediaContainer{ position: relative; width: 100%; height: auto; display: block; background: #fff; }
+    .sshub__screen{ width: 100%; height: auto; display: block; opacity: 0.95; }
+    
+    .sshub__placeholder{ padding: 100px 20px; text-align: center; color: var(--text-muted); }
+
+    .sshub__trusted{
+      text-align: center; margin: 80px 0 40px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .sshub__trustLabel{ font-size: 11px; font-weight: 700; color: #555; letter-spacing: 1.5px; }
+    .sshub__logos{ margin-top: 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; opacity: 0.6; }
+    .sshub__logoTxt{ font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
+
+    .sshub__grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
+    .sshub__feat{
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 30px; transition: transform 0.2s;
+    }
+    .sshub__feat:hover{ border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+    .sshub__iconBox{ color: var(--accent); margin-bottom: 16px; }
+    .sshub__featTitle{ font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px 0; }
+    .sshub__featDesc{ font-size: 14px; color: var(--text-muted); line-height: 1.6; margin: 0; }
+
+    @media (max-width: 800px){
+      .sshub__grid{ grid-template-columns: 1fr; }
+      .sshub__h1{ font-size: 42px; }
+      .sshub__actions{ flex-direction: column; width: 100%; }
+      .sshub__ctaStack{ width: 100%; }
+      .sshub__btn{ width: 100%; }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Landing – Dark Tactical",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Badge Text", "default": "OPERATOR BUILT // VETERAN OWNED" },
+    { "type": "text", "id": "primary_title", "label": "Headline", "default": "Logistics for your gear." },
+    { "type": "textarea", "id": "primary_desc", "label": "Subheadline", "default": "A purpose-built platform for military units and sports teams. No spreadsheets. No Venmo chaos. Just one link." },
+
+    { "type": "text", "id": "btn_login_label", "label": "Login Label", "default": "Log in to View Dashboard" },
+    { "type": "text", "id": "btn_request_label", "label": "Request Label", "default": "Request a Storefront" },
+
+    { "type": "text", "id": "cta_micro_login", "label": "Microcopy (Logged out)", "default": "Already have access? Sign in" },
+    { "type": "text", "id": "cta_micro_request", "label": "Microcopy (Request)", "default": "Start your private store" },
+
+    { "type": "text", "id": "primary_note", "label": "Fineprint", "default": "Currently onboarding new units for next month." },
+
+    { "type": "header", "content": "Media" },
+    { "type": "video", "id": "dashboard_video", "label": "Dashboard Video (MP4) - Overrides Image" },
+    { "type": "image_picker", "id": "dashboard_image", "label": "Dashboard Image (Fallback)" },
+
+    { "type": "header", "content": "Links" },
+    { "type": "text", "id": "dashboard_url", "label": "Portal URL", "default": "/pages/portal" },
+    { "type": "text", "id": "request_url", "label": "Request URL", "default": "/pages/private-storefronts" }
+  ],
+  "presets": [ { "name": "Landing – Dark Tactical" } ]
+}
+{% endschema %}

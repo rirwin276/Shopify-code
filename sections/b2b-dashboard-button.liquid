@@ -1,0 +1,143 @@
+{% comment %}
+  SS PLATFORM BAR — GLASS COMMAND EDITION
+  - Sticky positioning (always visible)
+  - Glassmorphism background
+  - Clean "Command Center" UX
+{% endcomment %}
+
+{% assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' %}
+{% assign explainer_url = section.settings.explainer_url | default: '/pages/private-storefronts' %}
+{% assign login_return = section.settings.login_return_url | default: dashboard_url %}
+{% capture login_url %}{{ routes.account_login_url }}?return_url={{ login_return | url_encode }}{% endcapture %}
+
+<section class="ss-command-bar">
+  <div class="ss-bar-inner">
+    
+    <div class="ss-bar-left">
+      <div class="ss-studio-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+      </div>
+      <span class="ss-bar-title">{{ section.settings.title }}</span>
+    </div>
+
+    <div class="ss-bar-right">
+      {% if customer %}
+        
+        <a class="ss-cmd-btn ss-btn-primary" href="{{ dashboard_url }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          {{ section.settings.dashboard_label }}
+        </a>
+
+        <div class="ss-account-group">
+          <span class="ss-user-name">{{ customer.first_name }}</span>
+          <span class="ss-sep">/</span>
+          <a href="{{ routes.account_logout_url }}" class="ss-link-muted">Log out</a>
+        </div>
+
+      {% else %}
+        
+        <a class="ss-link-muted" href="{{ explainer_url }}">{{ section.settings.explainer_label }}</a>
+        <a class="ss-cmd-btn ss-btn-dark" href="{{ login_url }}">{{ section.settings.login_label }}</a>
+        
+      {% endif %}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  :root {
+    --ss-bar-height: 54px;
+    --ss-glass-bg: rgba(255, 255, 255, 0.85);
+    --ss-border-color: rgba(0, 0, 0, 0.06);
+    --ss-txt-main: #0f172a;
+    --ss-txt-muted: #64748b;
+    --ss-accent-blue: #2563eb; 
+  }
+
+  .ss-command-bar {
+    position: sticky; /* Keeps it stuck to the top */
+    top: 0;
+    z-index: 9999; /* Above everything else */
+    width: 100%;
+    height: var(--ss-bar-height);
+    background: var(--ss-glass-bg);
+    backdrop-filter: blur(12px); /* The expensive blur effect */
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--ss-border-color);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s ease;
+  }
+
+  .ss-bar-inner {
+    width: 100%; max-width: 1180px; padding: 0 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  /* Left Side */
+  .ss-bar-left { display: flex; align-items: center; gap: 10px; }
+  
+  .ss-studio-icon {
+    width: 28px; height: 28px; background: var(--ss-txt-main); color: #fff;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  }
+  
+  .ss-bar-title {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px; font-weight: 700; color: var(--ss-txt-main);
+    letter-spacing: -0.01em;
+  }
+
+  /* Right Side */
+  .ss-bar-right { display: flex; align-items: center; gap: 16px; }
+
+  /* Buttons */
+  .ss-cmd-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 50px;
+    font-size: 12px; font-weight: 700; text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  
+  .ss-btn-primary {
+    background: rgba(37, 99, 235, 0.1); color: var(--ss-accent-blue);
+  }
+  .ss-btn-primary:hover { background: rgba(37, 99, 235, 0.15); transform: translateY(-1px); }
+
+  .ss-btn-dark { background: var(--ss-txt-main); color: #fff; }
+  .ss-btn-dark:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* Account Links */
+  .ss-account-group { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+  .ss-user-name { color: var(--ss-txt-main); font-weight: 700; }
+  .ss-sep { color: var(--ss-border-color); }
+  
+  .ss-link-muted { 
+    font-size: 12px; font-weight: 600; color: var(--ss-txt-muted); 
+    text-decoration: none; transition: 0.2s; 
+  }
+  .ss-link-muted:hover { color: var(--ss-txt-main); }
+
+  /* Mobile Tweaks */
+  @media (max-width: 600px) {
+    .ss-bar-title { display: none; } /* Hide title to save space */
+    .ss-account-group { display: none; } /* Hide name on mobile, just show dash button */
+    .ss-bar-right { gap: 8px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Platform Top Bar",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Bar Title", "default": "Studio Access" },
+    { "type": "text", "id": "dashboard_label", "label": "Dashboard Button", "default": "Dashboard" },
+    { "type": "text", "id": "dashboard_url", "label": "Dashboard URL", "default": "/pages/portal" },
+    { "type": "text", "id": "explainer_label", "label": "Logged Out Link", "default": "How it works" },
+    { "type": "text", "id": "login_label", "label": "Login Button", "default": "Member Login" }
+  ],
+  "presets": [
+    { "name": "Platform Top Bar" }
+  ]
+}
+{% endschema %}

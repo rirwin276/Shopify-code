@@ -1,0 +1,79 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "ps_gate": {
+      "type": "private-store-gate",
+      "settings": {
+        "request_access_url": "/pages/contact#request-storefront"
+      }
+    },
+    "ps_header": {
+      "type": "private-store-header",
+      "settings": {
+        "metaobject_type": "storefront",
+        "default_subtitle": "Approved products & easy reorders",
+        "back_label": "back to portal",
+        "dashboard_label": "Dashboard"
+      }
+    },
+    "private_store_catalog_4C9xrz": {
+      "type": "private-store-catalog",
+      "name": "Private Store Catalog",
+      "settings": {
+        "show_price": true
+      }
+    },
+    "ps_actions": {
+      "type": "private-store-actions",
+      "settings": {
+        "kicker": "Private store tools",
+        "title": "Requests & access",
+        "subtext": "Request new items for your storefront, and (if you’re an admin) request access for additional people. All requests are reviewed to keep your store secure.",
+        "open_new_tab": true,
+        "allow_any_member_to_add_people": false,
+        "note_logged_out": "Log in to request updates for this store.",
+        "note_not_a_member": "You don’t have access to request changes for this store. Please contact Stella & Sage.",
+        "item_box_title": "Need something added?",
+        "item_box_subtext": "Request a new product type, new design, logo update, or reorder option for this storefront.",
+        "item_button_label": "Request a new item",
+        "item_note_allowed": "We’ll review and add approved items to your private store.",
+        "item_form_url": "https://docs.google.com/forms/d/e/1FAIpQLSfdKoUbbJXkj87NHqU7ULYqSJ2m6IhJcC-rYpBMHB_mm05kmg/viewform?usp=header",
+        "item_prefill_store_name_key": "entry.000000",
+        "item_prefill_requester_email_key": "entry.000000",
+        "people_box_title": "Add teammates or family",
+        "people_box_subtext": "Admins can request access for others. We approve all additions to keep the storefront secure.",
+        "people_button_label": "Request store access",
+        "people_note_allowed": "We’ll review the request and grant access if approved.",
+        "people_note_not_allowed": "To add people, contact your store admin or Stella & Sage.",
+        "people_form_url": "https://docs.google.com/forms/d/e/1FAIpQLSeXyVTcuT6jC_A6ifmTHUe9XfQLylEH0zdLIcSUZfdZeW3qCw/viewform?usp=header",
+        "people_prefill_store_name_key": "entry.000000",
+        "people_prefill_requester_email_key": "entry.000000"
+      }
+    },
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "content_direction": "column",
+        "gap": 12,
+        "color_scheme": "",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    }
+  },
+  "order": [
+    "ps_gate",
+    "ps_header",
+    "private_store_catalog_4C9xrz",
+    "ps_actions",
+    "main"
+  ]
+}

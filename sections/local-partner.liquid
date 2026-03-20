@@ -1,0 +1,229 @@
+{% comment %}
+  LOCAL PARTNER SLIDER (FINAL: CENTERED HEADER + WIDE DESKTOP CARDS)
+  - Header: Centered alignment for Title, Text, and Arrows.
+  - Desktop: Cards are 90% width (filling the space).
+  - Mobile: Unchanged (Perfect centering).
+{% endcomment %}
+
+{%- assign partners = collection.metafields.custom.assigned_partner.value -%}
+{%- assign store_handle = collection.handle -%}
+{%- assign store_entry = shop.metaobjects.custom_shop[store_handle] -%}
+{%- assign store_logo = store_entry.logo | image_url: width: 500 -%}
+{%- assign store_name = collection.title -%}
+{%- assign clean_title = collection.title | replace: " Storefront", "" | replace: " Store", "" -%}
+
+{% if partners != blank %}
+  <div id="local-partners" class="ss-slider-container">
+    <div class="page-width">
+      
+      {%- comment -%} CENTERED HEADER {%- endcomment -%}
+      <div class="ss-slider-header">
+        <div class="ss-header-text">
+          <h2 class="ss-slider-title">Purchase from your <strong>Local Maker</strong></h2>
+          <p class="ss-slider-desc">
+            Support local craftsmanship by sourcing customized goods from makers in your area. 
+            Your <strong>{{ clean_title }}</strong> logo is automatically applied to every item—perfect for your business, team, or events.
+          </p>
+        </div>
+        
+        <div class="ss-slider-controls">
+          <button class="ss-nav-btn prev" onclick="scrollMakers(-1)">←</button>
+          <button class="ss-nav-btn next" onclick="scrollMakers(1)">→</button>
+        </div>
+      </div>
+
+      {%- comment -%} SCROLLING TRACK {%- endcomment -%}
+      <div class="ss-maker-track" id="MakerTrack">
+        {% for partner in partners %}
+          <div class="ss-maker-card">
+            <div class="ss-local-grid">
+              
+              {%- comment -%} BIO SECTION {%- endcomment -%}
+              <div class="ss-local-bio">
+                <div class="ss-local-badge">Local Partner</div>
+                <h3 class="ss-maker-name">{{ partner.name }}</h3>
+                
+                {% if partner.photo != blank %}
+                  <div class="ss-local-img-frame">
+                    {{ partner.photo | image_url: width: 400 | image_tag: loading: 'lazy', class: 'ss-bio-img' }}
+                  </div>
+                {% endif %}
+                
+                <div class="ss-local-meta">{{ partner.location }} • {{ partner.specialty }}</div>
+
+                <details class="ss-bio-dropdown">
+                  <summary>About {{ partner.name }} <span>+</span></summary>
+                  <div class="ss-bio-content">
+                    {{ partner.bio | newline_to_br }}
+                  </div>
+                </details>
+              </div>
+
+              {%- comment -%} PRODUCTS SECTION {%- endcomment -%}
+              <div class="ss-local-products">
+                
+                {%- comment -%} PRODUCT GRID {%- endcomment -%}
+                <div class="ss-mini-grid">
+                  {% if partner.products != blank %}
+                    {% for product in partner.products.value %}
+                      <a href="{{ product.url }}?team_name={{ store_name | url_encode }}&team_logo={{ store_logo | url_encode }}" class="ss-mini-card">
+                        <div class="ss-mini-img">
+                          {{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy' }}
+                        </div>
+                        <div class="ss-mini-info">
+                          <div class="ss-mini-title">{{ product.title }}</div>
+                          <div class="ss-mini-price">{{ product.price | money }}</div>
+                        </div>
+                      </a>
+                    {% endfor %}
+                  {% else %}
+                    <p class="ss-empty">No products assigned yet.</p>
+                  {% endif %}
+                </div>
+
+                {%- comment -%} CLEAN NOTE {%- endcomment -%}
+                <div class="ss-clean-note">
+                  <span class="ss-note-icon">✨</span> 
+                  <div class="ss-note-text">
+                    <strong>Custom Made for You:</strong>
+                    Items are shown blank, but your logo will be professionally applied by {{ partner.name }} before shipping.
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      
+    </div>
+  </div>
+{% endif %}
+
+<script>
+  function scrollMakers(direction) {
+    const track = document.getElementById('MakerTrack');
+    const cardWidth = track.querySelector('.ss-maker-card').offsetWidth;
+    // Scroll by card width + gap
+    track.scrollBy({ left: direction * (cardWidth + 40), behavior: 'smooth' });
+  }
+</script>
+
+<style>
+  /* CONTAINER */
+  .ss-slider-container { padding: 60px 0; background: linear-gradient(to bottom, #ffffff, #fafafa); margin-top: 40px; overflow: hidden; }
+  
+  /* HEADER (Centered Layout) */
+  .ss-slider-header { 
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    margin-bottom: 40px; padding: 0 20px;
+  }
+  .ss-header-text { max-width: 800px; margin-bottom: 20px; }
+  
+  .ss-slider-title { 
+    margin: 0 0 12px 0; 
+    font-size: 32px; 
+    font-weight: 500; 
+    letter-spacing: -0.01em; 
+    color: #1a1a1a;
+  }
+  .ss-slider-title strong { font-weight: 800; }
+  
+  .ss-slider-desc {
+    margin: 0 auto; font-size: 16px; color: #555; line-height: 1.6; max-width: 600px;
+  }
+
+  .ss-slider-controls { display: flex; gap: 12px; justify-content: center; }
+  .ss-nav-btn { background: #fff; border: 1px solid #ddd; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .ss-nav-btn:hover { background: #000; color: #fff; border-color: #000; }
+
+  /* TRACK (Universal) */
+  .ss-maker-track { 
+    display: flex; gap: 40px; overflow-x: auto; scroll-snap-type: x mandatory; 
+    padding-bottom: 40px; scrollbar-width: none; 
+  }
+  .ss-maker-track::-webkit-scrollbar { display: none; }
+  
+  /* CARD (Universal Base) */
+  .ss-maker-card { 
+    scroll-snap-align: center; background: #fff; border-radius: 20px; padding: 40px; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08); 
+    border: 1px solid rgba(0,0,0,0.03);
+  }
+  
+  /* GRID (Desktop) */
+  .ss-local-grid { display: grid; grid-template-columns: 300px 1fr; gap: 50px; align-items: start; }
+  
+  /* BIO (Desktop) */
+  .ss-local-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: #999; text-transform: uppercase; margin-bottom: 10px; }
+  .ss-maker-name { margin: 0 0 15px; font-size: 26px; font-weight: 600; }
+  .ss-local-img-frame { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; margin-bottom: 15px; background: #f4f4f5; }
+  .ss-bio-img { width: 100%; height: 100%; object-fit: cover; }
+  .ss-local-meta { font-size: 13px; color: #666; margin-bottom: 15px; font-weight: 500; }
+  
+  .ss-bio-dropdown { border-top: 1px solid #eee; padding-top: 12px; width: 100%; }
+  .ss-bio-dropdown summary { list-style: none; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; color: #555; }
+  .ss-bio-dropdown summary::-webkit-details-marker { display: none; }
+  .ss-bio-content { font-size: 13px; color: #555; line-height: 1.6; margin-top: 10px; padding-bottom: 10px; text-align: left; }
+
+  /* NOTE */
+  .ss-clean-note { background: #f9f9f9; border-radius: 8px; padding: 15px; margin-top: 25px; display: flex; gap: 12px; align-items: flex-start; }
+  .ss-note-icon { font-size: 16px; margin-top: 1px; }
+  .ss-note-text { font-size: 13px; color: #555; line-height: 1.5; }
+  .ss-note-text strong { color: #222; }
+  
+  /* PRODUCT GRID */
+  .ss-mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
+  .ss-mini-card { text-decoration: none; color: inherit; border: 1px solid #eee; border-radius: 12px; overflow: hidden; transition: transform 0.2s; }
+  .ss-mini-card:hover { transform: translateY(-4px); border-color: #ccc; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+  .ss-mini-img { width: 100%; aspect-ratio: 1; background: #f9f9f9; padding: 15px; display: flex; align-items: center; justify-content: center; }
+  .ss-mini-img img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+  .ss-mini-info { padding: 12px; }
+  .ss-mini-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #333; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+  /* --- DESKTOP SPECIFIC (WIDE SINGLE CARD) --- */
+  @media(min-width: 769px) {
+    /* 90% Width = Very wide card.
+       5% padding on each side centers it perfectly.
+       It leaves just a tiny peek of the next card.
+    */
+    .ss-maker-track { 
+      padding-left: 5%; padding-right: 5%; 
+      scroll-padding: 0 5%;
+    }
+    .ss-maker-card { 
+      min-width: 90%; 
+    }
+  }
+
+  /* --- MOBILE FIXES (UNCHANGED) --- */
+  @media(max-width: 768px) {
+    .ss-slider-header { padding: 0; } /* Remove extra header padding on mobile */
+    .ss-nav-btn { display: none; } 
+    
+    .ss-maker-track { padding-left: 7.5vw; padding-right: 7.5vw; gap: 15px; scroll-padding: 0 7.5vw; }
+    
+    .ss-maker-card { min-width: 85vw; margin-right: 0; scroll-snap-align: center; padding: 25px; }
+
+    .ss-local-grid { display: flex; flex-direction: column; gap: 24px; padding-bottom: 60px; }
+    
+    .ss-local-bio { 
+      width: 100% !important; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+      border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 0; 
+    }
+    
+    .ss-local-img-frame { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 15px auto !important; float: none !important; }
+    .ss-maker-name { font-size: 22px; margin-bottom: 8px; width: 100%; text-align: center; }
+    .ss-local-meta { width: 100%; text-align: center; }
+
+    .ss-local-products { display: flex; flex-direction: column; width: 100%; }
+    .ss-clean-note { order: 2; margin-top: 20px; border-left: none; text-align: left; }
+    .ss-mini-grid { order: 1; grid-template-columns: 1fr 1fr !important; gap: 12px; }
+    .ss-mini-img { padding: 5px; } 
+  }
+</style>
+
+{% schema %}
+{ "name": "Local Partner Slider", "settings": [], "presets": [ { "name": "Local Partner Slider" } ] }
+{% endschema %}
