@@ -243,6 +243,64 @@
   /* ── PUBLIC BLOCK ──────────────────────────────────────── */
   .ap-public-block { animation: ap-fadeIn 0.2s ease-out; }
   @keyframes ap-fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── DANGER ZONE CARD ──────────────────────────────────── */
+  .ap-danger-card {
+    background: #fff5f5;
+    border: 1.5px solid rgba(239,68,68,0.3);
+    border-radius: var(--ap-radius); padding: 28px;
+    box-shadow: var(--ap-shadow);
+  }
+  .ap-danger-card:hover { box-shadow: 0 8px 24px rgba(239,68,68,0.12); }
+  .ap-card-icon--red { background: #fee2e2; }
+  .ap-btn--nuke {
+    background: #ef4444; color: #fff; width: 100%;
+    margin-top: 4px;
+  }
+  .ap-btn--nuke:hover { background: #dc2626; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.4); }
+
+  /* ── NUKE MODAL ────────────────────────────────────────── */
+  .ap-nuke-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 9999;
+    align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .ap-nuke-overlay.open { display: flex; }
+  .ap-nuke-dialog {
+    width: min(520px, 100%); background: #fff;
+    border-radius: var(--ap-radius); border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.28); padding: 32px;
+    animation: ap-fadeIn 0.2s ease-out;
+  }
+  .ap-nuke-dialog__icon { font-size: 36px; margin-bottom: 10px; }
+  .ap-nuke-dialog__title {
+    font-weight: 900; font-size: 20px; color: #dc2626;
+    margin: 0 0 8px; letter-spacing: -0.02em;
+  }
+  .ap-nuke-dialog__warning {
+    font-size: 14px; line-height: 1.55; color: #374151; margin: 0 0 16px;
+  }
+  .ap-nuke-dialog__list {
+    font-size: 13px; color: #6b7280; margin: 0 0 20px 18px; line-height: 1.8;
+  }
+  .ap-nuke-confirm-input {
+    width: 100%; padding: 11px 14px; margin-bottom: 16px;
+    border: 1.5px solid rgba(239,68,68,0.4); border-radius: 10px;
+    font-size: 14px; font-family: var(--ap-font); color: #0f172a;
+    background: #fff; box-sizing: border-box;
+  }
+  .ap-nuke-confirm-input:focus { outline: none; border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+  .ap-nuke-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ap-nuke-actions .ap-btn { flex: 1; min-width: 120px; }
+  .ap-nuke-log {
+    margin-top: 16px; padding: 14px;
+    background: #0f172a; color: #94a3b8;
+    border-radius: 10px; font-size: 11px;
+    font-family: monospace; white-space: pre-wrap;
+    max-height: 180px; overflow-y: auto; display: none;
+    line-height: 1.6;
+  }
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -401,6 +459,52 @@
 
   </div><!-- /.ap-grid -->
 
+  <!-- DANGER ZONE (full width) -->
+  <div class="ap-danger-card" style="margin-top: 24px;">
+    <div class="ap-card-icon ap-card-icon--red">☢️</div>
+    <div class="ap-card-head">
+      <h3 style="color:#dc2626;">Danger Zone</h3>
+      <p>Permanently delete this storefront. This action <strong>cannot be undone</strong>.</p>
+    </div>
+    <p style="font-size:13px; color:#6b7280; margin: 0 0 16px; line-height:1.5;">
+      Nuking this store will remove all products tagged with this storefront, delete the collection
+      <code>/collections/{{ collection_handle }}</code>, delete the metaobject record, remove all
+      <code>storefront-admin--{{ shop_handle }}</code> and <code>storefront-member--{{ shop_handle }}</code>
+      customer tags, and delete all logo files from Shopify Files.
+    </p>
+    <button id="apNukeBtn" class="ap-btn ap-btn--nuke">☢️ Nuke This Store</button>
+  </div>
+
+  <!-- NUKE CONFIRMATION MODAL -->
+  <div class="ap-nuke-overlay" id="apNukeOverlay">
+    <div class="ap-nuke-dialog" role="dialog" aria-modal="true" aria-labelledby="apNukeTitle">
+      <div class="ap-nuke-dialog__icon">☢️</div>
+      <p class="ap-nuke-dialog__title" id="apNukeTitle">Permanently Destroy This Store?</p>
+      <p class="ap-nuke-dialog__warning">
+        You are about to permanently delete <strong>{{ shop_handle }}</strong>.
+        This action <strong>cannot be undone</strong>.
+      </p>
+      <ul class="ap-nuke-dialog__list">
+        <li>All products tagged with this storefront will be untagged</li>
+        <li>The collection <code>/collections/{{ collection_handle }}</code> will be deleted</li>
+        <li>The metaobject record will be deleted</li>
+        <li>All <code>storefront-admin--{{ shop_handle }}</code> and <code>storefront-member--{{ shop_handle }}</code> customer tags will be removed</li>
+        <li>All logo files will be deleted from Shopify Files</li>
+      </ul>
+      <input
+        type="text"
+        class="ap-nuke-confirm-input"
+        id="apNukeInput"
+        placeholder="Type &quot;{{ shop_handle }}&quot; to confirm"
+        autocomplete="off">
+      <div class="ap-nuke-actions">
+        <button id="apNukeDestroy" class="ap-btn ap-btn--nuke" disabled>Destroy Store</button>
+        <button id="apNukeCancel" class="ap-btn ap-btn--outline">Cancel</button>
+      </div>
+      <pre class="ap-nuke-log" id="apNukeLog"></pre>
+    </div>
+  </div>
+
 </div><!-- /.ap-wrap -->
 
 <script>
@@ -526,6 +630,109 @@
 
   document.getElementById('apBtnAdd').addEventListener('click', function(){ handleMemberAction('add'); });
   document.getElementById('apBtnRemove').addEventListener('click', function(){ handleMemberAction('remove'); });
+
+  // ── NUKE STORE ────────────────────────────────────────────
+  var NUKE_BACKEND_URL = 'https://studio-uploader-production.up.railway.app';
+  var NUKE_HANDLE = String(SSAP.shopHandle || '');
+  var apNukeBtn = document.getElementById('apNukeBtn');
+  var apNukeOverlay = document.getElementById('apNukeOverlay');
+  var apNukeInput = document.getElementById('apNukeInput');
+  var apNukeDestroy = document.getElementById('apNukeDestroy');
+  var apNukeCancel = document.getElementById('apNukeCancel');
+  var apNukeLog = document.getElementById('apNukeLog');
+
+  function appendNukeLog(msg){
+    apNukeLog.style.display = 'block';
+    apNukeLog.textContent += msg + '\n';
+    apNukeLog.scrollTop = apNukeLog.scrollHeight;
+  }
+
+  apNukeBtn && apNukeBtn.addEventListener('click', function(){
+    apNukeInput.value = '';
+    apNukeDestroy.disabled = true;
+    apNukeLog.textContent = '';
+    apNukeLog.style.display = 'none';
+    apNukeOverlay.classList.add('open');
+  });
+
+  apNukeCancel && apNukeCancel.addEventListener('click', function(){
+    apNukeOverlay.classList.remove('open');
+  });
+
+  apNukeOverlay && apNukeOverlay.addEventListener('click', function(e){
+    if(e.target === apNukeOverlay) apNukeOverlay.classList.remove('open');
+  });
+
+  apNukeInput && apNukeInput.addEventListener('input', function(){
+    apNukeDestroy.disabled = (apNukeInput.value.trim() !== NUKE_HANDLE);
+  });
+
+  apNukeDestroy && apNukeDestroy.addEventListener('click', async function(){
+    if(apNukeInput.value.trim() !== NUKE_HANDLE) return;
+    if(!NUKE_BACKEND_URL){
+      appendNukeLog('ERROR: No backend URL configured.');
+      return;
+    }
+    apNukeDestroy.disabled = true;
+    apNukeCancel.disabled = true;
+    appendNukeLog('Starting nuke for "' + NUKE_HANDLE + '"…');
+
+    try {
+      var res = await fetch(NUKE_BACKEND_URL + '/api/storefront/' + encodeURIComponent(NUKE_HANDLE) + '/nuke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      });
+
+      if(!res.ok){
+        appendNukeLog('ERROR: ' + res.status + ' ' + res.statusText);
+        apNukeDestroy.disabled = false;
+        apNukeCancel.disabled = false;
+        return;
+      }
+
+      var data = await res.json();
+      var jobId = data.job_id;
+      if(!jobId){
+        appendNukeLog('ERROR: No job_id in response.');
+        apNukeDestroy.disabled = false;
+        apNukeCancel.disabled = false;
+        return;
+      }
+      appendNukeLog('Job started: ' + jobId);
+
+      var lastLog = 0;
+      var pollInterval = setInterval(async function(){
+        try {
+          var pollRes = await fetch(NUKE_BACKEND_URL + '/api/job/' + encodeURIComponent(jobId), {
+            credentials: 'include'
+          });
+          if(!pollRes.ok){ appendNukeLog('Poll error: ' + pollRes.status); return; }
+          var job = await pollRes.json();
+          var lines = job.log || [];
+          for(var i = lastLog; i < lines.length; i++){ appendNukeLog(lines[i]); }
+          lastLog = lines.length;
+
+          if(job.status === 'done'){
+            clearInterval(pollInterval);
+            appendNukeLog('✅ Store destroyed. Redirecting…');
+            setTimeout(function(){ window.location.href = {{ dashboard_url | json }}; }, 2000);
+          } else if(job.status === 'error'){
+            clearInterval(pollInterval);
+            appendNukeLog('❌ Error: ' + (job.error || 'Unknown error'));
+            apNukeCancel.disabled = false;
+          }
+        } catch(pollErr){
+          appendNukeLog('Poll network error: ' + (pollErr.message || 'unknown'));
+        }
+      }, 2000);
+
+    } catch(err){
+      appendNukeLog('Network error: ' + (err.message || 'unknown'));
+      apNukeDestroy.disabled = false;
+      apNukeCancel.disabled = false;
+    }
+  });
 })();
 </script>
 
