@@ -1,588 +1,542 @@
 {% comment %}
-  STELLA & SAGE - ADMIN COMMAND CENTER
-  v2 — Dark header, 3-card sidebar (Invite / Store Info / Danger Zone), Nuke modal
+  ADMIN POWERS — V10 (SECTION FILE)
+  - Self-contained section (no Custom Liquid block needed).
+  - God Mode: Ryan Irwin hardcoded + super-admin tag.
+  - QR code, public toggle, invite/remove members.
+  - Premium design upgrade.
 {% endcomment %}
 
-{%- assign handle = request.query_params.shop | default: request.query_params.store -%}
-{%- assign handle = handle | downcase | strip -%}
-{%- assign backend_url = 'https://studio-uploader-production.up.railway.app' -%}
+{%- assign dashboard_url = '/pages/portal' -%}
+{%- assign join_path = '/pages/join-store' -%}
 
-<style>
+{%- comment %} 1. GET SHOP HANDLE {% endcomment -%}
+{%- assign shop_handle = request.params.shop | default: '' | strip -%}
+{%- if shop_handle == blank -%}
+  {%- assign _cfh = content_for_header -%}
+  {%- assign _url_part = _cfh | split: '"pageurl":"' | last | split: '"' | first -%}
+  {%- assign _url_part = _url_part | replace: '\u0026', '&' -%}
+  {%- if _url_part contains '?' -%}
+    {%- assign _qs = _url_part | split: '?' | last -%}
+    {%- assign _pairs = _qs | split: '&' -%}
+    {%- for p in _pairs -%}
+      {%- assign kv = p | split: '=' -%}
+      {%- if kv[0] == 'shop' -%}{%- assign shop_handle = kv[1] | default: '' | strip -%}{%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endif -%}
+{%- assign shop_handle = shop_handle | replace: '%2D', '-' | replace: '%5F', '_' | strip | downcase -%}
+
+{%- comment %} 2. PERMISSIONS CHECK {% endcomment -%}
+{%- assign required_admin_tag = 'storefront-admin--' | append: shop_handle -%}
+{%- assign is_admin_for_shop = false -%}
+{%- assign is_super_admin = false -%}
+
+{%- if customer and shop_handle != blank -%}
+  {%- if customer.email == 'ryan.irwin@stellaandsagecompany.com' -%}
+    {%- assign is_super_admin = true -%}
+    {%- assign is_admin_for_shop = true -%}
+  {%- endif -%}
+  {%- for t in customer.tags -%}
+    {%- assign tag_down = t | downcase | strip -%}
+    {%- if tag_down == 'super-admin' -%}
+      {%- assign is_super_admin = true -%}
+      {%- assign is_admin_for_shop = true -%}
+    {%- endif -%}
+    {%- if tag_down == required_admin_tag -%}{%- assign is_admin_for_shop = true -%}{%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- style -%}
   :root {
-    --ap-dark:    #0f172a;
-    --ap-gray:    #5b6b82;
-    --ap-border:  rgba(15,23,42,.09);
-    --ap-card-bg: #ffffff;
-    --ap-danger:  #b00020;
+    --ap-bg: #f0f4f8;
+    --ap-card: #ffffff;
+    --ap-text: #0f172a;
+    --ap-gray: #64748b;
+    --ap-border: #e2e8f0;
+    --ap-accent: #0f172a;
+    --ap-accent2: #6366f1;
+    --ap-success: #10b981;
+    --ap-danger: #ef4444;
+    --ap-shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --ap-shadow: 0 4px 16px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.04);
+    --ap-shadow-lg: 0 20px 40px rgba(15,23,42,0.12);
+    --ap-radius: 18px;
+    --ap-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
   }
 
-  /* ── Reset helpers ─────────────────────────────────────────── */
-  .ap-wrap * { box-sizing: border-box; }
+  /* ── AUTH SCREENS ──────────────────────────────────────── */
+  .ap-auth-wrap {
+    max-width: 420px; margin: 80px auto; padding: 20px;
+    text-align: center; font-family: var(--ap-font);
+  }
+  .ap-auth-card {
+    background: var(--ap-card); padding: 48px 40px;
+    border-radius: var(--ap-radius); border: 1px solid var(--ap-border);
+    box-shadow: var(--ap-shadow);
+  }
+  .ap-auth-icon {
+    font-size: 36px; width: 72px; height: 72px; line-height: 72px;
+    background: #f1f5f9; border-radius: 50%; margin: 0 auto 24px; display: block;
+  }
+  .ap-auth-card h2 { margin: 0 0 10px; font-size: 22px; font-weight: 800; }
+  .ap-auth-card p { margin: 0 0 24px; color: var(--ap-gray); font-size: 15px; }
 
-  /* ── Outer wrapper ─────────────────────────────────────────── */
-  .ap-wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
-
-  /* ── Dark header bar ───────────────────────────────────────── */
-  .ap-topbar {
-    background: var(--ap-dark);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 28px;
-    border-radius: 0 0 20px 20px;
-    margin: 0 -20px 32px;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .ap-topbar__left { display: flex; flex-direction: column; gap: 4px; }
-  .ap-topbar__kicker {
-    font-size: 10px; font-weight: 750; letter-spacing: .14em;
-    text-transform: uppercase; color: rgba(255,255,255,.55);
-  }
-  .ap-topbar__title {
-    font-size: clamp(22px, 3vw, 32px); font-weight: 900;
-    letter-spacing: -.025em; margin: 0; line-height: 1.1; color: #fff;
-  }
-  .ap-topbar__handle {
-    font-size: 13px; font-weight: 700;
-    background: rgba(255,255,255,.10);
-    border: 1px solid rgba(255,255,255,.14);
-    padding: 5px 12px; border-radius: 999px;
-    color: rgba(255,255,255,.8);
-    margin-top: 4px; display: inline-block;
-  }
-  .ap-back-link {
-    color: rgba(255,255,255,.75);
-    text-decoration: none;
-    font-size: 13px; font-weight: 750;
-    border: 1px solid rgba(255,255,255,.20);
-    padding: 10px 18px; border-radius: 999px;
-    transition: .15s ease;
-    white-space: nowrap;
-  }
-  .ap-back-link:hover { background: rgba(255,255,255,.10); color: #fff; }
-
-  /* ── 2-col layout ──────────────────────────────────────────── */
-  .ap-layout { display: grid; grid-template-columns: 320px 1fr; gap: 28px; align-items: start; }
-  @media (max-width: 860px) { .ap-layout { grid-template-columns: 1fr; } }
-
-  /* ── Sidebar cards ─────────────────────────────────────────── */
-  .ap-sidebar { display: flex; flex-direction: column; gap: 18px; }
-  .ap-card {
-    background: var(--ap-card-bg);
-    border: 1px solid var(--ap-border);
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 14px rgba(15,23,42,.06);
-  }
-  .ap-card__title {
-    font-size: 14px; font-weight: 900; margin: 0 0 4px;
-    color: var(--ap-dark);
-  }
-  .ap-card__sub {
-    font-size: 12px; color: var(--ap-gray);
-    margin: 0 0 14px; line-height: 1.45;
+  /* ── MAIN LAYOUT ───────────────────────────────────────── */
+  .ap-wrap {
+    max-width: 1080px; margin: 0 auto; padding: 40px 20px 80px;
+    font-family: var(--ap-font); color: var(--ap-text);
   }
 
-  /* ── Inputs / buttons ──────────────────────────────────────── */
-  .ap-input {
-    width: 100%; padding: 11px 13px;
-    border: 1px solid rgba(15,23,42,.15);
-    border-radius: 10px; margin-bottom: 10px;
-    font-size: 13px; font-family: inherit;
-    color: var(--ap-dark);
-    transition: border-color .15s;
+  /* ── HERO HEADER ───────────────────────────────────────── */
+  .ap-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
+    border-radius: var(--ap-radius); padding: 36px 40px; margin-bottom: 32px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    flex-wrap: wrap; gap: 20px; position: relative; overflow: hidden;
+    box-shadow: var(--ap-shadow-lg);
   }
-  .ap-input:focus { outline: none; border-color: rgba(43,109,232,.55); }
+  .ap-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(99,102,241,0.3) 0%, transparent 60%);
+  }
+  .ap-hero-left { position: relative; z-index: 1; }
+  .ap-hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 5px 12px; border-radius: 99px; margin-bottom: 14px;
+    backdrop-filter: blur(10px);
+  }
+  .ap-hero-badge .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #10b981;
+    box-shadow: 0 0 6px #10b981; animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ap-hero-badge .dot { animation: none; }
+    .ap-public-block { animation: none; }
+  }
+  .ap-hero h1 {
+    margin: 0 0 6px; font-size: clamp(26px, 4vw, 38px); font-weight: 900;
+    color: #fff; letter-spacing: -0.03em; line-height: 1.1;
+  }
+  .ap-hero-sub { color: rgba(255,255,255,0.6); font-size: 14px; margin: 0; }
+  .ap-hero-actions { display: flex; gap: 10px; position: relative; z-index: 1; flex-wrap: wrap; }
 
+  /* ── BUTTONS ───────────────────────────────────────────── */
   .ap-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: 11px 18px; border-radius: 10px;
-    font-size: 13px; font-weight: 800;
-    cursor: pointer; border: none;
-    text-decoration: none; transition: .18s ease;
-    font-family: inherit;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px;
+    cursor: pointer; transition: all 0.2s; border: none; text-decoration: none;
+    font-family: var(--ap-font); white-space: nowrap;
   }
-  .ap-btn--primary { background: var(--ap-dark); color: #fff; width: 100%; }
-  .ap-btn--primary:hover { background: #1e293b; }
-  .ap-btn--secondary {
-    background: rgba(15,23,42,.05); color: var(--ap-dark);
-    border: 1px solid var(--ap-border);
+  .ap-btn--primary { background: var(--ap-accent); color: #fff; }
+  .ap-btn--primary:hover { background: #1e293b; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,23,42,0.3); }
+  .ap-btn--glass {
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2); color: #fff;
   }
-  .ap-btn--secondary:hover { background: rgba(15,23,42,.09); }
-  .ap-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .ap-btn--glass:hover { background: rgba(255,255,255,0.22); color: #fff; }
+  .ap-btn--outline { background: transparent; border: 1px solid var(--ap-border); color: var(--ap-text); }
+  .ap-btn--outline:hover { background: #f8fafc; border-color: #94a3b8; }
+  .ap-btn--danger { background: #fee2e2; color: #991b1b; }
+  .ap-btn--danger:hover { background: #fecaca; }
+  .ap-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+  .ap-btn-full { width: 100%; }
 
-  /* ── Store info card ───────────────────────────────────────── */
-  .ap-info-row {
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .ap-info-item { font-size: 12px; }
-  .ap-info-label { font-weight: 750; color: var(--ap-gray); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; margin-bottom: 2px; }
-  .ap-info-value { font-weight: 700; color: var(--ap-dark); word-break: break-all; }
+  /* ── GRID ──────────────────────────────────────────────── */
+  .ap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media(max-width: 800px) { .ap-grid { grid-template-columns: 1fr; } }
 
-  /* ── Danger zone card ──────────────────────────────────────── */
-  .ap-danger-card {
-    background: rgba(176,0,32,.03);
-    border: 1px solid rgba(176,0,32,.28);
-    border-radius: 14px;
-    padding: 18px;
+  /* ── CARDS ─────────────────────────────────────────────── */
+  .ap-card {
+    background: var(--ap-card); border: 1px solid var(--ap-border);
+    border-radius: var(--ap-radius); padding: 28px;
+    box-shadow: var(--ap-shadow); transition: box-shadow 0.2s;
   }
-  .ap-danger-card__title {
-    font-weight: 900; color: var(--ap-danger);
-    margin: 0 0 6px; font-size: 14px;
+  .ap-card:hover { box-shadow: var(--ap-shadow-lg); }
+  .ap-card-head { margin-bottom: 22px; }
+  .ap-card-head h3 { margin: 0 0 5px; font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+  .ap-card-head p { margin: 0; font-size: 13px; color: var(--ap-gray); line-height: 1.4; }
+  .ap-card-icon {
+    width: 40px; height: 40px; border-radius: 10px; margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
   }
-  .ap-danger-card__text {
-    font-size: 13px; opacity: .8;
-    margin: 0 0 14px; line-height: 1.4;
-  }
-  .ap-nuke-btn {
-    background: var(--ap-danger); color: #fff;
-    width: 100%; font-size: 13px;
-  }
-  .ap-nuke-btn:hover { background: #8c0019; }
+  .ap-card-icon--indigo { background: #eef2ff; }
+  .ap-card-icon--emerald { background: #ecfdf5; }
 
-  /* ── Tabs ──────────────────────────────────────────────────── */
-  .ap-tabs {
-    display: flex; gap: 6px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--ap-border);
+  /* ── FORM ELEMENTS ─────────────────────────────────────── */
+  .ap-form-group { margin-bottom: 20px; }
+  .ap-label {
+    display: block; font-size: 11px; font-weight: 800; margin-bottom: 8px;
+    color: var(--ap-gray); text-transform: uppercase; letter-spacing: 0.08em;
   }
-  .ap-tab {
-    padding: 10px 18px; cursor: pointer;
-    font-weight: 800; font-size: 13px;
-    color: var(--ap-gray);
-    border-bottom: 3px solid transparent;
-    transition: color .15s, border-color .15s;
-    background: none; border-top: none; border-left: none; border-right: none;
+  .ap-input, .ap-textarea, .ap-select {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--ap-border);
+    border-radius: 10px; font-size: 14px; font-family: var(--ap-font);
+    transition: 0.2s; background: #fff; color: var(--ap-text);
+    box-sizing: border-box;
   }
-  .ap-tab.is-active { color: var(--ap-dark); border-bottom-color: var(--ap-dark); }
-
-  /* ── Product grids ─────────────────────────────────────────── */
-  .ap-grid { display: none; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
-  .ap-grid.is-active { display: grid; }
-
-  .ap-prod-card {
-    border: 1px solid var(--ap-border);
-    border-radius: 14px; padding: 14px;
-    background: var(--ap-card-bg); position: relative;
-    transition: box-shadow .2s;
+  .ap-input:focus, .ap-textarea:focus, .ap-select:focus {
+    outline: none; border-color: var(--ap-accent2);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
   }
-  .ap-prod-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.07); }
+  .ap-textarea { min-height: 110px; resize: vertical; }
+  .ap-input-mono { font-family: monospace; background: #f8fafc; color: #475569; }
+  .ap-helper { font-size: 12px; color: var(--ap-gray); margin: 6px 0 0; }
 
-  .ap-img-box {
-    position: relative; height: 240px;
-    background: #f9f9f9; border-radius: 10px;
-    overflow: hidden; margin-bottom: 12px;
+  /* ── RADIO GROUP ───────────────────────────────────────── */
+  .ap-radio-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .ap-radio {
+    display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+    border: 1.5px solid var(--ap-border); border-radius: 12px; cursor: pointer;
+    transition: all 0.2s; background: #fafafa;
   }
-  .ap-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .ap-radio:hover { border-color: #94a3b8; background: #f8fafc; }
+  .ap-radio.selected { border-color: var(--ap-accent2); background: #eef2ff; }
+  .ap-radio input[type="radio"] { margin-top: 3px; accent-color: var(--ap-accent2); }
+  .ap-radio-title { display: block; font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+  .ap-radio-desc { display: block; font-size: 12px; color: var(--ap-gray); }
 
+  /* ── DIVIDER ───────────────────────────────────────────── */
+  .ap-divider { height: 1px; background: var(--ap-border); margin: 22px 0; }
+
+  /* ── TABS ──────────────────────────────────────────────── */
+  .ap-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+  .ap-tab-btn {
+    background: none; border: none; font-size: 13px; font-weight: 700;
+    color: var(--ap-gray); cursor: pointer; padding: 6px 14px;
+    border-radius: 8px; transition: 0.15s;
+  }
+  .ap-tab-btn.active { background: #e2e8f0; color: var(--ap-text); }
+
+  /* ── COPY ROW ──────────────────────────────────────────── */
+  .ap-copy-row { display: flex; gap: 10px; }
+  .ap-copy-row .ap-input { flex: 1; }
+
+  /* ── QR ────────────────────────────────────────────────── */
+  .ap-qr-box {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px; background: #fff; border-radius: 14px;
+    border: 1px solid var(--ap-border); text-align: center;
+  }
+  #ap-qrcode { margin: 0 auto 12px; }
+  #ap-qrcode img, #ap-qrcode canvas { display: block; margin: 0 auto; }
+
+  /* ── BTN ROW ───────────────────────────────────────────── */
+  .ap-btn-row { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+  .ap-btn-row .ap-btn { flex: 1; min-width: 100px; }
+
+  /* ── STATUS ────────────────────────────────────────────── */
   .ap-status {
-    position: absolute; top: 9px; right: 9px;
-    padding: 4px 8px; border-radius: 6px;
-    font-size: 10px; font-weight: 800;
-    text-transform: uppercase; z-index: 2;
+    margin-top: 14px; font-size: 13px; font-weight: 600;
+    min-height: 20px; border-radius: 8px; padding: 0;
+    transition: all 0.2s;
   }
-  .status-pending { background: #fff3cd; color: #856404; }
-  .status-live    { background: #d1e7dd; color: #0f5132; }
+  .ap-status:not(:empty) { padding: 10px 14px; }
+  .ap-status.ok { background: #ecfdf5; color: #065f46; }
+  .ap-status.err { background: #fef2f2; color: #991b1b; }
 
-  .ap-prod-title { font-weight: 800; font-size: 13px; margin-bottom: 10px; }
+  /* ── PUBLIC BLOCK ──────────────────────────────────────── */
+  .ap-public-block { animation: ap-fadeIn 0.2s ease-out; }
+  @keyframes ap-fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+{%- endstyle -%}
 
-  /* ── Empty state ───────────────────────────────────────────── */
-  .ap-empty {
-    display: none; padding: 40px; text-align: center;
-    grid-column: 1/-1; background: #f9f9f9;
-    border-radius: 14px;
-  }
-  .ap-empty h3 { margin: 0 0 6px; }
+{%- if customer == nil -%}
 
-  /* ── Nuke overlay / modal ──────────────────────────────────── */
-  .ap-nukeOverlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.5); z-index: 9999;
-    align-items: center; justify-content: center;
-    padding: 18px;
-  }
-  .ap-nukeDialog {
-    width: min(520px,100%);
-    background: #fff; border-radius: 18px;
-    border: 1px solid rgba(0,0,0,.12);
-    box-shadow: 0 28px 80px rgba(0,0,0,.25);
-    padding: 24px;
-  }
-  .ap-nukeDialog__icon { font-size: 32px; margin-bottom: 8px; }
-  .ap-nukeDialog__title {
-    font-weight: 900; font-size: 18px;
-    margin: 0 0 6px; color: var(--ap-danger);
-  }
-  .ap-nukeDialog__warning {
-    font-size: 13px; line-height: 1.5;
-    opacity: .8; margin: 0 0 14px;
-  }
-  .ap-nukeDialog__list {
-    font-size: 12px; opacity: .75;
-    margin: 0 0 16px 16px; line-height: 1.7;
-  }
-  .ap-nukeConfirmInput {
-    width: 100%; padding: 10px 13px;
-    border: 1px solid rgba(176,0,32,.4);
-    border-radius: 10px; font-size: 13px;
-    font-family: inherit; margin-bottom: 14px;
-    color: var(--ap-dark); background: #fff;
-  }
-  .ap-nukeConfirmInput:focus { outline: none; border-color: var(--ap-danger); }
-  .ap-nukeActions { display: flex; gap: 10px; flex-wrap: wrap; }
-  .ap-nukeActions .ap-btn { flex: 1; min-width: 120px; }
-  .ap-destroyBtn { background: var(--ap-danger); color: #fff; }
-  .ap-destroyBtn:not(:disabled):hover { background: #8c0019; }
-  .ap-nukeLog {
-    margin-top: 14px; padding: 12px;
-    background: #0f172a; color: #94a3b8;
-    border-radius: 10px; font-size: 11px;
-    font-family: monospace; white-space: pre-wrap;
-    max-height: 180px; overflow-y: auto;
-    display: none;
-  }
-</style>
-
-{%- if customer.tags contains 'storefront-admin--' or customer.tags contains 'super-admin' or customer.email == 'ryan.irwin@stellaandsagecompany.com' -%}
-
-<div class="ap-wrap">
-
-  <!-- ── Dark header bar ─────────────────────────────────── -->
-  <div class="ap-topbar">
-    <div class="ap-topbar__left">
-      <span class="ap-topbar__kicker">Admin Powers</span>
-      <h1 class="ap-topbar__title">{{ handle | capitalize }}</h1>
-      <span class="ap-topbar__handle">{{ handle }}</span>
-    </div>
-    <a href="/pages/portal" class="ap-back-link">← Dashboard</a>
+<div class="ap-auth-wrap">
+  <div class="ap-auth-card">
+    <span class="ap-auth-icon">🔒</span>
+    <h2>Please Sign In</h2>
+    <p>You must be signed in to access Admin Powers.</p>
+    <a href="{{ routes.account_login_url }}?return_url={{ request.path | append: '?shop=' | append: shop_handle | url_encode }}" class="ap-btn ap-btn--primary">Sign In →</a>
   </div>
+</div>
 
-  <!-- ── 2-col layout ────────────────────────────────────── -->
-  <div class="ap-layout">
+{%- elsif is_admin_for_shop == false -%}
 
-    <!-- ── Left sidebar ──────────────────────────────────── -->
-    <aside class="ap-sidebar">
-
-      <!-- Card 1: Invite People -->
-      <div class="ap-card">
-        <p class="ap-card__title">Invite People</p>
-        <p class="ap-card__sub">Paste emails to grant immediate access.</p>
-        <textarea class="ap-input" rows="4" placeholder="name@example.com&#10;another@example.com" id="apInviteEmails"></textarea>
-        <button class="ap-btn ap-btn--primary" id="apInviteBtn">Send Invites</button>
-        <div id="apInviteStatus" style="margin-top:8px; font-size:12px; opacity:.75;"></div>
-      </div>
-
-      <!-- Card 2: Store Info -->
-      <div class="ap-card">
-        <p class="ap-card__title">Store Info</p>
-        <div class="ap-info-row">
-          <div class="ap-info-item">
-            <div class="ap-info-label">Store Handle</div>
-            <div class="ap-info-value">{{ handle }}</div>
-          </div>
-          <div class="ap-info-item">
-            <div class="ap-info-label">Collection</div>
-            <div class="ap-info-value">
-              <a href="/collections/{{ handle }}" style="color:inherit;">/collections/{{ handle }}</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 3: Danger Zone -->
-      <div class="ap-danger-card">
-        <p class="ap-danger-card__title">☢️ Danger Zone</p>
-        <p class="ap-danger-card__text">
-          Permanently delete this store. Removes all products, the collection,
-          the metaobject, all member tags, and all logo files. This cannot be undone.
-        </p>
-        <button id="nukeBtn" class="ap-btn ap-nuke-btn">Nuke This Store</button>
-      </div>
-
-    </aside>
-
-    <!-- ── Right main content ────────────────────────────── -->
-    <div class="ap-content">
-      <div class="ap-tabs">
-        <button class="ap-tab is-active" data-tab="pending">Pending Review</button>
-        <button class="ap-tab" data-tab="approved">Live on Store</button>
-      </div>
-
-      <div class="ap-grid is-active" id="grid-pending">
-        {% for product in collections[handle].products limit: 50 %}
-            {% assign lock_code = product.metafields.custom.logo_position %}
-            {% if lock_code == blank %}
-              <div class="ap-prod-card product-card" data-product-id="{{ product.id }}">
-                <span class="ap-status status-pending">Hidden</span>
-                <div class="ap-img-box">
-                  <img src="{{ product.featured_image | image_url: width: 400 }}"
-                       class="ap-img" width="400" height="400" loading="lazy"
-                       alt="{{ product.title | escape }}">
-                </div>
-                <div class="ap-prod-title">{{ product.title }}</div>
-                <button class="ap-btn ap-btn--primary ss-tuner-trigger">📐 Calibrate &amp; Approve</button>
-              </div>
-            {% endif %}
-        {% endfor %}
-        <div class="ap-empty" id="pending-empty">
-          <h3>🎉 All caught up!</h3>
-          <p>No new products waiting for calibration.</p>
-        </div>
-      </div>
-
-      <div class="ap-grid" id="grid-approved">
-        {% for product in collections[handle].products limit: 50 %}
-            {% assign lock_code = product.metafields.custom.logo_position %}
-            {% if lock_code != blank %}
-              <div class="ap-prod-card product-card" data-logo-lock="{{ lock_code }}">
-                <span class="ap-status status-live">Live</span>
-                <div class="ap-img-box">
-                  <img src="{{ product.featured_image | image_url: width: 400 }}"
-                       class="ap-img" width="400" height="400" loading="lazy"
-                       alt="{{ product.title | escape }}">
-                </div>
-                <div class="ap-prod-title">{{ product.title }}</div>
-                <button class="ap-btn ap-btn--secondary ss-tuner-trigger">⚙️ Adjust Position</button>
-              </div>
-            {% endif %}
-        {% endfor %}
-      </div>
-    </div>
-
-  </div><!-- /.ap-layout -->
-
-</div><!-- /.ap-wrap -->
-
-<!-- ── Nuke confirmation modal ─────────────────────────────────── -->
-<div class="ap-nukeOverlay" id="apNukeOverlay">
-  <div class="ap-nukeDialog" role="dialog" aria-modal="true" aria-labelledby="apNukeTitle">
-    <div class="ap-nukeDialog__icon">☢️</div>
-    <p class="ap-nukeDialog__title" id="apNukeTitle">Permanently Destroy This Store?</p>
-    <p class="ap-nukeDialog__warning">
-      You are about to permanently delete <strong>{{ handle }}</strong>.
-      This action <strong>cannot be undone</strong>.
-    </p>
-    <ul class="ap-nukeDialog__list">
-      <li>All products tagged with this storefront will be untagged</li>
-      <li>The collection <code>/collections/{{ handle }}</code> will be deleted</li>
-      <li>The metaobject record will be deleted</li>
-      <li>All <code>storefront-admin--{{ handle }}</code> and <code>storefront-member--{{ handle }}</code> customer tags will be removed</li>
-      <li>All logo files will be deleted from Shopify Files</li>
-    </ul>
-    <input
-      type="text"
-      class="ap-nukeConfirmInput"
-      id="apNukeInput"
-      placeholder="Type &quot;{{ handle }}&quot; to confirm"
-      autocomplete="off">
-    <div class="ap-nukeActions">
-      <button id="apNukeDestroy" class="ap-btn ap-destroyBtn" disabled>Destroy Store</button>
-      <button id="apNukeCancel" class="ap-btn ap-btn--secondary">Cancel</button>
-    </div>
-    <pre class="ap-nukeLog" id="apNukeLog"></pre>
+<div class="ap-auth-wrap">
+  <div class="ap-auth-card">
+    <span class="ap-auth-icon">🚫</span>
+    <h2>Access Denied</h2>
+    <p>You don't have permission to manage <strong>{{ shop_handle }}</strong>.</p>
+    <a href="{{ dashboard_url }}" class="ap-btn ap-btn--outline">← Back to Dashboard</a>
   </div>
 </div>
 
 {%- else -%}
 
-<div style="text-align:center; padding:100px 20px; font-family:Inter,sans-serif;">
-  <h1 style="font-size:28px; font-weight:900;">Access Denied</h1>
-  <p style="opacity:.7; margin-bottom:24px;">You do not have permission to manage this store.</p>
-  <a href="/pages/portal" style="display:inline-block; background:#0f172a; color:#fff; padding:12px 30px; border-radius:999px; text-decoration:none; font-weight:800;">Back to Dashboard</a>
-</div>
+{%- assign shop_meta = shop.metaobjects.custom_shop[shop_handle] -%}
+{%- assign join_mode = 'secure' -%}
+{%- assign collection_handle = shop_handle -%}
+{%- assign store_name = shop_handle -%}
 
+{%- if shop_meta -%}
+  {%- assign raw_jm = shop_meta.join_mode.value | default: shop_meta.join_mode -%}
+  {%- assign jm = raw_jm | strip | downcase -%}
+  {%- if jm == 'public' -%}{%- assign join_mode = 'public' -%}{%- endif -%}
+  {%- assign join_code = shop_meta.join_code.value | default: shop_meta.join_code | default: '' | strip -%}
+  {%- assign ch = shop_meta.collection_handle.value | default: shop_meta.collection_handle | default: '' | strip -%}
+  {%- if ch != blank -%}{%- assign collection_handle = ch -%}{%- endif -%}
+  {%- assign sn = shop_meta.name.value | default: shop_meta.name -%}
+  {%- if sn != blank -%}{%- assign store_name = sn -%}{%- endif -%}
 {%- endif -%}
+
+{%- assign join_link = shop.url | append: join_path | append: '?shop=' | append: collection_handle -%}
+{%- if join_code != blank -%}
+  {%- assign join_link = join_link | append: '&code=' | append: join_code -%}
+{%- endif -%}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<div class="ap-wrap">
+
+  <script>
+    window.SSAP = window.SSAP || {};
+    SSAP.collectionHandle = {{ collection_handle | json }};
+    SSAP.shopHandle = {{ shop_handle | json }};
+    SSAP.mechanicUrl = "https://webhooks.mechanic.dev/582ce69e-ceda-4086-9416-d0cd52260ce9";
+  </script>
+
+  <!-- HERO HEADER -->
+  <div class="ap-hero">
+    <div class="ap-hero-left">
+      <div class="ap-hero-badge">
+        <span class="dot"></span>
+        {% if is_super_admin %}God Mode Active{% else %}Admin Access{% endif %}
+      </div>
+      <h1>{{ store_name | capitalize }}</h1>
+      <p class="ap-hero-sub">Storefront Management Console · {{ shop_handle }}</p>
+    </div>
+    <div class="ap-hero-actions">
+      <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">View Store ↗</a>
+      <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
+    </div>
+  </div>
+
+  <!-- 2-COL GRID -->
+  <div class="ap-grid">
+
+    <!-- LEFT CARD: Invite & Access -->
+    <div class="ap-card">
+      <div class="ap-card-icon ap-card-icon--indigo">🔗</div>
+      <div class="ap-card-head">
+        <h3>Invite &amp; Access</h3>
+        <p>Control how people enter this storefront.</p>
+      </div>
+
+      <div class="ap-radio-group">
+        <label class="ap-radio {% if join_mode == 'secure' %}selected{% endif %}">
+          <input type="radio" name="ap-joinmode" value="secure" {% if join_mode == 'secure' %}checked{% endif %}>
+          <div>
+            <span class="ap-radio-title">🔒 Secure (Invite Only)</span>
+            <span class="ap-radio-desc">Only people you add can access.</span>
+          </div>
+        </label>
+        <label class="ap-radio {% if join_mode == 'public' %}selected{% endif %}">
+          <input type="radio" name="ap-joinmode" value="public" {% if join_mode == 'public' %}checked{% endif %}>
+          <div>
+            <span class="ap-radio-title">🌐 Public (Shareable Link)</span>
+            <span class="ap-radio-desc">Anyone with the link or QR code can join.</span>
+          </div>
+        </label>
+      </div>
+
+      <button id="apBtnSaveMode" class="ap-btn ap-btn--primary ap-btn-full">Save Settings</button>
+      <div id="apStatusMode" class="ap-status"></div>
+
+      <div id="apBlockPublic" class="ap-public-block" {% if join_mode != 'public' %}style="display:none"{% endif %}>
+        <div class="ap-divider"></div>
+        <div class="ap-tabs">
+          <button class="ap-tab-btn active" data-tab="apTabLink">🔗 Copy Link</button>
+          <button class="ap-tab-btn" data-tab="apTabQR">📱 QR Code</button>
+        </div>
+        <div id="apTabLink" class="ap-tab-content">
+          <div class="ap-copy-row">
+            <input id="apInputJoinLink" class="ap-input ap-input-mono" value="{{ join_link | escape }}" readonly>
+            <button id="apBtnCopy" class="ap-btn ap-btn--outline">Copy</button>
+          </div>
+          <p class="ap-helper">Share this link with your team via chat or email.</p>
+        </div>
+        <div id="apTabQR" class="ap-tab-content" style="display:none;">
+          <div class="ap-qr-box">
+            <div id="ap-qrcode"></div>
+            <p class="ap-helper">Print for flyers or let people scan in person.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT CARD: Manage Roster -->
+    <div class="ap-card">
+      <div class="ap-card-icon ap-card-icon--emerald">👥</div>
+      <div class="ap-card-head">
+        <h3>Manage Roster</h3>
+        <p>Add or remove people from this storefront.</p>
+      </div>
+
+      <div class="ap-form-group">
+        <label class="ap-label">Member Emails</label>
+        <textarea id="apInputEmails" class="ap-textarea" placeholder="alice@example.com, bob@example.com..."></textarea>
+        <p class="ap-helper">Separate multiple emails with commas.</p>
+      </div>
+
+      <div class="ap-form-group">
+        <label class="ap-label">Access Level</label>
+        <select id="apInputRole" class="ap-select">
+          <option value="member" selected>Member (Can Shop)</option>
+          <option value="admin">Admin (Can Edit Settings)</option>
+        </select>
+      </div>
+
+      <div class="ap-btn-row">
+        <button id="apBtnAdd" class="ap-btn ap-btn--primary">+ Add Members</button>
+        <button id="apBtnRemove" class="ap-btn ap-btn--danger">Remove</button>
+      </div>
+      <div id="apStatusMembers" class="ap-status"></div>
+    </div>
+
+  </div><!-- /.ap-grid -->
+
+</div><!-- /.ap-wrap -->
 
 <script>
 (function(){
-  /* ── Tab switching ───────────────────────────────────────────── */
-  document.querySelectorAll('.ap-tab').forEach(function(tab){
-    tab.addEventListener('click', function(){
-      document.querySelectorAll('.ap-tab').forEach(function(t){ t.classList.remove('is-active'); });
-      document.querySelectorAll('.ap-grid').forEach(function(g){ g.classList.remove('is-active'); });
-      tab.classList.add('is-active');
-      var target = 'grid-' + tab.getAttribute('data-tab');
-      var grid = document.getElementById(target);
-      if(grid) grid.classList.add('is-active');
+  // TAB SWITCHING
+  document.querySelectorAll('.ap-tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var targetId = btn.getAttribute('data-tab');
+      btn.closest('.ap-card').querySelectorAll('.ap-tab-content').forEach(function(c){ c.style.display = 'none'; });
+      btn.closest('.ap-card').querySelectorAll('.ap-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      document.getElementById(targetId).style.display = 'block';
+      btn.classList.add('active');
     });
   });
 
-  /* ── Empty pending check ─────────────────────────────────────── */
-  var pendingGrid  = document.getElementById('grid-pending');
-  var pendingEmpty = document.getElementById('pending-empty');
-  if(pendingGrid && pendingEmpty){
-    var cardCount = pendingGrid.querySelectorAll('.ap-prod-card').length;
-    if(cardCount === 0) pendingEmpty.style.display = 'block';
-  }
-
-  /* ── Tuner trigger ───────────────────────────────────────────── */
-  document.addEventListener('click', function(e){
-    if(!e.target.classList.contains('ss-tuner-trigger')) return;
-    if(window.SS && window.SS.tuner){
-      if(!document.querySelector('.ss-tuner-panel')) window.SS.tuner.init();
-      setTimeout(function(){
-        var panel = document.querySelector('.ss-tuner-panel');
-        if(panel) panel.classList.add('is-active');
-        alert("1. Use the panel to position the logo.\n2. Click 'Copy Code'.\n3. Go to Shopify Admin > Products > Metafields > Logo Position.\n4. Paste & Save!");
-      }, 200);
-    } else {
-      alert("Tuner script not loaded. Make sure you added the ss-visual-tuner.js script to your theme.liquid.");
+  // RADIO SYNC
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.name === 'ap-joinmode'){
+      document.querySelectorAll('.ap-radio').forEach(function(r){ r.classList.remove('selected'); });
+      e.target.closest('.ap-radio').classList.add('selected');
+      document.getElementById('apBlockPublic').style.display = (e.target.value === 'public') ? 'block' : 'none';
     }
   });
 
-  /* ── Nuke store ──────────────────────────────────────────────── */
-  var BACKEND_URL = {{ backend_url | json }};
-  var HANDLE      = {{ handle | json }};
-  var nukeBtn     = document.getElementById('nukeBtn');
-  var overlay     = document.getElementById('apNukeOverlay');
-  var nukeInput   = document.getElementById('apNukeInput');
-  var destroyBtn  = document.getElementById('apNukeDestroy');
-  var cancelBtn   = document.getElementById('apNukeCancel');
-  var nukeLog     = document.getElementById('apNukeLog');
-
-  if(nukeBtn){
-    nukeBtn.addEventListener('click', function(){
-      if(overlay){
-        nukeInput.value = '';
-        destroyBtn.disabled = true;
-        nukeLog.textContent = '';
-        nukeLog.style.display = 'none';
-        overlay.style.display = 'flex';
-      }
+  // QR CODE
+  if(typeof QRCode !== 'undefined'){
+    new QRCode(document.getElementById('ap-qrcode'), {
+      text: {{ join_link | json }},
+      width: 160, height: 160,
+      colorDark: '#0f172a', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
     });
   }
 
-  if(cancelBtn){
-    cancelBtn.addEventListener('click', function(){ overlay.style.display = 'none'; });
-  }
-  if(overlay){
-    overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.style.display = 'none'; });
-  }
-
-  if(nukeInput){
-    nukeInput.addEventListener('input', function(){
-      destroyBtn.disabled = (nukeInput.value.trim() !== HANDLE);
+  async function apPost(action, payload){
+    var body = Object.assign({
+      action: action,
+      shop_handle: String(SSAP.collectionHandle || ''),
+      requested_by_customer_id: {{ customer.id | json }},
+      requested_by_email: {{ customer.email | json }}
+    }, payload || {});
+    return fetch(SSAP.mechanicUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
   }
 
-  function appendLog(msg){
-    nukeLog.style.display = 'block';
-    nukeLog.textContent += msg + '\n';
-    nukeLog.scrollTop = nukeLog.scrollHeight;
+  function setStatus(el, msg, type){
+    el.textContent = msg;
+    el.className = 'ap-status ' + (type || '');
   }
 
-  if(destroyBtn){
-    destroyBtn.addEventListener('click', async function(){
-      if(nukeInput.value.trim() !== HANDLE) return;
-      if(!BACKEND_URL){
-        appendLog('ERROR: No backend URL configured in section settings.');
-        return;
+  // SAVE MODE
+  document.getElementById('apBtnSaveMode').addEventListener('click', async function(){
+    var btn = this;
+    var mode = document.querySelector('input[name="ap-joinmode"]:checked').value;
+    btn.disabled = true; btn.textContent = 'Saving…';
+    setStatus(document.getElementById('apStatusMode'), '', '');
+    try {
+      var res = await apPost('set_join_mode', { join_mode: mode });
+      if(!res.ok) throw new Error();
+      setStatus(document.getElementById('apStatusMode'), '✅ Settings saved!', 'ok');
+    } catch(e) {
+      setStatus(document.getElementById('apStatusMode'), '❌ Error saving settings.', 'err');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Save Settings';
+    }
+  });
+
+  // COPY LINK
+  document.getElementById('apBtnCopy').addEventListener('click', function(){
+    var btn = this;
+    var link = document.getElementById('apInputJoinLink').value;
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(link).then(function(){
+        btn.textContent = 'Copied!';
+        setTimeout(function(){ btn.textContent = 'Copy'; }, 1600);
+      }).catch(function(){
+        btn.textContent = 'Copy manually';
+        setTimeout(function(){ btn.textContent = 'Copy'; }, 2400);
+      });
+    } else {
+      // Fallback for non-HTTPS or unsupported browsers
+      document.getElementById('apInputJoinLink').select();
+      btn.textContent = 'Select & copy';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2400);
+    }
+  });
+
+  // ADD / REMOVE MEMBERS
+  async function handleMemberAction(action){
+    var rawText = document.getElementById('apInputEmails').value;
+    var emails = rawText.split(/[\s,;]+/).map(function(e){ return e.trim().toLowerCase(); }).filter(function(e){ return e.length > 0; });
+    var role = document.getElementById('apInputRole').value;
+    var statusEl = document.getElementById('apStatusMembers');
+    var btnAdd = document.getElementById('apBtnAdd');
+    var btnRemove = document.getElementById('apBtnRemove');
+
+    if(emails.length === 0){
+      setStatus(statusEl, '⚠️ Please enter at least one email.', 'err');
+      return;
+    }
+    if(action === 'remove' && !confirm('Remove ' + emails.length + ' member(s)?')) return;
+
+    setStatus(statusEl, 'Processing…', '');
+    btnAdd.disabled = true; btnRemove.disabled = true;
+
+    try {
+      var res = await apPost(action === 'add' ? 'add_members_bulk' : 'remove_members_bulk', { emails: emails, role: role });
+      if(res.ok){
+        setStatus(statusEl, '✅ Roster updated successfully!', 'ok');
+        document.getElementById('apInputEmails').value = '';
+      } else {
+        throw new Error();
       }
-      destroyBtn.disabled = true;
-      cancelBtn.disabled  = true;
-      appendLog('Starting nuke for "' + HANDLE + '"…');
-
-      try {
-        var res = await fetch(BACKEND_URL + '/api/storefront/' + encodeURIComponent(HANDLE) + '/nuke', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          credentials: 'include'
-        });
-
-        if(!res.ok){
-          appendLog('ERROR: ' + res.status + ' ' + res.statusText);
-          destroyBtn.disabled = false;
-          cancelBtn.disabled  = false;
-          return;
-        }
-
-        var data = await res.json();
-        var jobId = data.job_id;
-        if(!jobId){
-          appendLog('ERROR: No job_id in response.');
-          destroyBtn.disabled = false;
-          cancelBtn.disabled  = false;
-          return;
-        }
-        appendLog('Job started: ' + jobId);
-
-        // Poll for job status
-        var lastLog = 0;
-        var pollInterval = setInterval(async function(){
-          try {
-            var pollRes = await fetch(BACKEND_URL + '/api/job/' + encodeURIComponent(jobId), {
-              credentials: 'include'
-            });
-            if(!pollRes.ok){ appendLog('Poll error: ' + pollRes.status); return; }
-            var job = await pollRes.json();
-
-            // Append any new log lines
-            var lines = job.log || [];
-            for(var i = lastLog; i < lines.length; i++){
-              appendLog(lines[i]);
-            }
-            lastLog = lines.length;
-
-            if(job.status === 'done'){
-              clearInterval(pollInterval);
-              appendLog('\u2705 Store destroyed. Redirecting…');
-              setTimeout(function(){ window.location.href = '/pages/portal'; }, 2000);
-            } else if(job.status === 'error'){
-              clearInterval(pollInterval);
-              appendLog('\u274c Error: ' + (job.error || 'Unknown error'));
-              cancelBtn.disabled = false;
-            }
-          } catch(pollErr){
-            appendLog('Poll network error: ' + (pollErr.message || 'unknown'));
-          }
-        }, 2000);
-
-      } catch(err){
-        appendLog('Network error: ' + (err.message || 'unknown'));
-        destroyBtn.disabled = false;
-        cancelBtn.disabled  = false;
-      }
-    });
+    } catch(e) {
+      setStatus(statusEl, '❌ Could not process request.', 'err');
+    } finally {
+      btnAdd.disabled = false; btnRemove.disabled = false;
+    }
   }
 
-  /* ── Invite people ───────────────────────────────────────────── */
-  var inviteBtn    = document.getElementById('apInviteBtn');
-  var inviteEmails = document.getElementById('apInviteEmails');
-  var inviteStatus = document.getElementById('apInviteStatus');
-
-  if(inviteBtn){
-    inviteBtn.addEventListener('click', async function(){
-      var raw = (inviteEmails.value || '').trim();
-      if(!raw){ inviteStatus.textContent = 'Please enter at least one email.'; return; }
-      if(!BACKEND_URL){ inviteStatus.textContent = 'Backend URL not configured.'; return; }
-
-      var emails = raw.split(/[
-,]+/).map(function(e){ return e.trim(); }).filter(Boolean);
-      inviteBtn.disabled = true;
-      inviteStatus.textContent = 'Sending…';
-
-      try {
-        var res = await fetch(BACKEND_URL + '/api/storefront/' + encodeURIComponent(HANDLE) + '/invite', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          credentials: 'include',
-          body: JSON.stringify({ emails: emails })
-        });
-        if(!res.ok){
-          inviteStatus.textContent = 'Error: ' + res.status;
-          inviteBtn.disabled = false;
-          return;
-        }
-        inviteStatus.textContent = 'Done! ' + emails.length + ' invite(s) sent.';
-        inviteEmails.value = '';
-      } catch(err){
-        inviteStatus.textContent = 'Network error: ' + (err.message || 'unknown');
-      }
-      inviteBtn.disabled = false;
-    });
-  }
-
+  document.getElementById('apBtnAdd').addEventListener('click', function(){ handleMemberAction('add'); });
+  document.getElementById('apBtnRemove').addEventListener('click', function(){ handleMemberAction('remove'); });
 })();
 </script>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Admin Powers",
+  "settings": [],
+  "presets": [
+    { "name": "Admin Powers" }
+  ]
+}
+{% endschema %}
