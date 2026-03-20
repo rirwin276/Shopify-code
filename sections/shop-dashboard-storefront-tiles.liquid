@@ -271,6 +271,7 @@ page: {{ request.path }}
                   {% endif %}
 
                   {% if section.settings.enable_remove_store %}
+                    {% unless is_admin_tile %}
                     <button
                       type="button"
                       class="sdtiles__btn sdtiles__btn--danger"
@@ -279,6 +280,7 @@ page: {{ request.path }}
                       data-name="{{ display_name | escape }}">
                       {{ section.settings.remove_store_label }}
                     </button>
+                    {% endunless %}
                   {% endif %}
                 </div>
 
@@ -337,6 +339,7 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
     const enableRemove = {{ section.settings.enable_remove_store | json }};
     if(!enableRemove) return;
 
+    const backendUrl = {{ section.settings.backend_url | default: '' | json }};
     const webhookUrl = {{ section.settings.remove_store_webhook_url | json }};
     const modal = document.getElementById('sdtilesModal');
     const modalText = document.getElementById('sdtilesModalText');
@@ -376,13 +379,39 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
     btnConfirm && btnConfirm.addEventListener('click', async () => {
       if(!currentHandle) return;
 
-      if(!webhookUrl){
-        statusLine.textContent = "Remove is not connected yet (no webhook URL set).";
+      btnConfirm.disabled = true;
+      statusLine.textContent = "Removing access\u2026";
+
+      // Prefer the backend_url API endpoint if configured
+      if(backendUrl){
+        try{
+          const res = await fetch(backendUrl + '/api/storefront/' + encodeURIComponent(currentHandle) + '/leave', {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            credentials: "include"
+          });
+
+          if(!res.ok){
+            statusLine.textContent = "Error: " + res.status;
+            btnConfirm.disabled = false;
+            return;
+          }
+
+          statusLine.textContent = "Done! Refreshing\u2026";
+          setTimeout(() => window.location.reload(), 800);
+        }catch(err){
+          statusLine.textContent = "Network error: " + (err && err.message ? err.message : "unknown");
+          btnConfirm.disabled = false;
+        }
         return;
       }
 
-      btnConfirm.disabled = true;
-      statusLine.textContent = "Removing access…";
+      // Fallback to legacy webhook URL if no backend_url
+      if(!webhookUrl){
+        statusLine.textContent = "No removal method configured (set backend URL or legacy webhook URL in section settings).";
+        btnConfirm.disabled = false;
+        return;
+      }
 
       try{
         const res = await fetch(webhookUrl, {
@@ -401,7 +430,7 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
           return;
         }
 
-        statusLine.textContent = "Success! Refreshing…";
+        statusLine.textContent = "Success! Refreshing\u2026";
         window.location.reload();
       }catch(err){
         statusLine.textContent = "Network error: " + (err && err.message ? err.message : "unknown");
@@ -486,12 +515,13 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
     { "type": "text", "id": "missing_metaobject_text", "label": "Missing metaobject note", "default": "This storefront record isn’t readable on the storefront yet. (Usually: Storefront API access off, entry not Active, or you're not logged in as the tagged customer.)" },
 
     { "type": "header", "content": "Remove store (optional)" },
-    { "type": "checkbox", "id": "enable_remove_store", "label": "Enable “Remove store” button", "default": false },
-    { "type": "text", "id": "remove_store_label", "label": "Remove store button label", "default": "Remove store" },
+    { "type": "checkbox", "id": "enable_remove_store", "label": "Enable Leave Store button (members only)", "default": false },
+    { "type": "text", "id": "remove_store_label", "label": "Remove store button label", "default": "Leave Store" },
     { "type": "text", "id": "remove_modal_title", "label": "Remove modal title", "default": "Remove storefront access?" },
     { "type": "text", "id": "remove_confirm_label", "label": "Confirm button label", "default": "Yes, remove me" },
     { "type": "text", "id": "remove_cancel_label", "label": "Cancel button label", "default": "Cancel" },
-{ "type": "text", "id": "remove_store_webhook_url", "label": "Mechanic webhook URL (set to enable)", "default": "—" }
+    { "type": "text", "id": "backend_url", "label": "Studio Uploader backend URL (e.g. https://your-studio-uploader.com)", "default": "" },
+{ "type": "text", "id": "remove_store_webhook_url", "label": "Legacy Mechanic webhook URL (fallback if no backend URL)", "default": "" }
   ],
   "presets": [
     { "name": "Storefront tiles" }

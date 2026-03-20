@@ -347,6 +347,16 @@
                             System Preparing...
                           </button>
                         {% endif %}
+
+                        {% unless tile_is_admin %}
+                          <button
+                            class="ss-leave-btn"
+                            data-leave-store
+                            data-handle="{{ handle | escape }}"
+                            data-name="{{ tile_name | escape }}">
+                            Leave Store
+                          </button>
+                        {% endunless %}
                       </div>
 
                     </div>
@@ -437,6 +447,17 @@
         </div>
 
       {% endunless %}
+    </div>
+  </div>
+  <div class="ss-leaveOverlay" id="ssLeaveModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9999; align-items:center; justify-content:center; padding:18px;">
+    <div style="width:min(480px,100%); background:#fff; border-radius:16px; border:1px solid rgba(0,0,0,.14); box-shadow:0 22px 70px rgba(0,0,0,.22); padding:20px;">
+      <p style="font-weight:900; font-size:16px; margin:0 0 8px;" id="ssLeaveTitle">Leave storefront?</p>
+      <p style="margin:0 0 14px; opacity:.8; font-size:14px; line-height:1.45;" id="ssLeaveText"></p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="ssLeaveConfirm" class="ss-open-btn" style="background:#b00020; box-shadow:none;">Yes, leave</button>
+        <button id="ssLeaveCancel" class="ss-btn-secondary">Cancel</button>
+      </div>
+      <div id="ssLeaveStatus" style="margin-top:10px; font-size:12px; opacity:.75;"></div>
     </div>
   </div>
 </section>
@@ -710,6 +731,52 @@
 
     tick();
     setInterval(tick, 1000);
+
+    // --- Leave Store ---
+    var LEAVE_BACKEND = {{ section.settings.backend_url | default: '' | json }};
+    var leaveModal   = document.getElementById('ssLeaveModal');
+    var leaveText    = document.getElementById('ssLeaveText');
+    var leaveStatus  = document.getElementById('ssLeaveStatus');
+    var leaveConfirm = document.getElementById('ssLeaveConfirm');
+    var leaveCancel  = document.getElementById('ssLeaveCancel');
+    var leaveHandle  = '';
+
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-leave-store]');
+      if(!btn) return;
+      leaveHandle = btn.getAttribute('data-handle') || '';
+      var name = btn.getAttribute('data-name') || leaveHandle;
+      leaveText.textContent = 'You will be removed from "' + name + '". You can only re-join if an admin invites you back.';
+      leaveStatus.textContent = '';
+      leaveConfirm.disabled = false;
+      leaveModal.style.display = 'flex';
+    });
+
+    leaveCancel && leaveCancel.addEventListener('click', function(){ leaveModal.style.display = 'none'; });
+    leaveModal  && leaveModal.addEventListener('click', function(e){ if(e.target===leaveModal) leaveModal.style.display='none'; });
+
+    leaveConfirm && leaveConfirm.addEventListener('click', async function(){
+      if(!leaveHandle) return;
+      if(!LEAVE_BACKEND){
+        leaveStatus.textContent = 'Backend URL not configured in section settings.';
+        return;
+      }
+      leaveConfirm.disabled = true;
+      leaveStatus.textContent = 'Removing\u2026';
+      try {
+        var res = await fetch(LEAVE_BACKEND + '/api/storefront/' + encodeURIComponent(leaveHandle) + '/leave', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          credentials: 'include'
+        });
+        if(!res.ok){ leaveStatus.textContent = 'Error: ' + res.status; leaveConfirm.disabled=false; return; }
+        leaveStatus.textContent = 'Done! Refreshing\u2026';
+        setTimeout(function(){ window.location.reload(); }, 800);
+      } catch(err) {
+        leaveStatus.textContent = 'Network error: ' + (err.message||'unknown');
+        leaveConfirm.disabled = false;
+      }
+    });
   })();
 </script>
 
@@ -1145,6 +1212,22 @@
     .ss-dot-building-anim { animation: none !important; }
     .ss-progress-bar { transition: none !important; }
   }
+
+  .ss-leave-btn {
+    background: transparent;
+    color: #b00020;
+    border: 1px solid rgba(176,0,32,.28);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: 0.18s ease;
+  }
+  .ss-leave-btn:hover { background: rgba(176,0,32,.06); }
 </style>
 
 {% schema %}
@@ -1154,7 +1237,9 @@
     { "type": "header", "content": "Requests & access (Forms)" },
     { "type": "text", "id": "form_access_url", "label": "Store access request form URL" },
     { "type": "text", "id": "form_product_url", "label": "New product request form URL" },
-    { "type": "checkbox", "id": "allow_any_member_to_add_people", "label": "Allow any store member to request adding people (not just admins)", "default": false }
+    { "type": "checkbox", "id": "allow_any_member_to_add_people", "label": "Allow any store member to request adding people (not just admins)", "default": false },
+    { "type": "header", "content": "Backend API" },
+    { "type": "text", "id": "backend_url", "label": "Studio Uploader backend URL (e.g. https://your-studio-uploader.com)", "default": "" }
   ],
   "presets": [
     { "name": "Shop Dashboard" }
