@@ -1,1 +1,1248 @@
-{ "type": "text", "id": "backend_url", "label": "Studio Uploader backend URL (e.g. https://your-studio-uploader.com)", "default": "https://studio-uploader-production.up.railway.app" }
+{% comment %}
+  SHOP DASHBOARD — STUDIO EDITION (WITH SELLER MODE)
+
+  v0.37 changes (this update):
+  ✅ 5-minute loader ONLY runs for ADMIN (or GOD) on first device view
+  ✅ ALWAYS wait full 5 minutes (no early unlock)
+  ✅ Admin button DISABLED during the 5-minute loader (even when metaobject says ready)
+  ✅ CLOSED copy says "disabled by Stella & Sage" (not admin)
+
+  Notes:
+  - This does NOT change or write to is_fully_ready metaobject.
+  - Non-admin members will never see the loader; when ready they see LIVE immediately.
+{% endcomment %}
+
+{% assign explainer_url = '/pages/private-storefronts' %}
+{% assign portal_url = '/pages/portal' %}
+{% assign account_url = routes.account_url %}
+{% assign storefront_request_url = '/pages/request-storefront-form' %}
+
+{% assign has_storefront = false %}
+{% assign requested_badge = false %}
+{% assign member_handles_blob = '||' %}
+{% assign admin_handles_blob  = '||' %}
+{% assign store_count = 0 %}
+{% assign admin_count = 0 %}
+{% assign form_access_url = section.settings.form_access_url | default: '' %}
+{% assign form_product_url = section.settings.form_product_url | default: '' %}
+{% assign allow_any_member_to_add_people = section.settings.allow_any_member_to_add_people | default: false %}
+{% assign request_btn_label = 'Create a New Storefront' %}
+
+{% assign display_name = '' %}
+{% if customer %}
+  {% capture nm %}{{ customer.first_name }} {{ customer.last_name }}{% endcapture %}
+  {% assign display_name = nm | strip %}
+{% endif %}
+
+{% if customer %}
+  {% for tag in customer.tags %}
+    {% assign tag_stripped = tag | strip %}
+    {% assign tag_down = tag_stripped | downcase %}
+
+    {% if tag_down == 'storefront-requested' %}
+      {% assign requested_badge = true %}
+    {% endif %}
+
+    {% if tag_down contains 'storefront-admin--' %}
+      {% assign ah = tag_stripped | remove: 'storefront-admin--' | remove: 'STOREFRONT-ADMIN--' | strip %}
+      {% if ah != blank %}
+        {% capture admin_needle %}||{{ ah }}||{% endcapture %}
+        {% unless admin_handles_blob contains admin_needle %}
+          {% assign admin_handles_blob = admin_handles_blob | append: ah | append: '||' %}
+          {% assign admin_count = admin_count | plus: 1 %}
+        {% endunless %}
+        {% capture member_needle_from_admin %}||{{ ah }}||{% endcapture %}
+        {% unless member_handles_blob contains member_needle_from_admin %}
+          {% assign member_handles_blob = member_handles_blob | append: ah | append: '||' %}
+          {% assign store_count = store_count | plus: 1 %}
+          {% assign has_storefront = true %}
+        {% endunless %}
+      {% endif %}
+    {% endif %}
+
+    {% if tag_down contains 'storefront-member--' %}
+      {% assign mh = tag_stripped | remove: 'storefront-member--' | remove: 'STOREFRONT-MEMBER--' | strip %}
+      {% if mh != blank %}
+        {% capture member_needle %}||{{ mh }}||{% endcapture %}
+        {% unless member_handles_blob contains member_needle %}
+          {% assign member_handles_blob = member_handles_blob | append: mh | append: '||' %}
+          {% assign store_count = store_count | plus: 1 %}
+          {% assign has_storefront = true %}
+        {% endunless %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% comment %} --- CHECK FOR SUPER ADMIN STATUS --- {% endcomment %}
+{% assign is_god = false %}
+{% if customer %}
+  {% if customer.email == 'ryan.irwin@stellaandsagecompany.com' or customer.tags contains 'super-admin' %}
+    {% assign is_god = true %}
+  {% endif %}
+{% endif %}
+
+{% comment %} SMART SORTING LOGIC {% endcomment %}
+{% assign bucket_admin = '' %}
+{% assign bucket_live = '' %}
+{% assign bucket_building = '' %}
+
+{% assign raw_handles = member_handles_blob | split: '||' %}
+
+{% for h in raw_handles %}
+  {% assign handle = h | strip %}
+  {% if handle == blank %}{% continue %}{% endif %}
+  {% capture needle %}||{{ handle }}||{% endcapture %}
+
+  {% if admin_handles_blob contains needle %}
+    {% assign bucket_admin = bucket_admin | append: needle %}
+  {% else %}
+    {% assign entry = shop.metaobjects.custom_shop[handle] %}
+    {% assign is_ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
+    {% if is_ready == true %}
+      {% assign bucket_live = bucket_live | append: needle %}
+    {% else %}
+      {% assign bucket_building = bucket_building | append: needle %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+{% assign sorted_blob = bucket_admin | append: bucket_live | append: bucket_building %}
+{% assign handles_array = sorted_blob | split: '||' %}
+
+{% comment %} --- CALCULATE TOTAL PRODUCTS --- {% endcomment %}
+{% assign total_products_all = 0 %}
+{% if customer and has_storefront %}
+  {% for raw_handle in handles_array %}
+    {% assign handle = raw_handle | strip %}
+    {% if handle != blank %}
+      {% assign entry = shop.metaobjects.custom_shop[handle] %}
+      {% assign collection_handle = handle %}
+      {% if entry %}
+        {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
+        {% if ch != blank %}{% assign collection_handle = ch | strip %}{% endif %}
+      {% endif %}
+      {% assign c = collections[collection_handle] %}
+      {% if c %}
+        {% assign pc = c.products_count | default: 0 %}
+        {% assign total_products_all = total_products_all | plus: pc %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+<section class="ss-portal" data-ss-portal>
+  <div class="ss-bg">
+    <div class="ss-wrap">
+
+      <header class="ss-header">
+        <div class="ss-header-text">
+          <h1 class="ss-h1">Studio Dashboard</h1>
+          <p class="ss-sub">Manage your private collections and track real-time design production.</p>
+        </div>
+
+        {% if customer %}
+          <div class="ss-user-pill">
+            <div class="ss-avatar">{{ customer.first_name | slice: 0, 1 | default: 'U' | upcase }}</div>
+            <div class="ss-user-meta">
+              <span class="ss-user-name">{{ display_name | default: customer.email }}</span>
+              <span class="ss-user-status">● Active Member</span>
+            </div>
+            <a href="{{ account_url }}" class="ss-pill-btn" title="View Orders">Orders</a>
+          </div>
+        {% endif %}
+      </header>
+
+      {% if customer.tags contains 'seller' %}
+        <div class="ss-seller-alert">
+          <div class="ss-seller-content">
+            <div class="ss-seller-icon">⚡</div>
+            <div class="ss-seller-text">
+              <strong>Seller Mode Active</strong>
+              <p>You have orders waiting in the hub.</p>
+            </div>
+          </div>
+          <a href="/pages/maker-hub" class="ss-btn-seller">
+            Go to Production Hub &rarr;
+          </a>
+        </div>
+      {% endif %}
+
+      {% unless customer %}
+        <div class="ss-card ss-empty-state">
+          <div class="ss-empty-icon">🔒</div>
+          <h2>Member Access Required</h2>
+          <p>Please sign in to view your private design collections.</p>
+          <div class="ss-action-row">
+            <a class="ss-btn-primary" href="{{ routes.storefront_login_url }}?return_to={{ portal_url | url_encode }}">Log in</a>
+            <a class="ss-btn-secondary" href="{{ explainer_url }}">Request Access</a>
+          </div>
+        </div>
+      {% else %}
+
+        <div class="ss-main">
+
+          <div class="ss-block ss-block-stores">
+            {% if has_storefront or is_god %}
+              <div class="ss-grid-label">Active Productions</div>
+
+              <div class="ss-mobile-cta">
+                <a class="ss-btn-primary ss-btn-cta" href="{{ storefront_request_url }}">
+                  Create a New Storefront
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a class="ss-btn-secondary" href="{{ explainer_url }}">How it works</a>
+              </div>
+
+              <div class="ss-store-grid">
+
+                {% if is_god %}
+                  <div class="ss-store-card ss-clickrow ss-god-card" role="link" tabindex="0" data-href="/pages/super-admin" style="border-color: #3b82f6; box-shadow: 0 0 0 1px rgba(59,130,246,0.1), 0 10px 24px rgba(59,130,246,0.1);">
+                    <div class="ss-col-identity">
+                      <div class="ss-logo-frame" style="background:#eff6ff; border-color:#dbeafe;">
+                        <span style="font-size:24px;">⚡</span>
+                      </div>
+                      <div class="ss-identity-text">
+                        <h3 class="ss-card-title" style="color:#1e40af;">Command Center</h3>
+                        <span class="ss-card-subtitle" style="background:#dbeafe; color:#1e40af; border-color:#bfdbfe;">Super Admin</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-engine">
+                      <div class="ss-status-finished" style="background:#eff6ff; border-color:#bfdbfe;">
+                        <span class="ss-dot-live" style="background:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.2);"></span>
+                        <span class="ss-status-text" style="color:#1e40af;">GOD MODE ACTIVE</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-controls">
+                      <a href="/pages/super-admin" class="ss-open-btn" style="background:#2563eb;">
+                        <span>Enter God Mode</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </a>
+                    </div>
+                  </div>
+                {% endif %}
+
+                {% for raw_handle in handles_array %}
+                  {% assign handle = raw_handle | strip %}
+                  {% if handle != blank %}
+
+                    {% assign entry = shop.metaobjects.custom_shop[handle] %}
+                    {% assign tile_logo_clean = blank %}
+                    {% assign tile_logo_file = blank %}
+                    {% assign tile_name = handle | replace: '-', ' ' | capitalize %}
+                    {% assign is_fully_ready = false %}
+                    {% assign collection_handle = handle %}
+
+                    {% if entry %}
+                      {% assign n = entry.name.value | default: entry.name %}
+                      {% if n != blank %}{% assign tile_name = n %}{% endif %}
+
+                      {% assign ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
+                      {% if ready == true %}{% assign is_fully_ready = true %}{% endif %}
+
+                      {% assign lcu = entry.logo_clean_url.value | default: entry.logo_clean_url %}
+                      {% if lcu == blank %}{% assign lcu = entry.logo_clean.value | default: entry.logo_clean %}{% endif %}
+                      {% if lcu == blank %}{% assign lcu = entry.logo_clean_url_.value | default: entry.logo_clean_url_ %}{% endif %}
+                      {% if lcu != blank %}{% assign tile_logo_clean = lcu | strip %}{% endif %}
+
+                      {% assign lf = entry.logo.value | default: entry.logo %}
+                      {% if lf != blank %}{% assign tile_logo_file = lf %}{% endif %}
+
+                      {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
+                      {% if ch != blank %}{% assign collection_handle = ch | strip %}{% endif %}
+                    {% endif %}
+
+                    {% assign tile_url = routes.collections_url | append: '/' | append: collection_handle %}
+                    {% capture admin_url %}/pages/admin-powers?shop={{ handle | url_encode }}{% endcapture %}
+
+                    {% assign collection = collections[collection_handle] %}
+                    {% assign product_count = collection.products_count | default: 0 %}
+
+                    {% capture admin_needle2 %}||{{ handle }}||{% endcapture %}
+                    {% assign tile_is_admin = false %}
+                    {% if admin_handles_blob contains admin_needle2 %}{% assign tile_is_admin = true %}{% endif %}
+
+                    <div
+                      class="ss-store-card {% if is_fully_ready %}ss-clickrow{% endif %}"
+                      role="link"
+                      tabindex="0"
+                      data-href="{{ tile_url }}"
+                      data-ss-handle="{{ handle | escape }}"
+                      data-ss-products="{{ product_count }}"
+                      data-ss-ready="{% if is_fully_ready %}1{% else %}0{% endif %}"
+                      data-admin-href="{{ admin_url }}"
+                      data-ss-bootstrapper="{% if tile_is_admin or is_god %}1{% else %}0{% endif %}"
+                      style="animation-delay: {{ forloop.index0 | times: 80 }}ms;"
+                    >
+
+                      <div class="ss-col-identity">
+                        <div class="ss-logo-frame">
+                          {% if tile_logo_clean != blank %}
+                            <img
+                              src="{{ tile_logo_clean | escape }}"
+                              loading="lazy"
+                              decoding="async"
+                              fetchpriority="low"
+                              alt="{{ tile_name | escape }}"
+                              width="64"
+                              height="64">
+                          {% elsif tile_logo_file != blank %}
+                            {{ tile_logo_file
+                              | image_url: width: 96
+                              | image_tag: loading: 'lazy', decoding: 'async', alt: tile_name, width: 64, height: 64 }}
+                          {% else %}
+                            <span class="ss-logo-fallback">{{ tile_name | slice: 0, 2 | upcase }}</span>
+                          {% endif %}
+                        </div>
+
+                        <div class="ss-identity-text">
+                          <h3 class="ss-card-title">{{ tile_name }}</h3>
+                          <span class="ss-card-subtitle">Private Collection</span>
+                        </div>
+                      </div>
+
+                      <div class="ss-col-engine">
+                        {% if is_fully_ready %}
+                          <div class="ss-status-finished">
+                            <span class="ss-dot-live"></span>
+                            <span class="ss-status-text">LIVE STOREFRONT</span>
+                          </div>
+                        {% else %}
+                          <div class="ss-buildwrap ss-closedwrap">
+                            <div class="ss-buildtop">
+                              <div class="ss-status-building ss-buildbadge ss-closedbadge">
+                                <span class="ss-dot-building"></span>
+                                <span class="ss-status-text-building ss-closedtext">STORE TEMPORARILY CLOSED</span>
+                              </div>
+                            </div>
+
+                            <div class="ss-founderline" aria-live="polite">
+                              <span class="ss-fmsg ss-fmsg-a is-active">This storefront has been disabled by Stella &amp; Sage for maintenance or quality review.</span>
+                              <span class="ss-fmsg ss-fmsg-b">Check back soon — progress continues automatically.</span>
+                            </div>
+                          </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="ss-col-controls">
+
+                        {% if tile_is_admin %}
+                          {% if is_fully_ready %}
+                            {%- comment -%}
+                              Render as a real link, but with "ss-admin-dyn" so JS can disable it during the 5-min loader.
+                            {%- endcomment -%}
+                            <a href="{{ admin_url }}" class="ss-admin-btn ss-admin-dyn" title="Admin" data-admin-href="{{ admin_url }}">Admin</a>
+                          {% else %}
+                            <span class="ss-admin-btn ss-disabled" title="Admin disabled while store is closed">Admin</span>
+                          {% endif %}
+                        {% endif %}
+
+                        {% if is_fully_ready %}
+                          <a href="{{ tile_url }}" class="ss-open-btn">
+                            <span>Open Storefront</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                          </a>
+                        {% else %}
+                          <button class="ss-open-btn ss-disabled ss-open-dyn" disabled data-open-href="{{ tile_url }}">
+                            System Preparing...
+                          </button>
+                        {% endif %}
+
+                        {% unless tile_is_admin %}
+                          <button
+                            class="ss-leave-btn"
+                            data-leave-store
+                            data-handle="{{ handle | escape }}"
+                            data-name="{{ tile_name | escape }}">
+                            Leave Store
+                          </button>
+                        {% endunless %}
+                      </div>
+
+                    </div>
+
+                  {% endif %}
+                {% endfor %}
+              </div>
+
+              <div class="ss-mobile-insights">
+                <div class="ss-insights-card">
+                  <div class="ss-insights-title">Insights</div>
+                  <div class="ss-stats">
+                    <div class="ss-stat">
+                      <div class="ss-stat-label">Studios</div>
+                      <div class="ss-stat-value">{{ store_count }}</div>
+                    </div>
+                    <div class="ss-stat">
+                      <div class="ss-stat-label">Products Live</div>
+                      <div class="ss-stat-value">{{ total_products_all }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            {% else %}
+              <div class="ss-card ss-empty-state">
+                <div class="ss-empty-icon">✨</div>
+                <h2>No Active Productions</h2>
+                <p>You don't have any private stores assigned yet.</p>
+
+                {% if requested_badge %}
+                  <div class="ss-badge-pending">Request Under Review</div>
+                {% else %}
+                  <a class="ss-btn-primary" href="{{ storefront_request_url }}">{{ request_btn_label }}</a>
+                  <div style="height:10px"></div>
+                  <a class="ss-btn-secondary" href="{{ explainer_url }}">How it works</a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="ss-block ss-block-hero">
+            <div class="ss-hero">
+              <div class="ss-hero-left">
+                <div class="ss-hero-kicker">Your private storefront platform</div>
+
+                <div class="ss-hero-title">
+                  One dashboard for every team, brand, and community you run.
+                </div>
+
+                <div class="ss-hero-sub">
+                  Your storefront and products are generated automatically using your uploaded brand assets and placement rules.
+                  Once live, take a quick look at mockups to confirm everything looks perfect before ordering.
+                </div>
+
+                <div class="ss-hero-actions ss-desktop-cta">
+                  <a class="ss-btn-primary ss-btn-cta" href="{{ storefront_request_url }}">
+                    Create a New Storefront
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </a>
+                  <a class="ss-btn-secondary" href="{{ explainer_url }}">How it works</a>
+                </div>
+              </div>
+
+              <div class="ss-hero-right ss-desktop-insights">
+                <div class="ss-stats">
+                  <div class="ss-stat">
+                    <div class="ss-stat-label">Studios</div>
+                    <div class="ss-stat-value">{{ store_count }}</div>
+                  </div>
+                  <div class="ss-stat">
+                    <div class="ss-stat-label">Products Live</div>
+                    <div class="ss-stat-value">{{ total_products_all }}</div>
+                  </div>
+                </div>
+
+                <div class="ss-banner">
+                  <div class="ss-banner-dot"></div>
+                  <div class="ss-banner-text">
+                    <strong>Status:</strong>
+                    Automated provisioning is active. Your storefront updates as products publish.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      {% endunless %}
+    </div>
+  </div>
+  <div class="ss-leaveOverlay" id="ssLeaveModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9999; align-items:center; justify-content:center; padding:18px;">
+    <div style="width:min(480px,100%); background:#fff; border-radius:16px; border:1px solid rgba(0,0,0,.14); box-shadow:0 22px 70px rgba(0,0,0,.22); padding:20px;">
+      <p style="font-weight:900; font-size:16px; margin:0 0 8px;" id="ssLeaveTitle">Leave storefront?</p>
+      <p style="margin:0 0 14px; opacity:.8; font-size:14px; line-height:1.45;" id="ssLeaveText"></p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="ssLeaveConfirm" class="ss-open-btn" style="background:#b00020; box-shadow:none;">Yes, leave</button>
+        <button id="ssLeaveCancel" class="ss-btn-secondary">Cancel</button>
+      </div>
+      <div id="ssLeaveStatus" style="margin-top:10px; font-size:12px; opacity:.75;"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function(){
+    // ---------------------------
+    // Click rows
+    // ---------------------------
+    var rows = document.querySelectorAll('.ss-store-card[data-href]');
+    rows.forEach(function(row){
+      var href = row.getAttribute('data-href');
+      if(!href) return;
+
+      row.addEventListener('click', function(e){
+        if (e.target.closest('a, button')) return;
+        if (!row.classList.contains('ss-clickrow')) return;
+        window.location.href = href;
+      });
+
+      row.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' ') {
+          if (!row.classList.contains('ss-clickrow')) return;
+          e.preventDefault();
+          window.location.href = href;
+        }
+      });
+    });
+
+    // ---------------------------
+    // Remove trailing " ####" (UI only)
+    // ---------------------------
+    function stripSuffix4Digits(txt){
+      if(!txt) return txt;
+      return txt.replace(/\s\d{4}\s*$/,'').replace(/-\d{4}\s*$/,'');
+    }
+    document.querySelectorAll('.ss-card-title').forEach(function(el){
+      var cleaned = stripSuffix4Digits((el.textContent || '').trim());
+      if(cleaned) el.textContent = cleaned;
+    });
+
+    // ============================================================
+    // v0.37: 5-min loader ONLY for first ADMIN/GOD device (bootstrapper)
+    // - Non-admin users/devices NEVER see the loader
+    // - Loader ALWAYS runs full 5 minutes (no early unlock)
+    // - Does NOT write to is_fully_ready metaobject
+    // ============================================================
+    var BUILD_MS = 5 * 60 * 1000;
+
+    function now(){ return Date.now(); }
+    function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+
+    function startKey(handle){ return 'ss_build_start__' + handle; }
+    function doneKey(handle){ return 'ss_build_done__' + handle; }
+
+    function getDone(handle){
+      try{ return localStorage.getItem(doneKey(handle)) === '1'; }
+      catch(err){ return false; }
+    }
+
+    function setDone(handle){
+      try{
+        localStorage.setItem(doneKey(handle), '1');
+        localStorage.removeItem(startKey(handle));
+      }catch(err){}
+    }
+
+    function getOrInitStart(handle){
+      try{
+        var k = startKey(handle);
+        var v = localStorage.getItem(k);
+        if(v && !isNaN(parseInt(v,10))) return parseInt(v,10);
+        var t = now();
+        localStorage.setItem(k, String(t));
+        return t;
+      }catch(err){
+        return now();
+      }
+    }
+
+    // --- Ensure the card is in "building UI" state (visual only) ---
+    function ensureBuildUI(card){
+      if(card.getAttribute('data-ss-buildui') === '1') return;
+      card.setAttribute('data-ss-buildui','1');
+
+      // Disable clickrow while building UI is active
+      card.classList.remove('ss-clickrow');
+      card.setAttribute('data-ss-unlocked','0');
+
+      // Disable Admin during loader
+      disableAdminUI(card);
+
+      // Engine column: if it's currently showing LIVE, swap to buildwrap
+      var engine = card.querySelector('.ss-col-engine');
+      if(engine){
+        var finished = engine.querySelector('.ss-status-finished');
+        if(finished) finished.parentNode.removeChild(finished);
+
+        if(!engine.querySelector('.ss-buildwrap')){
+          var wrap = document.createElement('div');
+          wrap.className = 'ss-buildwrap';
+          wrap.innerHTML = '' +
+            '<div class="ss-buildtop">' +
+              '<div class="ss-status-building ss-buildbadge">' +
+                '<span class="ss-dot-building ss-dot-building-anim"></span>' +
+                '<span class="ss-status-text-building">CREATING PRODUCTS</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ss-progress" aria-hidden="true">' +
+              '<div class="ss-progress-track">' +
+                '<div class="ss-progress-bar" style="width:6%;"></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ss-founderline" aria-live="polite">' +
+              '<span class="ss-fmsg ss-fmsg-a is-active">Thanks for supporting a veteran-owned, operator-built platform.</span>' +
+              '<span class="ss-fmsg ss-fmsg-b">You can leave this page — progress continues automatically.</span>' +
+            '</div>';
+          engine.appendChild(wrap);
+        }
+      }
+
+      // Controls: replace "Open Storefront" link with disabled button (same class)
+      var controls = card.querySelector('.ss-col-controls');
+      if(controls){
+        var openLink = controls.querySelector('a.ss-open-btn');
+        if(openLink){
+          var href = openLink.getAttribute('href') || card.getAttribute('data-href') || '#';
+          var btn = document.createElement('button');
+          btn.className = 'ss-open-btn ss-disabled ss-open-dyn';
+          btn.disabled = true;
+          btn.setAttribute('data-open-href', href);
+          btn.textContent = 'System Preparing...';
+          openLink.parentNode.replaceChild(btn, openLink);
+        }
+      }
+    }
+
+    function disableAdminUI(card){
+      var admin = card.querySelector('.ss-admin-dyn');
+      if(!admin) return;
+
+      // If it's already been swapped to a span, nothing to do
+      if(admin.tagName && admin.tagName.toLowerCase() === 'span') return;
+
+      var href = admin.getAttribute('data-admin-href') || admin.getAttribute('href') || '';
+      var span = document.createElement('span');
+      span.className = 'ss-admin-btn ss-disabled ss-admin-dyn';
+      span.setAttribute('data-admin-href', href);
+      span.title = 'Admin disabled while system prepares';
+      span.textContent = 'Admin';
+      admin.parentNode.replaceChild(span, admin);
+    }
+
+    function enableAdminUI(card){
+      var admin = card.querySelector('.ss-admin-dyn');
+      if(!admin) return;
+
+      // Only swap back if it's disabled span
+      if(!(admin.tagName && admin.tagName.toLowerCase() === 'span')) return;
+
+      var href = admin.getAttribute('data-admin-href') || '';
+      if(!href) return;
+
+      var a = document.createElement('a');
+      a.href = href;
+      a.className = 'ss-admin-btn ss-admin-dyn';
+      a.setAttribute('data-admin-href', href);
+      a.title = 'Admin';
+      a.textContent = 'Admin';
+      admin.parentNode.replaceChild(a, admin);
+    }
+
+    function setLiveUI(card){
+      // Make row clickable
+      card.classList.add('ss-clickrow');
+      card.setAttribute('data-ss-unlocked','1');
+
+      // Engine: show LIVE pill
+      var engine = card.querySelector('.ss-col-engine');
+      if(engine){
+        var buildwrap = engine.querySelector('.ss-buildwrap');
+        if(buildwrap) buildwrap.parentNode.removeChild(buildwrap);
+
+        if(!engine.querySelector('.ss-status-finished')){
+          var finished = document.createElement('div');
+          finished.className = 'ss-status-finished';
+          finished.innerHTML = '<span class="ss-dot-live"></span><span class="ss-status-text">LIVE STOREFRONT</span>';
+          engine.appendChild(finished);
+        }
+      }
+
+      // Controls: button -> link
+      var btn = card.querySelector('.ss-open-dyn');
+      if(btn){
+        var href = btn.getAttribute('data-open-href') || card.getAttribute('data-href') || '#';
+        var a = document.createElement('a');
+        a.href = href;
+        a.className = 'ss-open-btn';
+        a.innerHTML = '<span>Open Storefront</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+        btn.parentNode.replaceChild(a, btn);
+      }
+
+      // Re-enable Admin after unlock
+      enableAdminUI(card);
+
+      card.setAttribute('data-ss-buildui','0');
+    }
+
+    function updateCard(card){
+      var isGloballyReady = card.getAttribute('data-ss-ready') === '1';
+      if(!isGloballyReady) return; // metaobject OFF => CLOSED mode, do nothing
+
+      var handle = card.getAttribute('data-ss-handle') || '';
+      if(!handle) return;
+
+      // ✅ Only admins/god are allowed to run the 5-minute loader
+      var canBootstrap = card.getAttribute('data-ss-bootstrapper') === '1';
+
+      // Non-admin members: NEVER show loader; show live immediately when ready
+      if(!canBootstrap){
+        setLiveUI(card);
+        return;
+      }
+
+      // Admin/God device already completed: ensure live UI
+      if(getDone(handle)){
+        setLiveUI(card);
+        return;
+      }
+
+      // First-time for this admin device: show build UI + run timer
+      ensureBuildUI(card);
+
+      // Timer progress bar + messages
+      var start = getOrInitStart(handle);
+      var elapsed = now() - start;
+
+      var pct = clamp((elapsed / BUILD_MS) * 100, 2, 99);
+      if(pct > 85){
+        var overshoot = pct - 85;
+        pct = 85 + (overshoot * 0.55);
+      }
+
+      var bar = card.querySelector('.ss-progress-bar');
+      if(bar) bar.style.width = pct.toFixed(2) + '%';
+
+      var msgA = card.querySelector('.ss-fmsg-a');
+      var msgB = card.querySelector('.ss-fmsg-b');
+      if(msgA && msgB){
+        var phase = Math.floor(elapsed / 20000) % 2;
+        if(phase === 0){
+          msgA.classList.add('is-active');
+          msgB.classList.remove('is-active');
+        }else{
+          msgB.classList.add('is-active');
+          msgA.classList.remove('is-active');
+        }
+      }
+
+      // HARD RULE: only unlock after FULL 5 minutes
+      if(elapsed >= BUILD_MS){
+        setDone(handle);
+        setLiveUI(card);
+      }
+    }
+
+    function tick(){
+      // Only apply to globally-ready stores (metaobject true)
+      document.querySelectorAll('.ss-store-card[data-ss-ready="1"]').forEach(updateCard);
+    }
+
+    tick();
+    setInterval(tick, 1000);
+
+    // --- Leave Store ---
+    var LEAVE_BACKEND = {{ section.settings.backend_url | default: '' | json }};
+    var leaveModal   = document.getElementById('ssLeaveModal');
+    var leaveText    = document.getElementById('ssLeaveText');
+    var leaveStatus  = document.getElementById('ssLeaveStatus');
+    var leaveConfirm = document.getElementById('ssLeaveConfirm');
+    var leaveCancel  = document.getElementById('ssLeaveCancel');
+    var leaveHandle  = '';
+
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-leave-store]');
+      if(!btn) return;
+      leaveHandle = btn.getAttribute('data-handle') || '';
+      var name = btn.getAttribute('data-name') || leaveHandle;
+      leaveText.textContent = 'You will be removed from "' + name + '". You can only re-join if an admin invites you back.';
+      leaveStatus.textContent = '';
+      leaveConfirm.disabled = false;
+      leaveModal.style.display = 'flex';
+    });
+
+    leaveCancel && leaveCancel.addEventListener('click', function(){ leaveModal.style.display = 'none'; });
+    leaveModal  && leaveModal.addEventListener('click', function(e){ if(e.target===leaveModal) leaveModal.style.display='none'; });
+
+    leaveConfirm && leaveConfirm.addEventListener('click', async function(){
+      if(!leaveHandle) return;
+      if(!LEAVE_BACKEND){
+        leaveStatus.textContent = 'Backend URL not configured in section settings.';
+        return;
+      }
+      leaveConfirm.disabled = true;
+      leaveStatus.textContent = 'Removing\u2026';
+      try {
+        var res = await fetch(LEAVE_BACKEND + '/api/storefront/' + encodeURIComponent(leaveHandle) + '/leave', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          credentials: 'include'
+        });
+        if(!res.ok){ leaveStatus.textContent = 'Error: ' + res.status; leaveConfirm.disabled=false; return; }
+        leaveStatus.textContent = 'Done! Refreshing\u2026';
+        setTimeout(function(){ window.location.reload(); }, 800);
+      } catch(err) {
+        leaveStatus.textContent = 'Network error: ' + (err.message||'unknown');
+        leaveConfirm.disabled = false;
+      }
+    });
+  })();
+</script>
+
+<style>
+  :root {
+    --ss-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    --ss-dark: #0f172a;
+    --ss-gray: #5b6b82;
+    --ss-accent: #2b6de8;
+    --ss-success: #10b981;
+    --ss-qa: #7c3aed;
+
+    --ss-card: rgba(255,255,255,0.78);
+    --ss-border: rgba(15,23,42,0.07);
+    --ss-shadow-card: 0 10px 24px rgba(15, 23, 42, 0.05);
+    --ss-shadow-hover: 0 18px 40px rgba(15, 23, 42, 0.08);
+    --ss-glow: 0 0 0 1px rgba(43, 109, 232, 0.08), 0 10px 26px rgba(43, 109, 232, 0.06);
+  }
+
+  .ss-portal { font-family: var(--ss-font); color: var(--ss-dark); -webkit-font-smoothing: antialiased; }
+  .ss-bg {
+    background: radial-gradient(circle at 50% 0%, #f8fafc 0%, #e9eef6 55%, #edf1f7 100%);
+    min-height: 85vh;
+    padding: 54px 0;
+  }
+  .ss-wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  .ss-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 18px; padding-bottom: 16px;
+    border-bottom: 1px solid rgba(15,23,42,0.06);
+  }
+  .ss-h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.035em; margin: 0; }
+  .ss-sub { font-size: 14px; color: var(--ss-gray); margin: 6px 0 0 0; }
+
+  .ss-seller-alert {
+    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;
+    padding: 15px 20px; margin-bottom: 24px; display: flex;
+    justify-content: space-between; align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  }
+  .ss-seller-content { display: flex; gap: 15px; align-items: center; }
+  .ss-seller-icon { font-size: 20px; background: #dcfce7; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .ss-seller-text strong { display: block; color: #166534; font-size: 15px; }
+  .ss-seller-text p { margin: 0; color: #15803d; font-size: 13px; }
+  .ss-btn-seller {
+    background: #166534; color: #fff !important; padding: 10px 20px;
+    border-radius: 8px; text-decoration: none; font-weight: 600;
+    transition: 0.2s; white-space: nowrap;
+  }
+  .ss-btn-seller:hover { background: #14532d; transform: translateY(-1px); }
+
+  @media (max-width: 600px) {
+    .ss-seller-alert { flex-direction: column; gap: 15px; text-align: center; }
+    .ss-seller-content { flex-direction: column; }
+    .ss-btn-seller { width: 100%; display: block; text-align: center; }
+  }
+
+  .ss-user-pill {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,0.70);
+    padding: 6px 10px 6px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--ss-border);
+    box-shadow: var(--ss-shadow-card);
+    backdrop-filter: blur(10px);
+  }
+  .ss-avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.14);
+  }
+  .ss-user-meta { display: flex; flex-direction: column; line-height: 1.12; margin-right: 6px; }
+  .ss-user-name { font-size: 13px; font-weight: 750; }
+  .ss-user-status { font-size: 10px; font-weight: 700; color: var(--ss-success); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .ss-pill-btn {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ss-dark);
+    background: rgba(15, 23, 42, 0.05);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    padding: 10px 14px;
+    border-radius: 999px;
+    transition: 0.18s ease;
+    white-space: nowrap;
+  }
+
+  .ss-main { display: flex; flex-direction: column; gap: 18px; }
+  .ss-block { width: 100%; }
+
+  .ss-hero {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 14px;
+  }
+  .ss-hero-left, .ss-hero-right {
+    background: var(--ss-card);
+    border: 1px solid var(--ss-border);
+    border-radius: 22px;
+    box-shadow: var(--ss-shadow-card);
+    backdrop-filter: blur(10px);
+  }
+  .ss-hero-left { padding: 20px; }
+  .ss-hero-right { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .ss-hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(43, 109, 232, 0.95);
+    background: rgba(43, 109, 232, 0.07);
+    border: 1px solid rgba(43, 109, 232, 0.10);
+    padding: 8px 12px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .ss-hero-title {
+    font-size: 18px;
+    font-weight: 820;
+    letter-spacing: -0.025em;
+    margin: 0 0 8px 0;
+    max-width: 44ch;
+  }
+  .ss-hero-sub {
+    font-size: 13px;
+    color: var(--ss-gray);
+    line-height: 1.55;
+    margin: 0 0 14px 0;
+    max-width: 60ch;
+  }
+  .ss-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .ss-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .ss-stat { background: rgba(248,250,252,0.70); border: 1px solid rgba(15,23,42,0.06); border-radius: 18px; padding: 12px; }
+  .ss-stat-label { font-size: 10px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(91,107,130,0.9); margin-bottom: 6px; }
+  .ss-stat-value { font-size: 19px; font-weight: 850; letter-spacing: -0.02em; }
+
+  .ss-banner {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px; border-radius: 18px;
+    border: 1px solid rgba(16,185,129,0.14);
+    background: rgba(236,253,245,0.62);
+  }
+  .ss-banner-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--ss-success); box-shadow: 0 0 0 3px rgba(16,185,129,0.14); margin-top: 3px; flex-shrink: 0; }
+  .ss-banner-text { font-size: 12px; color: rgba(15,23,42,0.74); line-height: 1.45; }
+  .ss-banner-text strong { color: rgba(6,95,70,0.92); font-weight: 800; }
+
+  .ss-grid-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(91,107,130,0.75);
+    font-weight: 750;
+    margin: 2px 0 10px 4px;
+  }
+  .ss-store-grid { display: flex; flex-direction: column; gap: 14px; }
+
+  .ss-store-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--ss-card);
+    border: 1px solid var(--ss-border);
+    border-radius: 20px;
+    padding: 18px 22px;
+    box-shadow: var(--ss-shadow-card);
+    cursor: default;
+
+    contain: content;
+    content-visibility: auto;
+    contain-intrinsic-size: 88px;
+
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    animation: fadeSlideUp 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    backdrop-filter: blur(10px);
+  }
+  .ss-store-card.ss-clickrow { cursor: pointer; }
+  @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (hover:hover) and (pointer:fine) {
+    .ss-store-card.ss-clickrow:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--ss-shadow-hover), var(--ss-glow);
+      border-color: rgba(43, 109, 232, 0.14);
+    }
+  }
+
+  .ss-col-identity { display: flex; align-items: center; gap: 16px; width: 32%; }
+  .ss-logo-frame {
+    width: 60px; height: 60px; border-radius: 16px;
+    background: rgba(248,250,252,0.75);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; border: 1px solid rgba(15,23,42,0.06); flex-shrink: 0;
+  }
+  .ss-logo-frame img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+
+  .ss-logo-fallback { font-size: 18px; font-weight: 850; color: rgba(148,163,184,0.9); }
+
+  .ss-card-title { margin: 0; font-size: 15.5px; font-weight: 820; letter-spacing: -0.01em; }
+  .ss-card-subtitle { font-size: 11px; font-weight: 700; color: rgba(91,107,130,0.9); background: rgba(241,245,249,0.75); padding: 3px 8px; border-radius: 8px; align-self: flex-start; border: 1px solid rgba(15,23,42,0.05); }
+
+  .ss-col-engine { flex: 1; padding: 0 34px; display: flex; justify-content: center; }
+
+  .ss-status-finished { display: flex; align-items: center; gap: 8px; background: rgba(236,253,245,0.70); padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(16,185,129,0.14); }
+  .ss-dot-live { width: 8px; height: 8px; background: var(--ss-success); border-radius: 50%; box-shadow: 0 0 0 3px rgba(16,185,129,0.14); }
+  .ss-status-text { font-size: 11px; font-weight: 850; color: rgba(6,95,70,0.92); letter-spacing: 0.06em; }
+
+  .ss-status-building { display: flex; align-items: center; gap: 8px; background: rgba(241,245,249,0.85); padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.2); }
+  .ss-dot-building { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; }
+  .ss-status-text-building { font-size: 11px; font-weight: 850; color: #64748b; letter-spacing: 0.06em; }
+
+  .ss-closedbadge{
+    background: rgba(255, 247, 237, 0.85);
+    border-color: rgba(194, 65, 12, 0.16);
+  }
+  .ss-closedtext{ color: #c2410c; }
+
+  .ss-col-controls { width: 25%; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+
+  .ss-admin-btn {
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ss-dark);
+    background: rgba(15, 23, 42, 0.05);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    padding: 10px 14px;
+    border-radius: 999px;
+    transition: 0.18s ease;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  .ss-admin-btn.ss-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.02);
+  }
+
+  .ss-open-btn {
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 820;
+    display: flex; align-items: center; gap: 8px;
+    transition: 0.18s ease;
+    box-shadow: 0 12px 24px rgba(15,23,42,0.18);
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+  }
+  .ss-open-btn.ss-disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .ss-btn-primary {
+    background: var(--ss-accent);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 999px;
+    font-weight: 820;
+    text-decoration: none;
+    transition: 0.18s ease;
+    box-shadow: 0 10px 20px rgba(43, 109, 232, 0.16);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .ss-btn-secondary {
+    background: rgba(15,23,42,0.05);
+    color: var(--ss-dark);
+    padding: 12px 18px;
+    border-radius: 999px;
+    font-weight: 820;
+    text-decoration: none;
+    transition: 0.18s ease;
+    border: 1px solid rgba(15,23,42,0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .ss-btn-cta { position: relative; }
+  .ss-btn-cta:after { content: ""; position: absolute; inset: -2px; border-radius: 999px; background: radial-gradient(circle at 35% 10%, rgba(255,255,255,0.30), transparent 55%); pointer-events: none; opacity: 0.55; }
+
+  .ss-mobile-cta { display: none; }
+  .ss-mobile-insights { display: none; }
+  .ss-insights-card {
+    margin-top: 14px;
+    background: var(--ss-card);
+    border: 1px solid var(--ss-border);
+    border-radius: 22px;
+    box-shadow: var(--ss-shadow-card);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ss-insights-title {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: rgba(91,107,130,0.75);
+    margin-left: 2px;
+  }
+
+  .ss-empty-state {
+    text-align: center;
+    padding: 76px 20px;
+    border: 2px dashed rgba(148,163,184,0.65);
+    background: rgba(255,255,255,0.86);
+    border-radius: 24px;
+    margin-top: 18px;
+    box-shadow: var(--ss-shadow-card);
+    backdrop-filter: blur(10px);
+  }
+  .ss-empty-icon { font-size: 46px; margin-bottom: 16px; }
+  .ss-empty-state h2 { font-size: 22px; font-weight: 820; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .ss-empty-state p { color: var(--ss-gray); margin-bottom: 26px; }
+  .ss-badge-pending { background: rgba(255,247,237,0.85); color: #c2410c; padding: 8px 16px; border-radius: 999px; font-size: 12px; font-weight: 820; display: inline-block; border: 1px solid rgba(194, 65, 12, 0.16); }
+
+  .ss-buildwrap{
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  .ss-buildtop{ display:flex; justify-content:center; width:100%; }
+  .ss-buildbadge{ background: rgba(241,245,249,0.85); border-color: rgba(148, 163, 184, 0.2); }
+  .ss-dot-building-anim{ animation: ssPulseSoft 1.8s ease-in-out infinite; }
+  @keyframes ssPulseSoft{
+    0%{ transform: scale(1); opacity: .85; }
+    50%{ transform: scale(1.18); opacity: .55; }
+    100%{ transform: scale(1); opacity: .85; }
+  }
+
+  .ss-progress{ width: 100%; }
+  .ss-progress-track{
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.07);
+    border: 1px solid rgba(15,23,42,0.06);
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+  }
+  .ss-progress-bar{
+    height: 100%;
+    width: 6%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(43,109,232,0.75), rgba(43,109,232,0.95));
+    box-shadow: 0 10px 18px rgba(43,109,232,0.12);
+    transition: width 0.9s ease;
+  }
+
+  .ss-founderline{
+    position: relative;
+    width: 100%;
+    min-height: 16px;
+    text-align: center;
+  }
+  .ss-fmsg{
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 1.1s ease, transform 1.1s ease;
+    font-size: 11px;
+    color: rgba(91,107,130,0.92);
+    font-weight: 650;
+    line-height: 1.25;
+  }
+  .ss-fmsg.is-active{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 950px) { .ss-hero { grid-template-columns: 1fr; } }
+
+  @media (max-width: 850px) {
+    .ss-block-stores { order: 1; }
+    .ss-block-hero { order: 2; }
+
+    .ss-desktop-cta { display: none; }
+    .ss-desktop-insights { display: none; }
+
+    .ss-mobile-cta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 6px 0 12px;
+      padding: 0 4px;
+    }
+    .ss-mobile-insights { display: block; }
+
+    .ss-store-card { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px 16px; }
+    .ss-col-identity, .ss-col-engine, .ss-col-controls { width: 100%; justify-content: flex-start; }
+    .ss-col-engine { padding: 0; justify-content: flex-start; }
+    .ss-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .ss-stats { grid-template-columns: 1fr; }
+    .ss-col-controls { gap: 10px; flex-wrap: wrap; }
+
+    .ss-buildwrap{ align-items: flex-start; max-width: 100%; }
+    .ss-founderline{ text-align: left; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ss-store-card { animation: none !important; transition: none !important; }
+    .ss-dot-building-anim { animation: none !important; }
+    .ss-progress-bar { transition: none !important; }
+  }
+
+  .ss-leave-btn {
+    background: transparent;
+    color: #b00020;
+    border: 1px solid rgba(176,0,32,.28);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: 0.18s ease;
+  }
+  .ss-leave-btn:hover { background: rgba(176,0,32,.06); }
+</style>
+
+{% schema %}
+{
+  "name": "Shop Dashboard",
+  "settings": [
+    { "type": "header", "content": "Requests & access (Forms)" },
+    { "type": "text", "id": "form_access_url", "label": "Store access request form URL" },
+    { "type": "text", "id": "form_product_url", "label": "New product request form URL" },
+    { "type": "checkbox", "id": "allow_any_member_to_add_people", "label": "Allow any store member to request adding people (not just admins)", "default": false },
+    { "type": "header", "content": "Backend API" },
+    { "type": "text", "id": "backend_url", "label": "Studio Uploader backend URL (e.g. https://your-studio-uploader.com)", "default": "https://studio-uploader-production.up.railway.app" }
+  ],
+  "presets": [
+    { "name": "Shop Dashboard" }
+  ]
+}
+{% endschema %}
