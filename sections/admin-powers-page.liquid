@@ -5,9 +5,9 @@
 
 {%- assign handle = request.query_params.shop | default: request.query_params.store -%}
 {%- assign handle = handle | downcase | strip -%}
-{%- assign backend_url = section.settings.backend_url | default: '' -%}
+{%- assign backend_url = 'https://studio-uploader-production.up.railway.app' -%}
 
-{%- style -%}
+<style>
   :root {
     --ap-dark:    #0f172a;
     --ap-gray:    #5b6b82;
@@ -243,7 +243,7 @@
     max-height: 180px; overflow-y: auto;
     display: none;
   }
-{%- endstyle -%}
+</style>
 
 {%- if customer.tags contains 'storefront-admin--' or customer.tags contains 'super-admin' or customer.email == 'ryan.irwin@stellaandsagecompany.com' -%}
 
@@ -311,8 +311,7 @@
       </div>
 
       <div class="ap-grid is-active" id="grid-pending">
-        {% paginate collections[handle].products by 50 %}
-          {% for product in collections[handle].products %}
+        {% for product in collections[handle].products limit: 50 %}
             {% assign lock_code = product.metafields.custom.logo_position %}
             {% if lock_code == blank %}
               <div class="ap-prod-card product-card" data-product-id="{{ product.id }}">
@@ -326,8 +325,7 @@
                 <button class="ap-btn ap-btn--primary ss-tuner-trigger">📐 Calibrate &amp; Approve</button>
               </div>
             {% endif %}
-          {% endfor %}
-        {% endpaginate %}
+        {% endfor %}
         <div class="ap-empty" id="pending-empty">
           <h3>🎉 All caught up!</h3>
           <p>No new products waiting for calibration.</p>
@@ -335,8 +333,7 @@
       </div>
 
       <div class="ap-grid" id="grid-approved">
-        {% paginate collections[handle].products by 50 %}
-          {% for product in collections[handle].products %}
+        {% for product in collections[handle].products limit: 50 %}
             {% assign lock_code = product.metafields.custom.logo_position %}
             {% if lock_code != blank %}
               <div class="ap-prod-card product-card" data-logo-lock="{{ lock_code }}">
@@ -350,8 +347,7 @@
                 <button class="ap-btn ap-btn--secondary ss-tuner-trigger">⚙️ Adjust Position</button>
               </div>
             {% endif %}
-          {% endfor %}
-        {% endpaginate %}
+        {% endfor %}
       </div>
     </div>
 
@@ -437,7 +433,7 @@
   });
 
   /* ── Nuke store ──────────────────────────────────────────────── */
-  var BACKEND_URL = {{ section.settings.backend_url | default: '' | json }};
+  var BACKEND_URL = {{ backend_url | json }};
   var HANDLE      = {{ handle | json }};
   var nukeBtn     = document.getElementById('nukeBtn');
   var overlay     = document.getElementById('apNukeOverlay');
@@ -590,29 +586,3 @@
 
 })();
 </script>
-
-{% schema %}
-{
-  "name": "Admin Command Center",
-  "settings": [
-    {
-      "type": "text",
-      "id": "form_access_url",
-      "label": "Store access request form URL"
-    },
-    {
-      "type": "header",
-      "content": "Backend API"
-    },
-    {
-      "type": "text",
-      "id": "backend_url",
-      "label": "Studio Uploader backend URL (e.g. https://your-studio-uploader.com)",
-      "default": ""
-    }
-  ],
-  "presets": [
-    { "name": "Admin Command Center" }
-  ]
-}
-{% endschema %}
