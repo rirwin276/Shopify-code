@@ -1,1 +1,618 @@
+{% comment %}
+  STELLA & SAGE - ADMIN COMMAND CENTER
+  v2 — Dark header, 3-card sidebar (Invite / Store Info / Danger Zone), Nuke modal
+{% endcomment %}
+
+{%- assign handle = request.query_params.shop | default: request.query_params.store -%}
+{%- assign handle = handle | downcase | strip -%}
+{%- assign backend_url = section.settings.backend_url | default: '' -%}
+
+{%- style -%}
+  :root {
+    --ap-dark:    #0f172a;
+    --ap-gray:    #5b6b82;
+    --ap-border:  rgba(15,23,42,.09);
+    --ap-card-bg: #ffffff;
+    --ap-danger:  #b00020;
+  }
+
+  /* ── Reset helpers ─────────────────────────────────────────── */
+  .ap-wrap * { box-sizing: border-box; }
+
+  /* ── Outer wrapper ─────────────────────────────────────────── */
+  .ap-wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; }
+
+  /* ── Dark header bar ───────────────────────────────────────── */
+  .ap-topbar {
+    background: var(--ap-dark);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-radius: 0 0 20px 20px;
+    margin: 0 -20px 32px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .ap-topbar__left { display: flex; flex-direction: column; gap: 4px; }
+  .ap-topbar__kicker {
+    font-size: 10px; font-weight: 750; letter-spacing: .14em;
+    text-transform: uppercase; color: rgba(255,255,255,.55);
+  }
+  .ap-topbar__title {
+    font-size: clamp(22px, 3vw, 32px); font-weight: 900;
+    letter-spacing: -.025em; margin: 0; line-height: 1.1; color: #fff;
+  }
+  .ap-topbar__handle {
+    font-size: 13px; font-weight: 700;
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.14);
+    padding: 5px 12px; border-radius: 999px;
+    color: rgba(255,255,255,.8);
+    margin-top: 4px; display: inline-block;
+  }
+  .ap-back-link {
+    color: rgba(255,255,255,.75);
+    text-decoration: none;
+    font-size: 13px; font-weight: 750;
+    border: 1px solid rgba(255,255,255,.20);
+    padding: 10px 18px; border-radius: 999px;
+    transition: .15s ease;
+    white-space: nowrap;
+  }
+  .ap-back-link:hover { background: rgba(255,255,255,.10); color: #fff; }
+
+  /* ── 2-col layout ──────────────────────────────────────────── */
+  .ap-layout { display: grid; grid-template-columns: 320px 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 860px) { .ap-layout { grid-template-columns: 1fr; } }
+
+  /* ── Sidebar cards ─────────────────────────────────────────── */
+  .ap-sidebar { display: flex; flex-direction: column; gap: 18px; }
+  .ap-card {
+    background: var(--ap-card-bg);
+    border: 1px solid var(--ap-border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(15,23,42,.06);
+  }
+  .ap-card__title {
+    font-size: 14px; font-weight: 900; margin: 0 0 4px;
+    color: var(--ap-dark);
+  }
+  .ap-card__sub {
+    font-size: 12px; color: var(--ap-gray);
+    margin: 0 0 14px; line-height: 1.45;
+  }
+
+  /* ── Inputs / buttons ──────────────────────────────────────── */
+  .ap-input {
+    width: 100%; padding: 11px 13px;
+    border: 1px solid rgba(15,23,42,.15);
+    border-radius: 10px; margin-bottom: 10px;
+    font-size: 13px; font-family: inherit;
+    color: var(--ap-dark);
+    transition: border-color .15s;
+  }
+  .ap-input:focus { outline: none; border-color: rgba(43,109,232,.55); }
+
+  .ap-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 11px 18px; border-radius: 10px;
+    font-size: 13px; font-weight: 800;
+    cursor: pointer; border: none;
+    text-decoration: none; transition: .18s ease;
+    font-family: inherit;
+  }
+  .ap-btn--primary { background: var(--ap-dark); color: #fff; width: 100%; }
+  .ap-btn--primary:hover { background: #1e293b; }
+  .ap-btn--secondary {
+    background: rgba(15,23,42,.05); color: var(--ap-dark);
+    border: 1px solid var(--ap-border);
+  }
+  .ap-btn--secondary:hover { background: rgba(15,23,42,.09); }
+  .ap-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Store info card ───────────────────────────────────────── */
+  .ap-info-row {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ap-info-item { font-size: 12px; }
+  .ap-info-label { font-weight: 750; color: var(--ap-gray); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; margin-bottom: 2px; }
+  .ap-info-value { font-weight: 700; color: var(--ap-dark); word-break: break-all; }
+
+  /* ── Danger zone card ──────────────────────────────────────── */
+  .ap-danger-card {
+    background: rgba(176,0,32,.03);
+    border: 1px solid rgba(176,0,32,.28);
+    border-radius: 14px;
+    padding: 18px;
+  }
+  .ap-danger-card__title {
+    font-weight: 900; color: var(--ap-danger);
+    margin: 0 0 6px; font-size: 14px;
+  }
+  .ap-danger-card__text {
+    font-size: 13px; opacity: .8;
+    margin: 0 0 14px; line-height: 1.4;
+  }
+  .ap-nuke-btn {
+    background: var(--ap-danger); color: #fff;
+    width: 100%; font-size: 13px;
+  }
+  .ap-nuke-btn:hover { background: #8c0019; }
+
+  /* ── Tabs ──────────────────────────────────────────────────── */
+  .ap-tabs {
+    display: flex; gap: 6px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--ap-border);
+  }
+  .ap-tab {
+    padding: 10px 18px; cursor: pointer;
+    font-weight: 800; font-size: 13px;
+    color: var(--ap-gray);
+    border-bottom: 3px solid transparent;
+    transition: color .15s, border-color .15s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .ap-tab.is-active { color: var(--ap-dark); border-bottom-color: var(--ap-dark); }
+
+  /* ── Product grids ─────────────────────────────────────────── */
+  .ap-grid { display: none; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+  .ap-grid.is-active { display: grid; }
+
+  .ap-prod-card {
+    border: 1px solid var(--ap-border);
+    border-radius: 14px; padding: 14px;
+    background: var(--ap-card-bg); position: relative;
+    transition: box-shadow .2s;
+  }
+  .ap-prod-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.07); }
+
+  .ap-img-box {
+    position: relative; height: 240px;
+    background: #f9f9f9; border-radius: 10px;
+    overflow: hidden; margin-bottom: 12px;
+  }
+  .ap-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+  .ap-status {
+    position: absolute; top: 9px; right: 9px;
+    padding: 4px 8px; border-radius: 6px;
+    font-size: 10px; font-weight: 800;
+    text-transform: uppercase; z-index: 2;
+  }
+  .status-pending { background: #fff3cd; color: #856404; }
+  .status-live    { background: #d1e7dd; color: #0f5132; }
+
+  .ap-prod-title { font-weight: 800; font-size: 13px; margin-bottom: 10px; }
+
+  /* ── Empty state ───────────────────────────────────────────── */
+  .ap-empty {
+    display: none; padding: 40px; text-align: center;
+    grid-column: 1/-1; background: #f9f9f9;
+    border-radius: 14px;
+  }
+  .ap-empty h3 { margin: 0 0 6px; }
+
+  /* ── Nuke overlay / modal ──────────────────────────────────── */
+  .ap-nukeOverlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.5); z-index: 9999;
+    align-items: center; justify-content: center;
+    padding: 18px;
+  }
+  .ap-nukeDialog {
+    width: min(520px,100%);
+    background: #fff; border-radius: 18px;
+    border: 1px solid rgba(0,0,0,.12);
+    box-shadow: 0 28px 80px rgba(0,0,0,.25);
+    padding: 24px;
+  }
+  .ap-nukeDialog__icon { font-size: 32px; margin-bottom: 8px; }
+  .ap-nukeDialog__title {
+    font-weight: 900; font-size: 18px;
+    margin: 0 0 6px; color: var(--ap-danger);
+  }
+  .ap-nukeDialog__warning {
+    font-size: 13px; line-height: 1.5;
+    opacity: .8; margin: 0 0 14px;
+  }
+  .ap-nukeDialog__list {
+    font-size: 12px; opacity: .75;
+    margin: 0 0 16px 16px; line-height: 1.7;
+  }
+  .ap-nukeConfirmInput {
+    width: 100%; padding: 10px 13px;
+    border: 1px solid rgba(176,0,32,.4);
+    border-radius: 10px; font-size: 13px;
+    font-family: inherit; margin-bottom: 14px;
+    color: var(--ap-dark); background: #fff;
+  }
+  .ap-nukeConfirmInput:focus { outline: none; border-color: var(--ap-danger); }
+  .ap-nukeActions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .ap-nukeActions .ap-btn { flex: 1; min-width: 120px; }
+  .ap-destroyBtn { background: var(--ap-danger); color: #fff; }
+  .ap-destroyBtn:not(:disabled):hover { background: #8c0019; }
+  .ap-nukeLog {
+    margin-top: 14px; padding: 12px;
+    background: #0f172a; color: #94a3b8;
+    border-radius: 10px; font-size: 11px;
+    font-family: monospace; white-space: pre-wrap;
+    max-height: 180px; overflow-y: auto;
+    display: none;
+  }
+{%- endstyle -%}
+
 {%- if customer.tags contains 'storefront-admin--' or customer.tags contains 'super-admin' or customer.email == 'ryan.irwin@stellaandsagecompany.com' -%}
+
+<div class="ap-wrap">
+
+  <!-- ── Dark header bar ─────────────────────────────────── -->
+  <div class="ap-topbar">
+    <div class="ap-topbar__left">
+      <span class="ap-topbar__kicker">Admin Powers</span>
+      <h1 class="ap-topbar__title">{{ handle | capitalize }}</h1>
+      <span class="ap-topbar__handle">{{ handle }}</span>
+    </div>
+    <a href="/pages/portal" class="ap-back-link">← Dashboard</a>
+  </div>
+
+  <!-- ── 2-col layout ────────────────────────────────────── -->
+  <div class="ap-layout">
+
+    <!-- ── Left sidebar ──────────────────────────────────── -->
+    <aside class="ap-sidebar">
+
+      <!-- Card 1: Invite People -->
+      <div class="ap-card">
+        <p class="ap-card__title">Invite People</p>
+        <p class="ap-card__sub">Paste emails to grant immediate access.</p>
+        <textarea class="ap-input" rows="4" placeholder="name@example.com&#10;another@example.com" id="apInviteEmails"></textarea>
+        <button class="ap-btn ap-btn--primary" id="apInviteBtn">Send Invites</button>
+        <div id="apInviteStatus" style="margin-top:8px; font-size:12px; opacity:.75;"></div>
+      </div>
+
+      <!-- Card 2: Store Info -->
+      <div class="ap-card">
+        <p class="ap-card__title">Store Info</p>
+        <div class="ap-info-row">
+          <div class="ap-info-item">
+            <div class="ap-info-label">Store Handle</div>
+            <div class="ap-info-value">{{ handle }}</div>
+          </div>
+          <div class="ap-info-item">
+            <div class="ap-info-label">Collection</div>
+            <div class="ap-info-value">
+              <a href="/collections/{{ handle }}" style="color:inherit;">/collections/{{ handle }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Danger Zone -->
+      <div class="ap-danger-card">
+        <p class="ap-danger-card__title">☢️ Danger Zone</p>
+        <p class="ap-danger-card__text">
+          Permanently delete this store. Removes all products, the collection,
+          the metaobject, all member tags, and all logo files. This cannot be undone.
+        </p>
+        <button id="nukeBtn" class="ap-btn ap-nuke-btn">Nuke This Store</button>
+      </div>
+
+    </aside>
+
+    <!-- ── Right main content ────────────────────────────── -->
+    <div class="ap-content">
+      <div class="ap-tabs">
+        <button class="ap-tab is-active" data-tab="pending">Pending Review</button>
+        <button class="ap-tab" data-tab="approved">Live on Store</button>
+      </div>
+
+      <div class="ap-grid is-active" id="grid-pending">
+        {% paginate collections[handle].products by 50 %}
+          {% for product in collections[handle].products %}
+            {% assign lock_code = product.metafields.custom.logo_position %}
+            {% if lock_code == blank %}
+              <div class="ap-prod-card product-card" data-product-id="{{ product.id }}">
+                <span class="ap-status status-pending">Hidden</span>
+                <div class="ap-img-box">
+                  <img src="{{ product.featured_image | image_url: width: 400 }}"
+                       class="ap-img" width="400" height="400" loading="lazy"
+                       alt="{{ product.title | escape }}">
+                </div>
+                <div class="ap-prod-title">{{ product.title }}</div>
+                <button class="ap-btn ap-btn--primary ss-tuner-trigger">📐 Calibrate &amp; Approve</button>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endpaginate %}
+        <div class="ap-empty" id="pending-empty">
+          <h3>🎉 All caught up!</h3>
+          <p>No new products waiting for calibration.</p>
+        </div>
+      </div>
+
+      <div class="ap-grid" id="grid-approved">
+        {% paginate collections[handle].products by 50 %}
+          {% for product in collections[handle].products %}
+            {% assign lock_code = product.metafields.custom.logo_position %}
+            {% if lock_code != blank %}
+              <div class="ap-prod-card product-card" data-logo-lock="{{ lock_code }}">
+                <span class="ap-status status-live">Live</span>
+                <div class="ap-img-box">
+                  <img src="{{ product.featured_image | image_url: width: 400 }}"
+                       class="ap-img" width="400" height="400" loading="lazy"
+                       alt="{{ product.title | escape }}">
+                </div>
+                <div class="ap-prod-title">{{ product.title }}</div>
+                <button class="ap-btn ap-btn--secondary ss-tuner-trigger">⚙️ Adjust Position</button>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endpaginate %}
+      </div>
+    </div>
+
+  </div><!-- /.ap-layout -->
+
+</div><!-- /.ap-wrap -->
+
+<!-- ── Nuke confirmation modal ─────────────────────────────────── -->
+<div class="ap-nukeOverlay" id="apNukeOverlay">
+  <div class="ap-nukeDialog" role="dialog" aria-modal="true" aria-labelledby="apNukeTitle">
+    <div class="ap-nukeDialog__icon">☢️</div>
+    <p class="ap-nukeDialog__title" id="apNukeTitle">Permanently Destroy This Store?</p>
+    <p class="ap-nukeDialog__warning">
+      You are about to permanently delete <strong>{{ handle }}</strong>.
+      This action <strong>cannot be undone</strong>.
+    </p>
+    <ul class="ap-nukeDialog__list">
+      <li>All products tagged with this storefront will be untagged</li>
+      <li>The collection <code>/collections/{{ handle }}</code> will be deleted</li>
+      <li>The metaobject record will be deleted</li>
+      <li>All <code>storefront-admin--{{ handle }}</code> and <code>storefront-member--{{ handle }}</code> customer tags will be removed</li>
+      <li>All logo files will be deleted from Shopify Files</li>
+    </ul>
+    <input
+      type="text"
+      class="ap-nukeConfirmInput"
+      id="apNukeInput"
+      placeholder="Type &quot;{{ handle }}&quot; to confirm"
+      autocomplete="off">
+    <div class="ap-nukeActions">
+      <button id="apNukeDestroy" class="ap-btn ap-destroyBtn" disabled>Destroy Store</button>
+      <button id="apNukeCancel" class="ap-btn ap-btn--secondary">Cancel</button>
+    </div>
+    <pre class="ap-nukeLog" id="apNukeLog"></pre>
+  </div>
+</div>
+
+{%- else -%}
+
+<div style="text-align:center; padding:100px 20px; font-family:Inter,sans-serif;">
+  <h1 style="font-size:28px; font-weight:900;">Access Denied</h1>
+  <p style="opacity:.7; margin-bottom:24px;">You do not have permission to manage this store.</p>
+  <a href="/pages/portal" style="display:inline-block; background:#0f172a; color:#fff; padding:12px 30px; border-radius:999px; text-decoration:none; font-weight:800;">Back to Dashboard</a>
+</div>
+
+{%- endif -%}
+
+<script>
+(function(){
+  /* ── Tab switching ───────────────────────────────────────────── */
+  document.querySelectorAll('.ap-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.ap-tab').forEach(function(t){ t.classList.remove('is-active'); });
+      document.querySelectorAll('.ap-grid').forEach(function(g){ g.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      var target = 'grid-' + tab.getAttribute('data-tab');
+      var grid = document.getElementById(target);
+      if(grid) grid.classList.add('is-active');
+    });
+  });
+
+  /* ── Empty pending check ─────────────────────────────────────── */
+  var pendingGrid  = document.getElementById('grid-pending');
+  var pendingEmpty = document.getElementById('pending-empty');
+  if(pendingGrid && pendingEmpty){
+    var cardCount = pendingGrid.querySelectorAll('.ap-prod-card').length;
+    if(cardCount === 0) pendingEmpty.style.display = 'block';
+  }
+
+  /* ── Tuner trigger ───────────────────────────────────────────── */
+  document.addEventListener('click', function(e){
+    if(!e.target.classList.contains('ss-tuner-trigger')) return;
+    if(window.SS && window.SS.tuner){
+      if(!document.querySelector('.ss-tuner-panel')) window.SS.tuner.init();
+      setTimeout(function(){
+        var panel = document.querySelector('.ss-tuner-panel');
+        if(panel) panel.classList.add('is-active');
+        alert("1. Use the panel to position the logo.\n2. Click 'Copy Code'.\n3. Go to Shopify Admin > Products > Metafields > Logo Position.\n4. Paste & Save!");
+      }, 200);
+    } else {
+      alert("Tuner script not loaded. Make sure you added the ss-visual-tuner.js script to your theme.liquid.");
+    }
+  });
+
+  /* ── Nuke store ──────────────────────────────────────────────── */
+  var BACKEND_URL = {{ section.settings.backend_url | default: '' | json }};
+  var HANDLE      = {{ handle | json }};
+  var nukeBtn     = document.getElementById('nukeBtn');
+  var overlay     = document.getElementById('apNukeOverlay');
+  var nukeInput   = document.getElementById('apNukeInput');
+  var destroyBtn  = document.getElementById('apNukeDestroy');
+  var cancelBtn   = document.getElementById('apNukeCancel');
+  var nukeLog     = document.getElementById('apNukeLog');
+
+  if(nukeBtn){
+    nukeBtn.addEventListener('click', function(){
+      if(overlay){
+        nukeInput.value = '';
+        destroyBtn.disabled = true;
+        nukeLog.textContent = '';
+        nukeLog.style.display = 'none';
+        overlay.style.display = 'flex';
+      }
+    });
+  }
+
+  if(cancelBtn){
+    cancelBtn.addEventListener('click', function(){ overlay.style.display = 'none'; });
+  }
+  if(overlay){
+    overlay.addEventListener('click', function(e){ if(e.target === overlay) overlay.style.display = 'none'; });
+  }
+
+  if(nukeInput){
+    nukeInput.addEventListener('input', function(){
+      destroyBtn.disabled = (nukeInput.value.trim() !== HANDLE);
+    });
+  }
+
+  function appendLog(msg){
+    nukeLog.style.display = 'block';
+    nukeLog.textContent += msg + '\n';
+    nukeLog.scrollTop = nukeLog.scrollHeight;
+  }
+
+  if(destroyBtn){
+    destroyBtn.addEventListener('click', async function(){
+      if(nukeInput.value.trim() !== HANDLE) return;
+      if(!BACKEND_URL){
+        appendLog('ERROR: No backend URL configured in section settings.');
+        return;
+      }
+      destroyBtn.disabled = true;
+      cancelBtn.disabled  = true;
+      appendLog('Starting nuke for "' + HANDLE + '"…');
+
+      try {
+        var res = await fetch(BACKEND_URL + '/api/storefront/' + encodeURIComponent(HANDLE) + '/nuke', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          credentials: 'include'
+        });
+
+        if(!res.ok){
+          appendLog('ERROR: ' + res.status + ' ' + res.statusText);
+          destroyBtn.disabled = false;
+          cancelBtn.disabled  = false;
+          return;
+        }
+
+        var data = await res.json();
+        var jobId = data.job_id;
+        if(!jobId){
+          appendLog('ERROR: No job_id in response.');
+          destroyBtn.disabled = false;
+          cancelBtn.disabled  = false;
+          return;
+        }
+        appendLog('Job started: ' + jobId);
+
+        // Poll for job status
+        var lastLog = 0;
+        var pollInterval = setInterval(async function(){
+          try {
+            var pollRes = await fetch(BACKEND_URL + '/api/job/' + encodeURIComponent(jobId), {
+              credentials: 'include'
+            });
+            if(!pollRes.ok){ appendLog('Poll error: ' + pollRes.status); return; }
+            var job = await pollRes.json();
+
+            // Append any new log lines
+            var lines = job.log || [];
+            for(var i = lastLog; i < lines.length; i++){
+              appendLog(lines[i]);
+            }
+            lastLog = lines.length;
+
+            if(job.status === 'done'){
+              clearInterval(pollInterval);
+              appendLog('\u2705 Store destroyed. Redirecting…');
+              setTimeout(function(){ window.location.href = '/pages/portal'; }, 2000);
+            } else if(job.status === 'error'){
+              clearInterval(pollInterval);
+              appendLog('\u274c Error: ' + (job.error || 'Unknown error'));
+              cancelBtn.disabled = false;
+            }
+          } catch(pollErr){
+            appendLog('Poll network error: ' + (pollErr.message || 'unknown'));
+          }
+        }, 2000);
+
+      } catch(err){
+        appendLog('Network error: ' + (err.message || 'unknown'));
+        destroyBtn.disabled = false;
+        cancelBtn.disabled  = false;
+      }
+    });
+  }
+
+  /* ── Invite people ───────────────────────────────────────────── */
+  var inviteBtn    = document.getElementById('apInviteBtn');
+  var inviteEmails = document.getElementById('apInviteEmails');
+  var inviteStatus = document.getElementById('apInviteStatus');
+
+  if(inviteBtn){
+    inviteBtn.addEventListener('click', async function(){
+      var raw = (inviteEmails.value || '').trim();
+      if(!raw){ inviteStatus.textContent = 'Please enter at least one email.'; return; }
+      if(!BACKEND_URL){ inviteStatus.textContent = 'Backend URL not configured.'; return; }
+
+      var emails = raw.split(/[
+,]+/).map(function(e){ return e.trim(); }).filter(Boolean);
+      inviteBtn.disabled = true;
+      inviteStatus.textContent = 'Sending…';
+
+      try {
+        var res = await fetch(BACKEND_URL + '/api/storefront/' + encodeURIComponent(HANDLE) + '/invite', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          credentials: 'include',
+          body: JSON.stringify({ emails: emails })
+        });
+        if(!res.ok){
+          inviteStatus.textContent = 'Error: ' + res.status;
+          inviteBtn.disabled = false;
+          return;
+        }
+        inviteStatus.textContent = 'Done! ' + emails.length + ' invite(s) sent.';
+        inviteEmails.value = '';
+      } catch(err){
+        inviteStatus.textContent = 'Network error: ' + (err.message || 'unknown');
+      }
+      inviteBtn.disabled = false;
+    });
+  }
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Admin Command Center",
+  "settings": [
+    {
+      "type": "text",
+      "id": "form_access_url",
+      "label": "Store access request form URL"
+    },
+    {
+      "type": "header",
+      "content": "Backend API"
+    },
+    {
+      "type": "text",
+      "id": "backend_url",
+      "label": "Studio Uploader backend URL (e.g. https://your-studio-uploader.com)",
+      "default": ""
+    }
+  ],
+  "presets": [
+    { "name": "Admin Command Center" }
+  ]
+}
+{% endschema %}
