@@ -767,7 +767,8 @@
         var res = await fetch(LEAVE_BACKEND + '/api/storefront/' + encodeURIComponent(leaveHandle) + '/leave', {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
-          credentials: 'include'
+          body: JSON.stringify({ customer_id: String({{ customer.id | json }}) }),
+          credentials: 'omit'
         });
         if(!res.ok){ leaveStatus.textContent = 'Error: ' + res.status; leaveConfirm.disabled=false; return; }
         leaveStatus.textContent = 'Done! Refreshing\u2026';
