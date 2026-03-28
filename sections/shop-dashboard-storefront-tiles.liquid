@@ -388,7 +388,8 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
           const res = await fetch(backendUrl + '/api/storefront/' + encodeURIComponent(currentHandle) + '/leave', {
             method: "POST",
             headers: {"Content-Type":"application/json"},
-            credentials: "include"
+            body: JSON.stringify({ customer_id: String({{ customer.id | json }}) }),
+            credentials: "omit"
           });
 
           if(!res.ok){
