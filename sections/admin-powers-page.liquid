@@ -282,9 +282,6 @@
   .ap-nuke-dialog__warning {
     font-size: 14px; line-height: 1.55; color: #374151; margin: 0 0 16px;
   }
-  .ap-nuke-dialog__list {
-    font-size: 13px; color: #6b7280; margin: 0 0 20px 18px; line-height: 1.8;
-  }
   .ap-nuke-confirm-input {
     width: 100%; padding: 11px 14px; margin-bottom: 16px;
     border: 1.5px solid rgba(239,68,68,0.4); border-radius: 10px;
@@ -468,10 +465,8 @@
       <p>Permanently delete this storefront. This action <strong>cannot be undone</strong>.</p>
     </div>
     <p style="font-size:13px; color:#6b7280; margin: 0 0 16px; line-height:1.5;">
-      Nuking this store will remove all products tagged with this storefront, delete the collection
-      <code>/collections/{{ collection_handle }}</code>, delete the metaobject record, remove all
-      <code>storefront-admin--{{ shop_handle }}</code> and <code>storefront-member--{{ shop_handle }}</code>
-      customer tags, and delete all logo files from Shopify Files.
+      This will completely and permanently delete the <strong>{{ store_name }}</strong> store.
+      All products, members, logos, and settings will be removed forever. <strong>This cannot be undone.</strong>
     </p>
     <button id="apNukeBtn" class="ap-btn ap-btn--nuke">☢️ Nuke This Store</button>
   </div>
@@ -482,21 +477,15 @@
       <div class="ap-nuke-dialog__icon">☢️</div>
       <p class="ap-nuke-dialog__title" id="apNukeTitle">Permanently Destroy This Store?</p>
       <p class="ap-nuke-dialog__warning">
-        You are about to permanently delete <strong>{{ shop_handle }}</strong>.
-        This action <strong>cannot be undone</strong>.
+        You are about to permanently delete <strong>{{ store_name }}</strong>.
+        This store and everything in it — all products, members, photos, and settings — will be gone forever.
+        <strong>This cannot be undone.</strong>
       </p>
-      <ul class="ap-nuke-dialog__list">
-        <li>All products tagged with this storefront will be untagged</li>
-        <li>The collection <code>/collections/{{ collection_handle }}</code> will be deleted</li>
-        <li>The metaobject record will be deleted</li>
-        <li>All <code>storefront-admin--{{ shop_handle }}</code> and <code>storefront-member--{{ shop_handle }}</code> customer tags will be removed</li>
-        <li>All logo files will be deleted from Shopify Files</li>
-      </ul>
       <input
         type="text"
         class="ap-nuke-confirm-input"
         id="apNukeInput"
-        placeholder="Type &quot;{{ shop_handle }}&quot; to confirm"
+        placeholder="Type &quot;gone&quot; to confirm"
         autocomplete="off">
       <div class="ap-nuke-actions">
         <button id="apNukeDestroy" class="ap-btn ap-btn--nuke" disabled>Destroy Store</button>
@@ -665,11 +654,11 @@
   });
 
   apNukeInput && apNukeInput.addEventListener('input', function(){
-    apNukeDestroy.disabled = (apNukeInput.value.trim() !== NUKE_HANDLE);
+    apNukeDestroy.disabled = (apNukeInput.value.trim() !== 'gone');
   });
 
   apNukeDestroy && apNukeDestroy.addEventListener('click', async function(){
-    if(apNukeInput.value.trim() !== NUKE_HANDLE) return;
+    if(apNukeInput.value.trim() !== 'gone') return;
     if(!NUKE_BACKEND_URL){
       appendNukeLog('ERROR: No backend URL configured.');
       return;
