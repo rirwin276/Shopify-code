@@ -80,6 +80,26 @@
   .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
   .btn-danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
   .btn-sm { padding: 6px 12px; font-size: 11px; }
+  .btn-warning { background: rgba(245, 158, 11, 0.1); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.2); }
+  .btn-warning:hover { background: var(--warning); color: white; border-color: var(--warning); }
+
+  /* --- STORE TAB BUTTONS --- */
+  .tab-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--gray);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .tab-btn.active, .tab-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
 
   /* --- MAIN CONTENT --- */
   .sa-main { padding: 40px 50px; overflow-y: auto; }
@@ -198,11 +218,18 @@
       </div>
 
       <h3 style="color:var(--text); margin-bottom:20px;">Active Storefronts</h3>
+      <div id="storeTabs" style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+        <button class="tab-btn active" onclick="setTab('all', event)">All Stores</button>
+        <button class="tab-btn" onclick="setTab('most_sales', event)">Most Sales</button>
+        <button class="tab-btn" onclick="setTab('least_sales', event)">Least Sales</button>
+        <button class="tab-btn" onclick="setTab('sleeping', event)">Sleeping</button>
+        <button class="tab-btn" onclick="setTab('awake_no_sales', event)">Awake / No Sales</button>
+      </div>
       <div class="store-grid" id="activeStoreGrid">
         {% for store in shop.metaobjects.custom_shop.values %}
           {% unless store.tags contains 'status:closed' %}
             
-            <div class="store-card" data-name="{{ store.name | downcase }}">
+            <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" data-sleep-status="active" data-sales="0">
               <div>
                 <div class="store-header">
                   <div class="store-icon"><i class="fas fa-store"></i></div>
@@ -220,7 +247,10 @@
                 <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
                   <i class="fas fa-cog"></i> Manage Store
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.name | escape }}')">
+                <button class="btn btn-warning btn-sm" onclick="sleepStore('{{ store.system.handle }}')">
+                  <i class="fas fa-moon"></i> Sleep
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.system.handle }}')">
                   <i class="fas fa-radiation"></i> NUKE
                 </button>
               </div>
@@ -305,33 +335,88 @@
 
   <script>
     // --- CONFIGURATION ---
-    const MECHANIC_GOD_URL = "https://webhooks.mechanic.dev/7446a70b-ecd0-43b3-b135-84e390735d64"; 
-    const MECHANIC_MEMBER_URL = "https://webhooks.mechanic.dev/582ce69e-ceda-4086-9416-d0cd52260ce9";
+    const RAILWAY_URL = "https://studio-uploader-production.up.railway.app";
+    const ADMIN_SECRET = "REPLACE_ME";
 
     // STATE
     let currentStoreTag = "";
     let currentStoreHandle = "";
     let currentCollection = "";
 
+    // --- HELPERS ---
+    function railwayHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "X-Admin-Secret": ADMIN_SECRET
+      };
+    }
+
+    function showToast(msg, isError = false) {
+      let t = document.getElementById('toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.cssText = 'position:fixed;bottom:30px;right:30px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:700;z-index:9999;transition:opacity 0.4s;';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.background = isError ? '#ef4444' : '#10b981';
+      t.style.color = 'white';
+      t.style.opacity = '1';
+      clearTimeout(t._timeout);
+      t._timeout = setTimeout(() => { t.style.opacity = '0'; }, 3500);
+    }
+
     // --- SEARCH FILTER ---
     function filterStores() {
       const filter = document.getElementById('storeSearch').value.toLowerCase();
-      const cards = document.querySelectorAll('.store-card');
-      cards.forEach(card => {
-        card.style.display = card.getAttribute('data-name').includes(filter) ? "flex" : "none";
+      document.querySelectorAll('.store-card').forEach(card => {
+        card.style.display = card.getAttribute('data-name').includes(filter) ? '' : 'none';
       });
+    }
+
+    // --- TAB SORTING ---
+    let currentTab = 'all';
+    function setTab(tab, evt) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (evt && evt.target) evt.target.classList.add('active');
+      applyTabFilter();
+    }
+
+    function applyTabFilter() {
+      const cards = document.querySelectorAll('#activeStoreGrid .store-card');
+      cards.forEach(card => {
+        const status = card.getAttribute('data-sleep-status') || 'active';
+        const sales = parseInt(card.getAttribute('data-sales') || '0', 10);
+        let show = true;
+        if (currentTab === 'sleeping') show = status === 'sleeping';
+        else if (currentTab === 'awake_no_sales') show = status !== 'sleeping' && sales === 0;
+        card.style.display = show ? '' : 'none';
+      });
+      if (currentTab === 'most_sales' || currentTab === 'least_sales') {
+        sortCards(currentTab);
+      }
+    }
+
+    function sortCards(tab) {
+      const grid = document.getElementById('activeStoreGrid');
+      const cards = Array.from(grid.querySelectorAll('.store-card'));
+      cards.sort((a, b) => {
+        const sa = parseInt(a.getAttribute('data-sales') || '0', 10);
+        const sb = parseInt(b.getAttribute('data-sales') || '0', 10);
+        return tab === 'most_sales' ? sb - sa : sa - sb;
+      });
+      cards.forEach(c => { c.style.display = ''; grid.appendChild(c); });
     }
 
     // --- MODAL LOGIC ---
     function openManage(name, collection, handle) {
-      currentStoreTag = name; // Assuming Tag matches Name for now
+      currentStoreTag = name;
       currentStoreHandle = handle;
       currentCollection = collection;
-      
       document.getElementById('manageTitle').textContent = "Manage: " + name;
       document.getElementById('manageModal').style.display = 'block';
-      
-      // Load Inventory by default
       loadInventory(collection);
     }
 
@@ -342,140 +427,182 @@
     function switchTab(tabName) {
       document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-      
       document.querySelector(`.modal-tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
     }
 
-    // --- TAB 1: INVENTORY (AUDIT) ---
-    async function loadInventory(collectionHandle) {
-      const list = document.getElementById('inventoryList');
-      list.innerHTML = '<div style="text-align:center; color:gray;">Scanning inventory...</div>';
-
-      try {
-        const res = await fetch(`/collections/${collectionHandle}/products.json`);
-        const data = await res.json();
-        
-        if(!data.products.length) {
-          list.innerHTML = '<div style="text-align:center; padding:20px;">No products found.</div>';
-          return;
-        }
-
-        let html = '';
-        data.products.forEach(p => {
-          let img = p.images[0] ? p.images[0].src : '';
-          html += `
-            <div class="modal-row" id="row-${p.id}">
-              <img src="${img}" class="modal-img" width="40" height="40">
-              <div style="flex:1;">
-                <div style="font-weight:700; font-size:13px; color:white;">${p.title}</div>
-                <div style="font-size:11px; color:#94a3b8; font-family:monospace;">ID: ${p.id}</div>
+    // --- TAB 1: INVENTORY ---
+    function loadInventory(collectionHandle) {
+      const el = document.getElementById('inventoryList');
+      if (!collectionHandle) { el.innerHTML = '<p style="color:var(--gray)">No collection linked.</p>'; return; }
+      el.innerHTML = '<p style="color:var(--gray)">Loading inventory...</p>';
+      fetch(`/collections/${collectionHandle}/products.json?limit=50`)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.products || !data.products.length) {
+            el.innerHTML = '<p style="color:var(--gray)">No products found.</p>';
+            return;
+          }
+          el.innerHTML = data.products.map(p => `
+            <div class="modal-row">
+              <img src="${p.image ? p.image.src : ''}" class="modal-img" alt="${p.title}" onerror="this.style.display='none'">
+              <div style="flex:1">
+                <div style="font-weight:700; font-size:13px;">${p.title}</div>
+                <div style="font-size:11px; color:var(--gray);">${p.variants.length} variant(s)</div>
               </div>
-              <button class="btn btn-danger btn-sm" onclick="deleteSingleProduct(${p.id})">Delete</button>
-            </div>`;
-        });
-        list.innerHTML = html;
-      } catch(e) {
-        list.innerHTML = '<div style="text-align:center; color:#ef4444;">Error loading collection data.</div>';
-      }
+            </div>`).join('');
+        })
+        .catch(() => { el.innerHTML = '<p style="color:var(--gray)">Could not load inventory.</p>'; });
     }
 
-    // --- TAB 2: MEMBER MANAGEMENT (NEW WEBHOOK) ---
-    async function handleMember(action) {
-      const email = document.getElementById('memberEmail').value;
-      const statusDiv = document.getElementById('memberStatus');
-      
-      if(!email) { alert("Please enter an email address."); return; }
-      
-      statusDiv.textContent = "Processing...";
-      statusDiv.style.color = "var(--warning)";
+    // --- TAB 2: MEMBERS (Add User) ---
+    function handleMember(action) {
+      const email = document.getElementById('memberEmail').value.trim();
+      const statusEl = document.getElementById('memberStatus');
+      if (!email) { statusEl.textContent = 'Please enter an email.'; statusEl.style.color = '#ef4444'; return; }
+      if (!currentStoreHandle) { statusEl.textContent = 'No store selected.'; statusEl.style.color = '#ef4444'; return; }
 
-      // SEND TO NEW WEBHOOK
-      try {
-        await fetch(MECHANIC_MEMBER_URL, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action: action === 'add' ? 'add_member' : 'remove_member',
-            email: email,
-            store_tag: currentStoreTag
-          })
-        });
-        
-        statusDiv.textContent = action === 'add' ? "Member added successfully." : "Member removed successfully.";
-        statusDiv.style.color = "var(--success)";
-      } catch(e) {
-        statusDiv.textContent = "Error updating member.";
-        statusDiv.style.color = "var(--danger)";
-      }
-    }
+      statusEl.textContent = action === 'add' ? 'Adding user...' : 'Removing user...';
+      statusEl.style.color = 'var(--gray)';
 
-    // --- TAB 3: SETTINGS (VISIBILITY) ---
-    async function toggleVisibility(state) {
-      if(!confirm(`Change store to ${state.toUpperCase()}?`)) return;
-      
-      // Sending to GOD MODE webhook to update Store Metaobject
-      try {
-        await fetch(MECHANIC_GOD_URL, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action: "set_store_visibility",
-            tag: currentStoreTag,
-            visibility: state
-          })
-        });
-        alert(`Command sent. Store is becoming ${state}.`);
-        location.reload();
-      } catch(e) {
-        alert("Error sending command.");
-      }
-    }
-
-    // --- GOD MODE ACTIONS ---
-    async function deleteSingleProduct(id) {
-      if(!confirm("Permanently delete this product?")) return;
-      const row = document.getElementById(`row-${id}`);
-      row.style.opacity = 0.5;
-      
-      await fetch(MECHANIC_GOD_URL, {
+      fetch(`${RAILWAY_URL}/api/storefront/${currentStoreHandle}/member`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ action: "delete_product", product_id: id })
-      });
-      
-      row.innerHTML = '<div style="color:#ef4444; font-weight:bold; width:100%; text-align:center;">DELETED</div>';
+        headers: railwayHeaders(),
+        body: JSON.stringify({ email: email, action: action })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok || data.status === 'ok') {
+            statusEl.textContent = action === 'add' ? `✅ ${email} added to store.` : `✅ ${email} removed from store.`;
+            statusEl.style.color = '#10b981';
+            document.getElementById('memberEmail').value = '';
+          } else {
+            statusEl.textContent = '❌ ' + (data.error || 'Unknown error');
+            statusEl.style.color = '#ef4444';
+          }
+        })
+        .catch(e => {
+          statusEl.textContent = '❌ Request failed: ' + e.message;
+          statusEl.style.color = '#ef4444';
+        });
     }
 
-    function nukeStore(storeTag) {
-      if(confirm(`⚠️ WARNING: CLOSING STORE '${storeTag}'\n\n1. All products deleted.\n2. All members untagged.\n3. Marked as Closed.\n\nProceed?`)) {
-        if(confirm(`Type OK to confirm deletion of '${storeTag}'.`)) {
-          fetch(MECHANIC_GOD_URL, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ action: "close_store", confirm: "true", tag: storeTag })
-          }).then(res => {
-             alert("Nuke sequence initiated.");
-             location.reload();
-          });
-        }
-      }
-    }
+    // --- SLEEP STORE ---
+    function sleepStore(handle) {
+      if (!confirm(`Put store "${handle}" to sleep? It will be hidden until woken up.`)) return;
+      showToast('Putting store to sleep...');
 
-    // --- GLOBAL PRICE UPDATE ---
-    document.getElementById('btnUpdatePrice').addEventListener('click', async function() {
-      const tag = document.getElementById('targetTag').value;
-      const price = document.getElementById('newPrice').value;
-      if(!confirm(`Update all products tagged '${tag}' to $${price}?`)) return;
-      
-      await fetch(MECHANIC_GOD_URL, {
+      fetch(`${RAILWAY_URL}/admin/store/${handle}/sleep`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ action: "global_price_update", tag, price })
-      });
-      alert("Update command sent.");
+        headers: railwayHeaders()
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.job_id || data.status === 'ok') {
+            showToast(`✅ Store "${handle}" is going to sleep.`);
+            const card = document.querySelector(`.store-card[data-handle="${handle}"]`);
+            if (card) {
+              card.setAttribute('data-sleep-status', 'sleeping');
+              card.style.opacity = '0.5';
+              const statusBadge = card.querySelector('.store-status');
+              if (statusBadge) { statusBadge.textContent = '💤 Sleeping'; statusBadge.className = 'store-status status-closed'; }
+            }
+          } else {
+            showToast('❌ ' + (data.error || 'Sleep failed'), true);
+          }
+        })
+        .catch(e => showToast('❌ Request failed: ' + e.message, true));
+    }
+
+    // --- NUKE STORE ---
+    function nukeStore(handle) {
+      if (!confirm(`☢️ NUKE store "${handle}"?\n\nThis will permanently delete ALL data for this store. This cannot be undone.`)) return;
+      if (!confirm(`Are you absolutely sure? Type OK to confirm nuke of "${handle}".`)) return;
+
+      showToast('☢️ Nuking store...');
+
+      fetch(`${RAILWAY_URL}/api/storefront/${handle}/nuke`, {
+        method: 'POST',
+        headers: railwayHeaders(),
+        body: JSON.stringify({})
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.job_id) {
+            showToast(`☢️ Nuke job started for "${handle}". Job: ${data.job_id}`);
+            pollNukeJob(data.job_id, handle);
+          } else {
+            showToast('❌ ' + (data.error || 'Nuke failed'), true);
+          }
+        })
+        .catch(e => showToast('❌ Request failed: ' + e.message, true));
+    }
+
+    function pollNukeJob(jobId, handle) {
+      let attempts = 0;
+      const interval = setInterval(() => {
+        attempts++;
+        fetch(`${RAILWAY_URL}/api/job/${jobId}`, { headers: railwayHeaders() })
+          .then(r => r.json())
+          .then(data => {
+            if (data.status === 'done') {
+              clearInterval(interval);
+              showToast(`✅ Store "${handle}" has been nuked.`);
+              const card = document.querySelector(`.store-card[data-handle="${handle}"]`);
+              if (card) card.remove();
+            } else if (data.status === 'error') {
+              clearInterval(interval);
+              showToast('❌ Nuke failed: ' + (data.error || 'unknown'), true);
+            }
+          })
+          .catch(() => {});
+        if (attempts > 30) { clearInterval(interval); showToast('⚠️ Nuke job status check timed out.', true); }
+      }, 3000);
+    }
+
+    // --- GLOBAL PRICE OVERRIDE ---
+    document.getElementById('btnUpdatePrice').addEventListener('click', function () {
+      const tag = document.getElementById('targetTag').value.trim();
+      const price = document.getElementById('newPrice').value.trim();
+      const statusEl = document.getElementById('priceStatus');
+      if (!tag || !price) { statusEl.textContent = 'Please fill in both fields.'; statusEl.style.color = '#ef4444'; return; }
+
+      statusEl.textContent = 'Updating prices...';
+      statusEl.style.color = 'var(--gray)';
+
+      fetch(`${RAILWAY_URL}/admin/price-override`, {
+        method: 'POST',
+        headers: railwayHeaders(),
+        body: JSON.stringify({ tag: tag, price: parseFloat(price) })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok || data.status === 'ok') {
+            statusEl.textContent = '✅ Prices updated!';
+            statusEl.style.color = '#10b981';
+          } else {
+            statusEl.textContent = '❌ ' + (data.error || 'Failed');
+            statusEl.style.color = '#ef4444';
+          }
+        })
+        .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
     });
 
+    // --- SETTINGS TAB ---
+    function toggleVisibility(vis) {
+      if (!currentStoreHandle) return;
+      fetch(`${RAILWAY_URL}/admin/store/${currentStoreHandle}/visibility`, {
+        method: 'POST',
+        headers: railwayHeaders(),
+        body: JSON.stringify({ visibility: vis })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok || data.status === 'ok') showToast(`✅ Store set to ${vis}`);
+          else showToast('❌ ' + (data.error || 'Failed'), true);
+        })
+        .catch(e => showToast('❌ ' + e.message, true));
+    }
   </script>
 
 {% else %}
