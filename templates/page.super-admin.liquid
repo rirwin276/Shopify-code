@@ -79,7 +79,19 @@
   .btn-glass:hover { background: rgba(255,255,255,0.1); border-color: var(--text); }
   .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
   .btn-danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
+  .btn-warning { background: #f59e0b; color: #000; border-color: #d97706; }
+  .btn-warning:hover { background: #d97706; }
   .btn-sm { padding: 6px 12px; font-size: 11px; }
+
+  /* --- SORT TABS --- */
+  .sort-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .sort-tab {
+    background: var(--card-bg); border: 1px solid var(--border); color: var(--gray);
+    padding: 8px 16px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sort-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .sort-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
 
   /* --- MAIN CONTENT --- */
   .sa-main { padding: 40px 50px; overflow-y: auto; }
@@ -109,6 +121,7 @@
   .status-active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
   .status-closed { background: rgba(148, 163, 184, 0.1); color: var(--gray); }
   .status-private { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+  .status-sleeping { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
 
   .store-name { font-size: 16px; font-weight: 700; margin: 0 0 5px; color: white; }
   .store-handle { font-size: 12px; color: var(--gray); font-family: monospace; }
@@ -198,11 +211,18 @@
       </div>
 
       <h3 style="color:var(--text); margin-bottom:20px;">Active Storefronts</h3>
+      <div class="sort-tabs" id="sortTabs">
+        <button class="sort-tab active" data-sort="default" onclick="setSortTab(this, 'default')">All Stores</button>
+        <button class="sort-tab" data-sort="most-sales" onclick="setSortTab(this, 'most-sales')">📈 Most Sales</button>
+        <button class="sort-tab" data-sort="least-sales" onclick="setSortTab(this, 'least-sales')">📉 Least Sales</button>
+        <button class="sort-tab" data-sort="sleeping" onclick="setSortTab(this, 'sleeping')">😴 Sleeping</button>
+        <button class="sort-tab" data-sort="active-no-sales" onclick="setSortTab(this, 'active-no-sales')">👻 Active, No Sales</button>
+      </div>
       <div class="store-grid" id="activeStoreGrid">
         {% for store in shop.metaobjects.custom_shop.values %}
           {% unless store.tags contains 'status:closed' %}
             
-            <div class="store-card" data-name="{{ store.name | downcase }}">
+            <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" data-sales="{{ store.orders_count | default: 0 }}" data-sleep-status="active">
               <div>
                 <div class="store-header">
                   <div class="store-icon"><i class="fas fa-store"></i></div>
@@ -220,7 +240,10 @@
                 <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
                   <i class="fas fa-cog"></i> Manage Store
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.name | escape }}')">
+                <button class="btn btn-warning btn-sm" onclick="sleepStore('{{ store.system.handle }}', '{{ store.name | escape }}')">
+                  <i class="fas fa-moon"></i> Sleep
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.name | escape }}', '{{ store.system.handle }}')">
                   <i class="fas fa-radiation"></i> NUKE
                 </button>
               </div>
@@ -305,8 +328,12 @@
 
   <script>
     // --- CONFIGURATION ---
-    const MECHANIC_GOD_URL = "https://webhooks.mechanic.dev/7446a70b-ecd0-43b3-b135-84e390735d64"; 
-    const MECHANIC_MEMBER_URL = "https://webhooks.mechanic.dev/582ce69e-ceda-4086-9416-d0cd52260ce9";
+    const RAILWAY_BASE = "https://studio-uploader-production.up.railway.app";
+    const ADMIN_SECRET = {{ shop.metafields.admin.railway_admin_secret | default: '' | json }};
+
+    function railwayHeaders() {
+      return { 'Content-Type': 'application/json', 'X-Admin-Secret': ADMIN_SECRET };
+    }
 
     // STATE
     let currentStoreTag = "";
@@ -380,100 +407,158 @@
       }
     }
 
-    // --- TAB 2: MEMBER MANAGEMENT (NEW WEBHOOK) ---
+    // --- TAB 2: MEMBER MANAGEMENT ---
     async function handleMember(action) {
-      const email = document.getElementById('memberEmail').value;
+      const email = document.getElementById('memberEmail').value.trim();
       const statusDiv = document.getElementById('memberStatus');
-      
-      if(!email) { alert("Please enter an email address."); return; }
-      
-      statusDiv.textContent = "Processing...";
-      statusDiv.style.color = "var(--warning)";
+      if (!email) { statusDiv.textContent = "Email required."; return; }
 
-      // SEND TO NEW WEBHOOK
-      try {
-        await fetch(MECHANIC_MEMBER_URL, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action: action === 'add' ? 'add_member' : 'remove_member',
-            email: email,
-            store_tag: currentStoreTag
-          })
-        });
-        
-        statusDiv.textContent = action === 'add' ? "Member added successfully." : "Member removed successfully.";
-        statusDiv.style.color = "var(--success)";
-      } catch(e) {
-        statusDiv.textContent = "Error updating member.";
-        statusDiv.style.color = "var(--danger)";
+      if (action === 'add') {
+        statusDiv.textContent = "Adding member…";
+        try {
+          const res = await fetch(`${RAILWAY_BASE}/api/storefront/${encodeURIComponent(currentStoreHandle)}/add-member`, {
+            method: 'POST',
+            headers: railwayHeaders(),
+            body: JSON.stringify({ email })
+          });
+          if (res.status === 404) {
+            statusDiv.textContent = "⚠️ Add-member endpoint coming soon. Tag the customer manually in Shopify admin for now.";
+            return;
+          }
+          const data = await res.json();
+          statusDiv.textContent = res.ok ? `✅ Member added!` : `Error: ${data.error}`;
+        } catch(e) { statusDiv.textContent = "Network error: " + e.message; }
+      } else if (action === 'remove') {
+        statusDiv.textContent = "⚠️ To remove a member: find their customer ID in Shopify Admin and call the leave endpoint, or remove the storefront-member--{handle} tag manually.";
       }
     }
 
     // --- TAB 3: SETTINGS (VISIBILITY) ---
-    async function toggleVisibility(state) {
-      if(!confirm(`Change store to ${state.toUpperCase()}?`)) return;
-      
-      // Sending to GOD MODE webhook to update Store Metaobject
-      try {
-        await fetch(MECHANIC_GOD_URL, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action: "set_store_visibility",
-            tag: currentStoreTag,
-            visibility: state
-          })
-        });
-        alert(`Command sent. Store is becoming ${state}.`);
-        location.reload();
-      } catch(e) {
-        alert("Error sending command.");
-      }
+    function toggleVisibility(state) {
+      alert(`Visibility toggle via Railway is not yet implemented.\nTo set this store to "${state}", update the "status" field on the custom_shop metaobject in Shopify Admin.`);
     }
 
     // --- GOD MODE ACTIONS ---
     async function deleteSingleProduct(id) {
       if(!confirm("Permanently delete this product?")) return;
-      const row = document.getElementById(`row-${id}`);
-      row.style.opacity = 0.5;
-      
-      await fetch(MECHANIC_GOD_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ action: "delete_product", product_id: id })
-      });
-      
-      row.innerHTML = '<div style="color:#ef4444; font-weight:bold; width:100%; text-align:center;">DELETED</div>';
+      // Product deletion requires Shopify Admin API — not available from Liquid frontend
+      alert("Product deletion must be done from Shopify Admin > Products.\n\nDirect Railway product deletion is not yet wired. Go to:\nhttps://{{ shop.permanent_domain }}/admin/products/" + id);
     }
 
-    function nukeStore(storeTag) {
-      if(confirm(`⚠️ WARNING: CLOSING STORE '${storeTag}'\n\n1. All products deleted.\n2. All members untagged.\n3. Marked as Closed.\n\nProceed?`)) {
-        if(confirm(`Type OK to confirm deletion of '${storeTag}'.`)) {
-          fetch(MECHANIC_GOD_URL, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ action: "close_store", confirm: "true", tag: storeTag })
-          }).then(res => {
-             alert("Nuke sequence initiated.");
-             location.reload();
-          });
-        }
+    async function nukeStore(storeTag, handle) {
+      if (!confirm(`⚠️ WARNING: NUKING STORE '${storeTag}'\n\nThis will delete all products, remove all members, and mark the store as closed.\n\nThis CANNOT be undone. Proceed?`)) return;
+
+      const second = prompt(`Type the store handle "${handle}" to confirm:`);
+      if (second !== handle) { alert("Handle mismatch — nuke cancelled."); return; }
+
+      try {
+        const res = await fetch(`${RAILWAY_BASE}/api/storefront/${encodeURIComponent(handle)}/nuke`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (!res.ok) { alert("Nuke failed: " + (data.error || res.status)); return; }
+
+        const jobId = data.job_id;
+        alert(`Nuke initiated! Job ID: ${jobId}\nPolling for completion…`);
+        await pollJob(jobId, `Nuke ${handle}`);
+        location.reload();
+      } catch(e) {
+        alert("Error: " + e.message);
       }
+    }
+
+    async function sleepStore(handle, name) {
+      if (!confirm(`Put store "${name}" to sleep?\n\nThis will hide all products and mark the store as sleeping.`)) return;
+
+      try {
+        const res = await fetch(`${RAILWAY_BASE}/admin/store/${encodeURIComponent(handle)}/sleep`, {
+          method: 'POST',
+          headers: railwayHeaders(),
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (!res.ok) { alert("Sleep failed: " + (data.error || res.status)); return; }
+
+        const jobId = data.job_id;
+        alert(`Sleep initiated! Polling for completion…`);
+        await pollJob(jobId, `Sleep ${handle}`);
+        location.reload();
+      } catch(e) {
+        alert("Error: " + e.message);
+      }
+    }
+
+    async function pollJob(jobId, label) {
+      for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+        try {
+          const res = await fetch(`${RAILWAY_BASE}/api/job/${jobId}`);
+          const data = await res.json();
+          if (data.status === 'done' || data.status === 'succeeded') {
+            alert(`✅ ${label} complete!`);
+            return;
+          }
+          if (data.status === 'error' || data.status === 'failed') {
+            alert(`❌ ${label} failed: ${data.error || 'unknown error'}`);
+            return;
+          }
+        } catch(e) { console.warn('Job polling error:', e); /* keep polling */ }
+      }
+      alert(`⏱ ${label} timed out. Check Railway logs.`);
     }
 
     // --- GLOBAL PRICE UPDATE ---
     document.getElementById('btnUpdatePrice').addEventListener('click', async function() {
-      const tag = document.getElementById('targetTag').value;
-      const price = document.getElementById('newPrice').value;
-      if(!confirm(`Update all products tagged '${tag}' to $${price}?`)) return;
-      
-      await fetch(MECHANIC_GOD_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ action: "global_price_update", tag, price })
-      });
-      alert("Update command sent.");
+      alert("Global price update via Railway is not yet implemented. Use Shopify Admin bulk edit or a price update script.");
+    });
+
+    // --- SORT TABS ---
+    async function loadSleepStatuses() {
+      const cards = document.querySelectorAll('.store-card[data-handle]');
+      for (const card of cards) {
+        const handle = card.getAttribute('data-handle');
+        try {
+          const res = await fetch(`${RAILWAY_BASE}/store/${encodeURIComponent(handle)}/status`);
+          if (res.ok) {
+            const data = await res.json();
+            card.setAttribute('data-sleep-status', data.status || 'active');
+            if (data.status === 'sleeping') {
+              const badge = card.querySelector('.store-status');
+              if (badge) { badge.textContent = '😴 Sleeping'; badge.className = 'store-status status-sleeping'; }
+            }
+          }
+        } catch(e) { /* ignore */ }
+      }
+    }
+
+    function setSortTab(btn, sortType) {
+      document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      const grid = document.getElementById('activeStoreGrid');
+      const cards = Array.from(grid.querySelectorAll('.store-card'));
+
+      let sorted = [...cards];
+
+      if (sortType === 'most-sales') {
+        sorted.sort((a, b) => (parseInt(b.getAttribute('data-sales') || '0')) - (parseInt(a.getAttribute('data-sales') || '0')));
+      } else if (sortType === 'least-sales') {
+        sorted.sort((a, b) => (parseInt(a.getAttribute('data-sales') || '0')) - (parseInt(b.getAttribute('data-sales') || '0')));
+      } else if (sortType === 'sleeping') {
+        sorted.sort((a, b) => (a.getAttribute('data-sleep-status') === 'sleeping' ? -1 : 1));
+      } else if (sortType === 'active-no-sales') {
+        const isActiveNoSales = c => c.getAttribute('data-sleep-status') !== 'sleeping' && parseInt(c.getAttribute('data-sales') || '0') === 0;
+        sorted = cards.filter(isActiveNoSales).concat(cards.filter(c => !isActiveNoSales(c)));
+      }
+
+      sorted.forEach(card => grid.appendChild(card));
+    }
+
+    // On page load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSleepStatuses();
     });
 
   </script>
