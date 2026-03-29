@@ -1,4 +1,5 @@
 {% layout none %}
+{% assign railway_secret = shop.metafields.super_admin.railway_secret | default: '' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -265,7 +266,7 @@
         <div class="store-grid" id="closedStoreGrid">
           {% for store in shop.metaobjects.custom_shop.values %}
             {% if store.tags contains 'status:closed' %}
-              <div class="store-card" data-name="{{ store.name | downcase }}" style="border-style:dashed;">
+              <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" style="border-style:dashed;">
                 <div>
                   <div class="store-header">
                     <div class="store-icon"><i class="fas fa-ban"></i></div>
@@ -275,7 +276,9 @@
                   <div class="store-handle">{{ store.system.handle }}</div>
                 </div>
                 <div class="store-actions">
-                  <span style="font-size:11px; color:var(--gray);">Store Decommissioned</span>
+                  <button class="btn btn-primary btn-sm" onclick="wakeStore('{{ store.system.handle | escape }}')">
+                    <i class="fas fa-sun"></i> Wake
+                  </button>
                 </div>
               </div>
             {% endif %}
@@ -327,6 +330,17 @@
               <button class="btn btn-glass" onclick="toggleVisibility('private')">Make Private</button>
             </div>
           </div>
+          <div class="setting-row" style="margin-top:15px;">
+            <div>
+              <div style="font-weight:700; font-size:14px; color:white;">Sleep Mode</div>
+              <div style="font-size:11px; color:var(--gray);">Delete all products. Metaobject and member tags are preserved. Store can be woken up to rebuild.</div>
+            </div>
+            <div>
+              <button class="btn btn-danger" onclick="sleepStore(currentStoreHandle); closeManage();">
+                <i class="fas fa-moon"></i> Put to Sleep
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -336,7 +350,7 @@
   <script>
     // --- CONFIGURATION ---
     const RAILWAY_URL = "https://studio-uploader-production.up.railway.app";
-    const ADMIN_SECRET = "REPLACE_ME";
+    const ADMIN_SECRET = {{ railway_secret | json }};
 
     // STATE
     let currentStoreTag = "";
@@ -345,6 +359,10 @@
 
     // --- HELPERS ---
     function railwayHeaders() {
+      if (!ADMIN_SECRET) {
+        showToast('❌ Admin secret not configured. Set shop.metafields.super_admin.railway_secret in Shopify Admin.', true);
+        throw new Error('ADMIN_SECRET is not configured');
+      }
       return {
         "Content-Type": "application/json",
         "X-Admin-Secret": ADMIN_SECRET
@@ -509,6 +527,27 @@
             }
           } else {
             showToast('❌ ' + (data.error || 'Sleep failed'), true);
+          }
+        })
+        .catch(e => showToast('❌ Request failed: ' + e.message, true));
+    }
+
+    // --- WAKE STORE ---
+    function wakeStore(handle) {
+      if (!confirm(`Wake store "${handle}"? This will re-run Printful Automation to rebuild products.`)) return;
+      showToast('Waking store up...');
+      fetch(`${RAILWAY_URL}/admin/store/${handle}/wakeup`, {
+        method: 'POST',
+        headers: railwayHeaders()
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.job_id || data.status === 'ok') {
+            showToast(`✅ Store "${handle}" is waking up. Products will be rebuilt.`);
+            const card = document.querySelector(`.store-card[data-handle="${handle}"]`);
+            if (card) card.style.opacity = '0.7';
+          } else {
+            showToast('❌ ' + (data.error || 'Wake failed'), true);
           }
         })
         .catch(e => showToast('❌ Request failed: ' + e.message, true));
