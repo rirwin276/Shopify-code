@@ -119,6 +119,22 @@
   .graveyard-section:hover { opacity: 1; transition: 0.3s; }
   .graveyard-title { font-size: 14px; text-transform: uppercase; color: var(--gray); letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
 
+  /* SLEEP / WAKE BUTTONS */
+  .btn-sleep { background: rgba(245, 158, 11, 0.1); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .btn-sleep:hover { background: var(--warning); color: #000; }
+  .btn-wake { background: rgba(16, 185, 129, 0.1); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+  .btn-wake:hover { background: var(--success); color: #000; }
+
+  /* SORT TABS */
+  .sort-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .sort-tab { 
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
+    color: var(--gray); padding: 8px 14px; border-radius: 20px; 
+    cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.2s;
+  }
+  .sort-tab:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+  .sort-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+
   /* MODAL */
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; }
   .modal { 
@@ -197,60 +213,81 @@
         <input type="text" id="storeSearch" class="sa-search" placeholder="Search stores..." onkeyup="filterStores()">
       </div>
 
-      <h3 style="color:var(--text); margin-bottom:20px;">Active Storefronts</h3>
-      <div class="store-grid" id="activeStoreGrid">
-        {% for store in shop.metaobjects.custom_shop.values %}
-          {% unless store.tags contains 'status:closed' %}
-            
-            <div class="store-card" data-name="{{ store.name | downcase }}">
-              <div>
-                <div class="store-header">
-                  <div class="store-icon"><i class="fas fa-store"></i></div>
-                  {% if store.tags contains 'status:private' %}
-                    <span class="store-status status-private">Private</span>
-                  {% else %}
-                    <span class="store-status status-active">Public</span>
-                  {% endif %}
-                </div>
-                <h3 class="store-name">{{ store.name }}</h3>
-                <div class="store-handle">{{ store.system.handle }}</div>
-              </div>
+      <div class="sort-tabs" id="sortTabs">
+        <button class="sort-tab active" data-tab="all" onclick="switchSortTab('all')">&#x1F3EA; All Active</button>
+        <button class="sort-tab" data-tab="sleeping" onclick="switchSortTab('sleeping')">&#x1F634; Sleeping</button>
+        <button class="sort-tab" data-tab="awake-no-sales" onclick="switchSortTab('awake-no-sales')">&#x26A0;&#xFE0F; Awake (No Sales)</button>
+        <button class="sort-tab" data-tab="most-sales" onclick="switchSortTab('most-sales')">&#x1F4C8; Most Sales</button>
+        <button class="sort-tab" data-tab="least-sales" onclick="switchSortTab('least-sales')">&#x1F4C9; Least Sales</button>
+      </div>
 
+      <div class="store-grid" id="storeGrid">
+        {% for store in shop.metaobjects.custom_shop.values %}
+          {% assign store_status = store.status.value | default: 'active' %}
+          {% assign last_active = store.last_active.value | default: '' %}
+          {% assign is_sleeping = false %}
+          {% if store_status == 'sleeping' %}{% assign is_sleeping = true %}{% endif %}
+          {% if store.tags contains 'status:sleeping' %}{% assign is_sleeping = true %}{% endif %}
+
+          {% assign is_closed = false %}
+          {% if store.tags contains 'status:closed' %}{% assign is_closed = true %}{% endif %}
+
+          <div class="store-card"
+               data-handle="{{ store.system.handle }}"
+               data-name="{{ store.name | downcase }}"
+               data-status="{% if is_sleeping %}sleeping{% elsif is_closed %}closed{% else %}active{% endif %}"
+               data-last-active="{{ last_active }}"
+               {% if is_closed %}style="border-style:dashed; opacity:0.5;"{% endif %}>
+            <div>
+              <div class="store-header">
+                <div class="store-icon">
+                  {% if is_sleeping %}<i class="fas fa-moon"></i>
+                  {% elsif is_closed %}<i class="fas fa-ban"></i>
+                  {% else %}<i class="fas fa-store"></i>{% endif %}
+                </div>
+                {% if is_sleeping %}
+                  <span class="store-status" style="background:rgba(99,102,241,0.15); color:#a5b4fc;">&#x1F634; SLEEPING</span>
+                {% elsif is_closed %}
+                  <span class="store-status status-closed">CLOSED</span>
+                {% elsif store.tags contains 'status:private' %}
+                  <span class="store-status status-private">PRIVATE</span>
+                {% else %}
+                  <span class="store-status status-active">PUBLIC</span>
+                {% endif %}
+              </div>
+              <h3 class="store-name" {% if is_closed %}style="color:var(--gray); text-decoration:line-through;"{% endif %}>{{ store.name }}</h3>
+              <div class="store-handle">{{ store.system.handle }}</div>
+              {% if last_active != '' %}
+                <div style="font-size:10px; color:var(--gray); margin-top:4px;">Last active: {{ last_active | date: "%b %d, %Y" }}</div>
+              {% endif %}
+            </div>
+
+            {% unless is_closed %}
               <div class="store-actions">
-                <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
-                  <i class="fas fa-cog"></i> Manage Store
+                <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle | escape }}')">
+                  <i class="fas fa-cog"></i> Manage
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.name | escape }}')">
+                {% if is_sleeping %}
+                  <button class="btn btn-wake btn-sm" onclick="wakeStore('{{ store.system.handle | escape }}', this.closest('.store-card'))">
+                    &#x23F0; Wake
+                  </button>
+                {% else %}
+                  <button class="btn btn-sleep btn-sm" onclick="sleepStore('{{ store.system.handle | escape }}', this.closest('.store-card'))">
+                    &#x1F634; Sleep
+                  </button>
+                {% endif %}
+                <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.system.handle | escape }}', '{{ store.name | escape }}')">
                   <i class="fas fa-radiation"></i> NUKE
                 </button>
               </div>
-            </div>
-
-          {% endunless %}
-        {% endfor %}
-      </div>
-
-      <div class="graveyard-section">
-        <h3 class="graveyard-title"><i class="fas fa-archive"></i> Closed Stores (Graveyard)</h3>
-        <div class="store-grid" id="closedStoreGrid">
-          {% for store in shop.metaobjects.custom_shop.values %}
-            {% if store.tags contains 'status:closed' %}
-              <div class="store-card" data-name="{{ store.name | downcase }}" style="border-style:dashed;">
-                <div>
-                  <div class="store-header">
-                    <div class="store-icon"><i class="fas fa-ban"></i></div>
-                    <span class="store-status status-closed">Closed</span>
-                  </div>
-                  <h3 class="store-name" style="color:var(--gray); text-decoration: line-through;">{{ store.name }}</h3>
-                  <div class="store-handle">{{ store.system.handle }}</div>
-                </div>
-                <div class="store-actions">
-                  <span style="font-size:11px; color:var(--gray);">Store Decommissioned</span>
-                </div>
+            {% endunless %}
+            {% if is_closed %}
+              <div class="store-actions">
+                <span style="font-size:11px; color:var(--gray);">Store Decommissioned</span>
               </div>
             {% endif %}
-          {% endfor %}
-        </div>
+          </div>
+        {% endfor %}
       </div>
     </main>
   </div>
@@ -305,33 +342,84 @@
 
   <script>
     // --- CONFIGURATION ---
-    const MECHANIC_GOD_URL = "https://webhooks.mechanic.dev/7446a70b-ecd0-43b3-b135-84e390735d64"; 
-    const MECHANIC_MEMBER_URL = "https://webhooks.mechanic.dev/582ce69e-ceda-4086-9416-d0cd52260ce9";
+    const RAILWAY_URL = "https://studio-uploader-production.up.railway.app";
+    const ADMIN_SECRET = "{{ shop.metafields.stellaandsage.admin_secret.value | default: '' }}";
 
     // STATE
     let currentStoreTag = "";
     let currentStoreHandle = "";
     let currentCollection = "";
 
-    // --- SEARCH FILTER ---
-    function filterStores() {
-      const filter = document.getElementById('storeSearch').value.toLowerCase();
-      const cards = document.querySelectorAll('.store-card');
-      cards.forEach(card => {
-        card.style.display = card.getAttribute('data-name').includes(filter) ? "flex" : "none";
+    // --- SORT TABS ---
+    let currentSortTab = 'all';
+
+    function switchSortTab(tab) {
+      currentSortTab = tab;
+      document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.sort-tab[data-tab="${tab}"]`).classList.add('active');
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const filter = (document.getElementById('storeSearch').value || '').toLowerCase();
+      const cards = Array.from(document.querySelectorAll('.store-card'));
+      const grid = document.getElementById('storeGrid');
+
+      let visible = cards.filter(card => {
+        const name = card.getAttribute('data-name') || '';
+        const status = card.getAttribute('data-status') || 'active';
+        const lastActive = card.getAttribute('data-last-active') || '';
+
+        if (filter && !name.includes(filter)) return false;
+
+        switch (currentSortTab) {
+          case 'all':
+            return status !== 'closed';
+          case 'sleeping':
+            return status === 'sleeping';
+          case 'awake-no-sales':
+            return status === 'active' && lastActive === '';
+          case 'most-sales':
+          case 'least-sales':
+            return status === 'active';
+          default:
+            return status !== 'closed';
+        }
       });
+
+      if (currentSortTab === 'most-sales' || currentSortTab === 'least-sales') {
+        visible.sort((a, b) => {
+          const aDate = a.getAttribute('data-last-active') || '';
+          const bDate = b.getAttribute('data-last-active') || '';
+          if (!aDate && !bDate) return 0;
+          if (!aDate) return 1;
+          if (!bDate) return -1;
+          return currentSortTab === 'most-sales'
+            ? bDate.localeCompare(aDate)
+            : aDate.localeCompare(bDate);
+        });
+      }
+
+      cards.forEach(c => c.style.display = 'none');
+      visible.forEach(c => {
+        c.style.display = 'flex';
+        grid.appendChild(c);
+      });
+    }
+
+    function filterStores() {
+      applyFilters();
     }
 
     // --- MODAL LOGIC ---
     function openManage(name, collection, handle) {
-      currentStoreTag = name; // Assuming Tag matches Name for now
+      currentStoreTag = name;
       currentStoreHandle = handle;
       currentCollection = collection;
-      
+
       document.getElementById('manageTitle').textContent = "Manage: " + name;
       document.getElementById('manageModal').style.display = 'block';
-      
-      // Load Inventory by default
+
       loadInventory(collection);
     }
 
@@ -342,12 +430,12 @@
     function switchTab(tabName) {
       document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-      
+
       document.querySelector(`.modal-tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
     }
 
-    // --- TAB 1: INVENTORY (AUDIT) ---
+    // --- TAB 1: INVENTORY ---
     async function loadInventory(collectionHandle) {
       const list = document.getElementById('inventoryList');
       list.innerHTML = '<div style="text-align:center; color:gray;">Scanning inventory...</div>';
@@ -355,8 +443,8 @@
       try {
         const res = await fetch(`/collections/${collectionHandle}/products.json`);
         const data = await res.json();
-        
-        if(!data.products.length) {
+
+        if (!data.products.length) {
           list.innerHTML = '<div style="text-align:center; padding:20px;">No products found.</div>';
           return;
         }
@@ -380,100 +468,142 @@
       }
     }
 
-    // --- TAB 2: MEMBER MANAGEMENT (NEW WEBHOOK) ---
+    async function deleteSingleProduct(id) {
+      alert("Single product delete is not supported in God Mode v2. Use Shopify Admin \u2192 Products to delete individual products.");
+    }
+
+    // --- TAB 2: MEMBER MANAGEMENT ---
     async function handleMember(action) {
-      const email = document.getElementById('memberEmail').value;
+      const email = document.getElementById('memberEmail').value.trim();
       const statusDiv = document.getElementById('memberStatus');
-      
-      if(!email) { alert("Please enter an email address."); return; }
-      
+
+      if (!email) { alert("Please enter an email address."); return; }
+
       statusDiv.textContent = "Processing...";
       statusDiv.style.color = "var(--warning)";
 
-      // SEND TO NEW WEBHOOK
       try {
-        await fetch(MECHANIC_MEMBER_URL, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action: action === 'add' ? 'add_member' : 'remove_member',
-            email: email,
-            store_tag: currentStoreTag
-          })
-        });
-        
-        statusDiv.textContent = action === 'add' ? "Member added successfully." : "Member removed successfully.";
-        statusDiv.style.color = "var(--success)";
+        if (action === 'add') {
+          const r = await fetch(`${RAILWAY_URL}/admin/store/${encodeURIComponent(currentStoreHandle)}/add-member`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Admin-Secret': ADMIN_SECRET
+            },
+            body: JSON.stringify({ email: email })
+          });
+          const data = await r.json();
+          if (r.ok) {
+            statusDiv.textContent = data.already_member ? "Already a member." : "\u2705 Member added successfully.";
+            statusDiv.style.color = "var(--success)";
+          } else {
+            statusDiv.textContent = "\u274C " + (data.error || "Error adding member.");
+            statusDiv.style.color = "var(--danger)";
+          }
+        } else {
+          statusDiv.textContent = "\u2139\uFE0F To remove a member, use Shopify Admin \u2192 Customers \u2192 remove tag 'storefront-member--" + currentStoreHandle + "'.";
+          statusDiv.style.color = "var(--warning)";
+        }
       } catch(e) {
-        statusDiv.textContent = "Error updating member.";
+        statusDiv.textContent = "\u274C Request failed: " + e.message;
         statusDiv.style.color = "var(--danger)";
       }
     }
 
-    // --- TAB 3: SETTINGS (VISIBILITY) ---
+    // --- TAB 3: SETTINGS ---
     async function toggleVisibility(state) {
-      if(!confirm(`Change store to ${state.toUpperCase()}?`)) return;
-      
-      // Sending to GOD MODE webhook to update Store Metaobject
+      alert("Visibility toggle coming soon. For now, use Shopify Admin \u2192 Metaobjects \u2192 custom_shop to update the store visibility field.");
+    }
+
+    // --- SLEEP / WAKE ---
+    async function sleepStore(handle, cardEl) {
+      if (!confirm(`Put store "${handle}" to sleep? All products will be deleted.`)) return;
+      const btn = cardEl.querySelector('.btn-sleep');
+      btn.disabled = true;
+      btn.textContent = '\uD83D\uDCA4 Sleeping...';
       try {
-        await fetch(MECHANIC_GOD_URL, {
+        const r = await fetch(`${RAILWAY_URL}/admin/store/${encodeURIComponent(handle)}/sleep`, {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action: "set_store_visibility",
-            tag: currentStoreTag,
-            visibility: state
-          })
+          headers: { 'X-Admin-Secret': ADMIN_SECRET }
         });
-        alert(`Command sent. Store is becoming ${state}.`);
-        location.reload();
-      } catch(e) {
-        alert("Error sending command.");
-      }
-    }
-
-    // --- GOD MODE ACTIONS ---
-    async function deleteSingleProduct(id) {
-      if(!confirm("Permanently delete this product?")) return;
-      const row = document.getElementById(`row-${id}`);
-      row.style.opacity = 0.5;
-      
-      await fetch(MECHANIC_GOD_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ action: "delete_product", product_id: id })
-      });
-      
-      row.innerHTML = '<div style="color:#ef4444; font-weight:bold; width:100%; text-align:center;">DELETED</div>';
-    }
-
-    function nukeStore(storeTag) {
-      if(confirm(`⚠️ WARNING: CLOSING STORE '${storeTag}'\n\n1. All products deleted.\n2. All members untagged.\n3. Marked as Closed.\n\nProceed?`)) {
-        if(confirm(`Type OK to confirm deletion of '${storeTag}'.`)) {
-          fetch(MECHANIC_GOD_URL, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ action: "close_store", confirm: "true", tag: storeTag })
-          }).then(res => {
-             alert("Nuke sequence initiated.");
-             location.reload();
-          });
+        const data = await r.json();
+        if (r.ok) {
+          btn.textContent = '\u2705 Asleep';
+          cardEl.setAttribute('data-status', 'sleeping');
+          setTimeout(() => location.reload(), 2000);
+        } else {
+          btn.disabled = false;
+          btn.textContent = '\uD83D\uDE34 Sleep';
+          alert('Sleep failed: ' + (data.error || r.status));
         }
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = '\uD83D\uDE34 Sleep';
+        alert('Request failed: ' + e.message);
       }
     }
 
-    // --- GLOBAL PRICE UPDATE ---
-    document.getElementById('btnUpdatePrice').addEventListener('click', async function() {
-      const tag = document.getElementById('targetTag').value;
-      const price = document.getElementById('newPrice').value;
-      if(!confirm(`Update all products tagged '${tag}' to $${price}?`)) return;
-      
-      await fetch(MECHANIC_GOD_URL, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ action: "global_price_update", tag, price })
-      });
-      alert("Update command sent.");
+    async function wakeStore(handle, cardEl) {
+      if (!confirm(`Wake up store "${handle}"? Printful Automation will re-create all products.`)) return;
+      const btn = cardEl.querySelector('.btn-wake');
+      btn.disabled = true;
+      btn.textContent = '\u23F3 Waking...';
+      try {
+        const r = await fetch(`${RAILWAY_URL}/admin/store/${encodeURIComponent(handle)}/wakeup`, {
+          method: 'POST',
+          headers: { 'X-Admin-Secret': ADMIN_SECRET }
+        });
+        const data = await r.json();
+        if (r.ok) {
+          btn.textContent = '\u2705 Waking up...';
+          setTimeout(() => location.reload(), 2000);
+        } else {
+          btn.disabled = false;
+          btn.textContent = '\u23F0 Wake';
+          alert('Wake failed: ' + (data.error || r.status));
+        }
+      } catch(e) {
+        btn.disabled = false;
+        btn.textContent = '\u23F0 Wake';
+        alert('Request failed: ' + e.message);
+      }
+    }
+
+    // --- NUKE ---
+    async function nukeStore(handle, name) {
+      const confirmed = prompt(`\u26A0\uFE0F DANGER ZONE\n\nYou are about to permanently destroy "${name}".\n\nAll products, members, and data will be deleted forever. This CANNOT be undone.\n\nType "nuke" to confirm:`);
+      if (confirmed !== 'nuke') return;
+
+      try {
+        const r = await fetch(`${RAILWAY_URL}/api/storefront/${encodeURIComponent(handle)}/nuke`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Secret': ADMIN_SECRET
+          }
+        });
+        const data = await r.json();
+        if (r.ok) {
+          alert(`\u2622\uFE0F Nuke started. Job ID: ${data.job_id || 'unknown'}. The store is being destroyed.`);
+          setTimeout(() => location.reload(), 3000);
+        } else {
+          alert('Nuke failed: ' + (data.error || r.status));
+        }
+      } catch(e) {
+        alert('Request failed: ' + e.message);
+      }
+    }
+
+    // --- GLOBAL PRICE OVERRIDE ---
+    document.getElementById('btnUpdatePrice').addEventListener('click', function() {
+      const tag = document.getElementById('targetTag').value.trim();
+      const price = document.getElementById('newPrice').value.trim();
+      if (!tag || !price) {
+        document.getElementById('priceStatus').textContent = "Please fill in both fields.";
+        return;
+      }
+      document.getElementById('priceStatus').textContent = "\u26A0\uFE0F Price override coming in next update.";
+      document.getElementById('priceStatus').style.color = "var(--warning)";
     });
 
   </script>
