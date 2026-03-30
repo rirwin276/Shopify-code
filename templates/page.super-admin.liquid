@@ -132,6 +132,11 @@
   .status-private { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
   .status-sleeping { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
 
+  @keyframes sa-wake-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.35); }
+    50%       { box-shadow: 0 0 0 6px rgba(59,130,246,0); }
+  }
+
   .store-name { font-size: 16px; font-weight: 700; margin: 0 0 5px; color: white; }
   .store-handle { font-size: 12px; color: var(--gray); font-family: monospace; }
   .store-actions { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
@@ -194,21 +199,32 @@
         {% assign total_stores = 0 %}
         {% assign active_count = 0 %}
         {% assign sleeping_count = 0 %}
+        {% assign waking_count = 0 %}
         {% assign closed_count = 0 %}
         {% for store in shop.metaobjects.custom_shop.values %}
           {% assign total_stores = total_stores | plus: 1 %}
           {% if store.tags contains 'status:closed' %}
             {% assign closed_count = closed_count | plus: 1 %}
-          {% elsif store.status == 'sleeping' or store.status.value == 'sleeping' %}
-            {% assign sleeping_count = sleeping_count | plus: 1 %}
           {% else %}
-            {% assign active_count = active_count | plus: 1 %}
+            {%- assign _sv = '' -%}
+            {%- for _f in store.fields -%}
+              {%- if _f.key == 'status' -%}{%- assign _sv = _f.value -%}{%- endif -%}
+            {%- endfor -%}
+            {%- if _sv == blank -%}{%- assign _sv = store.status.value | default: store.status | default: '' -%}{%- endif -%}
+            {% if _sv == 'sleeping' %}
+              {% assign sleeping_count = sleeping_count | plus: 1 %}
+            {% elsif _sv == 'waking' %}
+              {% assign waking_count = waking_count | plus: 1 %}
+            {% else %}
+              {% assign active_count = active_count | plus: 1 %}
+            {% endif %}
           {% endif %}
         {% endfor %}
         <div style="font-size:12px; color:var(--gray); line-height:2;">
           <div>Total: <strong style="color:white;">{{ total_stores }}</strong></div>
           <div>Active: <strong style="color:var(--success);">{{ active_count }}</strong></div>
           <div>Sleeping: <strong style="color:#a5b4fc;">{{ sleeping_count }}</strong></div>
+          <div>Waking: <strong style="color:#93c5fd;">{{ waking_count }}</strong></div>
           <div>Closed: <strong style="color:var(--gray);">{{ closed_count }}</strong></div>
         </div>
       </div>
@@ -263,21 +279,32 @@
         <button class="tab-btn" onclick="setTab('most_sales', event)">Most Sales</button>
         <button class="tab-btn" onclick="setTab('least_sales', event)">Least Sales</button>
         <button class="tab-btn" onclick="setTab('sleeping', event)">Sleeping</button>
+        <button class="tab-btn" onclick="setTab('waking', event)">Waking</button>
         <button class="tab-btn" onclick="setTab('awake_no_sales', event)">Awake / No Sales</button>
       </div>
       <div class="store-grid" id="activeStoreGrid">
         {% for store in shop.metaobjects.custom_shop.values %}
           {% unless store.tags contains 'status:closed' %}
-            {% assign store_status_val = store.status.value | default: store.status | default: '' %}
-            {% assign is_store_sleeping = false %}
-            {% if store_status_val == 'sleeping' %}{% assign is_store_sleeping = true %}{% endif %}
+            {%- assign store_status_val = '' -%}
+            {%- for f in store.fields -%}
+              {%- if f.key == 'status' -%}{%- assign store_status_val = f.value -%}{%- endif -%}
+            {%- endfor -%}
+            {%- if store_status_val == blank -%}
+              {%- assign store_status_val = store.status.value | default: store.status | default: '' -%}
+            {%- endif -%}
+            {%- assign is_store_sleeping = false -%}
+            {%- assign is_store_waking = false -%}
+            {%- if store_status_val == 'sleeping' -%}{%- assign is_store_sleeping = true -%}{%- endif -%}
+            {%- if store_status_val == 'waking' -%}{%- assign is_store_waking = true -%}{%- endif -%}
 
-            <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" data-sleep-status="{% if is_store_sleeping %}sleeping{% else %}active{% endif %}" data-sales="0" {% if is_store_sleeping %}style="opacity:0.5;"{% endif %}>
+            <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" data-sleep-status="{% if is_store_sleeping %}sleeping{% elsif is_store_waking %}waking{% else %}active{% endif %}" data-sales="0" {% if is_store_sleeping %}style="opacity:0.5; border-color:rgba(99,102,241,0.4);"{% elsif is_store_waking %}style="border-color:rgba(59,130,246,0.5); animation:sa-wake-pulse 2s ease-in-out infinite;"{% endif %}>
               <div>
                 <div class="store-header">
                   <div class="store-icon"><i class="fas fa-store"></i></div>
                   {% if is_store_sleeping %}
                     <span class="store-status status-sleeping">💤 Sleeping</span>
+                  {% elsif is_store_waking %}
+                    <span class="store-status" style="background:rgba(59,130,246,0.15); color:#93c5fd;">⏳ Waking</span>
                   {% elsif store.tags contains 'status:private' %}
                     <span class="store-status status-private">Private</span>
                   {% else %}
@@ -292,6 +319,10 @@
                 {% if is_store_sleeping %}
                   <button class="btn btn-primary btn-sm" onclick="wakeStore('{{ store.system.handle | escape }}')">
                     <i class="fas fa-sun"></i> Wake Up
+                  </button>
+                {% elsif is_store_waking %}
+                  <button class="btn btn-sm" disabled style="opacity:0.5; cursor:not-allowed; background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.2);">
+                    <i class="fas fa-spinner fa-spin"></i> Waking…
                   </button>
                 {% else %}
                   <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
@@ -455,7 +486,8 @@
         const sales = parseInt(card.getAttribute('data-sales') || '0', 10);
         let show = true;
         if (currentTab === 'sleeping') show = status === 'sleeping';
-        else if (currentTab === 'awake_no_sales') show = status !== 'sleeping' && sales === 0;
+        else if (currentTab === 'waking') show = status === 'waking';
+        else if (currentTab === 'awake_no_sales') show = status !== 'sleeping' && status !== 'waking' && sales === 0;
         card.style.display = show ? '' : 'none';
       });
       if (currentTab === 'most_sales' || currentTab === 'least_sales') {

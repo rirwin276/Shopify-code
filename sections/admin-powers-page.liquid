@@ -329,6 +329,7 @@
 {%- assign join_mode = 'secure' -%}
 {%- assign collection_handle = shop_handle -%}
 {%- assign store_name = shop_handle -%}
+{%- assign ap_store_status = 'active' -%}
 
 {%- if shop_meta -%}
   {%- assign raw_jm = shop_meta.join_mode.value | default: shop_meta.join_mode -%}
@@ -339,6 +340,10 @@
   {%- if ch != blank -%}{%- assign collection_handle = ch -%}{%- endif -%}
   {%- assign sn = shop_meta.name.value | default: shop_meta.name -%}
   {%- if sn != blank -%}{%- assign store_name = sn -%}{%- endif -%}
+  {%- assign _raw_status = shop_meta.status.value | default: shop_meta.status | default: '' | strip | downcase -%}
+  {%- if _raw_status == 'sleeping' or _raw_status == 'waking' or _raw_status == 'active' -%}
+    {%- assign ap_store_status = _raw_status -%}
+  {%- endif -%}
 {%- endif -%}
 
 {%- assign join_link = shop.url | append: join_path | append: '?shop=' | append: collection_handle -%}
@@ -456,6 +461,30 @@
     </div>
 
   </div><!-- /.ap-grid -->
+
+  <!-- SLEEP MODE CARD (full width) -->
+  <div class="ap-card" style="margin-top: 24px;" id="apSleepModeCard">
+    <div class="ap-card-icon" style="background:#fef3c7; font-size:20px;">💤</div>
+    <div class="ap-card-head">
+      <h3>Sleep Mode</h3>
+      <p>Put this store to sleep. All products will be deleted. Member tags and store data are preserved. You can wake the store back up at any time to rebuild products.</p>
+    </div>
+
+    {% if ap_store_status == 'sleeping' %}
+      <p style="font-size:13px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
+        💤 This store is currently sleeping. Wake it up to rebuild all products via Printful.
+      </p>
+      <button id="apBtnWakeStore" class="ap-btn ap-btn-full" style="background:#10b981; color:#fff;">☀️ Wake Up Store</button>
+    {% elsif ap_store_status == 'waking' %}
+      <p style="font-size:13px; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
+        ⏳ This store is currently waking up. Products are being rebuilt. Please wait.
+      </p>
+      <button class="ap-btn ap-btn-full" disabled style="opacity:0.5; cursor:not-allowed; background:#6366f1; color:#fff;">⏳ Waking Up…</button>
+    {% else %}
+      <button id="apBtnSleepStore" class="ap-btn ap-btn-full" style="background:#ef4444; color:#fff;">💤 Put Store to Sleep</button>
+    {% endif %}
+    <div id="apStatusSleep" class="ap-status"></div>
+  </div>
 
   <!-- DANGER ZONE (full width) -->
   <div class="ap-danger-card" style="margin-top: 24px;">
@@ -620,6 +649,75 @@
 
   document.getElementById('apBtnAdd').addEventListener('click', function(){ handleMemberAction('add'); });
   document.getElementById('apBtnRemove').addEventListener('click', function(){ handleMemberAction('remove'); });
+
+  // ── SLEEP / WAKE STORE ────────────────────────────────────
+  var AP_RAILWAY_URL = SSAP.railwayUrl;
+  var AP_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
+  var apStatusSleep = document.getElementById('apStatusSleep');
+
+  function apSleepStatus(msg, type){
+    if(!apStatusSleep) return;
+    apStatusSleep.textContent = msg;
+    apStatusSleep.className = 'ap-status ' + (type || '');
+  }
+
+  var apBtnSleepStore = document.getElementById('apBtnSleepStore');
+  if(apBtnSleepStore){
+    apBtnSleepStore.addEventListener('click', async function(){
+      if(!confirm('Put "' + (SSAP.shopHandle || 'this store') + '" to sleep? All products will be deleted. Member tags are preserved.')) return;
+      apBtnSleepStore.disabled = true;
+      apBtnSleepStore.textContent = 'Putting to sleep\u2026';
+      apSleepStatus('', '');
+      try {
+        var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/sleep', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET }
+        });
+        var data = await res.json();
+        if(data.job_id || data.status === 'ok' || res.ok){
+          apSleepStatus('\u2705 Store is going to sleep. Reloading\u2026', 'ok');
+          setTimeout(function(){ window.location.reload(); }, 2000);
+        } else {
+          apSleepStatus('\u274C ' + (data.error || 'Failed'), 'err');
+          apBtnSleepStore.disabled = false;
+          apBtnSleepStore.textContent = '\ud83d\udca4 Put Store to Sleep';
+        }
+      } catch(e) {
+        apSleepStatus('\u274C Network error: ' + (e.message || 'unknown'), 'err');
+        apBtnSleepStore.disabled = false;
+        apBtnSleepStore.textContent = '\ud83d\udca4 Put Store to Sleep';
+      }
+    });
+  }
+
+  var apBtnWakeStore = document.getElementById('apBtnWakeStore');
+  if(apBtnWakeStore){
+    apBtnWakeStore.addEventListener('click', async function(){
+      if(!confirm('Wake up "' + (SSAP.shopHandle || 'this store') + '"? Printful will rebuild all products.')) return;
+      apBtnWakeStore.disabled = true;
+      apBtnWakeStore.textContent = 'Waking up\u2026';
+      apSleepStatus('', '');
+      try {
+        var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/wakeup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET }
+        });
+        var data = await res.json();
+        if(data.job_id || data.status === 'ok' || res.ok){
+          apSleepStatus('\u2705 Store is waking up! Products are being rebuilt. Reloading\u2026', 'ok');
+          setTimeout(function(){ window.location.reload(); }, 2000);
+        } else {
+          apSleepStatus('\u274C ' + (data.error || 'Failed'), 'err');
+          apBtnWakeStore.disabled = false;
+          apBtnWakeStore.textContent = '\u2600\ufe0f Wake Up Store';
+        }
+      } catch(e) {
+        apSleepStatus('\u274C Network error: ' + (e.message || 'unknown'), 'err');
+        apBtnWakeStore.disabled = false;
+        apBtnWakeStore.textContent = '\u2600\ufe0f Wake Up Store';
+      }
+    });
+  }
 
   // ── NUKE STORE ────────────────────────────────────────────
   var NUKE_BACKEND_URL = SSAP.railwayUrl;
