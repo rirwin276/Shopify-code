@@ -238,7 +238,13 @@ page: {{ request.path }}
 
             {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
             {%- if status_value == 'sleeping' -%}
-              {%- assign status_label = 'Hibernation Mode' -%}
+              {%- assign status_label = '❄️ Hibernation Mode' -%}
+            {%- elsif status_value == 'waking' -%}
+              {%- assign status_label = '☀️ Waking Up...' -%}
+            {%- elsif status_value == 'active' -%}
+              {%- assign status_label = '✅ Active' -%}
+            {%- elsif status_value == 'under_construction' -%}
+              {%- assign status_label = '🔧 Under Construction' -%}
             {%- endif -%}
 
             {%- assign is_sleeping = false -%}
@@ -264,7 +270,7 @@ page: {{ request.path }}
                 <h3 class="sdtiles__name">{{ display_name }}</h3>
 
                 {% if is_sleeping %}
-                  <div class="sdtiles__sleep-banner">🌙 Hibernation Mode — Store is resting</div>
+                  <div class="sdtiles__sleep-banner">❄️ Hibernation Mode</div>
                 {% elsif is_waking %}
                   <div class="sdtiles__sleep-banner" style="color:#d97706; border-color:rgba(217,119,6,0.3); background:rgba(217,119,6,0.08);">⚡ Waking Up — Products are being rebuilt…</div>
                 {% endif %}
@@ -280,7 +286,7 @@ page: {{ request.path }}
 
                 <div class="sdtiles__cta">
                   {% if is_sleeping %}
-                    <button type="button" class="sdtiles__btn" disabled style="opacity:0.5; cursor:not-allowed;">🌙 In Hibernation</button>
+                    <button type="button" class="sdtiles__btn" disabled style="opacity:0.5; cursor:not-allowed;">❄️ In Hibernation</button>
                     {% if is_admin_tile %}
                       <button
                         type="button"
@@ -291,7 +297,7 @@ page: {{ request.path }}
                         ☀️ Wake Up Store
                       </button>
                     {% else %}
-                      <p style="font-size:12px; opacity:.75; margin:0;">This store is in hibernation mode. Ask the store admin to wake it up.</p>
+                      <p style="font-size:12px; opacity:.75; margin:0;">This store is in hibernation. Ask your admin to wake it up.</p>
                     {% endif %}
                   {% elsif is_waking %}
                     <button type="button" class="sdtiles__btn" disabled style="opacity:0.6; cursor:not-allowed;">⚡ Waking up…</button>
@@ -486,16 +492,23 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
     if (!backendUrl) { alert('Backend URL not configured in section settings.'); return; }
     if (!confirm(`Wake up store "${handle}"? This will re-run Printful to rebuild all products.`)) return;
     btn.disabled = true;
-    btn.textContent = 'Waking up\u2026';
+    btn.textContent = '☀️ Waking up... this may take a few minutes';
     fetch(backendUrl + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': 'stellasage-god-mode-2026-xK9mP' }
     })
-    .then(r => r.json())
-    .then(data => {
+    .then(async r => {
+      if (!r.ok) {
+        const errText = await r.text();
+        btn.textContent = '❌ Error: ' + errText;
+        btn.disabled = false;
+        return;
+      }
+      const data = await r.json();
+      const RELOAD_DELAY_MS = 3000;
       if (data.job_id || data.status === 'ok' || data.status === 'queued' || data.status === 'waking' || data.status === 'started') {
-        btn.textContent = '✅ Waking up… Reloading in 3s';
-        setTimeout(() => window.location.reload(), 3000);
+        btn.textContent = '✅ Store is waking up! Refreshing in 3 seconds...';
+        setTimeout(() => window.location.reload(), RELOAD_DELAY_MS);
       } else {
         btn.textContent = '❌ Failed: ' + (data.error || data.message || 'Unknown error');
         btn.disabled = false;
