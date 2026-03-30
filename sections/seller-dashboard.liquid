@@ -262,8 +262,18 @@
                     {% assign tile_is_admin = false %}
                     {% if admin_handles_blob contains admin_needle2 %}{% assign tile_is_admin = true %}{% endif %}
 
+                    {%- comment %} Read sleep/waking status from metaobject {%- endcomment -%}
+                    {%- assign tile_status = '' -%}
+                    {%- if entry -%}
+                      {%- assign tile_status = entry.status.value | default: entry.status | default: '' | strip | downcase -%}
+                    {%- endif -%}
+                    {%- assign tile_is_sleeping = false -%}
+                    {%- assign tile_is_waking = false -%}
+                    {%- if tile_status == 'sleeping' -%}{%- assign tile_is_sleeping = true -%}{%- endif -%}
+                    {%- if tile_status == 'waking' -%}{%- assign tile_is_waking = true -%}{%- endif -%}
+
                     <div
-                      class="ss-store-card {% if is_fully_ready %}ss-clickrow{% endif %}"
+                      class="ss-store-card {% if is_fully_ready and tile_is_sleeping == false and tile_is_waking == false %}ss-clickrow{% endif %}"
                       role="link"
                       tabindex="0"
                       data-href="{{ tile_url }}"
@@ -272,7 +282,8 @@
                       data-ss-ready="{% if is_fully_ready %}1{% else %}0{% endif %}"
                       data-admin-href="{{ admin_url }}"
                       data-ss-bootstrapper="{% if tile_is_admin or is_god %}1{% else %}0{% endif %}"
-                      style="animation-delay: {{ forloop.index0 | times: 80 }}ms;"
+                      data-ss-sleep-status="{% if tile_is_sleeping %}sleeping{% elsif tile_is_waking %}waking{% else %}active{% endif %}"
+                      style="animation-delay: {{ forloop.index0 | times: 80 }}ms;{% if tile_is_sleeping %} opacity:0.65; border-color:rgba(99,102,241,0.4);{% elsif tile_is_waking %} border-color:rgba(59,130,246,0.5);{% endif %}"
                     >
 
                       <div class="ss-col-identity">
@@ -302,7 +313,31 @@
                       </div>
 
                       <div class="ss-col-engine">
-                        {% if is_fully_ready %}
+                        {% if tile_is_sleeping %}
+                          <div class="ss-buildwrap ss-closedwrap">
+                            <div class="ss-buildtop">
+                              <div class="ss-status-building ss-buildbadge ss-closedbadge" style="background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.3);">
+                                <span class="ss-dot-building" style="background:#6366f1;"></span>
+                                <span class="ss-status-text-building ss-closedtext" style="color:#6366f1;">💤 STORE SLEEPING</span>
+                              </div>
+                            </div>
+                            <div class="ss-founderline" aria-live="polite">
+                              <span class="ss-fmsg ss-fmsg-a is-active">Products are on pause. The store can be woken up to rebuild inventory.</span>
+                            </div>
+                          </div>
+                        {% elsif tile_is_waking %}
+                          <div class="ss-buildwrap ss-closedwrap">
+                            <div class="ss-buildtop">
+                              <div class="ss-status-building ss-buildbadge" style="background:rgba(59,130,246,0.12); border-color:rgba(59,130,246,0.3);">
+                                <span class="ss-dot-building ss-dot-building-anim" style="background:#3b82f6;"></span>
+                                <span class="ss-status-text-building" style="color:#3b82f6;">⏳ WAKING UP…</span>
+                              </div>
+                            </div>
+                            <div class="ss-founderline" aria-live="polite">
+                              <span class="ss-fmsg ss-fmsg-a is-active">Rebuilding products — check back soon.</span>
+                            </div>
+                          </div>
+                        {% elsif is_fully_ready %}
                           <div class="ss-status-finished">
                             <span class="ss-dot-live"></span>
                             <span class="ss-status-text">LIVE STOREFRONT</span>
@@ -326,37 +361,55 @@
 
                       <div class="ss-col-controls">
 
-                        {% if tile_is_admin %}
-                          {% if is_fully_ready %}
-                            {%- comment -%}
-                              Render as a real link, but with "ss-admin-dyn" so JS can disable it during the 5-min loader.
-                            {%- endcomment -%}
-                            <a href="{{ admin_url }}" class="ss-admin-btn ss-admin-dyn" title="Admin" data-admin-href="{{ admin_url }}">Admin</a>
+                        {% if tile_is_sleeping %}
+                          {% if tile_is_admin or is_god %}
+                            <button
+                              class="ss-open-btn ss-wake-btn"
+                              data-wake-store-sd
+                              data-handle="{{ handle | escape }}"
+                              style="background:#2563eb;">
+                              ☀️ Wake Up Store
+                            </button>
                           {% else %}
-                            <span class="ss-admin-btn ss-disabled" title="Admin disabled while store is closed">Admin</span>
+                            <button class="ss-open-btn ss-disabled" disabled style="opacity:0.5; cursor:not-allowed; box-shadow:none;">💤 Sleeping</button>
+                            <p style="font-size:11px; opacity:.65; margin:4px 0 0; text-align:center;">Only the store admin can wake this store.</p>
                           {% endif %}
-                        {% endif %}
-
-                        {% if is_fully_ready %}
-                          <a href="{{ tile_url }}" class="ss-open-btn">
-                            <span>Open Storefront</span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                          </a>
+                        {% elsif tile_is_waking %}
+                          <button class="ss-open-btn ss-disabled" disabled style="opacity:0.5; cursor:not-allowed; box-shadow:none;">⏳ Rebuilding…</button>
                         {% else %}
-                          <button class="ss-open-btn ss-disabled ss-open-dyn" disabled data-open-href="{{ tile_url }}">
-                            System Preparing...
-                          </button>
-                        {% endif %}
 
-                        {% unless tile_is_admin %}
-                          <button
-                            class="ss-leave-btn"
-                            data-leave-store
-                            data-handle="{{ handle | escape }}"
-                            data-name="{{ tile_name | escape }}">
-                            Leave Store
-                          </button>
-                        {% endunless %}
+                          {% if tile_is_admin %}
+                            {% if is_fully_ready %}
+                              {%- comment -%}
+                                Render as a real link, but with "ss-admin-dyn" so JS can disable it during the 5-min loader.
+                              {%- endcomment -%}
+                              <a href="{{ admin_url }}" class="ss-admin-btn ss-admin-dyn" title="Admin" data-admin-href="{{ admin_url }}">Admin</a>
+                            {% else %}
+                              <span class="ss-admin-btn ss-disabled" title="Admin disabled while store is closed">Admin</span>
+                            {% endif %}
+                          {% endif %}
+
+                          {% if is_fully_ready %}
+                            <a href="{{ tile_url }}" class="ss-open-btn">
+                              <span>Open Storefront</span>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                          {% else %}
+                            <button class="ss-open-btn ss-disabled ss-open-dyn" disabled data-open-href="{{ tile_url }}">
+                              System Preparing...
+                            </button>
+                          {% endif %}
+
+                          {% unless tile_is_admin %}
+                            <button
+                              class="ss-leave-btn"
+                              data-leave-store
+                              data-handle="{{ handle | escape }}"
+                              data-name="{{ tile_name | escape }}">
+                              Leave Store
+                            </button>
+                          {% endunless %}
+                        {% endif %}
                       </div>
 
                     </div>
@@ -778,6 +831,35 @@
         leaveConfirm.disabled = false;
       }
     });
+
+    // --- Wake Store (seller dashboard) ---
+    var SD_RAILWAY_URL = 'https://studio-uploader-production.up.railway.app';
+    var SD_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('[data-wake-store-sd]');
+      if(!btn) return;
+      var handle = btn.getAttribute('data-handle') || '';
+      if(!handle) return;
+      if(!confirm('Wake up store "' + handle + '"? This will re-run Printful to rebuild all products.')) return;
+      btn.disabled = true;
+      btn.textContent = 'Waking up\u2026';
+      fetch(SD_RAILWAY_URL + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': SD_ADMIN_SECRET }
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.job_id || data.status === 'ok'){
+          btn.textContent = '\u2705 Waking! Reloading\u2026';
+          setTimeout(function(){ window.location.reload(); }, 2000);
+        } else {
+          btn.textContent = '\u274C Failed';
+          btn.disabled = false;
+        }
+      })
+      .catch(function(){ btn.textContent = '\u274C Error'; btn.disabled = false; });
+    });
+
   })();
 </script>
 

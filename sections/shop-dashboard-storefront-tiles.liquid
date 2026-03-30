@@ -119,6 +119,14 @@
 
     .sdtiles__card--sleeping { opacity: 0.65; border-color: rgba(99,102,241,0.4) !important; }
     .sdtiles__sleep-banner { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #6366f1; font-weight: 700; margin-bottom: 10px; }
+
+    .sdtiles__card--waking { border-color: rgba(59,130,246,0.5) !important; animation: sdtiles-wake-pulse 2s ease-in-out infinite; }
+    @keyframes sdtiles-wake-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.3); }
+      50%       { box-shadow: 0 0 0 6px rgba(59,130,246,0); }
+    }
+    @media (prefers-reduced-motion: reduce) { .sdtiles__card--waking { animation: none; } }
+    .sdtiles__waking-banner { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #3b82f6; font-weight: 700; margin-bottom: 10px; }
   </style>
 
   <div class="sdtiles__wrap">
@@ -237,14 +245,16 @@ page: {{ request.path }}
             {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
 
             {%- assign is_sleeping = false -%}
+            {%- assign is_waking = false -%}
             {%- if status_value == 'sleeping' -%}{%- assign is_sleeping = true -%}{%- endif -%}
+            {%- if status_value == 'waking' -%}{%- assign is_waking = true -%}{%- endif -%}
 
             {%- assign h_enc = h | url_encode -%}
             {%- assign storefront_url = section.settings.storefront_base_url | append: '?shop=' | append: h_enc -%}
             {%- assign admin_powers_url = section.settings.admin_powers_url | default: '/pages/admin-powers' -%}
             {%- assign admin_powers_link = admin_powers_url | append: '?shop=' | append: h_enc -%}
 
-            <div class="sdtiles__card{% if is_sleeping %} sdtiles__card--sleeping{% endif %}">
+            <div class="sdtiles__card{% if is_sleeping %} sdtiles__card--sleeping{% elsif is_waking %} sdtiles__card--waking{% endif %}">
               <div class="sdtiles__media">
                 {% if logo_value != blank %}
                   {{ logo_value | image_url: width: 1200 | image_tag: loading: 'lazy', alt: display_name }}
@@ -258,6 +268,8 @@ page: {{ request.path }}
 
                 {% if is_sleeping %}
                   <div class="sdtiles__sleep-banner">💤 This store is asleep</div>
+                {% elsif is_waking %}
+                  <div class="sdtiles__waking-banner">⏳ Store is Waking Up…</div>
                 {% endif %}
 
                 <div class="sdtiles__meta">
@@ -284,6 +296,8 @@ page: {{ request.path }}
                     {% else %}
                       <p style="font-size:12px; opacity:.75; margin:0;">Only the store admin can wake this store.</p>
                     {% endif %}
+                  {% elsif is_waking %}
+                    <button type="button" class="sdtiles__btn" disabled style="opacity:0.5; cursor:not-allowed;">Rebuilding Products…</button>
                   {% else %}
                     <a class="sdtiles__btn" href="{{ storefront_url }}">
                       {{ section.settings.open_button_label }}
@@ -574,7 +588,7 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
     { "type": "text", "id": "remove_modal_title", "label": "Remove modal title", "default": "Remove storefront access?" },
     { "type": "text", "id": "remove_confirm_label", "label": "Confirm button label", "default": "Yes, remove me" },
     { "type": "text", "id": "remove_cancel_label", "label": "Cancel button label", "default": "Cancel" },
-    { "type": "text", "id": "backend_url", "label": "Studio Uploader backend URL (e.g. https://your-studio-uploader.com)", "default": "" },
+    { "type": "text", "id": "backend_url", "label": "Studio Uploader backend URL (e.g. https://your-studio-uploader.com)", "default": "https://studio-uploader-production.up.railway.app" },
 { "type": "text", "id": "remove_store_webhook_url", "label": "Legacy Mechanic webhook URL (fallback if no backend URL)", "default": "" }
   ],
   "presets": [
