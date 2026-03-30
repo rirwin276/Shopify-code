@@ -234,10 +234,19 @@ page: {{ request.path }}
               {%- endif -%}
             {%- endif -%}
 
-            {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
-
             {%- assign is_sleeping = false -%}
-            {%- if status_value == 'sleeping' -%}{%- assign is_sleeping = true -%}{%- endif -%}
+            {%- if status_value == 'sleeping' or status_value == 'waking' -%}
+              {%- assign is_sleeping = true -%}
+            {%- endif -%}
+
+            {%- assign status_label = 'Active' -%}
+            {%- if status_value == 'sleeping' -%}
+              {%- assign status_label = '💤 Sleeping' -%}
+            {%- elsif status_value == 'waking' -%}
+              {%- assign status_label = '⏰ Waking Up…' -%}
+            {%- elsif status_value == 'active' -%}
+              {%- assign status_label = 'Active' -%}
+            {%- endif -%}
 
             {%- assign h_enc = h | url_encode -%}
             {%- assign storefront_url = section.settings.storefront_base_url | append: '?shop=' | append: h_enc -%}
@@ -466,31 +475,54 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
     });
   })();
 
-  // --- Wake Store ---
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-wake-store]');
-    if (!btn) return;
-    const handle = btn.getAttribute('data-handle');
-    const backendUrl = btn.getAttribute('data-backend-url') || '';
-    if (!backendUrl) { alert('Backend URL not configured in section settings.'); return; }
-    if (!confirm(`Wake up store "${handle}"? This will re-run Printful to rebuild all products.`)) return;
-    btn.disabled = true;
-    btn.textContent = 'Waking up\u2026';
-    fetch(backendUrl + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': 'stellasage-god-mode-2026-xK9mP' }
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (data.job_id || data.status === 'ok') {
-        btn.textContent = '\u2705 Success! Reloading\u2026';
-        setTimeout(() => window.location.reload(), 2000);
-      } else {
-        btn.textContent = '\u274C Failed';
+  // --- Wake Store Handler ---
+  document.querySelectorAll('[data-wake-store]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var handle = btn.getAttribute('data-handle');
+      var backendUrl = btn.getAttribute('data-backend-url') || '';
+      if (!handle) return;
+      if (!confirm('Wake up this store? This will rebuild all products. It may take a few minutes.')) return;
+
+      btn.disabled = true;
+      btn.textContent = '\u23f3 Waking up\u2026';
+
+      var adminSecret = 'stellasage-god-mode-2026-xK9mP';
+
+      fetch(backendUrl + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Secret': adminSecret
+        },
+        body: JSON.stringify({ store_handle: handle })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.job_id || data.status === 'ok' || data.ok) {
+          btn.textContent = '\u2705 Waking up\u2026 refresh in a few minutes';
+          var card = btn.closest('[data-tile-handle]') || btn.closest('.sdtiles__card');
+          if (card) {
+            var badge = card.querySelector('.sdtiles__badge');
+            if (badge) {
+              badge.textContent = '';
+              var dot = document.createElement('span');
+              dot.className = 'sdtiles__dot';
+              badge.appendChild(dot);
+              badge.appendChild(document.createTextNode('\u23f0 Waking Up\u2026'));
+            }
+          }
+        } else {
+          btn.disabled = false;
+          btn.textContent = '\u2600\ufe0f Wake Up Store';
+          alert('Wake failed: ' + (data.error || JSON.stringify(data)));
+        }
+      })
+      .catch(function(e) {
         btn.disabled = false;
-      }
-    })
-    .catch(() => { btn.textContent = '\u274C Error'; btn.disabled = false; });
+        btn.textContent = '\u2600\ufe0f Wake Up Store';
+        alert('Request failed: ' + e.message);
+      });
+    });
   });
   </script>
 </section>
