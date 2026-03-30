@@ -234,7 +234,16 @@ page: {{ request.path }}
               {%- endif -%}
             {%- endif -%}
 
-            {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
+            {%- assign status_label = 'Active' -%}
+            {%- if status_value == 'sleeping' -%}
+              {%- assign status_label = '💤 Sleeping' -%}
+            {%- elsif status_value == 'waking' -%}
+              {%- assign status_label = '⏰ Waking up…' -%}
+            {%- elsif status_value == 'closed' -%}
+              {%- assign status_label = 'Closed' -%}
+            {%- elsif status_value != blank and status_value != 'active' -%}
+              {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
+            {%- endif -%}
 
             {%- assign is_sleeping = false -%}
             {%- if status_value == 'sleeping' -%}{%- assign is_sleeping = true -%}{%- endif -%}
