@@ -117,16 +117,10 @@
     .sdtiles__modalActions .sdtiles__btn{ width: auto; }
     .sdtiles__statusLine{ margin-top: 10px; font-size: 12px; opacity: .75; }
 
-    .sdtiles__card--sleeping { opacity: 0.65; border-color: rgba(99,102,241,0.4) !important; }
-    .sdtiles__sleep-banner { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #6366f1; font-weight: 700; margin-bottom: 10px; }
+    .sdtiles__card--sleeping { opacity: 0.7; border-color: rgba(99,102,241,0.45) !important; filter: grayscale(0.15); }
+    .sdtiles__sleep-banner { background: linear-gradient(90deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12)); border: 1px solid rgba(99,102,241,0.35); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #6366f1; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.01em; }
 
-    .sdtiles__card--waking { border-color: rgba(59,130,246,0.5) !important; animation: sdtiles-wake-pulse 2s ease-in-out infinite; }
-    @keyframes sdtiles-wake-pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.3); }
-      50%       { box-shadow: 0 0 0 6px rgba(59,130,246,0); }
-    }
-    @media (prefers-reduced-motion: reduce) { .sdtiles__card--waking { animation: none; } }
-    .sdtiles__waking-banner { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #3b82f6; font-weight: 700; margin-bottom: 10px; }
+    .sdtiles__card--waking { border-color: rgba(217,119,6,0.45) !important; }
   </style>
 
   <div class="sdtiles__wrap">
@@ -243,6 +237,9 @@ page: {{ request.path }}
             {%- endif -%}
 
             {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
+            {%- if status_value == 'sleeping' -%}
+              {%- assign status_label = 'Hibernation Mode' -%}
+            {%- endif -%}
 
             {%- assign is_sleeping = false -%}
             {%- assign is_waking = false -%}
@@ -267,9 +264,9 @@ page: {{ request.path }}
                 <h3 class="sdtiles__name">{{ display_name }}</h3>
 
                 {% if is_sleeping %}
-                  <div class="sdtiles__sleep-banner">💤 This store is asleep</div>
+                  <div class="sdtiles__sleep-banner">🌙 Hibernation Mode — Store is resting</div>
                 {% elsif is_waking %}
-                  <div class="sdtiles__waking-banner">⏳ Store is Waking Up…</div>
+                  <div class="sdtiles__sleep-banner" style="color:#d97706; border-color:rgba(217,119,6,0.3); background:rgba(217,119,6,0.08);">⚡ Waking Up — Products are being rebuilt…</div>
                 {% endif %}
 
                 <div class="sdtiles__meta">
@@ -283,7 +280,7 @@ page: {{ request.path }}
 
                 <div class="sdtiles__cta">
                   {% if is_sleeping %}
-                    <button type="button" class="sdtiles__btn" disabled style="opacity:0.5; cursor:not-allowed;">Store is Sleeping</button>
+                    <button type="button" class="sdtiles__btn" disabled style="opacity:0.5; cursor:not-allowed;">🌙 In Hibernation</button>
                     {% if is_admin_tile %}
                       <button
                         type="button"
@@ -294,10 +291,10 @@ page: {{ request.path }}
                         ☀️ Wake Up Store
                       </button>
                     {% else %}
-                      <p style="font-size:12px; opacity:.75; margin:0;">Only the store admin can wake this store.</p>
+                      <p style="font-size:12px; opacity:.75; margin:0;">This store is in hibernation mode. Ask the store admin to wake it up.</p>
                     {% endif %}
                   {% elsif is_waking %}
-                    <button type="button" class="sdtiles__btn" disabled style="opacity:0.5; cursor:not-allowed;">Rebuilding Products…</button>
+                    <button type="button" class="sdtiles__btn" disabled style="opacity:0.6; cursor:not-allowed;">⚡ Waking up…</button>
                   {% else %}
                     <a class="sdtiles__btn" href="{{ storefront_url }}">
                       {{ section.settings.open_button_label }}
@@ -496,15 +493,15 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
     })
     .then(r => r.json())
     .then(data => {
-      if (data.job_id || data.status === 'ok') {
-        btn.textContent = '\u2705 Success! Reloading\u2026';
-        setTimeout(() => window.location.reload(), 2000);
+      if (data.job_id || data.status === 'ok' || data.status === 'queued' || data.status === 'waking' || data.status === 'started') {
+        btn.textContent = '✅ Waking up… Reloading in 3s';
+        setTimeout(() => window.location.reload(), 3000);
       } else {
-        btn.textContent = '\u274C Failed';
+        btn.textContent = '❌ Failed: ' + (data.error || data.message || 'Unknown error');
         btn.disabled = false;
       }
     })
-    .catch(() => { btn.textContent = '\u274C Error'; btn.disabled = false; });
+    .catch(err => { btn.textContent = '❌ Error: ' + (err && err.message ? err.message : 'Network error'); btn.disabled = false; });
   });
   </script>
 </section>
