@@ -116,6 +116,9 @@
     .sdtiles__modalActions{ margin-top: 12px; display:flex; gap: 10px; flex-wrap: wrap; }
     .sdtiles__modalActions .sdtiles__btn{ width: auto; }
     .sdtiles__statusLine{ margin-top: 10px; font-size: 12px; opacity: .75; }
+
+    .sdtiles__card--sleeping { opacity: 0.65; border-color: rgba(99,102,241,0.4) !important; }
+    .sdtiles__sleep-banner { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: #6366f1; font-weight: 700; margin-bottom: 10px; }
   </style>
 
   <div class="sdtiles__wrap">
@@ -233,12 +236,15 @@ page: {{ request.path }}
 
             {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
 
+            {%- assign is_sleeping = false -%}
+            {%- if status_value == 'sleeping' -%}{%- assign is_sleeping = true -%}{%- endif -%}
+
             {%- assign h_enc = h | url_encode -%}
             {%- assign storefront_url = section.settings.storefront_base_url | append: '?shop=' | append: h_enc -%}
             {%- assign admin_powers_url = section.settings.admin_powers_url | default: '/pages/admin-powers' -%}
             {%- assign admin_powers_link = admin_powers_url | append: '?shop=' | append: h_enc -%}
 
-            <div class="sdtiles__card">
+            <div class="sdtiles__card{% if is_sleeping %} sdtiles__card--sleeping{% endif %}">
               <div class="sdtiles__media">
                 {% if logo_value != blank %}
                   {{ logo_value | image_url: width: 1200 | image_tag: loading: 'lazy', alt: display_name }}
@@ -250,6 +256,10 @@ page: {{ request.path }}
               <div class="sdtiles__body">
                 <h3 class="sdtiles__name">{{ display_name }}</h3>
 
+                {% if is_sleeping %}
+                  <div class="sdtiles__sleep-banner">💤 This store is asleep</div>
+                {% endif %}
+
                 <div class="sdtiles__meta">
                   {% if section.settings.show_status_badge %}
                     <span class="sdtiles__badge"><span class="sdtiles__dot"></span>{{ status_label }}</span>
@@ -260,27 +270,43 @@ page: {{ request.path }}
                 </div>
 
                 <div class="sdtiles__cta">
-                  <a class="sdtiles__btn" href="{{ storefront_url }}">
-                    {{ section.settings.open_button_label }}
-                  </a>
-
-                  {% if is_admin_tile %}
-                    <a class="sdtiles__btn sdtiles__btn--secondary" href="{{ admin_powers_link }}">
-                      {{ section.settings.admin_powers_label }}
+                  {% if is_sleeping %}
+                    <button type="button" class="sdtiles__btn" disabled style="opacity:0.5; cursor:not-allowed;">Store is Sleeping</button>
+                    {% if is_admin_tile %}
+                      <button
+                        type="button"
+                        class="sdtiles__btn sdtiles__btn--secondary"
+                        data-wake-store
+                        data-handle="{{ h | escape }}"
+                        data-backend-url="{{ section.settings.backend_url | escape }}">
+                        ☀️ Wake Up Store
+                      </button>
+                    {% else %}
+                      <p style="font-size:12px; opacity:.75; margin:0;">Only the store admin can wake this store.</p>
+                    {% endif %}
+                  {% else %}
+                    <a class="sdtiles__btn" href="{{ storefront_url }}">
+                      {{ section.settings.open_button_label }}
                     </a>
-                  {% endif %}
 
-                  {% if section.settings.enable_remove_store %}
-                    {% unless is_admin_tile %}
-                    <button
-                      type="button"
-                      class="sdtiles__btn sdtiles__btn--danger"
-                      data-remove-store
-                      data-handle="{{ h | escape }}"
-                      data-name="{{ display_name | escape }}">
-                      {{ section.settings.remove_store_label }}
-                    </button>
-                    {% endunless %}
+                    {% if is_admin_tile %}
+                      <a class="sdtiles__btn sdtiles__btn--secondary" href="{{ admin_powers_link }}">
+                        {{ section.settings.admin_powers_label }}
+                      </a>
+                    {% endif %}
+
+                    {% if section.settings.enable_remove_store %}
+                      {% unless is_admin_tile %}
+                      <button
+                        type="button"
+                        class="sdtiles__btn sdtiles__btn--danger"
+                        data-remove-store
+                        data-handle="{{ h | escape }}"
+                        data-name="{{ display_name | escape }}">
+                        {{ section.settings.remove_store_label }}
+                      </button>
+                      {% endunless %}
+                    {% endif %}
                   {% endif %}
                 </div>
 
@@ -439,6 +465,33 @@ note: metaobject lookup is shop.metaobjects.custom_shop[handle]
       }
     });
   })();
+
+  // --- Wake Store ---
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-wake-store]');
+    if (!btn) return;
+    const handle = btn.getAttribute('data-handle');
+    const backendUrl = btn.getAttribute('data-backend-url') || '';
+    if (!backendUrl) { alert('Backend URL not configured in section settings.'); return; }
+    if (!confirm(`Wake up store "${handle}"? This will re-run Printful to rebuild all products.`)) return;
+    btn.disabled = true;
+    btn.textContent = 'Waking up\u2026';
+    fetch(backendUrl + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': 'stellasage-god-mode-2026-xK9mP' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.job_id || data.status === 'ok') {
+        btn.textContent = '\u2705 Success! Reloading\u2026';
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        btn.textContent = '\u274C Failed';
+        btn.disabled = false;
+      }
+    })
+    .catch(() => { btn.textContent = '\u274C Error'; btn.disabled = false; });
+  });
   </script>
 </section>
 

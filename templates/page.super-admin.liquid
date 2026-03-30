@@ -1,5 +1,5 @@
 {% layout none %}
-{% assign railway_secret = shop.metafields.super_admin.railway_secret | default: '' %}
+{% comment %}ADMIN_SECRET is hardcoded below{% endcomment %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -130,6 +130,7 @@
   .status-active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
   .status-closed { background: rgba(148, 163, 184, 0.1); color: var(--gray); }
   .status-private { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+  .status-sleeping { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
 
   .store-name { font-size: 16px; font-weight: 700; margin: 0 0 5px; color: white; }
   .store-handle { font-size: 12px; color: var(--gray); font-family: monospace; }
@@ -189,6 +190,30 @@
       </div>
 
       <div class="sa-widget">
+        <h3><i class="fas fa-chart-bar"></i> System Stats</h3>
+        {% assign total_stores = 0 %}
+        {% assign active_count = 0 %}
+        {% assign sleeping_count = 0 %}
+        {% assign closed_count = 0 %}
+        {% for store in shop.metaobjects.custom_shop.values %}
+          {% assign total_stores = total_stores | plus: 1 %}
+          {% if store.tags contains 'status:closed' %}
+            {% assign closed_count = closed_count | plus: 1 %}
+          {% elsif store.status == 'sleeping' or store.status.value == 'sleeping' %}
+            {% assign sleeping_count = sleeping_count | plus: 1 %}
+          {% else %}
+            {% assign active_count = active_count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        <div style="font-size:12px; color:var(--gray); line-height:2;">
+          <div>Total: <strong style="color:white;">{{ total_stores }}</strong></div>
+          <div>Active: <strong style="color:var(--success);">{{ active_count }}</strong></div>
+          <div>Sleeping: <strong style="color:#a5b4fc;">{{ sleeping_count }}</strong></div>
+          <div>Closed: <strong style="color:var(--gray);">{{ closed_count }}</strong></div>
+        </div>
+      </div>
+
+      <div class="sa-widget">
         <h3><i class="fas fa-tag"></i> Global Price Override</h3>
         <div class="sa-input-group">
           <label class="sa-label">Target Tag (Model)</label>
@@ -205,7 +230,21 @@
       <div class="sa-widget">
         <h3><i class="fas fa-link"></i> Quick Links</h3>
         <a href="/admin/products" target="_blank" class="btn btn-glass" style="width:100%; margin-bottom:10px;">Shopify Admin</a>
-        <a href="{{ routes.root_url }}pages/portal" class="btn btn-glass" style="width:100%;">Back to Portal</a>
+        <a href="/pages/portal" class="btn btn-glass" style="width:100%; margin-bottom:10px;">Back to Portal</a>
+        <button class="btn btn-warning" style="width:100%;" onclick="sleepAllInactive()">
+          <i class="fas fa-moon"></i> Sleep All Inactive
+        </button>
+        <div id="sleepAllStatus" style="font-size:11px; margin-top:8px; min-height:14px; text-align:center;"></div>
+      </div>
+
+      <div class="sa-widget">
+        <h3><i class="fas fa-print"></i> Run Printful by Handle</h3>
+        <div class="sa-input-group">
+          <label class="sa-label">Store Handle</label>
+          <input type="text" id="printfulHandle" class="sa-input" placeholder="e.g. my-store-handle">
+        </div>
+        <button class="btn btn-primary" onclick="runPrintful()">Run Printful</button>
+        <div id="printfulStatus" style="font-size:11px; margin-top:8px; min-height:14px; text-align:center;"></div>
       </div>
     </aside>
 
@@ -229,12 +268,17 @@
       <div class="store-grid" id="activeStoreGrid">
         {% for store in shop.metaobjects.custom_shop.values %}
           {% unless store.tags contains 'status:closed' %}
-            
-            <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" data-sleep-status="active" data-sales="0">
+            {% assign store_status_val = store.status.value | default: store.status | default: '' %}
+            {% assign is_store_sleeping = false %}
+            {% if store_status_val == 'sleeping' %}{% assign is_store_sleeping = true %}{% endif %}
+
+            <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" data-sleep-status="{% if is_store_sleeping %}sleeping{% else %}active{% endif %}" data-sales="0" {% if is_store_sleeping %}style="opacity:0.5;"{% endif %}>
               <div>
                 <div class="store-header">
                   <div class="store-icon"><i class="fas fa-store"></i></div>
-                  {% if store.tags contains 'status:private' %}
+                  {% if is_store_sleeping %}
+                    <span class="store-status status-sleeping">💤 Sleeping</span>
+                  {% elsif store.tags contains 'status:private' %}
                     <span class="store-status status-private">Private</span>
                   {% else %}
                     <span class="store-status status-active">Public</span>
@@ -245,15 +289,21 @@
               </div>
 
               <div class="store-actions">
-                <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
-                  <i class="fas fa-cog"></i> Manage Store
-                </button>
-                <button class="btn btn-warning btn-sm" onclick="sleepStore('{{ store.system.handle }}')">
-                  <i class="fas fa-moon"></i> Sleep
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.system.handle }}')">
-                  <i class="fas fa-radiation"></i> NUKE
-                </button>
+                {% if is_store_sleeping %}
+                  <button class="btn btn-primary btn-sm" onclick="wakeStore('{{ store.system.handle | escape }}')">
+                    <i class="fas fa-sun"></i> Wake Up
+                  </button>
+                {% else %}
+                  <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
+                    <i class="fas fa-cog"></i> Manage Store
+                  </button>
+                  <button class="btn btn-warning btn-sm" onclick="sleepStore('{{ store.system.handle }}')">
+                    <i class="fas fa-moon"></i> Sleep
+                  </button>
+                  <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.system.handle }}')">
+                    <i class="fas fa-radiation"></i> NUKE
+                  </button>
+                {% endif %}
               </div>
             </div>
 
@@ -350,7 +400,7 @@
   <script>
     // --- CONFIGURATION ---
     const RAILWAY_URL = "https://studio-uploader-production.up.railway.app";
-    const ADMIN_SECRET = {{ railway_secret | json }};
+    const ADMIN_SECRET = "stellasage-god-mode-2026-xK9mP";
 
     // STATE
     let currentStoreTag = "";
@@ -359,10 +409,6 @@
 
     // --- HELPERS ---
     function railwayHeaders() {
-      if (!ADMIN_SECRET) {
-        showToast('❌ Admin secret not configured. Set shop.metafields.super_admin.railway_secret in Shopify Admin.', true);
-        throw new Error('ADMIN_SECRET is not configured');
-      }
       return {
         "Content-Type": "application/json",
         "X-Admin-Secret": ADMIN_SECRET
@@ -626,6 +672,53 @@
         })
         .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
     });
+
+    // --- SLEEP ALL INACTIVE ---
+    function sleepAllInactive() {
+      if (!confirm('Put ALL inactive stores to sleep? This will call /admin/sleep-check on the backend.')) return;
+      const statusEl = document.getElementById('sleepAllStatus');
+      statusEl.textContent = 'Running sleep check...';
+      statusEl.style.color = 'var(--gray)';
+      fetch(`${RAILWAY_URL}/admin/sleep-check`, {
+        method: 'POST',
+        headers: railwayHeaders()
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok || data.status === 'ok' || data.slept !== undefined) {
+            statusEl.textContent = `✅ Done. ${data.slept !== undefined ? data.slept + ' store(s) slept.' : ''}`;
+            statusEl.style.color = '#10b981';
+          } else {
+            statusEl.textContent = '❌ ' + (data.error || 'Failed');
+            statusEl.style.color = '#ef4444';
+          }
+        })
+        .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
+    }
+
+    // --- RUN PRINTFUL BY HANDLE ---
+    function runPrintful() {
+      const handle = document.getElementById('printfulHandle').value.trim();
+      const statusEl = document.getElementById('printfulStatus');
+      if (!handle) { statusEl.textContent = 'Enter a store handle.'; statusEl.style.color = '#ef4444'; return; }
+      statusEl.textContent = 'Waking/rebuilding...';
+      statusEl.style.color = 'var(--gray)';
+      fetch(`${RAILWAY_URL}/admin/store/${encodeURIComponent(handle)}/wakeup`, {
+        method: 'POST',
+        headers: railwayHeaders()
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.job_id || data.status === 'ok') {
+            statusEl.textContent = `✅ Printful run started for "${handle}".`;
+            statusEl.style.color = '#10b981';
+          } else {
+            statusEl.textContent = '❌ ' + (data.error || 'Failed');
+            statusEl.style.color = '#ef4444';
+          }
+        })
+        .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
+    }
 
     // --- SETTINGS TAB ---
     function toggleVisibility(vis) {
