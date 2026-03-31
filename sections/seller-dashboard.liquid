@@ -683,7 +683,7 @@
         fetch(BACKEND_URL + '/api/store/' + encodeURIComponent(handle) + '/ready-status')
           .then(function(r){ return r.json(); })
           .then(function(data){
-            if(data.is_fully_ready === true || data.is_fully_ready === 'true'){
+            if(data.is_fully_ready === true || data.is_fully_ready === 'true' || data.ready === true || data.ready === 'true'){
               clearInterval(intervalId);
               setLiveUI(card);
             }
@@ -702,12 +702,12 @@
       if(isReady && !isAsleep){
         // Fully ready: ensure live UI (no-op if Liquid already rendered it)
         setLiveUI(card);
-      } else if(canBootstrap){
-        // Admin/god + not ready: poll backend; cycle messages for build state
-        if(!isAsleep) startMsgCycle(card);
+      } else {
+        // Not ready (building) or asleep: start polling for everyone
+        // Only admins/god see the progress messages; everyone polls
+        if(canBootstrap && !isAsleep) startMsgCycle(card);
         startPollingReady(card);
       }
-      // Non-admin + not ready: static Liquid-rendered message, no action needed
     });
 
     // --- Leave Store ---
