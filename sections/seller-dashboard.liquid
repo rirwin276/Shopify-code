@@ -1,15 +1,17 @@
 {% comment %}
   SHOP DASHBOARD — STUDIO EDITION (WITH SELLER MODE)
 
-  v0.37 changes (this update):
-  ✅ 5-minute loader ONLY runs for ADMIN (or GOD) on first device view
-  ✅ ALWAYS wait full 5 minutes (no early unlock)
-  ✅ Admin button DISABLED during the 5-minute loader (even when metaobject says ready)
-  ✅ CLOSED copy says "disabled by Stella & Sage" (not admin)
+  v0.38 changes (this update):
+  ✅ Remove hardcoded 5-minute localStorage countdown timer
+  ✅ Poll backend /api/store/{handle}/ready-status every 10s (admin/god only)
+  ✅ Unlock card only when backend confirms is_fully_ready = true
+  ✅ Updated loading messages to veteran-owned store copy
+  ✅ Sleeping/waking states show appropriate loading messages
+  ✅ Non-admin members see static Liquid-rendered messages (no polling)
 
   Notes:
-  - This does NOT change or write to is_fully_ready metaobject.
-  - Non-admin members will never see the loader; when ready they see LIVE immediately.
+  - This does NOT write to the is_fully_ready metaobject (Printful Automation does that).
+  - New device/browser no longer triggers loading screen if store is already live.
 {% endcomment %}
 
 {% assign explainer_url = '/pages/private-storefronts' %}
@@ -322,7 +324,7 @@
                               </div>
                             </div>
                             <div class="ss-founderline" aria-live="polite">
-                              <span class="ss-fmsg ss-fmsg-a is-active">Products are on pause. The store can be woken up to rebuild inventory.</span>
+                              <span class="ss-fmsg ss-fmsg-a is-active">This store is currently in sleep mode. Products will be restored when the store wakes up.</span>
                             </div>
                           </div>
                         {% elsif tile_is_waking %}
@@ -334,7 +336,7 @@
                               </div>
                             </div>
                             <div class="ss-founderline" aria-live="polite">
-                              <span class="ss-fmsg ss-fmsg-a is-active">Rebuilding products — check back soon.</span>
+                              <span class="ss-fmsg ss-fmsg-a is-active">This store is waking up — products are being restored. Check back in a few minutes.</span>
                             </div>
                           </div>
                         {% elsif is_fully_ready %}
@@ -343,17 +345,21 @@
                             <span class="ss-status-text">LIVE STOREFRONT</span>
                           </div>
                         {% else %}
-                          <div class="ss-buildwrap ss-closedwrap">
+                          <div class="ss-buildwrap">
                             <div class="ss-buildtop">
-                              <div class="ss-status-building ss-buildbadge ss-closedbadge">
-                                <span class="ss-dot-building"></span>
-                                <span class="ss-status-text-building ss-closedtext">STORE TEMPORARILY CLOSED</span>
+                              <div class="ss-status-building ss-buildbadge">
+                                <span class="ss-dot-building ss-dot-building-anim"></span>
+                                <span class="ss-status-text-building">BUILDING PRODUCTS</span>
                               </div>
                             </div>
-
+                            <div class="ss-progress" aria-hidden="true">
+                              <div class="ss-progress-track">
+                                <div class="ss-progress-bar ss-progress-bar-anim"></div>
+                              </div>
+                            </div>
                             <div class="ss-founderline" aria-live="polite">
-                              <span class="ss-fmsg ss-fmsg-a is-active">This storefront has been disabled by Stella &amp; Sage for maintenance or quality review.</span>
-                              <span class="ss-fmsg ss-fmsg-b">Check back soon — progress continues automatically.</span>
+                              <span class="ss-fmsg ss-fmsg-a is-active">Thank you for supporting a veteran-owned store! Production is in progress — you can leave this page and check back.</span>
+                              <span class="ss-fmsg ss-fmsg-b">Your products are being built. This usually takes a few minutes.</span>
                             </div>
                           </div>
                         {% endif %}
@@ -380,12 +386,9 @@
 
                           {% if tile_is_admin %}
                             {% if is_fully_ready %}
-                              {%- comment -%}
-                                Render as a real link, but with "ss-admin-dyn" so JS can disable it during the 5-min loader.
-                              {%- endcomment -%}
                               <a href="{{ admin_url }}" class="ss-admin-btn ss-admin-dyn" title="Admin" data-admin-href="{{ admin_url }}">Admin</a>
                             {% else %}
-                              <span class="ss-admin-btn ss-disabled" title="Admin disabled while store is closed">Admin</span>
+                              <span class="ss-admin-btn ss-disabled ss-admin-dyn" title="Admin disabled while system prepares" data-admin-href="{{ admin_url }}">Admin</span>
                             {% endif %}
                           {% endif %}
 
@@ -553,127 +556,17 @@
     });
 
     // ============================================================
-    // v0.37: 5-min loader ONLY for first ADMIN/GOD device (bootstrapper)
-    // - Non-admin users/devices NEVER see the loader
-    // - Loader ALWAYS runs full 5 minutes (no early unlock)
-    // - Does NOT write to is_fully_ready metaobject
+    // Backend URL (used for polling and leave-store)
     // ============================================================
-    var BUILD_MS = 5 * 60 * 1000;
+    var BACKEND_URL = {{ section.settings.backend_url | default: '' | json }};
 
-    function now(){ return Date.now(); }
-    function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-
-    function startKey(handle){ return 'ss_build_start__' + handle; }
-    function doneKey(handle){ return 'ss_build_done__' + handle; }
-
-    function getDone(handle){
-      try{ return localStorage.getItem(doneKey(handle)) === '1'; }
-      catch(err){ return false; }
-    }
-
-    function setDone(handle){
-      try{
-        localStorage.setItem(doneKey(handle), '1');
-        localStorage.removeItem(startKey(handle));
-      }catch(err){}
-    }
-
-    function getOrInitStart(handle){
-      try{
-        var k = startKey(handle);
-        var v = localStorage.getItem(k);
-        if(v && !isNaN(parseInt(v,10))) return parseInt(v,10);
-        var t = now();
-        localStorage.setItem(k, String(t));
-        return t;
-      }catch(err){
-        return now();
-      }
-    }
-
-    // --- Ensure the card is in "building UI" state (visual only) ---
-    function ensureBuildUI(card){
-      if(card.getAttribute('data-ss-buildui') === '1') return;
-      card.setAttribute('data-ss-buildui','1');
-
-      // Disable clickrow while building UI is active
-      card.classList.remove('ss-clickrow');
-      card.setAttribute('data-ss-unlocked','0');
-
-      // Disable Admin during loader
-      disableAdminUI(card);
-
-      // Engine column: if it's currently showing LIVE, swap to buildwrap
-      var engine = card.querySelector('.ss-col-engine');
-      if(engine){
-        var finished = engine.querySelector('.ss-status-finished');
-        if(finished) finished.parentNode.removeChild(finished);
-
-        if(!engine.querySelector('.ss-buildwrap')){
-          var wrap = document.createElement('div');
-          wrap.className = 'ss-buildwrap';
-          wrap.innerHTML = '' +
-            '<div class="ss-buildtop">' +
-              '<div class="ss-status-building ss-buildbadge">' +
-                '<span class="ss-dot-building ss-dot-building-anim"></span>' +
-                '<span class="ss-status-text-building">CREATING PRODUCTS</span>' +
-              '</div>' +
-            '</div>' +
-            '<div class="ss-progress" aria-hidden="true">' +
-              '<div class="ss-progress-track">' +
-                '<div class="ss-progress-bar" style="width:6%;"></div>' +
-              '</div>' +
-            '</div>' +
-            '<div class="ss-founderline" aria-live="polite">' +
-              '<span class="ss-fmsg ss-fmsg-a is-active">Thanks for supporting a veteran-owned, operator-built platform.</span>' +
-              '<span class="ss-fmsg ss-fmsg-b">You can leave this page — progress continues automatically.</span>' +
-            '</div>';
-          engine.appendChild(wrap);
-        }
-      }
-
-      // Controls: replace "Open Storefront" link with disabled button (same class)
-      var controls = card.querySelector('.ss-col-controls');
-      if(controls){
-        var openLink = controls.querySelector('a.ss-open-btn');
-        if(openLink){
-          var href = openLink.getAttribute('href') || card.getAttribute('data-href') || '#';
-          var btn = document.createElement('button');
-          btn.className = 'ss-open-btn ss-disabled ss-open-dyn';
-          btn.disabled = true;
-          btn.setAttribute('data-open-href', href);
-          btn.textContent = 'System Preparing...';
-          openLink.parentNode.replaceChild(btn, openLink);
-        }
-      }
-    }
-
-    function disableAdminUI(card){
-      var admin = card.querySelector('.ss-admin-dyn');
-      if(!admin) return;
-
-      // If it's already been swapped to a span, nothing to do
-      if(admin.tagName && admin.tagName.toLowerCase() === 'span') return;
-
-      var href = admin.getAttribute('data-admin-href') || admin.getAttribute('href') || '';
-      var span = document.createElement('span');
-      span.className = 'ss-admin-btn ss-disabled ss-admin-dyn';
-      span.setAttribute('data-admin-href', href);
-      span.title = 'Admin disabled while system prepares';
-      span.textContent = 'Admin';
-      admin.parentNode.replaceChild(span, admin);
-    }
-
+    // --- Enable admin link after store unlocks ---
     function enableAdminUI(card){
       var admin = card.querySelector('.ss-admin-dyn');
       if(!admin) return;
-
-      // Only swap back if it's disabled span
       if(!(admin.tagName && admin.tagName.toLowerCase() === 'span')) return;
-
       var href = admin.getAttribute('data-admin-href') || '';
       if(!href) return;
-
       var a = document.createElement('a');
       a.href = href;
       a.className = 'ss-admin-btn ss-admin-dyn';
@@ -683,17 +576,19 @@
       admin.parentNode.replaceChild(a, admin);
     }
 
+    // --- Transition a card to the live/unlocked state ---
     function setLiveUI(card){
-      // Make row clickable
       card.classList.add('ss-clickrow');
       card.setAttribute('data-ss-unlocked','1');
+      card.style.opacity = '';
+      card.style.borderColor = '';
+      card.style.boxShadow = '';
 
-      // Engine: show LIVE pill
+      // Engine: replace buildwrap with LIVE pill
       var engine = card.querySelector('.ss-col-engine');
       if(engine){
         var buildwrap = engine.querySelector('.ss-buildwrap');
         if(buildwrap) buildwrap.parentNode.removeChild(buildwrap);
-
         if(!engine.querySelector('.ss-status-finished')){
           var finished = document.createElement('div');
           finished.className = 'ss-status-finished';
@@ -702,91 +597,120 @@
         }
       }
 
-      // Controls: button -> link
-      var btn = card.querySelector('.ss-open-dyn');
-      if(btn){
-        var href = btn.getAttribute('data-open-href') || card.getAttribute('data-href') || '#';
-        var a = document.createElement('a');
-        a.href = href;
-        a.className = 'ss-open-btn';
-        a.innerHTML = '<span>Open Storefront</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-        btn.parentNode.replaceChild(a, btn);
-      }
+      // Controls: wire up Open Storefront link and Admin link
+      var controls = card.querySelector('.ss-col-controls');
+      if(controls){
+        var isBootstrapper = card.getAttribute('data-ss-bootstrapper') === '1';
+        var storeHref = card.getAttribute('data-href') || '#';
+        var adminHref = card.getAttribute('data-admin-href') || '';
 
-      // Re-enable Admin after unlock
-      enableAdminUI(card);
+        // Remove "only admin can wake" helper text if present
+        var wakeNote = controls.querySelector('p');
+        if(wakeNote) wakeNote.parentNode.removeChild(wakeNote);
 
-      card.setAttribute('data-ss-buildui','0');
-    }
+        // Build open-storefront anchor
+        function makeOpenLink(){
+          var a = document.createElement('a');
+          a.href = storeHref;
+          a.className = 'ss-open-btn';
+          a.innerHTML = '<span>Open Storefront</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+          return a;
+        }
 
-    function updateCard(card){
-      var isGloballyReady = card.getAttribute('data-ss-ready') === '1';
-      if(!isGloballyReady) return; // metaobject OFF => CLOSED mode, do nothing
+        // Replace .ss-open-dyn placeholder (building state)
+        var dynBtn = controls.querySelector('.ss-open-dyn');
+        if(dynBtn){
+          dynBtn.parentNode.replaceChild(makeOpenLink(), dynBtn);
+        }
 
-      var handle = card.getAttribute('data-ss-handle') || '';
-      if(!handle) return;
+        // Replace wake button (sleeping state — admin)
+        var wakeBtn = controls.querySelector('[data-wake-store-sd]');
+        if(wakeBtn){
+          if(isBootstrapper && adminHref){
+            var adminA = document.createElement('a');
+            adminA.href = adminHref;
+            adminA.className = 'ss-admin-btn ss-admin-dyn';
+            adminA.setAttribute('data-admin-href', adminHref);
+            adminA.title = 'Admin';
+            adminA.textContent = 'Admin';
+            controls.insertBefore(adminA, wakeBtn);
+          }
+          wakeBtn.parentNode.replaceChild(makeOpenLink(), wakeBtn);
+        }
 
-      // ✅ Only admins/god are allowed to run the 5-minute loader
-      var canBootstrap = card.getAttribute('data-ss-bootstrapper') === '1';
-
-      // Non-admin members: NEVER show loader; show live immediately when ready
-      if(!canBootstrap){
-        setLiveUI(card);
-        return;
-      }
-
-      // Admin/God device already completed: ensure live UI
-      if(getDone(handle)){
-        setLiveUI(card);
-        return;
-      }
-
-      // First-time for this admin device: show build UI + run timer
-      ensureBuildUI(card);
-
-      // Timer progress bar + messages
-      var start = getOrInitStart(handle);
-      var elapsed = now() - start;
-
-      var pct = clamp((elapsed / BUILD_MS) * 100, 2, 99);
-      if(pct > 85){
-        var overshoot = pct - 85;
-        pct = 85 + (overshoot * 0.55);
-      }
-
-      var bar = card.querySelector('.ss-progress-bar');
-      if(bar) bar.style.width = pct.toFixed(2) + '%';
-
-      var msgA = card.querySelector('.ss-fmsg-a');
-      var msgB = card.querySelector('.ss-fmsg-b');
-      if(msgA && msgB){
-        var phase = Math.floor(elapsed / 20000) % 2;
-        if(phase === 0){
-          msgA.classList.add('is-active');
-          msgB.classList.remove('is-active');
-        }else{
-          msgB.classList.add('is-active');
-          msgA.classList.remove('is-active');
+        // Replace any remaining disabled open button (waking / sleeping non-admin)
+        var disBtn = controls.querySelector('.ss-open-btn.ss-disabled');
+        if(disBtn){
+          if(isBootstrapper && adminHref && !controls.querySelector('.ss-admin-dyn')){
+            var adminA2 = document.createElement('a');
+            adminA2.href = adminHref;
+            adminA2.className = 'ss-admin-btn ss-admin-dyn';
+            adminA2.setAttribute('data-admin-href', adminHref);
+            adminA2.title = 'Admin';
+            adminA2.textContent = 'Admin';
+            disBtn.parentNode.insertBefore(adminA2, disBtn);
+          }
+          disBtn.parentNode.replaceChild(makeOpenLink(), disBtn);
         }
       }
 
-      // HARD RULE: only unlock after FULL 5 minutes
-      if(elapsed >= BUILD_MS){
-        setDone(handle);
+      // Enable admin span → link (building state)
+      enableAdminUI(card);
+    }
+
+    // --- Cycle between message A and B every 20 s ---
+    function startMsgCycle(card){
+      var msgA = card.querySelector('.ss-fmsg-a');
+      var msgB = card.querySelector('.ss-fmsg-b');
+      if(!msgA || !msgB) return;
+      setInterval(function(){
+        if(msgA.classList.contains('is-active')){
+          msgA.classList.remove('is-active');
+          msgB.classList.add('is-active');
+        } else {
+          msgB.classList.remove('is-active');
+          msgA.classList.add('is-active');
+        }
+      }, 20000);
+    }
+
+    // --- Poll backend every 10 s until is_fully_ready = true ---
+    function startPollingReady(card){
+      var handle = card.getAttribute('data-ss-handle') || '';
+      if(!handle || !BACKEND_URL) return;
+      var intervalId = setInterval(function(){
+        if(!document.body.contains(card)){ clearInterval(intervalId); return; }
+        fetch(BACKEND_URL + '/api/store/' + encodeURIComponent(handle) + '/ready-status')
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            if(data.is_fully_ready === true || data.is_fully_ready === 'true'){
+              clearInterval(intervalId);
+              setLiveUI(card);
+            }
+          })
+          .catch(function(err){ console.error('[ss-poll] ready-status error for ' + handle + ':', err); /* keep polling */ });
+      }, 10000);
+    }
+
+    // --- Initialise each store card ---
+    document.querySelectorAll('.ss-store-card').forEach(function(card){
+      var isReady     = card.getAttribute('data-ss-ready') === '1';
+      var canBootstrap = card.getAttribute('data-ss-bootstrapper') === '1';
+      var sleepStatus = card.getAttribute('data-ss-sleep-status') || 'active';
+      var isAsleep    = sleepStatus === 'sleeping' || sleepStatus === 'waking';
+
+      if(isReady && !isAsleep){
+        // Fully ready: ensure live UI (no-op if Liquid already rendered it)
         setLiveUI(card);
+      } else if(canBootstrap){
+        // Admin/god + not ready: poll backend; cycle messages for build state
+        if(!isAsleep) startMsgCycle(card);
+        startPollingReady(card);
       }
-    }
-
-    function tick(){
-      // Only apply to globally-ready stores (metaobject true)
-      document.querySelectorAll('.ss-store-card[data-ss-ready="1"]').forEach(updateCard);
-    }
-
-    tick();
-    setInterval(tick, 1000);
+      // Non-admin + not ready: static Liquid-rendered message, no action needed
+    });
 
     // --- Leave Store ---
-    var LEAVE_BACKEND = {{ section.settings.backend_url | default: '' | json }};
     var leaveModal   = document.getElementById('ssLeaveModal');
     var leaveText    = document.getElementById('ssLeaveText');
     var leaveStatus  = document.getElementById('ssLeaveStatus');
@@ -810,14 +734,14 @@
 
     leaveConfirm && leaveConfirm.addEventListener('click', async function(){
       if(!leaveHandle) return;
-      if(!LEAVE_BACKEND){
+      if(!BACKEND_URL){
         leaveStatus.textContent = 'Backend URL not configured in section settings.';
         return;
       }
       leaveConfirm.disabled = true;
       leaveStatus.textContent = 'Removing\u2026';
       try {
-        var res = await fetch(LEAVE_BACKEND + '/api/storefront/' + encodeURIComponent(leaveHandle) + '/leave', {
+        var res = await fetch(BACKEND_URL + '/api/storefront/' + encodeURIComponent(leaveHandle) + '/leave', {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ customer_id: String({{ customer.id | json }}) }),
@@ -1232,17 +1156,24 @@
   }
   .ss-progress-bar{
     height: 100%;
-    width: 6%;
+    width: 30%;
     border-radius: 999px;
     background: linear-gradient(90deg, rgba(43,109,232,0.75), rgba(43,109,232,0.95));
     box-shadow: 0 10px 18px rgba(43,109,232,0.12);
-    transition: width 0.9s ease;
+  }
+  .ss-progress-bar-anim{
+    animation: ssProgressIndeterminate 2.2s ease-in-out infinite alternate;
+  }
+  @keyframes ssProgressIndeterminate{
+    /* bar bounces left→right across the track; width varies slightly for a natural feel */
+    from{ margin-left: 0; width: 25%; }
+    to{ margin-left: 70%; width: 30%; }
   }
 
   .ss-founderline{
     position: relative;
     width: 100%;
-    min-height: 16px;
+    min-height: 3em; /* tall enough for 2 lines of 11px text at 1.45 line-height */
     text-align: center;
   }
   .ss-fmsg{
@@ -1293,7 +1224,7 @@
   @media (prefers-reduced-motion: reduce) {
     .ss-store-card { animation: none !important; transition: none !important; }
     .ss-dot-building-anim { animation: none !important; }
-    .ss-progress-bar { transition: none !important; }
+    .ss-progress-bar-anim { animation: none !important; }
   }
 
   .ss-leave-btn {
