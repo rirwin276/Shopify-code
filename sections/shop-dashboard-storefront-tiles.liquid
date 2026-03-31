@@ -229,28 +229,27 @@ page: {{ request.path }}
                 {%- assign display_name = entry.name.value | default: entry.name -%}
               {%- endif -%}
               {%- if entry.status != blank -%}
-                {%- assign status_value = entry.status.value | default: entry.status -%}
+                {%- assign status_value = entry.status.value | default: entry.status | default: '' | strip -%}
               {%- endif -%}
               {%- if entry.logo != blank -%}
                 {%- assign logo_value = entry.logo.value | default: entry.logo -%}
               {%- endif -%}
             {%- endif -%}
 
-            {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
-            {%- if status_value == 'sleeping' -%}
-              {%- assign status_label = '❄️ Hibernation Mode' -%}
-            {%- elsif status_value == 'waking' -%}
-              {%- assign status_label = '☀️ Waking Up...' -%}
-            {%- elsif status_value == 'active' -%}
-              {%- assign status_label = '✅ Active' -%}
-            {%- elsif status_value == 'under_construction' -%}
-              {%- assign status_label = '🔧 Under Construction' -%}
-            {%- endif -%}
-
+            {%- assign status_label = 'Active' -%}
             {%- assign is_sleeping = false -%}
             {%- assign is_waking = false -%}
-            {%- if status_value == 'sleeping' -%}{%- assign is_sleeping = true -%}{%- endif -%}
-            {%- if status_value == 'waking' -%}{%- assign is_waking = true -%}{%- endif -%}
+            {%- if status_value == 'sleeping' -%}
+              {%- assign status_label = '💤 Sleeping' -%}
+              {%- assign is_sleeping = true -%}
+            {%- elsif status_value == 'waking' -%}
+              {%- assign status_label = '⏰ Waking up…' -%}
+              {%- assign is_waking = true -%}
+            {%- elsif status_value == 'closed' -%}
+              {%- assign status_label = 'Closed' -%}
+            {%- elsif status_value != blank and status_value != 'active' -%}
+              {%- assign status_label = status_value | replace: '_', ' ' | capitalize -%}
+            {%- endif -%}
 
             {%- assign h_enc = h | url_encode -%}
             {%- assign storefront_url = section.settings.storefront_base_url | append: '?shop=' | append: h_enc -%}
