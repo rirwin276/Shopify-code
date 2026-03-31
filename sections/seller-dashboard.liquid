@@ -280,8 +280,10 @@
                       tabindex="0"
                       data-href="{{ tile_url }}"
                       data-ss-handle="{{ handle | escape }}"
+                      data-ss-backend="{{ section.settings.backend_url | escape }}"
                       data-ss-products="{{ product_count }}"
                       data-ss-ready="{% if is_fully_ready %}1{% else %}0{% endif %}"
+                      data-ss-building="{% unless is_fully_ready %}1{% else %}0{% endunless %}"
                       data-admin-href="{{ admin_url }}"
                       data-ss-bootstrapper="{% if tile_is_admin or is_god %}1{% else %}0{% endif %}"
                       data-ss-sleep-status="{% if tile_is_sleeping %}sleeping{% elsif tile_is_waking %}waking{% else %}active{% endif %}"
@@ -315,31 +317,7 @@
                       </div>
 
                       <div class="ss-col-engine">
-                        {% if tile_is_sleeping %}
-                          <div class="ss-buildwrap ss-closedwrap">
-                            <div class="ss-buildtop">
-                              <div class="ss-status-building ss-buildbadge ss-closedbadge" style="background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.3);">
-                                <span class="ss-dot-building" style="background:#6366f1;"></span>
-                                <span class="ss-status-text-building ss-closedtext" style="color:#6366f1;">💤 STORE SLEEPING</span>
-                              </div>
-                            </div>
-                            <div class="ss-founderline" aria-live="polite">
-                              <span class="ss-fmsg ss-fmsg-a is-active">This store is currently in sleep mode. Products will be restored when the store wakes up.</span>
-                            </div>
-                          </div>
-                        {% elsif tile_is_waking %}
-                          <div class="ss-buildwrap ss-closedwrap">
-                            <div class="ss-buildtop">
-                              <div class="ss-status-building ss-buildbadge" style="background:rgba(59,130,246,0.12); border-color:rgba(59,130,246,0.3);">
-                                <span class="ss-dot-building ss-dot-building-anim" style="background:#3b82f6;"></span>
-                                <span class="ss-status-text-building" style="color:#3b82f6;">⏳ WAKING UP…</span>
-                              </div>
-                            </div>
-                            <div class="ss-founderline" aria-live="polite">
-                              <span class="ss-fmsg ss-fmsg-a is-active">This store is waking up — products are being restored. Check back in a few minutes.</span>
-                            </div>
-                          </div>
-                        {% elsif is_fully_ready %}
+                        {% if is_fully_ready %}
                           <div class="ss-status-finished">
                             <span class="ss-dot-live"></span>
                             <span class="ss-status-text">LIVE STOREFRONT</span>
@@ -349,7 +327,7 @@
                             <div class="ss-buildtop">
                               <div class="ss-status-building ss-buildbadge">
                                 <span class="ss-dot-building ss-dot-building-anim"></span>
-                                <span class="ss-status-text-building">BUILDING PRODUCTS</span>
+                                <span class="ss-status-text-building">BUILDING YOUR STORE</span>
                               </div>
                             </div>
                             <div class="ss-progress" aria-hidden="true">
@@ -358,8 +336,8 @@
                               </div>
                             </div>
                             <div class="ss-founderline" aria-live="polite">
-                              <span class="ss-fmsg ss-fmsg-a is-active">Thank you for supporting a veteran-owned store! Production is in progress — you can leave this page and check back.</span>
-                              <span class="ss-fmsg ss-fmsg-b">Your products are being built. This usually takes a few minutes.</span>
+                              <span class="ss-fmsg ss-fmsg-a is-active">Thank you for supporting a veteran-owned store. You can leave this page — production will continue.</span>
+                              <span class="ss-fmsg ss-fmsg-b">Your products are being built right now. This page will update automatically when your store is ready.</span>
                             </div>
                           </div>
                         {% endif %}
@@ -674,18 +652,21 @@
       }, 20000);
     }
 
-    // --- Poll backend every 10 s until is_fully_ready = true ---
+    // --- Poll backend every 10 s until ready = true ---
     function startPollingReady(card){
       var handle = card.getAttribute('data-ss-handle') || '';
-      if(!handle || !BACKEND_URL) return;
+      var backendUrl = (card.getAttribute('data-ss-backend') || BACKEND_URL || '').replace(/\/$/, '');
+      if(!handle || !backendUrl) return;
       var intervalId = setInterval(function(){
         if(!document.body.contains(card)){ clearInterval(intervalId); return; }
-        fetch(BACKEND_URL + '/api/store/' + encodeURIComponent(handle) + '/ready-status')
+        fetch(backendUrl + '/store/' + encodeURIComponent(handle) + '/ready-status', { cache: 'no-store' })
           .then(function(r){ return r.json(); })
           .then(function(data){
-            if(data.is_fully_ready === true || data.is_fully_ready === 'true' || data.ready === true || data.ready === 'true'){
+            if(data.ready === true || data.ready === 'true' || data.is_fully_ready === true || data.is_fully_ready === 'true'){
               clearInterval(intervalId);
-              setLiveUI(card);
+              var bar = card.querySelector('.ss-progress-bar');
+              if(bar) bar.style.width = '100%';
+              setTimeout(function(){ window.location.reload(); }, 800);
             }
           })
           .catch(function(err){ console.error('[ss-poll] ready-status error for ' + handle + ':', err); /* keep polling */ });
@@ -693,21 +674,14 @@
     }
 
     // --- Initialise each store card ---
-    document.querySelectorAll('.ss-store-card').forEach(function(card){
-      var isReady     = card.getAttribute('data-ss-ready') === '1';
-      var canBootstrap = card.getAttribute('data-ss-bootstrapper') === '1';
-      var sleepStatus = card.getAttribute('data-ss-sleep-status') || 'active';
-      var isAsleep    = sleepStatus === 'sleeping' || sleepStatus === 'waking';
+    document.querySelectorAll('.ss-store-card[data-ss-building="1"]').forEach(function(card){
+      startMsgCycle(card);
+      startPollingReady(card);
+    });
 
-      if(isReady && !isAsleep){
-        // Fully ready: ensure live UI (no-op if Liquid already rendered it)
-        setLiveUI(card);
-      } else {
-        // Not ready (building) or asleep: start polling for everyone
-        // Only admins/god see the progress messages; everyone polls
-        if(canBootstrap && !isAsleep) startMsgCycle(card);
-        startPollingReady(card);
-      }
+    // Ready cards: Liquid already rendered LIVE — call setLiveUI to ensure JS state is consistent
+    document.querySelectorAll('.ss-store-card[data-ss-ready="1"]').forEach(function(card){
+      setLiveUI(card);
     });
 
     // --- Leave Store ---
