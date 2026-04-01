@@ -283,7 +283,7 @@
                       data-ss-backend="{{ section.settings.backend_url | escape }}"
                       data-ss-products="{{ product_count }}"
                       data-ss-ready="{% if is_fully_ready %}1{% else %}0{% endif %}"
-                      data-ss-building="{% if tile_is_sleeping == false and tile_is_waking == false and is_fully_ready == false %}1{% else %}0{% endif %}"
+                      data-ss-building="{% if tile_is_waking %}1{% elsif tile_is_sleeping == false and is_fully_ready == false %}1{% else %}0{% endif %}"
                       data-admin-href="{{ admin_url }}"
                       data-ss-bootstrapper="{% if tile_is_admin or is_god %}1{% else %}0{% endif %}"
                       data-ss-sleep-status="{% if tile_is_sleeping %}sleeping{% elsif tile_is_waking %}waking{% else %}active{% endif %}"
@@ -323,7 +323,10 @@
                             <span class="ss-status-text">LIVE STOREFRONT</span>
                           </div>
                         {% elsif tile_is_sleeping %}
-                          {{- '' -}}
+                          <div class="ss-status-finished ss-status-hibernating">
+                            <span class="ss-dot-live ss-dot-hibernating"></span>
+                            <span class="ss-status-text">HIBERNATING STORE</span>
+                          </div>
                         {% elsif tile_is_waking or is_fully_ready == false %}
                           <div class="ss-buildwrap">
                             <div class="ss-buildtop">
@@ -357,8 +360,14 @@
                               ☀️ Wake Up Store
                             </button>
                           {% else %}
-                            <button class="ss-open-btn ss-disabled" disabled style="opacity:0.5; cursor:not-allowed; box-shadow:none;">💤 Sleeping</button>
-                            <p style="font-size:11px; opacity:.65; margin:4px 0 0; text-align:center;">Only the store admin can wake this store.</p>
+                            <button
+                              class="ss-leave-btn"
+                              data-leave-store
+                              data-handle="{{ handle | escape }}"
+                              data-name="{{ tile_name | escape }}">
+                              Leave Store
+                            </button>
+                            <p style="font-size:11px; opacity:.65; margin:4px 0 0; text-align:center;">If you need your store woken up, talk to the store admin.</p>
                           {% endif %}
                         {% elsif tile_is_waking %}
                           <button class="ss-open-btn ss-disabled" disabled style="opacity:0.5; cursor:not-allowed; box-shadow:none;">⏳ Rebuilding…</button>
@@ -976,6 +985,8 @@
   .ss-status-finished { display: flex; align-items: center; gap: 8px; background: rgba(236,253,245,0.70); padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(16,185,129,0.14); }
   .ss-dot-live { width: 8px; height: 8px; background: var(--ss-success); border-radius: 50%; box-shadow: 0 0 0 3px rgba(16,185,129,0.14); }
   .ss-status-text { font-size: 11px; font-weight: 850; color: rgba(6,95,70,0.92); letter-spacing: 0.06em; }
+  .ss-status-hibernating { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.35); color: #4338ca; }
+  .ss-dot-hibernating { background: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
 
   .ss-status-building { display: flex; align-items: center; gap: 8px; background: rgba(241,245,249,0.85); padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.2); }
   .ss-dot-building { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; }
