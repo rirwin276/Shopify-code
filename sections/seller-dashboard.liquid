@@ -101,7 +101,7 @@
   {% else %}
     {% assign entry = shop.metaobjects.custom_shop[handle] %}
     {% assign is_ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
-    {% if is_ready == true %}
+    {% if is_ready == true or is_ready == 'true' %}
       {% assign bucket_live = bucket_live | append: needle %}
     {% else %}
       {% assign bucket_building = bucket_building | append: needle %}
@@ -240,7 +240,7 @@
                       {% if n != blank %}{% assign tile_name = n %}{% endif %}
 
                       {% assign ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
-                      {% if ready == true %}{% assign is_fully_ready = true %}{% endif %}
+                      {% if ready == true or ready == 'true' %}{% assign is_fully_ready = true %}{% endif %}
 
                       {% assign lcu = entry.logo_clean_url.value | default: entry.logo_clean_url %}
                       {% if lcu == blank %}{% assign lcu = entry.logo_clean.value | default: entry.logo_clean %}{% endif %}
