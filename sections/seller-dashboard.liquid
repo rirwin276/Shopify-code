@@ -393,13 +393,15 @@
                           {% endif %}
 
                           {% unless tile_is_admin %}
-                            <button
-                              class="ss-leave-btn"
-                              data-leave-store
-                              data-handle="{{ handle | escape }}"
-                              data-name="{{ tile_name | escape }}">
-                              Leave Store
-                            </button>
+                            {% if is_fully_ready %}
+                              <button
+                                class="ss-leave-btn"
+                                data-leave-store
+                                data-handle="{{ handle | escape }}"
+                                data-name="{{ tile_name | escape }}">
+                                Leave Store
+                              </button>
+                            {% endif %}
                           {% endunless %}
                         {% endif %}
                       </div>
