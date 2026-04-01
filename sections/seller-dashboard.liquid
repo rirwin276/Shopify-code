@@ -283,7 +283,7 @@
                       data-ss-backend="{{ section.settings.backend_url | escape }}"
                       data-ss-products="{{ product_count }}"
                       data-ss-ready="{% if is_fully_ready %}1{% else %}0{% endif %}"
-                      data-ss-building="{% unless is_fully_ready %}1{% else %}0{% endunless %}"
+                      data-ss-building="{% if tile_is_sleeping == false and tile_is_waking == false and is_fully_ready == false %}1{% else %}0{% endif %}"
                       data-admin-href="{{ admin_url }}"
                       data-ss-bootstrapper="{% if tile_is_admin or is_god %}1{% else %}0{% endif %}"
                       data-ss-sleep-status="{% if tile_is_sleeping %}sleeping{% elsif tile_is_waking %}waking{% else %}active{% endif %}"
@@ -317,12 +317,14 @@
                       </div>
 
                       <div class="ss-col-engine">
-                        {% if is_fully_ready %}
+                        {% if is_fully_ready and tile_is_sleeping == false and tile_is_waking == false %}
                           <div class="ss-status-finished">
                             <span class="ss-dot-live"></span>
                             <span class="ss-status-text">LIVE STOREFRONT</span>
                           </div>
-                        {% else %}
+                        {% elsif tile_is_sleeping %}
+                          {{- '' -}}
+                        {% elsif tile_is_waking or is_fully_ready == false %}
                           <div class="ss-buildwrap">
                             <div class="ss-buildtop">
                               <div class="ss-status-building ss-buildbadge">
