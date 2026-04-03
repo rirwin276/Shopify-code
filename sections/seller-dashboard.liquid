@@ -282,7 +282,7 @@
                       data-ss-handle="{{ handle | escape }}"
                       data-ss-backend="{{ section.settings.backend_url | escape }}"
                       data-ss-products="{{ product_count }}"
-                      data-ss-ready="{% if is_fully_ready %}1{% else %}0{% endif %}"
+                      data-ss-ready="{% if is_fully_ready and tile_is_sleeping == false and tile_is_waking == false %}1{% else %}0{% endif %}"
                       data-ss-building="{% if tile_is_waking %}1{% elsif tile_is_sleeping == false and is_fully_ready == false %}1{% else %}0{% endif %}"
                       data-admin-href="{{ admin_url }}"
                       data-ss-bootstrapper="{% if tile_is_admin or is_god %}1{% else %}0{% endif %}"
@@ -569,6 +569,9 @@
 
     // --- Transition a card to the live/unlocked state ---
     function setLiveUI(card){
+      // Never upgrade sleeping or waking cards — their controls are managed by Liquid
+      var sleepStatus = card.getAttribute('data-ss-sleep-status');
+      if(sleepStatus === 'sleeping' || sleepStatus === 'waking') return;
       card.classList.add('ss-clickrow');
       card.setAttribute('data-ss-unlocked','1');
       card.style.opacity = '';
