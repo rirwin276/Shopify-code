@@ -82,6 +82,7 @@
 
         <input type="hidden" name="main_session_id" id="SF_MAIN_SESSION" value="">
         <input type="hidden" name="secondary_session_id" id="SF_SEC_SESSION" value="">
+        <input type="hidden" name="type_of_store" id="SF_TYPE_OF_STORE" value="">
 
         <div class="sf-block">
           <div class="sf-legend">Basics</div>
@@ -113,7 +114,24 @@
 
             <div class="sf-field sf-hidden" id="SportType">
               <label class="sf-label" for="SportInput">Which Sport? *</label>
-              <input type="text" id="SportInput" name="sport_type" class="sf-input" placeholder="e.g. Baseball, Travel Ball">
+              <select id="SportInput" name="sport_type" class="sf-select">
+                <option value="" disabled selected>Select a sport...</option>
+                <option value="softball">Softball</option>
+                <option value="baseball">Baseball</option>
+                <option value="hockey">Hockey</option>
+                <option value="soccer">Soccer</option>
+                <option value="volleyball">Volleyball</option>
+                <option value="basketball">Basketball</option>
+                <option value="football">Football</option>
+                <option value="lacrosse">Lacrosse</option>
+                <option value="wrestling">Wrestling</option>
+                <option value="swimming">Swimming</option>
+                <option value="track">Track &amp; Field</option>
+                <option value="cross-country">Cross Country</option>
+                <option value="golf">Golf</option>
+                <option value="tennis">Tennis</option>
+                <option value="cheer">Cheer / Cheerleading</option>
+              </select>
             </div>
 
             <div class="sf-field">
@@ -957,6 +975,24 @@
     const endpoint = SF_UPLOADER_BASE + "/api/storefront-request";
     const form = document.getElementById('sf-request-form');
     const formData = new FormData(form);
+
+    // Build type_of_store from org_type + conditional sub-field
+    (function() {
+      const orgType = (document.getElementById('OrgType')?.value || "").trim();
+      const sportVal = (document.getElementById('SportInput')?.value || "").trim();
+      const branchVal = (document.getElementById('BranchInput')?.value || "").trim();
+      let typeOfStore = "";
+      if (orgType === "Sports Team" && sportVal) {
+        typeOfStore = sportVal; // e.g. "softball"
+      } else if (orgType === "Military Unit" && branchVal) {
+        typeOfStore = branchVal; // e.g. "Army"
+      } else if (orgType) {
+        typeOfStore = orgType; // e.g. "Small Business", "Other"
+      }
+      const tosEl = document.getElementById('SF_TYPE_OF_STORE');
+      if (tosEl) tosEl.value = typeOfStore;
+      if (typeOfStore) formData.set("type_of_store", typeOfStore);
+    })();
 
     const pcEl = document.getElementById("PrimaryColor");
     const pcVal = (pcEl && pcEl.value) ? pcEl.value.toString().trim() : "";
