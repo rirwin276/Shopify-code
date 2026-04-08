@@ -1,9 +1,10 @@
 {% comment %}
-  ADMIN POWERS — V13 (SECTION FILE)
+  ADMIN POWERS — V12 (SECTION FILE)
   - Self-contained section (no Custom Liquid block needed).
-  - V13: Stacked collapsible accordion cards; all panels start expanded. Product thumbnails
-    (52×52px) pulled from featured_image / image / images[0].src with 🖼️ placeholder.
-    "Store Controls" replaces "Danger Zone". Products load on page load.
+  - V12: Mobile-first single-dashboard redesign with tab navigation.
+    Single card with tabs (Overview | Members | Products | Danger).
+    Product thumbnails (52×52px) pulled from featured_image / image / images[0].src
+    with 🖼️ placeholder. Products lazy-load when tab is clicked.
   - V11: Route all calls to Railway (remove Mechanic URL). Remove credentials:include from fetches.
   - God Mode: Ryan Irwin hardcoded + super-admin tag.
   - QR code, public toggle, invite/remove members.
@@ -87,7 +88,7 @@
 
   /* ── MAIN LAYOUT ───────────────────────────────────────── */
   .ap-wrap {
-    max-width: 1080px; margin: 0 auto; padding: 40px 20px 80px;
+    max-width: 800px; margin: 0 auto; padding: 40px 20px 80px;
     font-family: var(--ap-font); color: var(--ap-text);
   }
 
@@ -336,33 +337,35 @@
     line-height: 1.6;
   }
 
-  /* ── COLLAPSIBLE SECTION ─────────────────────────────────── */
-  .ap-section {
+  /* ── MAIN TABS ─────────────────────────────────────────── */
+  .ap-main-card {
     background: var(--ap-card); border: 1px solid var(--ap-border);
-    border-radius: var(--ap-radius); margin-bottom: 24px;
-    box-shadow: var(--ap-shadow); overflow: hidden;
+    border-radius: var(--ap-radius); box-shadow: var(--ap-shadow);
+    overflow: hidden;
   }
-  .ap-section-toggle {
-    width: 100%; background: none; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 22px 28px; font-family: var(--ap-font); font-size: 15px;
-    font-weight: 800; color: var(--ap-text); text-align: left;
-    transition: background 0.15s; gap: 12px;
+  .ap-main-tabs {
+    display: flex; gap: 0; border-bottom: 2px solid var(--ap-border);
+    background: #f8fafc; overflow-x: auto;
   }
-  .ap-section-toggle:hover { background: #f8fafc; }
-  .ap-section-toggle-left { display: flex; align-items: center; gap: 12px; }
-  .ap-section-icon {
-    width: 36px; height: 36px; border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
+  .ap-main-tab-btn {
+    flex: 1; min-width: 0; padding: 14px 10px;
+    font-family: var(--ap-font); font-size: 13px; font-weight: 700;
+    color: var(--ap-gray); background: none; border: none;
+    border-bottom: 3px solid transparent; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; text-align: center;
+    margin-bottom: -2px;
   }
-  .ap-chevron { font-size: 11px; color: var(--ap-gray); transition: transform 0.2s; }
-  .ap-section-toggle[aria-expanded="true"] .ap-chevron { transform: rotate(180deg); }
-  .ap-section-body { padding: 0 28px 28px; }
+  .ap-main-tab-btn:hover { color: var(--ap-text); background: #f1f5f9; }
+  .ap-main-tab-btn.active {
+    color: #fff; background: var(--ap-accent);
+    border-bottom-color: var(--ap-accent2);
+  }
+  .ap-main-panel { display: none; padding: 28px; }
+  .ap-main-panel.active { display: block; }
   @media(max-width:600px) {
-    .ap-section-toggle { padding: 16px 20px; }
-    .ap-section-body { padding: 0 20px 20px; }
-    .ap-danger-zone-body { padding: 4px 20px 20px; }
+    .ap-main-tab-btn { font-size: 12px; padding: 12px 6px; }
+    .ap-main-panel { padding: 20px; }
+    .ap-danger-zone-body { padding: 4px 0 0; }
   }
 
   /* ── DANGER ROW ──────────────────────────────────────────── */
@@ -481,17 +484,19 @@
     </div>
   </div>
 
-  <!-- INVITE & ACCESS SECTION -->
-  <div class="ap-section">
-    <button class="ap-section-toggle" id="apToggleOverview" aria-expanded="true">
-      <span class="ap-section-toggle-left">
-        <span class="ap-section-icon" style="background:#eef2ff;">🔗</span>
-        <span>Invite &amp; Access</span>
-      </span>
-      <span class="ap-chevron">▼</span>
-    </button>
-    <div class="ap-divider" style="margin:0 28px;"></div>
-    <div class="ap-section-body" id="apBodyOverview" style="padding-top:20px;">
+  <!-- MAIN DASHBOARD CARD WITH TABS -->
+  <div class="ap-main-card">
+
+    <!-- MAIN PANEL TABS -->
+    <div class="ap-main-tabs" role="tablist">
+      <button class="ap-main-tab-btn active" id="apTabBtnOverview" data-main-tab="apPanelOverview" role="tab" aria-selected="true" aria-controls="apPanelOverview">🏠 Overview</button>
+      <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers">👥 Members</button>
+      <button class="ap-main-tab-btn" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="false" aria-controls="apPanelProducts">📦 Products</button>
+      <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger">☠️ Danger</button>
+    </div>
+
+    <!-- OVERVIEW PANEL -->
+    <div id="apPanelOverview" class="ap-main-panel active" role="tabpanel" aria-labelledby="apTabBtnOverview">
 
       <div class="ap-radio-group">
         <label class="ap-radio {% if join_mode == 'secure' %}selected{% endif %}">
@@ -534,20 +539,10 @@
         </div>
       </div>
 
-    </div>
-  </div><!-- /Invite & Access -->
+    </div><!-- /apPanelOverview -->
 
-  <!-- MEMBERS SECTION -->
-  <div class="ap-section">
-    <button class="ap-section-toggle" id="apToggleMembers" aria-expanded="true">
-      <span class="ap-section-toggle-left">
-        <span class="ap-section-icon" style="background:#ecfdf5;">👥</span>
-        <span>Members</span>
-      </span>
-      <span class="ap-chevron">▼</span>
-    </button>
-    <div class="ap-divider" style="margin:0 28px;"></div>
-    <div class="ap-section-body" id="apBodyMembers" style="padding-top:20px;">
+    <!-- MEMBERS PANEL -->
+    <div id="apPanelMembers" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnMembers">
       <p style="margin:0 0 16px;font-size:13px;color:var(--ap-gray);">Add or remove people from this storefront.</p>
 
       <div class="ap-form-group">
@@ -569,71 +564,49 @@
         <button id="apBtnRemove" class="ap-btn ap-btn--danger">Remove</button>
       </div>
       <div id="apStatusMembers" class="ap-status"></div>
-    </div>
-  </div><!-- /Members -->
+    </div><!-- /apPanelMembers -->
 
-  <!-- PRODUCTS SECTION -->
-  <div class="ap-section">
-    <button class="ap-section-toggle" id="apToggleProducts" aria-expanded="true">
-      <span class="ap-section-toggle-left">
-        <span class="ap-section-icon" style="background:#fef9c3;">📦</span>
-        <span>Products</span>
-      </span>
-      <span class="ap-chevron">▼</span>
-    </button>
-    <div class="ap-divider" style="margin:0 28px;"></div>
-    <div class="ap-section-body" id="apBodyProducts" style="padding-top:16px;">
+    <!-- PRODUCTS PANEL -->
+    <div id="apPanelProducts" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnProducts">
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
       <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found for this store.</div>
       <div id="apProductsContainer" class="ap-product-list"></div>
       <div id="apStatusProducts" class="ap-status"></div>
-    </div>
-  </div><!-- /Products -->
+    </div><!-- /apPanelProducts -->
 
-  <!-- STORE CONTROLS -->
-  <div class="ap-danger-card">
-    <div style="padding:24px 28px 0; display:flex; align-items:center; gap:12px;">
-      <div class="ap-card-icon ap-card-icon--red" style="margin:0;">⚙️</div>
-      <div>
-        <h3 style="margin:0; font-size:17px; font-weight:800; color:#dc2626;">Store Lifecycle</h3>
-        <p style="margin:4px 0 0; font-size:12px; color:var(--ap-gray);">Manage store sleep mode or permanently remove this storefront.</p>
-      </div>
-    </div>
-    <div class="ap-danger-zone-body">
+    <!-- DANGER PANEL -->
+    <div id="apPanelDanger" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnDanger">
 
-      <!-- Sleep / Wake row -->
-      <div class="ap-danger-row">
-        <div class="ap-danger-row-left">
-          <span class="ap-danger-row-icon">💤</span>
-          <div>
-            <div class="ap-danger-row-title">Sleep Store</div>
-            <div class="ap-danger-row-desc">Deletes all products and sets the store to hibernation mode. The store can be re-woken at any time.</div>
-          </div>
+      <!-- Sleep Mode Card -->
+      <div class="ap-card" style="margin-bottom:20px;border-color:rgba(239,68,68,0.2);background:#fff5f5;">
+        <div class="ap-card-head">
+          <div class="ap-card-icon ap-card-icon--red">💤</div>
+          <h3>Sleep Mode</h3>
+          <p>Deletes all products and sets the store to hibernation mode. The store can be re-woken at any time.</p>
         </div>
         {% if ap_store_status == 'sleeping' %}
-          <button id="apBtnWakeStore" class="ap-btn ap-btn--sm" style="background:#10b981;color:#fff;">☀️ Wake Up</button>
+          <button id="apBtnWakeStore" class="ap-btn ap-btn--primary ap-btn-full" style="background:#10b981;">☀️ Wake Up Store</button>
         {% elsif ap_store_status == 'waking' %}
-          <button class="ap-btn ap-btn--sm" disabled style="background:#6366f1;color:#fff;opacity:0.6;cursor:not-allowed;">⏳ Waking…</button>
+          <button class="ap-btn ap-btn-full" disabled style="background:#6366f1;color:#fff;opacity:0.6;cursor:not-allowed;">⏳ Waking…</button>
         {% else %}
-          <button id="apBtnSleepStore" class="ap-btn ap-btn--danger ap-btn--sm">💤 Sleep</button>
+          <button id="apBtnSleepStore" class="ap-btn ap-btn--danger ap-btn-full">💤 Put Store to Sleep</button>
         {% endif %}
+        <div id="apStatusSleep" class="ap-status"></div>
       </div>
 
-      <!-- Nuke Store row -->
-      <div class="ap-danger-row">
-        <div class="ap-danger-row-left">
-          <span class="ap-danger-row-icon">💣</span>
-          <div>
-            <div class="ap-danger-row-title">Nuke Store</div>
-            <div class="ap-danger-row-desc">Permanently deletes the store, all products, the collection, all member tags, and the metaobject. This cannot be undone.</div>
-          </div>
+      <!-- Danger Zone (Nuke) Card -->
+      <div class="ap-danger-card">
+        <div class="ap-card-head">
+          <div class="ap-card-icon ap-card-icon--red">💣</div>
+          <h3 style="color:#dc2626;">Danger Zone — Nuke Store</h3>
+          <p>Permanently deletes the store, all products, the collection, all member tags, and the metaobject. <strong>This cannot be undone.</strong></p>
         </div>
-        <button id="apNukeBtn" class="ap-btn ap-btn--nuke ap-btn--sm">💣 Nuke</button>
+        <button id="apNukeBtn" class="ap-btn ap-btn--nuke">💣 Nuke This Store</button>
       </div>
 
-      <div id="apStatusSleep" class="ap-status" style="margin-top:4px;"></div>
-    </div>
-  </div><!-- /Store Controls -->
+    </div><!-- /apPanelDanger -->
+
+  </div><!-- /.ap-main-card -->
 
   <!-- NUKE CONFIRMATION MODAL (position: fixed — outside sections) -->
   <div class="ap-nuke-overlay" id="apNukeOverlay">
@@ -663,28 +636,33 @@
 
 <script>
 (function(){
-  // ── COLLAPSIBLE SECTION TOGGLES ──────────────────────────────
+  // ── MAIN TAB SWITCHING ──────────────────────────────────────
+  var apProductsLoaded = false;
 
-  function apSetupToggle(btnId, bodyId) {
-    var btn = document.getElementById(btnId);
-    var body = document.getElementById(bodyId);
-    if (!btn || !body) return;
-    btn.addEventListener('click', function() {
-      var expanded = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', String(!expanded));
-      body.style.display = expanded ? 'none' : 'block';
+  document.querySelectorAll('.ap-main-tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var targetId = btn.getAttribute('data-main-tab');
+      // Deactivate all tabs and panels
+      document.querySelectorAll('.ap-main-tab-btn').forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      document.querySelectorAll('.ap-main-panel').forEach(function(p){ p.classList.remove('active'); });
+      // Activate clicked tab and its panel
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      var panel = document.getElementById(targetId);
+      if(panel) panel.classList.add('active');
+      // Lazy-load products when Products tab is first clicked
+      if(targetId === 'apPanelProducts' && !apProductsLoaded){
+        apProductsLoaded = true;
+        apLoadProducts();
+      }
     });
-  }
-
-  apSetupToggle('apToggleOverview', 'apBodyOverview');
-  apSetupToggle('apToggleMembers', 'apBodyMembers');
-  apSetupToggle('apToggleProducts', 'apBodyProducts');
+  });
 
   // TAB SWITCHING (inner tabs — Copy Link / QR Code)
   document.querySelectorAll('.ap-tab-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
       var targetId = btn.getAttribute('data-tab');
-      var scope = btn.closest('.ap-section-body') || btn.closest('.ap-card') || document;
+      var scope = btn.closest('.ap-main-panel') || btn.closest('.ap-card') || document;
       scope.querySelectorAll('.ap-tab-content').forEach(function(c){ c.style.display = 'none'; });
       scope.querySelectorAll('.ap-tab-btn').forEach(function(b){ b.classList.remove('active'); });
       document.getElementById(targetId).style.display = 'block';
@@ -1122,8 +1100,7 @@
     }
   }
 
-  // Load products immediately on page load since all cards start expanded
-  apLoadProducts();
+  // Products are lazy-loaded when the Products tab is first clicked
 })();
 </script>
 
