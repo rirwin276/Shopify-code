@@ -287,6 +287,8 @@
   }
   .ap-icon-action:hover { background: #f8fafc; border-color: #94a3b8; }
   .ap-icon-action--danger:hover { background: #fef2f2; border-color: #fca5a5; }
+  .ap-empty-state { color: var(--ap-gray); font-size: 14px; padding: 20px 0; text-align: center; }
+  .ap-error-state { color: #991b1b; font-size: 14px; padding: 20px 0; }
 
   /* ── SPINNER ──────────────────────────────────────────────── */
   .ap-spinner { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--ap-gray); font-size: 14px; gap: 10px; }
@@ -583,13 +585,16 @@
   // ── QUICK ACTION BUTTONS ────────────────────────────────────
   document.getElementById('apQuickQR').addEventListener('click', function() {
     showTab('overview');
-    // Show the public block so QR is visible regardless of current mode
     var block = document.getElementById('apBlockPublic');
-    if (block) block.style.display = 'block';
-    setTimeout(function() {
-      var qr = document.getElementById('ap-qrcode');
-      if (qr) qr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 50);
+    var currentMode = document.querySelector('input[name="ap-joinmode"]:checked');
+    // Only reveal the block when the store is in public mode; otherwise let user see the toggle
+    if (block && currentMode && currentMode.value === 'public') {
+      block.style.display = 'block';
+      setTimeout(function() {
+        var qr = document.getElementById('ap-qrcode');
+        if (qr) qr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+    }
   });
 
   document.getElementById('apQuickSleep').addEventListener('click', function() {
@@ -719,6 +724,51 @@
   // ── PRODUCTS ─────────────────────────────────────────────────
   var apProductsLoaded = false;
 
+  function buildProductRow(p) {
+    var isHidden = p.hidden === true;
+    var encodedId = encodeURIComponent(p.id);
+
+    var row = document.createElement('div');
+    row.className = 'ap-product-row';
+    row.setAttribute('data-product-id', encodedId);
+
+    var titleSpan = document.createElement('span');
+    titleSpan.className = 'ap-product-title';
+    titleSpan.textContent = p.title || '';
+    titleSpan.title = p.title || '';
+    row.appendChild(titleSpan);
+
+    var badge = document.createElement('span');
+    badge.className = 'ap-product-badge ' + (isHidden ? 'ap-product-badge--hidden' : 'ap-product-badge--visible');
+    badge.textContent = isHidden ? 'HIDDEN' : 'VISIBLE';
+    row.appendChild(badge);
+
+    var actions = document.createElement('div');
+    actions.className = 'ap-product-actions';
+
+    var toggleBtn = document.createElement('button');
+    toggleBtn.className = 'ap-icon-action';
+    toggleBtn.setAttribute('data-action', 'toggle');
+    toggleBtn.setAttribute('data-id', encodedId);
+    toggleBtn.setAttribute('data-hidden', String(isHidden));
+    toggleBtn.title = isHidden ? 'Show product' : 'Hide product';
+    toggleBtn.setAttribute('aria-label', isHidden ? 'Show product' : 'Hide product');
+    toggleBtn.textContent = '\uD83D\uDC41\uFE0F';
+    actions.appendChild(toggleBtn);
+
+    var deleteBtn = document.createElement('button');
+    deleteBtn.className = 'ap-icon-action ap-icon-action--danger';
+    deleteBtn.setAttribute('data-action', 'delete');
+    deleteBtn.setAttribute('data-id', encodedId);
+    deleteBtn.title = 'Delete product';
+    deleteBtn.setAttribute('aria-label', 'Delete product');
+    deleteBtn.textContent = '\uD83D\uDDD1\uFE0F';
+    actions.appendChild(deleteBtn);
+
+    row.appendChild(actions);
+    return row;
+  }
+
   async function loadProducts() {
     var content = document.getElementById('apProductsContent');
     var statusEl = document.getElementById('apStatusProducts');
@@ -731,25 +781,20 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var products = await res.json();
       if (!Array.isArray(products) || !products.length) {
-        content.innerHTML = '<p style="color:var(--ap-gray);font-size:14px;padding:20px 0;text-align:center;">No products found for this store.</p>';
+        content.innerHTML = '';
+        var empty = document.createElement('p');
+        empty.className = 'ap-empty-state';
+        empty.textContent = 'No products found for this store.';
+        content.appendChild(empty);
         return;
       }
-      var html = '<div>';
+
+      var list = document.createElement('div');
       products.forEach(function(p) {
-        var isHidden = p.hidden === true;
-        var encodedId = encodeURIComponent(p.id);
-        var safeTitle = String(p.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        html += '<div class="ap-product-row" data-product-id="' + encodedId + '">';
-        html += '<span class="ap-product-title" title="' + safeTitle + '">' + safeTitle + '</span>';
-        html += '<span class="ap-product-badge ' + (isHidden ? 'ap-product-badge--hidden' : 'ap-product-badge--visible') + '">' + (isHidden ? 'HIDDEN' : 'VISIBLE') + '</span>';
-        html += '<div class="ap-product-actions">';
-        html += '<button class="ap-icon-action" data-action="toggle" data-id="' + encodedId + '" data-hidden="' + isHidden + '" title="' + (isHidden ? 'Show product' : 'Hide product') + '" aria-label="' + (isHidden ? 'Show product' : 'Hide product') + '">\uD83D\uDC41\uFE0F</button>';
-        html += '<button class="ap-icon-action ap-icon-action--danger" data-action="delete" data-id="' + encodedId + '" title="Delete product" aria-label="Delete product">\uD83D\uDDD1\uFE0F</button>';
-        html += '</div>';
-        html += '</div>';
+        list.appendChild(buildProductRow(p));
       });
-      html += '</div>';
-      content.innerHTML = html;
+      content.innerHTML = '';
+      content.appendChild(list);
 
       content.querySelectorAll('[data-action="toggle"]').forEach(function(btn) {
         btn.addEventListener('click', async function() {
@@ -757,13 +802,17 @@
           var isHidden = btn.getAttribute('data-hidden') === 'true';
           btn.disabled = true;
           try {
-            var r = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/products/' + encodedId + '/hide', {
+            var response = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/products/' + encodedId + '/hide', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET },
               body: JSON.stringify({ hidden: !isHidden })
             });
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            await loadProducts();
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            try {
+              await loadProducts();
+            } catch(refreshErr) {
+              setStatus(statusEl, '\u2705 Product updated, but failed to refresh list.', 'ok');
+            }
           } catch(e) {
             setStatus(statusEl, '\u274C Could not update product: ' + (e.message || 'unknown'), 'err');
             btn.disabled = false;
@@ -777,12 +826,16 @@
           var encodedId = btn.getAttribute('data-id');
           btn.disabled = true;
           try {
-            var r = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/products/' + encodedId, {
+            var response = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/products/' + encodedId, {
               method: 'DELETE',
               headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }
             });
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            await loadProducts();
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            try {
+              await loadProducts();
+            } catch(refreshErr) {
+              setStatus(statusEl, '\u2705 Product deleted, but failed to refresh list.', 'ok');
+            }
           } catch(e) {
             setStatus(statusEl, '\u274C Could not delete product: ' + (e.message || 'unknown'), 'err');
             btn.disabled = false;
@@ -791,7 +844,11 @@
       });
 
     } catch(e) {
-      content.innerHTML = '<p style="color:#991b1b;font-size:14px;padding:20px 0;">\u274C Failed to load products: ' + (e.message || 'unknown error') + '</p>';
+      content.innerHTML = '';
+      var errEl = document.createElement('p');
+      errEl.className = 'ap-error-state';
+      errEl.textContent = '\u274C Failed to load products: ' + (e.message || 'unknown error');
+      content.appendChild(errEl);
     }
   }
 
