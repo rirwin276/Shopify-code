@@ -1,10 +1,9 @@
 {% comment %}
-  ADMIN POWERS — V11 (SECTION FILE)
-  - Self-contained section (no Custom Liquid block needed).
-  - V11: Route all calls to Railway (remove Mechanic URL). Remove credentials:include from fetches.
-  - God Mode: Ryan Irwin hardcoded + super-admin tag.
-  - QR code, public toggle, invite/remove members.
-  - Premium design upgrade.
+  ADMIN POWERS — V12 (SECTION FILE)
+  - V12: Mobile-first single-dashboard redesign with tab navigation.
+  - Tabs: Overview | Members | Products | Danger
+  - Products tab: list, hide/show, delete via Railway API.
+  - All existing functionality preserved.
 {% endcomment %}
 
 {%- assign dashboard_url = '/pages/portal' -%}
@@ -66,34 +65,21 @@
   }
 
   /* ── AUTH SCREENS ──────────────────────────────────────── */
-  .ap-auth-wrap {
-    max-width: 420px; margin: 80px auto; padding: 20px;
-    text-align: center; font-family: var(--ap-font);
-  }
-  .ap-auth-card {
-    background: var(--ap-card); padding: 48px 40px;
-    border-radius: var(--ap-radius); border: 1px solid var(--ap-border);
-    box-shadow: var(--ap-shadow);
-  }
-  .ap-auth-icon {
-    font-size: 36px; width: 72px; height: 72px; line-height: 72px;
-    background: #f1f5f9; border-radius: 50%; margin: 0 auto 24px; display: block;
-  }
+  .ap-auth-wrap { max-width: 420px; margin: 80px auto; padding: 20px; text-align: center; font-family: var(--ap-font); }
+  .ap-auth-card { background: var(--ap-card); padding: 48px 40px; border-radius: var(--ap-radius); border: 1px solid var(--ap-border); box-shadow: var(--ap-shadow); }
+  .ap-auth-icon { font-size: 36px; width: 72px; height: 72px; line-height: 72px; background: #f1f5f9; border-radius: 50%; margin: 0 auto 24px; display: block; }
   .ap-auth-card h2 { margin: 0 0 10px; font-size: 22px; font-weight: 800; }
   .ap-auth-card p { margin: 0 0 24px; color: var(--ap-gray); font-size: 15px; }
 
   /* ── MAIN LAYOUT ───────────────────────────────────────── */
-  .ap-wrap {
-    max-width: 1080px; margin: 0 auto; padding: 40px 20px 80px;
-    font-family: var(--ap-font); color: var(--ap-text);
-  }
+  .ap-wrap { max-width: 800px; margin: 0 auto; padding: 32px 20px 80px; font-family: var(--ap-font); color: var(--ap-text); }
 
   /* ── HERO HEADER ───────────────────────────────────────── */
   .ap-hero {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
-    border-radius: var(--ap-radius); padding: 36px 40px; margin-bottom: 32px;
-    display: flex; justify-content: space-between; align-items: flex-end;
-    flex-wrap: wrap; gap: 20px; position: relative; overflow: hidden;
+    border-radius: var(--ap-radius); padding: 22px 24px; margin-bottom: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 14px; position: relative; overflow: hidden;
     box-shadow: var(--ap-shadow-lg);
   }
   .ap-hero::before {
@@ -106,40 +92,45 @@
     background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
     color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.1em;
-    padding: 5px 12px; border-radius: 99px; margin-bottom: 14px;
+    padding: 4px 10px; border-radius: 99px; margin-bottom: 8px;
     backdrop-filter: blur(10px);
   }
   .ap-hero-badge .dot {
     width: 6px; height: 6px; border-radius: 50%; background: #10b981;
     box-shadow: 0 0 6px #10b981; animation: pulse-dot 2s infinite;
   }
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+  .ap-hero-badge.status--sleeping .dot { background: #6366f1; box-shadow: 0 0 6px #6366f1; }
+  .ap-hero-badge.status--waking .dot { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+  .ap-hero-badge.status--building .dot { background: #8b5cf6; box-shadow: 0 0 6px #8b5cf6; }
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @media (prefers-reduced-motion: reduce) { .ap-hero-badge .dot { animation: none; } }
+  .ap-hero h1 { margin: 0 0 3px; font-size: clamp(20px, 4vw, 28px); font-weight: 900; color: #fff; letter-spacing: -0.03em; line-height: 1.1; }
+  .ap-hero-sub { color: rgba(255,255,255,0.55); font-size: 12px; margin: 0; }
+  .ap-hero-actions { display: flex; gap: 8px; position: relative; z-index: 1; align-items: center; flex-wrap: wrap; }
+
+  /* ── ICON BUTTONS (HERO QUICK ACTIONS) ───────────────────── */
+  .ap-icon-btn {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2); color: #fff;
+    cursor: pointer; font-size: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .ap-hero-badge .dot { animation: none; }
-    .ap-public-block { animation: none; }
-  }
-  .ap-hero h1 {
-    margin: 0 0 6px; font-size: clamp(26px, 4vw, 38px); font-weight: 900;
-    color: #fff; letter-spacing: -0.03em; line-height: 1.1;
-  }
-  .ap-hero-sub { color: rgba(255,255,255,0.6); font-size: 14px; margin: 0; }
-  .ap-hero-actions { display: flex; gap: 10px; position: relative; z-index: 1; flex-wrap: wrap; }
+  .ap-icon-btn:hover { background: rgba(255,255,255,0.22); }
+  .ap-icon-btn--danger { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.35); }
+  .ap-icon-btn--danger:hover { background: rgba(239,68,68,0.38); }
 
   /* ── BUTTONS ───────────────────────────────────────────── */
   .ap-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px;
     cursor: pointer; transition: all 0.2s; border: none; text-decoration: none;
-    font-family: var(--ap-font); white-space: nowrap;
+    font-family: var(--ap-font); white-space: nowrap; min-height: 44px;
   }
   .ap-btn--primary { background: var(--ap-accent); color: #fff; }
   .ap-btn--primary:hover { background: #1e293b; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,23,42,0.3); }
-  .ap-btn--glass {
-    background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.2); color: #fff;
-  }
+  .ap-btn--glass { background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); color: #fff; }
   .ap-btn--glass:hover { background: rgba(255,255,255,0.22); color: #fff; }
   .ap-btn--outline { background: transparent; border: 1px solid var(--ap-border); color: var(--ap-text); }
   .ap-btn--outline:hover { background: #f8fafc; border-color: #94a3b8; }
@@ -148,54 +139,52 @@
   .ap-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
   .ap-btn-full { width: 100%; }
 
-  /* ── GRID ──────────────────────────────────────────────── */
-  .ap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  @media(max-width: 800px) { .ap-grid { grid-template-columns: 1fr; } }
+  /* ── TAB BAR ──────────────────────────────────────────────── */
+  .ap-tab-bar {
+    display: flex; gap: 4px; margin-bottom: 20px;
+    background: #f1f5f9; border-radius: 14px; padding: 4px;
+    position: sticky; top: 0; z-index: 100; box-shadow: var(--ap-shadow-sm);
+  }
+  .ap-tab {
+    flex: 1; padding: 10px 8px; border: none; background: transparent;
+    border-radius: 10px; font-weight: 700; font-size: 13px;
+    color: var(--ap-gray); cursor: pointer; transition: all 0.2s;
+    font-family: var(--ap-font); min-height: 44px; line-height: 1.2;
+  }
+  .ap-tab.active { background: #fff; color: var(--ap-text); box-shadow: var(--ap-shadow-sm); }
+  .ap-tab:hover:not(.active) { background: rgba(255,255,255,0.6); color: var(--ap-text); }
+
+  /* ── TAB PANELS ──────────────────────────────────────────── */
+  .ap-tab-panel { display: none; }
+  .ap-tab-panel.active { display: block; }
 
   /* ── CARDS ─────────────────────────────────────────────── */
   .ap-card {
     background: var(--ap-card); border: 1px solid var(--ap-border);
-    border-radius: var(--ap-radius); padding: 28px;
+    border-radius: var(--ap-radius); padding: 24px;
     box-shadow: var(--ap-shadow); transition: box-shadow 0.2s;
   }
-  .ap-card:hover { box-shadow: var(--ap-shadow-lg); }
-  .ap-card-head { margin-bottom: 22px; }
-  .ap-card-head h3 { margin: 0 0 5px; font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+  .ap-card + .ap-card { margin-top: 16px; }
+  .ap-card-head { margin-bottom: 20px; }
+  .ap-card-head h3 { margin: 0 0 4px; font-size: 16px; font-weight: 800; letter-spacing: -0.01em; }
   .ap-card-head p { margin: 0; font-size: 13px; color: var(--ap-gray); line-height: 1.4; }
-  .ap-card-icon {
-    width: 40px; height: 40px; border-radius: 10px; margin-bottom: 14px;
-    display: flex; align-items: center; justify-content: center; font-size: 20px;
-  }
-  .ap-card-icon--indigo { background: #eef2ff; }
-  .ap-card-icon--emerald { background: #ecfdf5; }
 
   /* ── FORM ELEMENTS ─────────────────────────────────────── */
-  .ap-form-group { margin-bottom: 20px; }
-  .ap-label {
-    display: block; font-size: 11px; font-weight: 800; margin-bottom: 8px;
-    color: var(--ap-gray); text-transform: uppercase; letter-spacing: 0.08em;
-  }
+  .ap-form-group { margin-bottom: 16px; }
+  .ap-label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 6px; color: var(--ap-gray); text-transform: uppercase; letter-spacing: 0.08em; }
   .ap-input, .ap-textarea, .ap-select {
-    width: 100%; padding: 11px 14px; border: 1.5px solid var(--ap-border);
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--ap-border);
     border-radius: 10px; font-size: 14px; font-family: var(--ap-font);
-    transition: 0.2s; background: #fff; color: var(--ap-text);
-    box-sizing: border-box;
+    transition: 0.2s; background: #fff; color: var(--ap-text); box-sizing: border-box;
   }
-  .ap-input:focus, .ap-textarea:focus, .ap-select:focus {
-    outline: none; border-color: var(--ap-accent2);
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
-  }
-  .ap-textarea { min-height: 110px; resize: vertical; }
+  .ap-input:focus, .ap-textarea:focus, .ap-select:focus { outline: none; border-color: var(--ap-accent2); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+  .ap-textarea { min-height: 100px; resize: vertical; }
   .ap-input-mono { font-family: monospace; background: #f8fafc; color: #475569; }
   .ap-helper { font-size: 12px; color: var(--ap-gray); margin: 6px 0 0; }
 
   /* ── RADIO GROUP ───────────────────────────────────────── */
-  .ap-radio-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .ap-radio {
-    display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
-    border: 1.5px solid var(--ap-border); border-radius: 12px; cursor: pointer;
-    transition: all 0.2s; background: #fafafa;
-  }
+  .ap-radio-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .ap-radio { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--ap-border); border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #fafafa; }
   .ap-radio:hover { border-color: #94a3b8; background: #f8fafc; }
   .ap-radio.selected { border-color: var(--ap-accent2); background: #eef2ff; }
   .ap-radio input[type="radio"] { margin-top: 3px; accent-color: var(--ap-accent2); }
@@ -203,61 +192,48 @@
   .ap-radio-desc { display: block; font-size: 12px; color: var(--ap-gray); }
 
   /* ── DIVIDER ───────────────────────────────────────────── */
-  .ap-divider { height: 1px; background: var(--ap-border); margin: 22px 0; }
-
-  /* ── TABS ──────────────────────────────────────────────── */
-  .ap-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
-  .ap-tab-btn {
-    background: none; border: none; font-size: 13px; font-weight: 700;
-    color: var(--ap-gray); cursor: pointer; padding: 6px 14px;
-    border-radius: 8px; transition: 0.15s;
-  }
-  .ap-tab-btn.active { background: #e2e8f0; color: var(--ap-text); }
+  .ap-divider { height: 1px; background: var(--ap-border); margin: 16px 0; }
 
   /* ── COPY ROW ──────────────────────────────────────────── */
-  .ap-copy-row { display: flex; gap: 10px; }
+  .ap-copy-row { display: flex; gap: 8px; }
   .ap-copy-row .ap-input { flex: 1; }
 
   /* ── QR ────────────────────────────────────────────────── */
-  .ap-qr-box {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 20px; background: #fff; border-radius: 14px;
-    border: 1px solid var(--ap-border); text-align: center;
-  }
+  .ap-qr-box { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #f8fafc; border-radius: 14px; border: 1px solid var(--ap-border); text-align: center; margin-top: 16px; }
   #ap-qrcode { margin: 0 auto 12px; }
   #ap-qrcode img, #ap-qrcode canvas { display: block; margin: 0 auto; }
 
   /* ── BTN ROW ───────────────────────────────────────────── */
-  .ap-btn-row { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+  .ap-btn-row { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
   .ap-btn-row .ap-btn { flex: 1; min-width: 100px; }
 
   /* ── STATUS ────────────────────────────────────────────── */
-  .ap-status {
-    margin-top: 14px; font-size: 13px; font-weight: 600;
-    min-height: 20px; border-radius: 8px; padding: 0;
-    transition: all 0.2s;
-  }
+  .ap-status { margin-top: 12px; font-size: 13px; font-weight: 600; min-height: 20px; border-radius: 8px; padding: 0; transition: all 0.2s; }
   .ap-status:not(:empty) { padding: 10px 14px; }
   .ap-status.ok { background: #ecfdf5; color: #065f46; }
   .ap-status.err { background: #fef2f2; color: #991b1b; }
 
-  /* ── PUBLIC BLOCK ──────────────────────────────────────── */
-  .ap-public-block { animation: ap-fadeIn 0.2s ease-out; }
+  /* ── ANIMATIONS ─────────────────────────────────────────── */
   @keyframes ap-fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .ap-public-block { animation: ap-fadeIn 0.2s ease-out; }
+
+  /* ── SLEEP CARD ────────────────────────────────────────── */
+  .ap-sleep-card {
+    background: #fffbeb; border: 1.5px solid rgba(245,158,11,0.3);
+    border-radius: var(--ap-radius); padding: 24px; box-shadow: var(--ap-shadow);
+  }
+  .ap-sleep-card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 800; }
+  .ap-sleep-card > p { margin: 0 0 14px; font-size: 13px; color: #6b7280; line-height: 1.5; }
 
   /* ── DANGER ZONE CARD ──────────────────────────────────── */
   .ap-danger-card {
-    background: #fff5f5;
-    border: 1.5px solid rgba(239,68,68,0.3);
-    border-radius: var(--ap-radius); padding: 28px;
-    box-shadow: var(--ap-shadow);
+    background: #fff5f5; border: 1.5px solid rgba(239,68,68,0.3);
+    border-radius: var(--ap-radius); padding: 24px;
+    box-shadow: var(--ap-shadow); margin-top: 16px;
   }
-  .ap-danger-card:hover { box-shadow: 0 8px 24px rgba(239,68,68,0.12); }
-  .ap-card-icon--red { background: #fee2e2; }
-  .ap-btn--nuke {
-    background: #ef4444; color: #fff; width: 100%;
-    margin-top: 4px;
-  }
+  .ap-danger-card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 800; color: #dc2626; }
+  .ap-danger-card > p { margin: 0 0 14px; font-size: 13px; color: #6b7280; line-height: 1.5; }
+  .ap-btn--nuke { background: #ef4444; color: #fff; width: 100%; margin-top: 4px; }
   .ap-btn--nuke:hover { background: #dc2626; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.4); }
 
   /* ── NUKE MODAL ────────────────────────────────────────── */
@@ -275,13 +251,8 @@
     animation: ap-fadeIn 0.2s ease-out;
   }
   .ap-nuke-dialog__icon { font-size: 36px; margin-bottom: 10px; }
-  .ap-nuke-dialog__title {
-    font-weight: 900; font-size: 20px; color: #dc2626;
-    margin: 0 0 8px; letter-spacing: -0.02em;
-  }
-  .ap-nuke-dialog__warning {
-    font-size: 14px; line-height: 1.55; color: #374151; margin: 0 0 16px;
-  }
+  .ap-nuke-dialog__title { font-weight: 900; font-size: 20px; color: #dc2626; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .ap-nuke-dialog__warning { font-size: 14px; line-height: 1.55; color: #374151; margin: 0 0 16px; }
   .ap-nuke-confirm-input {
     width: 100%; padding: 11px 14px; margin-bottom: 16px;
     border: 1.5px solid rgba(239,68,68,0.4); border-radius: 10px;
@@ -298,6 +269,45 @@
     font-family: monospace; white-space: pre-wrap;
     max-height: 180px; overflow-y: auto; display: none;
     line-height: 1.6;
+  }
+
+  /* ── PRODUCT ROWS ────────────────────────────────────────── */
+  .ap-product-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--ap-border); }
+  .ap-product-row:last-child { border-bottom: none; }
+  .ap-product-title { flex: 1; font-size: 14px; font-weight: 600; line-height: 1.3; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ap-product-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 99px; flex-shrink: 0; }
+  .ap-product-badge--visible { background: #dcfce7; color: #166534; }
+  .ap-product-badge--hidden { background: #f1f5f9; color: #64748b; }
+  .ap-product-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .ap-icon-action {
+    width: 44px; height: 44px; border: 1px solid var(--ap-border);
+    border-radius: 8px; background: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: all 0.15s;
+  }
+  .ap-icon-action:hover { background: #f8fafc; border-color: #94a3b8; }
+  .ap-icon-action--danger:hover { background: #fef2f2; border-color: #fca5a5; }
+
+  /* ── SPINNER ──────────────────────────────────────────────── */
+  .ap-spinner { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--ap-gray); font-size: 14px; gap: 10px; }
+  .ap-spinner::before {
+    content: ''; width: 20px; height: 20px; border: 2px solid var(--ap-border);
+    border-top-color: var(--ap-accent2); border-radius: 50%;
+    animation: ap-spin 0.8s linear infinite; flex-shrink: 0;
+  }
+  @keyframes ap-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .ap-spinner::before { animation: none; border-top-color: var(--ap-accent2); } }
+
+  /* ── MOBILE ────────────────────────────────────────────────── */
+  @media(max-width: 600px) {
+    .ap-card { padding: 16px; }
+    .ap-sleep-card { padding: 16px; }
+    .ap-danger-card { padding: 16px; }
+    .ap-wrap { padding: 16px 12px 60px; }
+    .ap-hero { padding: 16px 18px; }
+    .ap-tab { font-size: 12px; padding: 8px 6px; }
+    .ap-btn { min-height: 44px; }
+    .ap-hero h1 { font-size: 20px; }
   }
 {%- endstyle -%}
 
@@ -365,27 +375,35 @@
   <!-- HERO HEADER -->
   <div class="ap-hero">
     <div class="ap-hero-left">
-      <div class="ap-hero-badge">
+      <div class="ap-hero-badge status--{{ ap_store_status }}">
         <span class="dot"></span>
-        {% if is_super_admin %}God Mode Active{% else %}Admin Access{% endif %}
+        {{ ap_store_status | upcase }}
       </div>
       <h1>{{ store_name | capitalize }}</h1>
-      <p class="ap-hero-sub">Storefront Management Console · {{ shop_handle }}</p>
+      <p class="ap-hero-sub">{{ shop_handle }} &middot; {% if is_super_admin %}God Mode{% else %}Admin{% endif %}</p>
     </div>
     <div class="ap-hero-actions">
-      <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">View Store ↗</a>
-      <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
+      <button class="ap-icon-btn" id="apQuickQR" title="View QR Code" aria-label="View QR Code">🔗</button>
+      <button class="ap-icon-btn" id="apQuickSleep" title="Sleep / Wake Store" aria-label="Sleep or Wake Store">💤</button>
+      <button class="ap-icon-btn ap-icon-btn--danger" id="apQuickNuke" title="Nuke Store" aria-label="Nuke Store">☠️</button>
+      <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">View ↗</a>
+      <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Back</a>
     </div>
   </div>
 
-  <!-- 2-COL GRID -->
-  <div class="ap-grid">
+  <!-- TAB BAR -->
+  <div class="ap-tab-bar" role="tablist" aria-label="Admin sections">
+    <button class="ap-tab active" data-tab="overview" role="tab" aria-selected="true" aria-controls="apPanel-overview">Overview</button>
+    <button class="ap-tab" data-tab="members" role="tab" aria-selected="false" aria-controls="apPanel-members">Members</button>
+    <button class="ap-tab" data-tab="products" role="tab" aria-selected="false" aria-controls="apPanel-products">Products</button>
+    <button class="ap-tab" data-tab="danger" role="tab" aria-selected="false" aria-controls="apPanel-danger">Danger</button>
+  </div>
 
-    <!-- LEFT CARD: Invite & Access -->
+  <!-- ── OVERVIEW TAB ───────────────────────────────────── -->
+  <div class="ap-tab-panel active" id="apPanel-overview" role="tabpanel">
     <div class="ap-card">
-      <div class="ap-card-icon ap-card-icon--indigo">🔗</div>
       <div class="ap-card-head">
-        <h3>Invite &amp; Access</h3>
+        <h3>🔗 Invite &amp; Access</h3>
         <p>Control how people enter this storefront.</p>
       </div>
 
@@ -411,31 +429,27 @@
 
       <div id="apBlockPublic" class="ap-public-block" {% if join_mode != 'public' %}style="display:none"{% endif %}>
         <div class="ap-divider"></div>
-        <div class="ap-tabs">
-          <button class="ap-tab-btn active" data-tab="apTabLink">🔗 Copy Link</button>
-          <button class="ap-tab-btn" data-tab="apTabQR">📱 QR Code</button>
-        </div>
-        <div id="apTabLink" class="ap-tab-content">
+        <div class="ap-form-group">
+          <label class="ap-label">Join Link</label>
           <div class="ap-copy-row">
             <input id="apInputJoinLink" class="ap-input ap-input-mono" value="{{ join_link | escape }}" readonly>
             <button id="apBtnCopy" class="ap-btn ap-btn--outline">Copy</button>
           </div>
           <p class="ap-helper">Share this link with your team via chat or email.</p>
         </div>
-        <div id="apTabQR" class="ap-tab-content" style="display:none;">
-          <div class="ap-qr-box">
-            <div id="ap-qrcode"></div>
-            <p class="ap-helper">Print for flyers or let people scan in person.</p>
-          </div>
+        <div class="ap-qr-box">
+          <div id="ap-qrcode"></div>
+          <p class="ap-helper">Print for flyers or let people scan in person.</p>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- RIGHT CARD: Manage Roster -->
+  <!-- ── MEMBERS TAB ────────────────────────────────────── -->
+  <div class="ap-tab-panel" id="apPanel-members" role="tabpanel">
     <div class="ap-card">
-      <div class="ap-card-icon ap-card-icon--emerald">👥</div>
       <div class="ap-card-head">
-        <h3>Manage Roster</h3>
+        <h3>👥 Manage Roster</h3>
         <p>Add or remove people from this storefront.</p>
       </div>
 
@@ -459,46 +473,58 @@
       </div>
       <div id="apStatusMembers" class="ap-status"></div>
     </div>
+  </div>
 
-  </div><!-- /.ap-grid -->
+  <!-- ── PRODUCTS TAB ───────────────────────────────────── -->
+  <div class="ap-tab-panel" id="apPanel-products" role="tabpanel">
+    <div class="ap-card">
+      <div class="ap-card-head">
+        <h3>📦 Products</h3>
+        <p>Manage products visible in this storefront.</p>
+      </div>
+      <div id="apProductsContent">
+        <div class="ap-spinner">Loading products&hellip;</div>
+      </div>
+      <div id="apStatusProducts" class="ap-status"></div>
+    </div>
+  </div>
 
-  <!-- SLEEP MODE CARD (full width) -->
-  <div class="ap-card" style="margin-top: 24px;" id="apSleepModeCard">
-    <div class="ap-card-icon" style="background:#fef3c7; font-size:20px;">💤</div>
-    <div class="ap-card-head">
-      <h3>Sleep Mode</h3>
+  <!-- ── DANGER TAB ─────────────────────────────────────── -->
+  <div class="ap-tab-panel" id="apPanel-danger" role="tabpanel">
+
+    <!-- Sleep / Wake -->
+    <div class="ap-sleep-card" id="apSleepModeCard">
+      <h3>💤 Sleep Mode</h3>
       <p>Put this store to sleep. All products will be deleted. Member tags and store data are preserved. You can wake the store back up at any time to rebuild products.</p>
+
+      {% if ap_store_status == 'sleeping' %}
+        <p style="font-size:13px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin:0 0 14px;">
+          💤 This store is currently sleeping. Wake it up to rebuild all products via Printful.
+        </p>
+        <button id="apBtnWakeStore" class="ap-btn ap-btn-full" style="background:#10b981; color:#fff;">☀️ Wake Up Store</button>
+      {% elsif ap_store_status == 'waking' %}
+        <p style="font-size:13px; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin:0 0 14px;">
+          ⏳ This store is currently waking up. Products are being rebuilt. Please wait.
+        </p>
+        <button class="ap-btn ap-btn-full" disabled style="opacity:0.5; cursor:not-allowed; background:#6366f1; color:#fff;">⏳ Waking Up&hellip;</button>
+      {% else %}
+        <button id="apBtnSleepStore" class="ap-btn ap-btn-full" style="background:#ef4444; color:#fff;">💤 Put Store to Sleep</button>
+      {% endif %}
+      <div id="apStatusSleep" class="ap-status"></div>
     </div>
 
-    {% if ap_store_status == 'sleeping' %}
-      <p style="font-size:13px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
-        💤 This store is currently sleeping. Wake it up to rebuild all products via Printful.
+    <!-- Nuke -->
+    <div class="ap-danger-card">
+      <h3>☢️ Danger Zone</h3>
+      <p>
+        Permanently delete the <strong>{{ store_name }}</strong> store.
+        All products, members, logos, and settings will be removed forever.
+        <strong>This cannot be undone.</strong>
       </p>
-      <button id="apBtnWakeStore" class="ap-btn ap-btn-full" style="background:#10b981; color:#fff;">☀️ Wake Up Store</button>
-    {% elsif ap_store_status == 'waking' %}
-      <p style="font-size:13px; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
-        ⏳ This store is currently waking up. Products are being rebuilt. Please wait.
-      </p>
-      <button class="ap-btn ap-btn-full" disabled style="opacity:0.5; cursor:not-allowed; background:#6366f1; color:#fff;">⏳ Waking Up…</button>
-    {% else %}
-      <button id="apBtnSleepStore" class="ap-btn ap-btn-full" style="background:#ef4444; color:#fff;">💤 Put Store to Sleep</button>
-    {% endif %}
-    <div id="apStatusSleep" class="ap-status"></div>
-  </div>
-
-  <!-- DANGER ZONE (full width) -->
-  <div class="ap-danger-card" style="margin-top: 24px;">
-    <div class="ap-card-icon ap-card-icon--red">☢️</div>
-    <div class="ap-card-head">
-      <h3 style="color:#dc2626;">Danger Zone</h3>
-      <p>Permanently delete this storefront. This action <strong>cannot be undone</strong>.</p>
+      <button id="apNukeBtn" class="ap-btn ap-btn--nuke">☢️ Nuke This Store</button>
     </div>
-    <p style="font-size:13px; color:#6b7280; margin: 0 0 16px; line-height:1.5;">
-      This will completely and permanently delete the <strong>{{ store_name }}</strong> store.
-      All products, members, logos, and settings will be removed forever. <strong>This cannot be undone.</strong>
-    </p>
-    <button id="apNukeBtn" class="ap-btn ap-btn--nuke">☢️ Nuke This Store</button>
-  </div>
+
+  </div><!-- /.ap-tab-panel danger -->
 
   <!-- NUKE CONFIRMATION MODAL -->
   <div class="ap-nuke-overlay" id="apNukeOverlay">
@@ -528,28 +554,67 @@
 
 <script>
 (function(){
-  // TAB SWITCHING
-  document.querySelectorAll('.ap-tab-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var targetId = btn.getAttribute('data-tab');
-      btn.closest('.ap-card').querySelectorAll('.ap-tab-content').forEach(function(c){ c.style.display = 'none'; });
-      btn.closest('.ap-card').querySelectorAll('.ap-tab-btn').forEach(function(b){ b.classList.remove('active'); });
-      document.getElementById(targetId).style.display = 'block';
-      btn.classList.add('active');
+  var AP_RAILWAY_URL = SSAP.railwayUrl;
+  var AP_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
+  var AP_HANDLE = String(SSAP.shopHandle || '');
+
+  // ── TAB SWITCHING ──────────────────────────────────────────
+  function showTab(tabName) {
+    document.querySelectorAll('.ap-tab').forEach(function(t) {
+      var isActive = t.getAttribute('data-tab') === tabName;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    document.querySelectorAll('.ap-tab-panel').forEach(function(p) {
+      p.classList.toggle('active', p.id === 'apPanel-' + tabName);
+    });
+    if (tabName === 'products' && !apProductsLoaded) {
+      apProductsLoaded = true;
+      loadProducts();
+    }
+  }
+
+  document.querySelectorAll('.ap-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      showTab(tab.getAttribute('data-tab'));
     });
   });
 
-  // RADIO SYNC
-  document.addEventListener('change', function(e){
-    if(e.target && e.target.name === 'ap-joinmode'){
-      document.querySelectorAll('.ap-radio').forEach(function(r){ r.classList.remove('selected'); });
+  // ── QUICK ACTION BUTTONS ────────────────────────────────────
+  document.getElementById('apQuickQR').addEventListener('click', function() {
+    showTab('overview');
+    // Show the public block so QR is visible regardless of current mode
+    var block = document.getElementById('apBlockPublic');
+    if (block) block.style.display = 'block';
+    setTimeout(function() {
+      var qr = document.getElementById('ap-qrcode');
+      if (qr) qr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+  });
+
+  document.getElementById('apQuickSleep').addEventListener('click', function() {
+    showTab('danger');
+  });
+
+  document.getElementById('apQuickNuke').addEventListener('click', function() {
+    apNukeInput.value = '';
+    apNukeDestroy.disabled = true;
+    apNukeLog.textContent = '';
+    apNukeLog.style.display = 'none';
+    apNukeOverlay.classList.add('open');
+  });
+
+  // ── RADIO SYNC ──────────────────────────────────────────────
+  document.addEventListener('change', function(e) {
+    if (e.target && e.target.name === 'ap-joinmode') {
+      document.querySelectorAll('.ap-radio').forEach(function(r) { r.classList.remove('selected'); });
       e.target.closest('.ap-radio').classList.add('selected');
       document.getElementById('apBlockPublic').style.display = (e.target.value === 'public') ? 'block' : 'none';
     }
   });
 
-  // QR CODE
-  if(typeof QRCode !== 'undefined'){
+  // ── QR CODE ─────────────────────────────────────────────────
+  if (typeof QRCode !== 'undefined') {
     new QRCode(document.getElementById('ap-qrcode'), {
       text: {{ join_link | json }},
       width: 160, height: 160,
@@ -558,170 +623,246 @@
     });
   }
 
-  async function apPost(action, payload){
+  // ── apPost HELPER ─────────────────────────────────────────────
+  async function apPost(action, payload) {
     var body = Object.assign({
       action: action,
       shop_handle: String(SSAP.collectionHandle || ''),
       requested_by_customer_id: {{ customer.id | json }},
       requested_by_email: {{ customer.email | json }}
     }, payload || {});
-    return fetch(SSAP.railwayUrl + '/api/admin-action', {
+    return fetch(AP_RAILWAY_URL + '/api/admin-action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
   }
 
-  function setStatus(el, msg, type){
+  function setStatus(el, msg, type) {
+    if (!el) return;
     el.textContent = msg;
     el.className = 'ap-status ' + (type || '');
   }
 
-  // SAVE MODE
-  document.getElementById('apBtnSaveMode').addEventListener('click', async function(){
+  // ── SAVE MODE ─────────────────────────────────────────────────
+  document.getElementById('apBtnSaveMode').addEventListener('click', async function() {
     var btn = this;
     var mode = document.querySelector('input[name="ap-joinmode"]:checked').value;
-    btn.disabled = true; btn.textContent = 'Saving…';
+    btn.disabled = true; btn.textContent = 'Saving\u2026';
     setStatus(document.getElementById('apStatusMode'), '', '');
     try {
       var res = await apPost('set_join_mode', { join_mode: mode });
-      if(!res.ok) throw new Error();
-      setStatus(document.getElementById('apStatusMode'), '✅ Settings saved!', 'ok');
+      if (!res.ok) throw new Error();
+      setStatus(document.getElementById('apStatusMode'), '\u2705 Settings saved!', 'ok');
     } catch(e) {
-      setStatus(document.getElementById('apStatusMode'), '❌ Error saving settings.', 'err');
+      setStatus(document.getElementById('apStatusMode'), '\u274C Error saving settings.', 'err');
     } finally {
       btn.disabled = false; btn.textContent = 'Save Settings';
     }
   });
 
-  // COPY LINK
-  document.getElementById('apBtnCopy').addEventListener('click', function(){
+  // ── COPY LINK ─────────────────────────────────────────────────
+  document.getElementById('apBtnCopy').addEventListener('click', function() {
     var btn = this;
     var link = document.getElementById('apInputJoinLink').value;
-    if(navigator.clipboard && window.isSecureContext){
-      navigator.clipboard.writeText(link).then(function(){
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(link).then(function() {
         btn.textContent = 'Copied!';
-        setTimeout(function(){ btn.textContent = 'Copy'; }, 1600);
-      }).catch(function(){
+        setTimeout(function() { btn.textContent = 'Copy'; }, 1600);
+      }).catch(function() {
         btn.textContent = 'Copy manually';
-        setTimeout(function(){ btn.textContent = 'Copy'; }, 2400);
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2400);
       });
     } else {
-      // Fallback for non-HTTPS or unsupported browsers
       document.getElementById('apInputJoinLink').select();
       btn.textContent = 'Select & copy';
-      setTimeout(function(){ btn.textContent = 'Copy'; }, 2400);
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2400);
     }
   });
 
-  // ADD / REMOVE MEMBERS
-  async function handleMemberAction(action){
+  // ── ADD / REMOVE MEMBERS ──────────────────────────────────────
+  async function handleMemberAction(action) {
     var rawText = document.getElementById('apInputEmails').value;
-    var emails = rawText.split(/[\s,;]+/).map(function(e){ return e.trim().toLowerCase(); }).filter(function(e){ return e.length > 0; });
+    var emails = rawText.split(/[\s,;]+/).map(function(e) { return e.trim().toLowerCase(); }).filter(function(e) { return e.length > 0; });
     var role = document.getElementById('apInputRole').value;
     var statusEl = document.getElementById('apStatusMembers');
     var btnAdd = document.getElementById('apBtnAdd');
     var btnRemove = document.getElementById('apBtnRemove');
 
-    if(emails.length === 0){
-      setStatus(statusEl, '⚠️ Please enter at least one email.', 'err');
+    if (emails.length === 0) {
+      setStatus(statusEl, '\u26A0\uFE0F Please enter at least one email.', 'err');
       return;
     }
-    if(action === 'remove' && !confirm('Remove ' + emails.length + ' member(s)?')) return;
+    if (action === 'remove' && !confirm('Remove ' + emails.length + ' member(s)?')) return;
 
-    setStatus(statusEl, 'Processing…', '');
+    setStatus(statusEl, 'Processing\u2026', '');
     btnAdd.disabled = true; btnRemove.disabled = true;
 
     try {
       var res = await apPost(action === 'add' ? 'add_members_bulk' : 'remove_members_bulk', { emails: emails, role: role });
-      if(res.ok){
-        setStatus(statusEl, '✅ Roster updated successfully!', 'ok');
+      if (res.ok) {
+        setStatus(statusEl, '\u2705 Roster updated successfully!', 'ok');
         document.getElementById('apInputEmails').value = '';
       } else {
         throw new Error();
       }
     } catch(e) {
-      setStatus(statusEl, '❌ Could not process request.', 'err');
+      setStatus(statusEl, '\u274C Could not process request.', 'err');
     } finally {
       btnAdd.disabled = false; btnRemove.disabled = false;
     }
   }
 
-  document.getElementById('apBtnAdd').addEventListener('click', function(){ handleMemberAction('add'); });
-  document.getElementById('apBtnRemove').addEventListener('click', function(){ handleMemberAction('remove'); });
+  document.getElementById('apBtnAdd').addEventListener('click', function() { handleMemberAction('add'); });
+  document.getElementById('apBtnRemove').addEventListener('click', function() { handleMemberAction('remove'); });
 
-  // ── SLEEP / WAKE STORE ────────────────────────────────────
-  var AP_RAILWAY_URL = SSAP.railwayUrl;
-  var AP_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
+  // ── PRODUCTS ─────────────────────────────────────────────────
+  var apProductsLoaded = false;
+
+  async function loadProducts() {
+    var content = document.getElementById('apProductsContent');
+    var statusEl = document.getElementById('apStatusProducts');
+    setStatus(statusEl, '', '');
+    content.innerHTML = '<div class="ap-spinner">Loading products\u2026</div>';
+    try {
+      var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/products', {
+        headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var products = await res.json();
+      if (!Array.isArray(products) || !products.length) {
+        content.innerHTML = '<p style="color:var(--ap-gray);font-size:14px;padding:20px 0;text-align:center;">No products found for this store.</p>';
+        return;
+      }
+      var html = '<div>';
+      products.forEach(function(p) {
+        var isHidden = p.hidden === true;
+        var encodedId = encodeURIComponent(p.id);
+        var safeTitle = String(p.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        html += '<div class="ap-product-row" data-product-id="' + encodedId + '">';
+        html += '<span class="ap-product-title" title="' + safeTitle + '">' + safeTitle + '</span>';
+        html += '<span class="ap-product-badge ' + (isHidden ? 'ap-product-badge--hidden' : 'ap-product-badge--visible') + '">' + (isHidden ? 'HIDDEN' : 'VISIBLE') + '</span>';
+        html += '<div class="ap-product-actions">';
+        html += '<button class="ap-icon-action" data-action="toggle" data-id="' + encodedId + '" data-hidden="' + isHidden + '" title="' + (isHidden ? 'Show product' : 'Hide product') + '" aria-label="' + (isHidden ? 'Show product' : 'Hide product') + '">\uD83D\uDC41\uFE0F</button>';
+        html += '<button class="ap-icon-action ap-icon-action--danger" data-action="delete" data-id="' + encodedId + '" title="Delete product" aria-label="Delete product">\uD83D\uDDD1\uFE0F</button>';
+        html += '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      content.innerHTML = html;
+
+      content.querySelectorAll('[data-action="toggle"]').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+          var encodedId = btn.getAttribute('data-id');
+          var isHidden = btn.getAttribute('data-hidden') === 'true';
+          btn.disabled = true;
+          try {
+            var r = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/products/' + encodedId + '/hide', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET },
+              body: JSON.stringify({ hidden: !isHidden })
+            });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            await loadProducts();
+          } catch(e) {
+            setStatus(statusEl, '\u274C Could not update product: ' + (e.message || 'unknown'), 'err');
+            btn.disabled = false;
+          }
+        });
+      });
+
+      content.querySelectorAll('[data-action="delete"]').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+          if (!confirm('Delete this product? This cannot be undone.')) return;
+          var encodedId = btn.getAttribute('data-id');
+          btn.disabled = true;
+          try {
+            var r = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/products/' + encodedId, {
+              method: 'DELETE',
+              headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }
+            });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            await loadProducts();
+          } catch(e) {
+            setStatus(statusEl, '\u274C Could not delete product: ' + (e.message || 'unknown'), 'err');
+            btn.disabled = false;
+          }
+        });
+      });
+
+    } catch(e) {
+      content.innerHTML = '<p style="color:#991b1b;font-size:14px;padding:20px 0;">\u274C Failed to load products: ' + (e.message || 'unknown error') + '</p>';
+    }
+  }
+
+  // ── SLEEP / WAKE STORE ─────────────────────────────────────
   var apStatusSleep = document.getElementById('apStatusSleep');
 
-  function apSleepStatus(msg, type){
-    if(!apStatusSleep) return;
+  function apSleepStatus(msg, type) {
+    if (!apStatusSleep) return;
     apStatusSleep.textContent = msg;
     apStatusSleep.className = 'ap-status ' + (type || '');
   }
 
   var apBtnSleepStore = document.getElementById('apBtnSleepStore');
-  if(apBtnSleepStore){
-    apBtnSleepStore.addEventListener('click', async function(){
-      if(!confirm('Put "' + (SSAP.shopHandle || 'this store') + '" to sleep? All products will be deleted. Member tags are preserved.')) return;
+  if (apBtnSleepStore) {
+    apBtnSleepStore.addEventListener('click', async function() {
+      if (!confirm('Put "' + (AP_HANDLE || 'this store') + '" to sleep? All products will be deleted. Member tags are preserved.')) return;
       apBtnSleepStore.disabled = true;
       apBtnSleepStore.textContent = 'Putting to sleep\u2026';
       apSleepStatus('', '');
       try {
-        var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/sleep', {
+        var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/sleep', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET }
         });
         var data = await res.json();
-        if(data.job_id || data.status === 'ok' || res.ok){
+        if (data.job_id || data.status === 'ok' || res.ok) {
           apSleepStatus('\u2705 Store is going to sleep. Reloading\u2026', 'ok');
-          setTimeout(function(){ window.location.reload(); }, 2000);
+          setTimeout(function() { window.location.reload(); }, 2000);
         } else {
           apSleepStatus('\u274C ' + (data.error || 'Failed'), 'err');
           apBtnSleepStore.disabled = false;
-          apBtnSleepStore.textContent = '\ud83d\udca4 Put Store to Sleep';
+          apBtnSleepStore.textContent = '\uD83D\uDCA4 Put Store to Sleep';
         }
       } catch(e) {
         apSleepStatus('\u274C Network error: ' + (e.message || 'unknown'), 'err');
         apBtnSleepStore.disabled = false;
-        apBtnSleepStore.textContent = '\ud83d\udca4 Put Store to Sleep';
+        apBtnSleepStore.textContent = '\uD83D\uDCA4 Put Store to Sleep';
       }
     });
   }
 
   var apBtnWakeStore = document.getElementById('apBtnWakeStore');
-  if(apBtnWakeStore){
-    apBtnWakeStore.addEventListener('click', async function(){
-      if(!confirm('Wake up "' + (SSAP.shopHandle || 'this store') + '"? Printful will rebuild all products.')) return;
+  if (apBtnWakeStore) {
+    apBtnWakeStore.addEventListener('click', async function() {
+      if (!confirm('Wake up "' + (AP_HANDLE || 'this store') + '"? Printful will rebuild all products.')) return;
       apBtnWakeStore.disabled = true;
       apBtnWakeStore.textContent = 'Waking up\u2026';
       apSleepStatus('', '');
       try {
-        var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/wakeup', {
+        var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/wakeup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET }
         });
         var data = await res.json();
-        if(data.job_id || data.status === 'ok' || res.ok){
+        if (data.job_id || data.status === 'ok' || res.ok) {
           apSleepStatus('\u2705 Store is waking up! Products are being rebuilt. Reloading\u2026', 'ok');
-          setTimeout(function(){ window.location.reload(); }, 2000);
+          setTimeout(function() { window.location.reload(); }, 2000);
         } else {
           apSleepStatus('\u274C ' + (data.error || 'Failed'), 'err');
           apBtnWakeStore.disabled = false;
-          apBtnWakeStore.textContent = '\u2600\ufe0f Wake Up Store';
+          apBtnWakeStore.textContent = '\u2600\uFE0F Wake Up Store';
         }
       } catch(e) {
         apSleepStatus('\u274C Network error: ' + (e.message || 'unknown'), 'err');
         apBtnWakeStore.disabled = false;
-        apBtnWakeStore.textContent = '\u2600\ufe0f Wake Up Store';
+        apBtnWakeStore.textContent = '\u2600\uFE0F Wake Up Store';
       }
     });
   }
 
-  // ── NUKE STORE ────────────────────────────────────────────
-  var NUKE_BACKEND_URL = SSAP.railwayUrl;
-  var NUKE_HANDLE = String(SSAP.shopHandle || '');
+  // ── NUKE STORE ─────────────────────────────────────────────
   var apNukeBtn = document.getElementById('apNukeBtn');
   var apNukeOverlay = document.getElementById('apNukeOverlay');
   var apNukeInput = document.getElementById('apNukeInput');
@@ -729,13 +870,13 @@
   var apNukeCancel = document.getElementById('apNukeCancel');
   var apNukeLog = document.getElementById('apNukeLog');
 
-  function appendNukeLog(msg){
+  function appendNukeLog(msg) {
     apNukeLog.style.display = 'block';
     apNukeLog.textContent += msg + '\n';
     apNukeLog.scrollTop = apNukeLog.scrollHeight;
   }
 
-  apNukeBtn && apNukeBtn.addEventListener('click', function(){
+  apNukeBtn && apNukeBtn.addEventListener('click', function() {
     apNukeInput.value = '';
     apNukeDestroy.disabled = true;
     apNukeLog.textContent = '';
@@ -743,35 +884,35 @@
     apNukeOverlay.classList.add('open');
   });
 
-  apNukeCancel && apNukeCancel.addEventListener('click', function(){
+  apNukeCancel && apNukeCancel.addEventListener('click', function() {
     apNukeOverlay.classList.remove('open');
   });
 
-  apNukeOverlay && apNukeOverlay.addEventListener('click', function(e){
-    if(e.target === apNukeOverlay) apNukeOverlay.classList.remove('open');
+  apNukeOverlay && apNukeOverlay.addEventListener('click', function(e) {
+    if (e.target === apNukeOverlay) apNukeOverlay.classList.remove('open');
   });
 
-  apNukeInput && apNukeInput.addEventListener('input', function(){
+  apNukeInput && apNukeInput.addEventListener('input', function() {
     apNukeDestroy.disabled = (apNukeInput.value.trim() !== 'gone');
   });
 
-  apNukeDestroy && apNukeDestroy.addEventListener('click', async function(){
-    if(apNukeInput.value.trim() !== 'gone') return;
-    if(!NUKE_BACKEND_URL){
+  apNukeDestroy && apNukeDestroy.addEventListener('click', async function() {
+    if (apNukeInput.value.trim() !== 'gone') return;
+    if (!AP_RAILWAY_URL) {
       appendNukeLog('ERROR: No backend URL configured.');
       return;
     }
     apNukeDestroy.disabled = true;
     apNukeCancel.disabled = true;
-    appendNukeLog('Starting nuke for "' + NUKE_HANDLE + '"…');
+    appendNukeLog('Starting nuke for "' + AP_HANDLE + '"\u2026');
 
     try {
-      var res = await fetch(NUKE_BACKEND_URL + '/api/storefront/' + encodeURIComponent(NUKE_HANDLE) + '/nuke', {
+      var res = await fetch(AP_RAILWAY_URL + '/api/storefront/' + encodeURIComponent(AP_HANDLE) + '/nuke', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
 
-      if(!res.ok){
+      if (!res.ok) {
         appendNukeLog('ERROR: ' + res.status + ' ' + res.statusText);
         apNukeDestroy.disabled = false;
         apNukeCancel.disabled = false;
@@ -780,7 +921,7 @@
 
       var data = await res.json();
       var jobId = data.job_id;
-      if(!jobId){
+      if (!jobId) {
         appendNukeLog('ERROR: No job_id in response.');
         apNukeDestroy.disabled = false;
         apNukeCancel.disabled = false;
@@ -789,30 +930,30 @@
       appendNukeLog('Job started: ' + jobId);
 
       var lastLog = 0;
-      var pollInterval = setInterval(async function(){
+      var pollInterval = setInterval(async function() {
         try {
-          var pollRes = await fetch(NUKE_BACKEND_URL + '/api/job/' + encodeURIComponent(jobId));
-          if(!pollRes.ok){ appendNukeLog('Poll error: ' + pollRes.status); return; }
+          var pollRes = await fetch(AP_RAILWAY_URL + '/api/job/' + encodeURIComponent(jobId));
+          if (!pollRes.ok) { appendNukeLog('Poll error: ' + pollRes.status); return; }
           var job = await pollRes.json();
           var lines = job.log || [];
-          for(var i = lastLog; i < lines.length; i++){ appendNukeLog(lines[i]); }
+          for (var i = lastLog; i < lines.length; i++) { appendNukeLog(lines[i]); }
           lastLog = lines.length;
 
-          if(job.status === 'done'){
+          if (job.status === 'done') {
             clearInterval(pollInterval);
-            appendNukeLog('✅ Store destroyed. Redirecting…');
-            setTimeout(function(){ window.location.href = {{ dashboard_url | json }}; }, 2000);
-          } else if(job.status === 'error'){
+            appendNukeLog('\u2705 Store destroyed. Redirecting\u2026');
+            setTimeout(function() { window.location.href = {{ dashboard_url | json }}; }, 2000);
+          } else if (job.status === 'error') {
             clearInterval(pollInterval);
-            appendNukeLog('❌ Error: ' + (job.error || 'Unknown error'));
+            appendNukeLog('\u274C Error: ' + (job.error || 'Unknown error'));
             apNukeCancel.disabled = false;
           }
-        } catch(pollErr){
+        } catch(pollErr) {
           appendNukeLog('Poll network error: ' + (pollErr.message || 'unknown'));
         }
       }, 2000);
 
-    } catch(err){
+    } catch(err) {
       appendNukeLog('Network error: ' + (err.message || 'unknown'));
       apNukeDestroy.disabled = false;
       apNukeCancel.disabled = false;
