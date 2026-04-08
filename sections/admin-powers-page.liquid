@@ -351,6 +351,73 @@
     max-height: 180px; overflow-y: auto; display: none;
     line-height: 1.6;
   }
+
+  /* ── COLLAPSIBLE SECTION ─────────────────────────────────── */
+  .ap-section {
+    background: var(--ap-card); border: 1px solid var(--ap-border);
+    border-radius: var(--ap-radius); margin-bottom: 24px;
+    box-shadow: var(--ap-shadow); overflow: hidden;
+  }
+  .ap-section-toggle {
+    width: 100%; background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 28px; font-family: var(--ap-font); font-size: 15px;
+    font-weight: 800; color: var(--ap-text); text-align: left;
+    transition: background 0.15s; gap: 12px;
+  }
+  .ap-section-toggle:hover { background: #f8fafc; }
+  .ap-section-toggle-left { display: flex; align-items: center; gap: 12px; }
+  .ap-section-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .ap-chevron { font-size: 11px; color: var(--ap-gray); transition: transform 0.2s; }
+  .ap-section-toggle[aria-expanded="true"] .ap-chevron { transform: rotate(180deg); }
+  .ap-section-body { padding: 0 28px 28px; }
+  @media(max-width:600px) {
+    .ap-section-toggle { padding: 16px 20px; }
+    .ap-section-body { padding: 0 20px 20px; }
+    .ap-danger-zone-body { padding: 4px 20px 20px; }
+  }
+
+  /* ── DANGER ROW ──────────────────────────────────────────── */
+  .ap-danger-zone-body { padding: 4px 28px 24px; }
+  .ap-danger-row {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 20px; padding: 18px 0;
+  }
+  .ap-danger-row + .ap-danger-row { border-top: 1px solid rgba(239,68,68,0.2); }
+  .ap-danger-row-left { display: flex; align-items: flex-start; gap: 14px; flex: 1; min-width: 0; }
+  .ap-danger-row-icon { font-size: 22px; flex-shrink: 0; line-height: 1.2; }
+  .ap-danger-row-title { font-size: 14px; font-weight: 800; color: var(--ap-text); margin-bottom: 4px; }
+  .ap-danger-row-desc { font-size: 12px; color: var(--ap-gray); line-height: 1.5; }
+  .ap-btn--sm {
+    padding: 8px 16px; font-size: 13px; flex-shrink: 0;
+    align-self: center; white-space: nowrap;
+  }
+
+  /* ── PRODUCT THUMB ───────────────────────────────────────── */
+  .ap-product-thumb {
+    width: 56px; height: 56px; border-radius: 8px; object-fit: cover;
+    background: #f1f5f9; flex-shrink: 0; display: block;
+  }
+  .ap-product-thumb-empty {
+    width: 56px; height: 56px; border-radius: 8px;
+    background: #f1f5f9; flex-shrink: 0;
+  }
+  .ap-btn--outline-sm {
+    background: transparent; border: 1px solid var(--ap-border); color: var(--ap-text);
+    padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: 8px;
+    cursor: pointer; transition: all 0.15s; font-family: var(--ap-font);
+  }
+  .ap-btn--outline-sm:hover { background: #f8fafc; border-color: #94a3b8; }
+  .ap-btn--danger-sm {
+    background: #fee2e2; color: #991b1b;
+    padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: 8px;
+    cursor: pointer; transition: all 0.15s; border: none; font-family: var(--ap-font);
+  }
+  .ap-btn--danger-sm:hover { background: #fecaca; }
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -430,22 +497,17 @@
     </div>
   </div>
 
-  <!-- MAIN PANEL TABS -->
-  <div class="ap-main-tabs" role="tablist">
-    <button class="ap-main-tab-btn active" data-main-tab="apPanelOverview" role="tab">🏠 Overview</button>
-    <button class="ap-main-tab-btn" data-main-tab="apPanelMembers" role="tab">👥 Members</button>
-    <button class="ap-main-tab-btn" data-main-tab="apPanelProducts" role="tab">📦 Products</button>
-    <button class="ap-main-tab-btn" data-main-tab="apPanelDanger" role="tab">⚠️ Danger</button>
-  </div>
-
-  <!-- OVERVIEW PANEL -->
-  <div id="apPanelOverview" class="ap-main-panel active">
-    <div class="ap-card">
-      <div class="ap-card-icon ap-card-icon--indigo">🔗</div>
-      <div class="ap-card-head">
-        <h3>Invite &amp; Access</h3>
-        <p>Control how people enter this storefront.</p>
-      </div>
+  <!-- INVITE & ACCESS SECTION -->
+  <div class="ap-section">
+    <button class="ap-section-toggle" id="apToggleOverview" aria-expanded="true">
+      <span class="ap-section-toggle-left">
+        <span class="ap-section-icon" style="background:#eef2ff;">🔗</span>
+        <span>Invite &amp; Access</span>
+      </span>
+      <span class="ap-chevron">▼</span>
+    </button>
+    <div class="ap-divider" style="margin:0 28px;"></div>
+    <div class="ap-section-body" id="apBodyOverview" style="padding-top:20px;">
 
       <div class="ap-radio-group">
         <label class="ap-radio {% if join_mode == 'secure' %}selected{% endif %}">
@@ -487,17 +549,22 @@
           </div>
         </div>
       </div>
-    </div>
-  </div><!-- /#apPanelOverview -->
 
-  <!-- MEMBERS PANEL -->
-  <div id="apPanelMembers" class="ap-main-panel">
-    <div class="ap-card">
-      <div class="ap-card-icon ap-card-icon--emerald">👥</div>
-      <div class="ap-card-head">
-        <h3>Manage Roster</h3>
-        <p>Add or remove people from this storefront.</p>
-      </div>
+    </div>
+  </div><!-- /Invite & Access -->
+
+  <!-- MEMBERS SECTION -->
+  <div class="ap-section">
+    <button class="ap-section-toggle" id="apToggleMembers" aria-expanded="true">
+      <span class="ap-section-toggle-left">
+        <span class="ap-section-icon" style="background:#ecfdf5;">👥</span>
+        <span>Members</span>
+      </span>
+      <span class="ap-chevron">▼</span>
+    </button>
+    <div class="ap-divider" style="margin:0 28px;"></div>
+    <div class="ap-section-body" id="apBodyMembers" style="padding-top:20px;">
+      <p style="margin:0 0 16px;font-size:13px;color:var(--ap-gray);">Add or remove people from this storefront.</p>
 
       <div class="ap-form-group">
         <label class="ap-label">Member Emails</label>
@@ -519,67 +586,69 @@
       </div>
       <div id="apStatusMembers" class="ap-status"></div>
     </div>
-  </div><!-- /#apPanelMembers -->
+  </div><!-- /Members -->
 
-  <!-- PRODUCTS PANEL -->
-  <div id="apPanelProducts" class="ap-main-panel">
-    <div class="ap-card">
-      <div class="ap-card-icon" style="background:#fef9c3; font-size:20px;">📦</div>
-      <div class="ap-card-head">
-        <h3>Products</h3>
-        <p>View and manage products in this storefront.</p>
-      </div>
+  <!-- PRODUCTS SECTION -->
+  <div class="ap-section">
+    <button class="ap-section-toggle" id="apToggleProducts" aria-expanded="false">
+      <span class="ap-section-toggle-left">
+        <span class="ap-section-icon" style="background:#fef9c3;">📦</span>
+        <span>Products</span>
+      </span>
+      <span class="ap-chevron">▼</span>
+    </button>
+    <div class="ap-divider" style="margin:0 28px;"></div>
+    <div class="ap-section-body" id="apBodyProducts" style="display:none; padding-top:16px;">
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
-      <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found in this store.</div>
+      <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found for this store.</div>
       <div id="apProductsContainer" class="ap-product-list"></div>
       <div id="apStatusProducts" class="ap-status"></div>
     </div>
-  </div><!-- /#apPanelProducts -->
+  </div><!-- /Products -->
 
-  <!-- DANGER PANEL -->
-  <div id="apPanelDanger" class="ap-main-panel">
+  <!-- DANGER ZONE -->
+  <div class="ap-danger-card">
+    <div style="padding:24px 28px 0; display:flex; align-items:center; gap:12px;">
+      <div class="ap-card-icon ap-card-icon--red" style="margin:0;">⚠️</div>
+      <h3 style="margin:0; font-size:17px; font-weight:800; color:#dc2626;">Danger Zone</h3>
+    </div>
+    <div class="ap-danger-zone-body">
 
-    <!-- SLEEP MODE CARD -->
-    <div class="ap-card" id="apSleepModeCard">
-      <div class="ap-card-icon" style="background:#fef3c7; font-size:20px;">💤</div>
-      <div class="ap-card-head">
-        <h3>Sleep Mode</h3>
-        <p>Put this store to sleep. All products will be deleted. Member tags and store data are preserved. You can wake the store back up at any time to rebuild products.</p>
+      <!-- Sleep / Wake row -->
+      <div class="ap-danger-row">
+        <div class="ap-danger-row-left">
+          <span class="ap-danger-row-icon">💤</span>
+          <div>
+            <div class="ap-danger-row-title">Sleep Store</div>
+            <div class="ap-danger-row-desc">Deletes all products and sets the store to hibernation mode. The store can be re-woken at any time.</div>
+          </div>
+        </div>
+        {% if ap_store_status == 'sleeping' %}
+          <button id="apBtnWakeStore" class="ap-btn ap-btn--sm" style="background:#10b981;color:#fff;">☀️ Wake Up</button>
+        {% elsif ap_store_status == 'waking' %}
+          <button class="ap-btn ap-btn--sm" disabled style="background:#6366f1;color:#fff;opacity:0.6;cursor:not-allowed;">⏳ Waking…</button>
+        {% else %}
+          <button id="apBtnSleepStore" class="ap-btn ap-btn--danger ap-btn--sm">💤 Sleep</button>
+        {% endif %}
       </div>
 
-      {% if ap_store_status == 'sleeping' %}
-        <p style="font-size:13px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
-          💤 This store is currently sleeping. Wake it up to rebuild all products via Printful.
-        </p>
-        <button id="apBtnWakeStore" class="ap-btn ap-btn-full" style="background:#10b981; color:#fff;">☀️ Wake Up Store</button>
-      {% elsif ap_store_status == 'waking' %}
-        <p style="font-size:13px; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
-          ⏳ This store is currently waking up. Products are being rebuilt. Please wait.
-        </p>
-        <button class="ap-btn ap-btn-full" disabled style="opacity:0.5; cursor:not-allowed; background:#6366f1; color:#fff;">⏳ Waking Up…</button>
-      {% else %}
-        <button id="apBtnSleepStore" class="ap-btn ap-btn-full" style="background:#ef4444; color:#fff;">💤 Put Store to Sleep</button>
-      {% endif %}
-      <div id="apStatusSleep" class="ap-status"></div>
-    </div>
-
-    <!-- DANGER ZONE -->
-    <div class="ap-danger-card" style="margin-top: 24px;">
-      <div class="ap-card-icon ap-card-icon--red">☢️</div>
-      <div class="ap-card-head">
-        <h3 style="color:#dc2626;">Danger Zone</h3>
-        <p>Permanently delete this storefront. This action <strong>cannot be undone</strong>.</p>
+      <!-- Nuke Store row -->
+      <div class="ap-danger-row">
+        <div class="ap-danger-row-left">
+          <span class="ap-danger-row-icon">💣</span>
+          <div>
+            <div class="ap-danger-row-title">Nuke Store</div>
+            <div class="ap-danger-row-desc">Permanently deletes the store, all products, the collection, all member tags, and the metaobject. This cannot be undone.</div>
+          </div>
+        </div>
+        <button id="apNukeBtn" class="ap-btn ap-btn--nuke ap-btn--sm">💣 Nuke</button>
       </div>
-      <p style="font-size:13px; color:#6b7280; margin: 0 0 16px; line-height:1.5;">
-        This will completely and permanently delete the <strong>{{ store_name }}</strong> store.
-        All products, members, logos, and settings will be removed forever. <strong>This cannot be undone.</strong>
-      </p>
-      <button id="apNukeBtn" class="ap-btn ap-btn--nuke">☢️ Nuke This Store</button>
+
+      <div id="apStatusSleep" class="ap-status" style="margin-top:4px;"></div>
     </div>
+  </div><!-- /Danger Zone -->
 
-  </div><!-- /#apPanelDanger -->
-
-  <!-- NUKE CONFIRMATION MODAL (position: fixed — outside panels) -->
+  <!-- NUKE CONFIRMATION MODAL (position: fixed — outside sections) -->
   <div class="ap-nuke-overlay" id="apNukeOverlay">
     <div class="ap-nuke-dialog" role="dialog" aria-modal="true" aria-labelledby="apNukeTitle">
       <div class="ap-nuke-dialog__icon">☢️</div>
@@ -607,28 +676,34 @@
 
 <script>
 (function(){
-  // ── MAIN PANEL TAB SWITCHING ─────────────────────────────────
+  // ── COLLAPSIBLE SECTION TOGGLES ──────────────────────────────
   var apProductsLoaded = false;
-  document.querySelectorAll('.ap-main-tab-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var targetId = btn.getAttribute('data-main-tab');
-      document.querySelectorAll('.ap-main-tab-btn').forEach(function(b){ b.classList.remove('active'); });
-      document.querySelectorAll('.ap-main-panel').forEach(function(p){ p.classList.remove('active'); });
-      btn.classList.add('active');
-      document.getElementById(targetId).classList.add('active');
-      if(targetId === 'apPanelProducts' && !apProductsLoaded){
-        apProductsLoaded = true;
-        apLoadProducts();
-      }
+
+  function apSetupToggle(btnId, bodyId, onExpand) {
+    var btn = document.getElementById(btnId);
+    var body = document.getElementById(bodyId);
+    if (!btn || !body) return;
+    btn.addEventListener('click', function() {
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      body.style.display = expanded ? 'none' : 'block';
+      if (!expanded && onExpand) onExpand();
     });
+  }
+
+  apSetupToggle('apToggleOverview', 'apBodyOverview');
+  apSetupToggle('apToggleMembers', 'apBodyMembers');
+  apSetupToggle('apToggleProducts', 'apBodyProducts', function() {
+    if (!apProductsLoaded) { apProductsLoaded = true; apLoadProducts(); }
   });
 
   // TAB SWITCHING (inner tabs — Copy Link / QR Code)
   document.querySelectorAll('.ap-tab-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
       var targetId = btn.getAttribute('data-tab');
-      btn.closest('.ap-card').querySelectorAll('.ap-tab-content').forEach(function(c){ c.style.display = 'none'; });
-      btn.closest('.ap-card').querySelectorAll('.ap-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      var scope = btn.closest('.ap-section-body') || btn.closest('.ap-card') || document;
+      scope.querySelectorAll('.ap-tab-content').forEach(function(c){ c.style.display = 'none'; });
+      scope.querySelectorAll('.ap-tab-btn').forEach(function(b){ b.classList.remove('active'); });
       document.getElementById(targetId).style.display = 'block';
       btn.classList.add('active');
     });
@@ -936,22 +1011,48 @@
     products.forEach(function(product){
       var isHidden = !!product.hidden;
       var row = document.createElement('div');
-      row.className = 'ap-product-row';
-      row.innerHTML =
-        '<span class="ap-product-title">' + apEscape(product.title || product.id || '') + '</span>' +
-        '<div class="ap-product-actions">' +
-          '<span class="ap-badge ' + (isHidden ? 'ap-badge--hidden' : 'ap-badge--visible') + '">' +
-            (isHidden ? 'HIDDEN' : 'VISIBLE') +
-          '</span>' +
-          '<button class="ap-btn--icon ap-btn-toggle" title="' + (isHidden ? 'Unhide product' : 'Hide product') + '">👁️</button>' +
-          '<button class="ap-btn--icon ap-btn-delete" title="Delete product">🗑️</button>' +
-        '</div>';
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--ap-border);';
 
-      row.querySelector('.ap-btn-toggle').addEventListener('click', function(){
-        apToggleProductVisibility(product.id, isHidden);
+      var imgEl;
+      if(product.featured_image){
+        imgEl = document.createElement('img');
+        imgEl.className = 'ap-product-thumb';
+        imgEl.src = product.featured_image;
+        imgEl.alt = product.title || '';
+        imgEl.loading = 'lazy';
+      } else {
+        imgEl = document.createElement('div');
+        imgEl.className = 'ap-product-thumb-empty';
+      }
+
+      var titleEl = document.createElement('span');
+      titleEl.style.cssText = 'flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;font-weight:700;';
+      titleEl.textContent = product.title || product.id || '';
+
+      var toggleBtn = document.createElement('button');
+      toggleBtn.className = 'ap-btn--outline-sm';
+      toggleBtn.textContent = isHidden ? 'Show' : 'Hide';
+      toggleBtn.dataset.hidden = isHidden ? '1' : '0';
+
+      var deleteBtn = document.createElement('button');
+      deleteBtn.className = 'ap-btn--danger-sm';
+      deleteBtn.textContent = 'Delete';
+
+      var actionsEl = document.createElement('div');
+      actionsEl.style.cssText = 'display:flex;align-items:center;gap:8px;flex-shrink:0;';
+      actionsEl.appendChild(toggleBtn);
+      actionsEl.appendChild(deleteBtn);
+
+      row.appendChild(imgEl);
+      row.appendChild(titleEl);
+      row.appendChild(actionsEl);
+
+      toggleBtn.addEventListener('click', function(){
+        var curHidden = toggleBtn.dataset.hidden === '1';
+        apToggleProductVisibility(product.id, curHidden, toggleBtn);
       });
-      row.querySelector('.ap-btn-delete').addEventListener('click', function(){
-        apDeleteProduct(product.id, product.title || product.id);
+      deleteBtn.addEventListener('click', function(){
+        apDeleteProduct(product.id, product.title || product.id, row);
       });
 
       apProductsContainer.appendChild(row);
@@ -987,7 +1088,8 @@
     }
   }
 
-  async function apToggleProductVisibility(productId, currentHidden){
+  async function apToggleProductVisibility(productId, currentHidden, btn){
+    btn.disabled = true;
     apProductsStatus('Updating…', '');
     try {
       var res = await fetch(
@@ -999,16 +1101,19 @@
         }
       );
       if(!res.ok) throw new Error('HTTP ' + res.status);
+      var newHidden = !currentHidden;
+      btn.textContent = newHidden ? 'Show' : 'Hide';
+      btn.dataset.hidden = newHidden ? '1' : '0';
       apProductsStatus('✅ Visibility updated.', 'ok');
-      apProductsLoaded = false;
-      apLoadProducts();
     } catch(e){
       apProductsStatus('❌ Could not update visibility: ' + (e.message || 'unknown error'), 'err');
+    } finally {
+      btn.disabled = false;
     }
   }
 
-  async function apDeleteProduct(productId, productTitle){
-    if(!confirm('Delete "' + productTitle + '"? This cannot be undone.')) return;
+  async function apDeleteProduct(productId, productTitle, row){
+    if(!confirm('Delete ' + productTitle + '? This cannot be undone.')) return;
     apProductsStatus('Deleting…', '');
     try {
       var res = await fetch(
@@ -1019,9 +1124,11 @@
         }
       );
       if(!res.ok) throw new Error('HTTP ' + res.status);
+      row.remove();
       apProductsStatus('✅ Product deleted.', 'ok');
-      apProductsLoaded = false;
-      apLoadProducts();
+      if(apProductsContainer.children.length === 0){
+        apProductsEmpty.style.display = 'block';
+      }
     } catch(e){
       apProductsStatus('❌ Could not delete product: ' + (e.message || 'unknown error'), 'err');
     }
