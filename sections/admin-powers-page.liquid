@@ -1,6 +1,9 @@
 {% comment %}
-  ADMIN POWERS — V11 (SECTION FILE)
+  ADMIN POWERS — V13 (SECTION FILE)
   - Self-contained section (no Custom Liquid block needed).
+  - V13: Stacked collapsible accordion cards; all panels start expanded. Product thumbnails
+    (52×52px) pulled from featured_image / image / images[0].src with 🖼️ placeholder.
+    "Store Controls" replaces "Danger Zone". Products load on page load.
   - V11: Route all calls to Railway (remove Mechanic URL). Remove credentials:include from fetches.
   - God Mode: Ryan Irwin hardcoded + super-admin tag.
   - QR code, public toggle, invite/remove members.
@@ -214,24 +217,6 @@
   }
   .ap-tab-btn.active { background: #e2e8f0; color: var(--ap-text); }
 
-  /* ── MAIN PANEL TABS ───────────────────────────────────────── */
-  .ap-main-tabs {
-    display: flex; gap: 4px; margin-bottom: 24px;
-    background: var(--ap-card); border: 1px solid var(--ap-border);
-    border-radius: 12px; padding: 4px;
-    box-shadow: var(--ap-shadow-sm); flex-wrap: wrap;
-  }
-  .ap-main-tab-btn {
-    flex: 1; background: none; border: none; font-size: 13px; font-weight: 700;
-    color: var(--ap-gray); cursor: pointer; padding: 9px 14px;
-    border-radius: 9px; transition: 0.15s; font-family: var(--ap-font);
-    white-space: nowrap;
-  }
-  .ap-main-tab-btn.active { background: var(--ap-accent); color: #fff; box-shadow: var(--ap-shadow-sm); }
-  .ap-main-tab-btn:hover:not(.active) { background: #f1f5f9; color: var(--ap-text); }
-  .ap-main-panel { display: none; }
-  .ap-main-panel.active { display: block; }
-
   /* ── PRODUCT ROWS ──────────────────────────────────────────── */
   .ap-product-list { display: flex; flex-direction: column; gap: 10px; }
   .ap-product-row {
@@ -263,7 +248,6 @@
   @media(max-width: 600px) {
     .ap-product-row { flex-direction: column; align-items: flex-start; gap: 10px; }
     .ap-product-actions { width: 100%; justify-content: flex-end; }
-    .ap-main-tab-btn { font-size: 11px; padding: 8px 8px; }
   }
 
   /* ── COPY ROW ──────────────────────────────────────────── */
@@ -590,7 +574,7 @@
 
   <!-- PRODUCTS SECTION -->
   <div class="ap-section">
-    <button class="ap-section-toggle" id="apToggleProducts" aria-expanded="false">
+    <button class="ap-section-toggle" id="apToggleProducts" aria-expanded="true">
       <span class="ap-section-toggle-left">
         <span class="ap-section-icon" style="background:#fef9c3;">📦</span>
         <span>Products</span>
@@ -598,7 +582,7 @@
       <span class="ap-chevron">▼</span>
     </button>
     <div class="ap-divider" style="margin:0 28px;"></div>
-    <div class="ap-section-body" id="apBodyProducts" style="display:none; padding-top:16px;">
+    <div class="ap-section-body" id="apBodyProducts" style="padding-top:16px;">
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
       <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found for this store.</div>
       <div id="apProductsContainer" class="ap-product-list"></div>
@@ -680,9 +664,8 @@
 <script>
 (function(){
   // ── COLLAPSIBLE SECTION TOGGLES ──────────────────────────────
-  var apProductsLoaded = false;
 
-  function apSetupToggle(btnId, bodyId, onExpand) {
+  function apSetupToggle(btnId, bodyId) {
     var btn = document.getElementById(btnId);
     var body = document.getElementById(bodyId);
     if (!btn || !body) return;
@@ -690,15 +673,12 @@
       var expanded = btn.getAttribute('aria-expanded') === 'true';
       btn.setAttribute('aria-expanded', String(!expanded));
       body.style.display = expanded ? 'none' : 'block';
-      if (!expanded && onExpand) onExpand();
     });
   }
 
   apSetupToggle('apToggleOverview', 'apBodyOverview');
   apSetupToggle('apToggleMembers', 'apBodyMembers');
-  apSetupToggle('apToggleProducts', 'apBodyProducts', function() {
-    if (!apProductsLoaded) { apProductsLoaded = true; apLoadProducts(); }
-  });
+  apSetupToggle('apToggleProducts', 'apBodyProducts');
 
   // TAB SWITCHING (inner tabs — Copy Link / QR Code)
   document.querySelectorAll('.ap-tab-btn').forEach(function(btn){
@@ -1016,16 +996,21 @@
       var row = document.createElement('div');
       row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--ap-border);';
 
+      var imgSrc = product.featured_image || product.image ||
+                   (product.images && product.images[0] && (product.images[0].src || product.images[0])) ||
+                   null;
       var imgEl;
-      if(product.featured_image){
+      if(imgSrc){
         imgEl = document.createElement('img');
         imgEl.className = 'ap-product-thumb';
-        imgEl.src = product.featured_image;
+        imgEl.src = imgSrc;
         imgEl.alt = product.title || '';
         imgEl.loading = 'lazy';
       } else {
         imgEl = document.createElement('div');
         imgEl.className = 'ap-product-thumb-empty';
+        imgEl.style.cssText = 'display:flex;align-items:center;justify-content:center;font-size:20px;';
+        imgEl.textContent = '🖼️';
       }
 
       var titleEl = document.createElement('span');
@@ -1136,6 +1121,9 @@
       apProductsStatus('❌ Could not delete product: ' + (e.message || 'unknown error'), 'err');
     }
   }
+
+  // Load products immediately on page load since all cards start expanded
+  apLoadProducts();
 })();
 </script>
 
