@@ -377,9 +377,13 @@
   <!-- HERO HEADER -->
   <div class="ap-hero">
     <div class="ap-hero-left">
-      <div class="ap-hero-badge status--{{ ap_store_status }}">
+      {%- assign _safe_status = '' -%}
+      {%- if ap_store_status == 'active' or ap_store_status == 'sleeping' or ap_store_status == 'waking' or ap_store_status == 'building' -%}
+        {%- assign _safe_status = ap_store_status -%}
+      {%- endif -%}
+      <div class="ap-hero-badge{% if _safe_status != '' %} status--{{ _safe_status }}{% endif %}">
         <span class="dot"></span>
-        {{ ap_store_status | upcase }}
+        {{ _safe_status | default: 'active' | upcase }}
       </div>
       <h1>{{ store_name | capitalize }}</h1>
       <p class="ap-hero-sub">{{ shop_handle }} &middot; {% if is_super_admin %}God Mode{% else %}Admin{% endif %}</p>
@@ -778,7 +782,7 @@
       var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(AP_HANDLE) + '/products', {
         headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }
       });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (!res.ok) throw new Error('Failed to load products: HTTP ' + res.status);
       var products = await res.json();
       if (!Array.isArray(products) || !products.length) {
         content.innerHTML = '';
