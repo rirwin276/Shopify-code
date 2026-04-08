@@ -214,6 +214,58 @@
   }
   .ap-tab-btn.active { background: #e2e8f0; color: var(--ap-text); }
 
+  /* ── MAIN PANEL TABS ───────────────────────────────────────── */
+  .ap-main-tabs {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    background: var(--ap-card); border: 1px solid var(--ap-border);
+    border-radius: 12px; padding: 4px;
+    box-shadow: var(--ap-shadow-sm); flex-wrap: wrap;
+  }
+  .ap-main-tab-btn {
+    flex: 1; background: none; border: none; font-size: 13px; font-weight: 700;
+    color: var(--ap-gray); cursor: pointer; padding: 9px 14px;
+    border-radius: 9px; transition: 0.15s; font-family: var(--ap-font);
+    white-space: nowrap;
+  }
+  .ap-main-tab-btn.active { background: var(--ap-accent); color: #fff; box-shadow: var(--ap-shadow-sm); }
+  .ap-main-tab-btn:hover:not(.active) { background: #f1f5f9; color: var(--ap-text); }
+  .ap-main-panel { display: none; }
+  .ap-main-panel.active { display: block; }
+
+  /* ── PRODUCT ROWS ──────────────────────────────────────────── */
+  .ap-product-list { display: flex; flex-direction: column; gap: 10px; }
+  .ap-product-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 14px 18px;
+    background: var(--ap-card); border: 1px solid var(--ap-border);
+    border-radius: 12px; box-shadow: var(--ap-shadow-sm); transition: box-shadow 0.2s;
+  }
+  .ap-product-row:hover { box-shadow: var(--ap-shadow); }
+  .ap-product-title {
+    font-size: 14px; font-weight: 700; color: var(--ap-text);
+    flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .ap-product-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .ap-badge {
+    display: inline-flex; align-items: center; font-size: 11px; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px;
+  }
+  .ap-badge--visible { background: #ecfdf5; color: #065f46; }
+  .ap-badge--hidden { background: #f1f5f9; color: #64748b; }
+  .ap-btn--icon {
+    padding: 7px 10px; min-width: unset; font-size: 14px;
+    background: #f8fafc; border: 1px solid var(--ap-border); color: var(--ap-text);
+    border-radius: 8px; cursor: pointer; transition: background 0.15s;
+  }
+  .ap-btn--icon:hover { background: #e2e8f0; }
+  .ap-products-spinner { text-align: center; padding: 32px; color: var(--ap-gray); font-size: 14px; }
+  .ap-products-empty { text-align: center; padding: 48px 20px; color: var(--ap-gray); font-size: 15px; }
+  @media(max-width: 600px) {
+    .ap-product-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .ap-product-actions { width: 100%; justify-content: flex-end; }
+    .ap-main-tab-btn { font-size: 11px; padding: 8px 8px; }
+  }
+
   /* ── COPY ROW ──────────────────────────────────────────── */
   .ap-copy-row { display: flex; gap: 10px; }
   .ap-copy-row .ap-input { flex: 1; }
@@ -378,10 +430,16 @@
     </div>
   </div>
 
-  <!-- 2-COL GRID -->
-  <div class="ap-grid">
+  <!-- MAIN PANEL TABS -->
+  <div class="ap-main-tabs" role="tablist">
+    <button class="ap-main-tab-btn active" data-main-tab="apPanelOverview" role="tab">🏠 Overview</button>
+    <button class="ap-main-tab-btn" data-main-tab="apPanelMembers" role="tab">👥 Members</button>
+    <button class="ap-main-tab-btn" data-main-tab="apPanelProducts" role="tab">📦 Products</button>
+    <button class="ap-main-tab-btn" data-main-tab="apPanelDanger" role="tab">⚠️ Danger</button>
+  </div>
 
-    <!-- LEFT CARD: Invite & Access -->
+  <!-- OVERVIEW PANEL -->
+  <div id="apPanelOverview" class="ap-main-panel active">
     <div class="ap-card">
       <div class="ap-card-icon ap-card-icon--indigo">🔗</div>
       <div class="ap-card-head">
@@ -430,8 +488,10 @@
         </div>
       </div>
     </div>
+  </div><!-- /#apPanelOverview -->
 
-    <!-- RIGHT CARD: Manage Roster -->
+  <!-- MEMBERS PANEL -->
+  <div id="apPanelMembers" class="ap-main-panel">
     <div class="ap-card">
       <div class="ap-card-icon ap-card-icon--emerald">👥</div>
       <div class="ap-card-head">
@@ -459,48 +519,67 @@
       </div>
       <div id="apStatusMembers" class="ap-status"></div>
     </div>
+  </div><!-- /#apPanelMembers -->
 
-  </div><!-- /.ap-grid -->
+  <!-- PRODUCTS PANEL -->
+  <div id="apPanelProducts" class="ap-main-panel">
+    <div class="ap-card">
+      <div class="ap-card-icon" style="background:#fef9c3; font-size:20px;">📦</div>
+      <div class="ap-card-head">
+        <h3>Products</h3>
+        <p>View and manage products in this storefront.</p>
+      </div>
+      <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
+      <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found in this store.</div>
+      <div id="apProductsContainer" class="ap-product-list"></div>
+      <div id="apStatusProducts" class="ap-status"></div>
+    </div>
+  </div><!-- /#apPanelProducts -->
 
-  <!-- SLEEP MODE CARD (full width) -->
-  <div class="ap-card" style="margin-top: 24px;" id="apSleepModeCard">
-    <div class="ap-card-icon" style="background:#fef3c7; font-size:20px;">💤</div>
-    <div class="ap-card-head">
-      <h3>Sleep Mode</h3>
-      <p>Put this store to sleep. All products will be deleted. Member tags and store data are preserved. You can wake the store back up at any time to rebuild products.</p>
+  <!-- DANGER PANEL -->
+  <div id="apPanelDanger" class="ap-main-panel">
+
+    <!-- SLEEP MODE CARD -->
+    <div class="ap-card" id="apSleepModeCard">
+      <div class="ap-card-icon" style="background:#fef3c7; font-size:20px;">💤</div>
+      <div class="ap-card-head">
+        <h3>Sleep Mode</h3>
+        <p>Put this store to sleep. All products will be deleted. Member tags and store data are preserved. You can wake the store back up at any time to rebuild products.</p>
+      </div>
+
+      {% if ap_store_status == 'sleeping' %}
+        <p style="font-size:13px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
+          💤 This store is currently sleeping. Wake it up to rebuild all products via Printful.
+        </p>
+        <button id="apBtnWakeStore" class="ap-btn ap-btn-full" style="background:#10b981; color:#fff;">☀️ Wake Up Store</button>
+      {% elsif ap_store_status == 'waking' %}
+        <p style="font-size:13px; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
+          ⏳ This store is currently waking up. Products are being rebuilt. Please wait.
+        </p>
+        <button class="ap-btn ap-btn-full" disabled style="opacity:0.5; cursor:not-allowed; background:#6366f1; color:#fff;">⏳ Waking Up…</button>
+      {% else %}
+        <button id="apBtnSleepStore" class="ap-btn ap-btn-full" style="background:#ef4444; color:#fff;">💤 Put Store to Sleep</button>
+      {% endif %}
+      <div id="apStatusSleep" class="ap-status"></div>
     </div>
 
-    {% if ap_store_status == 'sleeping' %}
-      <p style="font-size:13px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
-        💤 This store is currently sleeping. Wake it up to rebuild all products via Printful.
+    <!-- DANGER ZONE -->
+    <div class="ap-danger-card" style="margin-top: 24px;">
+      <div class="ap-card-icon ap-card-icon--red">☢️</div>
+      <div class="ap-card-head">
+        <h3 style="color:#dc2626;">Danger Zone</h3>
+        <p>Permanently delete this storefront. This action <strong>cannot be undone</strong>.</p>
+      </div>
+      <p style="font-size:13px; color:#6b7280; margin: 0 0 16px; line-height:1.5;">
+        This will completely and permanently delete the <strong>{{ store_name }}</strong> store.
+        All products, members, logos, and settings will be removed forever. <strong>This cannot be undone.</strong>
       </p>
-      <button id="apBtnWakeStore" class="ap-btn ap-btn-full" style="background:#10b981; color:#fff;">☀️ Wake Up Store</button>
-    {% elsif ap_store_status == 'waking' %}
-      <p style="font-size:13px; color:#1e40af; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 14px; margin:0 0 16px;">
-        ⏳ This store is currently waking up. Products are being rebuilt. Please wait.
-      </p>
-      <button class="ap-btn ap-btn-full" disabled style="opacity:0.5; cursor:not-allowed; background:#6366f1; color:#fff;">⏳ Waking Up…</button>
-    {% else %}
-      <button id="apBtnSleepStore" class="ap-btn ap-btn-full" style="background:#ef4444; color:#fff;">💤 Put Store to Sleep</button>
-    {% endif %}
-    <div id="apStatusSleep" class="ap-status"></div>
-  </div>
-
-  <!-- DANGER ZONE (full width) -->
-  <div class="ap-danger-card" style="margin-top: 24px;">
-    <div class="ap-card-icon ap-card-icon--red">☢️</div>
-    <div class="ap-card-head">
-      <h3 style="color:#dc2626;">Danger Zone</h3>
-      <p>Permanently delete this storefront. This action <strong>cannot be undone</strong>.</p>
+      <button id="apNukeBtn" class="ap-btn ap-btn--nuke">☢️ Nuke This Store</button>
     </div>
-    <p style="font-size:13px; color:#6b7280; margin: 0 0 16px; line-height:1.5;">
-      This will completely and permanently delete the <strong>{{ store_name }}</strong> store.
-      All products, members, logos, and settings will be removed forever. <strong>This cannot be undone.</strong>
-    </p>
-    <button id="apNukeBtn" class="ap-btn ap-btn--nuke">☢️ Nuke This Store</button>
-  </div>
 
-  <!-- NUKE CONFIRMATION MODAL -->
+  </div><!-- /#apPanelDanger -->
+
+  <!-- NUKE CONFIRMATION MODAL (position: fixed — outside panels) -->
   <div class="ap-nuke-overlay" id="apNukeOverlay">
     <div class="ap-nuke-dialog" role="dialog" aria-modal="true" aria-labelledby="apNukeTitle">
       <div class="ap-nuke-dialog__icon">☢️</div>
@@ -528,7 +607,23 @@
 
 <script>
 (function(){
-  // TAB SWITCHING
+  // ── MAIN PANEL TAB SWITCHING ─────────────────────────────────
+  var apProductsLoaded = false;
+  document.querySelectorAll('.ap-main-tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var targetId = btn.getAttribute('data-main-tab');
+      document.querySelectorAll('.ap-main-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('.ap-main-panel').forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(targetId).classList.add('active');
+      if(targetId === 'apPanelProducts' && !apProductsLoaded){
+        apProductsLoaded = true;
+        apLoadProducts();
+      }
+    });
+  });
+
+  // TAB SWITCHING (inner tabs — Copy Link / QR Code)
   document.querySelectorAll('.ap-tab-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
       var targetId = btn.getAttribute('data-tab');
@@ -818,6 +913,119 @@
       apNukeCancel.disabled = false;
     }
   });
+
+  // ── PRODUCTS TAB ──────────────────────────────────────────────
+  var apProductsSpinner   = document.getElementById('apProductsSpinner');
+  var apProductsEmpty     = document.getElementById('apProductsEmpty');
+  var apProductsContainer = document.getElementById('apProductsContainer');
+  var apStatusProducts    = document.getElementById('apStatusProducts');
+
+  function apProductsStatus(msg, type){
+    if(!apStatusProducts) return;
+    apStatusProducts.textContent = msg;
+    apStatusProducts.className = 'ap-status ' + (type || '');
+  }
+
+  function apRenderProducts(products){
+    apProductsContainer.innerHTML = '';
+    if(!products || products.length === 0){
+      apProductsEmpty.style.display = 'block';
+      return;
+    }
+    apProductsEmpty.style.display = 'none';
+    products.forEach(function(product){
+      var isHidden = !!product.hidden;
+      var row = document.createElement('div');
+      row.className = 'ap-product-row';
+      row.innerHTML =
+        '<span class="ap-product-title">' + apEscape(product.title || product.id || '') + '</span>' +
+        '<div class="ap-product-actions">' +
+          '<span class="ap-badge ' + (isHidden ? 'ap-badge--hidden' : 'ap-badge--visible') + '">' +
+            (isHidden ? 'HIDDEN' : 'VISIBLE') +
+          '</span>' +
+          '<button class="ap-btn--icon ap-btn-toggle" title="' + (isHidden ? 'Unhide product' : 'Hide product') + '">👁️</button>' +
+          '<button class="ap-btn--icon ap-btn-delete" title="Delete product">🗑️</button>' +
+        '</div>';
+
+      row.querySelector('.ap-btn-toggle').addEventListener('click', function(){
+        apToggleProductVisibility(product.id, isHidden);
+      });
+      row.querySelector('.ap-btn-delete').addEventListener('click', function(){
+        apDeleteProduct(product.id, product.title || product.id);
+      });
+
+      apProductsContainer.appendChild(row);
+    });
+  }
+
+  function apEscape(str){
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  async function apLoadProducts(){
+    apProductsSpinner.style.display = 'block';
+    apProductsEmpty.style.display = 'none';
+    apProductsContainer.innerHTML = '';
+    apProductsStatus('', '');
+    try {
+      var res = await fetch(
+        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products',
+        { headers: { 'X-Admin-Secret': AP_ADMIN_SECRET } }
+      );
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      var data = await res.json();
+      var products = Array.isArray(data) ? data : (data.products || []);
+      apRenderProducts(products);
+    } catch(e){
+      apProductsStatus('❌ Could not load products: ' + (e.message || 'unknown error'), 'err');
+    } finally {
+      apProductsSpinner.style.display = 'none';
+    }
+  }
+
+  async function apToggleProductVisibility(productId, currentHidden){
+    apProductsStatus('Updating…', '');
+    try {
+      var res = await fetch(
+        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products/' + encodeURIComponent(productId) + '/hide',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET },
+          body: JSON.stringify({ hidden: !currentHidden })
+        }
+      );
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      apProductsStatus('✅ Visibility updated.', 'ok');
+      apProductsLoaded = false;
+      apLoadProducts();
+    } catch(e){
+      apProductsStatus('❌ Could not update visibility: ' + (e.message || 'unknown error'), 'err');
+    }
+  }
+
+  async function apDeleteProduct(productId, productTitle){
+    if(!confirm('Delete "' + productTitle + '"? This cannot be undone.')) return;
+    apProductsStatus('Deleting…', '');
+    try {
+      var res = await fetch(
+        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products/' + encodeURIComponent(productId),
+        {
+          method: 'DELETE',
+          headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }
+        }
+      );
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      apProductsStatus('✅ Product deleted.', 'ok');
+      apProductsLoaded = false;
+      apLoadProducts();
+    } catch(e){
+      apProductsStatus('❌ Could not delete product: ' + (e.message || 'unknown error'), 'err');
+    }
+  }
 })();
 </script>
 
