@@ -45,13 +45,15 @@
 {% assign studio_uploader_base_url = section.settings.studio_uploader_base_url | default: "https://studio-uploader-production.up.railway.app" %}
 {% assign admin_email = section.settings.admin_email | default: "ryan.irwin@stellaandsagecompany.com" %}
 
+{{ 'ss-wow.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
 <div class="sf-container">
-  <div class="sf-header">
+  <div class="sf-header ss-reveal">
     <h1 class="sf-h1">Request a Storefront</h1>
     <p class="sf-sub">A few quick details, then we build your private shop.</p>
   </div>
 
-  <div class="sf-form-wrap">
+  <div class="sf-form-wrap ss-reveal">
 
     {% unless customer %}
       <div class="sf-gate">
@@ -84,7 +86,7 @@
         <input type="hidden" name="secondary_session_id" id="SF_SEC_SESSION" value="">
         <input type="hidden" name="type_of_store" id="SF_TYPE_OF_STORE" value="">
 
-        <div class="sf-block">
+        <div class="sf-block ss-reveal" data-stagger="true">
           <div class="sf-legend">Basics</div>
 
           <div class="sf-grid">
@@ -196,7 +198,7 @@
 
         <div class="sf-divider"></div>
 
-        <div class="sf-block">
+        <div class="sf-block ss-reveal" data-stagger="true">
           <div class="sf-legend">Store</div>
 
           <div class="sf-field">
@@ -218,7 +220,7 @@
 
         <div class="sf-divider"></div>
 
-        <div class="sf-block">
+        <div class="sf-block ss-reveal" data-stagger="true">
           <div class="sf-legend">Logos</div>
 
           <div class="sf-field">

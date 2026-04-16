@@ -17,10 +17,12 @@
   {%- assign request_cta_url = routes.storefront_login_url | append: '?return_to=' | append: encoded_return -%}
 {%- endif -%}
 
+{{ 'ss-wow.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
 <section class="ssx" data-ss-exp>
   <div class="ssx-wrap">
 
-    <header class="ssx-hero">
+    <header class="ssx-hero ss-reveal">
       <div class="ssx-heroContent">
         <h1 class="ssx-h1">{{ section.settings.title }}</h1>
         <p class="ssx-sub">{{ section.settings.subtitle }}</p>
@@ -34,7 +36,7 @@
 
     <section class="ssx-sec ssx-problem">
       <div class="ssx-grid50">
-        <div class="ssx-textBox">
+        <div class="ssx-textBox ss-reveal ss-reveal--left">
           <div class="ssx-kicker">The Problem</div>
           <h2 class="ssx-h2">{{ section.settings.problem_title }}</h2>
           <p class="ssx-lead">{{ section.settings.problem_text }}</p>
@@ -44,7 +46,7 @@
             <li>No more "I ordered the wrong size" complaints.</li>
           </ul>
         </div>
-        <div class="ssx-cardBox">
+        <div class="ssx-cardBox ss-reveal ss-reveal--right">
           <div class="ssx-quoteCard">
             "Finally, I can stop being the unpaid 'T-Shirt Guy' for my unit."
           </div>
@@ -61,21 +63,21 @@
       </div>
 
       <div class="ssx-steps3">
-        <div class="ssx-step">
+        <div class="ssx-step ss-reveal" data-stagger="true">
           <div class="ssx-stepNum">01</div>
           <div class="ssx-stepContent">
             <h3 class="ssx-h3">Request It</h3>
             <p>Fill out a simple form. Submit your logo. We set up the backend structure for you.</p>
           </div>
         </div>
-        <div class="ssx-step">
+        <div class="ssx-step ss-reveal" data-stagger="true">
           <div class="ssx-stepNum">02</div>
           <div class="ssx-stepContent">
             <h3 class="ssx-h3">We Build It</h3>
             <p>We create a private collection with your approved gear. No inventory risk. No setup stress.</p>
           </div>
         </div>
-        <div class="ssx-step">
+        <div class="ssx-step ss-reveal" data-stagger="true">
           <div class="ssx-stepNum">03</div>
           <div class="ssx-stepContent">
             <h3 class="ssx-h3">You Invite</h3>
@@ -87,12 +89,12 @@
 
     <section class="ssx-sec ssx-access">
       <div class="ssx-grid50">
-        <div class="ssx-textBox">
+        <div class="ssx-textBox ss-reveal ss-reveal--left">
           <div class="ssx-kicker">Security & Access</div>
           <h2 class="ssx-h2">{{ section.settings.access_title }}</h2>
           <p class="ssx-lead">{{ section.settings.access_text }}</p>
         </div>
-        <div class="ssx-accessOptions">
+        <div class="ssx-accessOptions ss-reveal ss-reveal--right">
           <div class="ssx-opt">
             <div class="ssx-optIcon">🔒</div>
             <div class="ssx-optBody">
