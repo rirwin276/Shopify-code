@@ -26,6 +26,8 @@
 {%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
 {%- assign request_micro = section.settings.cta_micro_request -%}
 
+{{ 'ss-wow.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
 <section class="sshub" data-section-id="{{ section.id }}" style="
   --bg-dark: #0f1115;
   --bg-card: #181b21;
@@ -41,17 +43,17 @@
     
     <div class="sshub__heroCenter">
       
-      <div class="sshub__badgeRow">
+      <div class="sshub__badgeRow ss-reveal">
         <span class="sshub__pill">
           <span class="sshub__dot"></span> {{ section.settings.kicker | escape }}
         </span>
       </div>
 
-      <h1 class="sshub__h1">{{ section.settings.primary_title | escape }}</h1>
+      <h1 class="sshub__h1 ss-reveal ss-reveal--up" data-delay="100">{{ section.settings.primary_title | escape }}</h1>
 
-      <p class="sshub__sub">{{ section.settings.primary_desc }}</p>
+      <p class="sshub__sub ss-reveal ss-reveal--up" data-delay="200">{{ section.settings.primary_desc }}</p>
 
-      <div class="sshub__actions">
+      <div class="sshub__actions ss-reveal ss-reveal--up" data-delay="300">
         <div class="sshub__ctaStack">
           <a class="sshub__btn sshub__btn--primary" href="{{ primary_cta_url }}">
             {{ primary_label | escape }} <span class="sshub__arrow">→</span>
@@ -71,10 +73,10 @@
         </div>
       </div>
 
-      <div class="sshub__fineprint">{{ section.settings.primary_note }}</div>
+      <div class="sshub__fineprint ss-reveal ss-reveal--up" data-delay="400">{{ section.settings.primary_note }}</div>
     </div>
 
-    <div class="sshub__stage">
+    <div class="sshub__stage ss-reveal ss-reveal--scale" data-delay="200">
       <div class="sshub__browserFrame">
         <div class="sshub__browserHeader">
           <div class="sshub__dots">
@@ -107,7 +109,26 @@
       </div>
     </div>
 
-    <div class="sshub__trusted">
+    <div class="ss-stats ss-reveal" data-delay="100">
+      <div class="ss-stat">
+        <span class="ss-stat-num" data-target="2400" data-suffix="+">2,400+</span>
+        <span class="ss-stat-label">Storefronts Built</span>
+      </div>
+      <div class="ss-stat">
+        <span class="ss-stat-num" data-target="48" data-suffix=" States">48</span>
+        <span class="ss-stat-label">Nationwide</span>
+      </div>
+      <div class="ss-stat">
+        <span class="ss-stat-num" data-target="100" data-suffix="%">100%</span>
+        <span class="ss-stat-label">Zero Inventory</span>
+      </div>
+      <div class="ss-stat">
+        <span class="ss-stat-num" data-prefix="$" data-target="0">$0</span>
+        <span class="ss-stat-label">Upfront Cost</span>
+      </div>
+    </div>
+
+    <div class="sshub__trusted ss-reveal">
       <span class="sshub__trustLabel">TRUSTED BY TEAMS & UNITS ACROSS THE US</span>
       <div class="sshub__logos">
         <span class="sshub__logoTxt">YOUTH ATHLETICS</span>
@@ -120,22 +141,49 @@
       </div>
     </div>
 
+    <div class="ss-marquee-wrap ss-reveal" data-delay="150">
+      <div class="ss-marquee-track">
+        <!-- First set -->
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Riverside Youth Baseball</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Ft. Campbell Falcons</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>3rd Battalion Marines</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Lakewood Lightning Soccer</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bravo Company — 101st</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Westfield Youth Football</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Alpha Squad Softball</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Station 14 Fire Dept.</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Oak Park Travel Hockey</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Delta Troop — 1st Cavalry</span>
+        <!-- Duplicate for seamless loop -->
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Riverside Youth Baseball</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Ft. Campbell Falcons</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>3rd Battalion Marines</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Lakewood Lightning Soccer</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bravo Company — 101st</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Westfield Youth Football</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Alpha Squad Softball</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Station 14 Fire Dept.</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Oak Park Travel Hockey</span>
+        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Delta Troop — 1st Cavalry</span>
+      </div>
+    </div>
+
     <div class="sshub__grid">
-      <div class="sshub__feat">
+      <div class="sshub__feat ss-reveal" data-stagger="true">
         <div class="sshub__iconBox">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         </div>
         <h3 class="sshub__featTitle">Secure & Private</h3>
         <p class="sshub__featDesc">Invite-only access. The public sees nothing. You control the keys.</p>
       </div>
-      <div class="sshub__feat">
+      <div class="sshub__feat ss-reveal" data-stagger="true">
         <div class="sshub__iconBox">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
         </div>
         <h3 class="sshub__featTitle">Zero Inventory</h3>
         <p class="sshub__featDesc">We produce on-demand. Stop buying boxes of shirts that sit in your garage.</p>
       </div>
-      <div class="sshub__feat">
+      <div class="sshub__feat ss-reveal" data-stagger="true">
         <div class="sshub__iconBox">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
         </div>

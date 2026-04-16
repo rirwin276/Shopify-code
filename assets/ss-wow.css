@@ -1,0 +1,300 @@
+/* ============================================
+   STELLA & SAGE — WOW CSS
+   Visual polish layer — safe to remove entirely
+   ============================================ */
+
+/* --- SCROLL REVEAL BASE STATES --- */
+/* Elements start hidden/offset, then transition to visible when .ss-visible is added by JS */
+
+@media (prefers-reduced-motion: no-preference) {
+  .ss-reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .ss-reveal.ss-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Variants */
+  .ss-reveal--up { transform: translateY(28px); }
+  .ss-reveal--left { transform: translateX(-28px); }
+  .ss-reveal--right { transform: translateX(28px); }
+  .ss-reveal--scale {
+    transform: scale(0.94);
+    transform-origin: center bottom;
+  }
+  .ss-reveal--left.ss-visible,
+  .ss-reveal--right.ss-visible,
+  .ss-reveal--scale.ss-visible {
+    transform: none;
+  }
+}
+
+/* --- HERO GLOW ANIMATION --- */
+@keyframes ss-glow-drift {
+  0%   { opacity: 0.7; transform: scale(1) translateY(0); }
+  50%  { opacity: 1;   transform: scale(1.08) translateY(-10px); }
+  100% { opacity: 0.7; transform: scale(1) translateY(0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sshub__glow {
+    animation: ss-glow-drift 6s ease-in-out infinite;
+  }
+
+  /* Second ambient glow orb (appended via CSS ::after trick) */
+  .sshub::after {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    right: -5%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(closest-side, rgba(16, 185, 129, 0.07), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: ss-glow-drift 8s ease-in-out infinite reverse;
+  }
+}
+
+/* --- BROWSER FRAME UPGRADE --- */
+.sshub__browserFrame {
+  transform-origin: center top;
+  transition: transform 0.1s linear;
+  will-change: transform;
+}
+
+/* Shimmer effect on the browser frame top bar */
+.sshub__browserHeader {
+  position: relative;
+  overflow: hidden;
+}
+.sshub__browserHeader::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: ss-shimmer 4s ease-in-out infinite;
+}
+@keyframes ss-shimmer {
+  0%   { left: -100%; }
+  60%  { left: 160%; }
+  100% { left: 160%; }
+}
+
+/* --- HERO BADGE PULSE --- */
+@keyframes ss-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  50%       { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+}
+.sshub__dot {
+  animation: ss-dot-pulse 2s ease-in-out infinite;
+}
+
+/* --- BUTTON PRESS TRANSITION --- */
+a.sshub__btn,
+button.sf-btn,
+a.sf-btn,
+a.ssx-btn {
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background-color 0.2s ease,
+              border-color 0.2s ease,
+              opacity 0.2s ease;
+}
+
+/* Shimmer sweep on primary CTA hover */
+.sshub__btn--primary {
+  position: relative;
+  overflow: hidden;
+}
+.sshub__btn--primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition: left 0s;
+  pointer-events: none;
+}
+.sshub__btn--primary:hover::after {
+  left: 160%;
+  transition: left 0.5s ease;
+}
+
+/* Arrow nudge on hover for buttons with arrows */
+.sshub__btn:hover .sshub__arrow {
+  transform: translateX(4px);
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.sshub__arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+/* --- STATS BAR SECTION --- */
+.ss-stats {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 36px 20px;
+  background: rgba(255,255,255,0.025);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin: 0 auto;
+}
+.ss-stat {
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+  padding: 16px 24px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+.ss-stat:last-child { border-right: none; }
+.ss-stat-num {
+  display: block;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.ss-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+}
+@media (max-width: 600px) {
+  .ss-stats { gap: 0; }
+  .ss-stat { min-width: 45%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 14px 12px; }
+  .ss-stat:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.07); }
+  .ss-stat:last-child, .ss-stat:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+}
+
+/* --- FEATURE CARD UPGRADE (landing-dual-hub) --- */
+.sshub__feat {
+  position: relative;
+  overflow: hidden;
+}
+.sshub__feat::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at top left, rgba(16,185,129,0.06), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.sshub__feat:hover::before {
+  opacity: 1;
+}
+
+/* --- EXPLAINER PAGE CARD UPGRADES --- */
+.ssx-step {
+  position: relative;
+  overflow: hidden;
+}
+.ssx-step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.08), transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+.ssx-step:hover::before {
+  transform: scaleX(1);
+}
+
+/* --- TRUSTED STRIP FADE IN --- */
+.sshub__trusted {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+}
+.sshub__trusted.ss-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- MARQUEE SOCIAL PROOF STRIP STYLE (for the team names marquee) --- */
+.ss-marquee-wrap {
+  overflow: hidden;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 14px 0;
+}
+.ss-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: ss-marquee-scroll 28s linear infinite;
+  gap: 0;
+}
+@keyframes ss-marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ss-marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 32px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+}
+.ss-marquee-dot {
+  width: 4px;
+  height: 4px;
+  background: rgba(16,185,129,0.6);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ss-marquee-track { animation: none; }
+}
+
+/* --- GRID BG DEPTH (subtle noise texture) --- */
+.sshub__gridBg {
+  background-image:
+    linear-gradient(var(--border, rgba(255,255,255,0.08)) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border, rgba(255,255,255,0.08)) 1px, transparent 1px);
+  background-size: 44px 44px;
+  animation: ss-grid-breathe 12s ease-in-out infinite;
+}
+@keyframes ss-grid-breathe {
+  0%, 100% { opacity: 0.18; }
+  50%       { opacity: 0.26; }
+}
+
+/* --- PAGE TRANSITION FADE --- */
+@media (prefers-reduced-motion: no-preference) {
+  .content-for-layout {
+    animation: ss-page-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes ss-page-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
