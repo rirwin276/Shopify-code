@@ -55,8 +55,39 @@
   <style>
     .b2bDash-wrap{max-width:1100px;margin:0 auto;padding:28px 18px}
     .b2bDash-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .b2bDash-greeting { margin: 0 0 4px; font-size: 14px; opacity: 0.6; font-weight: 500; }
     .b2bDash-title{margin:0;font-size:28px;line-height:1.2}
     .b2bDash-sub{margin:6px 0 0 0;opacity:.8}
+    .b2bDash-stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 18px 0 0;
+    }
+    .b2bDash-stat {
+      flex: 1;
+      min-width: 120px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .b2bDash-stat-num {
+      display: block;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .b2bDash-stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.55;
+    }
     .b2bDash-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:18px}
     .b2bDash-card{grid-column:span 12;border:1px solid rgba(0,0,0,.12);border-radius:14px;padding:16px;background:rgba(255,255,255,.7)}
     @media(min-width: 900px){ .b2bDash-card.half{grid-column:span 6} .b2bDash-card.third{grid-column:span 4} }
@@ -68,20 +99,72 @@
     .b2bDash-btn:hover{transform:translateY(-1px)}
     .b2bDash-note{margin:8px 0 0 0;opacity:.75;font-size:14px}
     .b2bDash-tag{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.14);font-size:12px;margin:6px 6px 0 0;opacity:.9}
+    .b2bDash-timeline { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+    .b2bDash-tl-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 12px 14px;
+      background: rgba(0,0,0,0.02);
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .b2bDash-tl-num {
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      background: #111;
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
   </style>
 
   <div class="b2bDash-wrap">
     <div class="b2bDash-head">
       <div>
+        <p class="b2bDash-greeting">👋 Welcome back, {{ customer.first_name }}</p>
         <h1 class="b2bDash-title">{{ section.settings.heading | escape }}</h1>
         {% if section.settings.subheading != blank %}
           <p class="b2bDash-sub">{{ section.settings.subheading | escape }}</p>
         {% endif %}
       </div>
-
       <div class="b2bDash-btns">
         <a class="b2bDash-btn" href="{{ routes.account_url }}">My account</a>
         <a class="b2bDash-btn" href="{{ routes.account_logout_url }}">Sign out</a>
+      </div>
+    </div>
+
+    <div class="b2bDash-stats">
+      {% assign store_count = 0 %}
+      {% for block in section.blocks %}
+        {% if block.type == 'store_link' %}
+          {% assign tag_key = block.settings.tag_key | strip %}
+          {% if tag_key != blank and customer.tags contains tag_key %}
+            {% assign store_count = store_count | plus: 1 %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      <div class="b2bDash-stat">
+        <span class="b2bDash-stat-num">{{ store_count }}</span>
+        <span class="b2bDash-stat-label">Active Storefronts</span>
+      </div>
+      <div class="b2bDash-stat">
+        <span class="b2bDash-stat-num">{{ customer.orders_count | default: 0 }}</span>
+        <span class="b2bDash-stat-label">Total Orders</span>
+      </div>
+      <div class="b2bDash-stat">
+        <span class="b2bDash-stat-num">✓</span>
+        <span class="b2bDash-stat-label">Account Approved</span>
+      </div>
+      <div class="b2bDash-stat">
+        <span class="b2bDash-stat-num">∞</span>
+        <span class="b2bDash-stat-label">Zero Inventory</span>
       </div>
     </div>
 
@@ -167,6 +250,28 @@
           <a class="b2bDash-btn" href="/pages/contact">Message Stella &amp; Sage</a>
         </div>
         <p class="b2bDash-note">Include your business name + what you need changed.</p>
+      </div>
+
+      <div class="b2bDash-card" style="grid-column: span 12;">
+        <h3>📋 What happens after you request a storefront?</h3>
+        <div class="b2bDash-timeline">
+          <div class="b2bDash-tl-item">
+            <div class="b2bDash-tl-num">1</div>
+            <div><strong>You submit a request</strong> — Fill out the form with your logo, org name, and preferences.</div>
+          </div>
+          <div class="b2bDash-tl-item">
+            <div class="b2bDash-tl-num">2</div>
+            <div><strong>We build it</strong> — Our team sets up your private storefront, usually within 24–48 hours.</div>
+          </div>
+          <div class="b2bDash-tl-item">
+            <div class="b2bDash-tl-num">3</div>
+            <div><strong>You get a link</strong> — Your dashboard gets updated with your store link. Share it with your group.</div>
+          </div>
+          <div class="b2bDash-tl-item">
+            <div class="b2bDash-tl-num">4</div>
+            <div><strong>Members order directly</strong> — Everyone pays and ships themselves. No spreadsheets, no Venmo chaos.</div>
+          </div>
+        </div>
       </div>
 
     </div>
