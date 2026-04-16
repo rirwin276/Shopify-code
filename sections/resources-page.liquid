@@ -1,0 +1,590 @@
+<div class="res-wrap">
+
+  <div class="res-hero">
+    <h1 class="res-h1">{{ section.settings.title }}</h1>
+    <p class="res-sub">{{ section.settings.subtitle }}</p>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="res-tabs" role="tablist">
+    <button class="res-tab res-tab--active" role="tab" aria-selected="true"  data-tab="sports"    onclick="resShowTab('sports',this)">🏅 Sports Teams</button>
+    <button class="res-tab"               role="tab" aria-selected="false" data-tab="vacation"  onclick="resShowTab('vacation',this)">🏖️ Family Vacation</button>
+    <button class="res-tab"               role="tab" aria-selected="false" data-tab="weddings"  onclick="resShowTab('weddings',this)">💍 Weddings &amp; Parties</button>
+    <button class="res-tab"               role="tab" aria-selected="false" data-tab="groups"    onclick="resShowTab('groups',this)">🎲 Groups &amp; Other</button>
+  </div>
+
+  <!-- ========== TAB 1 — SPORTS TEAMS ========== -->
+  <div class="res-panel" id="res-panel-sports">
+
+    <div class="res-card">
+      <div class="res-card-title">Clean Team Wordmark</div>
+      <div class="res-prompt" id="res-prompt-sports-1">Create a bold, clean sports team logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
+
+Style: Strong athletic font with a slight forward slant. Thick solid lettering. Simple underline or swoosh. Optional small icon: <mark>[ICON – e.g. baseball, football, cleat]</mark>.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-sports-1')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Mascot-Style Logo</div>
+      <div class="res-prompt" id="res-prompt-sports-2">Create a bold mascot sports logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>". The mascot is a <mark>[MASCOT – e.g. bulldog, hawk, tiger, bear]</mark>.
+
+Style: Aggressive or energetic expression. Thick outlines. Cartoon-like but not childish. Mascot centered with team name integrated below or around it.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-sports-2')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Badge / Crest Style</div>
+      <div class="res-prompt" id="res-prompt-sports-3">Create a badge-style crest logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
+
+Design: Circular or shield shape. Team name wraps around the outside. Centered icon: <mark>[ICON – e.g. crossed bats, soccer ball, hockey stick]</mark>. Clean symmetrical layout.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-sports-3')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Minimal Icon + Text (Best for Hats)</div>
+      <div class="res-prompt" id="res-prompt-sports-4">Create a minimal sports logo for a <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
+
+Design: Small simple icon (e.g. <mark>[ICON]</mark>) with bold team name beside or below it. Nothing else.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: black or white
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-sports-4')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+  </div><!-- /panel sports -->
+
+  <!-- ========== TAB 2 — FAMILY VACATION ========== -->
+  <div class="res-panel res-panel--hidden" id="res-panel-vacation">
+
+    <div class="res-card">
+      <div class="res-card-title">Classic Vacation Logo</div>
+      <div class="res-prompt" id="res-prompt-vacation-1">Create a fun, bold family vacation logo for a group called "<mark>[FAMILY LAST NAME]</mark> Family <mark>[YEAR]</mark>".
+
+Destination or theme: <mark>[DESTINATION – e.g. beach trip, mountain cabin, lake house, cruise]</mark>.
+
+Style: Warm and friendly font. Add a simple destination icon (e.g. palm tree, waves, mountains, campfire). Playful but clean.
+
+Colors: Primary: <mark>[PRIMARY COLOR – e.g. teal, navy, sunset orange]</mark> / Secondary: <mark>[SECONDARY COLOR – e.g. white, gold]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-vacation-1')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Family Reunion Badge</div>
+      <div class="res-prompt" id="res-prompt-vacation-2">Create a vintage badge-style family reunion logo. Group name: "<mark>[FAMILY LAST NAME]</mark> Family Reunion <mark>[YEAR]</mark>".
+
+Design: Oval or circular badge. Family name + year displayed prominently. Small center icon: <mark>[ICON – e.g. family tree, anchor, state shape, house]</mark>.
+
+Style: Slightly retro. Bold text. Simple solid lines.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-vacation-2')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">🎮 GTA-Style Family Vacation Crew (FUN)</div>
+      <div class="res-prompt" id="res-prompt-vacation-3">Create a bold GTA-style crew logo for a family vacation group called "The <mark>[FAMILY LAST NAME]</mark> Crew – <mark>[YEAR]</mark>".
+
+The crew members are:
+- Dad: <mark>[DESCRIBE DAD IN 1 SENTENCE – e.g. "the retired cop who still thinks he's in charge"]</mark>
+- Mom: <mark>[DESCRIBE MOM IN 1 SENTENCE – e.g. "the planner who packed 6 bags and a spreadsheet"]</mark>
+- Kid 1: <mark>[DESCRIBE KID 1 – e.g. "the 10-year-old who only cares about screen time"]</mark>
+- Kid 2: <mark>[DESCRIBE KID 2 – e.g. "the 7-year-old who will definitely get lost at the beach"]</mark>
+(Add more family members as needed)
+
+Destination: <mark>[DESTINATION – e.g. Myrtle Beach, the mountains, Florida, a cruise]</mark>
+
+Style: Bold GTA Grand Theft Auto loading screen art style. Strong outlined characters or silhouettes. Gritty-fun, action-poster feel. Family name as the main title in bold block letters. Year below.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-vacation-3')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Matching Vacation Crew Tee</div>
+      <div class="res-prompt" id="res-prompt-vacation-4">Create a matching group t-shirt logo for a family vacation. Trip name: "<mark>[TRIP NAME – e.g. Beach Week 2025, Smith Family Florida Trip]</mark>".
+
+Style: Fun and casual. Bold statement text. Add a relevant icon (e.g. flip flops, waves, camper van, sunglasses, campfire). Year or destination below the name.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-vacation-4')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+  </div><!-- /panel vacation -->
+
+  <!-- ========== TAB 3 — WEDDINGS & PARTIES ========== -->
+  <div class="res-panel res-panel--hidden" id="res-panel-weddings">
+
+    <div class="res-card">
+      <div class="res-card-title">Wedding Monogram</div>
+      <div class="res-prompt" id="res-prompt-weddings-1">Create a clean, elegant wedding logo using the initials "<mark>[INITIAL 1]</mark>" and "<mark>[INITIAL 2]</mark>" and the date "<mark>[MONTH YEAR – e.g. June 2025]</mark>".
+
+Style: Classic serif or elegant script. Initials interlocked or side-by-side. Minimal decorative element (e.g. thin wreath, simple floral, single ring).
+
+Colors: Primary: <mark>[COLOR – e.g. dusty rose, navy, sage green]</mark> / Secondary: <mark>[COLOR – e.g. gold, white, cream]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-weddings-1')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Bachelorette / Bach Party</div>
+      <div class="res-prompt" id="res-prompt-weddings-2">Create a fun, bold bachelorette party logo for "<mark>[BRIDE'S NAME]</mark>'s Bach Party" in <mark>[DESTINATION or THEME – e.g. Nashville, Palm Springs, Disco Night, beach]</mark>.
+
+Style: Playful and celebratory. Icon: <mark>[ICON – e.g. cowboy hat, palm tree, disco ball, champagne flute, flamingo]</mark>. Mix of bold and script font.
+
+Colors: Primary: <mark>[COLOR – e.g. hot pink, black]</mark> / Secondary: <mark>[COLOR – e.g. white, gold]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-weddings-2')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Bachelor / Groom Squad</div>
+      <div class="res-prompt" id="res-prompt-weddings-3">Create a bold bachelor party logo for "<mark>[GROOM'S NAME]</mark>'s Last Ride" or "<mark>[GROUP NAME]</mark>".
+
+Theme: <mark>[ACTIVITY or DESTINATION – e.g. golf trip, Vegas weekend, hunting trip, mountain cabin]</mark>.
+
+Style: Strong and masculine. Icon: <mark>[ICON – e.g. golf flag, dice, deer skull, mountain, beer mug]</mark>. Rugged or classic block lettering.
+
+Colors: Primary: <mark>[COLOR – e.g. black, forest green, navy]</mark> / Secondary: <mark>[COLOR – e.g. white, gold, orange]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-weddings-3')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+  </div><!-- /panel weddings -->
+
+  <!-- ========== TAB 4 — GROUPS & OTHER ========== -->
+  <div class="res-panel res-panel--hidden" id="res-panel-groups">
+
+    <div class="res-card">
+      <div class="res-card-title">Club or Organization</div>
+      <div class="res-prompt" id="res-prompt-groups-1">Create a clean group logo for "<mark>[GROUP NAME]</mark>".
+
+Group type: <mark>[TYPE – e.g. neighborhood watch, hunting club, car club, book club, work team]</mark>.
+
+Style: Professional but approachable. Add a simple relevant icon. Bold readable font.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-groups-1')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Fundraiser / Charity Event</div>
+      <div class="res-prompt" id="res-prompt-groups-2">Create a bold event logo for "<mark>[EVENT NAME]</mark>" benefiting "<mark>[CAUSE OR ORGANIZATION]</mark>". Year: <mark>[YEAR]</mark>.
+
+Style: Warm and community-focused. Simple icon related to the cause (e.g. ribbon, heart, raised hand, star). Bold and easy to read.
+
+Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-groups-2')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-card-title">Work Team / Company Event</div>
+      <div class="res-prompt" id="res-prompt-groups-3">Create a fun team logo for "<mark>[COMPANY OR TEAM NAME]</mark>" for a <mark>[EVENT TYPE – e.g. company picnic, team retreat, holiday party]</mark>. Year: <mark>[YEAR]</mark>.
+
+Style: Professional but fun. Add a simple icon (e.g. star, lightning bolt, trophy). Bold clean font.
+
+Colors: Company colors — Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Thick, bold outlines — no thin lines
+- Crisp, defined borders on all shapes
+- Minimal empty space inside the logo
+- No gradients, shadows, or textures
+- High contrast only
+- White or transparent background
+- Vector-style, print-ready for DTF and embroidery</div>
+      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-groups-3')">📋 Copy Prompt</button>
+      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
+    </div>
+
+  </div><!-- /panel groups -->
+
+  <!-- ========== FREE TOOLS SECTION ========== -->
+  <div class="res-tools-sec">
+    <h2 class="res-tools-title">Free Tools to Polish Your Logo</h2>
+    <div class="res-tools-grid">
+
+      <a class="res-tool-card" href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
+        <div class="res-tool-name">ChatGPT / DALL·E 3</div>
+        <div class="res-tool-desc">Generate your logo using the prompts above</div>
+      </a>
+
+      <a class="res-tool-card" href="https://www.remove.bg" target="_blank" rel="noopener noreferrer">
+        <div class="res-tool-name">Remove.bg</div>
+        <div class="res-tool-desc">Remove the background from your logo for free</div>
+      </a>
+
+      <a class="res-tool-card" href="https://upscayl.org" target="_blank" rel="noopener noreferrer">
+        <div class="res-tool-name">Upscayl</div>
+        <div class="res-tool-desc">Upscale your image resolution (free desktop app)</div>
+      </a>
+
+      <a class="res-tool-card" href="https://icons8.com/upscaler" target="_blank" rel="noopener noreferrer">
+        <div class="res-tool-name">Icons8 Upscaler</div>
+        <div class="res-tool-desc">Free online AI image upscaler</div>
+      </a>
+
+      <a class="res-tool-card" href="https://www.photopea.com" target="_blank" rel="noopener noreferrer">
+        <div class="res-tool-name">Photopea</div>
+        <div class="res-tool-desc">Free browser-based Photoshop alternative</div>
+      </a>
+
+      <a class="res-tool-card" href="https://www.canva.com" target="_blank" rel="noopener noreferrer">
+        <div class="res-tool-name">Canva</div>
+        <div class="res-tool-desc">Polish text, colors, and layout with ease</div>
+      </a>
+
+    </div>
+  </div>
+
+</div><!-- /res-wrap -->
+
+<style>
+  .res-wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  /* HERO */
+  .res-hero {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .res-h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    margin: 0 0 14px;
+    line-height: 1.05;
+  }
+  .res-sub {
+    font-size: 17px;
+    color: rgba(0,0,0,.65);
+    max-width: 65ch;
+    margin: 0 auto;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  /* TABS */
+  .res-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .res-tab {
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    background: #ebebeb;
+    color: #333;
+    transition: background .15s ease, color .15s ease;
+  }
+  .res-tab--active {
+    background: #111;
+    color: #fff;
+  }
+  .res-tab:hover:not(.res-tab--active) {
+    background: #d5d5d5;
+  }
+
+  /* PANELS */
+  .res-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .res-panel--hidden {
+    display: none;
+  }
+
+  /* PROMPT CARDS */
+  .res-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 20px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.06);
+    padding: 28px;
+  }
+  .res-card-title {
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    color: #111;
+  }
+  .res-prompt {
+    font-family: monospace;
+    white-space: pre-wrap;
+    background: #f7f7f7;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #222;
+    margin-bottom: 14px;
+  }
+  .res-prompt mark {
+    background: #FFE000;
+    color: #111;
+    font-weight: 700;
+    border-radius: 3px;
+    padding: 0 3px;
+  }
+  .res-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 22px;
+    border-radius: 999px;
+    border: none;
+    background: #111;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .15s ease;
+  }
+  .res-copy-btn:hover {
+    transform: translateY(-2px);
+  }
+  .res-note {
+    margin-top: 10px;
+    font-size: 13px;
+    color: rgba(0,0,0,.55);
+    font-weight: 500;
+  }
+
+  /* FREE TOOLS */
+  .res-tools-sec {
+    margin-top: 60px;
+  }
+  .res-tools-title {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin: 0 0 20px;
+    color: #111;
+  }
+  .res-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .res-tool-card {
+    display: block;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.05);
+    padding: 20px 22px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .res-tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.09);
+  }
+  .res-tool-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 4px;
+  }
+  .res-tool-desc {
+    font-size: 13px;
+    color: rgba(0,0,0,.6);
+    line-height: 1.4;
+  }
+
+  /* MOBILE */
+  @media (max-width: 640px) {
+    .res-tools-grid {
+      grid-template-columns: 1fr;
+    }
+    .res-tabs {
+      gap: 6px;
+    }
+    .res-tab {
+      padding: 9px 14px;
+      font-size: 13px;
+    }
+  }
+</style>
+
+<script>
+  function resShowTab(tabId, btn) {
+    document.querySelectorAll('.res-panel').forEach(function(p) {
+      p.classList.add('res-panel--hidden');
+    });
+    document.querySelectorAll('.res-tab').forEach(function(t) {
+      t.classList.remove('res-tab--active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    document.getElementById('res-panel-' + tabId).classList.remove('res-panel--hidden');
+    btn.classList.add('res-tab--active');
+    btn.setAttribute('aria-selected', 'true');
+  }
+
+  function resCopy(btn, promptId) {
+    const el = document.getElementById(promptId);
+    const text = el.innerText;
+    const orig = btn.textContent;
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = '✅ Copied!';
+      setTimeout(function() { btn.textContent = orig; }, 2000);
+    }).catch(function() {
+      btn.textContent = '⚠️ Copy failed';
+      setTimeout(function() { btn.textContent = orig; }, 2000);
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Resources Page",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Page Title", "default": "Logo Resources" },
+    { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "Use these free ChatGPT prompts to generate a logo for your storefront. Fill in the highlighted sections, then paste into ChatGPT." }
+  ],
+  "presets": [{ "name": "Resources Page" }]
+}
+{% endschema %}
