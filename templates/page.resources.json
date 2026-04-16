@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "resources_main": {
+      "type": "resources-page",
+      "settings": {}
+    }
+  },
+  "order": ["resources_main"]
+}
