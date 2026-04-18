@@ -9,9 +9,9 @@
 @media (prefers-reduced-motion: no-preference) {
   .ss-reveal {
     opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(22px);
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .ss-reveal.ss-visible {
     opacity: 1;
@@ -19,7 +19,7 @@
   }
 
   /* Variants */
-  .ss-reveal--up { transform: translateY(28px); }
+  .ss-reveal--up { transform: translateY(22px); }
   .ss-reveal--left { transform: translateX(-28px); }
   .ss-reveal--right { transform: translateX(28px); }
   .ss-reveal--scale {
@@ -31,6 +31,16 @@
   .ss-reveal--scale.ss-visible {
     transform: none;
   }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ss-reveal[data-delay="50"]  { transition-delay: 50ms; }
+  .ss-reveal[data-delay="100"] { transition-delay: 100ms; }
+  .ss-reveal[data-delay="150"] { transition-delay: 150ms; }
+  .ss-reveal[data-delay="200"] { transition-delay: 200ms; }
+  .ss-reveal[data-delay="250"] { transition-delay: 250ms; }
+  .ss-reveal[data-delay="300"] { transition-delay: 300ms; }
+  .ss-reveal[data-delay="400"] { transition-delay: 400ms; }
 }
 
 /* --- HERO GLOW ANIMATION --- */
