@@ -74,6 +74,31 @@
       </div>
 
       <div class="sshub__fineprint ss-reveal ss-reveal--up" data-delay="400">{{ section.settings.primary_note }}</div>
+
+      <div class="sshub__products ss-reveal" data-delay="450">
+        <span class="sshub__prod-label">Available on every store:</span>
+        <span class="sshub__prod-chip">👕 T-Shirts</span>
+        <span class="sshub__prod-chip">🧥 Hoodies</span>
+        <span class="sshub__prod-chip">🧢 Hats</span>
+        <span class="sshub__prod-chip">+ More</span>
+      </div>
+    </div>
+
+    <div class="sshub__howstrip ss-reveal ss-reveal--up" data-delay="350">
+      <div class="sshub__howstep">
+        <span class="sshub__hownum">01</span>
+        <span class="sshub__howtext">Fill out the form &amp; upload your logo</span>
+      </div>
+      <span class="sshub__howdivider" aria-hidden="true">→</span>
+      <div class="sshub__howstep">
+        <span class="sshub__hownum">02</span>
+        <span class="sshub__howtext">Your store goes live in under 2 minutes</span>
+      </div>
+      <span class="sshub__howdivider" aria-hidden="true">→</span>
+      <div class="sshub__howstep">
+        <span class="sshub__hownum">03</span>
+        <span class="sshub__howtext">Share one link — your team orders &amp; pays individually</span>
+      </div>
     </div>
 
     <div class="sshub__stage ss-reveal ss-reveal--scale" data-delay="200">
@@ -311,12 +336,85 @@
     .sshub__featTitle{ font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px 0; }
     .sshub__featDesc{ font-size: 14px; color: var(--text-muted); line-height: 1.6; margin: 0; }
 
+    /* --- HOW IT WORKS STRIP --- */
+    .sshub__howstrip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 32px auto 0;
+      padding: 18px 24px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 16px;
+      max-width: 680px;
+    }
+    .sshub__howstep {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-align: center;
+    }
+    .sshub__hownum {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(16,185,129,0.8);
+    }
+    .sshub__howtext {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      max-width: 14ch;
+      line-height: 1.35;
+    }
+    .sshub__howdivider {
+      font-size: 18px;
+      color: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+
+    /* --- PRODUCT CHIPS --- */
+    .sshub__products {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .sshub__prod-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      margin-right: 4px;
+    }
+    .sshub__prod-chip {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 5px 12px;
+    }
+
     @media (max-width: 800px){
       .sshub__grid{ grid-template-columns: 1fr; }
       .sshub__h1{ font-size: 42px; }
       .sshub__actions{ flex-direction: column; width: 100%; }
       .sshub__ctaStack{ width: 100%; }
       .sshub__btn{ width: 100%; }
+    }
+    @media (max-width: 600px) {
+      .sshub__howstrip { gap: 12px; padding: 14px 16px; }
+      .sshub__howdivider { display: none; }
+      .sshub__howstep { flex-direction: row; gap: 8px; text-align: left; }
+      .sshub__howtext { max-width: none; }
+      .sshub__products { gap: 6px; }
     }
   </style>
 </section>
