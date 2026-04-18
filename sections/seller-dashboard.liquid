@@ -299,12 +299,12 @@
                               decoding="async"
                               fetchpriority="low"
                               alt="{{ tile_name | escape }}"
-                              width="64"
-                              height="64">
+                              width="72"
+                              height="72">
                           {% elsif tile_logo_file != blank %}
                             {{ tile_logo_file
                               | image_url: width: 300
-                              | image_tag: loading: 'lazy', decoding: 'async', alt: tile_name, width: 64, height: 64 }}
+                              | image_tag: loading: 'lazy', decoding: 'async', alt: tile_name, width: 72, height: 72 }}
                           {% else %}
                             <span class="ss-logo-fallback">{{ tile_name | slice: 0, 2 | upcase }}</span>
                           {% endif %}
@@ -973,12 +973,12 @@
 
   .ss-col-identity { display: flex; align-items: center; gap: 16px; width: 32%; }
   .ss-logo-frame {
-    width: 60px; height: 60px; border-radius: 16px;
-    background: rgba(248,250,252,0.75);
+    width: 72px; height: 72px; border-radius: 16px;
+    background: #ffffff;
     display: flex; align-items: center; justify-content: center;
-    overflow: hidden; border: 1px solid rgba(15,23,42,0.06); flex-shrink: 0;
+    overflow: hidden; border: 1px solid rgba(15,23,42,0.08); flex-shrink: 0;
   }
-  .ss-logo-frame img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+  .ss-logo-frame img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
 
   .ss-logo-fallback { font-size: 18px; font-weight: 850; color: rgba(148,163,184,0.9); }
 
