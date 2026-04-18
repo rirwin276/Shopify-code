@@ -3,6 +3,12 @@
    Visual polish layer — safe to remove entirely
    ============================================ */
 
+/* --- SECTION SEAM FIX: dark hero flush with header --- */
+.shopify-section:has(.sshub) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
 /* --- SCROLL REVEAL BASE STATES --- */
 /* Elements start hidden/offset, then transition to visible when .ss-visible is added by JS */
 
@@ -40,7 +46,9 @@
   .ss-reveal[data-delay="200"] { transition-delay: 200ms; }
   .ss-reveal[data-delay="250"] { transition-delay: 250ms; }
   .ss-reveal[data-delay="300"] { transition-delay: 300ms; }
+  .ss-reveal[data-delay="350"] { transition-delay: 350ms; }
   .ss-reveal[data-delay="400"] { transition-delay: 400ms; }
+  .ss-reveal[data-delay="450"] { transition-delay: 450ms; }
 }
 
 /* --- HERO GLOW ANIMATION --- */
@@ -300,7 +308,10 @@ a.ssx-btn {
 
 /* --- PAGE TRANSITION FADE --- */
 @media (prefers-reduced-motion: no-preference) {
-  .content-for-layout {
+  /* Animate only the main content area, not the sticky header */
+  main.content-for-layout,
+  #MainContent,
+  .content-for-layout > * {
     animation: ss-page-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   @keyframes ss-page-in {

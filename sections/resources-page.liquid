@@ -5,6 +5,10 @@
     <p class="res-sub">{{ section.settings.subtitle }}</p>
   </div>
 
+  <div class="res-context-banner">
+    <span role="img" aria-label="Tip">💡</span> <strong>How to use this page:</strong> Generate your logo using the prompts below, then paste it into your <a href="/pages/request-storefront-form">storefront request form</a>.
+  </div>
+
   <!-- TAB BAR -->
   <div class="res-tabs" role="tablist">
     <button class="res-tab res-tab--active" role="tab" aria-selected="true"  data-tab="sports"    onclick="resShowTab('sports',this)">🏅 Sports Teams</button>
@@ -547,6 +551,23 @@ Logo Requirements:
       padding: 9px 14px;
       font-size: 13px;
     }
+  }
+
+  .res-context-banner {
+    background: #fffbe6;
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+  .res-context-banner a {
+    color: #111;
+    text-decoration: underline;
+    font-weight: 800;
   }
 </style>
 
