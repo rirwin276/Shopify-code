@@ -506,6 +506,29 @@
     letter-spacing: -0.02em;
     line-height: 1.1;
     margin: 0 0 14px;
+    position: relative;
+  }
+
+  /* Gold underline flourish — draws in under the name on scroll-reveal */
+  .ldh-welcome-h1::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -9px;
+    height: 3px;
+    width: 0%;
+    border-radius: 2px;
+    background: rgba(183,163,106,1);
+    transition: width 700ms ease-out 180ms;
+  }
+  .ldh-welcome.is-visible .ldh-welcome-h1::after {
+    width: 56%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ldh-welcome-h1::after {
+      width: 56%;
+      transition: none;
+    }
   }
   .ldh-welcome-sub {
     font-size: clamp(15px, 2vw, 18px);
@@ -810,7 +833,7 @@
       "type": "textarea",
       "id": "step1_desc",
       "label": "Step 1 description",
-      "default": "Name, logo, colors, what you want made. About 2 minutes."
+      "default": "Tell us your team name, logo, and colors. About 2 minutes."
     },
     {
       "type": "text",
@@ -900,13 +923,13 @@
       "type": "textarea",
       "id": "second_store_body",
       "label": "Body copy",
-      "default": "Different team, different logo, different products — or a personal store for family reunions, fantasy leagues, anything. Same easy button. About 15 minutes."
+      "default": "Different team, different logo — or a personal store for family reunions, fantasy leagues, anything. Same easy button. About 15 minutes."
     },
     {
       "type": "text",
       "id": "second_store_cta",
       "label": "CTA label",
-      "default": "Start another store"
+      "default": "Create another store"
     }
   ],
   "presets": [
