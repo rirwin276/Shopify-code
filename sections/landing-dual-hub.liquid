@@ -1,15 +1,16 @@
 {% comment %}
-  LANDING — Apple-style dual-hub (V10)
-  - Logged-out: Hero → Speed proof → How it works → Examples carousel → Final CTA
-  - Logged-in: Welcome → Second/personal store CTA → Examples carousel
-  - Each section is its own toggleable schema block.
-  - No dashboard mockup image.
+  LANDING — Apple-style (V11)
+  - Settings-based (no blocks required) — works with existing templates/index.json
+  - Logged-out: Hero → Speed proof → How it works → Final CTA → Marquee
+  - Logged-in: Welcome by name → Store links → Second store CTA → Marquee
+  - All original V9 schema settings preserved (kicker, primary_title, dashboard_image, etc.)
+  - Dashboard image kept in schema but hidden via CSS — re-enable anytime.
   - "~15 minutes" build time — never "48 hours".
   - Scroll animations via IntersectionObserver, respects prefers-reduced-motion.
 {% endcomment %}
 
-{%- assign explainer_url = section.settings.explainer_url | default: '/pages/private-storefronts' -%}
-{%- assign portal_url = section.settings.portal_url | default: '/pages/portal' -%}
+{%- assign dashboard_url = section.settings.portal_url | default: section.settings.dashboard_url | default: '/pages/portal' -%}
+{%- assign request_url = section.settings.explainer_url | default: section.settings.request_url | default: '/pages/private-storefronts' -%}
 {%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
 
 {%- comment -%}Logged-in: parse storefront tags & metaobjects (same logic as portal-router){%- endcomment -%}
@@ -51,261 +52,207 @@
 
     {%- comment -%}======= LOGGED-IN VIEW ======={%- endcomment -%}
 
-    {%- for block in section.blocks -%}
+    <div class="ldh-section ldh-welcome ldh-reveal">
+      <div class="ldh-wrap">
+        <h1 class="ldh-welcome-h1">{{ section.settings.welcome_prefix | escape }}{{ welcome_name | escape }}.</h1>
+        <p class="ldh-welcome-sub">{{ section.settings.greeting_sub | escape }}</p>
 
-      {%- if block.type == 'welcome' -%}
-        <div class="ldh-section ldh-welcome ldh-reveal" {{ block.shopify_attributes }}>
-          <div class="ldh-wrap">
-            <h1 class="ldh-welcome-h1">{{ block.settings.greeting_prefix | escape }}{{ welcome_name | escape }}.</h1>
-            <p class="ldh-welcome-sub">{{ block.settings.greeting_sub | escape }}</p>
-
-            <div class="ldh-action-row">
-              {%- if has_storefront -%}
-                {%- assign tags_arr = storefront_tags | split: '||' -%}
-                {%- if store_count == 1 -%}
-                  {%- comment -%}Single store — one big primary button{%- endcomment -%}
-                  {%- for t in tags_arr -%}
-                    {%- if t != blank -%}
-                      {%- assign s_handle = t | remove: 'b2b-' | strip -%}
-                      {%- assign s_url = '/pages/' | append: s_handle -%}
-                      {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
-                      {%- if store_meta != blank -%}
-                        {%- for mo in store_meta -%}
-                          {%- assign mo_page = mo.page.value | default: mo.page -%}
-                          {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
-                          {%- assign mo_h = '' -%}
-                          {%- if mo_page != blank and mo_page.handle != blank -%}
-                            {%- assign mo_h = mo_page.handle | downcase | strip -%}
-                          {%- elsif mo_slug != blank -%}
-                            {%- assign mo_h = mo_slug | downcase | strip -%}
-                          {%- endif -%}
-                          {%- if mo_h == s_handle -%}
-                            {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
-                            {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
-                            {%- if mo_page != blank and mo_page.url != blank -%}{%- assign s_url = mo_page.url -%}{%- endif -%}
-                            {%- break -%}
-                          {%- endif -%}
-                        {%- endfor -%}
+        <div class="ldh-action-row">
+          {%- if has_storefront -%}
+            {%- assign tags_arr = storefront_tags | split: '||' -%}
+            {%- if store_count == 1 -%}
+              {%- comment -%}Single store — one big primary button{%- endcomment -%}
+              {%- for t in tags_arr -%}
+                {%- if t != blank -%}
+                  {%- assign s_handle = t | remove: 'b2b-' | strip -%}
+                  {%- assign s_url = '/pages/' | append: s_handle -%}
+                  {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
+                  {%- if store_meta != blank -%}
+                    {%- for mo in store_meta -%}
+                      {%- assign mo_page = mo.page.value | default: mo.page -%}
+                      {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
+                      {%- assign mo_h = '' -%}
+                      {%- if mo_page != blank and mo_page.handle != blank -%}
+                        {%- assign mo_h = mo_page.handle | downcase | strip -%}
+                      {%- elsif mo_slug != blank -%}
+                        {%- assign mo_h = mo_slug | downcase | strip -%}
                       {%- endif -%}
-                      <a class="ldh-pill ldh-pill--primary" href="{{ s_url }}">Open {{ s_name | escape }} →</a>
-                    {%- endif -%}
-                  {%- endfor -%}
-                {%- else -%}
-                  {%- comment -%}Multiple stores — tile row{%- endcomment -%}
-                  {%- for t in tags_arr -%}
-                    {%- if t != blank -%}
-                      {%- assign s_handle = t | remove: 'b2b-' | strip -%}
-                      {%- assign s_url = '/pages/' | append: s_handle -%}
-                      {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
-                      {%- if store_meta != blank -%}
-                        {%- for mo in store_meta -%}
-                          {%- assign mo_page = mo.page.value | default: mo.page -%}
-                          {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
-                          {%- assign mo_h = '' -%}
-                          {%- if mo_page != blank and mo_page.handle != blank -%}
-                            {%- assign mo_h = mo_page.handle | downcase | strip -%}
-                          {%- elsif mo_slug != blank -%}
-                            {%- assign mo_h = mo_slug | downcase | strip -%}
-                          {%- endif -%}
-                          {%- if mo_h == s_handle -%}
-                            {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
-                            {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
-                            {%- if mo_page != blank and mo_page.url != blank -%}{%- assign s_url = mo_page.url -%}{%- endif -%}
-                            {%- break -%}
-                          {%- endif -%}
-                        {%- endfor -%}
+                      {%- if mo_h == s_handle -%}
+                        {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
+                        {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
+                        {%- if mo_page != blank and mo_page.url != blank -%}{%- assign s_url = mo_page.url -%}{%- endif -%}
+                        {%- break -%}
                       {%- endif -%}
-                      <a class="ldh-pill ldh-pill--store" href="{{ s_url }}">{{ s_name | escape }} →</a>
-                    {%- endif -%}
-                  {%- endfor -%}
-                {%- endif -%}
-              {%- endif -%}
-              <a class="ldh-pill ldh-pill--secondary" href="{{ portal_url }}?stay=1">{{ block.settings.dashboard_label | escape }}</a>
-              <a class="ldh-pill ldh-pill--secondary" href="{{ routes.account_url }}">{{ block.settings.orders_label | escape }}</a>
-            </div>
-          </div>
-        </div>
-
-      {%- elsif block.type == 'second_store' -%}
-        <div class="ldh-section ldh-centered ldh-reveal" {{ block.shopify_attributes }}>
-          <div class="ldh-wrap ldh-wrap--narrow">
-            <h2 class="ldh-h2">{{ block.settings.headline | escape }}</h2>
-            <p class="ldh-body">{{ block.settings.body | escape }}</p>
-            <a class="ldh-btn ldh-btn--outline" href="{{ explainer_url }}">{{ block.settings.cta_label | escape }} →</a>
-          </div>
-        </div>
-
-      {%- elsif block.type == 'examples' -%}
-        <div class="ldh-section ldh-carousel-section ldh-reveal" {{ block.shopify_attributes }}>
-          <div class="ldh-wrap">
-            <h2 class="ldh-h2 ldh-centered-text">{{ block.settings.headline | escape }}</h2>
-            <p class="ldh-body ldh-centered-text ldh-carousel-sub">{{ block.settings.subhead | escape }}</p>
-          </div>
-          <div class="ldh-carousel" data-ldh-carousel>
-            <div class="ldh-carousel-shell">
-              <button class="ldh-arrow ldh-arrow--left" type="button" aria-label="Previous" data-ldh-prev>&#8249;</button>
-              <div class="ldh-track" data-ldh-track>
-                {%- assign ex_count = 0 -%}
-                {%- for b2 in section.blocks -%}
-                  {%- if b2.type == 'example' -%}
-                    {%- assign ex_count = ex_count | plus: 1 -%}
-                    <div class="ldh-slide" data-ldh-slide {{ b2.shopify_attributes }}>
-                      <div class="ldh-slide-inner">
-                        {%- if b2.settings.image != blank -%}
-                          {{ b2.settings.image | image_url: width: 1600 | image_tag: class: 'ldh-slide-img', loading: 'lazy', alt: b2.settings.alt | default: 'Team product example' }}
-                        {%- else -%}
-                          <div class="ldh-slide-placeholder">Add an image in the Theme Editor</div>
-                        {%- endif -%}
-                        {%- if b2.settings.caption != blank -%}
-                          <div class="ldh-slide-cap">{{ b2.settings.caption | escape }}</div>
-                        {%- endif -%}
-                      </div>
-                    </div>
+                    {%- endfor -%}
                   {%- endif -%}
-                {%- endfor -%}
-                {%- if ex_count == 0 -%}
-                  <div class="ldh-slide" data-ldh-slide>
-                    <div class="ldh-slide-inner">
-                      <div class="ldh-slide-placeholder">Add "Example slide" blocks in the Theme Editor to populate this carousel</div>
-                    </div>
-                  </div>
+                  <a class="ldh-pill ldh-pill--primary" href="{{ s_url }}">Open {{ s_name | escape }} →</a>
                 {%- endif -%}
-              </div>
-              <button class="ldh-arrow ldh-arrow--right" type="button" aria-label="Next" data-ldh-next>&#8250;</button>
-            </div>
-            <div class="ldh-dots" data-ldh-dots></div>
-          </div>
+              {%- endfor -%}
+            {%- else -%}
+              {%- comment -%}Multiple stores — tile row{%- endcomment -%}
+              {%- for t in tags_arr -%}
+                {%- if t != blank -%}
+                  {%- assign s_handle = t | remove: 'b2b-' | strip -%}
+                  {%- assign s_url = '/pages/' | append: s_handle -%}
+                  {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
+                  {%- if store_meta != blank -%}
+                    {%- for mo in store_meta -%}
+                      {%- assign mo_page = mo.page.value | default: mo.page -%}
+                      {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
+                      {%- assign mo_h = '' -%}
+                      {%- if mo_page != blank and mo_page.handle != blank -%}
+                        {%- assign mo_h = mo_page.handle | downcase | strip -%}
+                      {%- elsif mo_slug != blank -%}
+                        {%- assign mo_h = mo_slug | downcase | strip -%}
+                      {%- endif -%}
+                      {%- if mo_h == s_handle -%}
+                        {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
+                        {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
+                        {%- if mo_page != blank and mo_page.url != blank -%}{%- assign s_url = mo_page.url -%}{%- endif -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+                  <a class="ldh-pill ldh-pill--store" href="{{ s_url }}">{{ s_name | escape }} →</a>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endif -%}
+          <a class="ldh-pill ldh-pill--secondary" href="{{ dashboard_url }}?stay=1">{{ section.settings.dashboard_label | escape }}</a>
+          <a class="ldh-pill ldh-pill--secondary" href="{{ routes.account_url }}">{{ section.settings.orders_label | escape }}</a>
         </div>
+      </div>
+    </div>
 
-      {%- endif -%}
-
-    {%- endfor -%}
+    <div class="ldh-section ldh-centered ldh-reveal">
+      <div class="ldh-wrap ldh-wrap--narrow">
+        <h2 class="ldh-h2">{{ section.settings.second_store_headline | escape }}</h2>
+        <p class="ldh-body">{{ section.settings.second_store_body | escape }}</p>
+        <a class="ldh-btn ldh-btn--outline" href="{{ request_url }}">{{ section.settings.second_store_cta | escape }} →</a>
+      </div>
+    </div>
 
   {%- else -%}
 
     {%- comment -%}======= LOGGED-OUT VIEW ======={%- endcomment -%}
 
-    {%- for block in section.blocks -%}
+    {%- comment -%}Hero{%- endcomment -%}
+    <div class="ldh-section ldh-hero ldh-reveal">
+      <div class="ldh-wrap ldh-hero-wrap">
+        <h1 class="ldh-hero-h1">{{ section.settings.hero_headline | newline_to_br }}</h1>
+        <p class="ldh-hero-sub">{{ section.settings.hero_sub | escape }}</p>
+        <div class="ldh-hero-cta-wrap">
+          <a class="ldh-btn ldh-btn--primary" href="{{ request_url }}">{{ section.settings.hero_cta_label | escape }}</a>
+          <p class="ldh-hero-caption">{{ section.settings.hero_caption | escape }}</p>
+        </div>
+      </div>
+    </div>
 
-      {%- if block.type == 'hero' -%}
-        <div class="ldh-section ldh-hero ldh-reveal" {{ block.shopify_attributes }}>
-          <div class="ldh-wrap ldh-hero-wrap">
-            <h1 class="ldh-hero-h1">{{ block.settings.headline | newline_to_br }}</h1>
-            <p class="ldh-hero-sub">{{ block.settings.subhead | escape }}</p>
-            <div class="ldh-hero-cta-wrap">
-              <a class="ldh-btn ldh-btn--primary" href="{{ explainer_url }}">{{ block.settings.cta_label | escape }} →</a>
-              <p class="ldh-hero-caption">{{ block.settings.caption | escape }}</p>
+    {%- comment -%}Speed proof{%- endcomment -%}
+    <div class="ldh-section ldh-speed ldh-reveal">
+      <div class="ldh-wrap ldh-wrap--narrow ldh-centered-text">
+        <h2 class="ldh-h2">{{ section.settings.speed_headline | escape }}</h2>
+        <p class="ldh-body">{{ section.settings.speed_sub | escape }}</p>
+        <div class="ldh-stats-row">
+          <div class="ldh-stat ldh-reveal" data-delay="0">
+            <div class="ldh-stat-num">{{ section.settings.stat1_num | escape }}</div>
+            <div class="ldh-stat-label">{{ section.settings.stat1_label | escape }}</div>
+          </div>
+          <div class="ldh-stat ldh-reveal" data-delay="80">
+            <div class="ldh-stat-num">{{ section.settings.stat2_num | escape }}</div>
+            <div class="ldh-stat-label">{{ section.settings.stat2_label | escape }}</div>
+          </div>
+          <div class="ldh-stat ldh-reveal" data-delay="160">
+            <div class="ldh-stat-num">{{ section.settings.stat3_num | escape }}</div>
+            <div class="ldh-stat-label">{{ section.settings.stat3_label | escape }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%}How it works{%- endcomment -%}
+    <div class="ldh-section ldh-steps-section ldh-reveal">
+      <div class="ldh-wrap ldh-wrap--medium">
+        <h2 class="ldh-h2">{{ section.settings.steps_headline | escape }}</h2>
+        <div class="ldh-steps">
+          <div class="ldh-step ldh-reveal" data-delay="0">
+            <div class="ldh-step-num">01</div>
+            <div class="ldh-step-body">
+              <strong class="ldh-step-title">{{ section.settings.step1_title | escape }}</strong>
+              <p class="ldh-step-desc">{{ section.settings.step1_desc | escape }}</p>
+            </div>
+          </div>
+          <div class="ldh-step ldh-reveal" data-delay="80">
+            <div class="ldh-step-num">02</div>
+            <div class="ldh-step-body">
+              <strong class="ldh-step-title">{{ section.settings.step2_title | escape }}</strong>
+              <p class="ldh-step-desc">{{ section.settings.step2_desc | escape }}</p>
+            </div>
+          </div>
+          <div class="ldh-step ldh-reveal" data-delay="160">
+            <div class="ldh-step-num">03</div>
+            <div class="ldh-step-body">
+              <strong class="ldh-step-title">{{ section.settings.step3_title | escape }}</strong>
+              <p class="ldh-step-desc">{{ section.settings.step3_desc | escape }}</p>
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
-      {%- elsif block.type == 'speed' -%}
-        <div class="ldh-section ldh-speed ldh-reveal" {{ block.shopify_attributes }}>
-          <div class="ldh-wrap ldh-wrap--narrow ldh-centered-text">
-            <h2 class="ldh-h2">{{ block.settings.headline | escape }}</h2>
-            <p class="ldh-body">{{ block.settings.subhead | escape }}</p>
-            <div class="ldh-stats-row">
-              <div class="ldh-stat ldh-reveal" data-delay="0">
-                <div class="ldh-stat-num">{{ block.settings.stat1_num | escape }}</div>
-                <div class="ldh-stat-label">{{ block.settings.stat1_label | escape }}</div>
-              </div>
-              <div class="ldh-stat ldh-reveal" data-delay="80">
-                <div class="ldh-stat-num">{{ block.settings.stat2_num | escape }}</div>
-                <div class="ldh-stat-label">{{ block.settings.stat2_label | escape }}</div>
-              </div>
-              <div class="ldh-stat ldh-reveal" data-delay="160">
-                <div class="ldh-stat-num">{{ block.settings.stat3_num | escape }}</div>
-                <div class="ldh-stat-label">{{ block.settings.stat3_label | escape }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
+    {%- comment -%}Final CTA{%- endcomment -%}
+    <div class="ldh-section ldh-final ldh-reveal">
+      <div class="ldh-wrap ldh-wrap--narrow ldh-centered-text">
+        <h2 class="ldh-h2 ldh-h2--large">{{ section.settings.final_headline | escape }}</h2>
+        <p class="ldh-body">{{ section.settings.final_sub | escape }}</p>
+        <a class="ldh-btn ldh-btn--primary" href="{{ request_url }}">{{ section.settings.final_cta_label | escape }} →</a>
+      </div>
+    </div>
 
-      {%- elsif block.type == 'steps' -%}
-        <div class="ldh-section ldh-steps-section ldh-reveal" {{ block.shopify_attributes }}>
-          <div class="ldh-wrap ldh-wrap--medium">
-            <h2 class="ldh-h2">{{ block.settings.headline | escape }}</h2>
-            <div class="ldh-steps">
-              <div class="ldh-step ldh-reveal" data-delay="0">
-                <div class="ldh-step-num">01</div>
-                <div class="ldh-step-body">
-                  <strong class="ldh-step-title">{{ block.settings.step1_title | escape }}</strong>
-                  <p class="ldh-step-desc">{{ block.settings.step1_desc | escape }}</p>
-                </div>
-              </div>
-              <div class="ldh-step ldh-reveal" data-delay="80">
-                <div class="ldh-step-num">02</div>
-                <div class="ldh-step-body">
-                  <strong class="ldh-step-title">{{ block.settings.step2_title | escape }}</strong>
-                  <p class="ldh-step-desc">{{ block.settings.step2_desc | escape }}</p>
-                </div>
-              </div>
-              <div class="ldh-step ldh-reveal" data-delay="160">
-                <div class="ldh-step-num">03</div>
-                <div class="ldh-step-body">
-                  <strong class="ldh-step-title">{{ block.settings.step3_title | escape }}</strong>
-                  <p class="ldh-step-desc">{{ block.settings.step3_desc | escape }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  {%- endif -%}
 
-      {%- elsif block.type == 'examples' -%}
-        <div class="ldh-section ldh-carousel-section ldh-reveal" {{ block.shopify_attributes }}>
-          <div class="ldh-wrap ldh-centered-text">
-            <h2 class="ldh-h2">{{ block.settings.headline | escape }}</h2>
-            <p class="ldh-body ldh-carousel-sub">{{ block.settings.subhead | escape }}</p>
-          </div>
-          <div class="ldh-carousel" data-ldh-carousel>
-            <div class="ldh-carousel-shell">
-              <button class="ldh-arrow ldh-arrow--left" type="button" aria-label="Previous" data-ldh-prev>&#8249;</button>
-              <div class="ldh-track" data-ldh-track>
-                {%- assign ex_count = 0 -%}
-                {%- for b2 in section.blocks -%}
-                  {%- if b2.type == 'example' -%}
-                    {%- assign ex_count = ex_count | plus: 1 -%}
-                    <div class="ldh-slide" data-ldh-slide {{ b2.shopify_attributes }}>
-                      <div class="ldh-slide-inner">
-                        {%- if b2.settings.image != blank -%}
-                          {{ b2.settings.image | image_url: width: 1600 | image_tag: class: 'ldh-slide-img', loading: 'lazy', alt: b2.settings.alt | default: 'Team product example' }}
-                        {%- else -%}
-                          <div class="ldh-slide-placeholder">Add an image in the Theme Editor</div>
-                        {%- endif -%}
-                        {%- if b2.settings.caption != blank -%}
-                          <div class="ldh-slide-cap">{{ b2.settings.caption | escape }}</div>
-                        {%- endif -%}
-                      </div>
-                    </div>
-                  {%- endif -%}
-                {%- endfor -%}
-                {%- if ex_count == 0 -%}
-                  <div class="ldh-slide" data-ldh-slide>
-                    <div class="ldh-slide-inner">
-                      <div class="ldh-slide-placeholder">Add "Example slide" blocks in the Theme Editor to populate this carousel</div>
-                    </div>
-                  </div>
-                {%- endif -%}
-              </div>
-              <button class="ldh-arrow ldh-arrow--right" type="button" aria-label="Next" data-ldh-next>&#8250;</button>
-            </div>
-            <div class="ldh-dots" data-ldh-dots></div>
-          </div>
-        </div>
+  {%- comment -%}Marquee — always visible{%- endcomment -%}
+  <div class="ss-marquee-wrap">
+    <div class="ss-marquee-track">
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Fire Departments</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Football</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Law Enforcement</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Softball</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Corporate Teams</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Hockey</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Cheer Squads</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Wrestling Teams</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Fire Departments</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Football</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Law Enforcement</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Softball</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Corporate Teams</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Hockey</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Cheer Squads</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Wrestling Teams</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
+    </div>
+  </div>
 
-      {%- elsif block.type == 'final_cta' -%}
-        <div class="ldh-section ldh-final ldh-reveal" {{ block.shopify_attributes }}>
-          <div class="ldh-wrap ldh-wrap--narrow ldh-centered-text">
-            <h2 class="ldh-h2 ldh-h2--large">{{ block.settings.headline | escape }}</h2>
-            <p class="ldh-body">{{ block.settings.subhead | escape }}</p>
-            <a class="ldh-btn ldh-btn--primary" href="{{ explainer_url }}">{{ block.settings.cta_label | escape }} →</a>
-          </div>
-        </div>
-
-      {%- endif -%}
-
-    {%- endfor -%}
-
+  {%- comment -%}
+    Dashboard image kept in schema for theme editor compatibility.
+    Hidden via CSS — user can re-enable in theme editor by removing display:none below.
+  {%- endcomment -%}
+  {%- if section.settings.dashboard_image != blank -%}
+    <div class="ldh-dashboard-img-hidden" aria-hidden="true">
+      <img src="{{ section.settings.dashboard_image | image_url: width: 1400 }}" alt="" loading="lazy" width="{{ section.settings.dashboard_image.width }}" height="{{ section.settings.dashboard_image.height }}">
+    </div>
   {%- endif -%}
 
 </section>
@@ -535,103 +482,6 @@
     }
   }
 
-  /* ===== CAROUSEL ===== */
-  .ldh-carousel-section { overflow: hidden; }
-  .ldh-carousel-sub { margin-bottom: 40px; }
-  .ldh-carousel { margin-top: 40px; position: relative; }
-  .ldh-carousel-shell {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .ldh-track {
-    flex: 1;
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    gap: 24px;
-    padding: 0 4px 4px;
-  }
-  .ldh-track::-webkit-scrollbar { display: none; }
-  .ldh-slide {
-    flex: 0 0 min(80vw, 720px);
-    scroll-snap-align: start;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #f5f5f5;
-  }
-  .ldh-slide-inner {
-    width: 100%;
-    aspect-ratio: 16/9;
-    position: relative;
-    overflow: hidden;
-  }
-  .ldh-slide-img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .ldh-slide-placeholder {
-    width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(0,0,0,.35);
-    font-size: 14px;
-    padding: 24px;
-    text-align: center;
-    box-sizing: border-box;
-  }
-  .ldh-slide-cap {
-    padding: 12px 16px;
-    font-size: 13px;
-    color: rgba(0,0,0,.55);
-    text-align: center;
-  }
-  .ldh-arrow {
-    flex-shrink: 0;
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(0,0,0,.15);
-    background: #fff;
-    font-size: 24px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #0b0b0b;
-    transition: border-color 0.2s;
-    line-height: 1;
-    padding: 0;
-  }
-  .ldh-arrow:hover { border-color: #0b0b0b; }
-  .ldh-dots {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-  }
-  .ldh-dotbtn {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0,0,0,.18);
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.2s, transform 0.2s;
-  }
-  .ldh-dotbtn.is-active {
-    background: rgba(183,163,106,1);
-    transform: scale(1.35);
-  }
-  @media (max-width: 600px) {
-    .ldh-arrow { display: none; }
-    .ldh-slide { flex: 0 0 88vw; }
-  }
-
   /* ===== FINAL CTA (LOGGED-OUT) ===== */
   .ldh-final {
     background: #faf9f6;
@@ -696,7 +546,7 @@
   /* ===== LOGGED-IN: SECOND STORE ===== */
   .ldh-centered { text-align: center; }
 
-  /* ===== MARQUEE (kept from previous version) ===== */
+  /* ===== MARQUEE ===== */
   .ss-marquee-wrap {
     overflow: hidden;
     border-top: 1px solid rgba(0,0,0,.06);
@@ -735,6 +585,11 @@
   @media (prefers-reduced-motion: reduce) {
     .ss-marquee-track { animation: none; }
   }
+
+  /* ===== HIDDEN DASHBOARD IMAGE ===== */
+  /* Dashboard image is kept in the schema for theme editor access.
+     Remove this rule to re-enable it on the live page. */
+  .ldh-dashboard-img-hidden { display: none; }
 </style>
 
 <script>
@@ -760,83 +615,6 @@
       revealEls.forEach(function(el) { el.classList.add('is-visible'); });
     }
   }
-
-  /* ===== CAROUSEL(S) ===== */
-  var carousels = document.querySelectorAll('#ldh-{{ section.id }} [data-ldh-carousel]');
-  carousels.forEach(function(carousel) {
-    var track = carousel.querySelector('[data-ldh-track]');
-    if (!track) return;
-    var slides = Array.prototype.slice.call(track.querySelectorAll('[data-ldh-slide]'));
-    if (slides.length < 2) return;
-
-    var btnPrev = carousel.querySelector('[data-ldh-prev]');
-    var btnNext = carousel.querySelector('[data-ldh-next]');
-    var dotsWrap = carousel.querySelector('[data-ldh-dots]');
-    var index = 0;
-    var timer = null;
-    var autoplayEnabled = {{ section.settings.autoplay | default: true | json }};
-    var autoplayMs = {{ section.settings.autoplay_ms | default: 4500 }};
-
-    function setActive(i) {
-      index = (i + slides.length) % slides.length;
-      track.scrollTo({ left: slides[index].offsetLeft, behavior: 'smooth' });
-      updateDots();
-    }
-    function buildDots() {
-      if (!dotsWrap) return;
-      dotsWrap.innerHTML = '';
-      slides.forEach(function(_, i) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'ldh-dotbtn';
-        b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
-        b.addEventListener('click', function() { stop(); setActive(i); start(); });
-        dotsWrap.appendChild(b);
-      });
-      updateDots();
-    }
-    function updateDots() {
-      if (!dotsWrap) return;
-      var dots = dotsWrap.querySelectorAll('.ldh-dotbtn');
-      dots.forEach(function(d, i) {
-        d.classList.toggle('is-active', i === index);
-      });
-    }
-    function next() { setActive(index + 1); }
-    function prev() { setActive(index - 1); }
-    function start() {
-      if (!autoplayEnabled) return;
-      stop();
-      timer = setInterval(next, Math.max(2500, autoplayMs));
-    }
-    function stop() {
-      if (timer) clearInterval(timer);
-      timer = null;
-    }
-
-    if (btnNext) btnNext.addEventListener('click', function() { stop(); next(); start(); });
-    if (btnPrev) btnPrev.addEventListener('click', function() { stop(); prev(); start(); });
-
-    var scrollTimeout = null;
-    track.addEventListener('scroll', function() {
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(function() {
-        var best = 0, bestDist = Infinity;
-        slides.forEach(function(s, i) {
-          var dist = Math.abs(track.scrollLeft - s.offsetLeft);
-          if (dist < bestDist) { bestDist = dist; best = i; }
-        });
-        index = best;
-        updateDots();
-      }, 100);
-    }, { passive: true });
-
-    buildDots();
-    setActive(0);
-    start();
-    carousel.addEventListener('mouseenter', stop);
-    carousel.addEventListener('mouseleave', start);
-  });
 })();
 </script>
 
@@ -846,19 +624,92 @@
   "settings": [
     {
       "type": "header",
+      "content": "— Original settings (preserved) —"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Badge / eyebrow text",
+      "default": "TEAM STORES"
+    },
+    {
+      "type": "text",
+      "id": "primary_title",
+      "label": "Legacy headline (unused — see Hero section below)",
+      "default": "Your team store."
+    },
+    {
+      "type": "textarea",
+      "id": "primary_desc",
+      "label": "Legacy subheadline (unused — see Hero section below)",
+      "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done—forever."
+    },
+    {
+      "type": "text",
+      "id": "btn_login_label",
+      "label": "Legacy login button label (unused)",
+      "default": "Log in to Studio"
+    },
+    {
+      "type": "text",
+      "id": "btn_request_label",
+      "label": "Legacy request button label (unused)",
+      "default": "Request a storefront"
+    },
+    {
+      "type": "text",
+      "id": "cta_micro_login",
+      "label": "Legacy microcopy – logged out (unused)",
+      "default": "Already have access? Sign in"
+    },
+    {
+      "type": "text",
+      "id": "cta_micro_request",
+      "label": "Legacy microcopy – request (unused)",
+      "default": "Start your private store"
+    },
+    {
+      "type": "text",
+      "id": "primary_note",
+      "label": "Legacy fineprint (unused — see Hero caption below)",
+      "default": "No minimums · No meetings · No middleman"
+    },
+    {
+      "type": "header",
+      "content": "Media (dashboard image)"
+    },
+    {
+      "type": "image_picker",
+      "id": "dashboard_image",
+      "label": "Dashboard image (hidden on live site — re-enable via CSS)"
+    },
+    {
+      "type": "header",
       "content": "Links"
     },
     {
       "type": "text",
-      "id": "explainer_url",
-      "label": "Primary CTA URL",
+      "id": "dashboard_url",
+      "label": "Portal / Dashboard URL",
+      "default": "/pages/portal"
+    },
+    {
+      "type": "text",
+      "id": "request_url",
+      "label": "Primary CTA URL (request storefront)",
       "default": "/pages/private-storefronts"
     },
     {
       "type": "text",
       "id": "portal_url",
-      "label": "Portal / Dashboard URL",
+      "label": "Portal URL (overrides Dashboard URL above)",
       "default": "/pages/portal"
+    },
+    {
+      "type": "text",
+      "id": "explainer_url",
+      "label": "Explainer / CTA URL (overrides Request URL above)",
+      "default": "/pages/private-storefronts"
     },
     {
       "type": "text",
@@ -868,287 +719,206 @@
     },
     {
       "type": "header",
-      "content": "Carousel"
+      "content": "Hero (logged-out)"
     },
     {
-      "type": "checkbox",
-      "id": "autoplay",
-      "label": "Autoplay carousel",
-      "default": true
+      "type": "textarea",
+      "id": "hero_headline",
+      "label": "Headline (use line breaks for multi-line)",
+      "default": "Your team store.\nDone before your coffee."
     },
     {
-      "type": "range",
-      "id": "autoplay_ms",
-      "label": "Autoplay interval (ms)",
-      "min": 2500,
-      "max": 10000,
-      "step": 500,
-      "default": 4500
-    }
-  ],
-  "blocks": [
-    {
-      "type": "hero",
-      "name": "Hero (logged-out)",
-      "settings": [
-        {
-          "type": "textarea",
-          "id": "headline",
-          "label": "Headline (use line breaks)",
-          "default": "Your team store.\nDone before your coffee."
-        },
-        {
-          "type": "textarea",
-          "id": "subhead",
-          "label": "Subheadline",
-          "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done—forever."
-        },
-        {
-          "type": "text",
-          "id": "cta_label",
-          "label": "CTA button label",
-          "default": "Start my team's store"
-        },
-        {
-          "type": "text",
-          "id": "caption",
-          "label": "Caption below CTA",
-          "default": "No minimums · No meetings · No middleman"
-        }
-      ]
+      "type": "textarea",
+      "id": "hero_sub",
+      "label": "Subheadline",
+      "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done — forever."
     },
     {
-      "type": "speed",
-      "name": "Speed proof (logged-out)",
-      "settings": [
-        {
-          "type": "text",
-          "id": "headline",
-          "label": "Headline",
-          "default": "Two minutes to fill. About fifteen to build."
-        },
-        {
-          "type": "text",
-          "id": "subhead",
-          "label": "Sub",
-          "default": "That's it. That's the whole setup."
-        },
-        {
-          "type": "text",
-          "id": "stat1_num",
-          "label": "Stat 1 number",
-          "default": "2 min"
-        },
-        {
-          "type": "text",
-          "id": "stat1_label",
-          "label": "Stat 1 label",
-          "default": "Tell us about your team"
-        },
-        {
-          "type": "text",
-          "id": "stat2_num",
-          "label": "Stat 2 number",
-          "default": "~15 min"
-        },
-        {
-          "type": "text",
-          "id": "stat2_label",
-          "label": "Stat 2 label",
-          "default": "Automation builds your store"
-        },
-        {
-          "type": "text",
-          "id": "stat3_num",
-          "label": "Stat 3 number",
-          "default": "∞"
-        },
-        {
-          "type": "text",
-          "id": "stat3_label",
-          "label": "Stat 3 label",
-          "default": "Reorder whenever"
-        }
-      ]
+      "type": "text",
+      "id": "hero_cta_label",
+      "label": "CTA button label",
+      "default": "Start my team's store →"
     },
     {
-      "type": "steps",
-      "name": "How it works (logged-out)",
-      "settings": [
-        {
-          "type": "text",
-          "id": "headline",
-          "label": "Headline",
-          "default": "Three steps. No middleman."
-        },
-        {
-          "type": "text",
-          "id": "step1_title",
-          "label": "Step 1 title",
-          "default": "Tell us about your team"
-        },
-        {
-          "type": "textarea",
-          "id": "step1_desc",
-          "label": "Step 1 description",
-          "default": "Name, logo, colors, what you want made. About 2 minutes."
-        },
-        {
-          "type": "text",
-          "id": "step2_title",
-          "label": "Step 2 title",
-          "default": "We build it"
-        },
-        {
-          "type": "textarea",
-          "id": "step2_desc",
-          "label": "Step 2 description",
-          "default": "Automation sets up your private store with your logo on every product. About 15 minutes."
-        },
-        {
-          "type": "text",
-          "id": "step3_title",
-          "label": "Step 3 title",
-          "default": "Share the link"
-        },
-        {
-          "type": "textarea",
-          "id": "step3_desc",
-          "label": "Step 3 description",
-          "default": "Your teammates order direct. You never handle another request."
-        }
-      ]
+      "type": "text",
+      "id": "hero_caption",
+      "label": "Caption below CTA",
+      "default": "No minimums · No meetings · No middleman"
     },
     {
-      "type": "examples",
-      "name": "Examples carousel",
-      "settings": [
-        {
-          "type": "text",
-          "id": "headline",
-          "label": "Headline",
-          "default": "See what teams are making."
-        },
-        {
-          "type": "text",
-          "id": "subhead",
-          "label": "Subheadline",
-          "default": "Tanks, tees, hoodies, hats — your logo, your colors, ready to reorder."
-        }
-      ]
+      "type": "header",
+      "content": "Speed proof"
     },
     {
-      "type": "final_cta",
-      "name": "Final CTA (logged-out)",
-      "settings": [
-        {
-          "type": "text",
-          "id": "headline",
-          "label": "Headline",
-          "default": "One link. Every teammate. Every reorder. Forever."
-        },
-        {
-          "type": "text",
-          "id": "subhead",
-          "label": "Sub",
-          "default": "Your team store is about 15 minutes away."
-        },
-        {
-          "type": "text",
-          "id": "cta_label",
-          "label": "CTA button label",
-          "default": "Start my team's store"
-        }
-      ]
+      "type": "text",
+      "id": "speed_headline",
+      "label": "Headline",
+      "default": "Two minutes to fill. About fifteen to build."
     },
     {
-      "type": "welcome",
-      "name": "Welcome (logged-in)",
-      "settings": [
-        {
-          "type": "text",
-          "id": "greeting_prefix",
-          "label": "Greeting prefix",
-          "default": "Welcome back, "
-        },
-        {
-          "type": "text",
-          "id": "greeting_sub",
-          "label": "Greeting subline",
-          "default": "Jump into your store, reorder your last kit, or start another team."
-        },
-        {
-          "type": "text",
-          "id": "dashboard_label",
-          "label": "Dashboard button label",
-          "default": "My Dashboard"
-        },
-        {
-          "type": "text",
-          "id": "orders_label",
-          "label": "Orders button label",
-          "default": "My Orders"
-        }
-      ]
+      "type": "text",
+      "id": "speed_sub",
+      "label": "Sub",
+      "default": "That's it. That's the whole setup."
     },
     {
-      "type": "second_store",
-      "name": "Second store CTA (logged-in)",
-      "settings": [
-        {
-          "type": "text",
-          "id": "headline",
-          "label": "Headline",
-          "default": "Running another team? Or want a store for yourself?"
-        },
-        {
-          "type": "textarea",
-          "id": "body",
-          "label": "Body copy",
-          "default": "Different team, different logo, different products — or a personal store for family reunions, fantasy leagues, anything. Same easy button. About 15 minutes."
-        },
-        {
-          "type": "text",
-          "id": "cta_label",
-          "label": "CTA label",
-          "default": "Start another store"
-        }
-      ]
+      "type": "text",
+      "id": "stat1_num",
+      "label": "Stat 1 number",
+      "default": "2 min"
     },
     {
-      "type": "example",
-      "name": "Example slide",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Slide image"
-        },
-        {
-          "type": "text",
-          "id": "alt",
-          "label": "Image alt text"
-        },
-        {
-          "type": "text",
-          "id": "caption",
-          "label": "Caption (optional)"
-        }
-      ]
+      "type": "text",
+      "id": "stat1_label",
+      "label": "Stat 1 label",
+      "default": "Tell us about your team"
+    },
+    {
+      "type": "text",
+      "id": "stat2_num",
+      "label": "Stat 2 number",
+      "default": "~15 min"
+    },
+    {
+      "type": "text",
+      "id": "stat2_label",
+      "label": "Stat 2 label",
+      "default": "Automation builds your store"
+    },
+    {
+      "type": "text",
+      "id": "stat3_num",
+      "label": "Stat 3 number",
+      "default": "∞"
+    },
+    {
+      "type": "text",
+      "id": "stat3_label",
+      "label": "Stat 3 label",
+      "default": "Reorder whenever"
+    },
+    {
+      "type": "header",
+      "content": "How it works"
+    },
+    {
+      "type": "text",
+      "id": "steps_headline",
+      "label": "Headline",
+      "default": "Three steps. No middleman."
+    },
+    {
+      "type": "text",
+      "id": "step1_title",
+      "label": "Step 1 title",
+      "default": "Tell us about your team"
+    },
+    {
+      "type": "textarea",
+      "id": "step1_desc",
+      "label": "Step 1 description",
+      "default": "Name, logo, colors, what you want made. About 2 minutes."
+    },
+    {
+      "type": "text",
+      "id": "step2_title",
+      "label": "Step 2 title",
+      "default": "We build it"
+    },
+    {
+      "type": "textarea",
+      "id": "step2_desc",
+      "label": "Step 2 description",
+      "default": "Automation sets up your private store with your logo on every product. About 15 minutes."
+    },
+    {
+      "type": "text",
+      "id": "step3_title",
+      "label": "Step 3 title",
+      "default": "Share the link"
+    },
+    {
+      "type": "textarea",
+      "id": "step3_desc",
+      "label": "Step 3 description",
+      "default": "Your teammates order direct. You never handle another request."
+    },
+    {
+      "type": "header",
+      "content": "Final CTA (logged-out)"
+    },
+    {
+      "type": "text",
+      "id": "final_headline",
+      "label": "Headline",
+      "default": "One link. Every teammate. Every reorder. Forever."
+    },
+    {
+      "type": "text",
+      "id": "final_sub",
+      "label": "Sub",
+      "default": "Your team store is about 15 minutes away."
+    },
+    {
+      "type": "text",
+      "id": "final_cta_label",
+      "label": "CTA button label",
+      "default": "Start my team's store"
+    },
+    {
+      "type": "header",
+      "content": "Logged-in welcome"
+    },
+    {
+      "type": "text",
+      "id": "welcome_prefix",
+      "label": "Greeting prefix",
+      "default": "Welcome back, "
+    },
+    {
+      "type": "text",
+      "id": "greeting_sub",
+      "label": "Greeting subline",
+      "default": "Jump into your store, reorder your last kit, or start another team."
+    },
+    {
+      "type": "text",
+      "id": "dashboard_label",
+      "label": "Dashboard button label",
+      "default": "My Dashboard"
+    },
+    {
+      "type": "text",
+      "id": "orders_label",
+      "label": "Orders button label",
+      "default": "My Orders"
+    },
+    {
+      "type": "header",
+      "content": "Second store CTA (logged-in)"
+    },
+    {
+      "type": "text",
+      "id": "second_store_headline",
+      "label": "Headline",
+      "default": "Running another team? Or want a store for yourself?"
+    },
+    {
+      "type": "textarea",
+      "id": "second_store_body",
+      "label": "Body copy",
+      "default": "Different team, different logo, different products — or a personal store for family reunions, fantasy leagues, anything. Same easy button. About 15 minutes."
+    },
+    {
+      "type": "text",
+      "id": "second_store_cta",
+      "label": "CTA label",
+      "default": "Start another store"
     }
   ],
   "presets": [
     {
-      "name": "Landing – Apple Style",
-      "blocks": [
-        { "type": "hero" },
-        { "type": "speed" },
-        { "type": "steps" },
-        { "type": "examples" },
-        { "type": "final_cta" },
-        { "type": "welcome" },
-        { "type": "second_store" }
-      ]
+      "name": "Landing – Apple Style"
     }
   ]
 }
