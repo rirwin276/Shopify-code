@@ -39,6 +39,9 @@
   assign media_width = p.featured_media.width | default: 600
   assign media_height = p.featured_media.height | default: 600
 
+  # --- SECOND IMAGE ---
+  assign second_media = p.media[1]
+
   # --- ZONE READER ---
   assign zone_style = "top: 20%; left: 20%; width: 60%; height: 60%;"
   for tag in p.tags
@@ -58,34 +61,45 @@
   endfor
 -%}
 
-<div class="product-card ss-card-shell" data-product-id="{{ p.id }}">
+<div class="product-card ss-card-shell{% if second_media != nil %} ss-has-alt{% endif %}" data-product-id="{{ p.id }}">
   <a href="{{ p.url }}" class="ss-link-wrapper">
     
     {%- comment -%} IMAGE AREA {%- endcomment -%}
     <div class="ss-image-stage">
       <div class="ss-master-box" style="aspect-ratio: {{ pixel_ratio }};">
-        {%- if p.featured_media -%}
-          <img src="{{ p.featured_media | image_url: width: 600 }}"
-               class="ss-shirt-img"
-               loading="lazy"
-               width="{{ media_width }}"
-               height="{{ media_height }}"
-               alt="{{ p.featured_media.alt | escape }}">
+        <div class="ss-image-layers">
+          {%- if p.featured_media -%}
+            <img src="{{ p.featured_media | image_url: width: 600 }}"
+                 class="ss-shirt-img ss-img-primary"
+                 loading="lazy"
+                 width="{{ media_width }}"
+                 height="{{ media_height }}"
+                 alt="{{ p.featured_media.alt | escape }}">
 
-          {%- comment -%} OVERLAY LOGIC {%- endcomment -%}
-          {%- if lock_code != blank and lock_code != 'approved' and lock_code != 'DELETED' -%}
-            <div class="ss-zone-box" style="{{ zone_style }}">
-              <div class="ss-logo-wrapper" style="{{ lock_code | replace: '|', ';' }}">
-                {%- if logo_url != blank -%}
-                  <img src="{{ logo_url }}" class="ss-logo-img" width="200" height="200" alt="Logo">
-                {%- endif -%}
+            {%- if second_media != nil -%}
+              <img src="{{ second_media | image_url: width: 600 }}"
+                   class="ss-shirt-img ss-img-secondary"
+                   loading="lazy"
+                   width="{{ second_media.width | default: media_width }}"
+                   height="{{ second_media.height | default: media_height }}"
+                   alt="">
+            {%- endif -%}
+
+            {%- comment -%} OVERLAY LOGIC {%- endcomment -%}
+            {%- if lock_code != blank and lock_code != 'approved' and lock_code != 'DELETED' -%}
+              <div class="ss-zone-box" style="{{ zone_style }}">
+                <div class="ss-logo-wrapper" style="{{ lock_code | replace: '|', ';' }}">
+                  {%- if logo_url != blank -%}
+                    <img src="{{ logo_url }}" class="ss-logo-img" width="200" height="200" alt="Logo">
+                  {%- endif -%}
+                </div>
               </div>
-            </div>
-          {%- endif -%}
+            {%- endif -%}
 
-        {%- else -%}
-          {{ 'product-1' | placeholder_svg_tag: 'ss-shirt-img' }}
-        {%- endif -%}
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'ss-shirt-img ss-img-primary' }}
+          {%- endif -%}
+        </div>
       </div>
     </div>
 
@@ -125,9 +139,17 @@
       z-index: 5;
     }
     
-    /* Subtle zoom on image only */
-    .ss-card-shell:hover .ss-shirt-img {
-      transform: scale(1.03); 
+    /* Image swap: only when a second image exists */
+    .ss-card-shell.ss-has-alt:hover .ss-img-primary {
+      opacity: 0;
+    }
+    .ss-card-shell.ss-has-alt:hover .ss-img-secondary {
+      opacity: 1;
+    }
+
+    /* Zoom applies to the image layers wrapper */
+    .ss-card-shell:hover .ss-image-layers {
+      transform: scale(1.03);
     }
   }
 
@@ -163,6 +185,14 @@
     mix-blend-mode: multiply;
   }
 
+  /* --- IMAGE LAYERS WRAPPER --- */
+  .ss-image-layers {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transition: transform 0.5s ease;
+  }
+
   /* --- IMAGES & LAYERS --- */
   .ss-shirt-img {
     position: absolute;
@@ -171,7 +201,15 @@
     object-fit: contain;
     display: block;
     z-index: 1;
-    transition: transform 0.5s ease;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Primary always visible by default; secondary hidden */
+  .ss-img-primary {
+    opacity: 1;
+  }
+  .ss-img-secondary {
+    opacity: 0;
   }
 
   .ss-zone-box { position: absolute; pointer-events: none; z-index: 10; overflow: hidden; }
