@@ -121,7 +121,6 @@
     background: #ffffff;
     border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s ease, border-color 0.2s ease;
     border: 1px solid rgba(0,0,0,0.06);
     height: 100%;
     position: relative;
@@ -132,24 +131,12 @@
 
   /* --- DESKTOP INTERACTION (Mouse Only) --- */
   @media (hover: hover) {
-    .ss-card-shell:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
-      border-color: rgba(0,0,0,0.0);
-      z-index: 5;
-    }
-    
     /* Image swap: only when a second image exists */
     .ss-card-shell.ss-has-alt:hover .ss-img-primary {
       opacity: 0;
     }
     .ss-card-shell.ss-has-alt:hover .ss-img-secondary {
       opacity: 1;
-    }
-
-    /* Zoom applies to the image layers wrapper */
-    .ss-card-shell:hover .ss-image-layers {
-      transform: scale(1.03);
     }
   }
 
@@ -190,7 +177,6 @@
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    transition: transform 0.5s ease;
   }
 
   /* --- IMAGES & LAYERS --- */
@@ -201,7 +187,7 @@
     object-fit: contain;
     display: block;
     z-index: 1;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s ease-in-out;
   }
 
   /* Primary always visible by default; secondary hidden */

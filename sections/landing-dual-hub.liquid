@@ -1,530 +1,1155 @@
 {% comment %}
-  LANDING — TACTICAL DARK HERO (V9) — VIDEO ENABLED
-  - Logic: Added Video Support for the Browser Frame.
-  - Fallback: If no video is uploaded, it reverts to the Screenshot.
-  - FIXED: Now uses 'storefront_login_url' + 'return_to' to correctly redirect to Dashboard.
-  - FIXED: Button label updated to "Log in to View Dashboard".
+  LANDING — Apple-style dual-hub (V10)
+  - Logged-out: Hero → Speed proof → How it works → Examples carousel → Final CTA
+  - Logged-in: Welcome → Second/personal store CTA → Examples carousel
+  - Each section is its own toggleable schema block.
+  - No dashboard mockup image.
+  - "~15 minutes" build time — never "48 hours".
+  - Scroll animations via IntersectionObserver, respects prefers-reduced-motion.
 {% endcomment %}
 
-{%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
-{%- assign dashboard_return = dashboard_url | url_encode -%}
+{%- assign explainer_url = section.settings.explainer_url | default: '/pages/private-storefronts' -%}
+{%- assign portal_url = section.settings.portal_url | default: '/pages/portal' -%}
+{%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
+
+{%- comment -%}Logged-in: parse storefront tags & metaobjects (same logic as portal-router){%- endcomment -%}
+{%- assign has_storefront = false -%}
+{%- assign store_count = 0 -%}
+{%- assign storefront_tags = '' -%}
+{%- assign admin_handles = '' -%}
 
 {%- if customer -%}
-  {%- assign primary_cta_url = dashboard_url -%}
-  {%- assign primary_label = "Open Dashboard" -%}
-  {%- assign primary_micro = "Welcome back, " | append: customer.first_name -%}
-{%- else -%}
-  {%- comment -%} 
-    FIX: Using storefront_login_url + return_to ensures users go 
-    straight to the dashboard, skipping the order history page.
-  {%- endcomment -%}
-  {%- assign primary_cta_url = routes.storefront_login_url | append: '?return_to=' | append: dashboard_return -%}
-  {%- assign primary_label = section.settings.btn_login_label -%}
-  {%- assign primary_micro = section.settings.cta_micro_login -%}
+  {%- for tag in customer.tags -%}
+    {%- assign tag_down = tag | downcase | strip -%}
+    {%- if tag_down contains 'b2b-admin-' -%}
+      {%- assign ah = tag_down | remove: 'b2b-admin-' | strip -%}
+      {%- if ah != blank -%}
+        {%- assign admin_handles = admin_handles | append: '||' | append: ah | append: '||' -%}
+      {%- endif -%}
+    {%- elsif tag_down contains 'b2b-' -%}
+      {%- assign has_storefront = true -%}
+      {%- assign storefront_tags = storefront_tags | append: tag_down | append: '||' -%}
+      {%- assign store_count = store_count | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
 {%- endif -%}
 
-{%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
-{%- assign request_micro = section.settings.cta_micro_request -%}
+{%- assign store_meta = blank -%}
+{%- if shop.metaobjects[mo_type] and shop.metaobjects[mo_type].values != blank -%}
+  {%- assign store_meta = shop.metaobjects[mo_type].values -%}
+{%- endif -%}
 
-{{ 'ss-wow.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
-<section class="sshub" data-section-id="{{ section.id }}" style="
-  --bg-dark: #0f1115;
-  --bg-card: #181b21;
-  --text-main: #ffffff;
-  --text-muted: #9ca3af;
-  --accent: #10b981;
-  --border: rgba(255,255,255,0.08);
-">
-  <div class="sshub__gridBg" aria-hidden="true"></div>
-  <div class="sshub__glow" aria-hidden="true"></div>
+{%- comment -%}Customer display name{%- endcomment -%}
+{%- assign welcome_name = customer.first_name | strip -%}
+{%- if welcome_name == blank -%}
+  {%- assign welcome_name = customer.email | split: '@' | first -%}
+{%- endif -%}
 
-  <div class="sshub__wrap">
-    
-    <div class="sshub__heroCenter">
-      
-      <div class="sshub__badgeRow ss-reveal">
-        <span class="sshub__pill">
-          <span class="sshub__dot"></span> {{ section.settings.kicker | escape }}
-        </span>
-      </div>
+<section class="ldh" data-ldh id="ldh-{{ section.id }}">
 
-      <h1 class="sshub__h1 ss-reveal ss-reveal--up" data-delay="100">{{ section.settings.primary_title | escape }}</h1>
+  {%- if customer -%}
 
-      <p class="sshub__sub ss-reveal ss-reveal--up" data-delay="200">{{ section.settings.primary_desc }}</p>
+    {%- comment -%}======= LOGGED-IN VIEW ======={%- endcomment -%}
 
-      <div class="sshub__actions ss-reveal ss-reveal--up" data-delay="300">
-        <div class="sshub__ctaStack">
-          <a class="sshub__btn sshub__btn--primary" href="{{ primary_cta_url }}">
-            {{ primary_label | escape }} <span class="sshub__arrow">→</span>
-          </a>
-          {%- if primary_micro != blank -%}
-            <div class="sshub__ctaMicro">{{ primary_micro }}</div>
-          {%- endif -%}
-        </div>
+    {%- for block in section.blocks -%}
 
-        <div class="sshub__ctaStack">
-          <a class="sshub__btn sshub__btn--secondary" href="{{ request_url }}">
-            {{ section.settings.btn_request_label | escape }}
-          </a>
-          {%- if request_micro != blank -%}
-            <div class="sshub__ctaMicro">{{ request_micro }}</div>
-          {%- endif -%}
-        </div>
-      </div>
+      {%- if block.type == 'welcome' -%}
+        <div class="ldh-section ldh-welcome ldh-reveal" {{ block.shopify_attributes }}>
+          <div class="ldh-wrap">
+            <h1 class="ldh-welcome-h1">{{ block.settings.greeting_prefix | escape }}{{ welcome_name | escape }}.</h1>
+            <p class="ldh-welcome-sub">{{ block.settings.greeting_sub | escape }}</p>
 
-      <div class="sshub__fineprint ss-reveal ss-reveal--up" data-delay="400">{{ section.settings.primary_note }}</div>
-
-      <div class="sshub__productline ss-reveal" data-delay="420">
-        <span class="sshub__productline-label">AVAILABLE ON EVERY STORE</span>
-        <span class="sshub__productline-items">T-Shirts &nbsp;·&nbsp; Hoodies &nbsp;·&nbsp; Hats &nbsp;·&nbsp; Long-Sleeves &nbsp;·&nbsp; Headwear &nbsp;·&nbsp; and more</span>
-      </div>
-    </div>
-
-    <div class="sshub__steps ss-reveal ss-reveal--up" data-delay="350">
-      <div class="sshub__step">
-        <div class="sshub__step-circle"><span>1</span></div>
-        <div class="sshub__step-body">
-          <strong class="sshub__step-title">Submit Your Request</strong>
-          <p class="sshub__step-desc">Fill out a short form and upload your logo. No design skills needed.</p>
-        </div>
-      </div>
-      <div class="sshub__step-line" aria-hidden="true"></div>
-      <div class="sshub__step">
-        <div class="sshub__step-circle"><span>2</span></div>
-        <div class="sshub__step-body">
-          <strong class="sshub__step-title">We Build It For You</strong>
-          <p class="sshub__step-desc">Your branded store builds itself. By the time you finish your morning coffee, it's live and ready to share.</p>
-        </div>
-      </div>
-      <div class="sshub__step-line" aria-hidden="true"></div>
-      <div class="sshub__step">
-        <div class="sshub__step-circle"><span>3</span></div>
-        <div class="sshub__step-body">
-          <strong class="sshub__step-title">Share One Link</strong>
-          <p class="sshub__step-desc">Your team clicks it, picks their size, and pays. Ships direct to their door.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="ss-stats ss-reveal" data-delay="100">
-      <div class="ss-stat">
-        <span class="ss-stat-num">$0</span>
-        <span class="ss-stat-label">Upfront Cost</span>
-      </div>
-      <div class="ss-stat">
-        <span class="ss-stat-num">100%</span>
-        <span class="ss-stat-label">Zero Inventory Risk</span>
-      </div>
-      <div class="ss-stat">
-        <span class="ss-stat-num">1</span>
-        <span class="ss-stat-label">Link to Share</span>
-      </div>
-      <div class="ss-stat">
-        <span class="ss-stat-num">0</span>
-        <span class="ss-stat-label">Spreadsheets Needed</span>
-      </div>
-    </div>
-
-    <div class="sshub__stage ss-reveal ss-reveal--scale" data-delay="200">
-      <div class="sshub__browserFrame">
-        <div class="sshub__browserHeader">
-          <div class="sshub__dots">
-            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-          </div>
-          <div class="sshub__bUrl">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" style="margin-right:6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            secure.stellaandsage.com/dashboard
-          </div>
-        </div>
-        
-        <div class="sshub__mediaContainer">
-          {% if section.settings.dashboard_video != blank %}
-            {{ section.settings.dashboard_video | video_tag: autoplay: true, loop: true, muted: true, playsinline: true, class: 'sshub__screen' }}
-          {% elsif section.settings.dashboard_image != blank %}
-            <img src="{{ section.settings.dashboard_image | image_url: width: 1400 }}" 
-                 class="sshub__screen" 
-                 alt="Studio Dashboard"
-                 loading="eager"
-                 width="{{ section.settings.dashboard_image.width }}"
-                 height="{{ section.settings.dashboard_image.height }}">
-          {% else %}
-            <div class="sshub__placeholder">
-              <div style="font-size:40px; margin-bottom:10px;">🎥</div>
-              <h3 style="color:#fff;">Upload Video or Image</h3>
-              <p>Theme Editor > Landing SaaS > Dashboard Video</p>
+            <div class="ldh-action-row">
+              {%- if has_storefront -%}
+                {%- assign tags_arr = storefront_tags | split: '||' -%}
+                {%- if store_count == 1 -%}
+                  {%- comment -%}Single store — one big primary button{%- endcomment -%}
+                  {%- for t in tags_arr -%}
+                    {%- if t != blank -%}
+                      {%- assign s_handle = t | remove: 'b2b-' | strip -%}
+                      {%- assign s_url = '/pages/' | append: s_handle -%}
+                      {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
+                      {%- if store_meta != blank -%}
+                        {%- for mo in store_meta -%}
+                          {%- assign mo_page = mo.page.value | default: mo.page -%}
+                          {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
+                          {%- assign mo_h = '' -%}
+                          {%- if mo_page != blank and mo_page.handle != blank -%}
+                            {%- assign mo_h = mo_page.handle | downcase | strip -%}
+                          {%- elsif mo_slug != blank -%}
+                            {%- assign mo_h = mo_slug | downcase | strip -%}
+                          {%- endif -%}
+                          {%- if mo_h == s_handle -%}
+                            {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
+                            {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
+                            {%- if mo_page != blank and mo_page.url != blank -%}{%- assign s_url = mo_page.url -%}{%- endif -%}
+                            {%- break -%}
+                          {%- endif -%}
+                        {%- endfor -%}
+                      {%- endif -%}
+                      <a class="ldh-pill ldh-pill--primary" href="{{ s_url }}">Open {{ s_name | escape }} →</a>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- else -%}
+                  {%- comment -%}Multiple stores — tile row{%- endcomment -%}
+                  {%- for t in tags_arr -%}
+                    {%- if t != blank -%}
+                      {%- assign s_handle = t | remove: 'b2b-' | strip -%}
+                      {%- assign s_url = '/pages/' | append: s_handle -%}
+                      {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
+                      {%- if store_meta != blank -%}
+                        {%- for mo in store_meta -%}
+                          {%- assign mo_page = mo.page.value | default: mo.page -%}
+                          {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
+                          {%- assign mo_h = '' -%}
+                          {%- if mo_page != blank and mo_page.handle != blank -%}
+                            {%- assign mo_h = mo_page.handle | downcase | strip -%}
+                          {%- elsif mo_slug != blank -%}
+                            {%- assign mo_h = mo_slug | downcase | strip -%}
+                          {%- endif -%}
+                          {%- if mo_h == s_handle -%}
+                            {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
+                            {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
+                            {%- if mo_page != blank and mo_page.url != blank -%}{%- assign s_url = mo_page.url -%}{%- endif -%}
+                            {%- break -%}
+                          {%- endif -%}
+                        {%- endfor -%}
+                      {%- endif -%}
+                      <a class="ldh-pill ldh-pill--store" href="{{ s_url }}">{{ s_name | escape }} →</a>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              {%- endif -%}
+              <a class="ldh-pill ldh-pill--secondary" href="{{ portal_url }}?stay=1">{{ block.settings.dashboard_label | escape }}</a>
+              <a class="ldh-pill ldh-pill--secondary" href="{{ routes.account_url }}">{{ block.settings.orders_label | escape }}</a>
             </div>
-          {% endif %}
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div class="sshub__trusted ss-reveal">
-      <span class="sshub__trustLabel">TRUSTED BY TEAMS & UNITS ACROSS THE US</span>
-      <div class="sshub__logos">
-        <span class="sshub__logoTxt">YOUTH ATHLETICS</span>
-        <span class="sshub__logoTxt">•</span>
-        <span class="sshub__logoTxt">MILITARY PLATOONS</span>
-        <span class="sshub__logoTxt">•</span>
-        <span class="sshub__logoTxt">FIRST RESPONDERS</span>
-        <span class="sshub__logoTxt">•</span>
-        <span class="sshub__logoTxt">CORPORATE OPS</span>
-      </div>
-    </div>
-
-    <div class="ss-marquee-wrap ss-reveal" data-delay="150">
-      <div class="ss-marquee-track">
-        <!-- First set -->
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Fire Departments</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Football</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Law Enforcement</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Softball</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Corporate Teams</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Hockey</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Cheer Squads</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Wrestling Teams</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
-        <!-- Duplicate for seamless loop -->
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Fire Departments</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Football</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Law Enforcement</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Softball</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Corporate Teams</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Hockey</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Cheer Squads</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Wrestling Teams</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
-        <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
-      </div>
-    </div>
-
-    <div class="sshub__grid">
-      <div class="sshub__feat ss-reveal" data-stagger="true">
-        <div class="sshub__iconBox">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      {%- elsif block.type == 'second_store' -%}
+        <div class="ldh-section ldh-centered ldh-reveal" {{ block.shopify_attributes }}>
+          <div class="ldh-wrap ldh-wrap--narrow">
+            <h2 class="ldh-h2">{{ block.settings.headline | escape }}</h2>
+            <p class="ldh-body">{{ block.settings.body | escape }}</p>
+            <a class="ldh-btn ldh-btn--outline" href="{{ explainer_url }}">{{ block.settings.cta_label | escape }} →</a>
+          </div>
         </div>
-        <h3 class="sshub__featTitle">Secure & Private</h3>
-        <p class="sshub__featDesc">Invite-only access. The public sees nothing. You control the keys.</p>
-      </div>
-      <div class="sshub__feat ss-reveal" data-stagger="true">
-        <div class="sshub__iconBox">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+
+      {%- elsif block.type == 'examples' -%}
+        <div class="ldh-section ldh-carousel-section ldh-reveal" {{ block.shopify_attributes }}>
+          <div class="ldh-wrap">
+            <h2 class="ldh-h2 ldh-centered-text">{{ block.settings.headline | escape }}</h2>
+            <p class="ldh-body ldh-centered-text ldh-carousel-sub">{{ block.settings.subhead | escape }}</p>
+          </div>
+          <div class="ldh-carousel" data-ldh-carousel>
+            <div class="ldh-carousel-shell">
+              <button class="ldh-arrow ldh-arrow--left" type="button" aria-label="Previous" data-ldh-prev>&#8249;</button>
+              <div class="ldh-track" data-ldh-track>
+                {%- assign ex_count = 0 -%}
+                {%- for b2 in section.blocks -%}
+                  {%- if b2.type == 'example' -%}
+                    {%- assign ex_count = ex_count | plus: 1 -%}
+                    <div class="ldh-slide" data-ldh-slide {{ b2.shopify_attributes }}>
+                      <div class="ldh-slide-inner">
+                        {%- if b2.settings.image != blank -%}
+                          {{ b2.settings.image | image_url: width: 1600 | image_tag: class: 'ldh-slide-img', loading: 'lazy', alt: b2.settings.alt | default: 'Team product example' }}
+                        {%- else -%}
+                          <div class="ldh-slide-placeholder">Add an image in the Theme Editor</div>
+                        {%- endif -%}
+                        {%- if b2.settings.caption != blank -%}
+                          <div class="ldh-slide-cap">{{ b2.settings.caption | escape }}</div>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+                {%- if ex_count == 0 -%}
+                  <div class="ldh-slide" data-ldh-slide>
+                    <div class="ldh-slide-inner">
+                      <div class="ldh-slide-placeholder">Add "Example slide" blocks in the Theme Editor to populate this carousel</div>
+                    </div>
+                  </div>
+                {%- endif -%}
+              </div>
+              <button class="ldh-arrow ldh-arrow--right" type="button" aria-label="Next" data-ldh-next>&#8250;</button>
+            </div>
+            <div class="ldh-dots" data-ldh-dots></div>
+          </div>
         </div>
-        <h3 class="sshub__featTitle">Zero Inventory</h3>
-        <p class="sshub__featDesc">We produce on-demand. Stop buying boxes of shirts that sit in your garage.</p>
-      </div>
-      <div class="sshub__feat ss-reveal" data-stagger="true">
-        <div class="sshub__iconBox">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+
+      {%- endif -%}
+
+    {%- endfor -%}
+
+  {%- else -%}
+
+    {%- comment -%}======= LOGGED-OUT VIEW ======={%- endcomment -%}
+
+    {%- for block in section.blocks -%}
+
+      {%- if block.type == 'hero' -%}
+        <div class="ldh-section ldh-hero ldh-reveal" {{ block.shopify_attributes }}>
+          <div class="ldh-wrap ldh-hero-wrap">
+            <h1 class="ldh-hero-h1">{{ block.settings.headline | newline_to_br }}</h1>
+            <p class="ldh-hero-sub">{{ block.settings.subhead | escape }}</p>
+            <div class="ldh-hero-cta-wrap">
+              <a class="ldh-btn ldh-btn--primary" href="{{ explainer_url }}">{{ block.settings.cta_label | escape }} →</a>
+              <p class="ldh-hero-caption">{{ block.settings.caption | escape }}</p>
+            </div>
+          </div>
         </div>
-        <h3 class="sshub__featTitle">Operator Built</h3>
-        <p class="sshub__featDesc">Built by active duty for military & teams. We understand logistics.</p>
-      </div>
-    </div>
 
-  </div>
+      {%- elsif block.type == 'speed' -%}
+        <div class="ldh-section ldh-speed ldh-reveal" {{ block.shopify_attributes }}>
+          <div class="ldh-wrap ldh-wrap--narrow ldh-centered-text">
+            <h2 class="ldh-h2">{{ block.settings.headline | escape }}</h2>
+            <p class="ldh-body">{{ block.settings.subhead | escape }}</p>
+            <div class="ldh-stats-row">
+              <div class="ldh-stat ldh-reveal" data-delay="0">
+                <div class="ldh-stat-num">{{ block.settings.stat1_num | escape }}</div>
+                <div class="ldh-stat-label">{{ block.settings.stat1_label | escape }}</div>
+              </div>
+              <div class="ldh-stat ldh-reveal" data-delay="80">
+                <div class="ldh-stat-num">{{ block.settings.stat2_num | escape }}</div>
+                <div class="ldh-stat-label">{{ block.settings.stat2_label | escape }}</div>
+              </div>
+              <div class="ldh-stat ldh-reveal" data-delay="160">
+                <div class="ldh-stat-num">{{ block.settings.stat3_num | escape }}</div>
+                <div class="ldh-stat-label">{{ block.settings.stat3_label | escape }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-  <style>
-    .sshub{
-      padding: 80px 20px;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      position: relative;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    .sshub__gridBg{
-      position: absolute; inset: 0;
-      background-image: linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 44px 44px;
-      opacity: 0.2;
-      z-index: 0;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 42%, rgba(0,0,0,0) 100%);
-    }
+      {%- elsif block.type == 'steps' -%}
+        <div class="ldh-section ldh-steps-section ldh-reveal" {{ block.shopify_attributes }}>
+          <div class="ldh-wrap ldh-wrap--medium">
+            <h2 class="ldh-h2">{{ block.settings.headline | escape }}</h2>
+            <div class="ldh-steps">
+              <div class="ldh-step ldh-reveal" data-delay="0">
+                <div class="ldh-step-num">01</div>
+                <div class="ldh-step-body">
+                  <strong class="ldh-step-title">{{ block.settings.step1_title | escape }}</strong>
+                  <p class="ldh-step-desc">{{ block.settings.step1_desc | escape }}</p>
+                </div>
+              </div>
+              <div class="ldh-step ldh-reveal" data-delay="80">
+                <div class="ldh-step-num">02</div>
+                <div class="ldh-step-body">
+                  <strong class="ldh-step-title">{{ block.settings.step2_title | escape }}</strong>
+                  <p class="ldh-step-desc">{{ block.settings.step2_desc | escape }}</p>
+                </div>
+              </div>
+              <div class="ldh-step ldh-reveal" data-delay="160">
+                <div class="ldh-step-num">03</div>
+                <div class="ldh-step-body">
+                  <strong class="ldh-step-title">{{ block.settings.step3_title | escape }}</strong>
+                  <p class="ldh-step-desc">{{ block.settings.step3_desc | escape }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-    .sshub__glow{
-      position: absolute; inset: -20% -10% auto -10%; height: 520px;
-      background: radial-gradient(closest-side, rgba(16,185,129,0.12), rgba(16,185,129,0.00) 70%);
-      z-index: 0; pointer-events: none; opacity: 0.9; filter: blur(6px);
-    }
-    
-    .sshub__wrap{ max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+      {%- elsif block.type == 'examples' -%}
+        <div class="ldh-section ldh-carousel-section ldh-reveal" {{ block.shopify_attributes }}>
+          <div class="ldh-wrap ldh-centered-text">
+            <h2 class="ldh-h2">{{ block.settings.headline | escape }}</h2>
+            <p class="ldh-body ldh-carousel-sub">{{ block.settings.subhead | escape }}</p>
+          </div>
+          <div class="ldh-carousel" data-ldh-carousel>
+            <div class="ldh-carousel-shell">
+              <button class="ldh-arrow ldh-arrow--left" type="button" aria-label="Previous" data-ldh-prev>&#8249;</button>
+              <div class="ldh-track" data-ldh-track>
+                {%- assign ex_count = 0 -%}
+                {%- for b2 in section.blocks -%}
+                  {%- if b2.type == 'example' -%}
+                    {%- assign ex_count = ex_count | plus: 1 -%}
+                    <div class="ldh-slide" data-ldh-slide {{ b2.shopify_attributes }}>
+                      <div class="ldh-slide-inner">
+                        {%- if b2.settings.image != blank -%}
+                          {{ b2.settings.image | image_url: width: 1600 | image_tag: class: 'ldh-slide-img', loading: 'lazy', alt: b2.settings.alt | default: 'Team product example' }}
+                        {%- else -%}
+                          <div class="ldh-slide-placeholder">Add an image in the Theme Editor</div>
+                        {%- endif -%}
+                        {%- if b2.settings.caption != blank -%}
+                          <div class="ldh-slide-cap">{{ b2.settings.caption | escape }}</div>
+                        {%- endif -%}
+                      </div>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+                {%- if ex_count == 0 -%}
+                  <div class="ldh-slide" data-ldh-slide>
+                    <div class="ldh-slide-inner">
+                      <div class="ldh-slide-placeholder">Add "Example slide" blocks in the Theme Editor to populate this carousel</div>
+                    </div>
+                  </div>
+                {%- endif -%}
+              </div>
+              <button class="ldh-arrow ldh-arrow--right" type="button" aria-label="Next" data-ldh-next>&#8250;</button>
+            </div>
+            <div class="ldh-dots" data-ldh-dots></div>
+          </div>
+        </div>
 
-    .sshub__heroCenter{ text-align: center; max-width: 860px; margin: 0 auto 50px; }
+      {%- elsif block.type == 'final_cta' -%}
+        <div class="ldh-section ldh-final ldh-reveal" {{ block.shopify_attributes }}>
+          <div class="ldh-wrap ldh-wrap--narrow ldh-centered-text">
+            <h2 class="ldh-h2 ldh-h2--large">{{ block.settings.headline | escape }}</h2>
+            <p class="ldh-body">{{ block.settings.subhead | escape }}</p>
+            <a class="ldh-btn ldh-btn--primary" href="{{ explainer_url }}">{{ block.settings.cta_label | escape }} →</a>
+          </div>
+        </div>
 
-    .sshub__badgeRow{ display:flex; justify-content:center; margin-bottom: 24px; }
-    .sshub__pill{
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1px; color: var(--accent);
-      display: flex; align-items: center; gap: 8px;
-    }
-    .sshub__dot{ width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
+      {%- endif -%}
 
-    .sshub__h1{
-      font-size: clamp(42px, 5vw, 72px);
-      line-height: 1.05; font-weight: 800; letter-spacing: -0.03em;
-      margin: 0 0 20px 0; color: #fff;
-    }
+    {%- endfor -%}
 
-    .sshub__sub{
-      font-size: 20px; line-height: 1.5; color: var(--text-muted);
-      margin: 0 auto 32px; max-width: 680px; font-weight: 400;
-    }
+  {%- endif -%}
 
-    .sshub__actions{ display:flex; gap: 20px; justify-content: center; flex-wrap: wrap; align-items: flex-start; }
-    .sshub__ctaStack{ display:flex; flex-direction: column; align-items: center; gap: 8px; }
-
-    .sshub__btn{
-      padding: 16px 36px; border-radius: 8px; font-weight: 600; text-decoration: none;
-      font-size: 16px; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center;
-      min-width: 220px;
-    }
-    
-    .sshub__btn--primary{ background: #fff; color: #000; }
-    .sshub__btn--primary:hover{ background: #e5e5e5; transform: translateY(-2px); }
-
-    .sshub__btn--secondary{ background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
-    .sshub__btn--secondary:hover{ border-color: #fff; background: rgba(255,255,255,0.05); }
-
-    .sshub__ctaMicro{ font-size: 12px; color: rgba(255,255,255,0.4); }
-    .sshub__fineprint{ margin-top: 24px; font-size: 13px; color: var(--text-muted); opacity: 0.5; }
-
-    /* Browser & Video */
-    .sshub__stage{ perspective: 1000px; margin-top: 50px; margin-bottom: 0; position: relative; z-index: 1; }
-    .sshub__browserFrame{
-      background: #111; border-radius: 12px 12px 0 0;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 30px 60px -10px rgba(0,0,0,0.5);
-      overflow: hidden; max-width: 1000px; margin: 0 auto;
-    }
-    .sshub__browserHeader{
-      background: #1f2228; border-bottom: 1px solid rgba(255,255,255,0.05);
-      padding: 12px 16px; display: flex; align-items: center;
-    }
-    .sshub__dots{ display: flex; gap: 6px; margin-right: 16px; }
-    .dot{ width: 10px; height: 10px; border-radius: 50%; }
-    .red{ background:#ff5f57; } .yellow{ background:#ffbd2e; } .green{ background:#28c940; }
-    .sshub__bUrl{
-      background: #000; color: #666; font-size: 11px; padding: 4px 12px;
-      border-radius: 4px; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .sshub__mediaContainer{ position: relative; width: 100%; height: auto; display: block; background: #fff; }
-    .sshub__screen{ width: 100%; height: auto; display: block; opacity: 0.95; }
-    
-    .sshub__placeholder{ padding: 100px 20px; text-align: center; color: var(--text-muted); }
-
-    .sshub__trusted{
-      text-align: center; margin: 80px 0 40px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.05);
-    }
-    .sshub__trustLabel{ font-size: 11px; font-weight: 700; color: #555; letter-spacing: 1.5px; }
-    .sshub__logos{ margin-top: 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 24px; opacity: 0.6; }
-    .sshub__logoTxt{ font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.5px; }
-
-    .sshub__grid{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
-    .sshub__feat{
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 30px; transition: transform 0.2s;
-    }
-    .sshub__feat:hover{ border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
-    .sshub__iconBox{ color: var(--accent); margin-bottom: 16px; }
-    .sshub__featTitle{ font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px 0; }
-    .sshub__featDesc{ font-size: 14px; color: var(--text-muted); line-height: 1.6; margin: 0; }
-
-    /* --- HOW IT WORKS STRIP --- */
-    /* --- STEP INDICATOR — full redesign --- */
-    .sshub__steps {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 0;
-      max-width: 820px;
-      margin: 40px auto 0;
-      padding: 36px 40px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 20px;
-      backdrop-filter: blur(8px);
-    }
-
-    .sshub__step {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 0 20px;
-      position: relative;
-    }
-
-    .sshub__step-circle {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(16, 185, 129, 0.12);
-      border: 1.5px solid rgba(16, 185, 129, 0.45);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      flex-shrink: 0;
-    }
-    .sshub__step-circle span {
-      font-size: 14px;
-      font-weight: 800;
-      color: #10b981;
-      letter-spacing: -0.02em;
-      line-height: 1;
-    }
-
-    .sshub__step-line {
-      width: 1px;
-      height: 44px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.04));
-      flex-shrink: 0;
-      align-self: flex-start;
-      margin-top: 0;
-    }
-
-    .sshub__step-title {
-      display: block;
-      font-size: 14px;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-    }
-    .sshub__step-desc {
-      font-size: 13px;
-      font-weight: 400;
-      color: rgba(255,255,255,0.5);
-      line-height: 1.5;
-      margin: 0;
-      max-width: 18ch;
-    }
-
-    /* --- PRODUCT LINE (text only, no emojis) --- */
-    .sshub__productline {
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-    .sshub__productline-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-    }
-    .sshub__productline-items {
-      font-size: 13px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.55);
-      letter-spacing: 0.01em;
-    }
-
-    /* Prevent browser frame 3D transform from clipping the stats bar */
-    .sshub__stage {
-      position: relative;
-      z-index: 1;
-      isolation: isolate;
-    }
-
-    @media (max-width: 800px){
-      .sshub__grid{ grid-template-columns: 1fr; }
-      .sshub__h1{ font-size: 42px; }
-      .sshub__actions{ flex-direction: column; width: 100%; }
-      .sshub__ctaStack{ width: 100%; }
-      .sshub__btn{ width: 100%; }
-    }
-
-    @media (min-width: 601px) {
-      .sshub__steps {
-        flex-direction: row;
-        align-items: flex-start;
-      }
-      .sshub__step-line {
-        width: 40px;
-        height: 1px;
-        background: linear-gradient(to right, rgba(255,255,255,0.15), rgba(255,255,255,0.04));
-        align-self: auto;
-        margin-top: 22px;
-        flex-shrink: 0;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .sshub__steps {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 24px 20px;
-        gap: 0;
-      }
-      .sshub__step {
-        flex-direction: row;
-        text-align: left;
-        align-items: flex-start;
-        gap: 16px;
-        padding: 16px 0;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-      }
-      .sshub__step:last-child {
-        border-bottom: none;
-      }
-      .sshub__step-circle {
-        margin-bottom: 0;
-        flex-shrink: 0;
-      }
-      .sshub__step-body {
-        padding-top: 2px;
-      }
-      .sshub__step-desc {
-        max-width: none;
-      }
-      .sshub__step-line {
-        display: none;
-      }
-    }
-  </style>
 </section>
+
+<style>
+  /* ===== RESET & BASE ===== */
+  .ldh {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #0b0b0b;
+    background: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .ldh-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .ldh-wrap--narrow { max-width: 680px; }
+  .ldh-wrap--medium { max-width: 860px; }
+  .ldh-centered-text { text-align: center; }
+
+  /* ===== SCROLL REVEAL ===== */
+  @media (prefers-reduced-motion: no-preference) {
+    .ldh-reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    }
+    .ldh-reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ===== SECTIONS ===== */
+  .ldh-section {
+    padding: 100px 0;
+  }
+  @media (max-width: 600px) {
+    .ldh-section { padding: 60px 0; }
+  }
+
+  /* ===== TYPOGRAPHY ===== */
+  .ldh-h2 {
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    margin: 0 0 16px;
+    color: #0b0b0b;
+  }
+  .ldh-h2--large {
+    font-size: clamp(32px, 5vw, 64px);
+  }
+  .ldh-body {
+    font-size: clamp(16px, 2vw, 20px);
+    color: rgba(0,0,0,.6);
+    line-height: 1.6;
+    margin: 0 0 40px;
+    font-weight: 400;
+  }
+
+  /* ===== BUTTONS ===== */
+  .ldh-btn {
+    display: inline-block;
+    padding: 16px 36px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 16px;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+  }
+  .ldh-btn--primary {
+    background: #0b0b0b;
+    color: #fff;
+    border: 1px solid rgba(183,163,106,.5);
+  }
+  .ldh-btn--primary:hover { opacity: .88; transform: translateY(-1px); }
+  .ldh-btn--outline {
+    background: transparent;
+    color: #0b0b0b;
+    border: 1.5px solid rgba(0,0,0,.25);
+  }
+  .ldh-btn--outline:hover { border-color: #0b0b0b; }
+
+  /* ===== HERO (LOGGED-OUT) ===== */
+  .ldh-hero {
+    padding-top: 140px;
+    padding-bottom: 140px;
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    .ldh-hero { padding-top: 80px; padding-bottom: 80px; }
+  }
+  .ldh-hero-wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  .ldh-hero-h1 {
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.04;
+    margin: 0 0 24px;
+    color: #0b0b0b;
+  }
+  .ldh-hero-sub {
+    font-size: clamp(17px, 2.2vw, 22px);
+    color: rgba(0,0,0,.58);
+    line-height: 1.6;
+    margin: 0 auto 40px;
+    max-width: 560px;
+    font-weight: 400;
+  }
+  .ldh-hero-cta-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .ldh-hero-caption {
+    font-size: 13px;
+    color: rgba(0,0,0,.42);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+
+  /* ===== SPEED PROOF (LOGGED-OUT) ===== */
+  .ldh-speed {
+    background: #faf9f6;
+    border-top: 1px solid rgba(0,0,0,.06);
+    border-bottom: 1px solid rgba(0,0,0,.06);
+  }
+  .ldh-stats-row {
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    margin-top: 48px;
+    border: 1px solid rgba(0,0,0,.09);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .ldh-stat {
+    flex: 1;
+    padding: 40px 24px;
+    border-right: 1px solid rgba(0,0,0,.09);
+    text-align: center;
+  }
+  .ldh-stat:last-child { border-right: none; }
+  .ldh-stat-num {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: rgba(183,163,106,1);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .ldh-stat-label {
+    font-size: 13px;
+    color: rgba(0,0,0,.55);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  @media (max-width: 600px) {
+    .ldh-stats-row {
+      flex-direction: column;
+      border-radius: 12px;
+    }
+    .ldh-stat {
+      border-right: none;
+      border-bottom: 1px solid rgba(0,0,0,.09);
+      padding: 28px 16px;
+    }
+    .ldh-stat:last-child { border-bottom: none; }
+  }
+
+  /* ===== STEPS (LOGGED-OUT) ===== */
+  .ldh-steps-section { background: #fff; }
+  .ldh-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 56px;
+  }
+  .ldh-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 40px 0;
+    border-bottom: 1px solid rgba(0,0,0,.07);
+  }
+  .ldh-step:last-child { border-bottom: none; }
+  .ldh-step-num {
+    font-size: clamp(56px, 8vw, 96px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: rgba(183,163,106,.4);
+    flex-shrink: 0;
+    width: 120px;
+    text-align: right;
+  }
+  .ldh-step-body { padding-top: 8px; flex: 1; }
+  .ldh-step-title {
+    display: block;
+    font-size: clamp(18px, 2.5vw, 24px);
+    font-weight: 700;
+    color: #0b0b0b;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .ldh-step-desc {
+    font-size: clamp(15px, 1.8vw, 18px);
+    color: rgba(0,0,0,.6);
+    line-height: 1.6;
+    margin: 0;
+  }
+  @media (max-width: 600px) {
+    .ldh-step {
+      flex-direction: column;
+      gap: 12px;
+      padding: 32px 0;
+    }
+    .ldh-step-num {
+      font-size: 48px;
+      width: auto;
+      text-align: left;
+    }
+  }
+
+  /* ===== CAROUSEL ===== */
+  .ldh-carousel-section { overflow: hidden; }
+  .ldh-carousel-sub { margin-bottom: 40px; }
+  .ldh-carousel { margin-top: 40px; position: relative; }
+  .ldh-carousel-shell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .ldh-track {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 24px;
+    padding: 0 4px 4px;
+  }
+  .ldh-track::-webkit-scrollbar { display: none; }
+  .ldh-slide {
+    flex: 0 0 min(80vw, 720px);
+    scroll-snap-align: start;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f5f5f5;
+  }
+  .ldh-slide-inner {
+    width: 100%;
+    aspect-ratio: 16/9;
+    position: relative;
+    overflow: hidden;
+  }
+  .ldh-slide-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .ldh-slide-placeholder {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0,0,0,.35);
+    font-size: 14px;
+    padding: 24px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .ldh-slide-cap {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: rgba(0,0,0,.55);
+    text-align: center;
+  }
+  .ldh-arrow {
+    flex-shrink: 0;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,.15);
+    background: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0b0b0b;
+    transition: border-color 0.2s;
+    line-height: 1;
+    padding: 0;
+  }
+  .ldh-arrow:hover { border-color: #0b0b0b; }
+  .ldh-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .ldh-dotbtn {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,.18);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .ldh-dotbtn.is-active {
+    background: rgba(183,163,106,1);
+    transform: scale(1.35);
+  }
+  @media (max-width: 600px) {
+    .ldh-arrow { display: none; }
+    .ldh-slide { flex: 0 0 88vw; }
+  }
+
+  /* ===== FINAL CTA (LOGGED-OUT) ===== */
+  .ldh-final {
+    background: #faf9f6;
+    border-top: 1px solid rgba(0,0,0,.06);
+  }
+  .ldh-final .ldh-h2 { margin-bottom: 20px; }
+
+  /* ===== LOGGED-IN: WELCOME ===== */
+  .ldh-welcome {
+    padding-top: 80px;
+    padding-bottom: 60px;
+    border-bottom: 1px solid rgba(0,0,0,.07);
+  }
+  .ldh-welcome-h1 {
+    font-size: clamp(32px, 5vw, 60px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 14px;
+  }
+  .ldh-welcome-sub {
+    font-size: clamp(15px, 2vw, 18px);
+    color: rgba(0,0,0,.6);
+    margin: 0 0 32px;
+    line-height: 1.5;
+  }
+  .ldh-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .ldh-pill {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+  }
+  .ldh-pill--primary {
+    background: #0b0b0b;
+    color: #fff;
+    border: 1px solid rgba(183,163,106,.5);
+  }
+  .ldh-pill--primary:hover { opacity: .88; transform: translateY(-1px); }
+  .ldh-pill--store {
+    background: rgba(183,163,106,.12);
+    color: #5a4f2e;
+    border: 1px solid rgba(183,163,106,.4);
+  }
+  .ldh-pill--store:hover { background: rgba(183,163,106,.22); }
+  .ldh-pill--secondary {
+    background: #fff;
+    color: #0b0b0b;
+    border: 1.5px solid rgba(0,0,0,.18);
+  }
+  .ldh-pill--secondary:hover { border-color: #0b0b0b; }
+
+  /* ===== LOGGED-IN: SECOND STORE ===== */
+  .ldh-centered { text-align: center; }
+
+  /* ===== MARQUEE (kept from previous version) ===== */
+  .ss-marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid rgba(0,0,0,.06);
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    padding: 14px 0;
+    background: #faf9f6;
+  }
+  .ss-marquee-track {
+    display: flex;
+    gap: 0;
+    animation: ssMarquee 28s linear infinite;
+    white-space: nowrap;
+    will-change: transform;
+  }
+  .ss-marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(0,0,0,.5);
+    padding: 0 32px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .ss-marquee-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(183,163,106,.7);
+    flex-shrink: 0;
+  }
+  @keyframes ssMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ss-marquee-track { animation: none; }
+  }
+</style>
+
+<script>
+(function(){
+  /* ===== SCROLL REVEAL ===== */
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!prefersReducedMotion) {
+    var revealEls = document.querySelectorAll('#ldh-{{ section.id }} .ldh-reveal');
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var delay = entry.target.getAttribute('data-delay') || 0;
+            setTimeout(function() {
+              entry.target.classList.add('is-visible');
+            }, parseInt(delay, 10));
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      revealEls.forEach(function(el) { io.observe(el); });
+    } else {
+      revealEls.forEach(function(el) { el.classList.add('is-visible'); });
+    }
+  }
+
+  /* ===== CAROUSEL(S) ===== */
+  var carousels = document.querySelectorAll('#ldh-{{ section.id }} [data-ldh-carousel]');
+  carousels.forEach(function(carousel) {
+    var track = carousel.querySelector('[data-ldh-track]');
+    if (!track) return;
+    var slides = Array.prototype.slice.call(track.querySelectorAll('[data-ldh-slide]'));
+    if (slides.length < 2) return;
+
+    var btnPrev = carousel.querySelector('[data-ldh-prev]');
+    var btnNext = carousel.querySelector('[data-ldh-next]');
+    var dotsWrap = carousel.querySelector('[data-ldh-dots]');
+    var index = 0;
+    var timer = null;
+    var autoplayEnabled = {{ section.settings.autoplay | default: true | json }};
+    var autoplayMs = {{ section.settings.autoplay_ms | default: 4500 }};
+
+    function setActive(i) {
+      index = (i + slides.length) % slides.length;
+      track.scrollTo({ left: slides[index].offsetLeft, behavior: 'smooth' });
+      updateDots();
+    }
+    function buildDots() {
+      if (!dotsWrap) return;
+      dotsWrap.innerHTML = '';
+      slides.forEach(function(_, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ldh-dotbtn';
+        b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+        b.addEventListener('click', function() { stop(); setActive(i); start(); });
+        dotsWrap.appendChild(b);
+      });
+      updateDots();
+    }
+    function updateDots() {
+      if (!dotsWrap) return;
+      var dots = dotsWrap.querySelectorAll('.ldh-dotbtn');
+      dots.forEach(function(d, i) {
+        d.classList.toggle('is-active', i === index);
+      });
+    }
+    function next() { setActive(index + 1); }
+    function prev() { setActive(index - 1); }
+    function start() {
+      if (!autoplayEnabled) return;
+      stop();
+      timer = setInterval(next, Math.max(2500, autoplayMs));
+    }
+    function stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    if (btnNext) btnNext.addEventListener('click', function() { stop(); next(); start(); });
+    if (btnPrev) btnPrev.addEventListener('click', function() { stop(); prev(); start(); });
+
+    var scrollTimeout = null;
+    track.addEventListener('scroll', function() {
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(function() {
+        var best = 0, bestDist = Infinity;
+        slides.forEach(function(s, i) {
+          var dist = Math.abs(track.scrollLeft - s.offsetLeft);
+          if (dist < bestDist) { bestDist = dist; best = i; }
+        });
+        index = best;
+        updateDots();
+      }, 100);
+    }, { passive: true });
+
+    buildDots();
+    setActive(0);
+    start();
+    carousel.addEventListener('mouseenter', stop);
+    carousel.addEventListener('mouseleave', start);
+  });
+})();
+</script>
 
 {% schema %}
 {
-  "name": "Landing – Dark Tactical",
+  "name": "Landing – Apple Style",
   "settings": [
-    { "type": "text", "id": "kicker", "label": "Badge Text", "default": "OPERATOR BUILT // VETERAN OWNED" },
-    { "type": "text", "id": "primary_title", "label": "Headline", "default": "Logistics for your gear." },
-    { "type": "textarea", "id": "primary_desc", "label": "Subheadline", "default": "A purpose-built platform for military units and sports teams. No spreadsheets. No Venmo chaos. Just one link." },
-
-    { "type": "text", "id": "btn_login_label", "label": "Login Label", "default": "Log in to View Dashboard" },
-    { "type": "text", "id": "btn_request_label", "label": "Request Label", "default": "Request a Storefront" },
-
-    { "type": "text", "id": "cta_micro_login", "label": "Microcopy (Logged out)", "default": "Already have access? Sign in" },
-    { "type": "text", "id": "cta_micro_request", "label": "Microcopy (Request)", "default": "Start your private store" },
-
-    { "type": "text", "id": "primary_note", "label": "Fineprint", "default": "Currently onboarding new units for next month." },
-
-    { "type": "header", "content": "Media" },
-    { "type": "video", "id": "dashboard_video", "label": "Dashboard Video (MP4) - Overrides Image" },
-    { "type": "image_picker", "id": "dashboard_image", "label": "Dashboard Image (Fallback)" },
-
-    { "type": "header", "content": "Links" },
-    { "type": "text", "id": "dashboard_url", "label": "Portal URL", "default": "/pages/portal" },
-    { "type": "text", "id": "request_url", "label": "Request URL", "default": "/pages/private-storefronts" }
+    {
+      "type": "header",
+      "content": "Links"
+    },
+    {
+      "type": "text",
+      "id": "explainer_url",
+      "label": "Primary CTA URL",
+      "default": "/pages/private-storefronts"
+    },
+    {
+      "type": "text",
+      "id": "portal_url",
+      "label": "Portal / Dashboard URL",
+      "default": "/pages/portal"
+    },
+    {
+      "type": "text",
+      "id": "metaobject_type",
+      "label": "Storefront metaobject type",
+      "default": "storefront"
+    },
+    {
+      "type": "header",
+      "content": "Carousel"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay carousel",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_ms",
+      "label": "Autoplay interval (ms)",
+      "min": 2500,
+      "max": 10000,
+      "step": 500,
+      "default": 4500
+    }
   ],
-  "presets": [ { "name": "Landing – Dark Tactical" } ]
+  "blocks": [
+    {
+      "type": "hero",
+      "name": "Hero (logged-out)",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "headline",
+          "label": "Headline (use line breaks)",
+          "default": "Your team store.\nDone before your coffee."
+        },
+        {
+          "type": "textarea",
+          "id": "subhead",
+          "label": "Subheadline",
+          "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done—forever."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA button label",
+          "default": "Start my team's store"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption below CTA",
+          "default": "No minimums · No meetings · No middleman"
+        }
+      ]
+    },
+    {
+      "type": "speed",
+      "name": "Speed proof (logged-out)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Headline",
+          "default": "Two minutes to fill. About fifteen to build."
+        },
+        {
+          "type": "text",
+          "id": "subhead",
+          "label": "Sub",
+          "default": "That's it. That's the whole setup."
+        },
+        {
+          "type": "text",
+          "id": "stat1_num",
+          "label": "Stat 1 number",
+          "default": "2 min"
+        },
+        {
+          "type": "text",
+          "id": "stat1_label",
+          "label": "Stat 1 label",
+          "default": "Tell us about your team"
+        },
+        {
+          "type": "text",
+          "id": "stat2_num",
+          "label": "Stat 2 number",
+          "default": "~15 min"
+        },
+        {
+          "type": "text",
+          "id": "stat2_label",
+          "label": "Stat 2 label",
+          "default": "Automation builds your store"
+        },
+        {
+          "type": "text",
+          "id": "stat3_num",
+          "label": "Stat 3 number",
+          "default": "∞"
+        },
+        {
+          "type": "text",
+          "id": "stat3_label",
+          "label": "Stat 3 label",
+          "default": "Reorder whenever"
+        }
+      ]
+    },
+    {
+      "type": "steps",
+      "name": "How it works (logged-out)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Headline",
+          "default": "Three steps. No middleman."
+        },
+        {
+          "type": "text",
+          "id": "step1_title",
+          "label": "Step 1 title",
+          "default": "Tell us about your team"
+        },
+        {
+          "type": "textarea",
+          "id": "step1_desc",
+          "label": "Step 1 description",
+          "default": "Name, logo, colors, what you want made. About 2 minutes."
+        },
+        {
+          "type": "text",
+          "id": "step2_title",
+          "label": "Step 2 title",
+          "default": "We build it"
+        },
+        {
+          "type": "textarea",
+          "id": "step2_desc",
+          "label": "Step 2 description",
+          "default": "Automation sets up your private store with your logo on every product. About 15 minutes."
+        },
+        {
+          "type": "text",
+          "id": "step3_title",
+          "label": "Step 3 title",
+          "default": "Share the link"
+        },
+        {
+          "type": "textarea",
+          "id": "step3_desc",
+          "label": "Step 3 description",
+          "default": "Your teammates order direct. You never handle another request."
+        }
+      ]
+    },
+    {
+      "type": "examples",
+      "name": "Examples carousel",
+      "settings": [
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Headline",
+          "default": "See what teams are making."
+        },
+        {
+          "type": "text",
+          "id": "subhead",
+          "label": "Subheadline",
+          "default": "Tanks, tees, hoodies, hats — your logo, your colors, ready to reorder."
+        }
+      ]
+    },
+    {
+      "type": "final_cta",
+      "name": "Final CTA (logged-out)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Headline",
+          "default": "One link. Every teammate. Every reorder. Forever."
+        },
+        {
+          "type": "text",
+          "id": "subhead",
+          "label": "Sub",
+          "default": "Your team store is about 15 minutes away."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA button label",
+          "default": "Start my team's store"
+        }
+      ]
+    },
+    {
+      "type": "welcome",
+      "name": "Welcome (logged-in)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "greeting_prefix",
+          "label": "Greeting prefix",
+          "default": "Welcome back, "
+        },
+        {
+          "type": "text",
+          "id": "greeting_sub",
+          "label": "Greeting subline",
+          "default": "Jump into your store, reorder your last kit, or start another team."
+        },
+        {
+          "type": "text",
+          "id": "dashboard_label",
+          "label": "Dashboard button label",
+          "default": "My Dashboard"
+        },
+        {
+          "type": "text",
+          "id": "orders_label",
+          "label": "Orders button label",
+          "default": "My Orders"
+        }
+      ]
+    },
+    {
+      "type": "second_store",
+      "name": "Second store CTA (logged-in)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Headline",
+          "default": "Running another team? Or want a store for yourself?"
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "Body copy",
+          "default": "Different team, different logo, different products — or a personal store for family reunions, fantasy leagues, anything. Same easy button. About 15 minutes."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label",
+          "default": "Start another store"
+        }
+      ]
+    },
+    {
+      "type": "example",
+      "name": "Example slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Slide image"
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "Image alt text"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Landing – Apple Style",
+      "blocks": [
+        { "type": "hero" },
+        { "type": "speed" },
+        { "type": "steps" },
+        { "type": "examples" },
+        { "type": "final_cta" },
+        { "type": "welcome" },
+        { "type": "second_store" }
+      ]
+    }
+  ]
 }
 {% endschema %}
