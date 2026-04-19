@@ -774,6 +774,7 @@
     var dotsWrap = carousel.querySelector('[data-ldh-dots]');
     var index = 0;
     var timer = null;
+    var autoplayEnabled = {{ section.settings.autoplay | default: true | json }};
     var autoplayMs = {{ section.settings.autoplay_ms | default: 4500 }};
 
     function setActive(i) {
@@ -804,6 +805,7 @@
     function next() { setActive(index + 1); }
     function prev() { setActive(index - 1); }
     function start() {
+      if (!autoplayEnabled) return;
       stop();
       timer = setInterval(next, Math.max(2500, autoplayMs));
     }
@@ -899,7 +901,7 @@
           "type": "textarea",
           "id": "subhead",
           "label": "Subheadline",
-          "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done — forever."
+          "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done—forever."
         },
         {
           "type": "text",
