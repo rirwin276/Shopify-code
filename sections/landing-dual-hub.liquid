@@ -143,6 +143,7 @@
         <p class="ldh-hero-sub">{{ section.settings.hero_sub | escape }}</p>
         <div class="ldh-hero-cta-wrap">
           <a class="ldh-btn ldh-btn--primary" href="{{ request_url }}">{{ section.settings.hero_cta_label | escape }}</a>
+          <a class="ldh-btn ldh-btn--outline ldh-btn--signin" href="{{ routes.account_login_url }}">{{ section.settings.hero_signin_label | escape }}</a>
           <p class="ldh-hero-caption">{{ section.settings.hero_caption | escape }}</p>
         </div>
       </div>
@@ -754,6 +755,12 @@
       "id": "hero_cta_label",
       "label": "CTA button label",
       "default": "Start my team's store →"
+    },
+    {
+      "type": "text",
+      "id": "hero_signin_label",
+      "label": "Sign in button label",
+      "default": "Sign in"
     },
     {
       "type": "text",
