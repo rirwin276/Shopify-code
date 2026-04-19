@@ -9,8 +9,8 @@
   - Scroll animations via IntersectionObserver, respects prefers-reduced-motion.
 {% endcomment %}
 
-{%- assign dashboard_url = section.settings.portal_url | default: section.settings.dashboard_url | default: '/pages/portal' -%}
-{%- assign request_url = section.settings.explainer_url | default: section.settings.request_url | default: '/pages/private-storefronts' -%}
+{%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
+{%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
 {%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
 
 {%- comment -%}Logged-in: parse storefront tags & metaobjects (same logic as portal-router){%- endcomment -%}
@@ -211,7 +211,12 @@
 
   {%- endif -%}
 
-  {%- comment -%}Marquee — always visible{%- endcomment -%}
+  {%- comment -%}
+    Marquee — always visible.
+    Items are intentionally duplicated to create a seamless infinite scroll loop:
+    the CSS animation shifts the track by -50%, revealing the duplicate set,
+    then loops — producing continuous motion without a visible jump.
+  {%- endcomment -%}
   <div class="ss-marquee-wrap">
     <div class="ss-marquee-track">
       <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
@@ -697,18 +702,6 @@
       "type": "text",
       "id": "request_url",
       "label": "Primary CTA URL (request storefront)",
-      "default": "/pages/private-storefronts"
-    },
-    {
-      "type": "text",
-      "id": "portal_url",
-      "label": "Portal URL (overrides Dashboard URL above)",
-      "default": "/pages/portal"
-    },
-    {
-      "type": "text",
-      "id": "explainer_url",
-      "label": "Explainer / CTA URL (overrides Request URL above)",
       "default": "/pages/private-storefronts"
     },
     {
