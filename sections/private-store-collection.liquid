@@ -125,23 +125,78 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <style>
   /* BASE STYLES (Desktop) */
-  .ps-hero { padding: 38px 16px 18px; }
+  .ps-hero {
+    padding: 38px 16px 18px;
+    background-image:
+      radial-gradient(ellipse 65% 55% at 50% 0%, rgba(183,163,106,.10) 0%, transparent 68%),
+      radial-gradient(circle, rgba(0,0,0,.040) 1px, transparent 1px);
+    background-size: auto, 24px 24px;
+  }
   .ps-wrap { max-width: 980px; margin: 0 auto; }
   .ps-center { text-align: center; }
   
-  .ps-logo { width: 140px; height: 140px; margin: 0 auto 14px; display:flex; align-items:center; justify-content:center; }
-  .ps-logo-img { max-width: 100%; max-height: 100%; object-fit: contain; display:block; }
-  .ps-logo-fallback { font-weight: 900; font-size: 46px; opacity: .35; }
+  .ps-logo {
+    width: 140px; height: 140px; margin: 0 auto 14px;
+    display:flex; align-items:center; justify-content:center;
+    position: relative;
+  }
+  /* Warm radial glow behind the logo */
+  .ps-logo::before{
+    content: '';
+    position: absolute;
+    inset: -28px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(183,163,106,.22) 0%, transparent 68%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .ps-logo-img { max-width: 100%; max-height: 100%; object-fit: contain; display:block; position: relative; z-index: 1; }
+  .ps-logo-fallback { font-weight: 900; font-size: 46px; opacity: .35; position: relative; z-index: 1; }
   
   .ps-title { margin: 0; font-size: clamp(38px, 5vw, 64px); letter-spacing: -0.02em; line-height: 1.02; }
   .ps-sub { margin: 10px auto 0; max-width: 720px; opacity: .75; font-size: 16px; }
   
   .ps-actions { margin-top: 18px; display:flex; gap: 12px; justify-content:center; flex-wrap: wrap; }
-  .ps-btn { display:inline-flex; align-items:center; justify-content:center; padding: 12px 24px; border-radius: 999px; text-decoration:none; font-weight: 800; border: 1px solid rgba(0,0,0,.14); font-size: 14px; }
-  .ps-btn-solid { background: #111; color: #fff; border-color: #111; }
+  .ps-btn { display:inline-flex; align-items:center; justify-content:center; padding: 12px 24px; border-radius: 999px; text-decoration:none; font-weight: 800; border: 1px solid rgba(0,0,0,.14); font-size: 14px; transition: opacity .15s ease, box-shadow .15s ease; }
+  .ps-btn:hover{ opacity: .92; box-shadow: 0 4px 14px rgba(0,0,0,.10); }
+  .ps-btn-solid { background: #111; color: #fff; border-color: rgba(183,163,106,.55); }
   .ps-btn-ghost { background: #f4f4f4; color: #111; border: none; }
   
-  .ps-divider { height: 1px; background: rgba(0,0,0,.10); margin: 22px auto 0; max-width: 760px; }
+  /* Gold hairline divider with centred ornament */
+  .ps-divider {
+    position: relative;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(183,163,106,.60) 35%, rgba(183,163,106,.80) 50%, rgba(183,163,106,.60) 65%, transparent 100%);
+    margin: 28px auto 0;
+    max-width: 760px;
+    border: none;
+  }
+  .ps-divider::after{
+    content: '✦' / '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: rgba(183,163,106,.90);
+    line-height: 1;
+  }
+
+  /* Entrance animations — respect reduced-motion */
+  @media (prefers-reduced-motion: no-preference){
+    @keyframes ps-fadein-scale{
+      from{ opacity: 0; transform: scale(.95); }
+      to{ opacity: 1; transform: scale(1); }
+    }
+    @keyframes ps-fadeup{
+      from{ opacity: 0; transform: translateY(10px); }
+      to{ opacity: 1; transform: translateY(0); }
+    }
+    .ps-logo{ animation: ps-fadein-scale 400ms ease both; }
+    .ps-title{ animation: ps-fadeup 400ms ease 90ms both; }
+    .ps-sub{ animation: ps-fadeup 400ms ease 160ms both; }
+    .ps-actions{ animation: ps-fadeup 400ms ease 220ms both; }
+  }
 
   /* --- MOBILE OPTIMIZATION --- */
   @media (max-width: 768px) {

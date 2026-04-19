@@ -284,7 +284,7 @@
                       </div>
 
                       <div class="ss-storecard-right">
-                        <span class="ss-openpill">Open</span>
+                        <span class="ss-openpill"><span class="ss-livedot" aria-hidden="true"></span>Open Storefront <span aria-hidden="true">→</span></span>
                       </div>
                     </a>
 
@@ -692,7 +692,7 @@
   .ss-storegrid{
     display:grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 16px;
   }
   @media (min-width: 860px){
     .ss-storegrid{ grid-template-columns: 1fr 1fr; }
@@ -705,24 +705,32 @@
     align-items:center;
     justify-content:space-between;
     gap: 14px;
-    padding: 14px;
-    border-radius: 16px;
-    border: 1px solid rgba(0,0,0,.10);
-    background: rgba(0,0,0,.02);
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(0,0,0,.09);
+    background: linear-gradient(180deg, #fff 0%, #fafaf7 100%);
     text-decoration:none;
     color: inherit;
-    transition: transform .08s ease, box-shadow .12s ease, background .12s ease;
+    position: relative;
+    transition: transform .22s cubic-bezier(.25,.46,.45,.94), box-shadow .22s cubic-bezier(.25,.46,.45,.94), border-color .22s ease;
   }
   .ss-storecard:hover{
-    transform: translateY(-1px);
-    background: #fff;
-    box-shadow: 0 12px 24px rgba(0,0,0,.06);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,.10), 0 0 0 1.5px rgba(183,163,106,.55);
+    border-color: rgba(183,163,106,.35);
+  }
+  @media (hover: none){
+    .ss-storecard:active{
+      transform: scale(.98);
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
   }
 
-  .ss-storecard-left{ display:flex; gap:12px; align-items:center; min-width: 240px; flex:1; }
+  .ss-storecard-left{ display:flex; gap:14px; align-items:center; min-width: 240px; flex:1; }
   .ss-storelogo{
-    width: 52px; height:52px; border-radius: 14px;
-    background: rgba(0,0,0,.06);
+    width: 64px; height: 64px; border-radius: 16px;
+    background: linear-gradient(135deg, rgba(183,163,106,.14) 0%, rgba(183,163,106,.04) 100%);
+    box-shadow: 0 0 0 3px rgba(183,163,106,.20), inset 0 1px 3px rgba(0,0,0,.06);
     display:flex; align-items:center; justify-content:center;
     font-weight: 900; color: rgba(0,0,0,.35);
     flex:0 0 auto;
@@ -742,14 +750,34 @@
   .ss-openpill{
     display:inline-flex;
     align-items:center;
+    gap: 7px;
     justify-content:center;
-    padding: 10px 14px;
+    padding: 10px 16px;
     border-radius: 999px;
     background:#0b0b0b;
     color:#fff;
     font-weight: 900;
-    border: 1px solid rgba(183,163,106,.45);
+    border: 1px solid rgba(183,163,106,.55);
     white-space: nowrap;
+    font-size: 13px;
+    letter-spacing: .01em;
+  }
+
+  /* Green live-status pulse dot */
+  .ss-livedot{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3ecf5e;
+    display: inline-block;
+    flex: 0 0 auto;
+  }
+  @media (prefers-reduced-motion: no-preference){
+    @keyframes ss-dot-pulse{
+      0%, 100%{ opacity: 1; transform: scale(1); }
+      50%{ opacity: .55; transform: scale(.78); }
+    }
+    .ss-livedot{ animation: ss-dot-pulse 2.2s ease-in-out infinite; }
   }
 
   .ss-adminbtn{
@@ -765,8 +793,10 @@
     color: #0b0b0b;
     width: fit-content;
     align-self: flex-end;
+    font-size: 13px;
+    transition: opacity .15s ease, box-shadow .15s ease;
   }
-  .ss-adminbtn:hover{ opacity: .92; }
+  .ss-adminbtn:hover{ opacity: .92; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
 
   /* Forms */
   .ss-actions-grid{
