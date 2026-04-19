@@ -708,16 +708,16 @@
     padding: 16px;
     border-radius: 18px;
     border: 1px solid rgba(0,0,0,.09);
-    background: linear-gradient(180deg, #fff 0%, #fafaf7 100%);
+    background: linear-gradient(180deg, #fffef9 0%, #f3f0e6 100%);
     text-decoration:none;
     color: inherit;
     position: relative;
     transition: transform .22s cubic-bezier(.25,.46,.45,.94), box-shadow .22s cubic-bezier(.25,.46,.45,.94), border-color .22s ease;
   }
   .ss-storecard:hover{
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0,0,0,.10), 0 0 0 1.5px rgba(183,163,106,.55);
-    border-color: rgba(183,163,106,.35);
+    transform: translateY(-8px);
+    box-shadow: 0 18px 40px rgba(0,0,0,.13), 0 0 0 2px rgba(183,163,106,.45), 0 0 18px rgba(183,163,106,.20);
+    border-color: rgba(183,163,106,.50);
   }
   @media (hover: none){
     .ss-storecard:active{
@@ -729,8 +729,8 @@
   .ss-storecard-left{ display:flex; gap:14px; align-items:center; min-width: 240px; flex:1; }
   .ss-storelogo{
     width: 64px; height: 64px; border-radius: 16px;
-    background: linear-gradient(135deg, rgba(183,163,106,.14) 0%, rgba(183,163,106,.04) 100%);
-    box-shadow: 0 0 0 3px rgba(183,163,106,.20), inset 0 1px 3px rgba(0,0,0,.06);
+    background: linear-gradient(135deg, rgba(183,163,106,.26) 0%, rgba(183,163,106,.08) 100%);
+    box-shadow: 0 0 0 4px rgba(183,163,106,.32), inset 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(183,163,106,.22);
     display:flex; align-items:center; justify-content:center;
     font-weight: 900; color: rgba(0,0,0,.35);
     flex:0 0 auto;
@@ -765,19 +765,20 @@
 
   /* Green live-status pulse dot */
   .ss-livedot{
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     background: #3ecf5e;
     display: inline-block;
     flex: 0 0 auto;
+    box-shadow: 0 0 0 2px rgba(62,207,94,.20);
   }
   @media (prefers-reduced-motion: no-preference){
     @keyframes ss-dot-pulse{
-      0%, 100%{ opacity: 1; transform: scale(1); }
-      50%{ opacity: .55; transform: scale(.78); }
+      0%, 100%{ opacity: 1; transform: scale(1); box-shadow: 0 0 0 2px rgba(62,207,94,.22); }
+      50%{ opacity: .35; transform: scale(.60); box-shadow: 0 0 0 4px rgba(62,207,94,.08); }
     }
-    .ss-livedot{ animation: ss-dot-pulse 2.2s ease-in-out infinite; }
+    .ss-livedot{ animation: ss-dot-pulse 2s ease-in-out infinite; }
   }
 
   .ss-adminbtn{
