@@ -405,21 +405,6 @@
     cursor: pointer; transition: all 0.15s; border: none; font-family: var(--ap-font);
   }
   .ap-btn--danger-sm:hover { background: #fecaca; }
-
-  /* ── BC3413 EDIT PLACEMENT BUTTON ──────────────────────────── */
-  .ap-edit-placement-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px; background: #3b82f6; color: #ffffff;
-    border-radius: 8px; font-size: 12px; font-weight: 700;
-    text-decoration: none; border: none; cursor: pointer;
-    transition: background 0.15s ease; font-family: var(--ap-font);
-    white-space: nowrap; flex-shrink: 0;
-  }
-  .ap-edit-placement-btn:hover { background: #2563eb; color: #ffffff; text-decoration: none; }
-  .ap-edit-placement-btn--disabled {
-    background: #94a3b8; cursor: not-allowed; pointer-events: auto;
-  }
-  .ap-edit-placement-btn--disabled:hover { background: #94a3b8; }
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -446,10 +431,6 @@
 
 {%- else -%}
 
-{%- comment %} BC3413 placement editor settings {% endcomment -%}
-{%- assign editor_base_url = section.settings.editor_base_url | default: 'https://printfulautomation-production.up.railway.app/editor/bc3413' -%}
-{%- assign editor_secret = section.settings.editor_secret | default: '' -%}
-
 {%- assign shop_meta = shop.metaobjects.custom_shop[shop_handle] -%}
 {%- assign join_mode = 'secure' -%}
 {%- assign collection_handle = shop_handle -%}
@@ -471,15 +452,6 @@
   {%- endif -%}
 {%- endif -%}
 
-{%- comment %} Resolve shop logo URL for BC3413 placement editor {% endcomment -%}
-{%- assign ap_shop_logo_src = '' -%}
-{%- if shop_meta -%}
-  {%- assign _logo_obj = shop_meta.logo.value | default: shop_meta.logo -%}
-  {%- if _logo_obj != blank -%}
-    {%- assign ap_shop_logo_src = _logo_obj | image_url: width: 3000 -%}
-  {%- endif -%}
-{%- endif -%}
-
 {%- assign join_link = shop.url | append: join_path | append: '?shop=' | append: collection_handle -%}
 {%- if join_code != blank -%}
   {%- assign join_link = join_link | append: '&code=' | append: join_code -%}
@@ -494,9 +466,6 @@
     SSAP.collectionHandle = {{ collection_handle | json }};
     SSAP.shopHandle = {{ shop_handle | json }};
     SSAP.railwayUrl = "https://studio-uploader-production.up.railway.app";
-    SSAP.editorBaseUrl = {{ editor_base_url | json }};
-    SSAP.editorSecret = {{ editor_secret | json }};
-    SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
 
   <!-- HERO HEADER -->
@@ -1040,42 +1009,6 @@
       actionsEl.appendChild(toggleBtn);
       actionsEl.appendChild(deleteBtn);
 
-      // BC3413 placement editor — only show for products tagged BC3413_front
-      var productTags = product.tags || [];
-      var isBc3413 = false;
-      if(Array.isArray(productTags)){
-        for(var ti = 0; ti < productTags.length; ti++){
-          if(String(productTags[ti]).toLowerCase().trim() === 'bc3413_front'){ isBc3413 = true; break; }
-        }
-      } else if(typeof productTags === 'string'){
-        isBc3413 = productTags.split(',').some(function(t){ return t.toLowerCase().trim() === 'bc3413_front'; });
-      }
-
-      if(isBc3413 && SSAP.editorSecret){
-        var logoSrc = SSAP.shopLogoSrc || '';
-        var editorBtn;
-        if(logoSrc){
-          var editorUrl = SSAP.editorBaseUrl
-            + '?logo_url=' + encodeURIComponent(logoSrc)
-            + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(SSAP.shopHandle || '')
-            + '&secret=' + encodeURIComponent(SSAP.editorSecret);
-          editorBtn = document.createElement('a');
-          editorBtn.className = 'ap-edit-placement-btn';
-          editorBtn.href = editorUrl;
-          editorBtn.target = '_blank';
-          editorBtn.rel = 'noopener';
-          editorBtn.title = 'Open the placement editor in a new tab';
-          editorBtn.textContent = '✏️ Edit Placement';
-        } else {
-          editorBtn = document.createElement('span');
-          editorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          editorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          editorBtn.textContent = '✏️ Edit Placement (no logo)';
-        }
-        actionsEl.appendChild(editorBtn);
-      }
-
       row.appendChild(imgEl);
       row.appendChild(titleEl);
       row.appendChild(actionsEl);
@@ -1176,22 +1109,7 @@
 {% schema %}
 {
   "name": "Admin Powers",
-  "settings": [
-    {
-      "type": "text",
-      "id": "editor_base_url",
-      "label": "BC3413 placement editor base URL",
-      "default": "https://printfulautomation-production.up.railway.app/editor/bc3413",
-      "info": "Base URL for the Railway-hosted placement editor. Leave default in production."
-    },
-    {
-      "type": "text",
-      "id": "editor_secret",
-      "label": "BC3413 placement editor secret",
-      "default": "",
-      "info": "EDITOR_SECRET env var from Printful_Automation. Required for Edit Placement to work."
-    }
-  ],
+  "settings": [],
   "presets": [
     { "name": "Admin Powers" }
   ]
