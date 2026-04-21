@@ -418,6 +418,70 @@
     background: #94a3b8; cursor: not-allowed; pointer-events: auto;
   }
   .ap-edit-placement-btn--disabled:hover { background: #94a3b8; }
+  .ap-product-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--ap-border);
+  }
+  .ap-product-row__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
+  @media (max-width: 600px) {
+    .ap-product-row { flex-wrap: wrap; }
+    .ap-product-row__actions {
+      width: 100%;
+      justify-content: flex-start;
+      margin-top: 8px;
+    }
+    .ap-edit-placement-btn,
+    .ap-edit-placement-btn--disabled {
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+  }
+  .ap-rebuilding-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: min(540px, calc(100vw - 32px));
+    padding: 16px 44px 16px 20px;
+    background: #0f172a;
+    color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    font-family: var(--ap-font);
+    font-size: 14px;
+    line-height: 1.45;
+    z-index: 9999;
+    animation: ap-rebuilding-toast-in 0.25s ease-out;
+  }
+  .ap-rebuilding-toast strong { color: #86efac; font-weight: 700; }
+  .ap-rebuilding-toast__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: #cbd5e1;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .ap-rebuilding-toast__close:hover { background: rgba(255,255,255,0.08); color: #ffffff; }
+  @keyframes ap-rebuilding-toast-in {
+    from { opacity: 0; transform: translate(-50%, 12px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+  }
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -673,6 +737,36 @@
 
 <script>
 (function(){
+  // ── REBUILDING TOAST ─────────────────────────────────────────
+  (function apMaybeShowRebuildingToast(){
+    try {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('rebuilding') !== '1') return;
+
+      var toast = document.createElement('div');
+      toast.className = 'ap-rebuilding-toast';
+      toast.innerHTML =
+        '<strong>✅ Placement saved — rebuilding product.</strong><br>' +
+        'Allow 2–4 minutes, then refresh this page to see the updated mockups. ' +
+        '<button type="button" class="ap-rebuilding-toast__close" aria-label="Dismiss">✕</button>';
+      document.body.appendChild(toast);
+
+      var closeBtn = toast.querySelector('.ap-rebuilding-toast__close');
+      closeBtn.addEventListener('click', function(){
+        toast.remove();
+      });
+
+      // Clean ?rebuilding=1 from the URL so a page refresh doesn't re-show the toast
+      if (window.history && window.history.replaceState) {
+        var cleanParams = new URLSearchParams(window.location.search);
+        cleanParams.delete('rebuilding');
+        var qs = cleanParams.toString();
+        var clean = window.location.origin + window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+        window.history.replaceState({}, document.title, clean);
+      }
+    } catch(_e){}
+  })();
+
   // ── MAIN TAB SWITCHING ──────────────────────────────────────
   var apProductsLoaded = false;
 
@@ -1012,7 +1106,7 @@
     products.forEach(function(product){
       var isHidden = !!product.hidden;
       var row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--ap-border);';
+      row.className = 'ap-product-row';
 
       var imgSrc = product.featured_image || product.image ||
                    (product.images && product.images[0] && (product.images[0].src || product.images[0])) ||
@@ -1045,7 +1139,7 @@
       deleteBtn.textContent = 'Delete';
 
       var actionsEl = document.createElement('div');
-      actionsEl.style.cssText = 'display:flex;align-items:center;gap:8px;flex-shrink:0;';
+      actionsEl.className = 'ap-product-row__actions';
       actionsEl.appendChild(toggleBtn);
       actionsEl.appendChild(deleteBtn);
 
@@ -1064,11 +1158,13 @@
         var logoSrc = SSAP.shopLogoSrc || '';
         var editorBtn;
         if(logoSrc){
+          var returnUrl = window.location.origin + window.location.pathname;
           var editorUrl = SSAP.editorBaseUrl
             + '?logo_url=' + encodeURIComponent(logoSrc)
             + '&logo_kind=titan'
             + '&product_handle=' + encodeURIComponent(product.handle || '')
-            + '&secret=' + encodeURIComponent(SSAP.editorSecret);
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(returnUrl);
           editorBtn = document.createElement('a');
           editorBtn.className = 'ap-edit-placement-btn';
           editorBtn.href = editorUrl;
