@@ -246,9 +246,70 @@
   .ap-btn--icon:hover { background: #e2e8f0; }
   .ap-products-spinner { text-align: center; padding: 32px; color: var(--ap-gray); font-size: 14px; }
   .ap-products-empty { text-align: center; padding: 48px 20px; color: var(--ap-gray); font-size: 15px; }
-  @media(max-width: 600px) {
-    .ap-product-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .ap-product-actions { width: 100%; justify-content: flex-end; }
+  @media (max-width: 600px) {
+    /* Bigger product thumbnails */
+    .ap-product-thumb,
+    .ap-product-thumb-empty {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+    }
+
+    /* Stack product rows as cards */
+    .ap-product-row {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--ap-card);
+      border: 1px solid var(--ap-border);
+      border-radius: 14px;
+      box-shadow: var(--ap-shadow-sm);
+    }
+
+    /* Title takes remaining width on top row next to thumbnail */
+    .ap-product-title {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 15px;
+      white-space: normal;
+      -webkit-line-clamp: 2;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Action bar below thumbnail+title */
+    .ap-product-row__actions,
+    .ap-product-actions {
+      width: 100%;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-start;
+      align-items: stretch;
+      margin-top: 4px;
+      flex-wrap: nowrap;
+    }
+
+    /* Larger touch targets */
+    .ap-btn--outline-sm,
+    .ap-btn--danger-sm {
+      flex: 1 1 0;
+      min-height: 40px;
+      font-size: 13px;
+      padding: 10px 12px;
+    }
+
+    /* Edit Placement is the primary action — make it prominent */
+    .ap-edit-placement-btn,
+    .ap-edit-placement-btn--disabled {
+      flex: 2 1 0;
+      min-height: 40px;
+      font-size: 13px;
+      padding: 10px 14px;
+      justify-content: center;
+    }
   }
 
   /* ── COPY ROW ──────────────────────────────────────────── */
@@ -432,19 +493,6 @@
     flex-wrap: wrap;
     justify-content: flex-end;
     flex-shrink: 0;
-  }
-  @media (max-width: 600px) {
-    .ap-product-row { flex-wrap: wrap; }
-    .ap-product-row__actions {
-      width: 100%;
-      justify-content: flex-start;
-      margin-top: 8px;
-    }
-    .ap-edit-placement-btn,
-    .ap-edit-placement-btn--disabled {
-      font-size: 11px;
-      padding: 5px 10px;
-    }
   }
   .ap-rebuilding-inline {
     display: flex;
