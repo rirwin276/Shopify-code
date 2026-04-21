@@ -482,6 +482,78 @@
     from { opacity: 0; transform: translate(-50%, 12px); }
     to   { opacity: 1; transform: translate(-50%, 0); }
   }
+  .ap-editor-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 9998;
+    align-items: stretch;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+  }
+  .ap-editor-overlay.open { display: flex; }
+  .ap-editor-dialog {
+    width: min(1080px, 100%);
+    max-height: calc(100vh - 48px);
+    background: #1a1a1a;
+    border-radius: 16px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.55);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: ap-editor-fadein 0.2s ease-out;
+  }
+  @keyframes ap-editor-fadein {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .ap-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #0f172a;
+    color: #fff;
+    font-family: var(--ap-font);
+    font-weight: 700;
+    font-size: 14px;
+    border-bottom: 1px solid #2a2a2a;
+    flex-shrink: 0;
+  }
+  .ap-editor-close {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .ap-editor-close:hover { background: rgba(255,255,255,0.18); }
+  .ap-editor-iframe {
+    flex: 1;
+    width: 100%;
+    border: 0;
+    display: block;
+    background: #1a1a1a;
+    min-height: 640px;
+  }
+  @media (max-width: 900px) {
+    .ap-editor-overlay { padding: 0; }
+    .ap-editor-dialog {
+      width: 100%;
+      max-height: 100vh;
+      border-radius: 0;
+    }
+  }
+  body.ap-editor-open { overflow: hidden; }
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -733,29 +805,45 @@
     </div>
   </div>
 
+  <!-- BC3413 EDITOR MODAL -->
+  <div class="ap-editor-overlay" id="apEditorOverlay" aria-hidden="true">
+    <div class="ap-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="apEditorTitle">
+      <div class="ap-editor-header">
+        <span id="apEditorTitle">✏️ Edit Logo Placement</span>
+        <button type="button" class="ap-editor-close" id="apEditorClose" aria-label="Close editor">✕</button>
+      </div>
+      <iframe id="apEditorIframe"
+              class="ap-editor-iframe"
+              title="BC3413 Placement Editor"
+              allow="clipboard-write"></iframe>
+    </div>
+  </div>
+
 </div><!-- /.ap-wrap -->
 
 <script>
 (function(){
   // ── REBUILDING TOAST ─────────────────────────────────────────
+  function apShowRebuildingToast() {
+    // If a toast is already on-screen, don't stack them
+    if (document.querySelector('.ap-rebuilding-toast')) return;
+
+    var toast = document.createElement('div');
+    toast.className = 'ap-rebuilding-toast';
+    toast.innerHTML =
+      '<strong>✅ Placement saved — rebuilding product.</strong><br>' +
+      'Allow 2–4 minutes, then refresh this page to see the updated mockups. ' +
+      '<button type="button" class="ap-rebuilding-toast__close" aria-label="Dismiss">✕</button>';
+    document.body.appendChild(toast);
+    toast.querySelector('.ap-rebuilding-toast__close')
+      .addEventListener('click', function(){ toast.remove(); });
+  }
+
   (function apMaybeShowRebuildingToast(){
     try {
       var params = new URLSearchParams(window.location.search);
       if (params.get('rebuilding') !== '1') return;
-
-      var toast = document.createElement('div');
-      toast.className = 'ap-rebuilding-toast';
-      toast.innerHTML =
-        '<strong>✅ Placement saved — rebuilding product.</strong><br>' +
-        'Allow 2–4 minutes, then refresh this page to see the updated mockups. ' +
-        '<button type="button" class="ap-rebuilding-toast__close" aria-label="Dismiss">✕</button>';
-      document.body.appendChild(toast);
-
-      var closeBtn = toast.querySelector('.ap-rebuilding-toast__close');
-      closeBtn.addEventListener('click', function(){
-        toast.remove();
-      });
-
+      apShowRebuildingToast();
       // Clean ?rebuilding=1 from the URL so a page refresh doesn't re-show the toast
       if (window.history && window.history.replaceState) {
         var cleanParams = new URLSearchParams(window.location.search);
@@ -766,6 +854,71 @@
       }
     } catch(_e){}
   })();
+
+  // ── BC3413 EDITOR MODAL ─────────────────────────────────────
+  var apEditorOverlay = document.getElementById('apEditorOverlay');
+  var apEditorIframe  = document.getElementById('apEditorIframe');
+  var apEditorClose   = document.getElementById('apEditorClose');
+  var _apEditorKeydown = null;
+
+  function apOpenEditorModal(url) {
+    if (!apEditorOverlay || !apEditorIframe) {
+      // Modal DOM missing — fall back to new tab so the user isn't stuck
+      window.open(url, '_blank', 'noopener');
+      return;
+    }
+    apEditorIframe.src = url;
+    apEditorOverlay.classList.add('open');
+    apEditorOverlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('ap-editor-open');
+    _apEditorKeydown = function(e){ if (e.key === 'Escape') apCloseEditorModal(); };
+    document.addEventListener('keydown', _apEditorKeydown);
+  }
+
+  function apCloseEditorModal() {
+    if (!apEditorOverlay || !apEditorIframe) return;
+    apEditorOverlay.classList.remove('open');
+    apEditorOverlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('ap-editor-open');
+    // Clear iframe so the editor stops running (and next open starts fresh)
+    apEditorIframe.src = 'about:blank';
+    if (_apEditorKeydown) {
+      document.removeEventListener('keydown', _apEditorKeydown);
+      _apEditorKeydown = null;
+    }
+  }
+
+  // Expose close + open for other scopes (render function attaches click handlers)
+  window.apOpenEditorModal  = apOpenEditorModal;
+  window.apCloseEditorModal = apCloseEditorModal;
+
+  // Close button + backdrop click
+  if (apEditorClose) {
+    apEditorClose.addEventListener('click', apCloseEditorModal);
+  }
+  if (apEditorOverlay) {
+    apEditorOverlay.addEventListener('click', function(e){
+      // Only close on direct backdrop clicks, not on dialog content
+      if (e.target === apEditorOverlay) apCloseEditorModal();
+    });
+  }
+
+  // postMessage listener — editor signals save/close from inside the iframe
+  window.addEventListener('message', function(e){
+    var data = e && e.data;
+    if (!data || typeof data !== 'object') return;
+    // Security note: we don't strictly check origin because the editor is
+    // served from Railway and our theme may be served from multiple shopify
+    // preview origins. The message `type` strings are our own namespaced
+    // convention and we only *act* on them (no data is trusted from them
+    // beyond triggering UI transitions).
+    if (data.type === 'bc3413_placement_saved') {
+      apCloseEditorModal();
+      apShowRebuildingToast();
+    } else if (data.type === 'bc3413_close') {
+      apCloseEditorModal();
+    }
+  });
 
   // ── MAIN TAB SWITCHING ──────────────────────────────────────
   var apProductsLoaded = false;
@@ -1158,20 +1311,18 @@
         var logoSrc = SSAP.shopLogoSrc || '';
         var editorBtn;
         if(logoSrc){
-          var returnUrl = window.location.origin + window.location.pathname;
           var editorUrl = SSAP.editorBaseUrl
             + '?logo_url=' + encodeURIComponent(logoSrc)
             + '&logo_kind=titan'
             + '&product_handle=' + encodeURIComponent(product.handle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
-            + '&return_url=' + encodeURIComponent(returnUrl);
-          editorBtn = document.createElement('a');
+            + '&mode=embedded';
+          editorBtn = document.createElement('button');
+          editorBtn.type = 'button';
           editorBtn.className = 'ap-edit-placement-btn';
-          editorBtn.href = editorUrl;
-          editorBtn.target = '_blank';
-          editorBtn.rel = 'noopener';
-          editorBtn.title = 'Open the placement editor in a new tab';
-          editorBtn.textContent = '✏️ Edit Placement';
+          editorBtn.innerHTML = '✏️ Edit Placement';
+          editorBtn.title = 'Adjust logo placement for this product only';
+          editorBtn.addEventListener('click', function(){ apOpenEditorModal(editorUrl); });
         } else {
           editorBtn = document.createElement('span');
           editorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
