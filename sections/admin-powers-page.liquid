@@ -864,14 +864,14 @@
   function apOpenEditorModal(url) {
     if (!apEditorOverlay || !apEditorIframe) {
       // Modal DOM missing — fall back to new tab so the user isn't stuck
-      window.open(url, '_blank', 'noopener');
+      window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
     apEditorIframe.src = url;
     apEditorOverlay.classList.add('open');
     apEditorOverlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('ap-editor-open');
-    _apEditorKeydown = function(e){ if (e.key === 'Escape') apCloseEditorModal(); };
+    _apEditorKeydown = function(e){ if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); apCloseEditorModal(); } };
     document.addEventListener('keydown', _apEditorKeydown);
   }
 
@@ -907,11 +907,13 @@
   window.addEventListener('message', function(e){
     var data = e && e.data;
     if (!data || typeof data !== 'object') return;
-    // Security note: we don't strictly check origin because the editor is
-    // served from Railway and our theme may be served from multiple shopify
-    // preview origins. The message `type` strings are our own namespaced
-    // convention and we only *act* on them (no data is trusted from them
-    // beyond triggering UI transitions).
+    // Validate origin against the known editor base URL to reject messages
+    // from unrelated frames. Falls back to allowing the message if the base
+    // URL is unavailable (shouldn't happen in practice).
+    try {
+      var _expectedOrigin = new URL(SSAP.editorBaseUrl || '').origin;
+      if (_expectedOrigin && e.origin !== _expectedOrigin) return;
+    } catch(_origErr){}
     if (data.type === 'bc3413_placement_saved') {
       apCloseEditorModal();
       apShowRebuildingToast();
