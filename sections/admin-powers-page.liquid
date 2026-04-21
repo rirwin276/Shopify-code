@@ -446,6 +446,56 @@
       padding: 5px 10px;
     }
   }
+  .ap-rebuilding-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+    flex: 1;
+    max-width: 320px;
+  }
+  .ap-rebuilding-inline__bar {
+    height: 6px;
+    background: #dbeafe;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .ap-rebuilding-inline__bar-fill {
+    position: absolute;
+    top: 0; left: -30%;
+    width: 30%; height: 100%;
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+    animation: ap-rebuilding-inline-sweep 1.4s ease-in-out infinite;
+  }
+  @keyframes ap-rebuilding-inline-sweep {
+    0%   { left: -30%; }
+    100% { left: 100%; }
+  }
+  .ap-rebuilding-inline__label {
+    font-size: 12px;
+    color: #1e40af;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ap-rebuilding-inline__step { color: #64748b; font-weight: 500; }
+  .ap-rebuilding-inline.ap-rebuilding-inline--success .ap-rebuilding-inline__bar-fill {
+    left: 0; width: 100%; animation: none; background: #10b981;
+  }
+  .ap-rebuilding-inline.ap-rebuilding-inline--success .ap-rebuilding-inline__label {
+    color: #065f46;
+  }
+  .ap-rebuilding-inline.ap-rebuilding-inline--error .ap-rebuilding-inline__bar-fill {
+    left: 0; width: 100%; animation: none; background: #ef4444;
+  }
+  .ap-rebuilding-inline.ap-rebuilding-inline--error .ap-rebuilding-inline__label {
+    color: #991b1b;
+  }
+  @media (max-width: 600px) {
+    .ap-rebuilding-inline { min-width: 100%; max-width: 100%; }
+  }
   .ap-rebuilding-toast {
     position: fixed;
     bottom: 20px;
@@ -916,11 +966,109 @@
     } catch(_origErr){}
     if (data.type === 'bc3413_placement_saved') {
       apCloseEditorModal();
-      apShowRebuildingToast();
+      var handle = data.product_handle;
+      var jobId  = data.job_id;
+      if (jobId && handle) {
+        apStartInlineRebuilding(handle, jobId);
+      } else {
+        // Fallback: no job_id (old async flow or missing handle)
+        apShowRebuildingToast();
+      }
     } else if (data.type === 'bc3413_close') {
       apCloseEditorModal();
     }
   });
+
+  // ── INLINE REBUILDING PROGRESS ───────────────────────────────
+  function apCssEscape(s) {
+    if (window.CSS && CSS.escape) return CSS.escape(s);
+    return String(s).replace(/[^\w-]/g, function(c) { return '\\' + c; });
+  }
+
+  function apEscapeAttr(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function apFindRowByEditButton(handle) {
+    var btn = document.querySelector('.ap-edit-placement-btn[data-product-handle="' + apCssEscape(handle) + '"]');
+    return btn ? btn.closest('.ap-product-row') : null;
+  }
+
+  function apStartInlineRebuilding(productHandle, jobId) {
+    var row = document.querySelector('.ap-product-row[data-product-handle="' + apCssEscape(productHandle) + '"]')
+           || apFindRowByEditButton(productHandle);
+    if (!row) return;
+
+    var actions = row.querySelector('.ap-product-row__actions');
+    if (!actions) return;
+
+    actions.dataset.apOriginalActions = actions.innerHTML;
+    actions.innerHTML =
+      '<div class="ap-rebuilding-inline" data-job-id="' + apEscapeAttr(jobId) + '" data-product-handle="' + apEscapeAttr(productHandle) + '">' +
+        '<div class="ap-rebuilding-inline__bar"><div class="ap-rebuilding-inline__bar-fill"></div></div>' +
+        '<div class="ap-rebuilding-inline__label">Rebuilding\u2026 <span class="ap-rebuilding-inline__step">starting</span></div>' +
+      '</div>';
+
+    apPollApplyStatus(productHandle, jobId, actions);
+  }
+
+  function apPollApplyStatus(handle, jobId, actionsEl) {
+    var url = (SSAP.editorBaseUrl || '').replace(/\/editor\/bc3413\/?$/, '') +
+              '/editor/bc3413/apply_status/' + encodeURIComponent(jobId) +
+              '?secret=' + encodeURIComponent(SSAP.editorSecret || '');
+
+    var tries = 0;
+    var maxTries = 240;      // 240 × 3 s = 12 minute hard cap
+    var intervalMs = 3000;   // poll every 3 s
+    var consecutiveErrors = 0;
+
+    function tick() {
+      tries++;
+      fetch(url).then(function(r){ return r.json(); }).then(function(j){
+        consecutiveErrors = 0;
+        var wrap = actionsEl.querySelector('.ap-rebuilding-inline');
+        if (!wrap) return;
+        var stepEl = wrap.querySelector('.ap-rebuilding-inline__step');
+
+        if (j.status === 'succeeded') {
+          wrap.classList.add('ap-rebuilding-inline--success');
+          wrap.querySelector('.ap-rebuilding-inline__label').textContent = '✅ Rebuild complete — refreshing…';
+          setTimeout(function(){ window.location.reload(); }, 1500);
+          return;
+        }
+        if (j.status === 'failed') {
+          wrap.classList.add('ap-rebuilding-inline--error');
+          wrap.querySelector('.ap-rebuilding-inline__label').textContent =
+            '❌ Rebuild failed: ' + (j.error || 'unknown error');
+          setTimeout(function(){
+            if (actionsEl.dataset.apOriginalActions) {
+              actionsEl.innerHTML = actionsEl.dataset.apOriginalActions;
+              delete actionsEl.dataset.apOriginalActions;
+            }
+          }, 6000);
+          return;
+        }
+        if (stepEl) {
+          stepEl.textContent = (j.progress || j.current_step || j.status || 'working') + '\u2026';
+        }
+        if (tries < maxTries) {
+          setTimeout(tick, intervalMs);
+        } else {
+          if (stepEl) stepEl.textContent = 'taking longer than expected \u2014 check back soon';
+        }
+      }).catch(function(){
+        consecutiveErrors++;
+        var wrap = actionsEl.querySelector('.ap-rebuilding-inline');
+        var stepEl = wrap && wrap.querySelector('.ap-rebuilding-inline__step');
+        if (stepEl && consecutiveErrors >= 3) {
+          stepEl.textContent = 'connection issues \u2014 retrying\u2026';
+        }
+        if (tries < maxTries) setTimeout(tick, intervalMs);
+      });
+    }
+
+    tick();
+  }
 
   // ── MAIN TAB SWITCHING ──────────────────────────────────────
   var apProductsLoaded = false;
@@ -1262,6 +1410,7 @@
       var isHidden = !!product.hidden;
       var row = document.createElement('div');
       row.className = 'ap-product-row';
+      row.dataset.productHandle = product.handle || '';
 
       var imgSrc = product.featured_image || product.image ||
                    (product.images && product.images[0] && (product.images[0].src || product.images[0])) ||
@@ -1323,6 +1472,7 @@
           editorBtn = document.createElement('button');
           editorBtn.type = 'button';
           editorBtn.className = 'ap-edit-placement-btn';
+          editorBtn.dataset.productHandle = product.handle || '';
           editorBtn.innerHTML = '✏️ Edit Placement';
           editorBtn.title = 'Adjust logo placement for this product only';
           editorBtn.addEventListener('click', function(){ apOpenEditorModal(editorUrl); });
