@@ -467,7 +467,10 @@
 
 {%- comment %} BC3413 placement editor — hardcoded config (no schema settings — see PR #59 RCA) {% endcomment -%}
 {%- assign editor_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413' -%}
-{%- assign editor_secret = shop.metafields.custom.bc3413_editor_secret | default: '' -%}
+{%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
+   Not actually secret — it's already in the public repo, only gates the editor page,
+   and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
+{%- assign editor_secret = 'stellasage-god-mode-2026-xK9mP' -%}
 
 {%- assign ap_shop_logo_src = '' -%}
 {%- if shop_meta -%}
@@ -1003,6 +1006,9 @@
       return;
     }
     apProductsEmpty.style.display = 'none';
+    function _isBc3413Tag(t){
+      return String(t || '').toLowerCase().trim().indexOf('bc3413_') === 0;
+    }
     products.forEach(function(product){
       var isHidden = !!product.hidden;
       var row = document.createElement('div');
@@ -1043,15 +1049,15 @@
       actionsEl.appendChild(toggleBtn);
       actionsEl.appendChild(deleteBtn);
 
-      // BC3413 placement editor — only show for products tagged BC3413_front
+      // BC3413 placement editor — show for any product tagged bc3413_*
       var productTags = product.tags || [];
       var isBc3413 = false;
       if(Array.isArray(productTags)){
         for(var ti = 0; ti < productTags.length; ti++){
-          if(String(productTags[ti]).toLowerCase().trim() === 'bc3413_front'){ isBc3413 = true; break; }
+          if(_isBc3413Tag(productTags[ti])){ isBc3413 = true; break; }
         }
       } else if(typeof productTags === 'string'){
-        isBc3413 = productTags.split(',').some(function(t){ return t.toLowerCase().trim() === 'bc3413_front'; });
+        isBc3413 = productTags.split(',').some(_isBc3413Tag);
       }
 
       if(isBc3413 && SSAP.editorSecret){
@@ -1061,7 +1067,7 @@
           var editorUrl = SSAP.editorBaseUrl
             + '?logo_url=' + encodeURIComponent(logoSrc)
             + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&product_handle=' + encodeURIComponent(product.handle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret);
           editorBtn = document.createElement('a');
           editorBtn.className = 'ap-edit-placement-btn';
