@@ -701,6 +701,7 @@
 
 {%- comment %} BC3413 placement editor — hardcoded config (no schema settings — see PR #59 RCA) {% endcomment -%}
 {%- assign editor_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413' -%}
+{%- assign editor_bc3001y_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3001y' -%}
 {%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
    Not actually secret — it's already in the public repo, only gates the editor page,
    and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
@@ -735,6 +736,7 @@
     SSAP.shopHandle = {{ shop_handle | json }};
     SSAP.railwayUrl = "https://studio-uploader-production.up.railway.app";
     SSAP.editorBaseUrl = {{ editor_base_url | json }};
+    SSAP.editorBc3001yBaseUrl = {{ editor_bc3001y_base_url | json }};
     SSAP.editorSecret = {{ editor_secret | json }};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
@@ -1023,6 +1025,17 @@
         apShowRebuildingToast();
       }
     } else if (data.type === 'bc3413_close') {
+      apCloseEditorModal();
+    } else if (data.type === 'bc3001y_placement_saved') {
+      apCloseEditorModal();
+      var bc3001yHandle = data.product_handle;
+      var bc3001yJobId  = data.job_id;
+      if (bc3001yJobId && bc3001yHandle) {
+        apStartInlineRebuilding(bc3001yHandle, bc3001yJobId);
+      } else {
+        apShowRebuildingToast();
+      }
+    } else if (data.type === 'bc3001y_close') {
       apCloseEditorModal();
     }
   });
@@ -1531,6 +1544,46 @@
           editorBtn.textContent = '✏️ Edit Placement (no logo)';
         }
         actionsEl.appendChild(editorBtn);
+      }
+
+      // BC3001Y placement editor — show for any product tagged bc3001y_front
+      function _isBc3001yTag(t){
+        return String(t || '').toLowerCase().trim() === 'bc3001y_front';
+      }
+      var isBc3001y = false;
+      if(Array.isArray(productTags)){
+        for(var tagIndex = 0; tagIndex < productTags.length; tagIndex++){
+          if(_isBc3001yTag(productTags[tagIndex])){ isBc3001y = true; break; }
+        }
+      } else if(typeof productTags === 'string'){
+        isBc3001y = productTags.split(',').some(_isBc3001yTag);
+      }
+
+      if(isBc3001y && SSAP.editorSecret){
+        var bc3001yLogoSrc = SSAP.shopLogoSrc || '';
+        var bc3001yEditorBtn;
+        if(bc3001yLogoSrc){
+          var bc3001yEditorUrl = SSAP.editorBc3001yBaseUrl
+            + '?logo_url=' + encodeURIComponent(bc3001yLogoSrc)
+            + '&logo_kind=titan'
+            + '&product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&mode=embedded';
+          bc3001yEditorBtn = document.createElement('button');
+          bc3001yEditorBtn.type = 'button';
+          bc3001yEditorBtn.className = 'ap-edit-placement-btn';
+          bc3001yEditorBtn.dataset.productHandle = product.handle || '';
+          bc3001yEditorBtn.innerHTML = '✏️ Edit Placement';
+          bc3001yEditorBtn.title = 'Adjust logo placement for this youth tee product only';
+          bc3001yEditorBtn.addEventListener('click', function(){ apOpenEditorModal(bc3001yEditorUrl); });
+        } else {
+          bc3001yEditorBtn = document.createElement('span');
+          bc3001yEditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          bc3001yEditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          bc3001yEditorBtn.textContent = '✏️ Edit Placement (no logo)';
+        }
+        actionsEl.appendChild(bc3001yEditorBtn);
       }
 
       row.appendChild(imgEl);
