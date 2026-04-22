@@ -702,6 +702,10 @@
 {%- comment %} BC3413 placement editor — hardcoded config (no schema settings — see PR #59 RCA) {% endcomment -%}
 {%- assign editor_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413' -%}
 {%- assign editor_bc3001y_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3001y' -%}
+{%- assign editor_nl6733_base_url = 'https://printfulautomation-production.up.railway.app/editor/nl6733' -%}
+{%- assign editor_mc1790_base_url = 'https://printfulautomation-production.up.railway.app/editor/mc1790' -%}
+{%- assign editor_m2580_base_url = 'https://printfulautomation-production.up.railway.app/editor/m2580' -%}
+{%- assign editor_cc1467y_base_url = 'https://printfulautomation-production.up.railway.app/editor/cc1467y' -%}
 {%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
    Not actually secret — it's already in the public repo, only gates the editor page,
    and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
@@ -737,6 +741,10 @@
     SSAP.railwayUrl = "https://studio-uploader-production.up.railway.app";
     SSAP.editorBaseUrl = {{ editor_base_url | json }};
     SSAP.editorBc3001yBaseUrl = {{ editor_bc3001y_base_url | json }};
+    SSAP.editorNl6733BaseUrl = {{ editor_nl6733_base_url | json }};
+    SSAP.editorMc1790BaseUrl = {{ editor_mc1790_base_url | json }};
+    SSAP.editorM2580BaseUrl = {{ editor_m2580_base_url | json }};
+    SSAP.editorCc1467yBaseUrl = {{ editor_cc1467y_base_url | json }};
     SSAP.editorSecret = {{ editor_secret | json }};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
@@ -1036,6 +1044,30 @@
         apShowRebuildingToast();
       }
     } else if (data.type === 'bc3001y_close') {
+      apCloseEditorModal();
+    } else if (data.type === 'nl6733_placement_saved') {
+      apCloseEditorModal();
+      var nl6733Handle = data.product_handle; var nl6733JobId = data.job_id;
+      if (nl6733JobId && nl6733Handle) { apStartInlineRebuilding(nl6733Handle, nl6733JobId); } else { apShowRebuildingToast(); }
+    } else if (data.type === 'nl6733_close') {
+      apCloseEditorModal();
+    } else if (data.type === 'mc1790_placement_saved') {
+      apCloseEditorModal();
+      var mc1790Handle = data.product_handle; var mc1790JobId = data.job_id;
+      if (mc1790JobId && mc1790Handle) { apStartInlineRebuilding(mc1790Handle, mc1790JobId); } else { apShowRebuildingToast(); }
+    } else if (data.type === 'mc1790_close') {
+      apCloseEditorModal();
+    } else if (data.type === 'm2580_placement_saved') {
+      apCloseEditorModal();
+      var m2580Handle = data.product_handle; var m2580JobId = data.job_id;
+      if (m2580JobId && m2580Handle) { apStartInlineRebuilding(m2580Handle, m2580JobId); } else { apShowRebuildingToast(); }
+    } else if (data.type === 'm2580_close') {
+      apCloseEditorModal();
+    } else if (data.type === 'cc1467y_placement_saved') {
+      apCloseEditorModal();
+      var cc1467yHandle = data.product_handle; var cc1467yJobId = data.job_id;
+      if (cc1467yJobId && cc1467yHandle) { apStartInlineRebuilding(cc1467yHandle, cc1467yJobId); } else { apShowRebuildingToast(); }
+    } else if (data.type === 'cc1467y_close') {
       apCloseEditorModal();
     }
   });
@@ -1586,7 +1618,165 @@
         actionsEl.appendChild(bc3001yEditorBtn);
       }
 
-      row.appendChild(imgEl);
+      // NL6733 placement editor — show for any product tagged nl6733_front
+      function _isNl6733Tag(t){
+        return String(t || '').toLowerCase().trim() === 'nl6733_front';
+      }
+      var isNl6733 = false;
+      if(Array.isArray(productTags)){
+        for(var nl6733TagIdx = 0; nl6733TagIdx < productTags.length; nl6733TagIdx++){
+          if(_isNl6733Tag(productTags[nl6733TagIdx])){ isNl6733 = true; break; }
+        }
+      } else if(typeof productTags === 'string'){
+        isNl6733 = productTags.split(',').some(_isNl6733Tag);
+      }
+
+      if(isNl6733 && SSAP.editorSecret){
+        var nl6733LogoSrc = SSAP.shopLogoSrc || '';
+        var nl6733EditorBtn;
+        if(nl6733LogoSrc){
+          var nl6733EditorUrl = SSAP.editorNl6733BaseUrl
+            + '?logo_url=' + encodeURIComponent(nl6733LogoSrc)
+            + '&logo_kind=titan'
+            + '&product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&mode=embedded';
+          nl6733EditorBtn = document.createElement('button');
+          nl6733EditorBtn.type = 'button';
+          nl6733EditorBtn.className = 'ap-edit-placement-btn';
+          nl6733EditorBtn.dataset.productHandle = product.handle || '';
+          nl6733EditorBtn.innerHTML = '✏️ Edit Placement';
+          nl6733EditorBtn.title = 'Adjust logo placement for this product only';
+          nl6733EditorBtn.addEventListener('click', function(){ apOpenEditorModal(nl6733EditorUrl); });
+        } else {
+          nl6733EditorBtn = document.createElement('span');
+          nl6733EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          nl6733EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          nl6733EditorBtn.textContent = '✏️ Edit Placement (no logo)';
+        }
+        actionsEl.appendChild(nl6733EditorBtn);
+      }
+
+      // MC1790 placement editor — show for any product tagged mc1790_front
+      function _isMc1790Tag(t){
+        return String(t || '').toLowerCase().trim() === 'mc1790_front';
+      }
+      var isMc1790 = false;
+      if(Array.isArray(productTags)){
+        for(var mc1790TagIdx = 0; mc1790TagIdx < productTags.length; mc1790TagIdx++){
+          if(_isMc1790Tag(productTags[mc1790TagIdx])){ isMc1790 = true; break; }
+        }
+      } else if(typeof productTags === 'string'){
+        isMc1790 = productTags.split(',').some(_isMc1790Tag);
+      }
+
+      if(isMc1790 && SSAP.editorSecret){
+        var mc1790LogoSrc = SSAP.shopLogoSrc || '';
+        var mc1790EditorBtn;
+        if(mc1790LogoSrc){
+          var mc1790EditorUrl = SSAP.editorMc1790BaseUrl
+            + '?logo_url=' + encodeURIComponent(mc1790LogoSrc)
+            + '&logo_kind=titan'
+            + '&product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&mode=embedded';
+          mc1790EditorBtn = document.createElement('button');
+          mc1790EditorBtn.type = 'button';
+          mc1790EditorBtn.className = 'ap-edit-placement-btn';
+          mc1790EditorBtn.dataset.productHandle = product.handle || '';
+          mc1790EditorBtn.innerHTML = '✏️ Edit Placement';
+          mc1790EditorBtn.title = 'Adjust logo placement for this product only';
+          mc1790EditorBtn.addEventListener('click', function(){ apOpenEditorModal(mc1790EditorUrl); });
+        } else {
+          mc1790EditorBtn = document.createElement('span');
+          mc1790EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          mc1790EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          mc1790EditorBtn.textContent = '✏️ Edit Placement (no logo)';
+        }
+        actionsEl.appendChild(mc1790EditorBtn);
+      }
+
+      // M2580 placement editor — show for any product tagged m2580_front
+      function _isM2580Tag(t){
+        return String(t || '').toLowerCase().trim() === 'm2580_front';
+      }
+      var isM2580 = false;
+      if(Array.isArray(productTags)){
+        for(var m2580TagIdx = 0; m2580TagIdx < productTags.length; m2580TagIdx++){
+          if(_isM2580Tag(productTags[m2580TagIdx])){ isM2580 = true; break; }
+        }
+      } else if(typeof productTags === 'string'){
+        isM2580 = productTags.split(',').some(_isM2580Tag);
+      }
+
+      if(isM2580 && SSAP.editorSecret){
+        var m2580LogoSrc = SSAP.shopLogoSrc || '';
+        var m2580EditorBtn;
+        if(m2580LogoSrc){
+          var m2580EditorUrl = SSAP.editorM2580BaseUrl
+            + '?logo_url=' + encodeURIComponent(m2580LogoSrc)
+            + '&logo_kind=titan'
+            + '&product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&mode=embedded';
+          m2580EditorBtn = document.createElement('button');
+          m2580EditorBtn.type = 'button';
+          m2580EditorBtn.className = 'ap-edit-placement-btn';
+          m2580EditorBtn.dataset.productHandle = product.handle || '';
+          m2580EditorBtn.innerHTML = '✏️ Edit Placement';
+          m2580EditorBtn.title = 'Adjust logo placement for this product only';
+          m2580EditorBtn.addEventListener('click', function(){ apOpenEditorModal(m2580EditorUrl); });
+        } else {
+          m2580EditorBtn = document.createElement('span');
+          m2580EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          m2580EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          m2580EditorBtn.textContent = '✏️ Edit Placement (no logo)';
+        }
+        actionsEl.appendChild(m2580EditorBtn);
+      }
+
+      // CC1467Y placement editor — show for any product tagged cc1467y_front
+      function _isCc1467yTag(t){
+        return String(t || '').toLowerCase().trim() === 'cc1467y_front';
+      }
+      var isCc1467y = false;
+      if(Array.isArray(productTags)){
+        for(var cc1467yTagIdx = 0; cc1467yTagIdx < productTags.length; cc1467yTagIdx++){
+          if(_isCc1467yTag(productTags[cc1467yTagIdx])){ isCc1467y = true; break; }
+        }
+      } else if(typeof productTags === 'string'){
+        isCc1467y = productTags.split(',').some(_isCc1467yTag);
+      }
+
+      if(isCc1467y && SSAP.editorSecret){
+        var cc1467yLogoSrc = SSAP.shopLogoSrc || '';
+        var cc1467yEditorBtn;
+        if(cc1467yLogoSrc){
+          var cc1467yEditorUrl = SSAP.editorCc1467yBaseUrl
+            + '?logo_url=' + encodeURIComponent(cc1467yLogoSrc)
+            + '&logo_kind=titan'
+            + '&product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&mode=embedded';
+          cc1467yEditorBtn = document.createElement('button');
+          cc1467yEditorBtn.type = 'button';
+          cc1467yEditorBtn.className = 'ap-edit-placement-btn';
+          cc1467yEditorBtn.dataset.productHandle = product.handle || '';
+          cc1467yEditorBtn.innerHTML = '✏️ Edit Placement';
+          cc1467yEditorBtn.title = 'Adjust logo placement for this product only';
+          cc1467yEditorBtn.addEventListener('click', function(){ apOpenEditorModal(cc1467yEditorUrl); });
+        } else {
+          cc1467yEditorBtn = document.createElement('span');
+          cc1467yEditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          cc1467yEditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          cc1467yEditorBtn.textContent = '✏️ Edit Placement (no logo)';
+        }
+        actionsEl.appendChild(cc1467yEditorBtn);
+      }
       row.appendChild(titleEl);
       row.appendChild(actionsEl);
 
