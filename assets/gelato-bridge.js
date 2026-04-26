@@ -15,11 +15,8 @@
       
       // Safety: Do not run on public store pages (where handle is null)
       if (!storeHandle) {
-        console.log("[SS-Bridge] No private store handle. Manual mode.");
         return;
       }
-
-      console.log("[SS-Bridge] Private store detected. Polling for Gelato button...");
 
       const tryClick = () => {
         // Find ALL buttons to ensure we don't miss it due to a class change
@@ -30,7 +27,6 @@
         allButtons.forEach(btn => {
           // Check if the button text contains "Personalize" (case insensitive)
           if (btn.textContent && btn.textContent.toLowerCase().includes('personalize')) {
-            console.log("[SS-Bridge] Personalizer button found. Clicking...");
             btn.click();
             
             // Mark this variant as started (for the badges)

@@ -26,7 +26,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/unisex-tri-blend-t-shirt-clay-triblend-left-front-693b392aecdce.jpg",
-            "alt": "Stella & Sage products",
+            "alt": "Stella Sage Co products",
             "caption": "—"
           }
         },
@@ -34,7 +34,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/unisex-columbia-soft-shell-jacket-graphite-front-693e5458ac793.jpg",
-            "alt": "Stella & Sage products",
+            "alt": "Stella Sage Co products",
             "caption": "—"
           }
         },
@@ -42,7 +42,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/baby-short-sleeve-bodysuit-white-front-693eeb333aba3.jpg",
-            "alt": "Stella & Sage products",
+            "alt": "Stella Sage Co products",
             "caption": "—"
           }
         },
@@ -50,7 +50,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/unisex-tri-blend-t-shirt-tan-triblend-left-front-694790d718ead.jpg",
-            "alt": "Stella & Sage products",
+            "alt": "Stella Sage Co products",
             "caption": "—"
           }
         },
@@ -58,7 +58,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/cotton-heritage-m2580-i-unisex-premium-pullover-hoodie-latte-front-6948aeb140cd1.jpg",
-            "alt": "Stella & Sage products",
+            "alt": "Stella Sage Co products",
             "caption": "—"
           }
         },
@@ -66,7 +66,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/white-glossy-mug-white-11-oz-handle-on-left-6948b5bab2c79.jpg",
-            "alt": "Stella & Sage products",
+            "alt": "Stella Sage Co products",
             "caption": "—"
           }
         },
@@ -74,7 +74,7 @@
           "type": "slide",
           "settings": {
             "image": "shopify://shop_images/unisex-tri-blend-t-shirt-red-triblend-left-front-693e4c92adbbd.jpg",
-            "alt": "Stella & Sage products",
+            "alt": "Stella Sage Co products",
             "caption": "—"
           }
         }
@@ -93,18 +93,18 @@
         "kicker": "PERSONAL STORE",
         "microcopy": "Secure, invite-only storefront access",
         "brand_logo": "shopify://shop_images/Stella_and_Sage_logo_ad8727e1-888f-430a-8d78-9fe8dabe1bd8.png",
-        "brand_logo_alt": "Stella & Sage",
+        "brand_logo_alt": "Stella Sage Co",
         "primary_title": "Shop your personal store",
         "primary_desc": "Access your private storefront. If you’re not signed in, you’ll be prompted to log in first.",
         "btn_shop_label": "Shop your personal store",
         "btn_request_label": "Request a storefront",
         "primary_note": "—",
         "primary_note_fallback": "Use the email you were invited with. You’ll be prompted to log in before accessing your dashboard.",
-        "secondary_header": "Stella & Sage Custom",
-        "secondary_title": "Shop Stella & Sage Custom",
+        "secondary_header": "Stella Sage Co Custom",
+        "secondary_title": "Shop Stella Sage Co Custom",
         "secondary_desc": "Browse our public catalog for custom engraving, gifts, and handmade goods.",
         "secondary_image": "shopify://shop_images/Mama_Bear_Stanly_Pint_Glass_Succulant.jpg",
-        "btn_custom_label": "Shop Stella & Sage Custom",
+        "btn_custom_label": "Shop Stella Sage Co Custom",
         "secondary_note": "—",
         "secondary_note_fallback": "Visit our main shop for custom work and best sellers.",
         "dashboard_url": "/pages/shop-dashboard",

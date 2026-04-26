@@ -25,15 +25,11 @@
       {%- endcomment -%}
       {%- if store_meta.logo_clean_url != blank -%}
         window.SS.config.logoUrl = "{{ store_meta.logo_clean_url }}";
-        console.log("[SS-Data] Loaded Clean Pixelcut URL.");
         
       {%- comment -%} PRIORITY 2: Fallback to raw upload if Pixelcut failed {%- endcomment -%}
       {%- elsif store_meta.logo != blank -%}
         window.SS.config.logoUrl = "{{ store_meta.logo | image_url: width: 600 }}";
-        console.log("[SS-Data] Loaded Raw Logo (Fallback).");
         
-      {%- else -%}
-        console.log("[SS-Data] No logo found.");
       {%- endif -%}
       
     {%- endif -%}
