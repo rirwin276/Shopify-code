@@ -406,7 +406,7 @@
   }
   .ap-main-tabs {
     display: flex; gap: 0; border-bottom: 2px solid var(--ap-border);
-    background: #f8fafc; overflow-x: auto;
+    background: #f8fafc; overflow-x: hidden;
   }
   .ap-main-tab-btn {
     flex: 1; min-width: 0; padding: 14px 10px;
@@ -479,19 +479,12 @@
     background: #94a3b8; cursor: not-allowed; pointer-events: auto;
   }
   .ap-edit-placement-btn--disabled:hover { background: #94a3b8; }
-  .ap-product-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--ap-border);
-  }
   .ap-product-row__actions {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-shrink: 0;
   }
   .ap-rebuilding-inline {
