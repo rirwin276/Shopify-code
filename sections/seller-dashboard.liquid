@@ -150,7 +150,7 @@
               <span class="ss-user-name">{{ display_name | default: customer.email }}</span>
               <span class="ss-user-status">● Active Member</span>
             </div>
-            <a href="{{ account_url }}" class="ss-pill-btn" title="View Orders">Orders</a>
+
           </div>
         {% endif %}
       </header>
@@ -488,6 +488,17 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div class="ss-block ss-orders-preview">
+            <div class="ss-orders-header">
+              <h3 class="ss-section-title"><span aria-hidden="true">📦</span> Orders</h3>
+              <span class="ss-badge ss-badge-coming-soon">Coming Soon</span>
+            </div>
+            <div class="ss-orders-notice">
+              <p>Order history and real-time Printful production tracking is coming soon. Your orders are fulfilled through our print-on-demand system — live status updates will appear here once the integration is complete.</p>
+              <a href="{{ account_url }}" class="ss-btn-secondary ss-btn-sm">View Shopify Orders →</a>
             </div>
           </div>
 
@@ -1315,6 +1326,47 @@
     .ss-card-title { font-size: 14px; }
     .ss-card-subtitle { font-size: 11px; }
     .ss-logo-frame { width: 48px; height: 48px; }
+  }
+
+  /* Orders Coming Soon Block */
+  .ss-orders-preview {
+    margin-top: 32px;
+    padding: 24px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+  }
+  .ss-orders-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .ss-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ss-txt-main, #0f172a);
+    margin: 0;
+  }
+  .ss-badge-coming-soon {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(245,158,11,0.12);
+    color: #d97706;
+    padding: 2px 8px;
+    border-radius: 50px;
+  }
+  .ss-orders-notice p {
+    font-size: 13px;
+    color: var(--ss-txt-muted, #64748b);
+    margin: 0 0 14px;
+    line-height: 1.6;
+  }
+  .ss-btn-sm {
+    font-size: 12px;
+    padding: 6px 14px;
   }
 </style>
 
