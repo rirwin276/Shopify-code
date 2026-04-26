@@ -45,11 +45,6 @@
   </div>
 </section>
 
-{% comment %} Floating mobile dashboard button — fixed position, does not push content {% endcomment %}
-<a class="ss-fab-dashboard" href="{% if customer %}/pages/portal{% else %}{{ routes.account_login_url }}?return_url=%2Fpages%2Fportal{% endif %}" aria-label="Dashboard">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-  <span>Dashboard</span>
-</a>
 
 <style>
   :root {
@@ -131,30 +126,6 @@
     .ss-bar-right { gap: 8px; }
   }
 
-  /* Floating mobile dashboard button */
-  .ss-fab-dashboard {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 18px;
-    background: #0f172a;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 50px;
-    font-size: 13px;
-    font-weight: 700;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.32);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-  .ss-fab-dashboard:hover { opacity: 0.9; transform: translateY(-2px); }
-
-  @media (min-width: 769px) {
-    .ss-fab-dashboard { display: none; }
-  }
 </style>
 
 {% schema %}
