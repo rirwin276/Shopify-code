@@ -17,13 +17,11 @@
       
       if (handle && !ignored.includes(handle)) {
         sessionStorage.setItem('ss_store_handle', handle);
-        console.log("[SS-Context] Store handle saved:", handle);
       }
     } 
     
-    // 2. Always log the current state for debugging
+    // 2. Always check the current state
     const activeHandle = sessionStorage.getItem('ss_store_handle');
-    console.log("[SS-Context] Active handle in memory:", activeHandle || "None");
   }
 
   // Run immediately
