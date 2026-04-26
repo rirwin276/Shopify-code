@@ -177,21 +177,36 @@
         <h2 class="ldh-h2">{{ section.settings.steps_headline | escape }}</h2>
         <div class="ldh-steps">
           <div class="ldh-step ldh-reveal" data-delay="0">
-            <div class="ldh-step-num">01</div>
+            <div class="ldh-step-num">
+              <div class="ldh-step-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+              </div>
+              01
+            </div>
             <div class="ldh-step-body">
               <strong class="ldh-step-title">{{ section.settings.step1_title | escape }}</strong>
               <p class="ldh-step-desc">{{ section.settings.step1_desc | escape }}</p>
             </div>
           </div>
           <div class="ldh-step ldh-reveal" data-delay="80">
-            <div class="ldh-step-num">02</div>
+            <div class="ldh-step-num">
+              <div class="ldh-step-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              02
+            </div>
             <div class="ldh-step-body">
               <strong class="ldh-step-title">{{ section.settings.step2_title | escape }}</strong>
               <p class="ldh-step-desc">{{ section.settings.step2_desc | escape }}</p>
             </div>
           </div>
           <div class="ldh-step ldh-reveal" data-delay="160">
-            <div class="ldh-step-num">03</div>
+            <div class="ldh-step-num">
+              <div class="ldh-step-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              </div>
+              03
+            </div>
             <div class="ldh-step-body">
               <strong class="ldh-step-title">{{ section.settings.step3_title | escape }}</strong>
               <p class="ldh-step-desc">{{ section.settings.step3_desc | escape }}</p>
@@ -459,6 +474,29 @@
     flex-shrink: 0;
     width: 120px;
     text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .ldh-step-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(183,163,106,0.12);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .ldh-step-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: rgba(183,163,106,1);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
   .ldh-step-body { padding-top: 8px; flex: 1; }
   .ldh-step-title {
@@ -485,6 +523,9 @@
       font-size: 48px;
       width: auto;
       text-align: left;
+      align-items: flex-start;
+      flex-direction: row;
+      align-items: center;
     }
   }
 

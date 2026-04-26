@@ -84,7 +84,10 @@
               {% if store_status == 'live' %}
                 <p class="ps-sub">Store is live — shop approved items below.</p>
               {% else %}
-                <p class="ps-sub">Under Construction — please allow 24–48 hours while we build your private store.</p>
+                <p class="ps-sub">Your store is being built — it's usually ready in about 15 minutes. Check back shortly!</p>
+                <div class="ps-build-bar-wrap" aria-hidden="true">
+                  <div class="ps-build-bar"></div>
+                </div>
               {% endif %}
 
               <div class="ps-actions">
@@ -122,11 +125,22 @@
             </div>
           {% endif %}
         {% else %}
-          <div class="ps-card">
-            <h2 class="ps-h2">Next steps</h2>
-            <p class="ps-sub">
-              We’ll add approved products to your private store once it’s ready.
+          <div class="ps-card ps-building-card">
+            {% if logo_obj != blank %}
+              <div class="ps-building-logo">
+                {{ logo_obj | image_url: width: 200 | image_tag: loading: 'lazy', alt: store_name }}
+              </div>
+            {% endif %}
+            <h2 class="ps-h2">🔨 Your Store Is Being Built</h2>
+            <p class="ps-sub ps-building-body">
+              Sit tight — we’re spinning up your private store right now. Products with your logo will appear here within 15 minutes. We’ll send you an email when it’s live.
             </p>
+            <ul class="ps-checklist">
+              <li class="ps-checklist-done">✅ Store created</li>
+              <li class="ps-checklist-pending">⏳ Products being personalized with your logo</li>
+              <li class="ps-checklist-pending">⏳ Final review &amp; going live</li>
+            </ul>
+            <a class="ps-btn ps-btn--ghost ps-building-back" href="/pages/portal">Back to Shop Dashboard</a>
           </div>
         {% endif %}
 
@@ -158,6 +172,22 @@
   .ps-product-title{padding:10px 10px 0;font-weight:800;font-size:14px}
   .ps-product-price{padding:4px 10px 12px;opacity:.8;font-size:13px}
   @media(max-width:900px){.ps-grid{grid-template-columns:repeat(2,1fr)}.ps-h1{font-size:28px}}
+
+  /* Build progress bar (Fix 2) */
+  .ps-build-bar-wrap{margin-top:12px;height:4px;background:rgba(0,0,0,.07);border-radius:4px;overflow:hidden;max-width:240px}
+  .ps-build-bar{height:100%;width:40%;background:rgba(183,163,106,1);border-radius:4px;animation:psBuildPulse 1.6s ease-in-out infinite}
+  @keyframes psBuildPulse{0%,100%{opacity:.4;transform:translateX(-30%)}50%{opacity:1;transform:translateX(160%)}}
+
+  /* Building card (Fix 3) */
+  .ps-building-card{padding:28px}
+  .ps-building-logo{width:72px;height:72px;border-radius:16px;overflow:hidden;border:1px solid rgba(0,0,0,.1);background:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .ps-building-logo img{width:100%;height:100%;object-fit:cover;display:block}
+  .ps-building-body{font-size:15px;line-height:1.6;margin-top:8px}
+  .ps-checklist{list-style:none;margin:16px 0 20px;padding:0;display:flex;flex-direction:column;gap:8px}
+  .ps-checklist li{font-size:14px;font-weight:700;padding:8px 12px;border-radius:10px}
+  .ps-checklist-done{background:rgba(34,197,94,.08);color:#166534}
+  .ps-checklist-pending{background:rgba(251,191,36,.1);color:#92400e}
+  .ps-building-back{margin-top:4px;display:inline-flex}
 </style>
 
 {% schema %}

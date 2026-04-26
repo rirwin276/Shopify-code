@@ -101,20 +101,33 @@
         </div>
         <div class="ssx-accessOptions ss-reveal ss-reveal--right">
           <div class="ssx-opt">
-            <div class="ssx-optIcon">🔒</div>
+            <div class="ssx-optIcon">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
             <div class="ssx-optBody">
               <strong>Secure Invite (Email)</strong>
               <p>Type their email in your dashboard. They get instant access. Best for secure units or exclusive groups.</p>
             </div>
           </div>
           <div class="ssx-opt">
-            <div class="ssx-optIcon">🔗</div>
+            <div class="ssx-optIcon">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
             <div class="ssx-optBody">
               <strong>Direct Link (Easy)</strong>
               <p>Copy a shareable link. Send it to the group chat. Anyone with the link can join.</p>
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="ssx-sec ssx-final ss-reveal">
+      <div class="ssx-finalCard">
+        <h2 class="ssx-h2">Ready to stop being the middleman?</h2>
+        <p class="ssx-lead">Takes 2 minutes to request. We do the rest.</p>
+        <a class="ssx-btn ssx-btn--solid ssx-btn--lg" href="{{ request_cta_url }}">{{ section.settings.btn_request | escape }} →</a>
+        <p class="ssx-fine">No inventory. No minimums. Ships direct to your team.</p>
       </div>
     </section>
 
@@ -213,8 +226,33 @@
     background: #fff; padding: 16px; border-radius: 16px;
     border: 1px solid rgba(0,0,0,.1);
   }
-  .ssx-optIcon{ font-size: 24px; background: #f0f0f0; width: 44px; height: 44px; display:flex; align-items:center; justify-content:center; border-radius: 12px; }
+  .ssx-optIcon{
+    background: #111;
+    color: #fff;
+    border-radius: 12px;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ssx-optIcon svg{ width: 20px; height: 20px; }
   .ssx-optBody p{ margin: 4px 0 0; font-size: 14px; opacity: 0.7; }
+
+  /* FINAL CTA */
+  .ssx-final { margin-bottom: 0; }
+  .ssx-finalCard {
+    background: #0b0b0b;
+    color: #fff;
+    border-radius: 24px;
+    padding: 60px 40px;
+    text-align: center;
+  }
+  .ssx-finalCard .ssx-h2 { color: #fff; margin-bottom: 12px; }
+  .ssx-finalCard .ssx-lead { color: rgba(255,255,255,0.7); margin-bottom: 32px; }
+  .ssx-btn--lg { padding: 18px 40px; font-size: 18px; }
+  .ssx-fine { margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.4); }
+  @media(max-width:600px) {
+    .ssx-finalCard { padding: 40px 24px; }
+  }
 
   /* MOBILE */
   @media(max-width: 800px){

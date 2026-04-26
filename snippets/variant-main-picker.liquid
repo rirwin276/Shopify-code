@@ -145,52 +145,125 @@
               # (original width / original height) x new height (20px at the moment) = new width
               assign new_width = settings.variant_swatch_width | times: 1.0 | divided_by: settings.variant_swatch_height | times: 20
             endif
+            assign option_name_lower = product_option.name | downcase | strip
           %}
 
-          <div class="variant-option variant-option--dropdowns">
-            <label for="Option-{{ block.id }}-{{ forloop.index0 }}">{{ product_option.name | escape }}</label>
-            <div
-              class="variant-option__select-wrapper"
-              style="
-                {%- if property_being_updated  -%}
-                  --variant-picker-swatch-width: clamp(10px,{{ new_width }}px, 50px);
-                {%- endif -%}
-              "
-            >
-              <select
-                id="Option-{{ block.id }}-{{ forloop.index0 }}"
-                name="options[{{ product_option.name | escape }}]"
-                class="variant-option__select"
-              >
+          {% if option_name_lower == 'color' %}
+            {%- assign color_select_id = 'Option-' | append: block.id | append: '-' | append: forloop.index0 -%}
+            <div class="variant-option variant-option--dropdowns vcs-wrap">
+              <label>{{ product_option.name | escape }} <span class="vcs-current-label"></span></label>
+              <div class="vcs-row" data-vcs-row="{{ color_select_id }}">
                 {%- for product_option_value in product_option.values -%}
-                  <option
-                    value="{{ product_option_value | escape }}"
-                    data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
-                    data-option-value-id="{{ product_option_value.id }}"
-                    data-variant-id="{{ product_option_value.variant.id }}"
-                    data-connected-product-url="{{ product_option_value.product_url }}"
-                    {% if product_option_value.selected %}
-                      selected="selected"
-                    {% endif %}
-                  >
-                    {% if product_option_value.available == false %}
-                      {{ product_option_value | escape }} - {{ 'content.unavailable' | t }}
-                    {% else %}
-                      {{ product_option_value | escape }}
-                    {% endif %}
-                  </option>
+                  {%- liquid
+                    assign color_css = product_option_value | downcase | strip
+                    case color_css
+                      when 'royal'
+                        assign color_css = 'royalblue'
+                      when 'true royal'
+                        assign color_css = 'royalblue'
+                      when 'royal blue'
+                        assign color_css = 'royalblue'
+                      when 'forest green'
+                        assign color_css = 'forestgreen'
+                      when 'dark green'
+                        assign color_css = 'darkgreen'
+                      when 'heather gray'
+                        assign color_css = '#9e9e9e'
+                      when 'athletic heather'
+                        assign color_css = '#c0bdb8'
+                      when 'cardinal'
+                        assign color_css = '#c41e3a'
+                      when 'charcoal'
+                        assign color_css = '#444444'
+                      when 'sand'
+                        assign color_css = '#c2b280'
+                      when 'natural'
+                        assign color_css = '#f5e6c8'
+                      when 'kelly green'
+                        assign color_css = '#4cbb17'
+                      when 'light blue'
+                        assign color_css = 'lightblue'
+                    endcase
+                  -%}
+                  <button
+                    type="button"
+                    class="vcs-swatch{% if product_option_value.selected %} vcs-swatch--selected{% endif %}{% if product_option_value.available == false %} vcs-swatch--soldout{% endif %}"
+                    data-vcs-value="{{ product_option_value | escape }}"
+                    data-vcs-select="{{ color_select_id }}"
+                    title="{{ product_option_value | escape }}"
+                    aria-label="{{ product_option_value | escape }}"
+                    style="background-color: {{ color_css }};"
+                    {% if product_option_value.available == false %}aria-disabled="true"{% endif %}
+                  ></button>
                 {%- endfor -%}
-              </select>
-              <svg
-                aria-hidden="true"
-                focusable="false"
-                class="icon icon-caret"
-                viewBox="0 0 10 6"
-              >
-                {%- render 'icon', icon: 'caret' -%}
-              </svg>
+              </div>
+              <div class="variant-option__select-wrapper" style="display:none;" aria-hidden="true">
+                <select
+                  id="{{ color_select_id }}"
+                  name="options[{{ product_option.name | escape }}]"
+                  class="variant-option__select"
+                >
+                  {%- for product_option_value in product_option.values -%}
+                    <option
+                      value="{{ product_option_value | escape }}"
+                      data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
+                      data-option-value-id="{{ product_option_value.id }}"
+                      data-variant-id="{{ product_option_value.variant.id }}"
+                      data-connected-product-url="{{ product_option_value.product_url }}"
+                      {% if product_option_value.selected %}
+                        selected="selected"
+                      {% endif %}
+                    >{{ product_option_value | escape }}</option>
+                  {%- endfor -%}
+                </select>
+              </div>
             </div>
-          </div>
+          {% else %}
+            <div class="variant-option variant-option--dropdowns">
+              <label for="Option-{{ block.id }}-{{ forloop.index0 }}">{{ product_option.name | escape }}</label>
+              <div
+                class="variant-option__select-wrapper"
+                style="
+                  {%- if property_being_updated  -%}
+                    --variant-picker-swatch-width: clamp(10px,{{ new_width }}px, 50px);
+                  {%- endif -%}
+                "
+              >
+                <select
+                  id="Option-{{ block.id }}-{{ forloop.index0 }}"
+                  name="options[{{ product_option.name | escape }}]"
+                  class="variant-option__select"
+                >
+                  {%- for product_option_value in product_option.values -%}
+                    <option
+                      value="{{ product_option_value | escape }}"
+                      data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
+                      data-option-value-id="{{ product_option_value.id }}"
+                      data-variant-id="{{ product_option_value.variant.id }}"
+                      data-connected-product-url="{{ product_option_value.product_url }}"
+                      {% if product_option_value.selected %}
+                        selected="selected"
+                      {% endif %}
+                    >
+                      {% if product_option_value.available == false %}
+                        {{ product_option_value | escape }} - {{ 'content.unavailable' | t }}
+                      {% else %}
+                        {{ product_option_value | escape }}
+                      {% endif %}
+                    </option>
+                  {%- endfor -%}
+                </select>
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  class="icon icon-caret"
+                  viewBox="0 0 10 6"
+                >
+                  {%- render 'icon', icon: 'caret' -%}
+                </svg>
+              </div>
+            </div>
+          {% endif %}
         {%- endif -%}
       {%- endfor -%}
 
@@ -664,4 +737,94 @@
     text-align: right;
     justify-content: right;
   }
+
+  /* ===== COLOR SWATCH UI ===== */
+  .vcs-wrap label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+  .vcs-current-label { font-weight: 400; opacity: 0.65; }
+  .vcs-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .vcs-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    cursor: pointer;
+    padding: 0;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.18);
+    transition: outline-color 0.15s ease, transform 0.1s ease;
+    flex-shrink: 0;
+  }
+  .vcs-swatch:hover { transform: scale(1.1); }
+  .vcs-swatch--selected {
+    outline-color: #111;
+  }
+  .vcs-swatch--soldout {
+    opacity: 0.4;
+    cursor: not-allowed;
+    position: relative;
+    overflow: hidden;
+  }
+  .vcs-swatch--soldout::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom right,
+      transparent calc(50% - 1px),
+      rgba(0,0,0,0.55) calc(50% - 1px),
+      rgba(0,0,0,0.55) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+    border-radius: 50%;
+  }
 {% endstylesheet %}
+
+<script>
+(function () {
+  function initColorSwatches(root) {
+    root.querySelectorAll('[data-vcs-row]').forEach(function (row) {
+      var selectId = row.getAttribute('data-vcs-row');
+      var select = document.getElementById(selectId);
+      if (!select) return;
+
+      var label = row.previousElementSibling && row.previousElementSibling.querySelector('.vcs-current-label');
+
+      function updateLabel(val) {
+        if (label) label.textContent = '— ' + val;
+      }
+
+      // Set initial label
+      if (select.value) updateLabel(select.value);
+
+      row.querySelectorAll('.vcs-swatch').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (btn.getAttribute('aria-disabled') === 'true') return;
+          var val = btn.getAttribute('data-vcs-value');
+          select.value = val;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          row.querySelectorAll('.vcs-swatch').forEach(function (b) { b.classList.remove('vcs-swatch--selected'); });
+          btn.classList.add('vcs-swatch--selected');
+          updateLabel(val);
+        });
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { initColorSwatches(document); });
+  } else {
+    initColorSwatches(document);
+  }
+
+  // Re-init when variant picker re-renders (Shopify section rendering)
+  document.addEventListener('shopify:section:load', function (e) {
+    if (e.target) initColorSwatches(e.target);
+  });
+})();
+</script>
