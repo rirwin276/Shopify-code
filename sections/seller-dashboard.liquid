@@ -412,12 +412,6 @@
                           {% endunless %}
                         {% endif %}
 
-                        {% if is_god %}
-                          <a href="{{ tile_url }}" class="ss-god-visit-btn" target="_blank" title="Visit as god (new tab)">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                            Visit
-                          </a>
-                        {% endif %}
                       </div>
 
                     </div>
@@ -1480,25 +1474,6 @@
     transition: 0.15s;
   }
   .ss-nsp-dismiss:hover { border-color: #94a3b8; color: #0f172a; }
-
-  /* God Mode: visit store link */
-  .ss-god-visit-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #6366f1;
-    text-decoration: none;
-    padding: 5px 10px;
-    background: rgba(99,102,241,0.08);
-    border-radius: 8px;
-    border: 1px solid rgba(99,102,241,0.15);
-    margin-top: 4px;
-    transition: 0.15s;
-    white-space: nowrap;
-  }
-  .ss-god-visit-btn:hover { background: rgba(99,102,241,0.15); }
 
 </style>
 
