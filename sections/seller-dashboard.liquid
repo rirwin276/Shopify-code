@@ -832,14 +832,14 @@
         // Add new stores panel after the god card
         var panel = document.createElement('div');
         panel.className = 'ss-new-stores-panel';
-        panel.innerHTML = '<div class="ss-nsp-title">\uD83C\uDD95 New Stores (' + newStores.length + ')</div>' +
+        panel.innerHTML = '<div class="ss-nsp-title">🆕 New Stores (' + newStores.length + ')</div>' +
           newStores.map(function(s){
             return '<div class="ss-nsp-row">' +
               '<div class="ss-nsp-info"><span class="ss-nsp-name">' + ssGodEscape(s.name) + '</span><span class="ss-nsp-handle">@' + ssGodEscape(s.handle) + '</span></div>' +
-              '<a href="/collections/' + ssGodEscape(s.handle) + '" class="ss-nsp-visit" target="_blank">Visit Store \u2192</a>' +
+              '<a href="/collections/' + encodeURIComponent(s.handle) + '" class="ss-nsp-visit" target="_blank">Visit Store →</a>' +
               '</div>';
           }).join('') +
-          '<button class="ss-nsp-dismiss">Mark all seen \u2713</button>';
+          '<button class="ss-nsp-dismiss">Mark all seen ✓</button>';
         godCard.parentNode.insertBefore(panel, godCard.nextSibling);
 
         var dismissBtn = panel.querySelector('.ss-nsp-dismiss');
@@ -849,7 +849,7 @@
       }
 
       // Mark all seen when clicking the god mode link
-      var godLink = document.querySelector('.ss-god-card a[href*="super-admin"]');
+      var godLink = document.querySelector('.ss-god-card a[href="/pages/super-admin"]');
       if (godLink) {
         godLink.addEventListener('click', ssGodMarkAllSeen);
       }
