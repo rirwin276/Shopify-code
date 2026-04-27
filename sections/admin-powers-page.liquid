@@ -406,7 +406,8 @@
   }
   .ap-main-tabs {
     display: flex; gap: 0; border-bottom: 2px solid var(--ap-border);
-    background: #f8fafc; overflow-x: hidden;
+    background: #f8fafc; overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
   .ap-main-tabs::-webkit-scrollbar { display: none; }
@@ -426,9 +427,37 @@
   .ap-main-panel { display: none; padding: 28px; }
   .ap-main-panel.active { display: block; }
   @media(max-width:600px) {
-    .ap-main-tab-btn { font-size: 12px; padding: 12px 6px; }
-    .ap-main-panel { padding: 20px; }
+    /* Outer wrap */
+    .ap-wrap { padding: 16px 14px 60px; }
+    /* Hero */
+    .ap-hero { padding: 22px 18px; margin-bottom: 18px; }
+    .ap-hero h1 { font-size: 22px; }
+    .ap-hero-sub { font-size: 12px; }
+    .ap-hero-actions { width: 100%; flex-direction: column; }
+    .ap-hero-actions .ap-btn { width: 100%; justify-content: center; }
+    /* Tabs — don't squish, let them scroll */
+    .ap-main-tabs { padding-bottom: 1px; }
+    .ap-main-tab-btn { flex: 0 0 auto; min-width: 80px; font-size: 12px; padding: 12px 12px; }
+    /* Panel content */
+    .ap-main-panel { padding: 16px; }
     .ap-danger-zone-body { padding: 4px 0 0; }
+    /* Danger rows — stack vertically */
+    .ap-danger-row { flex-direction: column; gap: 10px; }
+    .ap-danger-row .ap-btn { width: 100%; justify-content: center; }
+    /* Forms */
+    .ap-radio { padding: 12px; }
+    .ap-form-group { margin-bottom: 14px; }
+    .ap-input, .ap-textarea, .ap-select { font-size: 16px; }
+    /* Member rows */
+    .ap-member-row { flex-wrap: wrap; gap: 8px; }
+    .ap-member-row .ap-btn { font-size: 12px; padding: 7px 12px; }
+    /* Product row action buttons */
+    .ap-product-row__actions { flex-wrap: wrap; gap: 6px; }
+  }
+  @media(max-width:480px) {
+    /* Auth card on tiny phones */
+    .ap-auth-card { padding: 28px 18px; }
+    .ap-auth-wrap { margin: 32px auto; }
   }
 
   /* ── DANGER ROW ──────────────────────────────────────────── */
