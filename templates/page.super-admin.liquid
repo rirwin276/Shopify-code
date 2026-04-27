@@ -139,7 +139,7 @@
 
   .store-name { font-size: 16px; font-weight: 700; margin: 0 0 5px; color: white; }
   .store-handle { font-size: 12px; color: var(--gray); font-family: monospace; }
-  .store-actions { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .store-actions { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border); display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 6px; }
 
   /* GRAVEYARD SECTION */
   .graveyard-section { margin-top: 80px; opacity: 0.7; }
@@ -328,6 +328,11 @@
                   <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
                     <i class="fas fa-cog"></i> Manage Store
                   </button>
+                  {% if store.collection_handle != blank %}
+                  <a href="/collections/{{ store.collection_handle }}" class="btn btn-glass btn-sm" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-external-link-alt"></i> Visit Store ↗
+                  </a>
+                  {% endif %}
                   <button class="btn btn-warning btn-sm" onclick="sleepStore('{{ store.system.handle }}')">
                     <i class="fas fa-moon"></i> Sleep
                   </button>

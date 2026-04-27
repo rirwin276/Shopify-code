@@ -426,6 +426,7 @@
   }
   .ap-main-panel { display: none; padding: 28px; }
   .ap-main-panel.active { display: block; }
+  .ap-main-tabs-wrap { position: relative; }
   @media(max-width:600px) {
     /* Outer wrap */
     .ap-wrap { padding: 16px 14px 60px; }
@@ -435,9 +436,14 @@
     .ap-hero-sub { font-size: 12px; }
     .ap-hero-actions { width: 100%; flex-direction: column; }
     .ap-hero-actions .ap-btn { width: 100%; justify-content: center; }
-    /* Tabs — don't squish, let them scroll */
+    /* Tabs — don't squish, let them scroll; show fade to hint more tabs */
     .ap-main-tabs { padding-bottom: 1px; }
-    .ap-main-tab-btn { flex: 0 0 auto; min-width: 80px; font-size: 12px; padding: 12px 12px; }
+    .ap-main-tab-btn { flex: 0 0 auto; min-width: 90px; font-size: 13px; padding: 14px 16px; }
+    .ap-main-tabs-wrap::after {
+      content: ''; position: absolute; right: 0; top: 0; bottom: 0;
+      width: 48px; background: linear-gradient(to right, transparent, #f8fafc 90%);
+      pointer-events: none; z-index: 2;
+    }
     /* Panel content */
     .ap-main-panel { padding: 16px; }
     .ap-danger-zone-body { padding: 4px 0 0; }
@@ -793,11 +799,13 @@
   <div class="ap-main-card">
 
     <!-- MAIN PANEL TABS -->
+    <div class="ap-main-tabs-wrap">
     <div class="ap-main-tabs" role="tablist">
       <button class="ap-main-tab-btn active" id="apTabBtnOverview" data-main-tab="apPanelOverview" role="tab" aria-selected="true" aria-controls="apPanelOverview">🏠 Overview</button>
       <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers">👥 Members</button>
       <button class="ap-main-tab-btn" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="false" aria-controls="apPanelProducts">📦 Products</button>
       <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger">☠️ Danger</button>
+    </div>
     </div>
 
     <!-- OVERVIEW PANEL -->
