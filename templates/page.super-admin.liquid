@@ -954,30 +954,33 @@
     }
 
     // --- MOBILE PRICE OVERRIDE ---
-    document.getElementById('btnUpdatePrice_m').addEventListener('click', function () {
-      const tag = document.getElementById('targetTag_m').value.trim();
-      const price = document.getElementById('newPrice_m').value.trim();
-      const statusEl = document.getElementById('priceStatus_m');
-      if (!tag || !price) { statusEl.textContent = 'Please fill in both fields.'; statusEl.style.color = '#ef4444'; return; }
-      statusEl.textContent = 'Updating prices...';
-      statusEl.style.color = 'var(--gray)';
-      fetch(`${RAILWAY_URL}/admin/price-override`, {
-        method: 'POST',
-        headers: railwayHeaders(),
-        body: JSON.stringify({ tag: tag, price: parseFloat(price) })
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.ok || data.status === 'ok') {
-            statusEl.textContent = '✅ Prices updated!';
-            statusEl.style.color = '#10b981';
-          } else {
-            statusEl.textContent = '❌ ' + (data.error || 'Failed');
-            statusEl.style.color = '#ef4444';
-          }
+    var btnPriceM = document.getElementById('btnUpdatePrice_m');
+    if (btnPriceM) {
+      btnPriceM.addEventListener('click', function () {
+        const tag = document.getElementById('targetTag_m').value.trim();
+        const price = document.getElementById('newPrice_m').value.trim();
+        const statusEl = document.getElementById('priceStatus_m');
+        if (!tag || !price) { statusEl.textContent = 'Please fill in both fields.'; statusEl.style.color = '#ef4444'; return; }
+        statusEl.textContent = 'Updating prices...';
+        statusEl.style.color = 'var(--gray)';
+        fetch(`${RAILWAY_URL}/admin/price-override`, {
+          method: 'POST',
+          headers: railwayHeaders(),
+          body: JSON.stringify({ tag: tag, price: parseFloat(price) })
         })
-        .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
-    });
+          .then(r => r.json())
+          .then(data => {
+            if (data.ok || data.status === 'ok') {
+              statusEl.textContent = '✅ Prices updated!';
+              statusEl.style.color = '#10b981';
+            } else {
+              statusEl.textContent = '❌ ' + (data.error || 'Failed');
+              statusEl.style.color = '#ef4444';
+            }
+          })
+          .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
+      });
+    }
 
     // --- MOBILE RUN PRINTFUL ---
     function runPrintfulMobile() {
