@@ -735,30 +735,6 @@
     display: block; object-fit: contain; margin-bottom: 8px;
   }
 
-  /* ── COLOR SWATCHES ────────────────────────────────────────── */
-  .ap-color-swatch {
-    width: 36px; height: 36px; border-radius: 6px;
-    cursor: pointer; border: 2px solid transparent;
-    transition: all 0.15s; position: relative;
-    flex-shrink: 0;
-  }
-  .ap-color-swatch:hover { transform: scale(1.12); }
-  .ap-color-swatch.selected {
-    border-color: var(--ap-accent2);
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--ap-accent2);
-  }
-  .ap-color-swatch.selected::after {
-    content: '✓';
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 900; color: #fff;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-  }
-  /* Light swatches need dark checkmark */
-  .ap-color-swatch.selected.ap-swatch-light::after { color: #1a1a1a; text-shadow: none; }
-  @media(max-width:600px) {
-    .ap-color-swatch { width: 40px; height: 40px; }
-  }
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -959,32 +935,6 @@
 
     <!-- PRODUCTS PANEL -->
     <div id="apPanelProducts" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnProducts">
-
-      <!-- ── COLOR PICKER CARD ── -->
-      <div class="ap-card" id="apColorPickerCard" style="margin-bottom: 20px;">
-        <div class="ap-card-head">
-          <div class="ap-card-icon ap-card-icon--indigo" style="font-size:18px;">👕</div>
-          <h3>Tri-Blend Shirt Colors</h3>
-          <p>Choose up to 3 colors for your Bella+Canvas tri-blend tee. Your store will rebuild with only these colors.</p>
-        </div>
-
-        <div id="apColorPickerStatus" style="font-size:12px;color:var(--ap-gray);margin-bottom:12px;min-height:16px;"></div>
-
-        <!-- Swatch grid -->
-        <div id="apColorSwatchGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
-          <!-- Swatches injected by JS -->
-        </div>
-
-        <div id="apColorPickerSelected" style="font-size:12px;color:var(--ap-gray);margin-bottom:14px;min-height:16px;">
-          No colors selected — using automatic color selection.
-        </div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button id="apBtnClearColors" class="ap-btn ap-btn--outline ap-btn--sm" type="button">Clear Selection</button>
-          <button id="apBtnSaveColors" class="ap-btn ap-btn--primary ap-btn--sm" type="button" disabled>Save &amp; Rebuild</button>
-        </div>
-        <div id="apStatusColors" class="ap-status" style="margin-top:12px;"></div>
-      </div>
 
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
       <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found for this store.</div>
@@ -1388,9 +1338,6 @@
         apProductsLoaded = true;
         apLoadProducts();
       }
-      if(targetId === 'apPanelProducts'){
-        apLoadColorSelections();
-      }
     });
   });
 
@@ -1778,13 +1725,26 @@
           editorBtn.innerHTML = '✏️ Edit Placement';
           editorBtn.title = 'Adjust logo placement for this product only';
           editorBtn.addEventListener('click', function(){ apOpenEditorModal(editorUrl); });
+          var editColorsBtn = document.createElement('button');
+          editColorsBtn.type = 'button';
+          editColorsBtn.className = 'ap-edit-placement-btn';
+          editColorsBtn.innerHTML = '🎨 Edit Colors';
+          editColorsBtn.title = 'Edit shirt colors for this product';
+          editColorsBtn.addEventListener('click', function(){ apOpenEditorModal(editorUrl + '&tab=colors'); });
+          actionsEl.appendChild(editorBtn);
+          actionsEl.appendChild(editColorsBtn);
         } else {
           editorBtn = document.createElement('span');
           editorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
           editorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
           editorBtn.textContent = '✏️ Edit Placement (no logo)';
+          var editColorsDisabledBtn = document.createElement('span');
+          editColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          editColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          editColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
+          actionsEl.appendChild(editorBtn);
+          actionsEl.appendChild(editColorsDisabledBtn);
         }
-        actionsEl.appendChild(editorBtn);
       }
 
       // BC3001Y placement editor — show for any product tagged bc3001y_front
@@ -2078,138 +2038,6 @@
   }
 
   // Products are lazy-loaded when the Products tab is first clicked
-
-  // ── COLOR PICKER ─────────────────────────────────────────────
-  var BC3413_COLORS = [
-    { name: "Solid Black Triblend",      hex: "#101211" },
-    { name: "Charcoal-Black Triblend",   hex: "#171b19" },
-    { name: "Emerald Triblend",          hex: "#142c1e" },
-    { name: "Brown Triblend",            hex: "#563e32" },
-    { name: "Navy Triblend",             hex: "#464d7e" },
-    { name: "Blue Triblend",             hex: "#62749b" },
-    { name: "True Royal Triblend",       hex: "#2e4c86" },
-    { name: "Teal Triblend",             hex: "#156560" },
-    { name: "Maroon Triblend",           hex: "#744e5a" },
-    { name: "Berry Triblend",            hex: "#bc437c" },
-    { name: "Clay Triblend",             hex: "#9a5344" },
-    { name: "Purple Triblend",           hex: "#846394" },
-    { name: "Red Triblend",              hex: "#da5154" },
-    { name: "Aqua Triblend",             hex: "#33869f" },
-    { name: "Athletic Grey Triblend",    hex: "#a49895" },
-    { name: "Grey Triblend",             hex: "#84817f" },
-    { name: "Olive Triblend",            hex: "#9c8861" },
-    { name: "Mustard Triblend",          hex: "#e3ac56" },
-    { name: "Mauve Triblend",            hex: "#cd8071" },
-    { name: "Tan Triblend",              hex: "#cdb9a6" },
-    { name: "Oatmeal Triblend",          hex: "#e8decd" },
-    { name: "White Fleck Triblend",      hex: "#eaeaea" },
-    { name: "Solid White Triblend",      hex: "#ffffff" }
-  ];
-
-  var apSelectedColors = [];
-
-  function apRenderSwatches(selectedColors) {
-    var grid = document.getElementById('apColorSwatchGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    BC3413_COLORS.forEach(function(c) {
-      var el = document.createElement('div');
-      el.className = 'ap-color-swatch';
-      el.style.background = c.hex;
-      el.title = c.name;
-      el.dataset.name = c.name;
-      var r = parseInt(c.hex.slice(1,3),16), g = parseInt(c.hex.slice(3,5),16), b = parseInt(c.hex.slice(5,7),16);
-      var lum = (0.299*r + 0.587*g + 0.114*b) / 255;
-      if (lum > 0.6) el.classList.add('ap-swatch-light');
-      if (selectedColors && selectedColors.includes(c.name)) el.classList.add('selected');
-      el.addEventListener('click', function() { apToggleSwatch(c.name); });
-      grid.appendChild(el);
-    });
-    apUpdateColorPickerState(selectedColors || []);
-  }
-
-  function apToggleSwatch(colorName) {
-    var idx = apSelectedColors.indexOf(colorName);
-    if (idx > -1) {
-      apSelectedColors.splice(idx, 1);
-    } else {
-      if (apSelectedColors.length >= 3) {
-        document.getElementById('apColorPickerStatus').textContent = 'Maximum 3 colors — deselect one first.';
-        return;
-      }
-      apSelectedColors.push(colorName);
-    }
-    document.getElementById('apColorPickerStatus').textContent = '';
-    apRenderSwatches(apSelectedColors);
-  }
-
-  function apUpdateColorPickerState(selected) {
-    var sel = document.getElementById('apColorPickerSelected');
-    var btn = document.getElementById('apBtnSaveColors');
-    if (!sel || !btn) return;
-    if (selected.length === 0) {
-      sel.textContent = 'No colors selected — using automatic color selection.';
-      btn.disabled = true;
-    } else {
-      sel.textContent = 'Selected: ' + selected.join(', ');
-      btn.disabled = false;
-    }
-  }
-
-  function apLoadColorSelections() {
-    fetch(SSAP.railwayUrl + '/admin/store/' + encodeURIComponent(SSAP.shopHandle) + '/color-selections?shirt_variant=bc3413', {
-      headers: { 'X-Admin-Secret': AP_ADMIN_SECRET },
-      cache: 'no-store'
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(j) {
-      apSelectedColors = j.colors || [];
-      apRenderSwatches(apSelectedColors);
-    })
-    .catch(function() {
-      apSelectedColors = [];
-      apRenderSwatches([]);
-    });
-  }
-
-  var apBtnSaveColors = document.getElementById('apBtnSaveColors');
-  if (apBtnSaveColors) {
-    apBtnSaveColors.addEventListener('click', function() {
-      var statusEl = document.getElementById('apStatusColors');
-      apBtnSaveColors.disabled = true;
-      if (statusEl) { statusEl.className = 'ap-status'; statusEl.textContent = ''; }
-      fetch(SSAP.railwayUrl + '/admin/store/' + encodeURIComponent(SSAP.shopHandle) + '/color-selections', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET },
-        body: JSON.stringify({ shirt_variant: 'bc3413', colors: apSelectedColors, rebuild: true })
-      })
-      .then(function(r) {
-        if (!r.ok) return r.json().then(function(j){ throw new Error(j.error || 'Save failed'); });
-        var overlay = document.getElementById('apRebuildOverlay');
-        if (overlay) {
-          overlay.classList.add('open');
-          overlay.setAttribute('aria-hidden', 'false');
-        }
-        setTimeout(function() { window.location.href = '/pages/portal'; }, 5000);
-      })
-      .catch(function(e) {
-        if (statusEl) { statusEl.className = 'ap-status err'; statusEl.textContent = '❌ ' + (e.message || 'Save failed'); }
-        apBtnSaveColors.disabled = false;
-      });
-    });
-  }
-
-  var apBtnClearColors = document.getElementById('apBtnClearColors');
-  if (apBtnClearColors) {
-    apBtnClearColors.addEventListener('click', function() {
-      apSelectedColors = [];
-      document.getElementById('apColorPickerStatus').textContent = '';
-      apRenderSwatches([]);
-    });
-  }
-
-  // Load color selections on page load
-  apLoadColorSelections();
 
 })();
 
