@@ -682,6 +682,13 @@
     }
   }
   body.ap-editor-open { overflow: hidden; }
+
+  /* ── SETTINGS LOGO PREVIEW ─────────────────────────────── */
+  .ap-settings-logo-new {
+    max-width: 120px; max-height: 80px; border-radius: 8px;
+    border: 2px solid var(--ap-success); padding: 4px; background: #fff;
+    display: block; object-fit: contain; margin-bottom: 8px;
+  }
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -804,6 +811,7 @@
       <button class="ap-main-tab-btn active" id="apTabBtnOverview" data-main-tab="apPanelOverview" role="tab" aria-selected="true" aria-controls="apPanelOverview">🏠 Overview</button>
       <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers">👥 Members</button>
       <button class="ap-main-tab-btn" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="false" aria-controls="apPanelProducts">📦 Products</button>
+      <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings">⚙️ Settings</button>
       <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger">☠️ Danger</button>
     </div>
     </div>
@@ -886,6 +894,63 @@
       <div id="apProductsContainer" class="ap-product-list"></div>
       <div id="apStatusProducts" class="ap-status"></div>
     </div><!-- /apPanelProducts -->
+
+    <!-- SETTINGS PANEL -->
+    <div id="apPanelSettings" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnSettings">
+
+      <!-- Store display name -->
+      <div class="ap-form-group">
+        <label class="ap-label" for="apSettingsName">Store Display Name</label>
+        <input id="apSettingsName" class="ap-input" type="text" value="{{ store_name | escape }}" placeholder="Store name" />
+        <p class="ap-helper">Only changes the display name — no rebuild needed.</p>
+      </div>
+
+      <!-- Primary color -->
+      <div class="ap-form-group">
+        <label class="ap-label" for="apSettingsColor">Primary Color</label>
+        <select id="apSettingsColor" class="ap-select">
+          {%- assign _ap_color = shop_meta.primary_color.value | default: shop_meta.primary_color | default: 'No preference' -%}
+          {%- assign _ap_colors = 'No preference,Black,White,Navy,Red,Royal Blue,Forest Green,Maroon,Purple,Orange,Grey,Vegas Gold,Pink,Light Blue,Brown,Tan' | split: ',' -%}
+          {%- for _c in _ap_colors -%}
+            <option value="{{ _c }}"{% if _c == _ap_color %} selected{% endif %}>{{ _c }}</option>
+          {%- endfor -%}
+        </select>
+        <p class="ap-helper">Changing this will rebuild all products (~5–10 min).</p>
+      </div>
+
+      <!-- Logo section -->
+      <div class="ap-form-group">
+        <label class="ap-label">Main Logo / Primary Image</label>
+        <div id="apSettingsLogoPreview" style="margin-bottom:12px;">
+          {% if ap_shop_logo_src != '' %}
+            <img src="{{ ap_shop_logo_src }}" alt="Current logo" style="max-width:120px;max-height:80px;border-radius:8px;border:1px solid var(--ap-border);padding:4px;background:#fff;display:block;object-fit:contain;" />
+          {% else %}
+            <div style="width:120px;height:80px;background:#f1f5f9;border-radius:8px;border:1px solid var(--ap-border);display:flex;align-items:center;justify-content:center;font-size:28px;">🖼️</div>
+          {% endif %}
+        </div>
+        <div id="apSettingsLogoStatus" style="font-size:12px;color:var(--ap-gray);margin-bottom:8px;min-height:16px;"></div>
+        <button id="apBtnChangeLogo" class="ap-btn ap-btn--outline ap-btn--sm" type="button">🖼️ Change Logo</button>
+        <p class="ap-helper">Changing the logo will rebuild all products (~5–10 min).</p>
+      </div>
+
+      <!-- Rebuild warning -->
+      <div id="apSettingsRebuildWarning" style="display:none;margin-bottom:16px;padding:12px 14px;background:#fef9c3;border:1px solid #fde047;border-radius:10px;font-size:13px;color:#713f12;font-weight:600;">
+        ⚠️ You've changed the logo or color. Saving will delete all current products and rebuild them with the new settings. This takes 5–10 minutes.
+      </div>
+
+      <button id="apBtnSaveSettings" class="ap-btn ap-btn--primary ap-btn-full">Save Settings</button>
+      <div id="apStatusSettings" class="ap-status"></div>
+
+      <!-- Progress bar (hidden until rebuild starts) -->
+      <div id="apSettingsProgress" style="display:none;margin-top:16px;">
+        <div class="ap-rebuilding-inline" id="apSettingsRebuildingInline">
+          <div class="ap-rebuilding-inline__bar"><div class="ap-rebuilding-inline__bar-fill"></div></div>
+          <div class="ap-rebuilding-inline__label">🔨 Rebuilding store… <span class="ap-rebuilding-inline__step" id="apSettingsRebuildStep"></span></div>
+        </div>
+        <p class="ap-helper" style="margin-top:8px;">Products are being rebuilt. This page will update when complete.</p>
+      </div>
+
+    </div><!-- /apPanelSettings -->
 
     <!-- DANGER PANEL -->
     <div id="apPanelDanger" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnDanger">
@@ -1052,7 +1117,8 @@
     // URL is unavailable (shouldn't happen in practice).
     try {
       var _expectedOrigin = new URL(SSAP.editorBaseUrl || '').origin;
-      if (_expectedOrigin && e.origin !== _expectedOrigin) return;
+      var _railwayOrigin = new URL(SSAP.railwayUrl || '').origin;
+      if (_expectedOrigin && e.origin !== _expectedOrigin && e.origin !== _railwayOrigin) return;
     } catch(_origErr){}
     if (data.type === 'bc3413_placement_saved') {
       apCloseEditorModal();
@@ -1101,6 +1167,10 @@
       if (cc1467yJobId && cc1467yHandle) { apStartInlineRebuilding(cc1467yHandle, cc1467yJobId); } else { apShowRebuildingToast(); }
     } else if (data.type === 'cc1467y_close') {
       apCloseEditorModal();
+    } else if (data.type === 'studio-uploader:done' && data.slot === 'settings-logo' && data.session_id) {
+      if (typeof window.apSettingsHandleLogoDone === 'function') {
+        window.apSettingsHandleLogoDone(data);
+      }
     }
   });
 
@@ -1901,6 +1971,159 @@
   }
 
   // Products are lazy-loaded when the Products tab is first clicked
+})();
+
+// ── SETTINGS TAB ─────────────────────────────────────────────
+(function(){
+  var AP_SETTINGS_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
+  var AP_SETTINGS_MAX_POLLS    = 180;
+  var AP_SETTINGS_POLL_MS      = 4000;
+
+  var apSettingsNewSessionId = null;
+  var apSettingsLogoChanged  = false;
+  var apSettingsColorOriginal = {{ shop_meta.primary_color.value | default: shop_meta.primary_color | default: 'No preference' | json }};
+
+  // Expose logo-done handler so the shared postMessage listener can call it
+  window.apSettingsHandleLogoDone = function(data) {
+    apSettingsNewSessionId = data.session_id;
+    apSettingsLogoChanged  = true;
+    // Close the editor overlay
+    if (typeof window.apCloseEditorModal === 'function') window.apCloseEditorModal();
+    // Show new logo preview
+    var previewImg = document.createElement('img');
+    previewImg.src = SSAP.railwayUrl + '/final-file/' + data.session_id + '?t=' + Date.now();
+    previewImg.alt = 'New logo preview';
+    previewImg.className = 'ap-settings-logo-new';
+    var previewDiv = document.getElementById('apSettingsLogoPreview');
+    if (previewDiv) {
+      previewDiv.innerHTML = '';
+      previewDiv.appendChild(previewImg);
+    }
+    var statusEl = document.getElementById('apSettingsLogoStatus');
+    if (statusEl) statusEl.textContent = '✅ New logo selected — save to apply.';
+    apSettingsUpdateRebuildWarning();
+  };
+
+  function apSettingsUpdateRebuildWarning() {
+    var colorEl = document.getElementById('apSettingsColor');
+    var colorChanged = colorEl && (colorEl.value !== apSettingsColorOriginal);
+    var needsRebuild = apSettingsLogoChanged || colorChanged;
+    var warningEl = document.getElementById('apSettingsRebuildWarning');
+    if (warningEl) warningEl.style.display = needsRebuild ? 'block' : 'none';
+  }
+
+  // Attach rebuild warning to color change
+  var apSettingsColorEl = document.getElementById('apSettingsColor');
+  if (apSettingsColorEl) apSettingsColorEl.addEventListener('change', apSettingsUpdateRebuildWarning);
+
+  // Change Logo button — open studio-uploader in existing editor modal
+  var apBtnChangeLogo = document.getElementById('apBtnChangeLogo');
+  if (apBtnChangeLogo) {
+    apBtnChangeLogo.addEventListener('click', function() {
+      var titleEl = document.getElementById('apEditorTitle');
+      if (titleEl) titleEl.textContent = '🖼️ Replace Store Logo';
+      if (typeof window.apOpenEditorModal === 'function') {
+        window.apOpenEditorModal(SSAP.railwayUrl + '/ui?slot=settings-logo&return=postmessage&embed=1');
+      }
+    });
+  }
+
+  // Save Settings button
+  var apBtnSaveSettings = document.getElementById('apBtnSaveSettings');
+  if (apBtnSaveSettings) {
+    apBtnSaveSettings.addEventListener('click', async function() {
+      var btn = this;
+      var statusEl = document.getElementById('apStatusSettings');
+      var storeName = document.getElementById('apSettingsName').value.trim();
+      var primaryColor = document.getElementById('apSettingsColor').value;
+      var colorChanged = (primaryColor !== apSettingsColorOriginal);
+      var needsRebuild = apSettingsLogoChanged || colorChanged;
+
+      if (!storeName && !colorChanged && !apSettingsLogoChanged) {
+        statusEl.className = 'ap-status err';
+        statusEl.textContent = 'No changes to save.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      statusEl.className = 'ap-status';
+      statusEl.textContent = '';
+
+      try {
+        var fd = new FormData();
+        if (storeName) fd.append('store_name', storeName);
+        if (colorChanged) fd.append('primary_color', primaryColor);
+        if (apSettingsNewSessionId) fd.append('main_session_id', apSettingsNewSessionId);
+
+        var r = await fetch(
+          SSAP.railwayUrl + '/admin/store/' + encodeURIComponent(SSAP.shopHandle) + '/update-settings',
+          {
+            method: 'POST',
+            headers: { 'X-Admin-Secret': AP_SETTINGS_ADMIN_SECRET },
+            body: fd,
+            cache: 'no-store'
+          }
+        );
+        var j = await r.json().catch(function(){ return {}; });
+        if (!r.ok) throw new Error(j.error || 'Update failed');
+
+        if (needsRebuild && j.job_id) {
+          document.getElementById('apSettingsProgress').style.display = 'block';
+          document.getElementById('apSettingsRebuildWarning').style.display = 'none';
+          statusEl.className = 'ap-status ok';
+          statusEl.textContent = '✅ Settings saved — rebuilding products…';
+          btn.textContent = 'Rebuilding…';
+          apSettingsPollJob(j.job_id);
+        } else {
+          statusEl.className = 'ap-status ok';
+          statusEl.textContent = '✅ Store name updated!';
+          btn.textContent = 'Save Settings';
+          btn.disabled = false;
+        }
+      } catch(e) {
+        statusEl.className = 'ap-status err';
+        statusEl.textContent = '❌ ' + (e.message || 'Save failed');
+        btn.textContent = 'Save Settings';
+        btn.disabled = false;
+      }
+    });
+  }
+
+  async function apSettingsPollJob(jobId) {
+    var stepEl   = document.getElementById('apSettingsRebuildStep');
+    var inlineEl = document.getElementById('apSettingsRebuildingInline');
+    var btn      = document.getElementById('apBtnSaveSettings');
+    for (var i = 0; i < AP_SETTINGS_MAX_POLLS; i++) {
+      await new Promise(function(res){ setTimeout(res, AP_SETTINGS_POLL_MS); });
+      try {
+        var r = await fetch(SSAP.railwayUrl + '/api/job/' + jobId + '?t=' + Date.now(), { cache: 'no-store' });
+        var j = await r.json().catch(function(){ return {}; });
+        var log = j.log || [];
+        if (log.length && stepEl) stepEl.textContent = log[log.length - 1];
+        if (j.status === 'done') {
+          if (inlineEl) inlineEl.classList.add('ap-rebuilding-inline--success');
+          document.getElementById('apStatusSettings').textContent = '✅ Rebuild complete! Refresh to see updated products.';
+          btn.textContent = 'Save Settings';
+          btn.disabled = false;
+          return;
+        }
+        if (j.status === 'error' || j.status === 'failed') {
+          if (inlineEl) inlineEl.classList.add('ap-rebuilding-inline--error');
+          var sEl = document.getElementById('apStatusSettings');
+          sEl.className = 'ap-status err';
+          sEl.textContent = '❌ Rebuild failed: ' + (j.error || 'Unknown error');
+          btn.textContent = 'Save Settings';
+          btn.disabled = false;
+          return;
+        }
+      } catch(e) {}
+    }
+    // Timeout — max polling time (AP_SETTINGS_MAX_POLLS × AP_SETTINGS_POLL_MS ms) exceeded
+    document.getElementById('apStatusSettings').textContent = '⏳ Still rebuilding — check back in a few minutes.';
+    btn.textContent = 'Save Settings';
+    btn.disabled = false;
+  }
 })();
 </script>
 
