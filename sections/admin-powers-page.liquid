@@ -398,6 +398,50 @@
     line-height: 1.6;
   }
 
+  /* ── REBUILD MODAL ─────────────────────────────────────── */
+  .ap-rebuild-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15,23,42,0.75); z-index: 10000;
+    align-items: center; justify-content: center; padding: 24px;
+    backdrop-filter: blur(6px);
+  }
+  .ap-rebuild-overlay.open { display: flex; }
+  .ap-rebuild-dialog {
+    width: min(480px, 100%); background: #fff;
+    border-radius: 20px; padding: 40px 36px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.32);
+    text-align: center;
+    animation: ap-fadeIn 0.3s ease-out;
+  }
+  .ap-rebuild-icon { font-size: 48px; margin-bottom: 16px; }
+  .ap-rebuild-title {
+    font-size: 22px; font-weight: 900; color: #0f172a;
+    margin: 0 0 16px; letter-spacing: -0.02em;
+  }
+  .ap-rebuild-body {
+    font-size: 15px; line-height: 1.6; color: #374151;
+    margin: 0 0 20px;
+  }
+  .ap-rebuild-sub {
+    font-size: 13px; color: #64748b; margin: 0 0 24px;
+  }
+  .ap-rebuild-bar {
+    height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;
+  }
+  .ap-rebuild-bar-fill {
+    height: 100%; width: 0%; background: linear-gradient(90deg, #6366f1, #10b981);
+    border-radius: 3px;
+    animation: ap-rebuild-drain 5s linear forwards;
+  }
+  @keyframes ap-rebuild-drain {
+    from { width: 0%; }
+    to   { width: 100%; }
+  }
+  @media(max-width:480px) {
+    .ap-rebuild-dialog { padding: 28px 20px; }
+    .ap-rebuild-title { font-size: 18px; }
+  }
+
   /* ── MAIN TABS ─────────────────────────────────────────── */
   .ap-main-card {
     background: var(--ap-card); border: 1px solid var(--ap-border);
@@ -942,15 +986,6 @@
       <button id="apBtnSaveSettings" class="ap-btn ap-btn--primary ap-btn-full">Save Settings</button>
       <div id="apStatusSettings" class="ap-status"></div>
 
-      <!-- Progress bar (hidden until rebuild starts) -->
-      <div id="apSettingsProgress" style="display:none;margin-top:16px;">
-        <div class="ap-rebuilding-inline" id="apSettingsRebuildingInline">
-          <div class="ap-rebuilding-inline__bar"><div class="ap-rebuilding-inline__bar-fill"></div></div>
-          <div class="ap-rebuilding-inline__label">🔨 Rebuilding store… <span class="ap-rebuilding-inline__step" id="apSettingsRebuildStep"></span></div>
-        </div>
-        <p class="ap-helper" style="margin-top:8px;">Products are being rebuilt. This page will update when complete.</p>
-      </div>
-
     </div><!-- /apPanelSettings -->
 
     <!-- DANGER PANEL -->
@@ -1022,6 +1057,22 @@
               class="ap-editor-iframe"
               title="BC3413 Placement Editor"
               allow="clipboard-write"></iframe>
+    </div>
+  </div>
+
+  <!-- REBUILD IN PROGRESS MODAL -->
+  <div class="ap-rebuild-overlay" id="apRebuildOverlay" aria-hidden="true">
+    <div class="ap-rebuild-dialog" role="dialog" aria-modal="true" aria-labelledby="apRebuildTitle">
+      <div class="ap-rebuild-icon">🔨</div>
+      <h2 class="ap-rebuild-title" id="apRebuildTitle">Rebuilding Your Store</h2>
+      <p class="ap-rebuild-body">
+        We're applying your changes and rebuilding all of your store's products.
+        This process takes about <strong>15–20 minutes</strong> to complete.
+        When it's done, everything will be right back where you left it —
+        all your products, members, and settings fully intact.
+      </p>
+      <p class="ap-rebuild-sub">Taking you back to your dashboard in a moment…</p>
+      <div class="ap-rebuild-bar"><div class="ap-rebuild-bar-fill"></div></div>
     </div>
   </div>
 
@@ -1977,8 +2028,6 @@
 // ── SETTINGS TAB ─────────────────────────────────────────────
 (function(){
   var AP_SETTINGS_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
-  var AP_SETTINGS_MAX_POLLS    = 180;
-  var AP_SETTINGS_POLL_MS      = 4000;
 
   var apSettingsNewSessionId = null;
   var apSettingsLogoChanged  = false;
@@ -2069,14 +2118,17 @@
         var j = await r.json().catch(function(){ return {}; });
         if (!r.ok) throw new Error(j.error || 'Update failed');
 
-        if (needsRebuild && j.job_id) {
-          document.getElementById('apSettingsProgress').style.display = 'block';
-          document.getElementById('apSettingsRebuildWarning').style.display = 'none';
-          statusEl.className = 'ap-status ok';
-          statusEl.textContent = '✅ Settings saved — rebuilding products…';
-          btn.textContent = 'Rebuilding…';
-          apSettingsPollJob(j.job_id);
+        if (needsRebuild) {
+          // Show the rebuild modal
+          var overlay = document.getElementById('apRebuildOverlay');
+          overlay.classList.add('open');
+          overlay.setAttribute('aria-hidden', 'false');
+          // After 5 seconds, redirect to dashboard
+          setTimeout(function() {
+            window.location.href = '/pages/portal';
+          }, 5000);
         } else {
+          // Name-only change — no rebuild
           statusEl.className = 'ap-status ok';
           statusEl.textContent = '✅ Store name updated!';
           btn.textContent = 'Save Settings';
@@ -2089,41 +2141,6 @@
         btn.disabled = false;
       }
     });
-  }
-
-  async function apSettingsPollJob(jobId) {
-    var stepEl   = document.getElementById('apSettingsRebuildStep');
-    var inlineEl = document.getElementById('apSettingsRebuildingInline');
-    var btn      = document.getElementById('apBtnSaveSettings');
-    for (var i = 0; i < AP_SETTINGS_MAX_POLLS; i++) {
-      await new Promise(function(res){ setTimeout(res, AP_SETTINGS_POLL_MS); });
-      try {
-        var r = await fetch(SSAP.railwayUrl + '/api/job/' + jobId + '?t=' + Date.now(), { cache: 'no-store' });
-        var j = await r.json().catch(function(){ return {}; });
-        var log = j.log || [];
-        if (log.length && stepEl) stepEl.textContent = log[log.length - 1];
-        if (j.status === 'done') {
-          if (inlineEl) inlineEl.classList.add('ap-rebuilding-inline--success');
-          document.getElementById('apStatusSettings').textContent = '✅ Rebuild complete! Refresh to see updated products.';
-          btn.textContent = 'Save Settings';
-          btn.disabled = false;
-          return;
-        }
-        if (j.status === 'error' || j.status === 'failed') {
-          if (inlineEl) inlineEl.classList.add('ap-rebuilding-inline--error');
-          var sEl = document.getElementById('apStatusSettings');
-          sEl.className = 'ap-status err';
-          sEl.textContent = '❌ Rebuild failed: ' + (j.error || 'Unknown error');
-          btn.textContent = 'Save Settings';
-          btn.disabled = false;
-          return;
-        }
-      } catch(e) {}
-    }
-    // Timeout — max polling time (AP_SETTINGS_MAX_POLLS × AP_SETTINGS_POLL_MS ms) exceeded
-    document.getElementById('apStatusSettings').textContent = '⏳ Still rebuilding — check back in a few minutes.';
-    btn.textContent = 'Save Settings';
-    btn.disabled = false;
   }
 })();
 </script>
