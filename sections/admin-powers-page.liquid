@@ -1778,13 +1778,26 @@
           bc3001yEditorBtn.innerHTML = '✏️ Edit Placement';
           bc3001yEditorBtn.title = 'Adjust logo placement for this youth tee product only';
           bc3001yEditorBtn.addEventListener('click', function(){ apOpenEditorModal(bc3001yEditorUrl); });
+          var bc3001yEditColorsBtn = document.createElement('button');
+          bc3001yEditColorsBtn.type = 'button';
+          bc3001yEditColorsBtn.className = 'ap-edit-placement-btn';
+          bc3001yEditColorsBtn.innerHTML = '🎨 Edit Colors';
+          bc3001yEditColorsBtn.title = 'Edit shirt colors for this product';
+          bc3001yEditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(bc3001yEditorUrl + '&tab=colors'); });
+          actionsEl.appendChild(bc3001yEditorBtn);
+          actionsEl.appendChild(bc3001yEditColorsBtn);
         } else {
           bc3001yEditorBtn = document.createElement('span');
           bc3001yEditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
           bc3001yEditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
           bc3001yEditorBtn.textContent = '✏️ Edit Placement (no logo)';
+          var bc3001yEditColorsDisabledBtn = document.createElement('span');
+          bc3001yEditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          bc3001yEditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          bc3001yEditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
+          actionsEl.appendChild(bc3001yEditorBtn);
+          actionsEl.appendChild(bc3001yEditColorsDisabledBtn);
         }
-        actionsEl.appendChild(bc3001yEditorBtn);
       }
 
       // NL6733 placement editor — show for any product tagged nl6733_front
@@ -1818,13 +1831,26 @@
           nl6733EditorBtn.innerHTML = '✏️ Edit Placement';
           nl6733EditorBtn.title = 'Adjust logo placement for this product only';
           nl6733EditorBtn.addEventListener('click', function(){ apOpenEditorModal(nl6733EditorUrl); });
+          var nl6733EditColorsBtn = document.createElement('button');
+          nl6733EditColorsBtn.type = 'button';
+          nl6733EditColorsBtn.className = 'ap-edit-placement-btn';
+          nl6733EditColorsBtn.innerHTML = '🎨 Edit Colors';
+          nl6733EditColorsBtn.title = 'Edit shirt colors for this product';
+          nl6733EditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(nl6733EditorUrl + '&tab=colors'); });
+          actionsEl.appendChild(nl6733EditorBtn);
+          actionsEl.appendChild(nl6733EditColorsBtn);
         } else {
           nl6733EditorBtn = document.createElement('span');
           nl6733EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
           nl6733EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
           nl6733EditorBtn.textContent = '✏️ Edit Placement (no logo)';
+          var nl6733EditColorsDisabledBtn = document.createElement('span');
+          nl6733EditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          nl6733EditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          nl6733EditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
+          actionsEl.appendChild(nl6733EditorBtn);
+          actionsEl.appendChild(nl6733EditColorsDisabledBtn);
         }
-        actionsEl.appendChild(nl6733EditorBtn);
       }
 
       // MC1790 placement editor — show for any product tagged mc1790_front
@@ -1858,13 +1884,26 @@
           mc1790EditorBtn.innerHTML = '✏️ Edit Placement';
           mc1790EditorBtn.title = 'Adjust logo placement for this product only';
           mc1790EditorBtn.addEventListener('click', function(){ apOpenEditorModal(mc1790EditorUrl); });
+          var mc1790EditColorsBtn = document.createElement('button');
+          mc1790EditColorsBtn.type = 'button';
+          mc1790EditColorsBtn.className = 'ap-edit-placement-btn';
+          mc1790EditColorsBtn.innerHTML = '🎨 Edit Colors';
+          mc1790EditColorsBtn.title = 'Edit shirt colors for this product';
+          mc1790EditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(mc1790EditorUrl + '&tab=colors'); });
+          actionsEl.appendChild(mc1790EditorBtn);
+          actionsEl.appendChild(mc1790EditColorsBtn);
         } else {
           mc1790EditorBtn = document.createElement('span');
           mc1790EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
           mc1790EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
           mc1790EditorBtn.textContent = '✏️ Edit Placement (no logo)';
+          var mc1790EditColorsDisabledBtn = document.createElement('span');
+          mc1790EditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          mc1790EditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          mc1790EditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
+          actionsEl.appendChild(mc1790EditorBtn);
+          actionsEl.appendChild(mc1790EditColorsDisabledBtn);
         }
-        actionsEl.appendChild(mc1790EditorBtn);
       }
 
       // M2580 placement editor — show for any product tagged m2580_front
@@ -1898,13 +1937,26 @@
           m2580EditorBtn.innerHTML = '✏️ Edit Placement';
           m2580EditorBtn.title = 'Adjust logo placement for this product only';
           m2580EditorBtn.addEventListener('click', function(){ apOpenEditorModal(m2580EditorUrl); });
+          var m2580EditColorsBtn = document.createElement('button');
+          m2580EditColorsBtn.type = 'button';
+          m2580EditColorsBtn.className = 'ap-edit-placement-btn';
+          m2580EditColorsBtn.innerHTML = '🎨 Edit Colors';
+          m2580EditColorsBtn.title = 'Edit shirt colors for this product';
+          m2580EditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(m2580EditorUrl + '&tab=colors'); });
+          actionsEl.appendChild(m2580EditorBtn);
+          actionsEl.appendChild(m2580EditColorsBtn);
         } else {
           m2580EditorBtn = document.createElement('span');
           m2580EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
           m2580EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
           m2580EditorBtn.textContent = '✏️ Edit Placement (no logo)';
+          var m2580EditColorsDisabledBtn = document.createElement('span');
+          m2580EditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          m2580EditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          m2580EditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
+          actionsEl.appendChild(m2580EditorBtn);
+          actionsEl.appendChild(m2580EditColorsDisabledBtn);
         }
-        actionsEl.appendChild(m2580EditorBtn);
       }
 
       // CC1467Y placement editor — show for any product tagged cc1467y_front
@@ -1938,13 +1990,26 @@
           cc1467yEditorBtn.innerHTML = '✏️ Edit Placement';
           cc1467yEditorBtn.title = 'Adjust logo placement for this product only';
           cc1467yEditorBtn.addEventListener('click', function(){ apOpenEditorModal(cc1467yEditorUrl); });
+          var cc1467yEditColorsBtn = document.createElement('button');
+          cc1467yEditColorsBtn.type = 'button';
+          cc1467yEditColorsBtn.className = 'ap-edit-placement-btn';
+          cc1467yEditColorsBtn.innerHTML = '🎨 Edit Colors';
+          cc1467yEditColorsBtn.title = 'Edit shirt colors for this product';
+          cc1467yEditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(cc1467yEditorUrl + '&tab=colors'); });
+          actionsEl.appendChild(cc1467yEditorBtn);
+          actionsEl.appendChild(cc1467yEditColorsBtn);
         } else {
           cc1467yEditorBtn = document.createElement('span');
           cc1467yEditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
           cc1467yEditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
           cc1467yEditorBtn.textContent = '✏️ Edit Placement (no logo)';
+          var cc1467yEditColorsDisabledBtn = document.createElement('span');
+          cc1467yEditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          cc1467yEditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          cc1467yEditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
+          actionsEl.appendChild(cc1467yEditorBtn);
+          actionsEl.appendChild(cc1467yEditColorsDisabledBtn);
         }
-        actionsEl.appendChild(cc1467yEditorBtn);
       }
       row.appendChild(imgEl);
       row.appendChild(titleEl);
