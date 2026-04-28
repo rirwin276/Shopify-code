@@ -427,6 +427,8 @@
   .ap-main-panel { display: none; padding: 28px; }
   .ap-main-panel.active { display: block; }
   .ap-main-tabs-wrap { position: relative; }
+  .ap-tab-icon { display: block; font-size: 16px; line-height: 1; }
+  .ap-tab-label { display: block; font-size: 10px; font-weight: 700; margin-top: 2px; }
   @media(max-width:600px) {
     /* Outer wrap */
     .ap-wrap { padding: 16px 14px 60px; }
@@ -436,14 +438,13 @@
     .ap-hero-sub { font-size: 12px; }
     .ap-hero-actions { width: 100%; flex-direction: column; }
     .ap-hero-actions .ap-btn { width: 100%; justify-content: center; }
-    /* Tabs — don't squish, let them scroll; show fade to hint more tabs */
-    .ap-main-tabs { padding-bottom: 1px; }
-    .ap-main-tab-btn { flex: 0 0 auto; min-width: 90px; font-size: 13px; padding: 14px 16px; }
-    .ap-main-tabs-wrap::after {
-      content: ''; position: absolute; right: 0; top: 0; bottom: 0;
-      width: 48px; background: linear-gradient(to right, transparent, #f8fafc 90%);
-      pointer-events: none; z-index: 2;
-    }
+    /* Tabs — all 5 fit on screen, no scroll */
+    .ap-main-tabs { overflow-x: hidden; -webkit-overflow-scrolling: auto; }
+    .ap-main-tab-btn { flex: 1 1 0; min-width: 0; padding: 10px 4px; font-size: 11px; white-space: normal; line-height: 1.2; overflow: visible; text-overflow: clip; }
+    /* Remove the scroll-hint fade gradient */
+    .ap-main-tabs-wrap::after { display: none; }
+    .ap-tab-icon { font-size: 18px; }
+    .ap-tab-label { font-size: 9px; }
     /* Panel content */
     .ap-main-panel { padding: 16px; }
     .ap-danger-zone-body { padding: 4px 0 0; }
@@ -808,11 +809,11 @@
     <!-- MAIN PANEL TABS -->
     <div class="ap-main-tabs-wrap">
     <div class="ap-main-tabs" role="tablist">
-      <button class="ap-main-tab-btn active" id="apTabBtnOverview" data-main-tab="apPanelOverview" role="tab" aria-selected="true" aria-controls="apPanelOverview">🏠 Overview</button>
-      <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers">👥 Members</button>
-      <button class="ap-main-tab-btn" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="false" aria-controls="apPanelProducts">📦 Products</button>
-      <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings">⚙️ Settings</button>
-      <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger">☠️ Danger</button>
+      <button class="ap-main-tab-btn active" id="apTabBtnOverview" data-main-tab="apPanelOverview" role="tab" aria-selected="true" aria-controls="apPanelOverview"><span class="ap-tab-icon">🏠</span><span class="ap-tab-label">Overview</span></button>
+      <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers"><span class="ap-tab-icon">👥</span><span class="ap-tab-label">Members</span></button>
+      <button class="ap-main-tab-btn" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="false" aria-controls="apPanelProducts"><span class="ap-tab-icon">📦</span><span class="ap-tab-label">Products</span></button>
+      <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings"><span class="ap-tab-icon">⚙️</span><span class="ap-tab-label">Settings</span></button>
+      <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger"><span class="ap-tab-icon">☠️</span><span class="ap-tab-label">Danger</span></button>
     </div>
     </div>
 
