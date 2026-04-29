@@ -789,6 +789,7 @@
 {%- assign editor_mc1790_base_url = 'https://printfulautomation-production.up.railway.app/editor/mc1790' -%}
 {%- assign editor_m2580_base_url = 'https://printfulautomation-production.up.railway.app/editor/m2580' -%}
 {%- assign editor_cc1467y_base_url = 'https://printfulautomation-production.up.railway.app/editor/cc1467y' -%}
+{%- assign editor_bc3413_back_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413_back' -%}
 {%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
    Not actually secret — it's already in the public repo, only gates the editor page,
    and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
@@ -828,6 +829,7 @@
     SSAP.editorMc1790BaseUrl = {{ editor_mc1790_base_url | json }};
     SSAP.editorM2580BaseUrl = {{ editor_m2580_base_url | json }};
     SSAP.editorCc1467yBaseUrl = {{ editor_cc1467y_base_url | json }};
+    SSAP.editorBc3413BackBaseUrl = {{ editor_bc3413_back_base_url | json }};
     SSAP.editorSecret = {{ editor_secret | json }};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
@@ -1744,6 +1746,59 @@
           editColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
           actionsEl.appendChild(editorBtn);
           actionsEl.appendChild(editColorsDisabledBtn);
+        }
+      }
+
+      // BC3413 Back placement editor — show for any product tagged bc3413_back
+      function _isBc3413BackTag(t){
+        return String(t || '').toLowerCase().trim() === 'bc3413_back';
+      }
+      var isBc3413Back = false;
+      if(Array.isArray(productTags)){
+        for(var bc3413BackTagIdx = 0; bc3413BackTagIdx < productTags.length; bc3413BackTagIdx++){
+          if(_isBc3413BackTag(productTags[bc3413BackTagIdx])){ isBc3413Back = true; break; }
+        }
+      } else if(typeof productTags === 'string'){
+        isBc3413Back = productTags.split(',').some(_isBc3413BackTag);
+      }
+
+      if(isBc3413Back && SSAP.editorSecret){
+        var bc3413BackLogoSrc = SSAP.shopLogoSrc || '';
+        var bc3413BackEditorBtn;
+        if(bc3413BackLogoSrc){
+          var bc3413BackEditorUrl = SSAP.editorBc3413BackBaseUrl
+            + '?logo_url=' + encodeURIComponent(bc3413BackLogoSrc)
+            + '&logo_kind=titan'
+            + '&product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&mode=embedded';
+          bc3413BackEditorBtn = document.createElement('button');
+          bc3413BackEditorBtn.type = 'button';
+          bc3413BackEditorBtn.className = 'ap-edit-placement-btn';
+          bc3413BackEditorBtn.dataset.productHandle = product.handle || '';
+          bc3413BackEditorBtn.innerHTML = '✏️ Edit BC3413 Back (beta)';
+          bc3413BackEditorBtn.title = 'Adjust back logo placement for this product only';
+          bc3413BackEditorBtn.addEventListener('click', function(){ apOpenEditorModal(bc3413BackEditorUrl); });
+          var bc3413BackEditColorsBtn = document.createElement('button');
+          bc3413BackEditColorsBtn.type = 'button';
+          bc3413BackEditColorsBtn.className = 'ap-edit-placement-btn';
+          bc3413BackEditColorsBtn.innerHTML = '🎨 Edit Colors (beta)';
+          bc3413BackEditColorsBtn.title = 'Edit shirt colors for this product';
+          bc3413BackEditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(bc3413BackEditorUrl + '&tab=colors'); });
+          actionsEl.appendChild(bc3413BackEditorBtn);
+          actionsEl.appendChild(bc3413BackEditColorsBtn);
+        } else {
+          bc3413BackEditorBtn = document.createElement('span');
+          bc3413BackEditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          bc3413BackEditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          bc3413BackEditorBtn.textContent = '✏️ Edit BC3413 Back (no logo)';
+          var bc3413BackEditColorsDisabledBtn = document.createElement('span');
+          bc3413BackEditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
+          bc3413BackEditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
+          bc3413BackEditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
+          actionsEl.appendChild(bc3413BackEditorBtn);
+          actionsEl.appendChild(bc3413BackEditColorsDisabledBtn);
         }
       }
 
