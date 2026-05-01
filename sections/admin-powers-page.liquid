@@ -1751,27 +1751,6 @@
         }
       }
 
-      // BC3413 Pro Shirt Editor — always available, no logo required
-      if(isBc3413 && SSAP.editorProShirtBc3413BaseUrl && SSAP.editorSecret){
-        var proShirtUrl = SSAP.editorProShirtBc3413BaseUrl
-          + '?product_handle=' + encodeURIComponent(product.handle || '')
-          + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
-          + '&secret=' + encodeURIComponent(SSAP.editorSecret)
-          + '&mode=embedded';
-        // Optionally pass logo_url if we have one
-        if(SSAP.shopLogoSrc){
-          proShirtUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
-        }
-        var proShirtBtn = document.createElement('button');
-        proShirtBtn.type = 'button';
-        proShirtBtn.className = 'ap-edit-placement-btn';
-        proShirtBtn.dataset.productHandle = product.handle || '';
-        proShirtBtn.innerHTML = '🚀 Pro Editor';
-        proShirtBtn.title = 'Open the Pro Shirt Editor — upload logos, pick colors, adjust placement';
-        proShirtBtn.addEventListener('click', function(){ apOpenEditorModal(proShirtUrl); });
-        actionsEl.appendChild(proShirtBtn);
-      }
-
       // BC3413 Back placement editor — show for any product tagged bc3413_back
       function _isBc3413BackTag(t){
         return String(t || '').toLowerCase().trim() === 'bc3413_back';
@@ -2102,8 +2081,149 @@
       });
 
       apProductsContainer.appendChild(row);
-    });
-  }
+    }); // end products.forEach
+
+    // ── "Add New" card — Custom Tri-Blend Shirt ─────────────────────────────
+    if(SSAP.editorProShirtBc3413BaseUrl && SSAP.editorSecret){
+      var addTriblendCard = document.createElement('div');
+      addTriblendCard.className = 'ap-product-row ap-add-product-row';
+      addTriblendCard.style.cssText = [
+        'border: 2px dashed rgba(59,130,246,0.35);',
+        'background: rgba(59,130,246,0.04);',
+        'cursor: default;',
+        'position: relative;',
+      ].join('');
+
+      // Shirt thumbnail — try to reuse an existing bc3413 product image, otherwise fallback
+      var triblendImgEl = document.createElement('div');
+      triblendImgEl.style.cssText = [
+        'width:52px;height:52px;border-radius:8px;flex-shrink:0;',
+        'display:flex;align-items:center;justify-content:center;',
+        'background:rgba(59,130,246,0.1);font-size:28px;',
+      ].join('');
+      triblendImgEl.textContent = '👕';
+      // If we found a bc3413 product image while rendering, use it
+      (function(){
+        for(var _pi = 0; _pi < products.length; _pi++){
+          var _p = products[_pi];
+          var _tags = _p.tags || [];
+          var _hasBc3413 = Array.isArray(_tags)
+            ? _tags.some(function(t){ return String(t||'').toLowerCase().indexOf('bc3413_') === 0; })
+            : String(_tags).toLowerCase().indexOf('bc3413_') >= 0;
+          if(_hasBc3413){
+            var _imgSrc = _p.featured_image || _p.image ||
+              (_p.images && _p.images[0] && (_p.images[0].src || _p.images[0])) || null;
+            if(_imgSrc){
+              var _realImg = document.createElement('img');
+              _realImg.src = _imgSrc;
+              _realImg.alt = 'Tri-Blend Tee';
+              _realImg.style.cssText = 'width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;';
+              _realImg.loading = 'lazy';
+              triblendImgEl = _realImg;
+            }
+            break;
+          }
+        }
+      })();
+
+      // Text block
+      var triblendTextWrap = document.createElement('div');
+      triblendTextWrap.style.cssText = 'flex:1;min-width:0;';
+
+      var triblendTitle = document.createElement('div');
+      triblendTitle.style.cssText = 'font-size:14px;font-weight:700;color:var(--ap-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      triblendTitle.textContent = 'Custom Unisex Tri-Blend Tee';
+
+      var triblendSub = document.createElement('div');
+      triblendSub.style.cssText = 'font-size:11px;color:var(--ap-gray);margin-top:3px;line-height:1.4;';
+      triblendSub.textContent = 'Front & back logo · Up to 2 colors · Separate listing';
+
+      triblendTextWrap.appendChild(triblendTitle);
+      triblendTextWrap.appendChild(triblendSub);
+
+      // Tooltip wrapper — custom rich tooltip on hover
+      var triblendTooltip = document.createElement('div');
+      triblendTooltip.style.cssText = [
+        'display:none;',
+        'position:absolute;',
+        'bottom:calc(100% + 8px);',
+        'left:50%;',
+        'transform:translateX(-50%);',
+        'background:#1e293b;',
+        'color:#f1f5f9;',
+        'font-size:12px;',
+        'line-height:1.5;',
+        'padding:10px 14px;',
+        'border-radius:10px;',
+        'box-shadow:0 8px 24px rgba(0,0,0,0.25);',
+        'z-index:200;',
+        'width:260px;',
+        'pointer-events:none;',
+        'text-align:left;',
+        'border:1px solid rgba(255,255,255,0.08);',
+      ].join('');
+      triblendTooltip.innerHTML = [
+        '<strong style="display:block;margin-bottom:5px;font-size:13px;">Add a New Custom Tri-Blend Shirt</strong>',
+        'Creates a brand-new Unisex Tri-Blend Tee listing in your store — completely separate from any existing shirt.',
+        ' You can add a custom logo to the front and optionally the back, choose up to 2 garment colors,',
+        ' and adjust placement in the built-in editor. Dual-logo orders are priced $4 higher.',
+      ].join('');
+
+      // Tooltip arrow
+      var triblendArrow = document.createElement('div');
+      triblendArrow.style.cssText = [
+        'position:absolute;bottom:-5px;left:50%;transform:translateX(-50%) rotate(45deg);',
+        'width:10px;height:10px;',
+        'background:#1e293b;',
+        'border-right:1px solid rgba(255,255,255,0.08);',
+        'border-bottom:1px solid rgba(255,255,255,0.08);',
+      ].join('');
+      triblendTooltip.appendChild(triblendArrow);
+      addTriblendCard.appendChild(triblendTooltip);
+
+      addTriblendCard.addEventListener('mouseenter', function(){ triblendTooltip.style.display = 'block'; });
+      addTriblendCard.addEventListener('mouseleave', function(){ triblendTooltip.style.display = 'none'; });
+
+      // "Add to Store" action button
+      var triblendActionsEl = document.createElement('div');
+      triblendActionsEl.className = 'ap-product-row__actions';
+
+      var addTriblendBtn = document.createElement('button');
+      addTriblendBtn.type = 'button';
+      addTriblendBtn.style.cssText = [
+        'display:inline-flex;align-items:center;gap:6px;',
+        'padding:8px 16px;',
+        'background:#3b82f6;color:#ffffff;',
+        'border-radius:8px;font-size:13px;font-weight:700;',
+        'border:none;cursor:pointer;',
+        'transition:background 0.15s ease;',
+        'white-space:nowrap;flex-shrink:0;',
+      ].join('');
+      addTriblendBtn.innerHTML = '✨ Add to Store';
+      addTriblendBtn.title = 'Create a new Custom Tri-Blend Tee listing with your logo and color choices';
+      addTriblendBtn.addEventListener('mouseover', function(){ this.style.background='#2563eb'; });
+      addTriblendBtn.addEventListener('mouseout',  function(){ this.style.background='#3b82f6'; });
+
+      addTriblendBtn.addEventListener('click', function(){
+        var proShirtUrl = SSAP.editorProShirtBc3413BaseUrl
+          + '?shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+          + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+          + '&mode=embedded';
+        if(SSAP.shopLogoSrc){
+          proShirtUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
+        }
+        apOpenEditorModal(proShirtUrl);
+      });
+
+      triblendActionsEl.appendChild(addTriblendBtn);
+
+      addTriblendCard.appendChild(triblendImgEl);
+      addTriblendCard.appendChild(triblendTextWrap);
+      addTriblendCard.appendChild(triblendActionsEl);
+
+      apProductsContainer.appendChild(addTriblendCard);
+    }
+  }    // end apRenderProducts
 
   function apEscape(str){
     return String(str)
