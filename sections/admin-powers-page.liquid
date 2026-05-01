@@ -790,6 +790,7 @@
 {%- assign editor_m2580_base_url = 'https://printfulautomation-production.up.railway.app/editor/m2580' -%}
 {%- assign editor_cc1467y_base_url = 'https://printfulautomation-production.up.railway.app/editor/cc1467y' -%}
 {%- assign editor_bc3413_back_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413_back' -%}
+{%- assign editor_pro_shirt_bc3413_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3413' -%}
 {%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
    Not actually secret — it's already in the public repo, only gates the editor page,
    and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
@@ -830,6 +831,7 @@
     SSAP.editorM2580BaseUrl = {{ editor_m2580_base_url | json }};
     SSAP.editorCc1467yBaseUrl = {{ editor_cc1467y_base_url | json }};
     SSAP.editorBc3413BackBaseUrl = {{ editor_bc3413_back_base_url | json }};
+    SSAP.editorProShirtBc3413BaseUrl = {{ editor_pro_shirt_bc3413_base_url | json }};
     SSAP.editorSecret = {{ editor_secret | json }};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
@@ -1747,6 +1749,27 @@
           actionsEl.appendChild(editorBtn);
           actionsEl.appendChild(editColorsDisabledBtn);
         }
+      }
+
+      // BC3413 Pro Shirt Editor — always available, no logo required
+      if(isBc3413 && SSAP.editorProShirtBc3413BaseUrl && SSAP.editorSecret){
+        var proShirtUrl = SSAP.editorProShirtBc3413BaseUrl
+          + '?product_handle=' + encodeURIComponent(product.handle || '')
+          + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+          + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+          + '&mode=embedded';
+        // Optionally pass logo_url if we have one
+        if(SSAP.shopLogoSrc){
+          proShirtUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
+        }
+        var proShirtBtn = document.createElement('button');
+        proShirtBtn.type = 'button';
+        proShirtBtn.className = 'ap-edit-placement-btn';
+        proShirtBtn.dataset.productHandle = product.handle || '';
+        proShirtBtn.innerHTML = '🚀 Pro Editor';
+        proShirtBtn.title = 'Open the Pro Shirt Editor — upload logos, pick colors, adjust placement';
+        proShirtBtn.addEventListener('click', function(){ apOpenEditorModal(proShirtUrl); });
+        actionsEl.appendChild(proShirtBtn);
       }
 
       // BC3413 Back placement editor — show for any product tagged bc3413_back
