@@ -1,5 +1,5 @@
 {% comment %}
-  ADMIN POWERS — V12 (SECTION FILE)
+  ADMIN POWERS — V13 (SECTION FILE)
   - Self-contained section (no Custom Liquid block needed).
   - V12: Mobile-first single-dashboard redesign with tab navigation.
     Single card with tabs (Overview | Members | Products | Danger).
@@ -8,6 +8,7 @@
   - V11: Route all calls to Railway (remove Mechanic URL). Remove credentials:include from fetches.
   - God Mode: Ryan Irwin hardcoded + super-admin tag.
   - QR code, public toggle, invite/remove members.
+  - V13: Wider desktop layout, Products-first tabs, hero Share Store modal, split Main vs Custom/Pro products, single editor button, silent product refresh.
   - Premium design upgrade.
 {% endcomment %}
 
@@ -88,7 +89,7 @@
 
   /* ── MAIN LAYOUT ───────────────────────────────────────── */
   .ap-wrap {
-    max-width: 800px; margin: 0 auto; padding: 40px 20px 80px;
+    max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px;
     font-family: var(--ap-font); color: var(--ap-text);
   }
 
@@ -735,6 +736,81 @@
     display: block; object-fit: contain; margin-bottom: 8px;
   }
 
+
+  /* ── V13 DESKTOP ADMIN UPGRADES ───────────────────────── */
+  .ap-share-overlay {
+    display: none; position: fixed; inset: 0; z-index: 9997;
+    background: rgba(15,23,42,0.58); backdrop-filter: blur(5px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .ap-share-overlay.open { display: flex; }
+  .ap-share-dialog {
+    width: min(520px, 100%); background: #fff; border-radius: 20px;
+    border: 1px solid rgba(15,23,42,0.08); box-shadow: 0 32px 80px rgba(0,0,0,0.28);
+    padding: 24px; position: relative; animation: ap-fadeIn 0.2s ease-out;
+  }
+  .ap-share-close {
+    position: absolute; top: 14px; right: 14px; width: 34px; height: 34px;
+    border-radius: 10px; border: 1px solid var(--ap-border); background: #fff;
+    color: var(--ap-text); cursor: pointer; font-weight: 900;
+  }
+  .ap-share-close:hover { background: #f8fafc; }
+  .ap-share-head { padding-right: 44px; margin-bottom: 18px; }
+  .ap-share-head h3 { margin: 0 0 5px; font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
+  .ap-share-head p { margin: 0; font-size: 13px; color: var(--ap-gray); line-height: 1.45; }
+  .ap-share-dialog .ap-tabs { background: #f8fafc; border: 1px solid var(--ap-border); border-radius: 12px; padding: 4px; }
+  .ap-share-dialog .ap-tab-btn { flex: 1; padding: 10px 12px; }
+  .ap-share-dialog .ap-tab-btn.active { background: #fff; box-shadow: var(--ap-shadow-sm); }
+
+  .ap-products-grid {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+    gap: 20px; align-items: start;
+  }
+  .ap-product-box {
+    background: #ffffff; border: 1px solid var(--ap-border); border-radius: 18px;
+    box-shadow: var(--ap-shadow-sm); padding: 18px; min-width: 0;
+  }
+  .ap-product-box--custom { background: linear-gradient(180deg, #ffffff 0%, #f8f7ff 100%); }
+  .ap-product-box-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--ap-border);
+  }
+  .ap-product-box-title { margin: 0; font-size: 16px; font-weight: 900; letter-spacing: -0.01em; color: var(--ap-text); }
+  .ap-product-box-sub { margin: 3px 0 0; font-size: 12px; color: var(--ap-gray); line-height: 1.35; }
+  .ap-product-count {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px;
+    padding: 0 8px; border-radius: 99px; background: #eef2ff; color: #3730a3;
+    font-size: 12px; font-weight: 900;
+  }
+  .ap-product-section-empty {
+    display: none; padding: 28px 14px; text-align: center; color: var(--ap-gray);
+    font-size: 13px; border: 1px dashed var(--ap-border); border-radius: 14px; background: #f8fafc;
+  }
+  .ap-product-editor-wrap { position: relative; display: inline-flex; }
+  .ap-product-editor-tip {
+    display: none; position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%);
+    width: 230px; padding: 10px 12px; background: #0f172a; color: #fff; border-radius: 10px;
+    font-size: 12px; line-height: 1.35; font-weight: 600; text-align: center; z-index: 50;
+    box-shadow: 0 12px 24px rgba(15,23,42,0.25); pointer-events: none;
+  }
+  .ap-product-editor-tip::after {
+    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent; border-top-color: #0f172a;
+  }
+  .ap-product-editor-wrap:hover .ap-product-editor-tip { display: block; }
+
+  @media (max-width: 980px) {
+    .ap-products-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .ap-wrap { max-width: 100%; padding: 16px 14px 60px; }
+    .ap-products-grid { gap: 14px; }
+    .ap-product-box { padding: 14px; }
+    .ap-product-box-head { align-items: flex-start; }
+    .ap-share-dialog { padding: 20px 16px; }
+    .ap-copy-row { flex-direction: column; }
+  }
+
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -848,69 +924,52 @@
     </div>
     <div class="ap-hero-actions">
       <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">View Store ↗</a>
+      <button id="apBtnShareStore" type="button" class="ap-btn ap-btn--glass">🔗 Share Store</button>
       <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
     </div>
   </div>
+
+  <!-- SHARE STORE MODAL -->
+  <div class="ap-share-overlay" id="apShareOverlay" aria-hidden="true">
+    <div class="ap-share-dialog" role="dialog" aria-modal="true" aria-labelledby="apShareTitle">
+      <button id="apShareClose" type="button" class="ap-share-close" aria-label="Close share options">✕</button>
+      <div class="ap-share-head">
+        <h3 id="apShareTitle">Share this store</h3>
+        <p>Copy the store link or show the QR code so people can join and order without you collecting payments.</p>
+      </div>
+      <div class="ap-tabs">
+        <button class="ap-tab-btn active" data-tab="apTabLink">🔗 Copy Link</button>
+        <button class="ap-tab-btn" data-tab="apTabQR">📱 QR Code</button>
+      </div>
+      <div id="apTabLink" class="ap-tab-content">
+        <div class="ap-copy-row">
+          <input id="apInputJoinLink" class="ap-input ap-input-mono" value="{{ join_link | escape }}" readonly>
+          <button id="apBtnCopy" class="ap-btn ap-btn--primary">Copy</button>
+        </div>
+        <p class="ap-helper">Send this link by text, email, team chat, or social post.</p>
+      </div>
+      <div id="apTabQR" class="ap-tab-content" style="display:none;">
+        <div class="ap-qr-box">
+          <div id="ap-qrcode"></div>
+          <p class="ap-helper">Great for flyers, team meetings, or in-person signups.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- MAIN DASHBOARD CARD WITH TABS -->
   <div class="ap-main-card">
 
     <!-- MAIN PANEL TABS -->
     <div class="ap-main-tabs-wrap">
-    <div class="ap-main-tabs" role="tablist">
-      <button class="ap-main-tab-btn active" id="apTabBtnOverview" data-main-tab="apPanelOverview" role="tab" aria-selected="true" aria-controls="apPanelOverview"><span class="ap-tab-icon">🏠</span><span class="ap-tab-label">Overview</span></button>
-      <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers"><span class="ap-tab-icon">👥</span><span class="ap-tab-label">Members</span></button>
-      <button class="ap-main-tab-btn" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="false" aria-controls="apPanelProducts"><span class="ap-tab-icon">📦</span><span class="ap-tab-label">Products</span></button>
-      <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings"><span class="ap-tab-icon">⚙️</span><span class="ap-tab-label">Settings</span></button>
-      <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger"><span class="ap-tab-icon">☠️</span><span class="ap-tab-label">Danger</span></button>
-    </div>
-    </div>
-
-    <!-- OVERVIEW PANEL -->
-    <div id="apPanelOverview" class="ap-main-panel active" role="tabpanel" aria-labelledby="apTabBtnOverview">
-
-      <div class="ap-radio-group">
-        <label class="ap-radio {% if join_mode == 'secure' %}selected{% endif %}">
-          <input type="radio" name="ap-joinmode" value="secure" {% if join_mode == 'secure' %}checked{% endif %}>
-          <div>
-            <span class="ap-radio-title">🔒 Secure (Invite Only)</span>
-            <span class="ap-radio-desc">Only people you add can access.</span>
-          </div>
-        </label>
-        <label class="ap-radio {% if join_mode == 'public' %}selected{% endif %}">
-          <input type="radio" name="ap-joinmode" value="public" {% if join_mode == 'public' %}checked{% endif %}>
-          <div>
-            <span class="ap-radio-title">🌐 Public (Shareable Link)</span>
-            <span class="ap-radio-desc">Anyone with the link or QR code can join.</span>
-          </div>
-        </label>
+      <div class="ap-main-tabs" role="tablist">
+        <button class="ap-main-tab-btn active" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="true" aria-controls="apPanelProducts"><span class="ap-tab-icon">📦</span><span class="ap-tab-label">Products</span></button>
+        <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers"><span class="ap-tab-icon">👥</span><span class="ap-tab-label">Members</span></button>
+        <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings"><span class="ap-tab-icon">⚙️</span><span class="ap-tab-label">Settings</span></button>
+        <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger"><span class="ap-tab-icon">☠️</span><span class="ap-tab-label">Danger</span></button>
       </div>
-
-      <button id="apBtnSaveMode" class="ap-btn ap-btn--primary ap-btn-full">Save Settings</button>
-      <div id="apStatusMode" class="ap-status"></div>
-
-      <div id="apBlockPublic" class="ap-public-block" {% if join_mode != 'public' %}style="display:none"{% endif %}>
-        <div class="ap-divider"></div>
-        <div class="ap-tabs">
-          <button class="ap-tab-btn active" data-tab="apTabLink">🔗 Copy Link</button>
-          <button class="ap-tab-btn" data-tab="apTabQR">📱 QR Code</button>
-        </div>
-        <div id="apTabLink" class="ap-tab-content">
-          <div class="ap-copy-row">
-            <input id="apInputJoinLink" class="ap-input ap-input-mono" value="{{ join_link | escape }}" readonly>
-            <button id="apBtnCopy" class="ap-btn ap-btn--outline">Copy</button>
-          </div>
-          <p class="ap-helper">Share this link with your team via chat or email.</p>
-        </div>
-        <div id="apTabQR" class="ap-tab-content" style="display:none;">
-          <div class="ap-qr-box">
-            <div id="ap-qrcode"></div>
-            <p class="ap-helper">Print for flyers or let people scan in person.</p>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /apPanelOverview -->
+    </div>
 
     <!-- MEMBERS PANEL -->
     <div id="apPanelMembers" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnMembers">
@@ -938,11 +997,37 @@
     </div><!-- /apPanelMembers -->
 
     <!-- PRODUCTS PANEL -->
-    <div id="apPanelProducts" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnProducts">
+    <div id="apPanelProducts" class="ap-main-panel active" role="tabpanel" aria-labelledby="apTabBtnProducts">
 
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
       <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found for this store.</div>
-      <div id="apProductsContainer" class="ap-product-list"></div>
+
+      <div class="ap-products-grid" id="apProductsGrid">
+        <section class="ap-product-box ap-product-box--main">
+          <div class="ap-product-box-head">
+            <div>
+              <h3 class="ap-product-box-title">Main Products</h3>
+              <p class="ap-product-box-sub">The standard products currently live in this store.</p>
+            </div>
+            <span class="ap-product-count" id="apMainProductCount">0</span>
+          </div>
+          <div id="apMainProductsEmpty" class="ap-product-section-empty">No main products found yet.</div>
+          <div id="apProductsMainContainer" class="ap-product-list"></div>
+        </section>
+
+        <section class="ap-product-box ap-product-box--custom" id="apCustomProductsBox" style="display:none;">
+          <div class="ap-product-box-head">
+            <div>
+              <h3 class="ap-product-box-title">Custom Builds / Pro Shirts</h3>
+              <p class="ap-product-box-sub">Premium custom products built with the pro editor.</p>
+            </div>
+            <span class="ap-product-count" id="apCustomProductCount">0</span>
+          </div>
+          <div id="apCustomProductsEmpty" class="ap-product-section-empty">No custom builds for this store yet.</div>
+          <div id="apProductsCustomContainer" class="ap-product-list"></div>
+        </section>
+      </div>
+
       <div id="apStatusProducts" class="ap-status"></div>
     </div><!-- /apPanelProducts -->
 
@@ -1323,6 +1408,26 @@
     tick();
   }
 
+  // ── SHARE STORE MODAL ───────────────────────────────────────
+  var apBtnShareStore = document.getElementById('apBtnShareStore');
+  var apShareOverlay = document.getElementById('apShareOverlay');
+  var apShareClose = document.getElementById('apShareClose');
+  function apOpenShareModal(){
+    if(!apShareOverlay) return;
+    apShareOverlay.classList.add('open');
+    apShareOverlay.setAttribute('aria-hidden', 'false');
+  }
+  function apCloseShareModal(){
+    if(!apShareOverlay) return;
+    apShareOverlay.classList.remove('open');
+    apShareOverlay.setAttribute('aria-hidden', 'true');
+  }
+  if(apBtnShareStore) apBtnShareStore.addEventListener('click', apOpenShareModal);
+  if(apShareClose) apShareClose.addEventListener('click', apCloseShareModal);
+  if(apShareOverlay){
+    apShareOverlay.addEventListener('click', function(e){ if(e.target === apShareOverlay) apCloseShareModal(); });
+  }
+
   // ── MAIN TAB SWITCHING ──────────────────────────────────────
   var apProductsLoaded = false;
 
@@ -1362,12 +1467,13 @@
     if(e.target && e.target.name === 'ap-joinmode'){
       document.querySelectorAll('.ap-radio').forEach(function(r){ r.classList.remove('selected'); });
       e.target.closest('.ap-radio').classList.add('selected');
-      document.getElementById('apBlockPublic').style.display = (e.target.value === 'public') ? 'block' : 'none';
+      var apBlockPublic = document.getElementById('apBlockPublic');
+      if(apBlockPublic) apBlockPublic.style.display = (e.target.value === 'public') ? 'block' : 'none';
     }
   });
 
   // QR CODE
-  if(typeof QRCode !== 'undefined'){
+  if(typeof QRCode !== 'undefined' && document.getElementById('ap-qrcode')){
     new QRCode(document.getElementById('ap-qrcode'), {
       text: {{ join_link | json }},
       width: 160, height: 160,
@@ -1395,25 +1501,31 @@
     el.className = 'ap-status ' + (type || '');
   }
 
-  // SAVE MODE
-  document.getElementById('apBtnSaveMode').addEventListener('click', async function(){
-    var btn = this;
-    var mode = document.querySelector('input[name="ap-joinmode"]:checked').value;
-    btn.disabled = true; btn.textContent = 'Saving…';
-    setStatus(document.getElementById('apStatusMode'), '', '');
-    try {
-      var res = await apPost('set_join_mode', { join_mode: mode });
-      if(!res.ok) throw new Error();
-      setStatus(document.getElementById('apStatusMode'), '✅ Settings saved!', 'ok');
-    } catch(e) {
-      setStatus(document.getElementById('apStatusMode'), '❌ Error saving settings.', 'err');
-    } finally {
-      btn.disabled = false; btn.textContent = 'Save Settings';
-    }
-  });
+  // SAVE MODE (legacy join-mode UI is hidden in V13; guard in case it is re-enabled later)
+  var apBtnSaveMode = document.getElementById('apBtnSaveMode');
+  if(apBtnSaveMode){
+    apBtnSaveMode.addEventListener('click', async function(){
+      var btn = this;
+      var checkedMode = document.querySelector('input[name="ap-joinmode"]:checked');
+      if(!checkedMode) return;
+      var mode = checkedMode.value;
+      btn.disabled = true; btn.textContent = 'Saving…';
+      setStatus(document.getElementById('apStatusMode'), '', '');
+      try {
+        var res = await apPost('set_join_mode', { join_mode: mode });
+        if(!res.ok) throw new Error();
+        setStatus(document.getElementById('apStatusMode'), '✅ Settings saved!', 'ok');
+      } catch(e) {
+        setStatus(document.getElementById('apStatusMode'), '❌ Error saving settings.', 'err');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Save Settings';
+      }
+    });
+  }
 
   // COPY LINK
-  document.getElementById('apBtnCopy').addEventListener('click', function(){
+  var apBtnCopy = document.getElementById('apBtnCopy');
+  if(apBtnCopy) apBtnCopy.addEventListener('click', function(){
     var btn = this;
     var link = document.getElementById('apInputJoinLink').value;
     if(navigator.clipboard && window.isSecureContext){
@@ -1638,10 +1750,17 @@
   });
 
   // ── PRODUCTS TAB ──────────────────────────────────────────────
-  var apProductsSpinner   = document.getElementById('apProductsSpinner');
-  var apProductsEmpty     = document.getElementById('apProductsEmpty');
-  var apProductsContainer = document.getElementById('apProductsContainer');
-  var apStatusProducts    = document.getElementById('apStatusProducts');
+  var apProductsSpinner         = document.getElementById('apProductsSpinner');
+  var apProductsEmpty           = document.getElementById('apProductsEmpty');
+  var apProductsMainContainer   = document.getElementById('apProductsMainContainer');
+  var apProductsCustomContainer = document.getElementById('apProductsCustomContainer');
+  var apProductsContainer       = apProductsMainContainer; // legacy fallback for older helpers
+  var apCustomProductsBox       = document.getElementById('apCustomProductsBox');
+  var apMainProductsEmpty       = document.getElementById('apMainProductsEmpty');
+  var apCustomProductsEmpty     = document.getElementById('apCustomProductsEmpty');
+  var apMainProductCount        = document.getElementById('apMainProductCount');
+  var apCustomProductCount      = document.getElementById('apCustomProductCount');
+  var apStatusProducts          = document.getElementById('apStatusProducts');
 
   function apProductsStatus(msg, type){
     if(!apStatusProducts) return;
@@ -1649,13 +1768,64 @@
     apStatusProducts.className = 'ap-status ' + (type || '');
   }
 
+  function apProductTagsArray(tags){
+    if(Array.isArray(tags)) return tags.map(function(t){ return String(t || '').toLowerCase().trim(); });
+    if(typeof tags === 'string') return tags.split(',').map(function(t){ return String(t || '').toLowerCase().trim(); });
+    return [];
+  }
+
+  function apIsCustomProduct(product){
+    var tags = apProductTagsArray(product && product.tags);
+    for(var i = 0; i < tags.length; i++){
+      var t = tags[i];
+      if(t === 'custom-build' || t.indexOf('custom-build--') === 0 || t.indexOf('pro-shirt') === 0) return true;
+    }
+    return false;
+  }
+
+  function apRefreshProductEmptyStates(mainCount, customCount){
+    if(apMainProductCount) apMainProductCount.textContent = String(mainCount || 0);
+    if(apCustomProductCount) apCustomProductCount.textContent = String(customCount || 0);
+    if(apMainProductsEmpty) apMainProductsEmpty.style.display = mainCount ? 'none' : 'block';
+    if(apCustomProductsEmpty) apCustomProductsEmpty.style.display = customCount ? 'none' : 'block';
+    if(apCustomProductsBox) apCustomProductsBox.style.display = customCount ? 'block' : 'none';
+    if(apProductsEmpty) apProductsEmpty.style.display = (mainCount || customCount) ? 'none' : 'block';
+  }
+
+  function apPolishEditorButtons(actionsEl){
+    if(!actionsEl) return;
+    Array.prototype.slice.call(actionsEl.querySelectorAll('.ap-edit-placement-btn')).forEach(function(btn){
+      if(/edit colors/i.test(btn.textContent || '')) btn.remove();
+    });
+    Array.prototype.slice.call(actionsEl.querySelectorAll('.ap-edit-placement-btn')).forEach(function(btn){
+      var noLogo = /no logo/i.test(btn.textContent || '') || btn.classList.contains('ap-edit-placement-btn--disabled');
+      btn.innerHTML = noLogo ? '✏️ Edit Logo Placement & Color (no logo)' : '✏️ Edit Logo Placement & Color';
+      btn.title = noLogo
+        ? 'Add a logo first before editing placement and colors.'
+        : 'Click to adjust logo size, logo placement, and product color options.';
+      if(!btn.parentNode.classList || !btn.parentNode.classList.contains('ap-product-editor-wrap')){
+        var wrap = document.createElement('span');
+        wrap.className = 'ap-product-editor-wrap';
+        btn.parentNode.insertBefore(wrap, btn);
+        wrap.appendChild(btn);
+        var tip = document.createElement('span');
+        tip.className = 'ap-product-editor-tip';
+        tip.textContent = noLogo ? 'Add a logo first, then you can edit placement and colors.' : 'Adjust the logo size, placement, and product color options.';
+        wrap.appendChild(tip);
+      }
+    });
+  }
+
   function apRenderProducts(products){
-    apProductsContainer.innerHTML = '';
+    if(apProductsMainContainer) apProductsMainContainer.innerHTML = '';
+    if(apProductsCustomContainer) apProductsCustomContainer.innerHTML = '';
+    var apMainCount = 0;
+    var apCustomCount = 0;
     if(!products || products.length === 0){
-      apProductsEmpty.style.display = 'block';
+      apRefreshProductEmptyStates(0, 0);
       return;
     }
-    apProductsEmpty.style.display = 'none';
+    if(apProductsEmpty) apProductsEmpty.style.display = 'none';
     function _isBc3413Tag(t){
       return String(t || '').toLowerCase().trim().indexOf('bc3413_') === 0;
     }
@@ -2068,6 +2238,8 @@
           actionsEl.appendChild(cc1467yEditColorsDisabledBtn);
         }
       }
+      apPolishEditorButtons(actionsEl);
+
       row.appendChild(imgEl);
       row.appendChild(titleEl);
       row.appendChild(actionsEl);
@@ -2080,7 +2252,13 @@
         apDeleteProduct(product.id, product.title || product.id, row);
       });
 
-      apProductsContainer.appendChild(row);
+      if(apIsCustomProduct(product)){
+        apCustomCount++;
+        if(apProductsCustomContainer) apProductsCustomContainer.appendChild(row);
+      } else {
+        apMainCount++;
+        if(apProductsMainContainer) apProductsMainContainer.appendChild(row);
+      }
     }); // end products.forEach
 
     // ── "Add New" card — Custom Tri-Blend Shirt ─────────────────────────────
@@ -2221,8 +2399,11 @@
       addTriblendCard.appendChild(triblendTextWrap);
       addTriblendCard.appendChild(triblendActionsEl);
 
-      apProductsContainer.appendChild(addTriblendCard);
+      apCustomCount++;
+      if(apProductsCustomContainer) apProductsCustomContainer.appendChild(addTriblendCard);
     }
+
+    apRefreshProductEmptyStates(apMainCount, apCustomCount);
   }    // end apRenderProducts
 
   function apEscape(str){
@@ -2233,24 +2414,29 @@
       .replace(/"/g, '&quot;');
   }
 
-  async function apLoadProducts(){
-    apProductsSpinner.style.display = 'block';
-    apProductsEmpty.style.display = 'none';
-    apProductsContainer.innerHTML = '';
-    apProductsStatus('', '');
+  async function apLoadProducts(options){
+    options = options || {};
+    var silent = !!options.silent;
+    if(apProductsSpinner && !silent) apProductsSpinner.style.display = 'block';
+    if(apProductsEmpty && !silent) apProductsEmpty.style.display = 'none';
+    if(!silent){
+      if(apProductsMainContainer) apProductsMainContainer.innerHTML = '';
+      if(apProductsCustomContainer) apProductsCustomContainer.innerHTML = '';
+      apProductsStatus('', '');
+    }
     try {
       var res = await fetch(
-        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products',
-        { headers: { 'X-Admin-Secret': AP_ADMIN_SECRET } }
+        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products?ts=' + Date.now(),
+        { headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }, cache: 'no-store' }
       );
       if(!res.ok) throw new Error('HTTP ' + res.status);
       var data = await res.json();
       var products = Array.isArray(data) ? data : (data.products || []);
       apRenderProducts(products);
     } catch(e){
-      apProductsStatus('❌ Could not load products: ' + (e.message || 'unknown error'), 'err');
+      if(!silent) apProductsStatus('❌ Could not load products: ' + (e.message || 'unknown error'), 'err');
     } finally {
-      apProductsSpinner.style.display = 'none';
+      if(apProductsSpinner && !silent) apProductsSpinner.style.display = 'none';
     }
   }
 
@@ -2292,15 +2478,26 @@
       if(!res.ok) throw new Error('HTTP ' + res.status);
       row.remove();
       apProductsStatus('✅ Product deleted.', 'ok');
-      if(apProductsContainer.children.length === 0){
-        apProductsEmpty.style.display = 'block';
-      }
+      var mainCountAfterDelete = apProductsMainContainer ? apProductsMainContainer.children.length : 0;
+      var customCountAfterDelete = apProductsCustomContainer ? apProductsCustomContainer.children.length : 0;
+      apRefreshProductEmptyStates(mainCountAfterDelete, customCountAfterDelete);
     } catch(e){
       apProductsStatus('❌ Could not delete product: ' + (e.message || 'unknown error'), 'err');
     }
   }
 
-  // Products are lazy-loaded when the Products tab is first clicked
+  // Products is the default tab in V13, so load immediately.
+  apProductsLoaded = true;
+  apLoadProducts();
+
+  // Quiet background refresh so newly built/rebuilt products show up without a manual browser refresh.
+  setInterval(function(){
+    if(document.hidden) return;
+    var productsPanel = document.getElementById('apPanelProducts');
+    if(productsPanel && productsPanel.classList.contains('active')){
+      apLoadProducts({ silent: true });
+    }
+  }, 60000);
 
 })();
 
