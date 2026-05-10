@@ -146,6 +146,18 @@
     border: 1px solid rgba(255,255,255,0.2); color: #fff;
   }
   .ap-btn--glass:hover { background: rgba(255,255,255,0.22); color: #fff; }
+  .ap-btn--share-primary {
+    background: #ffffff;
+    color: #1e1b4b;
+    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow: 0 10px 24px rgba(15,23,42,0.22);
+  }
+  .ap-btn--share-primary:hover {
+    background: #f8fafc;
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(15,23,42,0.28);
+  }
   .ap-btn--outline { background: transparent; border: 1px solid var(--ap-border); color: var(--ap-text); }
   .ap-btn--outline:hover { background: #f8fafc; border-color: #94a3b8; }
   .ap-btn--danger { background: #fee2e2; color: #991b1b; }
@@ -786,6 +798,27 @@
     display: none; padding: 28px 14px; text-align: center; color: var(--ap-gray);
     font-size: 13px; border: 1px dashed var(--ap-border); border-radius: 14px; background: #f8fafc;
   }
+  .ap-custom-builders-section {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ap-border);
+  }
+  .ap-custom-builders-head {
+    margin-bottom: 10px;
+  }
+  .ap-custom-builders-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--ap-text);
+    letter-spacing: -0.01em;
+  }
+  .ap-custom-builders-sub {
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: var(--ap-gray);
+    line-height: 1.35;
+  }
   .ap-product-editor-wrap { position: relative; display: inline-flex; }
   .ap-product-editor-tip {
     display: none; position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%);
@@ -923,8 +956,13 @@
       <p class="ap-hero-sub">Storefront Management Console · {{ shop_handle }}</p>
     </div>
     <div class="ap-hero-actions">
+      <button
+        id="apBtnShareStore"
+        type="button"
+        class="ap-btn ap-btn--share-primary"
+        title="Share this store with members. Anyone who opens the link will be asked to sign in or create an account, then this store will be added to their dashboard as a member-only store. Members can shop, but they do not get admin controls."
+      >🔗 Share Store</button>
       <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">View Store ↗</a>
-      <button id="apBtnShareStore" type="button" class="ap-btn ap-btn--glass">🔗 Share Store</button>
       <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
     </div>
   </div>
@@ -935,7 +973,7 @@
       <button id="apShareClose" type="button" class="ap-share-close" aria-label="Close share options">✕</button>
       <div class="ap-share-head">
         <h3 id="apShareTitle">Share this store</h3>
-        <p>Copy the store link or show the QR code so people can join and order without you collecting payments.</p>
+        <p>Send this link or QR code to anyone who needs access. New users will be asked to sign in or create an account. After they join, this store will appear on their dashboard as a member-only store.</p>
       </div>
       <div class="ap-tabs">
         <button class="ap-tab-btn active" data-tab="apTabLink">🔗 Copy Link</button>
@@ -946,12 +984,12 @@
           <input id="apInputJoinLink" class="ap-input ap-input-mono" value="{{ join_link | escape }}" readonly>
           <button id="apBtnCopy" class="ap-btn ap-btn--primary">Copy</button>
         </div>
-        <p class="ap-helper">Send this link by text, email, team chat, or social post.</p>
+        <p class="ap-helper">Members can shop from the store, but they cannot manage products, settings, or other members.</p>
       </div>
       <div id="apTabQR" class="ap-tab-content" style="display:none;">
         <div class="ap-qr-box">
           <div id="ap-qrcode"></div>
-          <p class="ap-helper">Great for flyers, team meetings, or in-person signups.</p>
+          <p class="ap-helper">Great for flyers, team meetings, or in-person signups. Scanning this gives member access only.</p>
         </div>
       </div>
     </div>
@@ -1023,8 +1061,16 @@
             </div>
             <span class="ap-product-count" id="apCustomProductCount">0</span>
           </div>
-          <div id="apCustomProductsEmpty" class="ap-product-section-empty">No custom builds for this store yet.</div>
+          <div id="apCustomProductsEmpty" class="ap-product-section-empty">No custom builds have been added yet.</div>
           <div id="apProductsCustomContainer" class="ap-product-list"></div>
+
+          <div id="apCustomBuildersSection" class="ap-custom-builders-section" style="display:none;">
+            <div class="ap-custom-builders-head">
+              <h4 class="ap-custom-builders-title">Available Custom Builders</h4>
+              <p class="ap-custom-builders-sub">Use these to create new custom products for this store.</p>
+            </div>
+            <div id="apCustomBuildersContainer" class="ap-product-list"></div>
+          </div>
         </section>
       </div>
 
@@ -1783,13 +1829,17 @@
     return false;
   }
 
-  function apRefreshProductEmptyStates(mainCount, customCount){
-    if(apMainProductCount) apMainProductCount.textContent = String(mainCount || 0);
-    if(apCustomProductCount) apCustomProductCount.textContent = String(customCount || 0);
+  function apRefreshProductEmptyStates(mainCount, customCount, builderCount){
+    mainCount = mainCount || 0;
+    customCount = customCount || 0;
+    builderCount = builderCount || 0;
+    if(apMainProductCount) apMainProductCount.textContent = String(mainCount);
+    if(apCustomProductCount) apCustomProductCount.textContent = String(customCount);
     if(apMainProductsEmpty) apMainProductsEmpty.style.display = mainCount ? 'none' : 'block';
     if(apCustomProductsEmpty) apCustomProductsEmpty.style.display = customCount ? 'none' : 'block';
-    if(apCustomProductsBox) apCustomProductsBox.style.display = customCount ? 'block' : 'none';
-    if(apProductsEmpty) apProductsEmpty.style.display = (mainCount || customCount) ? 'none' : 'block';
+    if(apCustomBuildersSection) apCustomBuildersSection.style.display = builderCount ? 'block' : 'none';
+    if(apCustomProductsBox) apCustomProductsBox.style.display = (customCount || builderCount) ? 'block' : 'none';
+    if(apProductsEmpty) apProductsEmpty.style.display = (mainCount || customCount || builderCount) ? 'none' : 'block';
   }
 
   function apPolishEditorButtons(actionsEl){
@@ -1819,8 +1869,10 @@
   function apRenderProducts(products){
     if(apProductsMainContainer) apProductsMainContainer.innerHTML = '';
     if(apProductsCustomContainer) apProductsCustomContainer.innerHTML = '';
+    if(apCustomBuildersContainer) apCustomBuildersContainer.innerHTML = '';
     var apMainCount = 0;
     var apCustomCount = 0;
+    var apBuilderCount = 0;
     if(!products || products.length === 0){
       apRefreshProductEmptyStates(0, 0);
       return;
@@ -2399,11 +2451,11 @@
       addTriblendCard.appendChild(triblendTextWrap);
       addTriblendCard.appendChild(triblendActionsEl);
 
-      apCustomCount++;
-      if(apProductsCustomContainer) apProductsCustomContainer.appendChild(addTriblendCard);
+      apBuilderCount++;
+      if(apCustomBuildersContainer) apCustomBuildersContainer.appendChild(addTriblendCard);
     }
 
-    apRefreshProductEmptyStates(apMainCount, apCustomCount);
+    apRefreshProductEmptyStates(apMainCount, apCustomCount, apBuilderCount);
   }    // end apRenderProducts
 
   function apEscape(str){
@@ -2422,6 +2474,7 @@
     if(!silent){
       if(apProductsMainContainer) apProductsMainContainer.innerHTML = '';
       if(apProductsCustomContainer) apProductsCustomContainer.innerHTML = '';
+      if(apCustomBuildersContainer) apCustomBuildersContainer.innerHTML = '';
       apProductsStatus('', '');
     }
     try {
@@ -2480,7 +2533,8 @@
       apProductsStatus('✅ Product deleted.', 'ok');
       var mainCountAfterDelete = apProductsMainContainer ? apProductsMainContainer.children.length : 0;
       var customCountAfterDelete = apProductsCustomContainer ? apProductsCustomContainer.children.length : 0;
-      apRefreshProductEmptyStates(mainCountAfterDelete, customCountAfterDelete);
+      var builderCountAfterDelete = apCustomBuildersContainer ? apCustomBuildersContainer.children.length : 0;
+      apRefreshProductEmptyStates(mainCountAfterDelete, customCountAfterDelete, builderCountAfterDelete);
     } catch(e){
       apProductsStatus('❌ Could not delete product: ' + (e.message || 'unknown error'), 'err');
     }
