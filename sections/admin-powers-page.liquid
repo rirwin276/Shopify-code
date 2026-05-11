@@ -188,19 +188,17 @@
     letter-spacing: -0.01em;
     color: #ffffff;
   }
-  .ap-share-help-bubble::after {
-    content: '';
+  .ap-share-help-bubble::after { display: none; }
+  .ap-smart-tooltip-arrow {
     position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%) rotate(45deg);
-    width: 12px; height: 12px;
+    width: 12px;
+    height: 12px;
     background: #1e293b;
+    transform: rotate(45deg);
     border-right: 1px solid rgba(255,255,255,0.09);
     border-bottom: 1px solid rgba(255,255,255,0.09);
+    pointer-events: none;
   }
-  .ap-share-help:hover .ap-share-help-bubble,
-  .ap-share-help:focus-within .ap-share-help-bubble { display: block; }
   @media (max-width: 700px) {
     .ap-share-help { width: 100%; }
     .ap-share-help-bubble { display: none !important; }
@@ -1013,6 +1011,7 @@
         <span class="ap-share-help-bubble" id="apShareHelpBubble" role="tooltip">
           <strong>Share this store</strong>
           Send this link to members. New users will be asked to sign in or create an account, then this store will be added to their dashboard as a member-only store. Members can shop, but they will not have admin controls.
+          <span class="ap-smart-tooltip-arrow" aria-hidden="true"></span>
         </span>
       </span>
       <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">View Store ↗</a>
@@ -1301,6 +1300,118 @@
       }
     } catch(_e){}
   })();
+
+  // ── SMART TOOLTIPS ───────────────────────────────────────────
+  function apInstallSmartTooltip(anchor, bubble, opts) {
+    if (!anchor || !bubble) return;
+    opts = opts || {};
+    var gap = opts.gap || 10;
+    var margin = opts.margin || 12;
+    var arrow = opts.arrow || bubble.querySelector('.ap-smart-tooltip-arrow');
+    var hideTimer = null;
+
+    function isMobileTooltipBlocked() {
+      return window.matchMedia && window.matchMedia('(max-width: 700px)').matches;
+    }
+
+    function place() {
+      if (isMobileTooltipBlocked()) {
+        bubble.style.display = 'none';
+        return;
+      }
+
+      clearTimeout(hideTimer);
+      bubble.style.display = 'block';
+      bubble.style.visibility = 'hidden';
+      bubble.style.position = 'fixed';
+      bubble.style.bottom = 'auto';
+      bubble.style.right = 'auto';
+      bubble.style.transform = 'none';
+      bubble.style.zIndex = opts.zIndex || 10050;
+
+      var anchorRect = anchor.getBoundingClientRect();
+      var vw = window.innerWidth || document.documentElement.clientWidth;
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var bRect = bubble.getBoundingClientRect();
+      var bubbleW = bRect.width;
+      var bubbleH = bRect.height;
+      var anchorCenter = anchorRect.left + (anchorRect.width / 2);
+
+      var roomAbove = anchorRect.top;
+      var roomBelow = vh - anchorRect.bottom;
+      var placement = (roomAbove >= bubbleH + gap + margin || roomAbove >= roomBelow) ? 'top' : 'bottom';
+
+      var top;
+      if (placement === 'top') {
+        top = anchorRect.top - bubbleH - gap;
+        if (top < margin) {
+          placement = 'bottom';
+          top = anchorRect.bottom + gap;
+        }
+      } else {
+        top = anchorRect.bottom + gap;
+        if (top + bubbleH > vh - margin && roomAbove > roomBelow) {
+          placement = 'top';
+          top = anchorRect.top - bubbleH - gap;
+        }
+      }
+
+      top = Math.max(margin, Math.min(top, vh - bubbleH - margin));
+      var left = anchorCenter - (bubbleW / 2);
+      left = Math.max(margin, Math.min(left, vw - bubbleW - margin));
+
+      bubble.style.top = Math.round(top) + 'px';
+      bubble.style.left = Math.round(left) + 'px';
+      bubble.style.visibility = 'visible';
+      bubble.setAttribute('data-placement', placement);
+
+      if (arrow) {
+        var arrowSize = arrow.offsetWidth || 12;
+        var arrowLeft = anchorCenter - left - (arrowSize / 2);
+        arrowLeft = Math.max(14, Math.min(arrowLeft, bubbleW - 14 - arrowSize));
+        arrow.style.left = Math.round(arrowLeft) + 'px';
+        arrow.style.right = 'auto';
+        arrow.style.transform = 'rotate(45deg)';
+        arrow.style.background = '#1e293b';
+
+        if (placement === 'top') {
+          arrow.style.top = 'auto';
+          arrow.style.bottom = '-' + Math.round(arrowSize / 2) + 'px';
+          arrow.style.borderRight = '1px solid rgba(255,255,255,0.09)';
+          arrow.style.borderBottom = '1px solid rgba(255,255,255,0.09)';
+          arrow.style.borderLeft = '0';
+          arrow.style.borderTop = '0';
+        } else {
+          arrow.style.bottom = 'auto';
+          arrow.style.top = '-' + Math.round(arrowSize / 2) + 'px';
+          arrow.style.borderLeft = '1px solid rgba(255,255,255,0.09)';
+          arrow.style.borderTop = '1px solid rgba(255,255,255,0.09)';
+          arrow.style.borderRight = '0';
+          arrow.style.borderBottom = '0';
+        }
+      }
+    }
+
+    function hide() {
+      hideTimer = setTimeout(function(){
+        bubble.style.display = 'none';
+        bubble.style.visibility = 'hidden';
+      }, 40);
+    }
+
+    anchor.addEventListener('mouseenter', place);
+    anchor.addEventListener('focusin', place);
+    anchor.addEventListener('mouseleave', hide);
+    anchor.addEventListener('focusout', hide);
+    window.addEventListener('resize', function(){ if (bubble.style.display === 'block') place(); });
+    window.addEventListener('scroll', function(){ if (bubble.style.display === 'block') place(); }, true);
+  }
+
+  apInstallSmartTooltip(
+    document.querySelector('.ap-share-help'),
+    document.getElementById('apShareHelpBubble'),
+    { gap: 12, margin: 14, zIndex: 10060 }
+  );
 
   // ── BC3413 EDITOR MODAL ─────────────────────────────────────
   var apEditorOverlay = document.getElementById('apEditorOverlay');
@@ -2454,18 +2565,13 @@
 
       // Tooltip arrow
       var triblendArrow = document.createElement('div');
-      triblendArrow.style.cssText = [
-        'position:absolute;bottom:-5px;left:50%;transform:translateX(-50%) rotate(45deg);',
-        'width:10px;height:10px;',
-        'background:#1e293b;',
-        'border-right:1px solid rgba(255,255,255,0.08);',
-        'border-bottom:1px solid rgba(255,255,255,0.08);',
-      ].join('');
+      triblendArrow.className = 'ap-smart-tooltip-arrow';
+      triblendArrow.style.width = '10px';
+      triblendArrow.style.height = '10px';
       triblendTooltip.appendChild(triblendArrow);
       addTriblendCard.appendChild(triblendTooltip);
 
-      addTriblendCard.addEventListener('mouseenter', function(){ triblendTooltip.style.display = 'block'; });
-      addTriblendCard.addEventListener('mouseleave', function(){ triblendTooltip.style.display = 'none'; });
+      apInstallSmartTooltip(addTriblendCard, triblendTooltip, { arrow: triblendArrow, gap: 10, margin: 12, zIndex: 10070 });
 
       // "Add to Store" action button
       var triblendActionsEl = document.createElement('div');
