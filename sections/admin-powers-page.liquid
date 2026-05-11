@@ -945,6 +945,7 @@
 {%- assign editor_cc1467y_base_url = 'https://printfulautomation-production.up.railway.app/editor/cc1467y' -%}
 {%- assign editor_bc3413_back_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413_back' -%}
 {%- assign editor_pro_shirt_bc3413_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3413' -%}
+{%- assign editor_pro_shirt_bc3001y_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3001y' -%}
 {%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
    Not actually secret — it's already in the public repo, only gates the editor page,
    and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
@@ -986,6 +987,7 @@
     SSAP.editorCc1467yBaseUrl = {{ editor_cc1467y_base_url | json }};
     SSAP.editorBc3413BackBaseUrl = {{ editor_bc3413_back_base_url | json }};
     SSAP.editorProShirtBc3413BaseUrl = {{ editor_pro_shirt_bc3413_base_url | json }};
+    SSAP.editorProShirtBc3001yBaseUrl = {{ editor_pro_shirt_bc3001y_base_url | json }};
     SSAP.editorSecret = {{ editor_secret | json }};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
@@ -2612,6 +2614,147 @@
 
       apBuilderCount++;
       if(apCustomBuildersContainer) apCustomBuildersContainer.appendChild(addTriblendCard);
+    }
+
+    // ── "Add New" card — Custom Youth Staple Tee ─────────────────────────────
+    if(SSAP.editorProShirtBc3001yBaseUrl && SSAP.editorSecret){
+      var addYouthCard = document.createElement('div');
+      addYouthCard.className = 'ap-product-row ap-add-product-row';
+      addYouthCard.style.cssText = [
+        'border: 2px dashed rgba(16,185,129,0.35);',
+        'background: rgba(16,185,129,0.05);',
+        'cursor: default;',
+        'position: relative;',
+      ].join('');
+
+      // Youth shirt thumbnail — try to reuse an existing BC3001Y product image, otherwise fallback
+      var youthImgEl = document.createElement('div');
+      youthImgEl.style.cssText = [
+        'width:52px;height:52px;border-radius:8px;flex-shrink:0;',
+        'display:flex;align-items:center;justify-content:center;',
+        'background:rgba(16,185,129,0.1);font-size:28px;',
+      ].join('');
+      youthImgEl.textContent = '👕';
+
+      (function(){
+        for(var _yi = 0; _yi < products.length; _yi++){
+          var _p = products[_yi];
+          var _tags = _p.tags || [];
+          var _tagText = Array.isArray(_tags) ? _tags.join(' ').toLowerCase() : String(_tags || '').toLowerCase();
+          var _titleText = String(_p.title || '').toLowerCase();
+          var _hasBc3001y = _tagText.indexOf('bc3001y') >= 0 || _titleText.indexOf('youth staple') >= 0;
+
+          if(_hasBc3001y){
+            var _imgSrc = _p.featured_image || _p.image ||
+              (_p.images && _p.images[0] && (_p.images[0].src || _p.images[0])) || null;
+
+            if(_imgSrc){
+              var _realYouthImg = document.createElement('img');
+              _realYouthImg.src = _imgSrc;
+              _realYouthImg.alt = 'Youth Staple Tee';
+              _realYouthImg.style.cssText = 'width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;';
+              _realYouthImg.loading = 'lazy';
+              youthImgEl = _realYouthImg;
+            }
+            break;
+          }
+        }
+      })();
+
+      // Text block
+      var youthTextWrap = document.createElement('div');
+      youthTextWrap.style.cssText = 'flex:1;min-width:0;';
+
+      var youthTitle = document.createElement('div');
+      youthTitle.style.cssText = 'font-size:14px;font-weight:700;color:var(--ap-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      youthTitle.textContent = 'Custom Youth Staple Tee';
+
+      var youthSub = document.createElement('div');
+      youthSub.style.cssText = 'font-size:11px;color:var(--ap-gray);margin-top:3px;line-height:1.4;';
+      youthSub.textContent = 'Front & back logo · Up to 2 colors · Separate listing';
+
+      youthTextWrap.appendChild(youthTitle);
+      youthTextWrap.appendChild(youthSub);
+
+      // Tooltip wrapper — custom rich tooltip on hover
+      var youthTooltip = document.createElement('div');
+      youthTooltip.style.cssText = [
+        'display:none;',
+        'position:absolute;',
+        'bottom:calc(100% + 8px);',
+        'left:50%;',
+        'transform:translateX(-50%);',
+        'background:#1e293b;',
+        'color:#f1f5f9;',
+        'font-size:12px;',
+        'line-height:1.5;',
+        'padding:10px 14px;',
+        'border-radius:10px;',
+        'box-shadow:0 8px 24px rgba(0,0,0,0.25);',
+        'z-index:200;',
+        'width:260px;',
+        'pointer-events:none;',
+        'text-align:left;',
+        'border:1px solid rgba(255,255,255,0.08);',
+      ].join('');
+      youthTooltip.innerHTML = [
+        '<strong style="display:block;margin-bottom:5px;font-size:13px;">Add a New Custom Youth Tee</strong>',
+        'Creates a brand-new Youth Staple Tee listing in your store — separate from the standard youth shirt.',
+        ' You can add a custom logo to the front and optionally the back, choose up to 2 garment colors,',
+        ' and adjust placement in the built-in editor. Front-only is $18 and front + back is $24.',
+      ].join('');
+
+      // Tooltip arrow
+      var youthArrow = document.createElement('div');
+      youthArrow.className = 'ap-smart-tooltip-arrow';
+      youthArrow.style.width = '10px';
+      youthArrow.style.height = '10px';
+      youthTooltip.appendChild(youthArrow);
+      addYouthCard.appendChild(youthTooltip);
+
+      apInstallSmartTooltip(addYouthCard, youthTooltip, { arrow: youthArrow, gap: 10, margin: 12, zIndex: 10070 });
+
+      // "Add to Store" action button
+      var youthActionsEl = document.createElement('div');
+      youthActionsEl.className = 'ap-product-row__actions';
+
+      var addYouthBtn = document.createElement('button');
+      addYouthBtn.type = 'button';
+      addYouthBtn.style.cssText = [
+        'display:inline-flex;align-items:center;gap:6px;',
+        'padding:8px 16px;',
+        'background:#10b981;color:#ffffff;',
+        'border-radius:8px;font-size:13px;font-weight:700;',
+        'border:none;cursor:pointer;',
+        'transition:background 0.15s ease;',
+        'white-space:nowrap;flex-shrink:0;',
+      ].join('');
+      addYouthBtn.innerHTML = '✨ Add to Store';
+      addYouthBtn.title = 'Create a new Custom Youth Staple Tee listing with your logo and color choices';
+      addYouthBtn.addEventListener('mouseover', function(){ this.style.background='#059669'; });
+      addYouthBtn.addEventListener('mouseout',  function(){ this.style.background='#10b981'; });
+
+      addYouthBtn.addEventListener('click', function(){
+        var youthProUrl = SSAP.editorProShirtBc3001yBaseUrl
+          + '?shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+          + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+          + '&mode=embedded';
+
+        if(SSAP.shopLogoSrc){
+          youthProUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
+        }
+
+        apOpenEditorModal(youthProUrl);
+      });
+
+      youthActionsEl.appendChild(addYouthBtn);
+
+      addYouthCard.appendChild(youthImgEl);
+      addYouthCard.appendChild(youthTextWrap);
+      addYouthCard.appendChild(youthActionsEl);
+
+      apBuilderCount++;
+      if(apCustomBuildersContainer) apCustomBuildersContainer.appendChild(addYouthCard);
     }
 
     apRefreshProductEmptyStates(apMainCount, apCustomCount, apBuilderCount);
