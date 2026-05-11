@@ -98,12 +98,13 @@
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
     border-radius: var(--ap-radius); padding: 36px 40px; margin-bottom: 32px;
     display: flex; justify-content: space-between; align-items: flex-end;
-    flex-wrap: wrap; gap: 20px; position: relative; overflow: hidden;
+    flex-wrap: wrap; gap: 20px; position: relative; overflow: visible;
     box-shadow: var(--ap-shadow-lg);
   }
   .ap-hero::before {
     content: ''; position: absolute; inset: 0;
     background: radial-gradient(circle at 80% 20%, rgba(99,102,241,0.3) 0%, transparent 60%);
+    border-radius: inherit; pointer-events: none;
   }
   .ap-hero-left { position: relative; z-index: 1; }
   .ap-hero-badge {
@@ -157,6 +158,52 @@
     color: #111827;
     transform: translateY(-1px);
     box-shadow: 0 14px 30px rgba(15,23,42,0.28);
+  }
+  .ap-share-help { position: relative; display: inline-flex; }
+  .ap-share-help-bubble {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(360px, calc(100vw - 48px));
+    background: #1e293b;
+    color: #f1f5f9;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 16px 18px;
+    border-radius: 14px;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.32);
+    z-index: 50;
+    pointer-events: none;
+    text-align: left;
+    border: 1px solid rgba(255,255,255,0.09);
+    white-space: normal;
+  }
+  .ap-share-help-bubble strong {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: #ffffff;
+  }
+  .ap-share-help-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px; height: 12px;
+    background: #1e293b;
+    border-right: 1px solid rgba(255,255,255,0.09);
+    border-bottom: 1px solid rgba(255,255,255,0.09);
+  }
+  .ap-share-help:hover .ap-share-help-bubble,
+  .ap-share-help:focus-within .ap-share-help-bubble { display: block; }
+  @media (max-width: 700px) {
+    .ap-share-help { width: 100%; }
+    .ap-share-help-bubble { display: none !important; }
   }
   .ap-btn--outline { background: transparent; border: 1px solid var(--ap-border); color: var(--ap-text); }
   .ap-btn--outline:hover { background: #f8fafc; border-color: #94a3b8; }
@@ -956,12 +1003,18 @@
       <p class="ap-hero-sub">Storefront Management Console · {{ shop_handle }}</p>
     </div>
     <div class="ap-hero-actions">
-      <button
-        id="apBtnShareStore"
-        type="button"
-        class="ap-btn ap-btn--share-primary"
-        title="Share this store with members. Anyone who opens the link will be asked to sign in or create an account, then this store will be added to their dashboard as a member-only store. Members can shop, but they do not get admin controls."
-      >🔗 Share Store</button>
+      <span class="ap-share-help">
+        <button
+          id="apBtnShareStore"
+          type="button"
+          class="ap-btn ap-btn--share-primary"
+          aria-describedby="apShareHelpBubble"
+        >🔗 Share Store</button>
+        <span class="ap-share-help-bubble" id="apShareHelpBubble" role="tooltip">
+          <strong>Share this store</strong>
+          Send this link to members. New users will be asked to sign in or create an account, then this store will be added to their dashboard as a member-only store. Members can shop, but they will not have admin controls.
+        </span>
+      </span>
       <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">View Store ↗</a>
       <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
     </div>
