@@ -608,13 +608,13 @@
   .ap-btn--danger-sm:hover { background: #fecaca; }
   .ap-edit-placement-btn {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px; background: #3b82f6; color: #ffffff;
+    padding: 6px 12px; background: #10b981; color: #ffffff;
     border-radius: 8px; font-size: 12px; font-weight: 700;
     text-decoration: none; border: none; cursor: pointer;
     transition: background 0.15s ease; font-family: var(--ap-font);
     white-space: nowrap; flex-shrink: 0;
   }
-  .ap-edit-placement-btn:hover { background: #2563eb; color: #ffffff; text-decoration: none; }
+  .ap-edit-placement-btn:hover { background: #059669; color: #ffffff; text-decoration: none; }
   .ap-edit-placement-btn--disabled {
     background: #94a3b8; cursor: not-allowed; pointer-events: auto;
   }
@@ -946,6 +946,7 @@
 {%- assign editor_bc3413_back_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413_back' -%}
 {%- assign editor_pro_shirt_bc3413_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3413' -%}
 {%- assign editor_pro_shirt_bc3001y_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3001y' -%}
+{%- assign editor_pro_shirt_m2580_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/m2580' -%}
 {%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
    Not actually secret — it's already in the public repo, only gates the editor page,
    and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
@@ -988,6 +989,7 @@
     SSAP.editorBc3413BackBaseUrl = {{ editor_bc3413_back_base_url | json }};
     SSAP.editorProShirtBc3413BaseUrl = {{ editor_pro_shirt_bc3413_base_url | json }};
     SSAP.editorProShirtBc3001yBaseUrl = {{ editor_pro_shirt_bc3001y_base_url | json }};
+    SSAP.editorProShirtM2580BaseUrl = {{ editor_pro_shirt_m2580_base_url | json }};
     SSAP.editorSecret = {{ editor_secret | json }};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
@@ -2484,8 +2486,8 @@
       var addTriblendCard = document.createElement('div');
       addTriblendCard.className = 'ap-product-row ap-add-product-row';
       addTriblendCard.style.cssText = [
-        'border: 2px dashed rgba(59,130,246,0.35);',
-        'background: rgba(59,130,246,0.04);',
+        'border: 2px dashed rgba(16,185,129,0.35);',
+        'background: rgba(16,185,129,0.05);',
         'cursor: default;',
         'position: relative;',
       ].join('');
@@ -2495,7 +2497,7 @@
       triblendImgEl.style.cssText = [
         'width:52px;height:52px;border-radius:8px;flex-shrink:0;',
         'display:flex;align-items:center;justify-content:center;',
-        'background:rgba(59,130,246,0.1);font-size:28px;',
+        'background:rgba(16,185,129,0.1);font-size:28px;',
       ].join('');
       triblendImgEl.textContent = '👕';
       // If we found a bc3413 product image while rendering, use it
@@ -2584,7 +2586,7 @@
       addTriblendBtn.style.cssText = [
         'display:inline-flex;align-items:center;gap:6px;',
         'padding:8px 16px;',
-        'background:#3b82f6;color:#ffffff;',
+        'background:#10b981;color:#ffffff;',
         'border-radius:8px;font-size:13px;font-weight:700;',
         'border:none;cursor:pointer;',
         'transition:background 0.15s ease;',
@@ -2592,8 +2594,8 @@
       ].join('');
       addTriblendBtn.innerHTML = '✨ Add to Store';
       addTriblendBtn.title = 'Create a new Custom Tri-Blend Tee listing with your logo and color choices';
-      addTriblendBtn.addEventListener('mouseover', function(){ this.style.background='#2563eb'; });
-      addTriblendBtn.addEventListener('mouseout',  function(){ this.style.background='#3b82f6'; });
+      addTriblendBtn.addEventListener('mouseover', function(){ this.style.background='#059669'; });
+      addTriblendBtn.addEventListener('mouseout',  function(){ this.style.background='#10b981'; });
 
       addTriblendBtn.addEventListener('click', function(){
         var proShirtUrl = SSAP.editorProShirtBc3413BaseUrl
@@ -2755,6 +2757,143 @@
 
       apBuilderCount++;
       if(apCustomBuildersContainer) apCustomBuildersContainer.appendChild(addYouthCard);
+    }
+
+    // ── "Add New" card — Custom Premium Pullover Hoodie / M2580 ─────────────
+    if(SSAP.editorProShirtM2580BaseUrl && SSAP.editorSecret){
+      var addHoodieCard = document.createElement('div');
+      addHoodieCard.className = 'ap-product-row ap-add-product-row';
+      addHoodieCard.style.cssText = [
+        'border: 2px dashed rgba(16,185,129,0.35);',
+        'background: rgba(16,185,129,0.05);',
+        'cursor: default;',
+        'position: relative;',
+      ].join('');
+
+      // Hoodie thumbnail — try to reuse an existing M2580 hoodie image, otherwise fallback
+      var hoodieImgEl = document.createElement('div');
+      hoodieImgEl.style.cssText = [
+        'width:52px;height:52px;border-radius:8px;flex-shrink:0;',
+        'display:flex;align-items:center;justify-content:center;',
+        'background:rgba(16,185,129,0.1);font-size:28px;',
+      ].join('');
+      hoodieImgEl.textContent = '🧥';
+
+      (function(){
+        for(var _hi = 0; _hi < products.length; _hi++){
+          var _p = products[_hi];
+          var _tags = _p.tags || [];
+          var _tagText = Array.isArray(_tags) ? _tags.join(' ').toLowerCase() : String(_tags || '').toLowerCase();
+          var _titleText = String(_p.title || '').toLowerCase();
+          var _hasM2580 = _tagText.indexOf('m2580') >= 0 || _titleText.indexOf('hoodie') >= 0 || _titleText.indexOf('pullover') >= 0;
+
+          if(_hasM2580){
+            var _imgSrc = _p.featured_image || _p.image ||
+              (_p.images && _p.images[0] && (_p.images[0].src || _p.images[0])) || null;
+
+            if(_imgSrc){
+              var _realHoodieImg = document.createElement('img');
+              _realHoodieImg.src = _imgSrc;
+              _realHoodieImg.alt = 'Premium Pullover Hoodie';
+              _realHoodieImg.style.cssText = 'width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;';
+              _realHoodieImg.loading = 'lazy';
+              hoodieImgEl = _realHoodieImg;
+            }
+            break;
+          }
+        }
+      })();
+
+      var hoodieTextWrap = document.createElement('div');
+      hoodieTextWrap.style.cssText = 'flex:1;min-width:0;';
+
+      var hoodieTitle = document.createElement('div');
+      hoodieTitle.style.cssText = 'font-size:14px;font-weight:700;color:var(--ap-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+      hoodieTitle.textContent = 'Custom Premium Hoodie';
+
+      var hoodieSub = document.createElement('div');
+      hoodieSub.style.cssText = 'font-size:11px;color:var(--ap-gray);margin-top:3px;line-height:1.4;';
+      hoodieSub.textContent = 'Front $34 · Front & back $39 · Up to 2 colors';
+
+      hoodieTextWrap.appendChild(hoodieTitle);
+      hoodieTextWrap.appendChild(hoodieSub);
+
+      var hoodieTooltip = document.createElement('div');
+      hoodieTooltip.style.cssText = [
+        'display:none;',
+        'position:absolute;',
+        'bottom:calc(100% + 8px);',
+        'left:50%;',
+        'transform:translateX(-50%);',
+        'background:#1e293b;',
+        'color:#f1f5f9;',
+        'font-size:12px;',
+        'line-height:1.5;',
+        'padding:10px 14px;',
+        'border-radius:10px;',
+        'box-shadow:0 8px 24px rgba(0,0,0,0.25);',
+        'z-index:200;',
+        'width:280px;',
+        'pointer-events:none;',
+        'text-align:left;',
+        'border:1px solid rgba(255,255,255,0.08);',
+      ].join('');
+      hoodieTooltip.innerHTML = [
+        '<strong style="display:block;margin-bottom:5px;font-size:13px;">Add a New Custom Hoodie</strong>',
+        'Creates a brand-new Premium Pullover Hoodie listing in your store — separate from the standard products.',
+        ' Add a custom logo to the front and optionally the back, choose up to 2 garment colors,',
+        ' and adjust placement in the pro editor. Front-only is $34 and front + back is $39.',
+      ].join('');
+
+      var hoodieArrow = document.createElement('div');
+      hoodieArrow.className = 'ap-smart-tooltip-arrow';
+      hoodieArrow.style.width = '10px';
+      hoodieArrow.style.height = '10px';
+      hoodieTooltip.appendChild(hoodieArrow);
+      addHoodieCard.appendChild(hoodieTooltip);
+
+      apInstallSmartTooltip(addHoodieCard, hoodieTooltip, { arrow: hoodieArrow, gap: 10, margin: 12, zIndex: 10070 });
+
+      var hoodieActionsEl = document.createElement('div');
+      hoodieActionsEl.className = 'ap-product-row__actions';
+
+      var addHoodieBtn = document.createElement('button');
+      addHoodieBtn.type = 'button';
+      addHoodieBtn.style.cssText = [
+        'display:inline-flex;align-items:center;gap:6px;',
+        'padding:8px 16px;',
+        'background:#10b981;color:#ffffff;',
+        'border-radius:8px;font-size:13px;font-weight:700;',
+        'border:none;cursor:pointer;',
+        'transition:background 0.15s ease;',
+        'white-space:nowrap;flex-shrink:0;',
+      ].join('');
+      addHoodieBtn.innerHTML = '✨ Add to Store';
+      addHoodieBtn.title = 'Create a new Custom Premium Hoodie listing with your logo and color choices';
+      addHoodieBtn.addEventListener('mouseover', function(){ this.style.background='#059669'; });
+      addHoodieBtn.addEventListener('mouseout',  function(){ this.style.background='#10b981'; });
+
+      addHoodieBtn.addEventListener('click', function(){
+        var hoodieProUrl = SSAP.editorProShirtM2580BaseUrl
+          + '?shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+          + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+          + '&mode=embedded';
+
+        if(SSAP.shopLogoSrc){
+          hoodieProUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
+        }
+
+        apOpenEditorModal(hoodieProUrl);
+      });
+
+      hoodieActionsEl.appendChild(addHoodieBtn);
+
+      addHoodieCard.appendChild(hoodieImgEl);
+      addHoodieCard.appendChild(hoodieTextWrap);
+      addHoodieCard.appendChild(hoodieActionsEl);
+
+      apBuilderCount++;
+      if(apCustomBuildersContainer) apCustomBuildersContainer.appendChild(addHoodieCard);
     }
 
     apRefreshProductEmptyStates(apMainCount, apCustomCount, apBuilderCount);
