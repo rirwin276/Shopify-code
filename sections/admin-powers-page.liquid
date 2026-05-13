@@ -2353,57 +2353,55 @@
         }
       }
 
-      // M2580 placement editor — show for any product tagged m2580_front
+      // M2580 Pro Builder products:
+      // Do not render edit buttons yet.
+      //
+      // Keep operational tags like:
+      // - M2580_front
+      // - M2580_front_back
+      // - model--M2580
+      // - custom-build
+      // - pro-builder-m2580
+      // - pro-shirt-m2580
+      //
+      // Those tags are useful for future bulk pricing, filtering, reporting,
+      // and operations. The problem was not the tag itself — the problem was
+      // this admin page opening the old /editor/m2580 placement editor for
+      // newly built Pro Builder products.
+      //
+      // Future plan:
+      // When existing-product editing is ready, this same section can become
+      // a real "Edit Custom Build" button that opens /editor/pro-shirt/m2580
+      // in rebuild mode and loads saved colors, front/back print files, and
+      // saved placement coords from product/variant metafields.
       function _isM2580Tag(t){
-        return String(t || '').toLowerCase().trim() === 'm2580_front';
+        var tag = String(t || '').toLowerCase().trim();
+        return (
+          tag === 'm2580_front' ||
+          tag === 'm2580_front_back' ||
+          tag === 'model--m2580' ||
+          tag === 'custom-build' ||
+          tag === 'pro-builder-m2580' ||
+          tag === 'pro-shirt-m2580'
+        );
       }
+
       var isM2580 = false;
       if(Array.isArray(productTags)){
         for(var m2580TagIdx = 0; m2580TagIdx < productTags.length; m2580TagIdx++){
-          if(_isM2580Tag(productTags[m2580TagIdx])){ isM2580 = true; break; }
+          if(_isM2580Tag(productTags[m2580TagIdx])){
+            isM2580 = true;
+            break;
+          }
         }
       } else if(typeof productTags === 'string'){
         isM2580 = productTags.split(',').some(_isM2580Tag);
       }
 
-      if(isM2580 && SSAP.editorSecret){
-        var m2580LogoSrc = SSAP.shopLogoSrc || '';
-        var m2580EditorBtn;
-        if(m2580LogoSrc){
-          var m2580EditorUrl = SSAP.editorM2580BaseUrl
-            + '?logo_url=' + encodeURIComponent(m2580LogoSrc)
-            + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(product.handle || '')
-            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
-            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
-            + '&mode=embedded';
-          m2580EditorBtn = document.createElement('button');
-          m2580EditorBtn.type = 'button';
-          m2580EditorBtn.className = 'ap-edit-placement-btn';
-          m2580EditorBtn.dataset.productHandle = product.handle || '';
-          m2580EditorBtn.innerHTML = '✏️ Edit Placement';
-          m2580EditorBtn.title = 'Adjust logo placement for this product only';
-          m2580EditorBtn.addEventListener('click', function(){ apOpenEditorModal(m2580EditorUrl); });
-          var m2580EditColorsBtn = document.createElement('button');
-          m2580EditColorsBtn.type = 'button';
-          m2580EditColorsBtn.className = 'ap-edit-placement-btn';
-          m2580EditColorsBtn.innerHTML = '🎨 Edit Colors';
-          m2580EditColorsBtn.title = 'Edit shirt colors for this product';
-          m2580EditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(m2580EditorUrl + '&tab=colors'); });
-          actionsEl.appendChild(m2580EditorBtn);
-          actionsEl.appendChild(m2580EditColorsBtn);
-        } else {
-          m2580EditorBtn = document.createElement('span');
-          m2580EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          m2580EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          m2580EditorBtn.textContent = '✏️ Edit Placement (no logo)';
-          var m2580EditColorsDisabledBtn = document.createElement('span');
-          m2580EditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          m2580EditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          m2580EditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
-          actionsEl.appendChild(m2580EditorBtn);
-          actionsEl.appendChild(m2580EditColorsDisabledBtn);
-        }
+      // Intentionally append nothing for M2580 custom/pro-builder products.
+      // This hides Edit Placement / Edit Colors without removing the tags.
+      if(isM2580){
+        // No edit button yet.
       }
 
       // CC1467Y placement editor — show for any product tagged cc1467y_front
