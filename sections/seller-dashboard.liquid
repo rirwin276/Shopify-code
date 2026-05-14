@@ -1,7 +1,7 @@
 {% comment %}
   SHOP DASHBOARD — STUDIO EDITION (WITH SELLER MODE)
 
-  v0.39 changes (this update):
+  v0.40 changes (this update):
   ✅ Remove hardcoded 5-minute localStorage countdown timer
   ✅ Poll backend /api/store/{handle}/ready-status every 10s (admin/god only)
   ✅ Unlock card only when backend confirms is_fully_ready = true
@@ -9,6 +9,8 @@
   ✅ Sleeping/waking states show appropriate loading messages
   ✅ Non-admin members see static Liquid-rendered messages (no polling)
   ✅ New-store onboarding modal triggered by ?new_store=1&store_handle=...
+  ✅ Adds polished dashboard/admin/storefront screenshot previews
+  ✅ Mobile-first onboarding layout while preserving the desktop split-card look
 
   Notes:
   - This does NOT write to the is_fully_ready metaobject (Printful Automation does that).
@@ -520,15 +522,25 @@
     <div class="ss-onboardingCard" role="dialog" aria-modal="true" aria-labelledby="ssOnboardingTitle">
       <button type="button" class="ss-onboardingX" data-ss-onboarding-close aria-label="Close tutorial">✕</button>
 
-      <div class="ss-onboardingMedia">
+      <div class="ss-onboardingMedia" id="ssOnboardingMedia">
         <div class="ss-onboardingGlow"></div>
+
         <div class="ss-onboardingLogoShell" id="ssOnboardingLogoShell">
           <span id="ssOnboardingLogoFallback">S&amp;S</span>
           <img id="ssOnboardingLogoImg" alt="Store logo preview" loading="eager">
         </div>
+
+        <div class="ss-onboardingShotShell" id="ssOnboardingShotShell" aria-hidden="true">
+          <div class="ss-onboardingShotTop">
+            <span id="ssOnboardingShotLabel">Dashboard preview</span>
+            <span>Preview</span>
+          </div>
+          <img id="ssOnboardingShotImg" alt="Onboarding screen preview" loading="eager">
+        </div>
+
         <div class="ss-onboardingBuildPill">
           <span class="ss-onboardingPulse"></span>
-          Store build started
+          <span id="ssOnboardingPillText">Store build started</span>
         </div>
       </div>
 
@@ -634,8 +646,9 @@
 
       var storeHandle = (params.get('store_handle') || '').trim();
       var storageKey = storeHandle ? ('ss-new-store-onboarding-seen-' + storeHandle) : 'ss-new-store-onboarding-seen-generic';
+      var forceOnboarding = params.get('force_onboarding') === '1' || params.get('test_onboarding') === '1';
 
-      if(localStorage.getItem(storageKey) === '1'){
+      if(!forceOnboarding && localStorage.getItem(storageKey) === '1'){
         try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
         return;
       }
@@ -665,9 +678,37 @@
         if(img && img.getAttribute('src')) logoSrc = img.getAttribute('src');
       }
 
+      var media = document.getElementById('ssOnboardingMedia');
       var fallback = document.getElementById('ssOnboardingLogoFallback');
       var logoImg = document.getElementById('ssOnboardingLogoImg');
       var logoShell = document.getElementById('ssOnboardingLogoShell');
+      var shotShell = document.getElementById('ssOnboardingShotShell');
+      var shotImg = document.getElementById('ssOnboardingShotImg');
+      var shotLabel = document.getElementById('ssOnboardingShotLabel');
+      var pillText = document.getElementById('ssOnboardingPillText');
+
+      var onboardingMediaSlides = [
+        { kind: 'logo', pill: 'Store build started' },
+        {
+          kind: 'shot',
+          pill: 'Your dashboard',
+          label: 'Dashboard preview',
+          src: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/dashboard_onboarding_modual.png?v=1778737340'
+        },
+        {
+          kind: 'shot',
+          pill: 'Admin powers',
+          label: 'Admin tools preview',
+          src: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/admin_dashbaord_onboard_modual.png?v=1778737340'
+        },
+        {
+          kind: 'shot',
+          pill: 'Your storefront',
+          label: 'Storefront preview',
+          src: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/storefront_onboard_modual.png?v=1778737340'
+        }
+      ];
+
       if(fallback){
         var initials = storeName.split(/\s+/).filter(Boolean).slice(0,2).map(function(w){ return w.charAt(0); }).join('').toUpperCase();
         fallback.textContent = initials || 'S&S';
@@ -682,6 +723,29 @@
         }
       }
 
+      function renderMedia(){
+        var item = onboardingMediaSlides[slideIndex] || onboardingMediaSlides[0];
+        if(pillText) pillText.textContent = item.pill || 'Store build started';
+
+        if(item.kind === 'shot'){
+          if(media) media.classList.add('has-shot');
+          if(logoShell) logoShell.style.display = 'none';
+          if(shotShell) {
+            shotShell.classList.add('is-visible');
+            shotShell.setAttribute('aria-hidden', 'false');
+          }
+          if(shotImg && item.src && shotImg.getAttribute('src') !== item.src) shotImg.src = item.src;
+          if(shotLabel) shotLabel.textContent = item.label || 'Preview';
+        } else {
+          if(media) media.classList.remove('has-shot');
+          if(logoShell) logoShell.style.display = '';
+          if(shotShell) {
+            shotShell.classList.remove('is-visible');
+            shotShell.setAttribute('aria-hidden', 'true');
+          }
+        }
+      }
+
       var slideIndex = 0;
       var slides = Array.prototype.slice.call(modal.querySelectorAll('[data-ss-onboarding-slide]'));
       var dots = Array.prototype.slice.call(modal.querySelectorAll('.ss-onboardingDots span'));
@@ -693,6 +757,7 @@
         dots.forEach(function(dot, i){ dot.classList.toggle('is-active', i === slideIndex); });
         if(backBtn) backBtn.style.visibility = slideIndex === 0 ? 'hidden' : 'visible';
         if(nextBtn) nextBtn.textContent = slideIndex >= slides.length - 1 ? 'Got it' : 'Next';
+        renderMedia();
       }
 
       function close(){
@@ -1668,6 +1733,9 @@
     padding: 34px;
     color: #fff;
   }
+  .ss-onboardingMedia.has-shot {
+    padding: 28px;
+  }
   .ss-onboardingGlow {
     position: absolute;
     width: 260px;
@@ -1705,6 +1773,53 @@
   }
   .ss-onboardingLogoShell.has-img span { display: none; }
   .ss-onboardingLogoShell.has-img img { display: block; }
+
+  .ss-onboardingShotShell {
+    position: relative;
+    z-index: 1;
+    display: none;
+    width: min(100%, 350px);
+    aspect-ratio: 4 / 3;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(255,255,255,0.62);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.30);
+  }
+  .ss-onboardingShotShell.is-visible {
+    display: block;
+    animation: ssShotIn .24s ease-out both;
+  }
+  @keyframes ssShotIn {
+    from { opacity: 0; transform: translateY(8px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .ss-onboardingShotTop {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 12px;
+    background: rgba(248,250,252,0.96);
+    border-bottom: 1px solid rgba(15,23,42,0.08);
+    color: rgba(15,23,42,0.70);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .ss-onboardingShotTop span:last-child {
+    color: rgba(43,109,232,0.90);
+  }
+  .ss-onboardingShotShell img {
+    display: block;
+    width: 100%;
+    height: calc(100% - 34px);
+    object-fit: cover;
+    object-position: top center;
+  }
+
   .ss-onboardingBuildPill {
     position: relative;
     z-index: 1;
@@ -1852,29 +1967,116 @@
     box-shadow: 0 14px 30px rgba(15,23,42,0.18);
   }
   @media (max-width: 760px) {
-    .ss-onboardingOverlay { padding: 10px; align-items: flex-end; }
+    .ss-onboardingOverlay {
+      padding: 10px;
+      align-items: flex-end;
+    }
     .ss-onboardingCard {
       grid-template-columns: 1fr;
       width: 100%;
       min-height: auto;
-      max-height: calc(100vh - 20px);
+      max-height: calc(100dvh - 20px);
       overflow-y: auto;
       border-radius: 26px;
     }
-    .ss-onboardingMedia { min-height: 190px; padding: 28px 20px 22px; }
+    .ss-onboardingX {
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+    }
+    .ss-onboardingMedia {
+      min-height: 188px;
+      padding: 26px 18px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .ss-onboardingMedia.has-shot {
+      min-height: 238px;
+      padding: 20px 16px 18px;
+    }
     .ss-onboardingLogoShell { width: 118px; height: 118px; border-radius: 28px; }
     .ss-onboardingLogoShell span { font-size: 30px; }
-    .ss-onboardingBuildPill { margin-top: 12px; }
-    .ss-onboardingContent { padding: 28px 22px 22px; }
-    .ss-onboardingSlides { min-height: 380px; }
-    .ss-onboardingTitle { font-size: 27px; }
-    .ss-onboardingText { font-size: 14px; }
+    .ss-onboardingShotShell {
+      width: 100%;
+      max-width: 430px;
+      aspect-ratio: 16 / 10;
+      border-radius: 18px;
+    }
+    .ss-onboardingShotTop {
+      height: 30px;
+      padding: 0 10px;
+      font-size: 9px;
+    }
+    .ss-onboardingShotShell img {
+      height: calc(100% - 30px);
+    }
+    .ss-onboardingBuildPill {
+      margin-top: 12px;
+      padding: 9px 12px;
+      font-size: 10px;
+    }
+    .ss-onboardingContent { padding: 24px 20px 20px; }
+    .ss-onboardingSlides { min-height: auto; }
+    .ss-onboardingKicker {
+      margin-bottom: 11px;
+      font-size: 10px;
+    }
+    .ss-onboardingTitle {
+      font-size: clamp(24px, 7vw, 30px);
+      line-height: 1.05;
+      margin-bottom: 12px;
+    }
+    .ss-onboardingText {
+      font-size: 14px;
+      line-height: 1.48;
+      margin-bottom: 10px;
+    }
+    .ss-onboardingCallout {
+      margin-top: 14px;
+      padding: 12px 13px;
+      font-size: 13px;
+      border-radius: 16px;
+    }
     .ss-onboardingMiniGrid,
-    .ss-onboardingMiniGrid3 { grid-template-columns: 1fr; }
-    .ss-onboardingFooter { align-items: stretch; flex-direction: column; }
+    .ss-onboardingMiniGrid3 {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .ss-onboardingMiniGrid div {
+      padding: 11px 12px;
+      border-radius: 14px;
+    }
+    .ss-onboardingFooter {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      align-items: stretch;
+      flex-direction: column;
+      margin: 18px -20px -20px;
+      padding: 12px 20px max(14px, env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.98));
+      border-top: 1px solid rgba(15,23,42,0.06);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .ss-onboardingDots { justify-content: center; }
     .ss-onboardingBtns { width: 100%; }
     .ss-onboardingBack,
-    .ss-onboardingNext { flex: 1; border-radius: 14px; }
+    .ss-onboardingNext {
+      flex: 1;
+      min-height: 48px;
+      border-radius: 14px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .ss-onboardingMedia.has-shot { min-height: 218px; }
+    .ss-onboardingContent { padding: 22px 18px 18px; }
+    .ss-onboardingTitle { font-size: 23px; }
+    .ss-onboardingText { font-size: 13.5px; }
+    .ss-onboardingFooter { margin-left: -18px; margin-right: -18px; margin-bottom: -18px; padding-left: 18px; padding-right: 18px; }
   }
   /* God Mode: new store notification badge */
   .ss-god-new-badge {
