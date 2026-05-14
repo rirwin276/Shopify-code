@@ -11,6 +11,7 @@
   ✅ New-store onboarding modal triggered by ?new_store=1&store_handle=...
   ✅ Adds polished dashboard/admin/storefront screenshot previews
   ✅ Mobile-first onboarding layout while preserving the desktop split-card look
+  ✅ Mobile sticky footer with subtle fade cue instead of scroll-for-more pill
 
   Notes:
   - This does NOT write to the is_fully_ready metaobject (Printful Automation does that).
@@ -2057,32 +2058,7 @@
       padding: 11px 12px;
       border-radius: 14px;
     }
-    .ss-onboardingScrollHint {
-      display: inline-flex;
-      align-self: center;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin: 8px auto 0;
-      padding: 7px 11px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.045);
-      border: 1px solid rgba(15,23,42,0.06);
-      color: rgba(91,107,130,0.86);
-      font-size: 11px;
-      font-weight: 850;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      animation: ssScrollHintFloat 1.8s ease-in-out infinite;
-    }
-    .ss-onboardingScrollHint svg {
-      opacity: .72;
-      transform: translateY(1px);
-    }
-    @keyframes ssScrollHintFloat {
-      0%, 100% { transform: translateY(0); opacity: .72; }
-      50% { transform: translateY(3px); opacity: 1; }
-    }
+    .ss-onboardingScrollHint { display: none !important; }
     .ss-onboardingFooter {
       position: sticky;
       bottom: 0;
@@ -2091,13 +2067,23 @@
       flex-direction: column;
       margin: 18px -20px -20px;
       padding: 12px 20px max(14px, env(safe-area-inset-bottom));
-      background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.98));
+      background: linear-gradient(180deg, rgba(255,255,255,0.90), rgba(255,255,255,0.98));
       border-top: 1px solid rgba(15,23,42,0.06);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
-    .ss-onboardingDots { justify-content: center; }
-    .ss-onboardingBtns { width: 100%; }
+    .ss-onboardingFooter::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -28px;
+      height: 28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.90));
+      pointer-events: none;
+    }
+    .ss-onboardingDots { justify-content: center; position: relative; z-index: 1; }
+    .ss-onboardingBtns { width: 100%; position: relative; z-index: 1; }
     .ss-onboardingBack,
     .ss-onboardingNext {
       flex: 1;
