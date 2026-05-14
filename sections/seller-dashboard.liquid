@@ -1,13 +1,14 @@
 {% comment %}
   SHOP DASHBOARD — STUDIO EDITION (WITH SELLER MODE)
 
-  v0.38 changes (this update):
+  v0.39 changes (this update):
   ✅ Remove hardcoded 5-minute localStorage countdown timer
   ✅ Poll backend /api/store/{handle}/ready-status every 10s (admin/god only)
   ✅ Unlock card only when backend confirms is_fully_ready = true
   ✅ Updated loading messages to veteran-owned store copy
   ✅ Sleeping/waking states show appropriate loading messages
   ✅ Non-admin members see static Liquid-rendered messages (no polling)
+  ✅ New-store onboarding modal triggered by ?new_store=1&store_handle=...
 
   Notes:
   - This does NOT write to the is_fully_ready metaobject (Printful Automation does that).
@@ -512,7 +513,100 @@
       {% endunless %}
     </div>
   </div>
-  <div class="ss-leaveOverlay" id="ssLeaveModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9999; align-items:center; justify-content:center; padding:18px;">
+  
+
+  <div class="ss-onboardingOverlay" id="ssNewStoreOnboarding" aria-hidden="true">
+    <div class="ss-onboardingBackdrop" data-ss-onboarding-close></div>
+    <div class="ss-onboardingCard" role="dialog" aria-modal="true" aria-labelledby="ssOnboardingTitle">
+      <button type="button" class="ss-onboardingX" data-ss-onboarding-close aria-label="Close tutorial">✕</button>
+
+      <div class="ss-onboardingMedia">
+        <div class="ss-onboardingGlow"></div>
+        <div class="ss-onboardingLogoShell" id="ssOnboardingLogoShell">
+          <span id="ssOnboardingLogoFallback">S&amp;S</span>
+          <img id="ssOnboardingLogoImg" alt="Store logo preview" loading="eager">
+        </div>
+        <div class="ss-onboardingBuildPill">
+          <span class="ss-onboardingPulse"></span>
+          Store build started
+        </div>
+      </div>
+
+      <div class="ss-onboardingContent">
+        <div class="ss-onboardingSlides">
+          <article class="ss-onboardingSlide is-active" data-ss-onboarding-slide="0">
+            <div class="ss-onboardingKicker">Welcome to Stella &amp; Sage</div>
+            <h2 class="ss-onboardingTitle" id="ssOnboardingTitle">Your store is live. Your products are building now.</h2>
+            <p class="ss-onboardingText">
+              Thanks for supporting a veteran-owned and operated business. Your store has been created successfully, and your products are now being built in the background.
+            </p>
+            <p class="ss-onboardingText">
+              This can take about <strong>15–20 minutes</strong>. You can leave this page and come back later — production will continue either way.
+            </p>
+            <div class="ss-onboardingCallout">
+              Congratulations — you just fired yourself as the middleman.
+            </div>
+          </article>
+
+          <article class="ss-onboardingSlide" data-ss-onboarding-slide="1">
+            <div class="ss-onboardingKicker">Dashboard</div>
+            <h2 class="ss-onboardingTitle">Everything lives in one simple dashboard.</h2>
+            <p class="ss-onboardingText">
+              Every store you create or join will live here. You can come back anytime to shop, manage, or build more products from one place.
+            </p>
+            <p class="ss-onboardingText">
+              Admin tools are only shown to store admins. Customers who join your store can shop or leave the store, but they will not have access to product editing or admin controls.
+            </p>
+            <div class="ss-onboardingMiniGrid">
+              <div><strong>Admins</strong><span>Manage products and store tools</span></div>
+              <div><strong>Members</strong><span>Shop the store without extra controls</span></div>
+            </div>
+          </article>
+
+          <article class="ss-onboardingSlide" data-ss-onboarding-slide="2">
+            <div class="ss-onboardingKicker">Admin tools</div>
+            <h2 class="ss-onboardingTitle">Simple tools. Powerful control.</h2>
+            <p class="ss-onboardingText">
+              Your admin page lets you view products, hide products, delete products, adjust logo placement, and choose product colors without using complicated design software.
+            </p>
+            <p class="ss-onboardingText">
+              Pro Builders let you add more customizable merch with different images, front and back designs, and your store image library. Adding a new shirt later only takes a few minutes.
+            </p>
+            <div class="ss-onboardingMiniGrid ss-onboardingMiniGrid3">
+              <div><strong>Edit</strong><span>Placement and colors</span></div>
+              <div><strong>Build</strong><span>New products fast</span></div>
+              <div><strong>Store</strong><span>Up to 10 images</span></div>
+            </div>
+          </article>
+
+          <article class="ss-onboardingSlide" data-ss-onboarding-slide="3">
+            <div class="ss-onboardingKicker">Storefront</div>
+            <h2 class="ss-onboardingTitle">Your beautiful store is almost ready to share.</h2>
+            <p class="ss-onboardingText">
+              Once the build finishes, your store will unlock and everyone can shop the finished merch directly from your private storefront.
+            </p>
+            <p class="ss-onboardingText">
+              No collecting sizes. No chasing payments. No spreadsheets. Just share the link with your team, group, family, business, or event.
+            </p>
+            <div class="ss-onboardingCallout ss-onboardingCalloutReady">
+              Your store will open automatically when production is complete.
+            </div>
+          </article>
+        </div>
+
+        <div class="ss-onboardingFooter">
+          <div class="ss-onboardingDots" aria-hidden="true">
+            <span class="is-active"></span><span></span><span></span><span></span>
+          </div>
+          <div class="ss-onboardingBtns">
+            <button type="button" class="ss-onboardingBack" data-ss-onboarding-back>Back</button>
+            <button type="button" class="ss-onboardingNext" data-ss-onboarding-next>Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="ss-leaveOverlay" id="ssLeaveModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:9999; align-items:center; justify-content:center; padding:18px;">
     <div style="width:min(480px,100%); background:#fff; border-radius:16px; border:1px solid rgba(0,0,0,.14); box-shadow:0 22px 70px rgba(0,0,0,.22); padding:20px;">
       <p style="font-weight:900; font-size:16px; margin:0 0 8px;" id="ssLeaveTitle">Leave storefront?</p>
       <p style="margin:0 0 14px; opacity:.8; font-size:14px; line-height:1.45;" id="ssLeaveText"></p>
@@ -527,6 +621,116 @@
 
 <script>
   (function(){
+
+
+    // ---------------------------
+    // New Store Onboarding Tutorial
+    // Triggered by /pages/portal?new_store=1&store_handle=<handle>
+    // ---------------------------
+    function initNewStoreOnboarding(){
+      var params = new URLSearchParams(window.location.search || '');
+      var shouldShow = params.get('new_store') === '1';
+      if(!shouldShow) return;
+
+      var storeHandle = (params.get('store_handle') || '').trim();
+      var storageKey = storeHandle ? ('ss-new-store-onboarding-seen-' + storeHandle) : 'ss-new-store-onboarding-seen-generic';
+
+      if(localStorage.getItem(storageKey) === '1'){
+        try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
+        return;
+      }
+
+      var modal = document.getElementById('ssNewStoreOnboarding');
+      if(!modal) return;
+
+      var card = null;
+      if(storeHandle && window.CSS && CSS.escape){
+        card = document.querySelector('.ss-store-card[data-ss-handle="' + CSS.escape(storeHandle) + '"]');
+      }
+      if(!card && storeHandle){
+        card = Array.prototype.slice.call(document.querySelectorAll('.ss-store-card[data-ss-handle]')).find(function(el){
+          return (el.getAttribute('data-ss-handle') || '') === storeHandle;
+        });
+      }
+      if(!card){
+        card = document.querySelector('.ss-store-card[data-ss-building="1"]') || document.querySelector('.ss-store-card[data-ss-handle]');
+      }
+
+      var storeName = 'your store';
+      var logoSrc = '';
+      if(card){
+        var title = card.querySelector('.ss-card-title');
+        if(title && title.textContent.trim()) storeName = title.textContent.trim();
+        var img = card.querySelector('.ss-logo-frame img');
+        if(img && img.getAttribute('src')) logoSrc = img.getAttribute('src');
+      }
+
+      var fallback = document.getElementById('ssOnboardingLogoFallback');
+      var logoImg = document.getElementById('ssOnboardingLogoImg');
+      var logoShell = document.getElementById('ssOnboardingLogoShell');
+      if(fallback){
+        var initials = storeName.split(/\s+/).filter(Boolean).slice(0,2).map(function(w){ return w.charAt(0); }).join('').toUpperCase();
+        fallback.textContent = initials || 'S&S';
+      }
+      if(logoImg && logoShell){
+        if(logoSrc){
+          logoImg.src = logoSrc;
+          logoShell.classList.add('has-img');
+        } else {
+          logoImg.removeAttribute('src');
+          logoShell.classList.remove('has-img');
+        }
+      }
+
+      var slideIndex = 0;
+      var slides = Array.prototype.slice.call(modal.querySelectorAll('[data-ss-onboarding-slide]'));
+      var dots = Array.prototype.slice.call(modal.querySelectorAll('.ss-onboardingDots span'));
+      var backBtn = modal.querySelector('[data-ss-onboarding-back]');
+      var nextBtn = modal.querySelector('[data-ss-onboarding-next]');
+
+      function render(){
+        slides.forEach(function(slide, i){ slide.classList.toggle('is-active', i === slideIndex); });
+        dots.forEach(function(dot, i){ dot.classList.toggle('is-active', i === slideIndex); });
+        if(backBtn) backBtn.style.visibility = slideIndex === 0 ? 'hidden' : 'visible';
+        if(nextBtn) nextBtn.textContent = slideIndex >= slides.length - 1 ? 'Got it' : 'Next';
+      }
+
+      function close(){
+        localStorage.setItem(storageKey, '1');
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
+      }
+
+      function next(){
+        if(slideIndex >= slides.length - 1){ close(); return; }
+        slideIndex += 1;
+        render();
+      }
+
+      function back(){
+        slideIndex = Math.max(0, slideIndex - 1);
+        render();
+      }
+
+      modal.querySelectorAll('[data-ss-onboarding-close]').forEach(function(btn){ btn.addEventListener('click', close); });
+      if(nextBtn) nextBtn.addEventListener('click', next);
+      if(backBtn) backBtn.addEventListener('click', back);
+      document.addEventListener('keydown', function(e){
+        if(!modal.classList.contains('is-open')) return;
+        if(e.key === 'Escape') close();
+        if(e.key === 'ArrowRight') next();
+        if(e.key === 'ArrowLeft') back();
+      });
+
+      render();
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    initNewStoreOnboarding();
     // ---------------------------
     // Click rows
     // ---------------------------
@@ -1397,6 +1601,281 @@
     .ss-block-hero { display: none !important; }
   }
 
+
+
+  /* New Store Onboarding Tutorial */
+  .ss-onboardingOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10050;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    font-family: var(--ss-font);
+  }
+  .ss-onboardingOverlay.is-open { display: flex; }
+  .ss-onboardingBackdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15,23,42,0.56);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .ss-onboardingCard {
+    position: relative;
+    width: min(920px, 100%);
+    min-height: 560px;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid rgba(255,255,255,0.72);
+    border-radius: 30px;
+    box-shadow: 0 30px 110px rgba(15,23,42,0.34);
+    display: grid;
+    grid-template-columns: 0.92fr 1.08fr;
+    overflow: hidden;
+    animation: ssOnboardingIn .26s ease-out both;
+  }
+  @keyframes ssOnboardingIn {
+    from { opacity: 0; transform: translateY(12px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .ss-onboardingX {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(15,23,42,0.08);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.72);
+    color: #0f172a;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(15,23,42,0.08);
+  }
+  .ss-onboardingMedia {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    background:
+      radial-gradient(circle at 42% 35%, rgba(43,109,232,0.24), transparent 34%),
+      radial-gradient(circle at 55% 62%, rgba(16,185,129,0.18), transparent 34%),
+      linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    padding: 34px;
+    color: #fff;
+  }
+  .ss-onboardingGlow {
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    filter: blur(18px);
+  }
+  .ss-onboardingLogoShell {
+    position: relative;
+    z-index: 1;
+    width: 180px;
+    height: 180px;
+    border-radius: 38px;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(255,255,255,0.65);
+    box-shadow: 0 30px 70px rgba(0,0,0,0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .ss-onboardingLogoShell span {
+    color: #94a3b8;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+  }
+  .ss-onboardingLogoShell img {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 14px;
+  }
+  .ss-onboardingLogoShell.has-img span { display: none; }
+  .ss-onboardingLogoShell.has-img img { display: block; }
+  .ss-onboardingBuildPill {
+    position: relative;
+    z-index: 1;
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.20);
+    color: rgba(255,255,255,0.92);
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .ss-onboardingPulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 5px rgba(16,185,129,0.18);
+    animation: ssPulseSoft 1.8s ease-in-out infinite;
+  }
+  .ss-onboardingContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 54px 48px 34px;
+  }
+  .ss-onboardingSlides { position: relative; min-height: 360px; }
+  .ss-onboardingSlide { display: none; animation: ssSlideFade .24s ease-out both; }
+  .ss-onboardingSlide.is-active { display: block; }
+  @keyframes ssSlideFade {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .ss-onboardingKicker {
+    display: inline-flex;
+    margin-bottom: 14px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: rgba(43,109,232,0.08);
+    color: rgba(43,109,232,0.98);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .ss-onboardingTitle {
+    margin: 0 0 14px;
+    color: #0f172a;
+    font-size: 33px;
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+    font-weight: 900;
+  }
+  .ss-onboardingText {
+    margin: 0 0 12px;
+    color: rgba(15,23,42,0.70);
+    font-size: 15px;
+    line-height: 1.58;
+  }
+  .ss-onboardingText strong { color: #0f172a; font-weight: 900; }
+  .ss-onboardingCallout {
+    margin-top: 18px;
+    padding: 14px 15px;
+    border-radius: 18px;
+    background: rgba(15,23,42,0.04);
+    border: 1px solid rgba(15,23,42,0.07);
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 880;
+  }
+  .ss-onboardingCalloutReady {
+    background: rgba(236,253,245,0.78);
+    border-color: rgba(16,185,129,0.18);
+    color: rgba(6,95,70,0.94);
+  }
+  .ss-onboardingMiniGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .ss-onboardingMiniGrid3 { grid-template-columns: repeat(3, 1fr); }
+  .ss-onboardingMiniGrid div {
+    padding: 13px;
+    border-radius: 16px;
+    background: rgba(248,250,252,0.86);
+    border: 1px solid rgba(15,23,42,0.06);
+  }
+  .ss-onboardingMiniGrid strong {
+    display: block;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+  .ss-onboardingMiniGrid span {
+    display: block;
+    color: rgba(91,107,130,0.95);
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  .ss-onboardingFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+  .ss-onboardingDots { display: flex; gap: 7px; align-items: center; }
+  .ss-onboardingDots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.16);
+    transition: .18s ease;
+  }
+  .ss-onboardingDots span.is-active {
+    width: 24px;
+    background: #2b6de8;
+  }
+  .ss-onboardingBtns { display: flex; gap: 10px; align-items: center; }
+  .ss-onboardingBack,
+  .ss-onboardingNext {
+    appearance: none;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .ss-onboardingBack {
+    background: rgba(15,23,42,0.05);
+    color: #0f172a;
+    border: 1px solid rgba(15,23,42,0.08);
+  }
+  .ss-onboardingNext {
+    min-width: 92px;
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 14px 30px rgba(15,23,42,0.18);
+  }
+  @media (max-width: 760px) {
+    .ss-onboardingOverlay { padding: 10px; align-items: flex-end; }
+    .ss-onboardingCard {
+      grid-template-columns: 1fr;
+      width: 100%;
+      min-height: auto;
+      max-height: calc(100vh - 20px);
+      overflow-y: auto;
+      border-radius: 26px;
+    }
+    .ss-onboardingMedia { min-height: 190px; padding: 28px 20px 22px; }
+    .ss-onboardingLogoShell { width: 118px; height: 118px; border-radius: 28px; }
+    .ss-onboardingLogoShell span { font-size: 30px; }
+    .ss-onboardingBuildPill { margin-top: 12px; }
+    .ss-onboardingContent { padding: 28px 22px 22px; }
+    .ss-onboardingSlides { min-height: 380px; }
+    .ss-onboardingTitle { font-size: 27px; }
+    .ss-onboardingText { font-size: 14px; }
+    .ss-onboardingMiniGrid,
+    .ss-onboardingMiniGrid3 { grid-template-columns: 1fr; }
+    .ss-onboardingFooter { align-items: stretch; flex-direction: column; }
+    .ss-onboardingBtns { width: 100%; }
+    .ss-onboardingBack,
+    .ss-onboardingNext { flex: 1; border-radius: 14px; }
+  }
   /* God Mode: new store notification badge */
   .ss-god-new-badge {
     position: absolute;
