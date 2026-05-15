@@ -639,17 +639,18 @@
     }
   }
 
+
   /* ============================================================
-     Stella & Sage Premium Header Upgrade
+     Stella & Sage Premium Header — V3 Balanced Center Fix
      Purpose:
-     - Make the main header match the new premium storefront pages.
-     - Reduce wasted vertical height.
-     - Soften the default Shopify feel.
-     - Keep existing Shopify header/menu/search/account/cart logic intact.
+     - Restore true viewport-centered logo.
+     - Keep left nav and right icons pushed to the edges evenly.
+     - Make header row height match logo size with balanced top/bottom padding.
+     - Preserve Shopify menu/search/account/cart logic.
      ============================================================ */
 
   body:has(> #header-group > header) {
-    --header-height: 72px;
+    --header-height: 92px;
   }
 
   #header-component {
@@ -661,48 +662,84 @@
     --ss-header-gold: #a9955d;
 
     background:
-      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.075), transparent 28%),
-      linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(255, 255, 255, 0.94));
+      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.055), transparent 30%),
+      linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 255, 255, 0.96));
     border-bottom: 1px solid var(--ss-header-border);
-    box-shadow: 0 14px 44px rgba(17, 16, 14, 0.045);
+    box-shadow: 0 10px 34px rgba(17, 16, 14, 0.035);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
   }
 
   #header-component .header__row {
-    background:
-      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.05), transparent 28%),
-      linear-gradient(180deg, rgba(255, 253, 249, 0.94), rgba(255, 255, 255, 0.96));
-    border-color: var(--ss-header-border);
+    background: transparent !important;
+    border-color: var(--ss-header-border) !important;
   }
 
   #header-component .header__row--top {
-    min-height: 74px !important;
-    height: 74px !important;
-    display: flex;
-    align-items: center;
-  }
-
-  #header-component .header__row--top .header__columns {
-    min-height: 74px !important;
-    height: 74px !important;
+    min-height: 92px !important;
+    height: 92px !important;
+    display: flex !important;
     align-items: center !important;
-    padding-block-start: 0 !important;
-    padding-block-end: 0 !important;
-    padding-inline-start: clamp(22px, 3.2vw, 56px) !important;
-    padding-inline-end: clamp(22px, 3.2vw, 56px) !important;
   }
 
-  #header-component .header__row--bottom .header__columns {
-    min-height: 36px !important;
-    height: 36px !important;
-    padding-block-start: 0 !important;
-    padding-block-end: 0 !important;
+  #header-component .header__row--top .header__columns,
+  #header-component .header__row--top .header__columns.spacing-style {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 92px !important;
+    height: 92px !important;
+    margin: 0 !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    padding-inline-start: clamp(28px, 3.8vw, 70px) !important;
+    padding-inline-end: clamp(28px, 3.8vw, 70px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    grid-template-areas: 'left center right' !important;
+    align-items: center !important;
+    column-gap: clamp(18px, 2.4vw, 42px) !important;
+    box-sizing: border-box !important;
+  }
+
+  #header-component .header__row--bottom .header__columns,
+  #header-component .header__row--bottom .header__columns.spacing-style {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    align-items: center !important;
   }
 
   #header-component .spacing-style {
-    --padding-block-start: 0 !important;
-    --padding-block-end: 0 !important;
+    --padding-block-start: 0px !important;
+    --padding-block-end: 0px !important;
+  }
+
+  #header-component .header__column--left {
+    grid-area: left !important;
+    justify-content: flex-start !important;
+  }
+
+  #header-component .header__column--center {
+    grid-area: center !important;
+    justify-content: center !important;
+  }
+
+  #header-component .header__column--right {
+    grid-area: right !important;
+    justify-content: flex-end !important;
+  }
+
+  #header-component .header__column,
+  #header-component .header__column--left,
+  #header-component .header__column--center,
+  #header-component .header__column--right,
+  #header-component header-menu,
+  #header-component header-actions {
+    min-height: 72px !important;
+    height: 72px !important;
+    align-items: center !important;
+    align-self: center !important;
   }
 
   #header-component .header-logo,
@@ -714,8 +751,10 @@
     align-items: center !important;
     justify-content: center !important;
     line-height: 0 !important;
-    height: 58px !important;
-    max-height: 58px !important;
+    height: 72px !important;
+    max-height: 72px !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   #header-component .header-logo img,
@@ -723,145 +762,128 @@
   #header-component .header__heading-logo,
   #header-component .header__heading-logo-wrapper img {
     display: block !important;
-    max-height: 56px !important;
     height: auto !important;
+    max-height: 70px !important;
     width: auto !important;
-    object-fit: contain;
-    filter: drop-shadow(0 8px 16px rgba(17, 16, 14, 0.05));
+    object-fit: contain !important;
+    margin: 0 auto !important;
+    filter: drop-shadow(0 8px 16px rgba(17, 16, 14, 0.045));
   }
 
   #header-component header-menu,
   #header-component .menu-list,
   #header-component .menu-list__list,
   #header-component .overflow-menu::part(list) {
-    align-items: center;
+    align-items: center !important;
   }
 
   #header-component .menu-list__link,
   #header-component .menu-list__link span,
   #header-component .menu-list__list-item > a,
   #header-component .menu-list__list-item > button {
-    color: rgba(17, 16, 14, 0.78);
-    font-size: 15px;
-    font-weight: 620;
-    letter-spacing: -0.018em;
-    text-decoration: none;
+    color: rgba(17, 16, 14, 0.78) !important;
+    font-size: 15px !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.018em !important;
+    text-decoration: none !important;
   }
 
   #header-component .menu-list__link:hover,
   #header-component .menu-list__list-item > a:hover,
   #header-component .menu-list__list-item > button:hover {
-    color: var(--ss-header-ink);
-  }
-
-  #header-component .header__column,
-  #header-component header-menu,
-  #header-component header-actions {
-    align-self: center !important;
-  }
-
-  #header-component .header__column--left,
-  #header-component .header__column--center,
-  #header-component .header__column--right {
-    min-height: 74px !important;
-    align-items: center !important;
+    color: var(--ss-header-ink) !important;
   }
 
   #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
   #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link,
   #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link {
-    border-radius: 999px;
-    transition:
-      background-color 180ms ease,
-      color 180ms ease,
-      transform 180ms ease;
+    border-radius: 999px !important;
+    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease !important;
   }
 
   #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link:hover,
   #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link:hover {
-    background: rgba(17, 16, 14, 0.045);
+    background: rgba(17, 16, 14, 0.045) !important;
     transform: translateY(-1px);
   }
 
   #header-component header-actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    display: inline-flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 10px !important;
   }
 
   #header-component .header-actions__action,
   #header-component .search-action,
   #header-component .account-actions,
   #header-component .cart-action {
-    border-radius: 999px;
+    border-radius: 999px !important;
   }
 
   #header-component .header-actions__action,
   #header-component .search-action button,
   #header-component .account-actions a,
   #header-component .cart-action a {
-    transition:
-      background-color 180ms ease,
-      box-shadow 180ms ease,
-      transform 180ms ease,
-      opacity 180ms ease;
+    transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, opacity 180ms ease !important;
   }
 
   #header-component .header-actions__action:hover,
   #header-component .search-action:hover,
   #header-component .account-actions:hover,
   #header-component .cart-action:hover {
-    background: rgba(17, 16, 14, 0.045);
-    box-shadow: 0 12px 34px rgba(17, 16, 14, 0.055);
+    background: rgba(17, 16, 14, 0.045) !important;
+    box-shadow: 0 12px 34px rgba(17, 16, 14, 0.055) !important;
     transform: translateY(-1px);
   }
 
   #header-component .header__icon--menu {
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.70);
-    border: 1px solid rgba(17, 16, 14, 0.075);
-    box-shadow: 0 10px 26px rgba(17, 16, 14, 0.045);
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    border: 1px solid rgba(17, 16, 14, 0.075) !important;
+    box-shadow: 0 10px 26px rgba(17, 16, 14, 0.045) !important;
   }
 
   #header-component .header__row--mobile {
-    background:
-      linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(255, 255, 255, 0.94));
-    border-bottom: 1px solid rgba(17, 16, 14, 0.06);
-  }
-
-  @media screen and (min-width: 750px) {
-    #header-component .header__columns {
-      column-gap: clamp(18px, 2vw, 34px);
-    }
-
-    #header-component .header__column--left,
-    #header-component .header__column--center,
-    #header-component .header__column--right {
-      gap: clamp(16px, 1.8vw, 28px);
-    }
+    background: linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 255, 255, 0.96)) !important;
+    border-bottom: 1px solid rgba(17, 16, 14, 0.06) !important;
   }
 
   @media screen and (max-width: 749px) {
     body:has(> #header-group > header) {
-      --header-height: 52px;
+      --header-height: 56px;
     }
 
     #header-component {
-      box-shadow: 0 10px 32px rgba(17, 16, 14, 0.045);
+      box-shadow: 0 8px 26px rgba(17, 16, 14, 0.035);
     }
 
     #header-component .header__row--top {
-      min-height: 52px !important;
-      height: 52px !important;
+      min-height: 56px !important;
+      height: 56px !important;
     }
 
-    #header-component .header__row--top .header__columns {
-      min-height: 52px !important;
-      height: 52px !important;
-      padding-block-start: 0 !important;
-      padding-block-end: 0 !important;
+    #header-component .header__row--top .header__columns,
+    #header-component .header__row--top .header__columns.spacing-style {
+      min-height: 56px !important;
+      height: 56px !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
       padding-inline-start: 10px !important;
       padding-inline-end: 10px !important;
+      grid-template-columns: 42px 42px 1fr 42px 42px !important;
+      grid-template-areas: 'leftA leftB center rightA rightB' !important;
+      column-gap: 0 !important;
+    }
+
+    #header-component .header__column,
+    #header-component .header__column--left,
+    #header-component .header__column--center,
+    #header-component .header__column--right,
+    #header-component header-menu,
+    #header-component header-actions {
+      min-height: 44px !important;
+      height: 44px !important;
     }
 
     #header-component .header-logo,
@@ -869,39 +891,29 @@
     #header-component .header__heading,
     #header-component .header__heading-link,
     #header-component .header__heading-logo-wrapper {
-      height: 40px !important;
-      max-height: 40px !important;
+      height: 44px !important;
+      max-height: 44px !important;
     }
 
     #header-component .header-logo img,
     #header-component .header-logo svg,
     #header-component .header__heading-logo,
     #header-component .header__heading-logo-wrapper img {
-      max-height: 38px !important;
+      max-height: 42px !important;
       width: auto !important;
-    }
-
-    #header-component .header__columns {
-      --header-mobile-bookend: 40px;
-      grid-template-columns:
-        var(--header-mobile-bookend)
-        var(--header-mobile-bookend)
-        1fr
-        var(--header-mobile-bookend)
-        var(--header-mobile-bookend);
     }
 
     #header-component .header-actions__action,
     #header-component .search-action,
     #header-component .account-actions,
     #header-component .cart-action {
-      min-width: 38px;
-      min-height: 38px;
+      min-width: 38px !important;
+      min-height: 38px !important;
     }
 
     #header-component .header__row--mobile {
-      min-height: 44px;
-      overflow-x: auto;
+      min-height: 42px !important;
+      overflow-x: auto !important;
       -webkit-overflow-scrolling: touch;
     }
 
