@@ -638,6 +638,226 @@
       margin-top: calc(var(--header-height) * var(--transparent-header-offset-boolean) * -1);
     }
   }
+
+  /* ============================================================
+     Stella & Sage Premium Header Upgrade
+     Purpose:
+     - Make the main header match the new premium storefront pages.
+     - Reduce wasted vertical height.
+     - Soften the default Shopify feel.
+     - Keep existing Shopify header/menu/search/account/cart logic intact.
+     ============================================================ */
+
+  body:has(> #header-group > header) {
+    --header-height: 82px;
+  }
+
+  #header-component {
+    --ss-header-cream: #fffdf9;
+    --ss-header-cream-2: #fbf8f1;
+    --ss-header-ink: #11100e;
+    --ss-header-muted: rgba(17, 16, 14, 0.58);
+    --ss-header-border: rgba(17, 16, 14, 0.075);
+    --ss-header-gold: #a9955d;
+
+    background:
+      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.075), transparent 28%),
+      linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(255, 255, 255, 0.94));
+    border-bottom: 1px solid var(--ss-header-border);
+    box-shadow: 0 14px 44px rgba(17, 16, 14, 0.045);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  #header-component .header__row {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.055), transparent 30%),
+      linear-gradient(180deg, rgba(255, 253, 249, 0.88), rgba(255, 255, 255, 0.92));
+    border-color: var(--ss-header-border);
+  }
+
+  #header-component .header__row--top .header__columns {
+    min-height: 78px;
+    align-items: center;
+    padding-block-start: 8px !important;
+    padding-block-end: 8px !important;
+  }
+
+  #header-component .header__row--bottom .header__columns {
+    min-height: 44px;
+    padding-block-start: 4px !important;
+    padding-block-end: 8px !important;
+  }
+
+  #header-component .header-logo,
+  #header-component .header-logo a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #header-component .header-logo img,
+  #header-component .header-logo svg,
+  #header-component .header__heading-logo,
+  #header-component .header__heading-logo-wrapper img {
+    max-height: 58px !important;
+    width: auto !important;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(17, 16, 14, 0.055));
+  }
+
+  #header-component header-menu,
+  #header-component .menu-list,
+  #header-component .menu-list__list,
+  #header-component .overflow-menu::part(list) {
+    align-items: center;
+  }
+
+  #header-component .menu-list__link,
+  #header-component .menu-list__link span,
+  #header-component .menu-list__list-item > a,
+  #header-component .menu-list__list-item > button {
+    color: rgba(17, 16, 14, 0.78);
+    font-size: 15px;
+    font-weight: 620;
+    letter-spacing: -0.018em;
+    text-decoration: none;
+  }
+
+  #header-component .menu-list__link:hover,
+  #header-component .menu-list__list-item > a:hover,
+  #header-component .menu-list__list-item > button:hover {
+    color: var(--ss-header-ink);
+  }
+
+  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
+  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link,
+  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link {
+    border-radius: 999px;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link:hover,
+  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link:hover {
+    background: rgba(17, 16, 14, 0.045);
+    transform: translateY(-1px);
+  }
+
+  #header-component header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #header-component .header-actions__action,
+  #header-component .search-action,
+  #header-component .account-actions,
+  #header-component .cart-action {
+    border-radius: 999px;
+  }
+
+  #header-component .header-actions__action,
+  #header-component .search-action button,
+  #header-component .account-actions a,
+  #header-component .cart-action a {
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease,
+      opacity 180ms ease;
+  }
+
+  #header-component .header-actions__action:hover,
+  #header-component .search-action:hover,
+  #header-component .account-actions:hover,
+  #header-component .cart-action:hover {
+    background: rgba(17, 16, 14, 0.045);
+    box-shadow: 0 12px 34px rgba(17, 16, 14, 0.055);
+    transform: translateY(-1px);
+  }
+
+  #header-component .header__icon--menu {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.70);
+    border: 1px solid rgba(17, 16, 14, 0.075);
+    box-shadow: 0 10px 26px rgba(17, 16, 14, 0.045);
+  }
+
+  #header-component .header__row--mobile {
+    background:
+      linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(255, 255, 255, 0.94));
+    border-bottom: 1px solid rgba(17, 16, 14, 0.06);
+  }
+
+  @media screen and (min-width: 750px) {
+    #header-component .header__columns {
+      column-gap: clamp(18px, 2vw, 34px);
+    }
+
+    #header-component .header__column--left,
+    #header-component .header__column--center,
+    #header-component .header__column--right {
+      gap: clamp(16px, 1.8vw, 28px);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    body:has(> #header-group > header) {
+      --header-height: 58px;
+    }
+
+    #header-component {
+      box-shadow: 0 10px 32px rgba(17, 16, 14, 0.045);
+    }
+
+    #header-component .header__row--top .header__columns {
+      min-height: 56px;
+      padding-block-start: 5px !important;
+      padding-block-end: 5px !important;
+      padding-inline-start: 10px !important;
+      padding-inline-end: 10px !important;
+    }
+
+    #header-component .header-logo img,
+    #header-component .header-logo svg,
+    #header-component .header__heading-logo,
+    #header-component .header__heading-logo-wrapper img {
+      max-height: 44px !important;
+      width: auto !important;
+    }
+
+    #header-component .header__columns {
+      --header-mobile-bookend: 40px;
+      grid-template-columns:
+        var(--header-mobile-bookend)
+        var(--header-mobile-bookend)
+        1fr
+        var(--header-mobile-bookend)
+        var(--header-mobile-bookend);
+    }
+
+    #header-component .header-actions__action,
+    #header-component .search-action,
+    #header-component .account-actions,
+    #header-component .cart-action {
+      min-width: 38px;
+      min-height: 38px;
+    }
+
+    #header-component .header__row--mobile {
+      min-height: 44px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #header-component .header__row--mobile::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
 {% endstylesheet %}
 
 {% unless request.design_mode %}
