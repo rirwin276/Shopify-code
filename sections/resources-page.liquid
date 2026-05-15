@@ -3,6 +3,7 @@
   - Replaces old tab-heavy prompt layout.
   - Smoother guided flow: Pick prompt → Generate logo → Upload to storefront request.
   - Every prompt includes transparent background, no padding, tight crop, high-resolution requirements.
+  - V2: Category picker and prompt library are visually connected so users do not miss the relationship.
 {% endcomment %}
 
 <section class="ss-resources" id="ss-resources-{{ section.id }}">
@@ -15,7 +16,7 @@
 
       <div class="ss-res-hero-actions">
         <a class="ss-res-btn ss-res-btn--dark" href="/pages/request-storefront-form">Request a storefront →</a>
-        <a class="ss-res-btn ss-res-btn--light" href="#prompt-library">Browse prompts</a>
+        <a class="ss-res-btn ss-res-btn--light" href="#logo-helper">Browse prompts</a>
       </div>
     </header>
 
@@ -29,7 +30,7 @@
       <div class="ss-flow-card">
         <span>02</span>
         <h3>Generate your logo</h3>
-        <p>Paste the prompt into ChatGPT and replace the highlighted placeholders.</p>
+        <p>Paste the prompt into ChatGPT and replace the placeholder text.</p>
       </div>
 
       <div class="ss-flow-card">
@@ -47,56 +48,65 @@
       </div>
     </section>
 
-    <section class="ss-res-categories" aria-label="Prompt categories">
-      <button class="ss-cat-card ss-cat-card--active" type="button" data-res-category="sports">
-        <span>🏅</span>
-        <strong>Sports Teams</strong>
-        <p>Wordmarks, mascots, badges, and hat-ready logos.</p>
-      </button>
-
-      <button class="ss-cat-card" type="button" data-res-category="vacation">
-        <span>🏖️</span>
-        <strong>Family Trips</strong>
-        <p>Vacation crews, reunions, lake trips, and beach weeks.</p>
-      </button>
-
-      <button class="ss-cat-card" type="button" data-res-category="parties">
-        <span>💍</span>
-        <strong>Weddings &amp; Parties</strong>
-        <p>Bachelor trips, bachelorette parties, and wedding marks.</p>
-      </button>
-
-      <button class="ss-cat-card" type="button" data-res-category="groups">
-        <span>🎲</span>
-        <strong>Groups &amp; Fundraisers</strong>
-        <p>Clubs, businesses, charity events, and work teams.</p>
-      </button>
-    </section>
-
-    <section class="ss-prompt-library" id="prompt-library">
-      <div class="ss-res-section-head">
-        <div class="ss-res-kicker">Prompt Library</div>
-        <h2>Copy a prompt. Replace the blanks. Generate your logo.</h2>
-        <p>Every prompt is written to create a clean, upload-ready logo with no background, no padding, and crisp high-resolution artwork.</p>
+    <section class="ss-logo-helper" id="logo-helper">
+      <div class="ss-helper-head">
+        <div>
+          <div class="ss-res-kicker">Prompt Library</div>
+          <h2>Choose a logo type. The prompts update below.</h2>
+          <p>Pick the closest category, open a prompt, replace the blanks, then copy it into ChatGPT.</p>
+        </div>
       </div>
 
-      <div class="ss-prompt-panel" data-panel="sports">
+      <div class="ss-res-categories" aria-label="Prompt categories">
+        <button class="ss-cat-card ss-cat-card--active" type="button" data-res-category="sports">
+          <span>🏅</span>
+          <strong>Sports Teams</strong>
+          <p>Wordmarks, mascots, badges, and hat-ready logos.</p>
+        </button>
 
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for teams</span>
-                <span>Shirts + hoodies</span>
+        <button class="ss-cat-card" type="button" data-res-category="vacation">
+          <span>🏖️</span>
+          <strong>Family Trips</strong>
+          <p>Vacation crews, reunions, lake trips, and beach weeks.</p>
+        </button>
+
+        <button class="ss-cat-card" type="button" data-res-category="parties">
+          <span>💍</span>
+          <strong>Weddings &amp; Parties</strong>
+          <p>Bachelor trips, bachelorette parties, and wedding marks.</p>
+        </button>
+
+        <button class="ss-cat-card" type="button" data-res-category="groups">
+          <span>🎲</span>
+          <strong>Groups &amp; Fundraisers</strong>
+          <p>Clubs, businesses, charity events, and work teams.</p>
+        </button>
+      </div>
+
+      <div class="ss-active-label" aria-live="polite">
+        <span>Showing prompts for:</span>
+        <strong data-active-category-label>Sports Teams</strong>
+      </div>
+
+      <div class="ss-prompt-library" id="prompt-library">
+
+        <div class="ss-prompt-panel" data-panel="sports">
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for teams</span>
+                  <span>Shirts + hoodies</span>
+                </div>
+                <h3>Clean Team Wordmark</h3>
+                <p>Bold athletic lettering with a simple icon or underline.</p>
               </div>
-              <h3>Clean Team Wordmark</h3>
-              <p>Bold athletic lettering with a simple icon or underline.</p>
+              <button class="ss-view-btn" type="button">View Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-sports-1">Create a bold, clean sports team logo for a youth [SPORT TYPE] team named "[TEAM NAME]".
+            <div class="ss-prompt-body">
+              <pre id="prompt-sports-1">Create a bold, clean sports team logo for a youth [SPORT TYPE] team named "[TEAM NAME]".
 
 Style:
 Strong athletic font with a slight forward slant. Thick solid lettering. Simple underline or swoosh. Optional small icon: [ICON — e.g. baseball, football, cleat, lightning bolt].
@@ -118,25 +128,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-1">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for mascots</span>
-                <span>Youth sports</span>
-              </div>
-              <h3>Mascot-Style Logo</h3>
-              <p>Energetic mascot art with team name built into the design.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-1">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-sports-2">Create a bold mascot sports logo for a youth [SPORT TYPE] team named "[TEAM NAME]". The mascot is a [MASCOT — e.g. bulldog, hawk, tiger, bear, raptor].
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for mascots</span>
+                  <span>Youth sports</span>
+                </div>
+                <h3>Mascot-Style Logo</h3>
+                <p>Energetic mascot art with team name built into the design.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-sports-2">Create a bold mascot sports logo for a youth [SPORT TYPE] team named "[TEAM NAME]". The mascot is a [MASCOT — e.g. bulldog, hawk, tiger, bear, raptor].
 
 Style:
 Aggressive or energetic expression. Thick outlines. Cartoon-like but not childish. Mascot centered with team name integrated below or around it.
@@ -158,25 +168,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-2">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for badges</span>
-                <span>Classic team look</span>
-              </div>
-              <h3>Badge / Crest Style</h3>
-              <p>A circular or shield-style team mark with a center icon.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-2">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-sports-3">Create a badge-style crest logo for a youth [SPORT TYPE] team named "[TEAM NAME]".
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for badges</span>
+                  <span>Classic team look</span>
+                </div>
+                <h3>Badge / Crest Style</h3>
+                <p>A circular or shield-style team mark with a center icon.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-sports-3">Create a badge-style crest logo for a youth [SPORT TYPE] team named "[TEAM NAME]".
 
 Design:
 Circular or shield shape. Team name wraps around the outside. Centered icon: [ICON — e.g. crossed bats, soccer ball, hockey stick, football helmet]. Clean symmetrical layout.
@@ -198,25 +208,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-3">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for hats</span>
-                <span>Simple logo</span>
-              </div>
-              <h3>Minimal Icon + Text</h3>
-              <p>A small, clean logo that works well on hats and left-chest prints.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-3">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-sports-4">Create a minimal sports logo for a [SPORT TYPE] team named "[TEAM NAME]".
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for hats</span>
+                  <span>Simple logo</span>
+                </div>
+                <h3>Minimal Icon + Text</h3>
+                <p>A small, clean logo that works well on hats and left-chest prints.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-sports-4">Create a minimal sports logo for a [SPORT TYPE] team named "[TEAM NAME]".
 
 Design:
 Small simple icon: [ICON — e.g. ball, cleat, helmet, lightning bolt, paw] with bold team name beside or below it. Nothing extra.
@@ -238,29 +248,29 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-4">Copy Prompt</button>
-          </div>
-        </article>
-
-      </div>
-
-      <div class="ss-prompt-panel ss-hidden" data-panel="vacation">
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for trips</span>
-                <span>Family shirts</span>
-              </div>
-              <h3>Classic Vacation Logo</h3>
-              <p>Friendly vacation logo for beach trips, cabins, cruises, and lake houses.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-4">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-vacation-1">Create a fun, bold family vacation logo for a group called "[FAMILY LAST NAME] Family [YEAR]".
+        </div>
+
+        <div class="ss-prompt-panel ss-hidden" data-panel="vacation">
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for trips</span>
+                  <span>Family shirts</span>
+                </div>
+                <h3>Classic Vacation Logo</h3>
+                <p>Friendly vacation logo for beach trips, cabins, cruises, and lake houses.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-vacation-1">Create a fun, bold family vacation logo for a group called "[FAMILY LAST NAME] Family [YEAR]".
 
 Destination or theme:
 [DESTINATION — e.g. beach trip, mountain cabin, lake house, cruise]
@@ -285,25 +295,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-1">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for reunions</span>
-                <span>Classic badge</span>
-              </div>
-              <h3>Family Reunion Badge</h3>
-              <p>A clean badge logo with family name, year, and a simple symbol.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-1">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-vacation-2">Create a vintage badge-style family reunion logo. Group name: "[FAMILY LAST NAME] Family Reunion [YEAR]".
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for reunions</span>
+                  <span>Classic badge</span>
+                </div>
+                <h3>Family Reunion Badge</h3>
+                <p>A clean badge logo with family name, year, and a simple symbol.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-vacation-2">Create a vintage badge-style family reunion logo. Group name: "[FAMILY LAST NAME] Family Reunion [YEAR]".
 
 Design:
 Oval or circular badge. Family name and year displayed prominently. Small center icon: [ICON — e.g. family tree, anchor, state shape, house, lake, mountain].
@@ -328,25 +338,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-2">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for fun shirts</span>
-                <span>Big personality</span>
-              </div>
-              <h3>Vacation Crew Logo</h3>
-              <p>A bold illustrated crew-style logo for families or friend groups.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-2">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-vacation-3">Create a bold illustrated crew logo for a family vacation group called "The [FAMILY LAST NAME] Crew — [YEAR]".
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for fun shirts</span>
+                  <span>Big personality</span>
+                </div>
+                <h3>Vacation Crew Logo</h3>
+                <p>A bold illustrated crew-style logo for families or friend groups.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-vacation-3">Create a bold illustrated crew logo for a family vacation group called "The [FAMILY LAST NAME] Crew — [YEAR]".
 
 The crew members are:
 - Person 1: [DESCRIBE PERSON 1 IN 1 SENTENCE]
@@ -378,25 +388,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-3">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for matching tees</span>
-                <span>Simple event mark</span>
-              </div>
-              <h3>Matching Vacation Crew Tee</h3>
-              <p>A simple wearable logo for matching group trip shirts.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-3">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-vacation-4">Create a matching group t-shirt logo for a family vacation. Trip name: "[TRIP NAME — e.g. Beach Week 2025, Smith Family Florida Trip]".
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for matching tees</span>
+                  <span>Simple event mark</span>
+                </div>
+                <h3>Matching Vacation Crew Tee</h3>
+                <p>A simple wearable logo for matching group trip shirts.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-vacation-4">Create a matching group t-shirt logo for a family vacation. Trip name: "[TRIP NAME — e.g. Beach Week 2025, Smith Family Florida Trip]".
 
 Style:
 Fun and casual. Bold statement text. Add a relevant icon such as flip flops, waves, camper van, sunglasses, palm tree, mountain, or campfire. Year or destination below the name.
@@ -418,29 +428,29 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-4">Copy Prompt</button>
-          </div>
-        </article>
-
-      </div>
-
-      <div class="ss-prompt-panel ss-hidden" data-panel="parties">
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for weddings</span>
-                <span>Clean monogram</span>
-              </div>
-              <h3>Wedding Monogram</h3>
-              <p>Elegant initials and date mark for wedding gear or gifts.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-4">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-parties-1">Create a clean, elegant wedding logo using the initials "[INITIAL 1]" and "[INITIAL 2]" and the date "[MONTH YEAR — e.g. June 2025]".
+        </div>
+
+        <div class="ss-prompt-panel ss-hidden" data-panel="parties">
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for weddings</span>
+                  <span>Clean monogram</span>
+                </div>
+                <h3>Wedding Monogram</h3>
+                <p>Elegant initials and date mark for wedding gear or gifts.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-parties-1">Create a clean, elegant wedding logo using the initials "[INITIAL 1]" and "[INITIAL 2]" and the date "[MONTH YEAR — e.g. June 2025]".
 
 Style:
 Classic serif or elegant script. Initials interlocked or side-by-side. Minimal decorative element such as a wreath, simple floral, single ring, or small line detail.
@@ -462,25 +472,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-1">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for bachelorette</span>
-                <span>Fun shirts</span>
-              </div>
-              <h3>Bachelorette / Bach Party</h3>
-              <p>Playful party logo for destination trips and matching tees.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-1">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-parties-2">Create a fun, bold bachelorette party logo for "[BRIDE'S NAME]'s Bach Party" in [DESTINATION OR THEME — e.g. Nashville, Palm Springs, disco night, beach weekend].
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for bachelorette</span>
+                  <span>Fun shirts</span>
+                </div>
+                <h3>Bachelorette / Bach Party</h3>
+                <p>Playful party logo for destination trips and matching tees.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-parties-2">Create a fun, bold bachelorette party logo for "[BRIDE'S NAME]'s Bach Party" in [DESTINATION OR THEME — e.g. Nashville, Palm Springs, disco night, beach weekend].
 
 Style:
 Playful and celebratory. Icon: [ICON — e.g. cowboy hat, palm tree, disco ball, champagne flute, flamingo]. Mix of bold and script font.
@@ -502,25 +512,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-2">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for bachelor trips</span>
-                <span>Rugged logo</span>
-              </div>
-              <h3>Bachelor / Groom Squad</h3>
-              <p>Bold logo for golf trips, cabins, Vegas weekends, or groom squads.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-2">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-parties-3">Create a bold bachelor party logo for "[GROOM'S NAME]'s Last Ride" or "[GROUP NAME]".
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for bachelor trips</span>
+                  <span>Rugged logo</span>
+                </div>
+                <h3>Bachelor / Groom Squad</h3>
+                <p>Bold logo for golf trips, cabins, Vegas weekends, or groom squads.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-parties-3">Create a bold bachelor party logo for "[GROOM'S NAME]'s Last Ride" or "[GROUP NAME]".
 
 Theme:
 [ACTIVITY OR DESTINATION — e.g. golf trip, Vegas weekend, fishing trip, mountain cabin]
@@ -545,29 +555,29 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-3">Copy Prompt</button>
-          </div>
-        </article>
-
-      </div>
-
-      <div class="ss-prompt-panel ss-hidden" data-panel="groups">
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for clubs</span>
-                <span>Simple group logo</span>
-              </div>
-              <h3>Club or Organization</h3>
-              <p>A clean mark for clubs, work groups, neighborhood groups, or teams.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-3">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-groups-1">Create a clean group logo for "[GROUP NAME]".
+        </div>
+
+        <div class="ss-prompt-panel ss-hidden" data-panel="groups">
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for clubs</span>
+                  <span>Simple group logo</span>
+                </div>
+                <h3>Club or Organization</h3>
+                <p>A clean mark for clubs, work groups, neighborhood groups, or teams.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-groups-1">Create a clean group logo for "[GROUP NAME]".
 
 Group type:
 [TYPE — e.g. neighborhood group, hunting club, car club, book club, work team, gym group]
@@ -592,25 +602,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-1">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for fundraisers</span>
-                <span>Community events</span>
-              </div>
-              <h3>Fundraiser / Charity Event</h3>
-              <p>A warm, readable event mark for charity or community campaigns.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-1">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-groups-2">Create a bold event logo for "[EVENT NAME]" benefiting "[CAUSE OR ORGANIZATION]". Year: [YEAR].
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for fundraisers</span>
+                  <span>Community events</span>
+                </div>
+                <h3>Fundraiser / Charity Event</h3>
+                <p>A warm, readable event mark for charity or community campaigns.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-groups-2">Create a bold event logo for "[EVENT NAME]" benefiting "[CAUSE OR ORGANIZATION]". Year: [YEAR].
 
 Style:
 Warm and community-focused. Simple icon related to the cause such as ribbon, heart, raised hand, star, shield, or local symbol. Bold and easy to read.
@@ -632,25 +642,25 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-2">Copy Prompt</button>
-          </div>
-        </article>
-
-        <article class="ss-prompt-card">
-          <div class="ss-prompt-top">
-            <div>
-              <div class="ss-prompt-tags">
-                <span>Best for work teams</span>
-                <span>Company events</span>
-              </div>
-              <h3>Work Team / Company Event</h3>
-              <p>A clean, professional event logo that still feels fun.</p>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-2">Copy Prompt</button>
             </div>
-            <button class="ss-view-btn" type="button">View Prompt</button>
-          </div>
+          </article>
 
-          <div class="ss-prompt-body">
-            <pre id="prompt-groups-3">Create a fun team logo for "[COMPANY OR TEAM NAME]" for a [EVENT TYPE — e.g. company picnic, team retreat, holiday party, sales kickoff]. Year: [YEAR].
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for work teams</span>
+                  <span>Company events</span>
+                </div>
+                <h3>Work Team / Company Event</h3>
+                <p>A clean, professional event logo that still feels fun.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-groups-3">Create a fun team logo for "[COMPANY OR TEAM NAME]" for a [EVENT TYPE — e.g. company picnic, team retreat, holiday party, sales kickoff]. Year: [YEAR].
 
 Style:
 Professional but fun. Add a simple icon such as star, lightning bolt, trophy, mountain, handshake, or company-related symbol. Bold clean font.
@@ -673,9 +683,11 @@ Logo Requirements:
 - High contrast colors only
 - Simple vector-style artwork
 - No gradients, shadows, textures, or realistic effects</pre>
-            <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-3">Copy Prompt</button>
-          </div>
-        </article>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-3">Copy Prompt</button>
+            </div>
+          </article>
+
+        </div>
 
       </div>
     </section>
@@ -955,18 +967,51 @@ Logo Requirements:
     font-weight: 520;
   }
 
+  #ss-resources-{{ section.id }} .ss-logo-helper {
+    padding: clamp(22px, 4vw, 34px);
+    border-radius: 42px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(183,163,106,.07), transparent 32%),
+      rgba(255,255,255,.58);
+    border: 1px solid rgba(17,16,14,.075);
+    box-shadow: 0 28px 100px rgba(17,16,14,.055);
+  }
+
+  #ss-resources-{{ section.id }} .ss-helper-head {
+    max-width: 840px;
+    margin-bottom: 24px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-helper-head h2 {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(34px, 4.6vw, 58px);
+    line-height: .98;
+    letter-spacing: -.058em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-helper-head p {
+    max-width: 690px;
+    margin: 16px 0 0;
+    color: rgba(17,16,14,.64);
+    font-size: 16px;
+    line-height: 1.58;
+    font-weight: 480;
+  }
+
   #ss-resources-{{ section.id }} .ss-res-categories {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 14px;
-    margin-bottom: 70px;
+    margin-bottom: 18px;
   }
 
   #ss-resources-{{ section.id }} .ss-cat-card {
     appearance: none;
     text-align: left;
     cursor: pointer;
-    min-height: 185px;
+    min-height: 172px;
     padding: 22px;
     border-radius: 30px;
     background: rgba(255,255,255,.76);
@@ -991,7 +1036,7 @@ Logo Requirements:
   #ss-resources-{{ section.id }} .ss-cat-card span {
     display: block;
     font-size: 26px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
   }
 
   #ss-resources-{{ section.id }} .ss-cat-card strong {
@@ -1015,27 +1060,29 @@ Logo Requirements:
     color: rgba(255,255,255,.58);
   }
 
-  #ss-resources-{{ section.id }} .ss-res-section-head {
-    max-width: 790px;
-    margin-bottom: 34px;
+  #ss-resources-{{ section.id }} .ss-active-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 14px;
+    margin: 2px 0 18px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.045);
+    color: rgba(17,16,14,.58);
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: .04em;
+    text-transform: uppercase;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-section-head h2 {
-    margin: 0;
+  #ss-resources-{{ section.id }} .ss-active-label strong {
     color: #11100e;
-    font-size: clamp(34px, 4.6vw, 62px);
-    line-height: .98;
-    letter-spacing: -.058em;
     font-weight: 950;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-section-head p {
-    max-width: 680px;
-    margin: 17px 0 0;
-    color: rgba(17,16,14,.64);
-    font-size: 17px;
-    line-height: 1.6;
-    font-weight: 480;
+  #ss-resources-{{ section.id }} .ss-prompt-library {
+    display: block;
   }
 
   #ss-resources-{{ section.id }} .ss-prompt-panel {
@@ -1049,9 +1096,9 @@ Logo Requirements:
 
   #ss-resources-{{ section.id }} .ss-prompt-card {
     border-radius: 30px;
-    background: rgba(255,255,255,.82);
+    background: rgba(255,255,255,.88);
     border: 1px solid rgba(17,16,14,.08);
-    box-shadow: 0 24px 80px rgba(17,16,14,.055);
+    box-shadow: 0 24px 80px rgba(17,16,14,.045);
     overflow: hidden;
   }
 
@@ -1161,6 +1208,29 @@ Logo Requirements:
   #ss-resources-{{ section.id }} .ss-checklist-section,
   #ss-resources-{{ section.id }} .ss-tools-section {
     padding-top: 86px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-section-head {
+    max-width: 790px;
+    margin-bottom: 34px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-section-head h2 {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(34px, 4.6vw, 62px);
+    line-height: .98;
+    letter-spacing: -.058em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-section-head p {
+    max-width: 680px;
+    margin: 17px 0 0;
+    color: rgba(17,16,14,.64);
+    font-size: 17px;
+    line-height: 1.6;
+    font-weight: 480;
   }
 
   #ss-resources-{{ section.id }} .ss-check-grid {
@@ -1314,6 +1384,17 @@ Logo Requirements:
       width: 100%;
     }
 
+    #ss-resources-{{ section.id }} .ss-logo-helper {
+      border-radius: 30px;
+      padding: 18px;
+    }
+
+    #ss-resources-{{ section.id }} .ss-helper-head h2,
+    #ss-resources-{{ section.id }} .ss-res-section-head h2,
+    #ss-resources-{{ section.id }} .ss-res-final h2 {
+      font-size: 40px;
+    }
+
     #ss-resources-{{ section.id }} .ss-prompt-top {
       flex-direction: column;
     }
@@ -1327,9 +1408,11 @@ Logo Requirements:
       flex-direction: column;
     }
 
-    #ss-resources-{{ section.id }} .ss-res-section-head h2,
-    #ss-resources-{{ section.id }} .ss-res-final h2 {
-      font-size: 40px;
+    #ss-resources-{{ section.id }} .ss-active-label {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+      flex-wrap: wrap;
     }
   }
 </style>
@@ -1341,6 +1424,14 @@ Logo Requirements:
 
     var categoryButtons = root.querySelectorAll('[data-res-category]');
     var panels = root.querySelectorAll('[data-panel]');
+    var activeLabel = root.querySelector('[data-active-category-label]');
+
+    var labels = {
+      sports: 'Sports Teams',
+      vacation: 'Family Trips',
+      parties: 'Weddings & Parties',
+      groups: 'Groups & Fundraisers'
+    };
 
     categoryButtons.forEach(function(button) {
       button.addEventListener('click', function() {
@@ -1359,6 +1450,15 @@ Logo Requirements:
         });
 
         button.classList.add('ss-cat-card--active');
+
+        if (activeLabel && labels[target]) {
+          activeLabel.textContent = labels[target];
+        }
+
+        var library = root.querySelector('#prompt-library');
+        if (library && window.innerWidth < 900) {
+          library.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       });
     });
 
