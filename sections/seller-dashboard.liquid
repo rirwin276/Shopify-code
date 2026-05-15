@@ -158,7 +158,19 @@
 
       <header class="ss-header">
         <div class="ss-header-text">
-          <h1 class="ss-h1">Studio Dashboard</h1>
+          <h1 class="ss-h1">
+            {% if customer %}
+              {% if customer.first_name != blank %}
+                {{ customer.first_name | escape }}’s Dashboard
+              {% elsif display_name != blank %}
+                {{ display_name | escape }}’s Dashboard
+              {% else %}
+                My Dashboard
+              {% endif %}
+            {% else %}
+              Studio Dashboard
+            {% endif %}
+          </h1>
           <p class="ss-sub">Manage your private collections and track real-time design production.</p>
         </div>
 
@@ -394,7 +406,7 @@
 
                           {% if is_fully_ready %}
                             <a href="{{ tile_url }}" class="ss-open-btn">
-                              <span>Open Storefront</span>
+                              <span>Shop Store</span>
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                             </a>
                           {% else %}
@@ -884,7 +896,7 @@
         }
       }
 
-      // Controls: wire up Open Storefront link and Admin link
+      // Controls: wire up Shop Store link and Admin link
       var controls = card.querySelector('.ss-col-controls');
       if(controls){
         var isBootstrapper = card.getAttribute('data-ss-bootstrapper') === '1';
@@ -895,12 +907,12 @@
         var wakeNote = controls.querySelector('p');
         if(wakeNote) wakeNote.parentNode.removeChild(wakeNote);
 
-        // Build open-storefront anchor
+        // Build shop-store anchor
         function makeOpenLink(){
           var a = document.createElement('a');
           a.href = storeHref;
           a.className = 'ss-open-btn';
-          a.innerHTML = '<span>Open Storefront</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+          a.innerHTML = '<span>Shop Store</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
           return a;
         }
 
@@ -2218,9 +2230,9 @@
   overflow: hidden;
   padding: clamp(28px, 5vw, 64px) 0 clamp(48px, 7vw, 86px) !important;
   background:
-    radial-gradient(circle at 13% 0%, rgba(183,163,106,.24), transparent 30%),
+    radial-gradient(circle at 13% 0%, rgba(183,163,106,.14), transparent 30%),
     radial-gradient(circle at 88% 4%, rgba(255,255,255,.92), transparent 24%),
-    radial-gradient(circle at 55% 100%, rgba(183,163,106,.11), transparent 32%),
+    radial-gradient(circle at 55% 100%, rgba(183,163,106,.065), transparent 32%),
     linear-gradient(180deg, #f7f2e8 0%, #fffdf8 36%, #f8f4ea 100%) !important;
 }
 
@@ -2238,7 +2250,7 @@
   height: 440px;
   left: -170px;
   top: -180px;
-  background: rgba(183,163,106,.22);
+  background: rgba(183,163,106,.13);
 }
 
 .ss-bg::after {
@@ -2914,6 +2926,137 @@
     transition: none !important;
   }
 }
+
+/* ===== V13 micro-refinements: softer gold + stronger mobile store cards ===== */
+.ss-h1 {
+  text-wrap: balance;
+}
+
+@media (min-width: 901px) {
+  .ss-bg::before {
+    opacity: .72;
+  }
+}
+
+@media (max-width: 900px) {
+  .ss-store-card {
+    grid-template-columns: 82px minmax(0, 1fr) !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+    row-gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  .ss-col-identity {
+    display: contents !important;
+  }
+
+  .ss-logo-frame {
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: 82px !important;
+    height: 82px !important;
+    border-radius: 23px !important;
+  }
+
+  .ss-logo-frame img {
+    padding: 3px !important;
+  }
+
+  .ss-identity-text {
+    grid-column: 2 !important;
+    min-width: 0 !important;
+  }
+
+  .ss-card-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ss-col-engine {
+    grid-column: 2 !important;
+    justify-content: flex-start !important;
+    align-self: start !important;
+  }
+
+  .ss-status-finished,
+  .ss-status-building {
+    padding: 7px 11px !important;
+  }
+
+  .ss-status-text,
+  .ss-status-text-building {
+    font-size: 10px !important;
+  }
+
+  .ss-col-controls {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1.45fr !important;
+    gap: 10px !important;
+    margin-top: 2px !important;
+  }
+
+  .ss-col-controls > * {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .ss-admin-btn,
+  .ss-open-btn,
+  .ss-leave-btn {
+    min-height: 46px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .ss-open-btn span {
+    white-space: nowrap !important;
+  }
+
+  .ss-buildwrap {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 560px) {
+  .ss-h1 {
+    font-size: clamp(34px, 10.5vw, 42px) !important;
+    letter-spacing: -.065em !important;
+  }
+
+  .ss-store-card {
+    grid-template-columns: 86px minmax(0, 1fr) !important;
+    padding: 13px !important;
+  }
+
+  .ss-logo-frame {
+    width: 86px !important;
+    height: 86px !important;
+    border-radius: 24px !important;
+  }
+
+  .ss-card-title {
+    font-size: 17px !important;
+  }
+
+  .ss-card-subtitle {
+    font-size: 10px !important;
+    padding: 4px 8px !important;
+  }
+
+  .ss-col-controls {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ss-admin-btn,
+  .ss-open-btn,
+  .ss-leave-btn {
+    min-height: 48px !important;
+  }
+}
+
 </style>
 
 
