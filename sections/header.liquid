@@ -268,6 +268,29 @@
   {% endif %}
 </header-component>
 
+  {%- comment -%}
+    Stella & Sage custom mobile mini nav
+    - Mobile only.
+    - Replaces Shopify overflow/More menu on phones so the header stays tiny and clean.
+    - Desktop header remains handled by the normal Shopify header logic above.
+  {%- endcomment -%}
+  <div class="ss-mobile-mini-nav" data-ss-mobile-nav>
+    <button class="ss-mobile-mini-nav__button" type="button" aria-label="Open menu" aria-expanded="false" data-ss-mobile-nav-button>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="ss-mobile-mini-nav__panel" aria-label="Mobile navigation" data-ss-mobile-nav-panel>
+      <a href="/">Home</a>
+      <a href="/pages/portal">Dashboard</a>
+      <a href="/pages/private-storefronts">How it works</a>
+      <a href="/pages/about-us">About us</a>
+      <a href="/pages/support">Support</a>
+      <a href="/pages/resources">Resources</a>
+    </nav>
+  </div>
+
 <script
   src="{{ 'header.js' | asset_url }}"
   type="module"
@@ -871,7 +894,227 @@
     }
   }
 
+
+  /* ============================================================
+     Stella & Sage V8 — MOBILE ONLY CLEANUP
+     Goal: tiny, minimal, no broken Shopify More sheet.
+     Desktop stays as-is from the stable version.
+     ============================================================ */
+
+  .ss-mobile-mini-nav {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .header-section {
+      position: relative !important;
+      z-index: 50;
+    }
+
+    #header-component {
+      box-shadow: 0 8px 24px rgba(17, 16, 14, 0.035) !important;
+      border-bottom: 1px solid rgba(17, 16, 14, 0.06) !important;
+      background: rgba(255, 255, 255, 0.94) !important;
+      backdrop-filter: blur(18px) !important;
+      -webkit-backdrop-filter: blur(18px) !important;
+    }
+
+    #header-component .header__row--top .header__columns {
+      min-height: 50px !important;
+      height: 50px !important;
+      padding-block: 0 !important;
+      padding-inline: 12px !important;
+      align-items: center !important;
+    }
+
+    #header-component .header__columns {
+      display: grid !important;
+      grid-template-columns: 48px 1fr auto !important;
+      grid-template-areas: 'left center right' !important;
+      column-gap: 8px !important;
+      align-items: center !important;
+    }
+
+    /* Kill the Shopify mobile/overflow menu that created the giant broken sheet. */
+    #header-component header-menu,
+    #header-component .menu-list,
+    #header-component .overflow-menu,
+    #header-component .header__row--mobile {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    /* Hide the duplicate left mobile search. Keep right-side account/cart/search actions clean. */
+    #header-component .desktop\:hidden.search-action,
+    #header-component .desktop\:hidden .search-action,
+    #header-component .header__columns > .search-action {
+      display: none !important;
+    }
+
+    #header-component .header-logo {
+      grid-area: center !important;
+      justify-self: center !important;
+      align-self: center !important;
+      margin: 0 !important;
+    }
+
+    #header-component .header-logo,
+    #header-component .header-logo a,
+    #header-component .header-logo__link,
+    #header-component .header-logo__image-container {
+      max-height: 44px !important;
+      height: 44px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    #header-component .header-logo img,
+    #header-component .header-logo svg,
+    #header-component .header-logo__image,
+    #header-component .header-logo__image-container img {
+      max-height: 42px !important;
+      width: auto !important;
+      object-fit: contain !important;
+      display: block !important;
+    }
+
+    #header-component header-actions,
+    #header-component .header-actions {
+      grid-area: right !important;
+      justify-self: end !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+    }
+
+    #header-component .header-actions__action,
+    #header-component .search-action,
+    #header-component .account-actions a,
+    #header-component .cart-icon,
+    #header-component .header__icon {
+      min-width: 34px !important;
+      width: 34px !important;
+      min-height: 34px !important;
+      height: 34px !important;
+      border-radius: 999px !important;
+    }
+
+    .ss-mobile-mini-nav {
+      display: block;
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 80;
+    }
+
+    .ss-mobile-mini-nav__button {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border: 1px solid rgba(17, 16, 14, 0.08);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 10px 28px rgba(17, 16, 14, 0.07);
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ss-mobile-mini-nav__button span {
+      width: 15px;
+      height: 2px;
+      border-radius: 999px;
+      background: #11100e;
+      display: block;
+    }
+
+    .ss-mobile-mini-nav__panel {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: calc(100% + 8px);
+      width: min(226px, calc(100vw - 24px));
+      padding: 8px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(183, 163, 106, 0.10), transparent 32%),
+        rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(17, 16, 14, 0.08);
+      box-shadow: 0 26px 70px rgba(17, 16, 14, 0.16);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .ss-mobile-mini-nav.is-open .ss-mobile-mini-nav__panel {
+      display: grid;
+      gap: 3px;
+    }
+
+    .ss-mobile-mini-nav__panel a {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 0 13px;
+      border-radius: 16px;
+      color: rgba(17, 16, 14, 0.82);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+
+    .ss-mobile-mini-nav__panel a:hover,
+    .ss-mobile-mini-nav__panel a:focus-visible {
+      background: rgba(17, 16, 14, 0.045);
+      color: #11100e;
+      outline: none;
+    }
+  }
+
 {% endstylesheet %}
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var nav = document.querySelector('[data-ss-mobile-nav]');
+  if (!nav) return;
+
+  var btn = nav.querySelector('[data-ss-mobile-nav-button]');
+  if (!btn) return;
+
+  function closeMenu() {
+    nav.classList.remove('is-open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleMenu(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    var open = nav.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  btn.addEventListener('click', toggleMenu);
+
+  document.addEventListener('click', function(event) {
+    if (!nav.contains(event.target)) closeMenu();
+  });
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') closeMenu();
+  });
+
+  window.addEventListener('scroll', closeMenu, { passive: true });
+});
+</script>
 
 {% unless request.design_mode %}
   <script type="module">
