@@ -202,13 +202,58 @@
       {% endif %}
 
       {% unless customer %}
-        <div class="ss-card ss-empty-state">
-          <div class="ss-empty-icon">🔒</div>
-          <h2>Member Access Required</h2>
-          <p>Please sign in to view your private design collections.</p>
-          <div class="ss-action-row">
-            <a class="ss-btn-primary" href="{{ routes.storefront_login_url }}?return_to={{ portal_url | url_encode }}">Log in</a>
-            <a class="ss-btn-secondary" href="{{ explainer_url }}">Request Access</a>
+        <div class="ss-loggedout-shell">
+          <div class="ss-card ss-empty-state ss-empty-state--premium">
+            <div class="ss-empty-icon">⌁</div>
+            <div class="ss-locked-kicker">PRIVATE DASHBOARD</div>
+            <h2>Your stores live here.</h2>
+            <p>Sign in to manage private storefronts, shop stores you’ve joined, edit product placement, build new merch, and keep every group store in one clean place.</p>
+            <div class="ss-action-row">
+              <a class="ss-btn-primary" href="{{ routes.storefront_login_url }}?return_to={{ portal_url | url_encode }}">Sign in</a>
+              <a class="ss-btn-secondary" href="{{ storefront_request_url }}">Create a Storefront</a>
+            </div>
+          </div>
+
+          <div class="ss-locked-preview" aria-hidden="true">
+            <div class="ss-preview-window">
+              <div class="ss-preview-top">
+                <span></span><span></span><span></span>
+              </div>
+              <div class="ss-preview-main">
+                <div class="ss-preview-heading">
+                  <div>
+                    <small>DASHBOARD PREVIEW</small>
+                    <strong>My Stores</strong>
+                  </div>
+                  <em>Live</em>
+                </div>
+
+                <div class="ss-preview-store-row">
+                  <div class="ss-preview-logo">SS</div>
+                  <div><strong>Raptors Football</strong><span>Private Store · 12 products</span></div>
+                  <button>Shop Store</button>
+                </div>
+
+                <div class="ss-preview-store-row ss-preview-store-row--soft">
+                  <div class="ss-preview-logo ss-preview-logo--gold">IR</div>
+                  <div><strong>Family Reunion</strong><span>Building · products generating</span></div>
+                  <button>Building</button>
+                </div>
+
+                <div class="ss-preview-tools">
+                  <span>Edit placement</span>
+                  <span>Build products</span>
+                  <span>Copy link</span>
+                  <span>Manage colors</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ss-loggedout-benefits">
+            <div><strong>Admins manage</strong><span>Hide, delete, edit, rebuild, and share storefront links.</span></div>
+            <div><strong>Members shop</strong><span>Normal buyers only see the simple store experience.</span></div>
+            <div><strong>Stores stay organized</strong><span>Every team, trip, unit, family, or event lives in one dashboard.</span></div>
           </div>
         </div>
       {% else %}
@@ -3054,6 +3099,346 @@
   .ss-open-btn,
   .ss-leave-btn {
     min-height: 48px !important;
+  }
+}
+
+
+/* ===== V14 refinements: mobile color, softer mobile gold, richer logged-out dashboard ===== */
+.ss-loggedout-shell {
+  display: grid;
+  grid-template-columns: minmax(0, .88fr) minmax(360px, .8fr);
+  gap: 22px;
+  align-items: stretch;
+  margin-top: 22px;
+}
+
+.ss-empty-state--premium {
+  margin: 0 !important;
+  max-width: none !important;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ss-locked-kicker {
+  margin: 0 0 14px;
+  color: rgba(17,16,14,.48);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: .16em;
+}
+
+.ss-locked-preview {
+  position: relative;
+  min-height: 520px;
+  border-radius: 36px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(183,163,106,.12), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.68), rgba(255,255,255,.38));
+  border: 1px solid rgba(255,255,255,.82);
+  box-shadow: var(--ss-premium-shadow);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  overflow: hidden;
+}
+
+.ss-locked-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,.38) 76%, rgba(255,255,255,.78) 100%);
+  pointer-events: none;
+}
+
+.ss-preview-window {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(183,163,106,.13), transparent 36%),
+    linear-gradient(180deg, #151411, #070706);
+  box-shadow: 0 34px 110px rgba(17,16,14,.20);
+}
+
+.ss-preview-top {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.ss-preview-top span {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.22);
+}
+
+.ss-preview-main {
+  padding: 20px;
+}
+
+.ss-preview-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.ss-preview-heading small {
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(255,255,255,.42);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+
+.ss-preview-heading strong {
+  color: #fff;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -.06em;
+  font-weight: 950;
+}
+
+.ss-preview-heading em {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #a7f3d0;
+  background: rgba(16,185,129,.13);
+  border: 1px solid rgba(16,185,129,.18);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.ss-preview-store-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.09);
+}
+
+.ss-preview-store-row--soft {
+  opacity: .72;
+}
+
+.ss-preview-logo {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #fff;
+  background: #244b9b;
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.ss-preview-logo--gold {
+  color: #11100e;
+  background: #f4e2a6;
+}
+
+.ss-preview-store-row div:not(.ss-preview-logo) {
+  min-width: 0;
+  flex: 1;
+}
+
+.ss-preview-store-row strong {
+  display: block;
+  color: rgba(255,255,255,.92);
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ss-preview-store-row span {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255,255,255,.44);
+  font-size: 12px;
+}
+
+.ss-preview-store-row button {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: #11100e;
+  background: rgba(255,255,255,.88);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.ss-preview-tools {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.ss-preview-tools span {
+  padding: 12px;
+  border-radius: 16px;
+  color: rgba(255,255,255,.62);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  font-size: 11px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.ss-loggedout-benefits {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.ss-loggedout-benefits div {
+  padding: 18px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.66);
+  border: 1px solid rgba(255,255,255,.78);
+  box-shadow: 0 18px 60px rgba(17,16,14,.055);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.ss-loggedout-benefits strong {
+  display: block;
+  color: var(--ss-premium-ink);
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.ss-loggedout-benefits span {
+  display: block;
+  margin-top: 6px;
+  color: rgba(17,16,14,.58);
+  font-size: 13px;
+  line-height: 1.42;
+}
+
+.ss-logo-frame img {
+  opacity: 1 !important;
+  filter: saturate(1.12) contrast(1.05) brightness(1.02) !important;
+  mix-blend-mode: normal !important;
+}
+
+@media (max-width: 900px) {
+  .ss-bg {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(183,163,106,.055), transparent 28%),
+      radial-gradient(circle at 100% 6%, rgba(255,255,255,.86), transparent 22%),
+      linear-gradient(180deg, #fbf8f1 0%, #fffdf8 44%, #f9f5ec 100%) !important;
+  }
+
+  .ss-bg::before {
+    opacity: .22 !important;
+    width: 340px;
+    height: 340px;
+    left: -190px;
+    top: -190px;
+  }
+
+  .ss-bg::after {
+    opacity: .34 !important;
+    background: rgba(17,16,14,.035) !important;
+  }
+
+  .ss-store-card::before {
+    background: linear-gradient(90deg, rgba(255,255,255,.26), transparent 58%) !important;
+    opacity: .45 !important;
+  }
+
+  .ss-hero-left::before,
+  .ss-empty-state::before {
+    opacity: .40 !important;
+  }
+
+  .ss-logo-frame {
+    background: #fff !important;
+    border-color: rgba(17,16,14,.065) !important;
+    box-shadow: 0 10px 26px rgba(17,16,14,.055) !important;
+  }
+
+  .ss-logo-frame img {
+    padding: 1px !important;
+    filter: saturate(1.24) contrast(1.08) brightness(1.04) !important;
+  }
+
+  .ss-admin-btn {
+    background: rgba(255,255,255,.72) !important;
+    border-color: rgba(17,16,14,.09) !important;
+    color: #5a4f2e !important;
+  }
+
+  .ss-loggedout-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .ss-empty-state--premium,
+  .ss-locked-preview {
+    min-height: auto;
+  }
+
+  .ss-locked-preview {
+    display: none;
+  }
+
+  .ss-loggedout-benefits {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .ss-bg {
+    background:
+      linear-gradient(180deg, #fcfaf5 0%, #ffffff 46%, #faf7ef 100%) !important;
+  }
+
+  .ss-bg::before,
+  .ss-bg::after {
+    opacity: .10 !important;
+  }
+
+  .ss-store-card {
+    background: rgba(255,255,255,.82) !important;
+  }
+
+  .ss-logo-frame {
+    width: 92px !important;
+    height: 92px !important;
+    border-radius: 25px !important;
+  }
+
+  .ss-logo-frame img {
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
+
+  .ss-empty-state--premium {
+    padding-top: 46px !important;
+    padding-bottom: 46px !important;
   }
 }
 
