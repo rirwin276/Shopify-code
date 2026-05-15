@@ -1,10 +1,10 @@
 {% comment %}
-  PRIVATE STORE HERO — PREMIUM STOREFRONT V2
-  - Buyer-facing storefront hero for private collection pages.
+  PRIVATE STORE HERO — PREMIUM STOREFRONT V3
+  - Desktop: premium full hero.
+  - Mobile: ultra-compact shopping-first hero so products appear immediately.
   - Keeps member/admin access logic.
   - Adds admin-only Admin Powers link on desktop + mobile.
   - Adds admin-only Share Store popup with copy link + QR code.
-  - Mobile-first: tighter hero so products appear faster.
   - Keeps product grid logo overlay logic from previous section.
 {% endcomment %}
 
@@ -28,40 +28,6 @@
     {% endif %}
   {% endfor %}
 {% endif %}
-
-{% unless customer %}
-  <section class="ps-hero ps-hero--auth">
-    <div class="ps-wrap ps-center">
-      <div class="ps-auth-card">
-        <div class="ps-auth-icon">🔒</div>
-        <h1 class="ps-title">Sign in to access your private store</h1>
-        <p class="ps-sub">This storefront is private. Sign in to view approved products and reorders.</p>
-        <div class="ps-actions">
-          <a class="ps-btn ps-btn-solid" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">Sign in</a>
-          <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
-        </div>
-      </div>
-    </div>
-  </section>
-  {% break %}
-{% endunless %}
-
-{% unless allowed %}
-  <section class="ps-hero ps-hero--auth">
-    <div class="ps-wrap ps-center">
-      <div class="ps-auth-card">
-        <div class="ps-auth-icon">🚫</div>
-        <h1 class="ps-title">Access required</h1>
-        <p class="ps-sub">You do not currently have access to this private store.</p>
-        <div class="ps-actions">
-          <a class="ps-btn ps-btn-solid" href="/pages/portal">Request access</a>
-          <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
-        </div>
-      </div>
-    </div>
-  </section>
-  {% break %}
-{% endunless %}
 
 {% assign entry = shop.metaobjects.custom_shop[handle] %}
 {% assign store_name = collection.title %}
@@ -89,113 +55,149 @@
   {% assign join_link = join_link | append: '&code=' | append: join_code %}
 {% endif %}
 
-{% if is_admin %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-{% endif %}
+{% if customer and allowed %}
 
-<section class="ps-hero" id="ps-storefront-{{ section.id }}">
-  <div class="ps-shell">
-    <div class="ps-hero-card">
+  {% if is_admin %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  {% endif %}
 
-      <div class="ps-hero-main">
-        <div class="ps-logo">
-          {% if store_logo != blank %}
-            {{ store_logo | image_url: width: 520 | image_tag: class: 'ps-logo-img', loading: 'lazy', alt: store_name }}
-          {% else %}
-            <span class="ps-logo-fallback">{{ store_name | slice: 0, 1 | upcase }}</span>
+  <section class="ps-hero" id="ps-storefront-{{ section.id }}">
+    <div class="ps-shell">
+      <div class="ps-hero-card">
+
+        <div class="ps-hero-main">
+          <div class="ps-logo">
+            {% if store_logo != blank %}
+              {{ store_logo | image_url: width: 520 | image_tag: class: 'ps-logo-img', loading: 'eager', alt: store_name }}
+            {% else %}
+              <span class="ps-logo-fallback">{{ store_name | slice: 0, 1 | upcase }}</span>
+            {% endif %}
+          </div>
+
+          <div class="ps-copy">
+            <div class="ps-eyebrow">
+              <span class="ps-live-dot"></span>
+              Private Storefront
+            </div>
+
+            <h1 class="ps-title">{{ store_name }}</h1>
+
+            <p class="ps-sub">
+              Approved gear for your group. Choose your size, checkout directly, and come back anytime for reorders.
+            </p>
+
+            <div class="ps-meta-row">
+              <span>{{ collection.products_count }} {% if collection.products_count == 1 %}item{% else %}items{% endif %}</span>
+              <span>Direct checkout</span>
+              <span>Reorder anytime</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ps-action-panel">
+          <div class="ps-action-panel-title">Store actions</div>
+
+          <a class="ps-btn ps-btn-solid ps-shop-anchor" href="#ProductGridContainer">
+            Shop products ↓
+          </a>
+
+          <a class="ps-btn ps-btn-ghost" href="/pages/portal">
+            ← Dashboard
+          </a>
+
+          {% if is_admin %}
+            <button class="ps-btn ps-btn-soft" id="psShareStoreBtn" type="button">
+              🔗 Share Store
+            </button>
+
+            <a class="ps-btn ps-btn-admin" href="/pages/admin-powers?shop={{ handle | url_encode }}">
+              Admin Powers
+            </a>
           {% endif %}
         </div>
 
-        <div class="ps-copy">
-          <div class="ps-eyebrow">
-            <span class="ps-live-dot"></span>
-            Private Storefront
+      </div>
+
+      {% if is_admin %}
+        <div class="ps-admin-mobile-bar" aria-label="Admin quick actions">
+          <button class="ps-mobile-pill" id="psShareStoreBtnMobile" type="button">🔗 Share</button>
+          <a class="ps-mobile-pill ps-mobile-pill--dark" href="/pages/admin-powers?shop={{ handle | url_encode }}">Admin</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if is_admin %}
+    <div class="ps-share-overlay" id="psShareOverlay" aria-hidden="true">
+      <div class="ps-share-dialog" role="dialog" aria-modal="true" aria-labelledby="psShareTitle">
+        <button class="ps-share-close" id="psShareClose" type="button" aria-label="Close share options">✕</button>
+
+        <div class="ps-share-head">
+          <div class="ps-share-icon">🔗</div>
+          <div>
+            <h2 id="psShareTitle">Share this store</h2>
+            <p>Send this link to parents, teammates, members, or anyone who needs to shop this storefront.</p>
           </div>
+        </div>
 
-          <h1 class="ps-title">{{ store_name }}</h1>
+        <div class="ps-share-tabs" role="tablist">
+          <button class="ps-share-tab active" type="button" data-ps-share-tab="link">Copy Link</button>
+          <button class="ps-share-tab" type="button" data-ps-share-tab="qr">QR Code</button>
+        </div>
 
-          <p class="ps-sub">
-            Approved gear for your group. Choose your size, checkout directly, and come back anytime for reorders.
+        <div class="ps-share-panel active" data-ps-share-panel="link">
+          <label class="ps-share-label" for="psJoinLink">Store invite link</label>
+          <div class="ps-copy-row">
+            <input id="psJoinLink" class="ps-copy-input" value="{{ join_link | escape }}" readonly>
+            <button id="psCopyJoinLink" class="ps-copy-button" type="button">Copy</button>
+          </div>
+          <p class="ps-share-helper">
+            New users will be asked to sign in or create an account. After joining, this store will appear on their dashboard.
           </p>
+        </div>
 
-          <div class="ps-meta-row">
-            <span>{{ collection.products_count }} {% if collection.products_count == 1 %}item{% else %}items{% endif %}</span>
-            <span>Direct checkout</span>
-            <span>Reorder anytime</span>
+        <div class="ps-share-panel" data-ps-share-panel="qr">
+          <div class="ps-qr-box">
+            <div id="psQRCode"></div>
+            <p>Great for team meetings, flyers, group texts, or in-person signups.</p>
           </div>
         </div>
       </div>
-
-      <div class="ps-action-panel">
-        <div class="ps-action-panel-title">Store actions</div>
-
-        <a class="ps-btn ps-btn-solid ps-shop-anchor" href="#ProductGridContainer">
-          Shop products ↓
-        </a>
-
-        <a class="ps-btn ps-btn-ghost" href="/pages/portal">
-          ← Dashboard
-        </a>
-
-        {% if is_admin %}
-          <button class="ps-btn ps-btn-soft" id="psShareStoreBtn" type="button">
-            🔗 Share Store
-          </button>
-
-          <a class="ps-btn ps-btn-admin" href="/pages/admin-powers?shop={{ handle | url_encode }}">
-            Admin Powers
-          </a>
-        {% endif %}
-      </div>
-
     </div>
+  {% endif %}
 
-    {% if is_admin %}
-      <div class="ps-admin-mobile-bar" aria-label="Admin quick actions">
-        <button class="ps-mobile-pill" id="psShareStoreBtnMobile" type="button">🔗 Share</button>
-        <a class="ps-mobile-pill ps-mobile-pill--dark" href="/pages/admin-powers?shop={{ handle | url_encode }}">Admin</a>
-      </div>
-    {% endif %}
-  </div>
-</section>
+{% elsif customer and allowed == false %}
 
-{% if is_admin %}
-  <div class="ps-share-overlay" id="psShareOverlay" aria-hidden="true">
-    <div class="ps-share-dialog" role="dialog" aria-modal="true" aria-labelledby="psShareTitle">
-      <button class="ps-share-close" id="psShareClose" type="button" aria-label="Close share options">✕</button>
-
-      <div class="ps-share-head">
-        <div class="ps-share-icon">🔗</div>
-        <div>
-          <h2 id="psShareTitle">Share this store</h2>
-          <p>Send this link to parents, teammates, members, or anyone who needs to shop this storefront.</p>
-        </div>
-      </div>
-
-      <div class="ps-share-tabs" role="tablist">
-        <button class="ps-share-tab active" type="button" data-ps-share-tab="link">Copy Link</button>
-        <button class="ps-share-tab" type="button" data-ps-share-tab="qr">QR Code</button>
-      </div>
-
-      <div class="ps-share-panel active" data-ps-share-panel="link">
-        <label class="ps-share-label" for="psJoinLink">Store invite link</label>
-        <div class="ps-copy-row">
-          <input id="psJoinLink" class="ps-copy-input" value="{{ join_link | escape }}" readonly>
-          <button id="psCopyJoinLink" class="ps-copy-button" type="button">Copy</button>
-        </div>
-        <p class="ps-share-helper">
-          New users will be asked to sign in or create an account. After joining, this store will appear on their dashboard.
-        </p>
-      </div>
-
-      <div class="ps-share-panel" data-ps-share-panel="qr">
-        <div class="ps-qr-box">
-          <div id="psQRCode"></div>
-          <p>Great for team meetings, flyers, group texts, or in-person signups.</p>
+  <section class="ps-hero ps-hero--auth">
+    <div class="ps-wrap ps-center">
+      <div class="ps-auth-card">
+        <div class="ps-auth-icon">🚫</div>
+        <h1 class="ps-title">Access required</h1>
+        <p class="ps-sub">You do not currently have access to this private store.</p>
+        <div class="ps-actions">
+          <a class="ps-btn ps-btn-solid" href="/pages/portal">Request access</a>
+          <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+
+{% else %}
+
+  <section class="ps-hero ps-hero--auth">
+    <div class="ps-wrap ps-center">
+      <div class="ps-auth-card">
+        <div class="ps-auth-icon">🔒</div>
+        <h1 class="ps-title">Sign in to access your private store</h1>
+        <p class="ps-sub">This storefront is private. Sign in to view approved products and reorders.</p>
+        <div class="ps-actions">
+          <a class="ps-btn ps-btn-solid" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">Sign in</a>
+          <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
 {% endif %}
 
 {%- comment -%} --- GRID LOGO OVERLAY LOGIC --- {%- endcomment -%}
@@ -730,67 +732,92 @@ document.addEventListener("DOMContentLoaded", function() {
 
   @media (max-width: 768px) {
     #ps-storefront-{{ section.id }} {
-      padding: 22px 14px 18px;
+      padding: 8px 10px 8px;
       background:
-        radial-gradient(circle at 18% 0%, rgba(183,163,106,.08), transparent 28%),
+        radial-gradient(circle at 18% 0%, rgba(183,163,106,.07), transparent 24%),
         linear-gradient(180deg, #fbf8f1 0%, #fffdf9 34%, #ffffff 100%);
+    }
+
+    #ps-storefront-{{ section.id }} .ps-shell {
+      width: 100%;
     }
 
     #ps-storefront-{{ section.id }} .ps-hero-card {
       min-height: auto;
-      padding: 22px 16px;
-      border-radius: 30px;
-      text-align: center;
-      gap: 18px;
+      padding: 12px;
+      border-radius: 22px;
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 11px;
+      align-items: center;
+      text-align: left;
+      box-shadow: 0 14px 44px rgba(17,16,14,.075);
     }
 
     #ps-storefront-{{ section.id }} .ps-hero-main {
-      display: block;
+      display: contents;
     }
 
     #ps-storefront-{{ section.id }} .ps-logo {
-      width: 136px;
-      height: 136px;
-      margin: 0 auto 16px;
-      border-radius: 28px;
+      width: 72px;
+      height: 72px;
+      margin: 0;
+      border-radius: 18px;
+      box-shadow: 0 10px 26px rgba(17,16,14,.07);
+    }
+
+    #ps-storefront-{{ section.id }} .ps-logo-img {
+      width: 88%;
+      height: 88%;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-copy {
+      min-width: 0;
     }
 
     #ps-storefront-{{ section.id }} .ps-eyebrow {
-      min-height: 30px;
-      padding: 0 11px;
-      margin-bottom: 12px;
-      font-size: 10px;
+      display: none;
     }
 
     #ps-storefront-{{ section.id }} .ps-title {
-      font-size: clamp(40px, 12vw, 58px);
+      font-size: clamp(27px, 8.5vw, 38px);
       line-height: .94;
-      letter-spacing: -.075em;
+      letter-spacing: -.065em;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
     #ps-storefront-{{ section.id }} .ps-sub {
-      margin: 12px auto 0;
-      font-size: 15px;
-      line-height: 1.45;
+      display: none;
     }
 
     #ps-storefront-{{ section.id }} .ps-meta-row {
-      justify-content: center;
-      gap: 7px;
-      margin-top: 16px;
+      margin-top: 7px;
+      gap: 5px;
     }
 
     #ps-storefront-{{ section.id }} .ps-meta-row span {
-      min-height: 28px;
-      padding: 0 10px;
-      font-size: 10px;
+      min-height: 23px;
+      padding: 0 8px;
+      font-size: 9px;
+      letter-spacing: .055em;
+      box-shadow: none;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-meta-row span:nth-child(n+3) {
+      display: none;
     }
 
     #ps-storefront-{{ section.id }} .ps-action-panel {
-      grid-template-columns: 1fr;
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
       width: 100%;
-      padding: 12px;
-      border-radius: 24px;
+      padding: 8px;
+      border-radius: 18px;
+      box-shadow: none;
+      background: rgba(255,255,255,.64);
     }
 
     #ps-storefront-{{ section.id }} .ps-action-panel-title {
@@ -799,44 +826,30 @@ document.addEventListener("DOMContentLoaded", function() {
 
     #ps-storefront-{{ section.id }} .ps-btn {
       width: 100%;
-      min-height: 48px;
+      min-height: 38px;
+      padding: 0 10px;
+      font-size: 12px;
+      border-radius: 999px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-shop-anchor {
+      display: none;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn-ghost {
+      order: 4;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn-soft {
+      order: 1;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn-admin {
+      order: 2;
     }
 
     #ps-storefront-{{ section.id }} .ps-admin-mobile-bar {
-      position: sticky;
-      top: 8px;
-      z-index: 20;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin: 12px 0 0;
-      padding: 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.78);
-      border: 1px solid rgba(17,16,14,.08);
-      box-shadow: 0 18px 46px rgba(17,16,14,.12);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    #ps-storefront-{{ section.id }} .ps-mobile-pill {
-      min-height: 42px;
-      border: 0;
-      border-radius: 999px;
-      background: rgba(17,16,14,.055);
-      color: #11100e;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 950;
-      cursor: pointer;
-    }
-
-    #ps-storefront-{{ section.id }} .ps-mobile-pill--dark {
-      color: #fff;
-      background: #11100e;
+      display: none;
     }
 
     .ps-share-overlay {
@@ -845,8 +858,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     .ps-share-dialog {
-      border-radius: 30px;
-      padding: 20px;
+      border-radius: 28px;
+      padding: 18px;
       max-height: calc(100vh - 24px);
       overflow-y: auto;
     }
@@ -857,11 +870,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     .ps-share-icon {
+      width: 46px;
+      height: 46px;
       margin-bottom: 12px;
     }
 
     .ps-share-head h2 {
-      font-size: 26px;
+      font-size: 25px;
     }
 
     .ps-copy-row {
@@ -871,16 +886,47 @@ document.addEventListener("DOMContentLoaded", function() {
     .ps-copy-button {
       width: 100%;
     }
+
+    .ps-hero--auth {
+      padding: 30px 14px;
+    }
+
+    .ps-auth-card {
+      padding: 30px 18px;
+      border-radius: 28px;
+    }
   }
 
   @media (max-width: 420px) {
-    #ps-storefront-{{ section.id }} .ps-title {
-      font-size: 38px;
+    #ps-storefront-{{ section.id }} .ps-hero-card {
+      grid-template-columns: 64px minmax(0, 1fr);
+      padding: 10px;
+      gap: 10px;
     }
 
     #ps-storefront-{{ section.id }} .ps-logo {
-      width: 118px;
-      height: 118px;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-title {
+      font-size: 26px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-meta-row span {
+      font-size: 8.5px;
+      padding: 0 7px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel {
+      padding: 7px;
+      gap: 6px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-btn {
+      min-height: 36px;
+      font-size: 11.5px;
     }
   }
 </style>
