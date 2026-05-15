@@ -1,1546 +1,2273 @@
 {% comment %}
-  Stella & Sage — Resources / Logo Launch Helper
-  - Replaces old tab-heavy prompt layout.
-  - Smoother guided flow: Pick prompt → Generate logo → Upload to storefront request.
-  - Every prompt includes transparent background, no padding, tight crop, high-resolution requirements.
-  - V2: Category picker and prompt library are visually connected so users do not miss the relationship.
+  LANDING — Stella & Sage Premium Front Page (V13 toned gold)
+  - Built from existing V11 homepage file.
+  - Keeps existing logged-in customer/store tag logic.
+  - Logged-out: Premium hero → proof bar → pain/solution → process → example stores → dashboard preview → roles → trust/FAQ → final CTA → marquee.
+  - Logged-in: Premium welcome → store links → second store CTA → marquee.
+  - No backend required.
+  - Existing schema IDs preserved so current theme settings keep working.
+  - V13 tones down gold intensity for a cleaner Apple-grade look.
 {% endcomment %}
 
-<section class="ss-resources" id="ss-resources-{{ section.id }}">
-  <div class="ss-res-wrap">
+{%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
+{%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
+{%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
+{%- assign login_url = routes.account_login_url | default: routes.storefront_login_url -%}
 
-    <header class="ss-res-hero">
-      <div class="ss-res-kicker">Logo Launch Helper</div>
-      <h1 class="ss-res-h1">{{ section.settings.title }}</h1>
-      <p class="ss-res-sub">{{ section.settings.subtitle }}</p>
+{%- comment -%}Logged-in: parse storefront tags & metaobjects, same core logic as previous homepage.{%- endcomment -%}
+{%- assign has_storefront = false -%}
+{%- assign store_count = 0 -%}
+{%- assign storefront_tags = '' -%}
+{%- assign admin_handles = '' -%}
 
-      <div class="ss-res-hero-actions">
-        <a class="ss-res-btn ss-res-btn--dark" href="/pages/request-storefront-form">Request a storefront →</a>
-        <a class="ss-res-btn ss-res-btn--light" href="#logo-helper">Browse prompts</a>
-      </div>
-    </header>
+{%- if customer -%}
+  {%- for tag in customer.tags -%}
+    {%- assign tag_down = tag | downcase | strip -%}
+    {%- if tag_down contains 'b2b-admin-' -%}
+      {%- assign ah = tag_down | remove: 'b2b-admin-' | strip -%}
+      {%- if ah != blank -%}
+        {%- assign admin_handles = admin_handles | append: '||' | append: ah | append: '||' -%}
+      {%- endif -%}
+    {%- elsif tag_down contains 'b2b-' -%}
+      {%- assign has_storefront = true -%}
+      {%- assign storefront_tags = storefront_tags | append: tag_down | append: '||' -%}
+      {%- assign store_count = store_count | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
 
-    <section class="ss-res-flow" aria-label="How to use this page">
-      <div class="ss-flow-card">
-        <span>01</span>
-        <h3>Pick a prompt</h3>
-        <p>Choose the logo style that fits your team, trip, event, business, or group.</p>
-      </div>
+{%- assign store_meta = blank -%}
+{%- if shop.metaobjects[mo_type] and shop.metaobjects[mo_type].values != blank -%}
+  {%- assign store_meta = shop.metaobjects[mo_type].values -%}
+{%- endif -%}
 
-      <div class="ss-flow-card">
-        <span>02</span>
-        <h3>Generate your logo</h3>
-        <p>Paste the prompt into ChatGPT and replace the placeholder text.</p>
-      </div>
+{%- assign welcome_name = customer.first_name | strip -%}
+{%- if welcome_name == blank and customer -%}
+  {%- assign welcome_name = customer.email | split: '@' | first -%}
+{%- endif -%}
 
-      <div class="ss-flow-card">
-        <span>03</span>
-        <h3>Upload it</h3>
-        <p>Use the finished logo when you request your Stella &amp; Sage storefront.</p>
+<section class="ss-home" data-ss-home id="ss-home-{{ section.id }}">
+
+  {%- if customer -%}
+
+    {%- comment -%} =========================
+      LOGGED-IN VIEW
+    ========================== {%- endcomment -%}
+
+    <div class="ss-bg-orb ss-bg-orb--one"></div>
+    <div class="ss-bg-orb ss-bg-orb--two"></div>
+
+    <section class="ss-member-hero ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-member-shell">
+          <div class="ss-eyebrow">
+            <span class="ss-eyebrow-dot"></span>
+            STELLA & SAGE DASHBOARD
+          </div>
+
+          <h1 class="ss-member-title">{{ section.settings.welcome_prefix | escape }}{{ welcome_name | escape }}.</h1>
+          <p class="ss-member-sub">{{ section.settings.greeting_sub | escape }}</p>
+
+          <div class="ss-action-row">
+            {%- if has_storefront -%}
+              {%- assign tags_arr = storefront_tags | split: '||' -%}
+              {%- for t in tags_arr -%}
+                {%- if t != blank -%}
+                  {%- assign s_handle = t | remove: 'b2b-' | strip -%}
+                  {%- assign s_url = '/pages/' | append: s_handle -%}
+                  {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
+
+                  {%- if store_meta != blank -%}
+                    {%- for mo in store_meta -%}
+                      {%- assign mo_page = mo.page.value | default: mo.page -%}
+                      {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
+                      {%- assign mo_h = '' -%}
+
+                      {%- if mo_page != blank and mo_page.handle != blank -%}
+                        {%- assign mo_h = mo_page.handle | downcase | strip -%}
+                      {%- elsif mo_slug != blank -%}
+                        {%- assign mo_h = mo_slug | downcase | strip -%}
+                      {%- endif -%}
+
+                      {%- if mo_h == s_handle -%}
+                        {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
+                        {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
+                        {%- if mo_page != blank and mo_page.url != blank -%}{%- assign s_url = mo_page.url -%}{%- endif -%}
+                        {%- break -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                  {%- endif -%}
+
+                  <a class="ss-pill ss-pill--primary" href="{{ s_url }}">Open {{ s_name | escape }} →</a>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+
+            <a class="ss-pill ss-pill--glass" href="{{ dashboard_url }}?stay=1">{{ section.settings.dashboard_label | escape }}</a>
+            <a class="ss-pill ss-pill--glass" href="{{ routes.account_url }}">{{ section.settings.orders_label | escape }}</a>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="ss-res-warning">
-      <div class="ss-warning-icon">!</div>
-      <div>
-        <strong>Important before you upload</strong>
-        <p>Your logo should have a transparent background, no extra padding, no mockup, and no empty space around it. The artwork should be tightly cropped, centered, crisp, and high resolution.</p>
+    <section class="ss-section ss-reveal">
+      <div class="ss-wrap ss-wrap--narrow ss-center">
+        <div class="ss-mini-kicker">CREATE ANOTHER STORE</div>
+        <h2 class="ss-h2">{{ section.settings.second_store_headline | escape }}</h2>
+        <p class="ss-body">{{ section.settings.second_store_body | escape }}</p>
+        <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.second_store_cta | escape }} →</a>
       </div>
     </section>
 
-    <section class="ss-logo-helper" id="logo-helper">
-      <div class="ss-helper-head">
+  {%- else -%}
+
+    {%- comment -%} =========================
+      LOGGED-OUT VIEW
+    ========================== {%- endcomment -%}
+
+    <div class="ss-bg-orb ss-bg-orb--one"></div>
+    <div class="ss-bg-orb ss-bg-orb--two"></div>
+
+    <section class="ss-hero ss-reveal">
+      <div class="ss-wrap ss-hero-grid">
+        <div class="ss-hero-copy">
+          <div class="ss-eyebrow">
+            <span class="ss-eyebrow-dot"></span>
+            VETERAN OWNED · PRIVATE GROUP STORES
+          </div>
+
+          <h1 class="ss-hero-title">{{ section.settings.hero_headline | newline_to_br }}</h1>
+          <p class="ss-hero-sub">{{ section.settings.hero_sub | escape }}</p>
+
+          <div class="ss-hero-actions">
+            <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.hero_cta_label | escape }}</a>
+            <a class="ss-btn ss-btn--light" href="{{ login_url }}?return_to={{ dashboard_url | url_encode }}">{{ section.settings.hero_signin_label | escape }}</a>
+          </div>
+
+          <div class="ss-hero-proofline">
+            <span>{{ section.settings.hero_caption | escape }}</span>
+          </div>
+        </div>
+
+        <div class="ss-hero-visual ss-reveal" data-delay="120" aria-label="Private store dashboard preview">
+          <div class="ss-device-card">
+            <div class="ss-device-topbar">
+              <span></span><span></span><span></span>
+            </div>
+
+            <div class="ss-dashboard-preview">
+              <div class="ss-preview-head">
+                <div>
+                  <p>PRIVATE STORE</p>
+                  <h3>Vista Raptors</h3>
+                </div>
+                <div class="ss-live-badge">Live</div>
+              </div>
+
+              <div class="ss-product-strip">
+                <div class="ss-product-card">
+                  <div class="ss-shirt ss-shirt--black">
+                    <div class="ss-shirt-logo">VR</div>
+                  </div>
+                  <p>Team Tee</p>
+                </div>
+
+                <div class="ss-product-card">
+                  <div class="ss-shirt ss-shirt--sand">
+                    <div class="ss-shirt-logo">VR</div>
+                  </div>
+                  <p>Hoodie</p>
+                </div>
+
+                <div class="ss-product-card">
+                  <div class="ss-hat">
+                    <div class="ss-hat-logo">VR</div>
+                  </div>
+                  <p>Hat</p>
+                </div>
+              </div>
+
+              <div class="ss-dashboard-tools">
+                <div class="ss-tool-row">
+                  <span class="ss-tool-icon"></span>
+                  <div>
+                    <strong>Share one link</strong>
+                    <small>Everyone orders direct.</small>
+                  </div>
+                </div>
+                <div class="ss-tool-row">
+                  <span class="ss-tool-icon"></span>
+                  <div>
+                    <strong>Edit placement</strong>
+                    <small>Dial in colors and logo size.</small>
+                  </div>
+                </div>
+                <div class="ss-tool-row">
+                  <span class="ss-tool-icon"></span>
+                  <div>
+                    <strong>Manage products</strong>
+                    <small>Hide, delete, or build more.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ss-floating-card ss-floating-card--top">
+            <strong>2 min</strong>
+            <span>form</span>
+          </div>
+
+          <div class="ss-floating-card ss-floating-card--bottom">
+            <strong>~15 min</strong>
+            <span>store build</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-proof-bar ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-proof-grid">
+          <div class="ss-proof-item">
+            <strong>{{ section.settings.stat1_num | escape }}</strong>
+            <span>{{ section.settings.stat1_label | escape }}</span>
+          </div>
+          <div class="ss-proof-item">
+            <strong>{{ section.settings.stat2_num | escape }}</strong>
+            <span>{{ section.settings.stat2_label | escape }}</span>
+          </div>
+          <div class="ss-proof-item">
+            <strong>{{ section.settings.stat3_num | escape }}</strong>
+            <span>{{ section.settings.stat3_label | escape }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-pain-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-section-head">
+          <div class="ss-mini-kicker">THE REAL PROBLEM</div>
+          <h2 class="ss-h2">Stop being the unpaid shirt manager.</h2>
+          <p class="ss-body">Group merch should not mean chasing sizes, collecting Venmo payments, tracking spreadsheets, and answering the same text over and over.</p>
+        </div>
+
+        <div class="ss-compare-grid">
+          <div class="ss-compare-card ss-compare-card--old">
+            <div class="ss-card-label">THE OLD WAY</div>
+            <h3>One person gets stuck with everything.</h3>
+            <ul>
+              <li>Collect every size manually</li>
+              <li>Chase payments in Venmo</li>
+              <li>Deal with late orders</li>
+              <li>Track everything in a spreadsheet</li>
+              <li>Handle mistakes yourself</li>
+            </ul>
+          </div>
+
+          <div class="ss-compare-card ss-compare-card--new">
+            <div class="ss-card-label">THE STELLA & SAGE WAY</div>
+            <h3>Create the store. Share the link. You’re done.</h3>
+            <ul>
+              <li>Everyone orders directly</li>
+              <li>No minimums or upfront inventory</li>
+              <li>No size collection</li>
+              <li>No payment chasing</li>
+              <li>Reorder anytime</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-process-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-section-head ss-center">
+          <div class="ss-mini-kicker">HOW IT WORKS</div>
+          <h2 class="ss-h2">{{ section.settings.steps_headline | escape }}</h2>
+          <p class="ss-body">A private merch store without the slow meetings, minimum order pressure, or group chat chaos.</p>
+        </div>
+
+        <div class="ss-steps-grid">
+          <div class="ss-step-card ss-reveal" data-delay="0">
+            <div class="ss-step-num">01</div>
+            <h3>{{ section.settings.step1_title | escape }}</h3>
+            <p>{{ section.settings.step1_desc | escape }}</p>
+          </div>
+
+          <div class="ss-step-card ss-reveal" data-delay="90">
+            <div class="ss-step-num">02</div>
+            <h3>{{ section.settings.step2_title | escape }}</h3>
+            <p>{{ section.settings.step2_desc | escape }}</p>
+          </div>
+
+          <div class="ss-step-card ss-reveal" data-delay="180">
+            <div class="ss-step-num">03</div>
+            <h3>{{ section.settings.step3_title | escape }}</h3>
+            <p>{{ section.settings.step3_desc | escape }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-examples-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-section-head">
+          <div class="ss-mini-kicker">BUILT FOR REAL GROUPS</div>
+          <h2 class="ss-h2">One system. Almost any group.</h2>
+          <p class="ss-body">Teams, units, trips, businesses, fundraisers, families — if people need to order gear without one person managing chaos, it fits.</p>
+        </div>
+
+        <div class="ss-example-grid">
+          <div class="ss-example-card">
+            <div class="ss-example-art ss-example-art--team">
+              <span>RAPTORS</span>
+            </div>
+            <h3>Youth sports teams</h3>
+            <p>Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey.</p>
+          </div>
+
+          <div class="ss-example-card">
+            <div class="ss-example-art ss-example-art--unit">
+              <span>UNIT</span>
+            </div>
+            <h3>Military & first responders</h3>
+            <p>Private storefronts for units, stations, departments, classes, teams, and special events.</p>
+          </div>
+
+          <div class="ss-example-card">
+            <div class="ss-example-art ss-example-art--trip">
+              <span>TRIP</span>
+            </div>
+            <h3>Trips, parties & reunions</h3>
+            <p>Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events.</p>
+          </div>
+
+          <div class="ss-example-card">
+            <div class="ss-example-art ss-example-art--business">
+              <span>CO.</span>
+            </div>
+            <h3>Small businesses & fundraisers</h3>
+            <p>Simple merch stores without buying boxes of shirts or managing orders by hand.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-dashboard-section ss-reveal">
+      <div class="ss-wrap ss-dashboard-grid">
         <div>
-          <div class="ss-res-kicker">Prompt Library</div>
-          <h2>Choose a logo type. The prompts update below.</h2>
-          <p>Pick the closest category, open a prompt, replace the blanks, then copy it into ChatGPT.</p>
-        </div>
-      </div>
+          <div class="ss-mini-kicker">YOUR HOME BASE</div>
+          <h2 class="ss-h2">Every store lives in one clean dashboard.</h2>
+          <p class="ss-body">Admins can manage products, edit placement, choose colors, hide items, delete products, build new merch, and share the storefront link. Members just shop.</p>
 
-      <div class="ss-res-categories" aria-label="Prompt categories">
-        <button class="ss-cat-card ss-cat-card--active" type="button" data-res-category="sports">
-          <span>🏅</span>
-          <strong>Sports Teams</strong>
-          <p>Wordmarks, mascots, badges, and hat-ready logos.</p>
-        </button>
-
-        <button class="ss-cat-card" type="button" data-res-category="vacation">
-          <span>🏖️</span>
-          <strong>Family Trips</strong>
-          <p>Vacation crews, reunions, lake trips, and beach weeks.</p>
-        </button>
-
-        <button class="ss-cat-card" type="button" data-res-category="parties">
-          <span>💍</span>
-          <strong>Weddings &amp; Parties</strong>
-          <p>Bachelor trips, bachelorette parties, and wedding marks.</p>
-        </button>
-
-        <button class="ss-cat-card" type="button" data-res-category="groups">
-          <span>🎲</span>
-          <strong>Groups &amp; Fundraisers</strong>
-          <p>Clubs, businesses, charity events, and work teams.</p>
-        </button>
-      </div>
-
-      <div class="ss-active-label" aria-live="polite">
-        <span>Showing prompts for:</span>
-        <strong data-active-category-label>Sports Teams</strong>
-      </div>
-
-      <div class="ss-prompt-library" id="prompt-library">
-
-        <div class="ss-prompt-panel" data-panel="sports">
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for teams</span>
-                  <span>Shirts + hoodies</span>
-                </div>
-                <h3>Clean Team Wordmark</h3>
-                <p>Bold athletic lettering with a simple icon or underline.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
+          <div class="ss-feature-list">
+            <div>
+              <strong>Admin tools</strong>
+              <span>Edit, hide, delete, rebuild, and share.</span>
             </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-sports-1">Create a bold, clean sports team logo for a youth [SPORT TYPE] team named "[TEAM NAME]".
-
-Style:
-Strong athletic font with a slight forward slant. Thick solid lettering. Simple underline or swoosh. Optional small icon: [ICON — e.g. baseball, football, cleat, lightning bolt].
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-1">Copy Prompt</button>
+            <div>
+              <strong>Member shopping</strong>
+              <span>No confusing admin controls for normal buyers.</span>
             </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for mascots</span>
-                  <span>Youth sports</span>
-                </div>
-                <h3>Mascot-Style Logo</h3>
-                <p>Energetic mascot art with team name built into the design.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
+            <div>
+              <strong>Reorder forever</strong>
+              <span>Your group can come back later without starting over.</span>
             </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-sports-2">Create a bold mascot sports logo for a youth [SPORT TYPE] team named "[TEAM NAME]". The mascot is a [MASCOT — e.g. bulldog, hawk, tiger, bear, raptor].
-
-Style:
-Aggressive or energetic expression. Thick outlines. Cartoon-like but not childish. Mascot centered with team name integrated below or around it.
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-2">Copy Prompt</button>
-            </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for badges</span>
-                  <span>Classic team look</span>
-                </div>
-                <h3>Badge / Crest Style</h3>
-                <p>A circular or shield-style team mark with a center icon.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-sports-3">Create a badge-style crest logo for a youth [SPORT TYPE] team named "[TEAM NAME]".
-
-Design:
-Circular or shield shape. Team name wraps around the outside. Centered icon: [ICON — e.g. crossed bats, soccer ball, hockey stick, football helmet]. Clean symmetrical layout.
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-3">Copy Prompt</button>
-            </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for hats</span>
-                  <span>Simple logo</span>
-                </div>
-                <h3>Minimal Icon + Text</h3>
-                <p>A small, clean logo that works well on hats and left-chest prints.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-sports-4">Create a minimal sports logo for a [SPORT TYPE] team named "[TEAM NAME]".
-
-Design:
-Small simple icon: [ICON — e.g. ball, cleat, helmet, lightning bolt, paw] with bold team name beside or below it. Nothing extra.
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: black or white
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-4">Copy Prompt</button>
-            </div>
-          </article>
-
+          </div>
         </div>
 
-        <div class="ss-prompt-panel ss-hidden" data-panel="vacation">
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for trips</span>
-                  <span>Family shirts</span>
-                </div>
-                <h3>Classic Vacation Logo</h3>
-                <p>Friendly vacation logo for beach trips, cabins, cruises, and lake houses.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
+        <div class="ss-admin-panel" aria-label="Dashboard tools preview">
+          <div class="ss-admin-top">
+            <div>
+              <p>DASHBOARD</p>
+              <h3>My Stores</h3>
             </div>
+            <button type="button">Copy Link</button>
+          </div>
 
-            <div class="ss-prompt-body">
-              <pre id="prompt-vacation-1">Create a fun, bold family vacation logo for a group called "[FAMILY LAST NAME] Family [YEAR]".
-
-Destination or theme:
-[DESTINATION — e.g. beach trip, mountain cabin, lake house, cruise]
-
-Style:
-Warm and friendly font. Add a simple destination icon such as palm tree, waves, mountains, campfire, boat, or camper van. Playful but clean.
-
-Colors:
-Primary: [PRIMARY COLOR — e.g. teal, navy, sunset orange]
-Secondary: [SECONDARY COLOR — e.g. white, cream, muted gold]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-1">Copy Prompt</button>
+          <div class="ss-store-row">
+            <div class="ss-store-dot"></div>
+            <div>
+              <strong>Raptors Football</strong>
+              <span>Live · 12 products</span>
             </div>
-          </article>
+            <em>Manage</em>
+          </div>
 
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for reunions</span>
-                  <span>Classic badge</span>
-                </div>
-                <h3>Family Reunion Badge</h3>
-                <p>A clean badge logo with family name, year, and a simple symbol.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
+          <div class="ss-store-row">
+            <div class="ss-store-dot ss-store-dot--gold"></div>
+            <div>
+              <strong>Family Reunion</strong>
+              <span>Building · products generating</span>
             </div>
+            <em>View</em>
+          </div>
 
-            <div class="ss-prompt-body">
-              <pre id="prompt-vacation-2">Create a vintage badge-style family reunion logo. Group name: "[FAMILY LAST NAME] Family Reunion [YEAR]".
-
-Design:
-Oval or circular badge. Family name and year displayed prominently. Small center icon: [ICON — e.g. family tree, anchor, state shape, house, lake, mountain].
-
-Style:
-Slightly retro. Bold text. Simple solid lines. Clean and easy to read.
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-2">Copy Prompt</button>
-            </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for fun shirts</span>
-                  <span>Big personality</span>
-                </div>
-                <h3>Vacation Crew Logo</h3>
-                <p>A bold illustrated crew-style logo for families or friend groups.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-vacation-3">Create a bold illustrated crew logo for a family vacation group called "The [FAMILY LAST NAME] Crew — [YEAR]".
-
-The crew members are:
-- Person 1: [DESCRIBE PERSON 1 IN 1 SENTENCE]
-- Person 2: [DESCRIBE PERSON 2 IN 1 SENTENCE]
-- Person 3: [DESCRIBE PERSON 3 IN 1 SENTENCE]
-- Person 4: [DESCRIBE PERSON 4 IN 1 SENTENCE]
-(Add more family members as needed)
-
-Destination:
-[DESTINATION — e.g. Myrtle Beach, the mountains, Florida, a cruise, lake house]
-
-Style:
-Bold poster-style family crew logo. Fun, energetic, and clean. Strong outlined characters or simple silhouettes. Family name as the main title in bold block letters. Year below.
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-3">Copy Prompt</button>
-            </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for matching tees</span>
-                  <span>Simple event mark</span>
-                </div>
-                <h3>Matching Vacation Crew Tee</h3>
-                <p>A simple wearable logo for matching group trip shirts.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-vacation-4">Create a matching group t-shirt logo for a family vacation. Trip name: "[TRIP NAME — e.g. Beach Week 2025, Smith Family Florida Trip]".
-
-Style:
-Fun and casual. Bold statement text. Add a relevant icon such as flip flops, waves, camper van, sunglasses, palm tree, mountain, or campfire. Year or destination below the name.
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-4">Copy Prompt</button>
-            </div>
-          </article>
-
-        </div>
-
-        <div class="ss-prompt-panel ss-hidden" data-panel="parties">
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for weddings</span>
-                  <span>Clean monogram</span>
-                </div>
-                <h3>Wedding Monogram</h3>
-                <p>Elegant initials and date mark for wedding gear or gifts.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-parties-1">Create a clean, elegant wedding logo using the initials "[INITIAL 1]" and "[INITIAL 2]" and the date "[MONTH YEAR — e.g. June 2025]".
-
-Style:
-Classic serif or elegant script. Initials interlocked or side-by-side. Minimal decorative element such as a wreath, simple floral, single ring, or small line detail.
-
-Colors:
-Primary: [COLOR — e.g. dusty rose, navy, sage green]
-Secondary: [COLOR — e.g. cream, white, muted gold]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, readable linework — avoid ultra-thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-1">Copy Prompt</button>
-            </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for bachelorette</span>
-                  <span>Fun shirts</span>
-                </div>
-                <h3>Bachelorette / Bach Party</h3>
-                <p>Playful party logo for destination trips and matching tees.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-parties-2">Create a fun, bold bachelorette party logo for "[BRIDE'S NAME]'s Bach Party" in [DESTINATION OR THEME — e.g. Nashville, Palm Springs, disco night, beach weekend].
-
-Style:
-Playful and celebratory. Icon: [ICON — e.g. cowboy hat, palm tree, disco ball, champagne flute, flamingo]. Mix of bold and script font.
-
-Colors:
-Primary: [COLOR — e.g. hot pink, black, teal]
-Secondary: [COLOR — e.g. white, cream, muted gold]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-2">Copy Prompt</button>
-            </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for bachelor trips</span>
-                  <span>Rugged logo</span>
-                </div>
-                <h3>Bachelor / Groom Squad</h3>
-                <p>Bold logo for golf trips, cabins, Vegas weekends, or groom squads.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-parties-3">Create a bold bachelor party logo for "[GROOM'S NAME]'s Last Ride" or "[GROUP NAME]".
-
-Theme:
-[ACTIVITY OR DESTINATION — e.g. golf trip, Vegas weekend, fishing trip, mountain cabin]
-
-Style:
-Strong and clean. Icon: [ICON — e.g. golf flag, dice, fish, mountain, beer mug]. Rugged or classic block lettering.
-
-Colors:
-Primary: [COLOR — e.g. black, forest green, navy]
-Secondary: [COLOR — e.g. white, cream, orange]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-3">Copy Prompt</button>
-            </div>
-          </article>
-
-        </div>
-
-        <div class="ss-prompt-panel ss-hidden" data-panel="groups">
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for clubs</span>
-                  <span>Simple group logo</span>
-                </div>
-                <h3>Club or Organization</h3>
-                <p>A clean mark for clubs, work groups, neighborhood groups, or teams.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-groups-1">Create a clean group logo for "[GROUP NAME]".
-
-Group type:
-[TYPE — e.g. neighborhood group, hunting club, car club, book club, work team, gym group]
-
-Style:
-Professional but approachable. Add a simple relevant icon. Bold readable font. Clean enough to work on shirts, hoodies, and hats.
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-1">Copy Prompt</button>
-            </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for fundraisers</span>
-                  <span>Community events</span>
-                </div>
-                <h3>Fundraiser / Charity Event</h3>
-                <p>A warm, readable event mark for charity or community campaigns.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-groups-2">Create a bold event logo for "[EVENT NAME]" benefiting "[CAUSE OR ORGANIZATION]". Year: [YEAR].
-
-Style:
-Warm and community-focused. Simple icon related to the cause such as ribbon, heart, raised hand, star, shield, or local symbol. Bold and easy to read.
-
-Colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-2">Copy Prompt</button>
-            </div>
-          </article>
-
-          <article class="ss-prompt-card">
-            <div class="ss-prompt-top">
-              <div>
-                <div class="ss-prompt-tags">
-                  <span>Best for work teams</span>
-                  <span>Company events</span>
-                </div>
-                <h3>Work Team / Company Event</h3>
-                <p>A clean, professional event logo that still feels fun.</p>
-              </div>
-              <button class="ss-view-btn" type="button">View Prompt</button>
-            </div>
-
-            <div class="ss-prompt-body">
-              <pre id="prompt-groups-3">Create a fun team logo for "[COMPANY OR TEAM NAME]" for a [EVENT TYPE — e.g. company picnic, team retreat, holiday party, sales kickoff]. Year: [YEAR].
-
-Style:
-Professional but fun. Add a simple icon such as star, lightning bolt, trophy, mountain, handshake, or company-related symbol. Bold clean font.
-
-Colors:
-Company colors:
-Primary: [PRIMARY COLOR]
-Secondary: [SECONDARY COLOR]
-
-Logo Requirements:
-- Transparent background only
-- No background color, no mockup, no shirt, no scene
-- Remove all extra padding or empty space around the artwork
-- Crop tightly to the outer edge of the design
-- Center the artwork perfectly
-- High resolution, crisp edges, no blur
-- Thick, bold outlines — no thin lines
-- Crisp, readable text
-- Minimal tiny details
-- High contrast colors only
-- Simple vector-style artwork
-- No gradients, shadows, textures, or realistic effects</pre>
-              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-3">Copy Prompt</button>
-            </div>
-          </article>
-
-        </div>
-
-      </div>
-    </section>
-
-    <section class="ss-checklist-section">
-      <div class="ss-res-section-head">
-        <div class="ss-res-kicker">Upload Checklist</div>
-        <h2>What makes a logo upload-ready?</h2>
-        <p>Before you submit your storefront request, try to make sure your image checks these boxes.</p>
-      </div>
-
-      <div class="ss-check-grid">
-        <div class="ss-check-card">
-          <strong>Transparent background</strong>
-          <span>No white box, no photo background, no shirt mockup.</span>
-        </div>
-        <div class="ss-check-card">
-          <strong>No extra padding</strong>
-          <span>The logo should be tightly cropped to the artwork.</span>
-        </div>
-        <div class="ss-check-card">
-          <strong>High resolution</strong>
-          <span>Crisp edges, readable text, and no blurry screenshots.</span>
-        </div>
-        <div class="ss-check-card">
-          <strong>Bold and readable</strong>
-          <span>Thick lines and simple shapes print better than tiny details.</span>
+          <div class="ss-admin-actions">
+            <span>Edit placement</span>
+            <span>Build new product</span>
+            <span>Hide product</span>
+            <span>Delete product</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="ss-tools-section">
-      <div class="ss-res-section-head">
-        <div class="ss-res-kicker">Free Tools</div>
-        <h2>Useful tools to clean up your logo.</h2>
-        <p>You do not need to use all of these. They are here if your logo needs background removal, cleanup, or upscaling before upload.</p>
-      </div>
+    <section class="ss-section ss-roles-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-section-head ss-center">
+          <div class="ss-mini-kicker">SIMPLE ACCESS</div>
+          <h2 class="ss-h2">Admins manage. Members order.</h2>
+          <p class="ss-body">The store feels simple because each person only sees what they need.</p>
+        </div>
 
-      <div class="ss-tools-grid">
-        <a class="ss-tool-card" href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
-          <span>Generate</span>
-          <strong>ChatGPT / Image Generator</strong>
-          <p>Use the prompts above to create your first logo concept.</p>
-        </a>
+        <div class="ss-role-grid">
+          <div class="ss-role-card">
+            <span>ADMIN</span>
+            <h3>For the person running the store</h3>
+            <p>Create the store, manage products, edit placement, choose colors, and share the link.</p>
+          </div>
 
-        <a class="ss-tool-card" href="https://www.remove.bg" target="_blank" rel="noopener noreferrer">
-          <span>Clean</span>
-          <strong>Remove.bg</strong>
-          <p>Remove unwanted backgrounds from simple logo files.</p>
-        </a>
-
-        <a class="ss-tool-card" href="https://www.photopea.com" target="_blank" rel="noopener noreferrer">
-          <span>Edit</span>
-          <strong>Photopea</strong>
-          <p>Free browser-based editor for cleanup, cropping, and small fixes.</p>
-        </a>
-
-        <a class="ss-tool-card" href="https://upscayl.org" target="_blank" rel="noopener noreferrer">
-          <span>Improve</span>
-          <strong>Upscayl</strong>
-          <p>Free desktop upscaler for improving image resolution.</p>
-        </a>
-
-        <a class="ss-tool-card" href="https://icons8.com/upscaler" target="_blank" rel="noopener noreferrer">
-          <span>Improve</span>
-          <strong>Icons8 Upscaler</strong>
-          <p>Online upscaler for logos that need more resolution.</p>
-        </a>
-
-        <a class="ss-tool-card" href="https://www.canva.com" target="_blank" rel="noopener noreferrer">
-          <span>Design</span>
-          <strong>Canva</strong>
-          <p>Useful for layout ideas, text treatments, and quick visual polish.</p>
-        </a>
+          <div class="ss-role-card">
+            <span>MEMBER</span>
+            <h3>For everyone ordering</h3>
+            <p>Open the link, pick a product, choose size and color, checkout, and reorder later.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="ss-res-final">
-      <h2>Ready to build your store?</h2>
-      <p>Once your logo looks clean, centered, and background-free, upload it with your storefront request.</p>
-      <a class="ss-res-btn ss-res-btn--dark" href="/pages/request-storefront-form">Start the request →</a>
+    <section class="ss-section ss-trust-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-trust-shell">
+          <div>
+            <div class="ss-mini-kicker">WHY IT WORKS</div>
+            <h2 class="ss-h2">Built for people who do not have time to manage merch.</h2>
+            <p class="ss-body">Stella & Sage removes the annoying parts of group apparel: collecting sizes, handling payments, placing bulk orders, and being the person everyone texts when they need another shirt.</p>
+          </div>
+
+          <div class="ss-trust-points">
+            <div>
+              <strong>Veteran owned</strong>
+              <span>Built by someone who understands teams, units, and group chaos.</span>
+            </div>
+            <div>
+              <strong>No minimums</strong>
+              <span>People order what they need, when they need it.</span>
+            </div>
+            <div>
+              <strong>No inventory</strong>
+              <span>No boxes of extra shirts sitting in your garage.</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
+    <section class="ss-section ss-faq-section ss-reveal">
+      <div class="ss-wrap ss-wrap--medium">
+        <div class="ss-section-head ss-center">
+          <div class="ss-mini-kicker">FAQ</div>
+          <h2 class="ss-h2">The questions people ask first.</h2>
+        </div>
+
+        <div class="ss-faq-list">
+          <details>
+            <summary>Do I have to collect everyone’s sizes?</summary>
+            <p>No. Everyone orders their own size directly from the private storefront.</p>
+          </details>
+
+          <details>
+            <summary>Is there a minimum order?</summary>
+            <p>No. The whole point is to avoid minimums, bulk order pressure, and upfront inventory.</p>
+          </details>
+
+          <details>
+            <summary>How long does setup take?</summary>
+            <p>The form takes about 2 minutes. The automated store build usually takes about 15 minutes.</p>
+          </details>
+
+          <details>
+            <summary>Can I edit products after the store is built?</summary>
+            <p>Yes. Store admins can manage products, adjust placement, choose colors, hide items, delete products, and build more.</p>
+          </details>
+
+          <details>
+            <summary>Who can use this?</summary>
+            <p>Sports teams, military units, first responders, families, bachelor trips, fundraisers, small businesses, school groups, and almost any group that needs merch.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-final-cta ss-reveal">
+      <div class="ss-wrap ss-wrap--narrow ss-center">
+        <div class="ss-mini-kicker">READY WHEN YOU ARE</div>
+        <h2 class="ss-final-title">{{ section.settings.final_headline | escape }}</h2>
+        <p class="ss-final-sub">{{ section.settings.final_sub | escape }}</p>
+        <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.final_cta_label | escape }} →</a>
+      </div>
+    </section>
+
+  {%- endif -%}
+
+  <div class="ss-marquee-wrap">
+    <div class="ss-marquee-track">
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Fire Departments</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Football</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Law Enforcement</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Softball</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Corporate Teams</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Hockey</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Cheer Squads</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Wrestling Teams</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
+
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Fire Departments</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Football</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Law Enforcement</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Softball</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Corporate Teams</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Hockey</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Cheer Squads</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Wrestling Teams</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
+      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
+    </div>
   </div>
+
+  {%- if section.settings.dashboard_image != blank -%}
+    <div class="ss-dashboard-img-hidden" aria-hidden="true">
+      <img src="{{ section.settings.dashboard_image | image_url: width: 1400 }}" alt="" loading="lazy" width="{{ section.settings.dashboard_image.width }}" height="{{ section.settings.dashboard_image.height }}">
+    </div>
+  {%- endif -%}
+
 </section>
 
 <style>
-  #ss-resources-{{ section.id }},
-  #ss-resources-{{ section.id }} * {
+  /* =========================
+     STELLA & SAGE PREMIUM HOME
+  ========================== */
+
+  .ss-home,
+  .ss-home * {
     box-sizing: border-box;
   }
 
-  #ss-resources-{{ section.id }} {
+  .ss-home {
     position: relative;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
     color: #11100e;
     background:
-      radial-gradient(circle at 14% 0%, rgba(183,163,106,.07), transparent 30%),
-      linear-gradient(180deg, #fbfaf7 0%, #ffffff 44%, #fbfaf7 100%);
-    padding: 78px 20px 96px;
+      radial-gradient(circle at 18% 5%, rgba(183, 163, 106, 0.10), transparent 30%),
+      radial-gradient(circle at 80% 8%, rgba(255, 255, 255, 0.85), transparent 22%),
+      linear-gradient(180deg, #fbf8f1 0%, #fffdf9 22%, #ffffff 50%, #fbfaf7 100%);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-wrap {
-    width: min(1120px, 100%);
+  .ss-wrap {
+    width: min(1180px, calc(100% - 44px));
     margin: 0 auto;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-hero {
-    max-width: 850px;
-    margin: 0 auto 42px;
+  .ss-wrap--narrow {
+    max-width: 760px;
+  }
+
+  .ss-wrap--medium {
+    max-width: 920px;
+  }
+
+  .ss-center {
     text-align: center;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-kicker {
+  .ss-bg-orb {
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    filter: blur(12px);
+    opacity: .34;
+  }
+
+  .ss-bg-orb--one {
+    width: 420px;
+    height: 420px;
+    top: -160px;
+    left: -120px;
+    background: rgba(183, 163, 106, 0.10);
+  }
+
+  .ss-bg-orb--two {
+    width: 520px;
+    height: 520px;
+    top: 240px;
+    right: -220px;
+    background: rgba(14, 14, 14, 0.08);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ss-reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 560ms ease, transform 560ms ease;
+    }
+
+    .ss-reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .ss-eyebrow,
+  .ss-mini-kicker {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: rgba(17,16,14,.50);
+    margin-bottom: 18px;
+    color: rgba(17, 16, 14, .58);
     font-size: 12px;
-    font-weight: 950;
+    font-weight: 850;
     letter-spacing: .14em;
     text-transform: uppercase;
-    margin-bottom: 16px;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-kicker::before {
-    content: "";
+  .ss-eyebrow-dot {
     width: 8px;
     height: 8px;
     border-radius: 999px;
     background: #a9955d;
-    box-shadow: 0 0 0 7px rgba(183,163,106,.08);
+    box-shadow: 0 0 0 7px rgba(183, 163, 106, .08);
   }
 
-  #ss-resources-{{ section.id }} .ss-res-h1 {
+  .ss-h2 {
     margin: 0;
     color: #11100e;
-    font-size: clamp(48px, 7vw, 88px);
-    line-height: .94;
-    letter-spacing: -.07em;
+    font-size: clamp(34px, 5vw, 68px);
+    line-height: .98;
+    letter-spacing: -.055em;
     font-weight: 950;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-sub {
-    max-width: 720px;
-    margin: 22px auto 0;
-    color: rgba(17,16,14,.66);
-    font-size: clamp(17px, 2vw, 22px);
-    line-height: 1.55;
-    font-weight: 470;
+  .ss-body {
+    margin: 18px 0 0;
+    color: rgba(17, 16, 14, .64);
+    font-size: clamp(16px, 2vw, 21px);
+    line-height: 1.58;
+    font-weight: 450;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-hero-actions {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 30px;
+  .ss-section {
+    position: relative;
+    padding: 104px 0;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-btn {
-    min-height: 54px;
-    padding: 0 25px;
-    border-radius: 999px;
+  .ss-section-head {
+    max-width: 760px;
+    margin-bottom: 44px;
+  }
+
+  .ss-section-head.ss-center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ss-btn,
+  .ss-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      background 180ms ease,
+      border-color 180ms ease,
+      opacity 180ms ease;
+  }
+
+  .ss-btn {
+    min-height: 54px;
+    padding: 0 25px;
+    border-radius: 999px;
     font-size: 15px;
-    font-weight: 900;
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    font-weight: 850;
+    letter-spacing: -.01em;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-btn:hover {
-    transform: translateY(-2px);
-  }
-
-  #ss-resources-{{ section.id }} .ss-res-btn--dark {
+  .ss-btn--dark {
     color: #fff;
     background: #11100e;
-    border: 1px solid rgba(183,163,106,.24);
-    box-shadow: 0 18px 44px rgba(17,16,14,.18);
+    border: 1px solid rgba(183, 163, 106, .28);
+    box-shadow: 0 18px 44px rgba(17, 16, 14, .18);
   }
 
-  #ss-resources-{{ section.id }} .ss-res-btn--light {
+  .ss-btn--dark:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 24px 62px rgba(17, 16, 14, .24);
+  }
+
+  .ss-btn--light {
     color: #11100e;
-    background: rgba(255,255,255,.72);
-    border: 1px solid rgba(17,16,14,.12);
-    box-shadow: 0 12px 34px rgba(17,16,14,.08);
+    background: rgba(255, 255, 255, .72);
+    border: 1px solid rgba(17, 16, 14, .12);
+    box-shadow: 0 12px 34px rgba(17, 16, 14, .08);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
   }
 
-  #ss-resources-{{ section.id }} .ss-res-flow {
+  .ss-btn--light:hover {
+    transform: translateY(-2px);
+    border-color: rgba(17, 16, 14, .22);
+  }
+
+  /* HERO */
+
+  .ss-hero {
+    position: relative;
+    padding: 118px 0 86px;
+  }
+
+  .ss-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(360px, .98fr);
+    gap: 56px;
+    align-items: center;
+  }
+
+  .ss-hero-title {
+    max-width: 760px;
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(54px, 8.4vw, 112px);
+    line-height: .9;
+    letter-spacing: -.075em;
+    font-weight: 950;
+  }
+
+  .ss-hero-sub {
+    max-width: 620px;
+    margin: 25px 0 0;
+    color: rgba(17, 16, 14, .66);
+    font-size: clamp(18px, 2.2vw, 23px);
+    line-height: 1.55;
+    font-weight: 450;
+  }
+
+  .ss-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    align-items: center;
+    margin-top: 34px;
+  }
+
+  .ss-hero-proofline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    color: rgba(17, 16, 14, .50);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .ss-hero-proofline::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: rgba(183, 163, 106, .45);
+  }
+
+  .ss-hero-visual {
+    position: relative;
+    min-height: 570px;
+  }
+
+  .ss-device-card {
+    position: relative;
+    width: 100%;
+    border-radius: 34px;
+    padding: 13px;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.85), rgba(255,255,255,.42)),
+      linear-gradient(145deg, rgba(183,163,106,.12), rgba(17,16,14,.045));
+    border: 1px solid rgba(255,255,255,.8);
+    box-shadow:
+      0 45px 120px rgba(17, 16, 14, .20),
+      inset 0 1px 0 rgba(255,255,255,.86);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .ss-device-topbar {
+    height: 44px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ss-device-topbar span {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(17, 16, 14, .18);
+  }
+
+  .ss-dashboard-preview {
+    border-radius: 25px;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(183,163,106,.10), transparent 32%),
+      linear-gradient(180deg, #141311, #070706);
+    color: #fff;
+    min-height: 470px;
+    overflow: hidden;
+  }
+
+  .ss-preview-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .ss-preview-head p,
+  .ss-admin-top p {
+    margin: 0 0 6px;
+    color: rgba(255,255,255,.42);
+    font-size: 11px;
+    letter-spacing: .14em;
+    font-weight: 850;
+  }
+
+  .ss-preview-head h3,
+  .ss-admin-top h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 30px;
+    letter-spacing: -.04em;
+    line-height: 1;
+  }
+
+  .ss-live-badge {
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: rgba(183, 163, 106, .10);
+    border: 1px solid rgba(183, 163, 106, .22);
+    color: #ead892;
+    font-size: 12px;
+    font-weight: 850;
+  }
+
+  .ss-product-strip {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin: 46px 0 18px;
+    gap: 11px;
+    margin-top: 28px;
   }
 
-  #ss-resources-{{ section.id }} .ss-flow-card {
-    padding: 24px;
+  .ss-product-card {
+    min-height: 156px;
+    padding: 12px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.09);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ss-product-card p {
+    margin: 8px 0 0;
+    color: rgba(255,255,255,.68);
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .ss-shirt {
+    position: relative;
+    width: 74px;
+    height: 90px;
+    margin-top: 4px;
+    border-radius: 20px 20px 15px 15px;
+    clip-path: polygon(20% 0, 35% 8%, 65% 8%, 80% 0, 100% 22%, 84% 38%, 84% 100%, 16% 100%, 16% 38%, 0 22%);
+    box-shadow: inset 0 14px 22px rgba(255,255,255,.06);
+  }
+
+  .ss-shirt--black { background: #111; border: 1px solid rgba(255,255,255,.14); }
+  .ss-shirt--sand { background: #d9c9a5; }
+
+  .ss-shirt-logo,
+  .ss-hat-logo {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #11100e;
+    background: #efe4bf;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: -.04em;
+  }
+
+  .ss-hat {
+    position: relative;
+    width: 88px;
+    height: 62px;
+    margin-top: 24px;
+    background: #f2f0e9;
+    border-radius: 999px 999px 18px 18px;
+  }
+
+  .ss-hat::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: -10px;
+    height: 18px;
+    border-radius: 999px;
+    background: #11100e;
+  }
+
+  .ss-hat-logo {
+    top: 8px;
+    bottom: auto;
+    width: 28px;
+    height: 28px;
+    font-size: 9px;
+  }
+
+  .ss-dashboard-tools {
+    margin-top: 25px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .ss-tool-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+
+  .ss-tool-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background:
+      linear-gradient(145deg, rgba(183,163,106,.68), rgba(243,222,154,.42));
+    flex: 0 0 auto;
+  }
+
+  .ss-tool-row strong {
+    display: block;
+    color: rgba(255,255,255,.92);
+    font-size: 14px;
+    line-height: 1.1;
+  }
+
+  .ss-tool-row small {
+    display: block;
+    margin-top: 3px;
+    color: rgba(255,255,255,.46);
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .ss-floating-card {
+    position: absolute;
+    padding: 15px 17px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.78);
+    border: 1px solid rgba(255,255,255,.88);
+    box-shadow: 0 22px 70px rgba(17,16,14,.16);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .ss-floating-card strong {
+    display: block;
+    color: #11100e;
+    font-size: 26px;
+    letter-spacing: -.055em;
+    line-height: 1;
+  }
+
+  .ss-floating-card span {
+    display: block;
+    margin-top: 4px;
+    color: rgba(17,16,14,.52);
+    font-size: 12px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+
+  .ss-floating-card--top {
+    top: 44px;
+    right: -12px;
+  }
+
+  .ss-floating-card--bottom {
+    left: -18px;
+    bottom: 62px;
+  }
+
+  /* PROOF BAR */
+
+  .ss-proof-bar {
+    padding: 0 0 42px;
+  }
+
+  .ss-proof-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-radius: 28px;
+    overflow: hidden;
+    background: rgba(255,255,255,.68);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 24px 80px rgba(17,16,14,.08);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .ss-proof-item {
+    padding: 30px 24px;
+    border-right: 1px solid rgba(17,16,14,.075);
+    text-align: center;
+  }
+
+  .ss-proof-item:last-child {
+    border-right: 0;
+  }
+
+  .ss-proof-item strong {
+    display: block;
+    color: #9f8d5a;
+    font-size: clamp(34px, 4.4vw, 58px);
+    line-height: .92;
+    letter-spacing: -.06em;
+    font-weight: 950;
+  }
+
+  .ss-proof-item span {
+    display: block;
+    margin-top: 8px;
+    color: rgba(17,16,14,.56);
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 750;
+  }
+
+  /* PAIN / SOLUTION */
+
+  .ss-pain-section {
+    background: #fff;
+  }
+
+  .ss-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .ss-compare-card {
+    min-height: 430px;
+    padding: clamp(24px, 4vw, 42px);
+    border-radius: 34px;
+    border: 1px solid rgba(17,16,14,.09);
+    box-shadow: 0 24px 80px rgba(17,16,14,.06);
+  }
+
+  .ss-compare-card--old {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.88), rgba(250,248,243,.96));
+  }
+
+  .ss-compare-card--new {
+    color: #fff;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(183,163,106,.15), transparent 36%),
+      linear-gradient(180deg, #171613, #080807);
+  }
+
+  .ss-card-label {
+    margin-bottom: 22px;
+    color: #9f8d5a;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .14em;
+  }
+
+  .ss-compare-card h3 {
+    max-width: 500px;
+    margin: 0 0 24px;
+    font-size: clamp(26px, 3.5vw, 42px);
+    line-height: 1;
+    letter-spacing: -.05em;
+    font-weight: 950;
+  }
+
+  .ss-compare-card--old h3 {
+    color: #11100e;
+  }
+
+  .ss-compare-card ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 13px;
+  }
+
+  .ss-compare-card li {
+    position: relative;
+    padding-left: 30px;
+    color: rgba(17,16,14,.62);
+    font-size: 16px;
+    line-height: 1.35;
+    font-weight: 650;
+  }
+
+  .ss-compare-card--new li {
+    color: rgba(255,255,255,.72);
+  }
+
+  .ss-compare-card li::before {
+    content: "";
+    position: absolute;
+    top: .35em;
+    left: 0;
+    width: 17px;
+    height: 17px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.11);
+  }
+
+  .ss-compare-card--new li::before {
+    background: #a9955d;
+    box-shadow: 0 0 0 5px rgba(183,163,106,.08);
+  }
+
+  /* PROCESS */
+
+  .ss-process-section {
+    background: #fbfaf7;
+    border-top: 1px solid rgba(17,16,14,.06);
+    border-bottom: 1px solid rgba(17,16,14,.06);
+  }
+
+  .ss-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .ss-step-card {
+    min-height: 310px;
+    padding: 28px;
     border-radius: 30px;
-    background: rgba(255,255,255,.76);
+    background: rgba(255,255,255,.70);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 20px 70px rgba(17,16,14,.055);
+  }
+
+  .ss-step-num {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 42px;
+    border-radius: 18px;
+    color: #11100e;
+    background: rgba(183,163,106,.12);
+    font-size: 14px;
+    font-weight: 950;
+    letter-spacing: -.02em;
+  }
+
+  .ss-step-card h3 {
+    margin: 0;
+    color: #11100e;
+    font-size: 25px;
+    line-height: 1.05;
+    letter-spacing: -.04em;
+    font-weight: 930;
+  }
+
+  .ss-step-card p {
+    margin: 12px 0 0;
+    color: rgba(17,16,14,.61);
+    font-size: 15px;
+    line-height: 1.52;
+    font-weight: 520;
+  }
+
+  /* EXAMPLES */
+
+  .ss-examples-section {
+    background: #fff;
+  }
+
+  .ss-example-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .ss-example-card {
+    padding: 13px;
+    border-radius: 30px;
+    background: #fff;
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 22px 70px rgba(17,16,14,.06);
+  }
+
+  .ss-example-art {
+    height: 178px;
+    border-radius: 22px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .ss-example-art span {
+    color: #fff;
+    font-size: 31px;
+    font-weight: 950;
+    letter-spacing: -.06em;
+    transform: skewX(-7deg);
+    text-shadow: 0 12px 34px rgba(0,0,0,.22);
+  }
+
+  .ss-example-art--team {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255,255,255,.18), transparent 34%),
+      linear-gradient(145deg, #173a7a, #11100e);
+  }
+
+  .ss-example-art--unit {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(183,163,106,.14), transparent 35%),
+      linear-gradient(145deg, #293224, #090a08);
+  }
+
+  .ss-example-art--trip {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255,255,255,.20), transparent 34%),
+      linear-gradient(145deg, #b76d45, #22110c);
+  }
+
+  .ss-example-art--business {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(183,163,106,.12), transparent 35%),
+      linear-gradient(145deg, #242424, #090909);
+  }
+
+  .ss-example-card h3 {
+    margin: 20px 12px 0;
+    color: #11100e;
+    font-size: 19px;
+    line-height: 1.1;
+    letter-spacing: -.03em;
+    font-weight: 920;
+  }
+
+  .ss-example-card p {
+    margin: 9px 12px 16px;
+    color: rgba(17,16,14,.58);
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 520;
+  }
+
+  /* DASHBOARD */
+
+  .ss-dashboard-section {
+    background:
+      radial-gradient(circle at 80% 20%, rgba(183,163,106,.09), transparent 27%),
+      linear-gradient(180deg, #11100e, #070706);
+    color: #fff;
+  }
+
+  .ss-dashboard-section .ss-h2 {
+    color: #fff;
+  }
+
+  .ss-dashboard-section .ss-body {
+    color: rgba(255,255,255,.62);
+  }
+
+  .ss-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(360px, 1fr);
+    gap: 52px;
+    align-items: center;
+  }
+
+  .ss-feature-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 30px;
+  }
+
+  .ss-feature-list div {
+    padding: 17px 18px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.09);
+  }
+
+  .ss-feature-list strong {
+    display: block;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  .ss-feature-list span {
+    display: block;
+    margin-top: 4px;
+    color: rgba(255,255,255,.52);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .ss-admin-panel {
+    padding: 22px;
+    border-radius: 34px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.11);
+    box-shadow: 0 40px 120px rgba(0,0,0,.34);
+  }
+
+  .ss-admin-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .ss-admin-top button {
+    border: 0;
+    border-radius: 999px;
+    padding: 11px 15px;
+    color: #11100e;
+    background: #efe4bf;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .ss-store-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 16px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.08);
+    margin-bottom: 11px;
+  }
+
+  .ss-store-row strong {
+    display: block;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .ss-store-row span {
+    display: block;
+    margin-top: 3px;
+    color: rgba(255,255,255,.48);
+    font-size: 12px;
+  }
+
+  .ss-store-row em {
+    margin-left: auto;
+    color: #f4e2a6;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 850;
+  }
+
+  .ss-store-dot {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    background: #244b9b;
+  }
+
+  .ss-store-dot--gold {
+    background: #a9955d;
+  }
+
+  .ss-admin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .ss-admin-actions span {
+    padding: 13px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+    color: rgba(255,255,255,.68);
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  /* ROLES */
+
+  .ss-roles-section {
+    background: #fbfaf7;
+  }
+
+  .ss-role-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .ss-role-card {
+    padding: clamp(24px, 4vw, 40px);
+    border-radius: 34px;
+    background: rgba(255,255,255,.72);
     border: 1px solid rgba(17,16,14,.08);
     box-shadow: 0 24px 80px rgba(17,16,14,.055);
   }
 
-  #ss-resources-{{ section.id }} .ss-flow-card span {
-    display: grid;
-    place-items: center;
-    width: 46px;
-    height: 46px;
-    margin-bottom: 26px;
-    border-radius: 16px;
-    background: rgba(183,163,106,.10);
-    color: #11100e;
-    font-size: 13px;
-    font-weight: 950;
-  }
-
-  #ss-resources-{{ section.id }} .ss-flow-card h3 {
-    margin: 0;
-    color: #11100e;
-    font-size: 21px;
-    line-height: 1.08;
-    letter-spacing: -.04em;
-    font-weight: 950;
-  }
-
-  #ss-resources-{{ section.id }} .ss-flow-card p {
-    margin: 9px 0 0;
-    color: rgba(17,16,14,.60);
-    font-size: 14px;
-    line-height: 1.48;
-    font-weight: 520;
-  }
-
-  #ss-resources-{{ section.id }} .ss-res-warning {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    padding: 20px;
-    border-radius: 26px;
-    margin: 18px 0 44px;
-    background:
-      linear-gradient(180deg, rgba(17,16,14,.035), rgba(17,16,14,.02));
-    border: 1px solid rgba(17,16,14,.08);
-  }
-
-  #ss-resources-{{ section.id }} .ss-warning-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    color: #11100e;
-    background: rgba(183,163,106,.14);
-    font-size: 18px;
-    font-weight: 950;
-    flex: 0 0 auto;
-  }
-
-  #ss-resources-{{ section.id }} .ss-res-warning strong {
-    display: block;
-    color: #11100e;
-    font-size: 15px;
-    font-weight: 950;
-  }
-
-  #ss-resources-{{ section.id }} .ss-res-warning p {
-    margin: 5px 0 0;
-    color: rgba(17,16,14,.62);
-    font-size: 14px;
-    line-height: 1.5;
-    font-weight: 520;
-  }
-
-  #ss-resources-{{ section.id }} .ss-logo-helper {
-    padding: clamp(22px, 4vw, 34px);
-    border-radius: 42px;
-    background:
-      radial-gradient(circle at 10% 0%, rgba(183,163,106,.07), transparent 32%),
-      rgba(255,255,255,.58);
-    border: 1px solid rgba(17,16,14,.075);
-    box-shadow: 0 28px 100px rgba(17,16,14,.055);
-  }
-
-  #ss-resources-{{ section.id }} .ss-helper-head {
-    max-width: 840px;
-    margin-bottom: 24px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-helper-head h2 {
-    margin: 0;
-    color: #11100e;
-    font-size: clamp(34px, 4.6vw, 58px);
-    line-height: .98;
-    letter-spacing: -.058em;
-    font-weight: 950;
-  }
-
-  #ss-resources-{{ section.id }} .ss-helper-head p {
-    max-width: 690px;
-    margin: 16px 0 0;
-    color: rgba(17,16,14,.64);
-    font-size: 16px;
-    line-height: 1.58;
-    font-weight: 480;
-  }
-
-  #ss-resources-{{ section.id }} .ss-res-categories {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 18px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-cat-card {
-    appearance: none;
-    text-align: left;
-    cursor: pointer;
-    min-height: 172px;
-    padding: 22px;
-    border-radius: 30px;
-    background: rgba(255,255,255,.76);
-    border: 1px solid rgba(17,16,14,.08);
-    box-shadow: 0 20px 70px rgba(17,16,14,.045);
-    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
-  }
-
-  #ss-resources-{{ section.id }} .ss-cat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 28px 86px rgba(17,16,14,.075);
-  }
-
-  #ss-resources-{{ section.id }} .ss-cat-card--active {
-    background:
-      radial-gradient(circle at 15% 0%, rgba(183,163,106,.12), transparent 36%),
-      linear-gradient(180deg, #171613, #080807);
-    border-color: rgba(183,163,106,.22);
-    color: #fff;
-  }
-
-  #ss-resources-{{ section.id }} .ss-cat-card span {
-    display: block;
-    font-size: 26px;
-    margin-bottom: 24px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-cat-card strong {
-    display: block;
-    color: inherit;
-    font-size: 18px;
-    line-height: 1.08;
-    letter-spacing: -.035em;
-    font-weight: 950;
-  }
-
-  #ss-resources-{{ section.id }} .ss-cat-card p {
-    margin: 9px 0 0;
-    color: rgba(17,16,14,.58);
-    font-size: 13px;
-    line-height: 1.45;
-    font-weight: 520;
-  }
-
-  #ss-resources-{{ section.id }} .ss-cat-card--active p {
-    color: rgba(255,255,255,.58);
-  }
-
-  #ss-resources-{{ section.id }} .ss-active-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding: 0 14px;
-    margin: 2px 0 18px;
-    border-radius: 999px;
-    background: rgba(17,16,14,.045);
-    color: rgba(17,16,14,.58);
+  .ss-role-card span {
+    color: #9f8d5a;
     font-size: 12px;
-    font-weight: 850;
-    letter-spacing: .04em;
-    text-transform: uppercase;
+    font-weight: 950;
+    letter-spacing: .14em;
   }
 
-  #ss-resources-{{ section.id }} .ss-active-label strong {
+  .ss-role-card h3 {
+    margin: 22px 0 0;
     color: #11100e;
+    font-size: clamp(25px, 3vw, 38px);
+    line-height: 1.02;
+    letter-spacing: -.05em;
     font-weight: 950;
   }
 
-  #ss-resources-{{ section.id }} .ss-prompt-library {
-    display: block;
+  .ss-role-card p {
+    margin: 14px 0 0;
+    color: rgba(17,16,14,.62);
+    font-size: 16px;
+    line-height: 1.52;
+    font-weight: 520;
   }
 
-  #ss-resources-{{ section.id }} .ss-prompt-panel {
+  /* TRUST */
+
+  .ss-trust-section {
+    background: #fff;
+  }
+
+  .ss-trust-shell {
     display: grid;
-    gap: 16px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-hidden {
-    display: none !important;
-  }
-
-  #ss-resources-{{ section.id }} .ss-prompt-card {
-    border-radius: 30px;
-    background: rgba(255,255,255,.88);
+    grid-template-columns: minmax(0, .95fr) minmax(320px, .75fr);
+    gap: 42px;
+    align-items: start;
+    padding: clamp(28px, 5vw, 54px);
+    border-radius: 40px;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(183,163,106,.10), transparent 35%),
+      linear-gradient(180deg, #fbf8ef, #fff);
     border: 1px solid rgba(17,16,14,.08);
-    box-shadow: 0 24px 80px rgba(17,16,14,.045);
+    box-shadow: 0 30px 110px rgba(17,16,14,.075);
+  }
+
+  .ss-trust-points {
+    display: grid;
+    gap: 13px;
+  }
+
+  .ss-trust-points div {
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.78);
+    border: 1px solid rgba(17,16,14,.08);
+  }
+
+  .ss-trust-points strong {
+    display: block;
+    color: #11100e;
+    font-size: 16px;
+    font-weight: 920;
+  }
+
+  .ss-trust-points span {
+    display: block;
+    margin-top: 5px;
+    color: rgba(17,16,14,.58);
+    font-size: 13px;
+    line-height: 1.42;
+  }
+
+  /* FAQ */
+
+  .ss-faq-section {
+    background: #fbfaf7;
+    border-top: 1px solid rgba(17,16,14,.06);
+    border-bottom: 1px solid rgba(17,16,14,.06);
+  }
+
+  .ss-faq-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 38px;
+  }
+
+  .ss-faq-list details {
+    border-radius: 22px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.08);
     overflow: hidden;
   }
 
-  #ss-resources-{{ section.id }} .ss-prompt-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 18px;
-    align-items: flex-start;
-    padding: 24px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-prompt-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-prompt-tags span {
-    display: inline-flex;
-    align-items: center;
-    min-height: 28px;
-    padding: 0 10px;
-    border-radius: 999px;
-    background: rgba(17,16,14,.045);
-    color: rgba(17,16,14,.62);
-    font-size: 11px;
-    font-weight: 850;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-  }
-
-  #ss-resources-{{ section.id }} .ss-prompt-card h3 {
-    margin: 0;
-    color: #11100e;
-    font-size: 25px;
-    line-height: 1.04;
-    letter-spacing: -.045em;
-    font-weight: 950;
-  }
-
-  #ss-resources-{{ section.id }} .ss-prompt-card p {
-    max-width: 650px;
-    margin: 9px 0 0;
-    color: rgba(17,16,14,.58);
-    font-size: 14px;
-    line-height: 1.48;
-    font-weight: 520;
-  }
-
-  #ss-resources-{{ section.id }} .ss-view-btn,
-  #ss-resources-{{ section.id }} .ss-copy-btn {
-    appearance: none;
-    border: 0;
+  .ss-faq-list summary {
     cursor: pointer;
-    min-height: 42px;
-    padding: 0 18px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 900;
-    white-space: nowrap;
-    transition: transform 180ms ease, background 180ms ease;
-  }
-
-  #ss-resources-{{ section.id }} .ss-view-btn {
-    color: #11100e;
-    background: rgba(17,16,14,.06);
-  }
-
-  #ss-resources-{{ section.id }} .ss-view-btn:hover,
-  #ss-resources-{{ section.id }} .ss-copy-btn:hover {
-    transform: translateY(-2px);
-  }
-
-  #ss-resources-{{ section.id }} .ss-prompt-body {
-    display: none;
-    padding: 0 24px 24px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-prompt-card.is-open .ss-prompt-body {
-    display: block;
-  }
-
-  #ss-resources-{{ section.id }} .ss-prompt-card.is-open .ss-view-btn {
-    color: #fff;
-    background: #11100e;
-  }
-
-  #ss-resources-{{ section.id }} pre {
-    margin: 0 0 14px;
-    padding: 18px;
-    border-radius: 20px;
-    background: #f7f7f4;
-    border: 1px solid rgba(17,16,14,.08);
-    white-space: pre-wrap;
-    color: rgba(17,16,14,.82);
-    font-size: 13px;
-    line-height: 1.65;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  }
-
-  #ss-resources-{{ section.id }} .ss-copy-btn {
-    color: #fff;
-    background: #11100e;
-  }
-
-  #ss-resources-{{ section.id }} .ss-checklist-section,
-  #ss-resources-{{ section.id }} .ss-tools-section {
-    padding-top: 86px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-res-section-head {
-    max-width: 790px;
-    margin-bottom: 34px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-res-section-head h2 {
-    margin: 0;
-    color: #11100e;
-    font-size: clamp(34px, 4.6vw, 62px);
-    line-height: .98;
-    letter-spacing: -.058em;
-    font-weight: 950;
-  }
-
-  #ss-resources-{{ section.id }} .ss-res-section-head p {
-    max-width: 680px;
-    margin: 17px 0 0;
-    color: rgba(17,16,14,.64);
-    font-size: 17px;
-    line-height: 1.6;
-    font-weight: 480;
-  }
-
-  #ss-resources-{{ section.id }} .ss-check-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-check-card {
-    padding: 22px;
-    border-radius: 26px;
-    background: rgba(255,255,255,.76);
-    border: 1px solid rgba(17,16,14,.08);
-    box-shadow: 0 20px 70px rgba(17,16,14,.045);
-  }
-
-  #ss-resources-{{ section.id }} .ss-check-card strong {
-    display: block;
+    padding: 20px 22px;
     color: #11100e;
     font-size: 16px;
-    font-weight: 930;
-    letter-spacing: -.025em;
-  }
-
-  #ss-resources-{{ section.id }} .ss-check-card span {
-    display: block;
-    margin-top: 8px;
-    color: rgba(17,16,14,.60);
-    font-size: 13px;
-    line-height: 1.45;
-    font-weight: 520;
-  }
-
-  #ss-resources-{{ section.id }} .ss-tools-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-  }
-
-  #ss-resources-{{ section.id }} .ss-tool-card {
-    display: block;
-    min-height: 180px;
-    padding: 22px;
-    border-radius: 28px;
-    background: rgba(255,255,255,.76);
-    border: 1px solid rgba(17,16,14,.08);
-    box-shadow: 0 20px 70px rgba(17,16,14,.045);
-    text-decoration: none;
-    color: inherit;
-    transition: transform 180ms ease, box-shadow 180ms ease;
-  }
-
-  #ss-resources-{{ section.id }} .ss-tool-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 28px 90px rgba(17,16,14,.08);
-  }
-
-  #ss-resources-{{ section.id }} .ss-tool-card span {
-    display: inline-flex;
-    margin-bottom: 34px;
-    min-height: 28px;
-    padding: 0 10px;
-    align-items: center;
-    border-radius: 999px;
-    color: #11100e;
-    background: rgba(183,163,106,.10);
-    font-size: 11px;
     font-weight: 900;
-    letter-spacing: .08em;
-    text-transform: uppercase;
+    list-style: none;
   }
 
-  #ss-resources-{{ section.id }} .ss-tool-card strong {
-    display: block;
-    color: #11100e;
-    font-size: 18px;
-    line-height: 1.08;
-    letter-spacing: -.035em;
-    font-weight: 950;
+  .ss-faq-list summary::-webkit-details-marker {
+    display: none;
   }
 
-  #ss-resources-{{ section.id }} .ss-tool-card p {
-    margin: 9px 0 0;
-    color: rgba(17,16,14,.60);
-    font-size: 13px;
-    line-height: 1.48;
-    font-weight: 520;
+  .ss-faq-list summary::after {
+    content: "+";
+    float: right;
+    color: #9f8d5a;
+    font-size: 20px;
+    line-height: 1;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-final {
-    margin-top: 90px;
-    text-align: center;
-    padding: 82px 20px;
-    border-radius: 42px;
+  .ss-faq-list details[open] summary::after {
+    content: "–";
+  }
+
+  .ss-faq-list p {
+    margin: 0;
+    padding: 0 22px 22px;
+    color: rgba(17,16,14,.62);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* FINAL CTA */
+
+  .ss-final-cta {
+    position: relative;
+    padding: 118px 0;
     background:
-      radial-gradient(circle at 50% 0%, rgba(183,163,106,.09), transparent 34%),
-      linear-gradient(180deg, #fff, #fbf8f1);
-    border: 1px solid rgba(17,16,14,.07);
-    box-shadow: 0 30px 100px rgba(17,16,14,.065);
+      radial-gradient(circle at 50% 0%, rgba(183,163,106,.11), transparent 34%),
+      linear-gradient(180deg, #fff, #f8f3e8);
   }
 
-  #ss-resources-{{ section.id }} .ss-res-final h2 {
-    max-width: 760px;
-    margin: 0 auto;
+  .ss-final-title {
+    margin: 0;
     color: #11100e;
-    font-size: clamp(40px, 5.5vw, 76px);
+    font-size: clamp(42px, 6vw, 82px);
     line-height: .96;
     letter-spacing: -.065em;
     font-weight: 950;
   }
 
-  #ss-resources-{{ section.id }} .ss-res-final p {
-    max-width: 620px;
-    margin: 20px auto 30px;
+  .ss-final-sub {
+    margin: 18px auto 30px;
+    max-width: 560px;
     color: rgba(17,16,14,.62);
-    font-size: 18px;
-    line-height: 1.6;
+    font-size: clamp(17px, 2vw, 22px);
+    line-height: 1.5;
     font-weight: 500;
   }
 
-  @media (max-width: 980px) {
-    #ss-resources-{{ section.id }} .ss-res-flow,
-    #ss-resources-{{ section.id }} .ss-res-categories,
-    #ss-resources-{{ section.id }} .ss-check-grid,
-    #ss-resources-{{ section.id }} .ss-tools-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  /* LOGGED-IN */
+
+  .ss-member-hero {
+    position: relative;
+    padding: 94px 0 74px;
   }
 
-  @media (max-width: 680px) {
-    #ss-resources-{{ section.id }} {
-      padding: 54px 16px 80px;
+  .ss-member-shell {
+    padding: clamp(28px, 6vw, 66px);
+    border-radius: 40px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(183,163,106,.10), transparent 30%),
+      linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,255,255,.56));
+    border: 1px solid rgba(255,255,255,.8);
+    box-shadow: 0 34px 120px rgba(17,16,14,.10);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .ss-member-title {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(44px, 7vw, 90px);
+    line-height: .94;
+    letter-spacing: -.065em;
+    font-weight: 950;
+  }
+
+  .ss-member-sub {
+    max-width: 680px;
+    margin: 18px 0 0;
+    color: rgba(17,16,14,.62);
+    font-size: clamp(17px, 2vw, 22px);
+    line-height: 1.5;
+  }
+
+  .ss-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .ss-pill {
+    min-height: 46px;
+    padding: 0 19px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 850;
+  }
+
+  .ss-pill--primary {
+    color: #fff;
+    background: #11100e;
+    border: 1px solid rgba(183,163,106,.28);
+    box-shadow: 0 16px 44px rgba(17,16,14,.16);
+  }
+
+  .ss-pill--primary:hover,
+  .ss-pill--glass:hover {
+    transform: translateY(-2px);
+  }
+
+  .ss-pill--glass {
+    color: #11100e;
+    background: rgba(255,255,255,.66);
+    border: 1px solid rgba(17,16,14,.12);
+  }
+
+  /* MARQUEE */
+
+  .ss-marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid rgba(17,16,14,.06);
+    border-bottom: 1px solid rgba(17,16,14,.06);
+    padding: 15px 0;
+    background: rgba(255,255,255,.72);
+  }
+
+  .ss-marquee-track {
+    display: flex;
+    gap: 0;
+    width: max-content;
+    animation: ssMarquee 30s linear infinite;
+    white-space: nowrap;
+    will-change: transform;
+  }
+
+  .ss-marquee-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 30px;
+    color: rgba(17,16,14,.52);
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+  }
+
+  .ss-marquee-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(159,141,90,.55);
+  }
+
+  @keyframes ssMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .ss-dashboard-img-hidden {
+    display: none;
+  }
+
+  /* RESPONSIVE */
+
+  @media (max-width: 980px) {
+    .ss-hero {
+      padding-top: 78px;
     }
 
-    #ss-resources-{{ section.id }} .ss-res-h1 {
-      font-size: 47px;
-    }
-
-    #ss-resources-{{ section.id }} .ss-res-flow,
-    #ss-resources-{{ section.id }} .ss-res-categories,
-    #ss-resources-{{ section.id }} .ss-check-grid,
-    #ss-resources-{{ section.id }} .ss-tools-grid {
+    .ss-hero-grid,
+    .ss-dashboard-grid,
+    .ss-trust-shell {
       grid-template-columns: 1fr;
     }
 
-    #ss-resources-{{ section.id }} .ss-res-hero-actions {
-      flex-direction: column;
-    }
-
-    #ss-resources-{{ section.id }} .ss-res-btn {
-      width: 100%;
-    }
-
-    #ss-resources-{{ section.id }} .ss-logo-helper {
-      border-radius: 30px;
-      padding: 18px;
-    }
-
-    #ss-resources-{{ section.id }} .ss-helper-head h2,
-    #ss-resources-{{ section.id }} .ss-res-section-head h2,
-    #ss-resources-{{ section.id }} .ss-res-final h2 {
-      font-size: 40px;
-    }
-
-    #ss-resources-{{ section.id }} .ss-prompt-top {
-      flex-direction: column;
-    }
-
-    #ss-resources-{{ section.id }} .ss-view-btn,
-    #ss-resources-{{ section.id }} .ss-copy-btn {
-      width: 100%;
-    }
-
-    #ss-resources-{{ section.id }} .ss-res-warning {
-      flex-direction: column;
-    }
-
-    #ss-resources-{{ section.id }} .ss-active-label {
-      width: 100%;
-      justify-content: center;
+    .ss-hero-copy {
       text-align: center;
-      flex-wrap: wrap;
+    }
+
+    .ss-hero-title,
+    .ss-hero-sub {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .ss-hero-actions,
+    .ss-hero-proofline {
+      justify-content: center;
+    }
+
+    .ss-hero-visual {
+      min-height: auto;
+      max-width: 560px;
+      margin: 12px auto 0;
+    }
+
+    .ss-floating-card--top {
+      right: 10px;
+    }
+
+    .ss-floating-card--bottom {
+      left: 10px;
+      bottom: 34px;
+    }
+
+    .ss-example-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ss-steps-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ss-step-card {
+      min-height: auto;
+    }
+
+    .ss-step-num {
+      margin-bottom: 26px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .ss-wrap {
+      width: min(100% - 32px, 1180px);
+    }
+
+    .ss-section {
+      padding: 74px 0;
+    }
+
+    .ss-hero {
+      padding: 58px 0 46px;
+    }
+
+    .ss-hero-title {
+      font-size: clamp(48px, 14vw, 70px);
+      letter-spacing: -.07em;
+    }
+
+    .ss-hero-sub {
+      font-size: 17px;
+    }
+
+    .ss-hero-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ss-btn {
+      width: 100%;
+    }
+
+    .ss-device-card {
+      border-radius: 28px;
+      padding: 10px;
+    }
+
+    .ss-dashboard-preview {
+      min-height: auto;
+      padding: 18px;
+      border-radius: 22px;
+    }
+
+    .ss-preview-head h3,
+    .ss-admin-top h3 {
+      font-size: 24px;
+    }
+
+    .ss-product-strip {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ss-product-card:nth-child(3) {
+      grid-column: 1 / -1;
+      min-height: 128px;
+    }
+
+    .ss-floating-card {
+      display: none;
+    }
+
+    .ss-proof-grid,
+    .ss-compare-grid,
+    .ss-role-grid,
+    .ss-example-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ss-proof-item {
+      border-right: 0;
+      border-bottom: 1px solid rgba(17,16,14,.075);
+    }
+
+    .ss-proof-item:last-child {
+      border-bottom: 0;
+    }
+
+    .ss-compare-card {
+      min-height: auto;
+    }
+
+    .ss-admin-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .ss-member-hero {
+      padding: 54px 0 48px;
+    }
+
+    .ss-action-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ss-pill {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .ss-hero-title {
+      font-size: 47px;
+    }
+
+    .ss-h2 {
+      font-size: 36px;
+    }
+
+    .ss-final-title {
+      font-size: 42px;
+    }
+
+    .ss-example-art {
+      height: 150px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ss-reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .ss-marquee-track {
+      animation: none;
+    }
+
+    .ss-btn,
+    .ss-pill {
+      transition: none;
     }
   }
 </style>
 
 <script>
-  (function() {
-    var root = document.getElementById('ss-resources-{{ section.id }}');
-    if (!root) return;
+(function() {
+  var root = document.getElementById('ss-home-{{ section.id }}');
+  if (!root) return;
 
-    var categoryButtons = root.querySelectorAll('[data-res-category]');
-    var panels = root.querySelectorAll('[data-panel]');
-    var activeLabel = root.querySelector('[data-active-category-label]');
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var revealEls = root.querySelectorAll('.ss-reveal');
 
-    var labels = {
-      sports: 'Sports Teams',
-      vacation: 'Family Trips',
-      parties: 'Weddings & Parties',
-      groups: 'Groups & Fundraisers'
-    };
+  if (prefersReducedMotion) {
+    revealEls.forEach(function(el) {
+      el.classList.add('is-visible');
+    });
+    return;
+  }
 
-    categoryButtons.forEach(function(button) {
-      button.addEventListener('click', function() {
-        var target = button.getAttribute('data-res-category');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
 
-        categoryButtons.forEach(function(btn) {
-          btn.classList.remove('ss-cat-card--active');
-        });
+        var delay = parseInt(entry.target.getAttribute('data-delay') || '0', 10);
+        window.setTimeout(function() {
+          entry.target.classList.add('is-visible');
+        }, delay);
 
-        panels.forEach(function(panel) {
-          if (panel.getAttribute('data-panel') === target) {
-            panel.classList.remove('ss-hidden');
-          } else {
-            panel.classList.add('ss-hidden');
-          }
-        });
-
-        button.classList.add('ss-cat-card--active');
-
-        if (activeLabel && labels[target]) {
-          activeLabel.textContent = labels[target];
-        }
-
-        var library = root.querySelector('#prompt-library');
-        if (library && window.innerWidth < 900) {
-          library.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        io.unobserve(entry.target);
       });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -40px 0px'
     });
 
-    root.querySelectorAll('.ss-view-btn').forEach(function(button) {
-      button.addEventListener('click', function() {
-        var card = button.closest('.ss-prompt-card');
-        if (!card) return;
-
-        var isOpen = card.classList.toggle('is-open');
-        button.textContent = isOpen ? 'Hide Prompt' : 'View Prompt';
-      });
+    revealEls.forEach(function(el) {
+      io.observe(el);
     });
-
-    root.querySelectorAll('.ss-copy-btn').forEach(function(button) {
-      button.addEventListener('click', function() {
-        var targetId = button.getAttribute('data-copy-target');
-        var target = root.querySelector('#' + targetId);
-        if (!target) return;
-
-        var text = target.innerText || target.textContent;
-        var original = button.textContent;
-
-        function copied() {
-          button.textContent = 'Copied';
-          setTimeout(function() {
-            button.textContent = original;
-          }, 1800);
-        }
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(copied).catch(function() {
-            button.textContent = 'Copy failed';
-            setTimeout(function() {
-              button.textContent = original;
-            }, 1800);
-          });
-        } else {
-          var textarea = document.createElement('textarea');
-          textarea.value = text;
-          textarea.setAttribute('readonly', '');
-          textarea.style.position = 'absolute';
-          textarea.style.left = '-9999px';
-          document.body.appendChild(textarea);
-          textarea.select();
-
-          try {
-            document.execCommand('copy');
-            copied();
-          } catch (err) {
-            button.textContent = 'Copy failed';
-            setTimeout(function() {
-              button.textContent = original;
-            }, 1800);
-          }
-
-          document.body.removeChild(textarea);
-        }
-      });
+  } else {
+    revealEls.forEach(function(el) {
+      el.classList.add('is-visible');
     });
-  })();
+  }
+})();
 </script>
 
 {% schema %}
 {
-  "name": "Resources Page",
+  "name": "Landing – Apple Style",
   "settings": [
     {
+      "type": "header",
+      "content": "— Original settings (preserved) —"
+    },
+    {
       "type": "text",
-      "id": "title",
-      "label": "Page Title",
-      "default": "Need a logo? Start here."
+      "id": "kicker",
+      "label": "Badge / eyebrow text",
+      "default": "TEAM STORES"
+    },
+    {
+      "type": "text",
+      "id": "primary_title",
+      "label": "Legacy headline (unused — see Hero section below)",
+      "default": "Your team store."
     },
     {
       "type": "textarea",
-      "id": "subtitle",
-      "label": "Subtitle",
-      "default": "Pick the type of store you are building, copy a prompt, generate a clean logo in ChatGPT, then upload it when you request your Stella & Sage storefront."
+      "id": "primary_desc",
+      "label": "Legacy subheadline (unused — see Hero section below)",
+      "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done—forever."
+    },
+    {
+      "type": "text",
+      "id": "btn_login_label",
+      "label": "Legacy login button label (unused)",
+      "default": "Log in to Studio"
+    },
+    {
+      "type": "text",
+      "id": "btn_request_label",
+      "label": "Legacy request button label (unused)",
+      "default": "Request a storefront"
+    },
+    {
+      "type": "text",
+      "id": "cta_micro_login",
+      "label": "Legacy microcopy – logged out (unused)",
+      "default": "Already have access? Sign in"
+    },
+    {
+      "type": "text",
+      "id": "cta_micro_request",
+      "label": "Legacy microcopy – request (unused)",
+      "default": "Start your private store"
+    },
+    {
+      "type": "text",
+      "id": "primary_note",
+      "label": "Legacy fineprint (unused — see Hero caption below)",
+      "default": "No minimums · No meetings · No middleman"
+    },
+    {
+      "type": "header",
+      "content": "Media (dashboard image)"
+    },
+    {
+      "type": "image_picker",
+      "id": "dashboard_image",
+      "label": "Dashboard image (hidden on live site — re-enable via CSS)"
+    },
+    {
+      "type": "header",
+      "content": "Links"
+    },
+    {
+      "type": "text",
+      "id": "dashboard_url",
+      "label": "Portal / Dashboard URL",
+      "default": "/pages/portal"
+    },
+    {
+      "type": "text",
+      "id": "request_url",
+      "label": "Primary CTA URL (request storefront)",
+      "default": "/pages/private-storefronts"
+    },
+    {
+      "type": "text",
+      "id": "metaobject_type",
+      "label": "Storefront metaobject type",
+      "default": "storefront"
+    },
+    {
+      "type": "header",
+      "content": "Hero (logged-out)"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_headline",
+      "label": "Headline (use line breaks for multi-line)",
+      "default": "Your team store.\nDone before your coffee."
+    },
+    {
+      "type": "textarea",
+      "id": "hero_sub",
+      "label": "Subheadline",
+      "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done — forever."
+    },
+    {
+      "type": "text",
+      "id": "hero_cta_label",
+      "label": "CTA button label",
+      "default": "Start my team's store →"
+    },
+    {
+      "type": "text",
+      "id": "hero_signin_label",
+      "label": "Sign in button label",
+      "default": "Sign in"
+    },
+    {
+      "type": "text",
+      "id": "hero_caption",
+      "label": "Caption below CTA",
+      "default": "No minimums · No meetings · No middleman"
+    },
+    {
+      "type": "header",
+      "content": "Speed proof"
+    },
+    {
+      "type": "text",
+      "id": "speed_headline",
+      "label": "Headline",
+      "default": "Two minutes to fill. About fifteen to build."
+    },
+    {
+      "type": "text",
+      "id": "speed_sub",
+      "label": "Sub",
+      "default": "That's it. That's the whole setup."
+    },
+    {
+      "type": "text",
+      "id": "stat1_num",
+      "label": "Stat 1 number",
+      "default": "2 min"
+    },
+    {
+      "type": "text",
+      "id": "stat1_label",
+      "label": "Stat 1 label",
+      "default": "Tell us about your team"
+    },
+    {
+      "type": "text",
+      "id": "stat2_num",
+      "label": "Stat 2 number",
+      "default": "~15 min"
+    },
+    {
+      "type": "text",
+      "id": "stat2_label",
+      "label": "Stat 2 label",
+      "default": "Automation builds your store"
+    },
+    {
+      "type": "text",
+      "id": "stat3_num",
+      "label": "Stat 3 number",
+      "default": "∞"
+    },
+    {
+      "type": "text",
+      "id": "stat3_label",
+      "label": "Stat 3 label",
+      "default": "Reorder whenever"
+    },
+    {
+      "type": "header",
+      "content": "How it works"
+    },
+    {
+      "type": "text",
+      "id": "steps_headline",
+      "label": "Headline",
+      "default": "Three steps. No middleman."
+    },
+    {
+      "type": "text",
+      "id": "step1_title",
+      "label": "Step 1 title",
+      "default": "Tell us about your team"
+    },
+    {
+      "type": "textarea",
+      "id": "step1_desc",
+      "label": "Step 1 description",
+      "default": "Tell us your team name, logo, and colors. About 2 minutes."
+    },
+    {
+      "type": "text",
+      "id": "step2_title",
+      "label": "Step 2 title",
+      "default": "We build it"
+    },
+    {
+      "type": "textarea",
+      "id": "step2_desc",
+      "label": "Step 2 description",
+      "default": "Automation sets up your private store with your logo on every product. About 15 minutes."
+    },
+    {
+      "type": "text",
+      "id": "step3_title",
+      "label": "Step 3 title",
+      "default": "Share the link"
+    },
+    {
+      "type": "textarea",
+      "id": "step3_desc",
+      "label": "Step 3 description",
+      "default": "Your teammates order direct. You never handle another request."
+    },
+    {
+      "type": "header",
+      "content": "Final CTA (logged-out)"
+    },
+    {
+      "type": "text",
+      "id": "final_headline",
+      "label": "Headline",
+      "default": "One link. Every teammate. Every reorder. Forever."
+    },
+    {
+      "type": "text",
+      "id": "final_sub",
+      "label": "Sub",
+      "default": "Your team store is about 15 minutes away."
+    },
+    {
+      "type": "text",
+      "id": "final_cta_label",
+      "label": "CTA button label",
+      "default": "Start my team's store"
+    },
+    {
+      "type": "header",
+      "content": "Logged-in welcome"
+    },
+    {
+      "type": "text",
+      "id": "welcome_prefix",
+      "label": "Greeting prefix",
+      "default": "Welcome back, "
+    },
+    {
+      "type": "text",
+      "id": "greeting_sub",
+      "label": "Greeting subline",
+      "default": "Jump into your store, reorder your last kit, or start another team."
+    },
+    {
+      "type": "text",
+      "id": "dashboard_label",
+      "label": "Dashboard button label",
+      "default": "My Dashboard"
+    },
+    {
+      "type": "text",
+      "id": "orders_label",
+      "label": "Orders button label",
+      "default": "My Orders"
+    },
+    {
+      "type": "header",
+      "content": "Second store CTA (logged-in)"
+    },
+    {
+      "type": "text",
+      "id": "second_store_headline",
+      "label": "Headline",
+      "default": "Running another team? Or want a store for yourself?"
+    },
+    {
+      "type": "textarea",
+      "id": "second_store_body",
+      "label": "Body copy",
+      "default": "Different team, different logo — or a personal store for family reunions, fantasy leagues, anything. Same easy button. About 15 minutes."
+    },
+    {
+      "type": "text",
+      "id": "second_store_cta",
+      "label": "CTA label",
+      "default": "Create another store"
     }
   ],
   "presets": [
     {
-      "name": "Resources Page"
+      "name": "Landing – Apple Style"
     }
   ]
 }
