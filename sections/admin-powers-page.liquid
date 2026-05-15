@@ -1807,6 +1807,192 @@
     }
   }
 
+
+  /* ── V15 USER REQUEST UPGRADES: COMPACT HERO + ADD PRODUCTS TAB + MOBILE ACTIONS ── */
+  .ap-hero {
+    min-height: 218px !important;
+    padding: clamp(22px, 3vw, 36px) !important;
+    border-radius: 34px !important;
+    margin-bottom: 18px !important;
+    align-items: center !important;
+  }
+
+  .ap-hero-left {
+    gap: 18px !important;
+  }
+
+  .ap-hero-title-row {
+    gap: 18px !important;
+  }
+
+  .ap-hero-logo {
+    width: 82px !important;
+    height: 82px !important;
+    border-radius: 26px !important;
+  }
+
+  .ap-hero h1 {
+    font-size: clamp(42px, 5vw, 76px) !important;
+    line-height: .92 !important;
+  }
+
+  .ap-hero-sub {
+    margin-top: 10px !important;
+    font-size: clamp(14px, 1.1vw, 16px) !important;
+  }
+
+  .ap-hero-meta {
+    gap: 7px !important;
+  }
+
+  .ap-hero-pill {
+    min-height: 30px !important;
+    padding: 0 11px !important;
+    font-size: 10px !important;
+  }
+
+  .ap-hero-actions {
+    justify-content: center !important;
+    min-width: 210px !important;
+  }
+
+  .ap-hero-actions .ap-btn {
+    min-height: 44px !important;
+  }
+
+  .ap-products-grid--stacked {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .ap-product-box--custom {
+    order: 1;
+  }
+
+  .ap-product-box--main {
+    order: 2;
+  }
+
+  .ap-product-box--builder {
+    background:
+      radial-gradient(circle at 0% 0%, rgba(183,163,106,0.12), transparent 36%),
+      rgba(255,255,255,0.72);
+  }
+
+  .ap-product-list--builders .ap-add-product-row {
+    border-color: rgba(183,163,106,0.30) !important;
+    background: rgba(183,163,106,0.075) !important;
+  }
+
+  #apBuilderProductCount {
+    background: rgba(183,163,106,0.16);
+  }
+
+  .ap-product-editor-wrap {
+    max-width: 100%;
+  }
+
+  .ap-edit-placement-btn {
+    max-width: 100%;
+    text-align: center;
+    line-height: 1.15;
+    white-space: normal;
+  }
+
+  @media (max-width: 700px) {
+    .ap-hero {
+      padding: 16px !important;
+      border-radius: 26px !important;
+      margin-bottom: 12px !important;
+    }
+
+    .ap-hero-title-row {
+      align-items: center !important;
+      gap: 12px !important;
+    }
+
+    .ap-hero-logo {
+      width: 58px !important;
+      height: 58px !important;
+      border-radius: 18px !important;
+    }
+
+    .ap-hero h1 {
+      font-size: clamp(31px, 10vw, 44px) !important;
+      line-height: .94 !important;
+    }
+
+    .ap-hero-sub {
+      display: none !important;
+    }
+
+    .ap-hero-badge {
+      padding: 5px 10px !important;
+      font-size: 9px !important;
+      margin-bottom: 4px !important;
+    }
+
+    .ap-hero-meta {
+      display: none !important;
+    }
+
+    .ap-hero-actions {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+      min-width: 0 !important;
+      margin-top: 14px !important;
+    }
+
+    .ap-share-help {
+      grid-column: 1 / -1;
+    }
+
+    .ap-hero-actions .ap-btn {
+      min-height: 44px !important;
+      font-size: 13px !important;
+      padding: 0 12px !important;
+    }
+
+    .ap-main-tabs {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .ap-main-tab-btn {
+      min-height: 54px !important;
+      padding: 6px 2px !important;
+    }
+
+    .ap-tab-label {
+      font-size: 8px !important;
+    }
+
+    .ap-product-row__actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .ap-product-editor-wrap {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      display: flex !important;
+    }
+
+    .ap-product-editor-wrap .ap-edit-placement-btn,
+    .ap-edit-placement-btn {
+      width: 100% !important;
+      min-height: 46px !important;
+      padding: 7px 10px !important;
+      font-size: 12px !important;
+      white-space: normal !important;
+      line-height: 1.15 !important;
+    }
+
+    .ap-add-product-row .ap-product-row__actions {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -1997,6 +2183,7 @@
     <div class="ap-main-tabs-wrap">
       <div class="ap-main-tabs" role="tablist">
         <button class="ap-main-tab-btn active" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="true" aria-controls="apPanelProducts"><span class="ap-tab-icon">📦</span><span class="ap-tab-label">Products</span></button>
+        <button class="ap-main-tab-btn" id="apTabBtnAddProducts" data-main-tab="apPanelAddProducts" role="tab" aria-selected="false" aria-controls="apPanelAddProducts"><span class="ap-tab-icon">✨</span><span class="ap-tab-label">Add</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers"><span class="ap-tab-icon">👥</span><span class="ap-tab-label">Members</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings"><span class="ap-tab-icon">⚙️</span><span class="ap-tab-label">Settings</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger"><span class="ap-tab-icon">☠️</span><span class="ap-tab-label">Danger</span></button>
@@ -2041,7 +2228,7 @@
         <div>
           <span class="ap-panel-kicker">Store build</span>
           <h2>Products</h2>
-          <p>Review live products, adjust placement/colors, hide items, or add premium custom builds.</p>
+          <p>Review live products, adjust placement/colors, hide items, or delete old products. Custom products appear first.</p>
         </div>
         <a class="ap-panel-mini-link" href="/collections/{{ collection_handle }}">View live store ↗</a>
       </div>
@@ -2049,42 +2236,61 @@
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
       <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found for this store.</div>
 
-      <div class="ap-products-grid" id="apProductsGrid">
-        <section class="ap-product-box ap-product-box--main">
-          <div class="ap-product-box-head">
-            <div>
-              <h3 class="ap-product-box-title">Main Products</h3>
-              <p class="ap-product-box-sub">Core products currently live in this storefront.</p>
-            </div>
-            <span class="ap-product-count" id="apMainProductCount">0</span>
-          </div>
-          <div id="apMainProductsEmpty" class="ap-product-section-empty">No main products found yet.</div>
-          <div id="apProductsMainContainer" class="ap-product-list"></div>
-        </section>
-
+      <div class="ap-products-grid ap-products-grid--stacked" id="apProductsGrid">
         <section class="ap-product-box ap-product-box--custom" id="apCustomProductsBox" style="display:none;">
           <div class="ap-product-box-head">
             <div>
-              <h3 class="ap-product-box-title">Custom Builds</h3>
-              <p class="ap-product-box-sub">Premium products created from the custom builder.</p>
+              <h3 class="ap-product-box-title">Custom / Pro Products</h3>
+              <p class="ap-product-box-sub">The premium products admins usually care about first.</p>
             </div>
             <span class="ap-product-count" id="apCustomProductCount">0</span>
           </div>
-          <div id="apCustomProductsEmpty" class="ap-product-section-empty">No custom builds have been added yet.</div>
+          <div id="apCustomProductsEmpty" class="ap-product-section-empty">No custom products have been built yet. Use the Add tab to create one.</div>
           <div id="apProductsCustomContainer" class="ap-product-list"></div>
+        </section>
 
-          <div id="apCustomBuildersSection" class="ap-custom-builders-section" style="display:none;">
-            <div class="ap-custom-builders-head">
-              <h4 class="ap-custom-builders-title">Add a Custom Product</h4>
-              <p class="ap-custom-builders-sub">Create a new premium product without touching the core store build.</p>
+        <section class="ap-product-box ap-product-box--main">
+          <div class="ap-product-box-head">
+            <div>
+              <h3 class="ap-product-box-title">Standard Products</h3>
+              <p class="ap-product-box-sub">The core products currently live in this storefront.</p>
             </div>
-            <div id="apCustomBuildersContainer" class="ap-product-list"></div>
+            <span class="ap-product-count" id="apMainProductCount">0</span>
           </div>
+          <div id="apMainProductsEmpty" class="ap-product-section-empty">No standard products found yet.</div>
+          <div id="apProductsMainContainer" class="ap-product-list"></div>
         </section>
       </div>
 
       <div id="apStatusProducts" class="ap-status"></div>
     </div><!-- /apPanelProducts -->
+
+    <!-- ADD PRODUCTS PANEL -->
+    <div id="apPanelAddProducts" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnAddProducts">
+      <div class="ap-panel-head">
+        <div>
+          <span class="ap-panel-kicker">Build more</span>
+          <h2>Add Products</h2>
+          <p>Create premium custom products without scrolling through the current catalog. These build as separate products inside this store.</p>
+        </div>
+      </div>
+
+      <section class="ap-product-box ap-product-box--builder">
+        <div class="ap-product-box-head">
+          <div>
+            <h3 class="ap-product-box-title">Pro Builders</h3>
+            <p class="ap-product-box-sub">Start with a product type, choose images/colors, then add it to the storefront.</p>
+          </div>
+          <span class="ap-product-count" id="apBuilderProductCount">0</span>
+        </div>
+        <div id="apCustomBuildersEmpty" class="ap-product-section-empty">Builders are loading. If nothing appears, refresh the page.</div>
+        <div id="apCustomBuildersSection" class="ap-custom-builders-section" style="display:none;">
+          <div id="apCustomBuildersContainer" class="ap-product-list ap-product-list--builders"></div>
+        </div>
+      </section>
+
+      <div id="apStatusAddProducts" class="ap-status"></div>
+    </div><!-- /apPanelAddProducts -->
 
     <!-- SETTINGS PANEL -->
     <div id="apPanelSettings" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnSettings">
@@ -2633,7 +2839,7 @@
       var panel = document.getElementById(targetId);
       if(panel) panel.classList.add('active');
       // Lazy-load products when Products tab is first clicked
-      if(targetId === 'apPanelProducts' && !apProductsLoaded){
+      if((targetId === 'apPanelProducts' || targetId === 'apPanelAddProducts') && !apProductsLoaded){
         apProductsLoaded = true;
         apLoadProducts();
       }
@@ -2977,12 +3183,16 @@
     mainCount = mainCount || 0;
     customCount = customCount || 0;
     builderCount = builderCount || 0;
+    var apBuilderProductCount = document.getElementById('apBuilderProductCount');
+    var apCustomBuildersEmpty = document.getElementById('apCustomBuildersEmpty');
     if(apMainProductCount) apMainProductCount.textContent = String(mainCount);
     if(apCustomProductCount) apCustomProductCount.textContent = String(customCount);
+    if(apBuilderProductCount) apBuilderProductCount.textContent = String(builderCount);
     if(apMainProductsEmpty) apMainProductsEmpty.style.display = mainCount ? 'none' : 'block';
     if(apCustomProductsEmpty) apCustomProductsEmpty.style.display = customCount ? 'none' : 'block';
     if(apCustomBuildersSection) apCustomBuildersSection.style.display = builderCount ? 'block' : 'none';
-    if(apCustomProductsBox) apCustomProductsBox.style.display = (customCount || builderCount) ? 'block' : 'none';
+    if(apCustomBuildersEmpty) apCustomBuildersEmpty.style.display = builderCount ? 'none' : 'block';
+    if(apCustomProductsBox) apCustomProductsBox.style.display = customCount ? 'block' : 'none';
     if(apProductsEmpty) apProductsEmpty.style.display = (mainCount || customCount || builderCount) ? 'none' : 'block';
   }
 
@@ -2993,7 +3203,7 @@
     });
     Array.prototype.slice.call(actionsEl.querySelectorAll('.ap-edit-placement-btn')).forEach(function(btn){
       var noLogo = /no logo/i.test(btn.textContent || '') || btn.classList.contains('ap-edit-placement-btn--disabled');
-      btn.innerHTML = noLogo ? '✏️ Edit Logo Placement & Color (no logo)' : '✏️ Edit Logo Placement & Color';
+      btn.innerHTML = noLogo ? '✏️ Edit Placement + Colors (no logo)' : '✏️ Edit Placement + Colors';
       btn.title = noLogo
         ? 'Add a logo first before editing placement and colors.'
         : 'Click to adjust logo size, logo placement, and product color options.';
@@ -3004,7 +3214,7 @@
         wrap.appendChild(btn);
         var tip = document.createElement('span');
         tip.className = 'ap-product-editor-tip';
-        tip.textContent = noLogo ? 'Add a logo first, then you can edit placement and colors.' : 'Adjust the logo size, placement, and product color options.';
+        tip.textContent = noLogo ? 'Add a logo first, then you can edit placement and colors.' : 'Adjust logo size, placement, and product colors.';
         wrap.appendChild(tip);
       }
     });
