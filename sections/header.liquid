@@ -649,7 +649,7 @@
      ============================================================ */
 
   body:has(> #header-group > header) {
-    --header-height: 82px;
+    --header-height: 72px;
   }
 
   #header-component {
@@ -671,39 +671,63 @@
 
   #header-component .header__row {
     background:
-      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.055), transparent 30%),
-      linear-gradient(180deg, rgba(255, 253, 249, 0.88), rgba(255, 255, 255, 0.92));
+      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.05), transparent 28%),
+      linear-gradient(180deg, rgba(255, 253, 249, 0.94), rgba(255, 255, 255, 0.96));
     border-color: var(--ss-header-border);
   }
 
-  #header-component .header__row--top .header__columns {
-    min-height: 78px;
+  #header-component .header__row--top {
+    min-height: 74px !important;
+    height: 74px !important;
+    display: flex;
     align-items: center;
-    padding-block-start: 8px !important;
-    padding-block-end: 8px !important;
+  }
+
+  #header-component .header__row--top .header__columns {
+    min-height: 74px !important;
+    height: 74px !important;
+    align-items: center !important;
+    padding-block-start: 0 !important;
+    padding-block-end: 0 !important;
+    padding-inline-start: clamp(22px, 3.2vw, 56px) !important;
+    padding-inline-end: clamp(22px, 3.2vw, 56px) !important;
   }
 
   #header-component .header__row--bottom .header__columns {
-    min-height: 44px;
-    padding-block-start: 4px !important;
-    padding-block-end: 8px !important;
+    min-height: 36px !important;
+    height: 36px !important;
+    padding-block-start: 0 !important;
+    padding-block-end: 0 !important;
+  }
+
+  #header-component .spacing-style {
+    --padding-block-start: 0 !important;
+    --padding-block-end: 0 !important;
   }
 
   #header-component .header-logo,
-  #header-component .header-logo a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  #header-component .header-logo a,
+  #header-component .header__heading,
+  #header-component .header__heading-link,
+  #header-component .header__heading-logo-wrapper {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 0 !important;
+    height: 58px !important;
+    max-height: 58px !important;
   }
 
   #header-component .header-logo img,
   #header-component .header-logo svg,
   #header-component .header__heading-logo,
   #header-component .header__heading-logo-wrapper img {
-    max-height: 58px !important;
+    display: block !important;
+    max-height: 56px !important;
+    height: auto !important;
     width: auto !important;
     object-fit: contain;
-    filter: drop-shadow(0 10px 20px rgba(17, 16, 14, 0.055));
+    filter: drop-shadow(0 8px 16px rgba(17, 16, 14, 0.05));
   }
 
   #header-component header-menu,
@@ -728,6 +752,19 @@
   #header-component .menu-list__list-item > a:hover,
   #header-component .menu-list__list-item > button:hover {
     color: var(--ss-header-ink);
+  }
+
+  #header-component .header__column,
+  #header-component header-menu,
+  #header-component header-actions {
+    align-self: center !important;
+  }
+
+  #header-component .header__column--left,
+  #header-component .header__column--center,
+  #header-component .header__column--right {
+    min-height: 74px !important;
+    align-items: center !important;
   }
 
   #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
@@ -806,26 +843,41 @@
 
   @media screen and (max-width: 749px) {
     body:has(> #header-group > header) {
-      --header-height: 58px;
+      --header-height: 52px;
     }
 
     #header-component {
       box-shadow: 0 10px 32px rgba(17, 16, 14, 0.045);
     }
 
+    #header-component .header__row--top {
+      min-height: 52px !important;
+      height: 52px !important;
+    }
+
     #header-component .header__row--top .header__columns {
-      min-height: 56px;
-      padding-block-start: 5px !important;
-      padding-block-end: 5px !important;
+      min-height: 52px !important;
+      height: 52px !important;
+      padding-block-start: 0 !important;
+      padding-block-end: 0 !important;
       padding-inline-start: 10px !important;
       padding-inline-end: 10px !important;
+    }
+
+    #header-component .header-logo,
+    #header-component .header-logo a,
+    #header-component .header__heading,
+    #header-component .header__heading-link,
+    #header-component .header__heading-logo-wrapper {
+      height: 40px !important;
+      max-height: 40px !important;
     }
 
     #header-component .header-logo img,
     #header-component .header-logo svg,
     #header-component .header__heading-logo,
     #header-component .header__heading-logo-wrapper img {
-      max-height: 44px !important;
+      max-height: 38px !important;
       width: auto !important;
     }
 
