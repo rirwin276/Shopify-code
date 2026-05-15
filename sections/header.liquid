@@ -641,482 +641,233 @@
 
 
   /* ============================================================
-     Stella & Sage Premium Header — V4 Clean Balanced
+     STELLA & SAGE PREMIUM HEADER — V7 STABLE CLEAN
      Purpose:
-     - Remove the empty lower header band that was creating bottom padding.
-     - Keep the logo centered in the viewport.
-     - Vertically center nav/menu/actions with the logo.
-     - Preserve Shopify menu/search/account/cart logic.
+     - Roll back the broken overflow/menu experiments.
+     - Keep Shopify's original header logic intact.
+     - Make desktop nav fit so the unwanted "More" overflow is avoided.
+     - Center nav/logo/actions vertically with balanced top/bottom padding.
+     - Keep mobile clean and compact without turning menu items into icons.
      ============================================================ */
 
-  body:has(> #header-group > header) {
-    --header-height: 82px;
-  }
-
   #header-component {
-    --ss-header-ink: #11100e;
-    --ss-header-muted: rgba(17, 16, 14, 0.64);
-    --ss-header-border: rgba(17, 16, 14, 0.065);
-    --ss-header-gold: #a9955d;
+    --ss-cream: #fbf8f1;
+    --ss-cream-2: #fffdf9;
+    --ss-ink: #11100e;
+    --ss-gold: #a9955d;
+    --ss-line: rgba(17, 16, 14, 0.075);
     background:
-      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.045), transparent 32%),
-      linear-gradient(180deg, rgba(255, 253, 249, 0.99), rgba(255, 255, 255, 0.97));
-    border-bottom: 1px solid var(--ss-header-border);
-    box-shadow: 0 8px 26px rgba(17, 16, 14, 0.028);
+      radial-gradient(circle at 50% -20%, rgba(183, 163, 106, 0.075), transparent 32%),
+      linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.90));
+    border-bottom: 1px solid var(--ss-line);
+    box-shadow: 0 10px 34px rgba(17, 16, 14, 0.035);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
   }
 
   #header-component .header__row {
     background: transparent !important;
-    border-color: var(--ss-header-border) !important;
   }
 
-  /* The bottom desktop row was rendering as an empty band. Hide it unless mobile nav needs its own row. */
-  #header-component .header__row--bottom {
-    display: none !important;
-  }
-
-  #header-component .header__row--top {
+  #header-component .header__row--top .header__columns {
     min-height: 82px !important;
-    height: 82px !important;
-    display: flex !important;
-    align-items: center !important;
-    border-bottom-width: 0 !important;
-  }
-
-  #header-component .header__row--top .header__columns,
-  #header-component .header__row--top .header__columns.spacing-style {
-    position: relative !important;
-    width: 100% !important;
-    max-width: none !important;
-    min-height: 82px !important;
-    height: 82px !important;
-    margin: 0 !important;
     padding-block: 0 !important;
-    padding-inline-start: clamp(34px, 3.8vw, 76px) !important;
-    padding-inline-end: clamp(34px, 3.8vw, 76px) !important;
-    display: grid !important;
+    align-items: center !important;
+  }
+
+  #header-component .header__columns {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
     grid-template-areas: 'left center right' !important;
-    align-items: center !important;
-    column-gap: clamp(16px, 2.4vw, 40px) !important;
-    box-sizing: border-box !important;
-  }
-
-  #header-component .spacing-style {
-    --padding-block-start: 0px !important;
-    --padding-block-end: 0px !important;
-  }
-
-  #header-component .header__column--left {
-    grid-area: left !important;
-    justify-content: flex-start !important;
-    align-items: center !important;
-  }
-
-  #header-component .header__column--center {
-    grid-area: center !important;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-
-  #header-component .header__column--right {
-    grid-area: right !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
+    column-gap: clamp(18px, 3vw, 42px) !important;
   }
 
   #header-component .header__column,
   #header-component .header__column--left,
   #header-component .header__column--center,
-  #header-component .header__column--right,
-  #header-component header-menu,
-  #header-component header-actions,
-  #header-component .menu-list,
-  #header-component .menu-list__list,
-  #header-component .overflow-menu::part(list) {
-    min-height: 82px !important;
-    height: 82px !important;
-    display: flex !important;
+  #header-component .header__column--right {
     align-items: center !important;
-    align-self: center !important;
   }
 
-  #header-component .header__column--left header-menu,
-  #header-component .header__column--left .menu-list,
-  #header-component .header__column--left .menu-list__list,
-  #header-component .header__column--left .overflow-menu::part(list) {
+  #header-component .header__column--left {
     justify-content: flex-start !important;
+    gap: clamp(12px, 1.5vw, 22px) !important;
   }
 
-  #header-component .header__column--right header-actions {
+  #header-component .header__column--center {
+    justify-content: center !important;
+  }
+
+  #header-component .header__column--right {
     justify-content: flex-end !important;
+    gap: clamp(10px, 1.3vw, 18px) !important;
   }
 
+  /* Logo: centered, intentional, and matched to row height */
   #header-component .header-logo,
   #header-component .header-logo a,
-  #header-component .header__heading,
-  #header-component .header__heading-link,
-  #header-component .header__heading-logo-wrapper {
-    display: inline-flex !important;
+  #header-component .header-logo__link,
+  #header-component .header-logo__image-container {
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    line-height: 0 !important;
-    height: 64px !important;
-    max-height: 64px !important;
-    margin: 0 !important;
-    padding: 0 !important;
   }
 
   #header-component .header-logo img,
   #header-component .header-logo svg,
-  #header-component .header__heading-logo,
-  #header-component .header__heading-logo-wrapper img {
-    display: block !important;
+  #header-component .header-logo__image,
+  #header-component .header-logo__image-container img {
     max-height: 64px !important;
-    height: auto !important;
     width: auto !important;
     object-fit: contain !important;
-    margin: 0 auto !important;
-    filter: drop-shadow(0 8px 16px rgba(17, 16, 14, 0.035));
+    display: block !important;
   }
 
-  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
-  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link,
-  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link {
-    margin-block: 0 !important;
-    padding-block: 0 !important;
-    min-height: 42px !important;
-    height: 42px !important;
-    display: inline-flex !important;
+  /* Desktop nav: smaller gap so all six links fit instead of collapsing into More */
+  @media screen and (min-width: 750px) {
+    #header-component header-menu,
+    #header-component .menu-list,
+    #header-component .menu-list__list,
+    #header-component .overflow-menu::part(list) {
+      display: flex !important;
+      align-items: center !important;
+      gap: clamp(12px, 1.35vw, 24px) !important;
+    }
+
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link,
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link {
+      margin: 0 !important;
+      padding: 10px 0 !important;
+      color: rgba(17, 16, 14, 0.78) !important;
+      font-size: clamp(14px, 1.05vw, 16px) !important;
+      line-height: 1 !important;
+      font-weight: 760 !important;
+      letter-spacing: -0.02em !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+      transition: color 180ms ease, opacity 180ms ease, transform 180ms ease;
+    }
+
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link:hover,
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link:hover {
+      color: var(--ss-ink) !important;
+      transform: translateY(-1px);
+    }
+
+    /* Keep overflow from becoming the main desktop experience. If the nav fits, this never matters.
+       If Shopify still creates a More item at odd browser zooms, make it a small clean menu button. */
+    #header-component .menu-list__list-item[slot='overflow'] > .menu-list__link,
+    #header-component .menu-list__list-item[slot='overflow'] > button.menu-list__link {
+      width: 42px !important;
+      height: 42px !important;
+      min-width: 42px !important;
+      padding: 0 !important;
+      border-radius: 999px !important;
+      background: rgba(17, 16, 14, 0.045) !important;
+      border: 1px solid rgba(17, 16, 14, 0.075) !important;
+      color: transparent !important;
+      font-size: 0 !important;
+      overflow: hidden !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    #header-component .menu-list__list-item[slot='overflow'] > .menu-list__link::before,
+    #header-component .menu-list__list-item[slot='overflow'] > button.menu-list__link::before {
+      content: "☰" !important;
+      color: var(--ss-ink) !important;
+      font-size: 22px !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+    }
+  }
+
+  /* Header actions: clean circular Apple-like controls */
+  #header-component header-actions,
+  #header-component .header-actions,
+  #header-component .header-actions__action,
+  #header-component .search-action,
+  #header-component .account-actions,
+  #header-component .cart-icon,
+  #header-component .header__icon {
     align-items: center !important;
-    justify-content: center !important;
-    border-radius: 999px !important;
-    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease !important;
-  }
-
-  #header-component .menu-list__link,
-  #header-component .menu-list__link span,
-  #header-component .menu-list__list-item > a,
-  #header-component .menu-list__list-item > button {
-    color: rgba(17, 16, 14, 0.78) !important;
-    font-size: 15px !important;
-    font-weight: 680 !important;
-    letter-spacing: -0.018em !important;
-    text-decoration: none !important;
-    line-height: 1 !important;
-  }
-
-  #header-component .menu-list__link:hover,
-  #header-component .menu-list__list-item > a:hover,
-  #header-component .menu-list__list-item > button:hover {
-    color: var(--ss-header-ink) !important;
-    background: rgba(17, 16, 14, 0.045) !important;
-    transform: translateY(-1px);
-  }
-
-  #header-component header-actions {
-    display: inline-flex !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
-    gap: 10px !important;
   }
 
   #header-component .header-actions__action,
   #header-component .search-action,
-  #header-component .account-actions,
-  #header-component .cart-action {
+  #header-component .account-actions a,
+  #header-component .cart-icon,
+  #header-component .header__icon {
     min-width: 42px !important;
     min-height: 42px !important;
-    height: 42px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
     border-radius: 999px !important;
   }
 
-  #header-component .header-actions__action,
-  #header-component .search-action button,
   #header-component .account-actions a,
-  #header-component .cart-action a {
-    transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, opacity 180ms ease !important;
-  }
-
-  #header-component .header-actions__action:hover,
-  #header-component .search-action:hover,
-  #header-component .account-actions:hover,
-  #header-component .cart-action:hover {
+  #header-component .header-actions__action:is(:hover, :focus-visible),
+  #header-component .search-action:is(:hover, :focus-visible),
+  #header-component .cart-icon:is(:hover, :focus-visible) {
     background: rgba(17, 16, 14, 0.045) !important;
-    box-shadow: 0 12px 34px rgba(17, 16, 14, 0.055) !important;
-    transform: translateY(-1px);
   }
 
-  #header-component .header__icon--menu {
-    border-radius: 999px !important;
-    background: rgba(255, 255, 255, 0.72) !important;
-    border: 1px solid rgba(17, 16, 14, 0.075) !important;
-    box-shadow: 0 10px 26px rgba(17, 16, 14, 0.045) !important;
+  /* Prevent the giant full-width overflow/menu sheet from inheriting our icon styling.
+     This leaves Shopify's menu links readable if overflow opens. */
+  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu,
+  #header-component .menu-list__list-item[slot='overflow'] .menu-drawer,
+  #header-component .menu-list__list-item[slot='overflow'] [popover] {
+    color: var(--ss-ink) !important;
+    font-size: 15px !important;
   }
 
-  #header-component .header__row--mobile {
-    background: linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 255, 255, 0.96)) !important;
-    border-bottom: 1px solid rgba(17, 16, 14, 0.06) !important;
+  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu .menu-list__link,
+  #header-component .menu-list__list-item[slot='overflow'] .menu-drawer .menu-list__link,
+  #header-component .menu-list__list-item[slot='overflow'] [popover] .menu-list__link {
+    color: rgba(17, 16, 14, 0.78) !important;
+    font-size: 15px !important;
+    background: transparent !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    border-radius: 12px !important;
+    padding: 12px 14px !important;
   }
 
+  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu .menu-list__link::before,
+  #header-component .menu-list__list-item[slot='overflow'] .menu-drawer .menu-list__link::before,
+  #header-component .menu-list__list-item[slot='overflow'] [popover] .menu-list__link::before {
+    content: none !important;
+  }
+
+  /* Mobile: compact header, no giant vertical waste */
   @media screen and (max-width: 749px) {
-    body:has(> #header-group > header) {
-      --header-height: 54px;
-    }
-
-    #header-component {
-      box-shadow: 0 8px 24px rgba(17, 16, 14, 0.032);
-    }
-
-    #header-component .header__row--bottom {
-      display: none !important;
-    }
-
-    #header-component .header__row--top {
-      min-height: 54px !important;
-      height: 54px !important;
-    }
-
-    #header-component .header__row--top .header__columns,
-    #header-component .header__row--top .header__columns.spacing-style {
-      min-height: 54px !important;
-      height: 54px !important;
+    #header-component .header__row--top .header__columns {
+      min-height: 58px !important;
       padding-block: 0 !important;
-      padding-inline-start: 10px !important;
-      padding-inline-end: 10px !important;
+    }
+
+    #header-component .header__columns {
+      --header-mobile-bookend: 42px;
       grid-template-columns: 42px 42px 1fr 42px 42px !important;
-      grid-template-areas: 'leftA leftB center rightA rightB' !important;
       column-gap: 0 !important;
-    }
-
-    #header-component .header__column,
-    #header-component .header__column--left,
-    #header-component .header__column--center,
-    #header-component .header__column--right,
-    #header-component header-menu,
-    #header-component header-actions {
-      min-height: 54px !important;
-      height: 54px !important;
-    }
-
-    #header-component .header-logo,
-    #header-component .header-logo a,
-    #header-component .header__heading,
-    #header-component .header__heading-link,
-    #header-component .header__heading-logo-wrapper {
-      height: 44px !important;
-      max-height: 44px !important;
+      align-items: center !important;
     }
 
     #header-component .header-logo img,
     #header-component .header-logo svg,
-    #header-component .header__heading-logo,
-    #header-component .header__heading-logo-wrapper img {
-      max-height: 42px !important;
-      width: auto !important;
+    #header-component .header-logo__image,
+    #header-component .header-logo__image-container img {
+      max-height: 48px !important;
     }
 
     #header-component .header-actions__action,
     #header-component .search-action,
-    #header-component .account-actions,
-    #header-component .cart-action {
+    #header-component .account-actions a,
+    #header-component .cart-icon,
+    #header-component .header__icon {
       min-width: 38px !important;
       min-height: 38px !important;
-      height: 38px !important;
-    }
-
-    #header-component .header__row--mobile {
-      min-height: 0 !important;
-      height: auto !important;
-      overflow-x: auto !important;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    #header-component .header__row--mobile::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
-
-
-
-
-  /* ============================================================
-     Stella & Sage Premium Header — V6 Compact Overflow Menu
-     Purpose:
-     - The theme's desktop overflow button says “More” and opens a huge horizontal panel.
-     - Make that trigger a simple three-line button at all breakpoints.
-     - Constrain any opened overflow/mobile menu into a small rounded card.
-     ============================================================ */
-
-  #header-component .menu-list__list-item[slot='overflow'] {
-    position: relative !important;
-  }
-
-  #header-component .menu-list__list-item[slot='overflow'] > .menu-list__link,
-  #header-component .menu-list__list-item[slot='overflow'] > button.menu-list__link,
-  #header-component .menu-list__list-item[slot='overflow'] > summary.menu-list__link,
-  #header-component .overflow-menu::part(trigger),
-  #header-component .overflow-menu::part(button) {
-    position: relative !important;
-    width: 42px !important;
-    min-width: 42px !important;
-    max-width: 42px !important;
-    height: 42px !important;
-    min-height: 42px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border-radius: 999px !important;
-    background: rgba(255,255,255,.76) !important;
-    border: 1px solid rgba(17,16,14,.08) !important;
-    box-shadow: 0 10px 26px rgba(17,16,14,.055) !important;
-    color: transparent !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  #header-component .menu-list__list-item[slot='overflow'] > .menu-list__link *,
-  #header-component .menu-list__list-item[slot='overflow'] > button.menu-list__link *,
-  #header-component .menu-list__list-item[slot='overflow'] > summary.menu-list__link * {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  #header-component .menu-list__list-item[slot='overflow'] > .menu-list__link::before,
-  #header-component .menu-list__list-item[slot='overflow'] > button.menu-list__link::before,
-  #header-component .menu-list__list-item[slot='overflow'] > summary.menu-list__link::before {
-    content: "" !important;
-    position: absolute !important;
-    left: 50% !important;
-    top: 50% !important;
-    width: 18px !important;
-    height: 2px !important;
-    border-radius: 999px !important;
-    background: #11100e !important;
-    transform: translate(-50%, -50%) !important;
-    box-shadow: 0 -6px 0 #11100e, 0 6px 0 #11100e !important;
-    opacity: .88 !important;
-    visibility: visible !important;
-  }
-
-  /* Compact the actual opened menu. These cover both light-DOM dropdowns and shadow-part popovers. */
-  #header-component .header__row--mobile,
-  #header-component .menu-list__list-item[slot='overflow'] .mega-menu,
-  #header-component .menu-list__list-item[slot='overflow'] .mega-menu__list,
-  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu,
-  #header-component .menu-list__list-item[slot='overflow'] .header__submenu,
-  #header-component .menu-list__list-item[slot='overflow'] [role='menu'],
-  #header-component .menu-list__list-item[slot='overflow'] [popover],
-  #header-component .overflow-menu::part(overflow),
-  #header-component .overflow-menu::part(popover),
-  #header-component .overflow-menu::part(menu),
-  #header-component .overflow-menu::part(overflow-list),
-  #header-component .overflow-menu::part(panel),
-  #header-component .overflow-menu::part(listbox) {
-    width: min(310px, calc(100vw - 28px)) !important;
-    max-width: min(310px, calc(100vw - 28px)) !important;
-    min-width: 0 !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: min(70vh, 500px) !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    border-radius: 26px !important;
-    background:
-      radial-gradient(circle at 18% 0%, rgba(183,163,106,.10), transparent 34%),
-      linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.94)) !important;
-    border: 1px solid rgba(17,16,14,.08) !important;
-    box-shadow: 0 28px 90px rgba(17,16,14,.18) !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
-    padding: 10px !important;
-  }
-
-  /* If Shopify exposes the full mobile row when the menu opens, make it a floating card, not a full-width sheet. */
-  #header-component .header__row--mobile {
-    position: absolute !important;
-    top: calc(100% + 10px) !important;
-    left: 14px !important;
-    right: auto !important;
-    z-index: 9999 !important;
-    margin: 0 !important;
-  }
-
-  #header-component .header__row--mobile:empty {
-    display: none !important;
-  }
-
-  #header-component .header__row--mobile .menu-list,
-  #header-component .header__row--mobile .menu-list__list,
-  #header-component .header__row--mobile ul,
-  #header-component .menu-list__list-item[slot='overflow'] .mega-menu__list,
-  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu,
-  #header-component .menu-list__list-item[slot='overflow'] [role='menu'] {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 4px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    list-style: none !important;
-  }
-
-  #header-component .header__row--mobile a,
-  #header-component .header__row--mobile button,
-  #header-component .menu-list__list-item[slot='overflow'] .mega-menu a,
-  #header-component .menu-list__list-item[slot='overflow'] .mega-menu button,
-  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu a,
-  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu button,
-  #header-component .menu-list__list-item[slot='overflow'] [role='menu'] a,
-  #header-component .menu-list__list-item[slot='overflow'] [role='menu'] button {
-    min-height: 46px !important;
-    height: auto !important;
-    padding: 0 14px !important;
-    border-radius: 16px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    color: #11100e !important;
-    font-size: 15px !important;
-    font-weight: 850 !important;
-    letter-spacing: -0.02em !important;
-    text-decoration: none !important;
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-  }
-
-  #header-component .header__row--mobile a:hover,
-  #header-component .header__row--mobile button:hover,
-  #header-component .menu-list__list-item[slot='overflow'] .mega-menu a:hover,
-  #header-component .menu-list__list-item[slot='overflow'] .mega-menu button:hover,
-  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu a:hover,
-  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu button:hover,
-  #header-component .menu-list__list-item[slot='overflow'] [role='menu'] a:hover,
-  #header-component .menu-list__list-item[slot='overflow'] [role='menu'] button:hover {
-    background: rgba(17,16,14,.045) !important;
-  }
-
-  @media screen and (min-width: 750px) {
-    #header-component .menu-list__list-item[slot='overflow'] .mega-menu,
-    #header-component .menu-list__list-item[slot='overflow'] .mega-menu__list,
-    #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu,
-    #header-component .menu-list__list-item[slot='overflow'] .header__submenu,
-    #header-component .menu-list__list-item[slot='overflow'] [role='menu'],
-    #header-component .menu-list__list-item[slot='overflow'] [popover] {
-      position: absolute !important;
-      top: calc(100% + 10px) !important;
-      left: 0 !important;
-      right: auto !important;
-      z-index: 9999 !important;
     }
   }
 
