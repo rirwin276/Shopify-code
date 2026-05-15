@@ -1,19 +1,19 @@
 {% comment %}
-  LANDING — Apple-style (V11)
-  - Settings-based (no blocks required) — works with existing templates/index.json
-  - Logged-out: Hero → Speed proof → How it works → Final CTA → Marquee
-  - Logged-in: Welcome by name → Store links → Second store CTA → Marquee
-  - All original V9 schema settings preserved (kicker, primary_title, dashboard_image, etc.)
-  - Dashboard image kept in schema but hidden via CSS — re-enable anytime.
-  - "~15 minutes" build time — never "48 hours".
-  - Scroll animations via IntersectionObserver, respects prefers-reduced-motion.
+  LANDING — Stella & Sage Premium Front Page (V12)
+  - Built from existing V11 homepage file.
+  - Keeps existing logged-in customer/store tag logic.
+  - Logged-out: Premium hero → proof bar → pain/solution → process → example stores → dashboard preview → roles → trust/FAQ → final CTA → marquee.
+  - Logged-in: Premium welcome → store links → second store CTA → marquee.
+  - No backend required.
+  - Existing schema IDs preserved so current theme settings keep working.
 {% endcomment %}
 
 {%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
 {%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
 {%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
+{%- assign login_url = routes.account_login_url | default: routes.storefront_login_url -%}
 
-{%- comment -%}Logged-in: parse storefront tags & metaobjects (same logic as portal-router){%- endcomment -%}
+{%- comment -%}Logged-in: parse storefront tags & metaobjects, same core logic as previous homepage.{%- endcomment -%}
 {%- assign has_storefront = false -%}
 {%- assign store_count = 0 -%}
 {%- assign storefront_tags = '' -%}
@@ -40,43 +40,54 @@
   {%- assign store_meta = shop.metaobjects[mo_type].values -%}
 {%- endif -%}
 
-{%- comment -%}Customer display name{%- endcomment -%}
 {%- assign welcome_name = customer.first_name | strip -%}
-{%- if welcome_name == blank -%}
+{%- if welcome_name == blank and customer -%}
   {%- assign welcome_name = customer.email | split: '@' | first -%}
 {%- endif -%}
 
-<section class="ldh" data-ldh id="ldh-{{ section.id }}">
+<section class="ss-home" data-ss-home id="ss-home-{{ section.id }}">
 
   {%- if customer -%}
 
-    {%- comment -%}======= LOGGED-IN VIEW ======={%- endcomment -%}
+    {%- comment -%} =========================
+      LOGGED-IN VIEW
+    ========================== {%- endcomment -%}
 
-    <div class="ldh-section ldh-welcome ldh-reveal">
-      <div class="ldh-wrap">
-        <h1 class="ldh-welcome-h1">{{ section.settings.welcome_prefix | escape }}{{ welcome_name | escape }}.</h1>
-        <p class="ldh-welcome-sub">{{ section.settings.greeting_sub | escape }}</p>
+    <div class="ss-bg-orb ss-bg-orb--one"></div>
+    <div class="ss-bg-orb ss-bg-orb--two"></div>
 
-        <div class="ldh-action-row">
-          {%- if has_storefront -%}
-            {%- assign tags_arr = storefront_tags | split: '||' -%}
-            {%- if store_count == 1 -%}
-              {%- comment -%}Single store — one big primary button{%- endcomment -%}
+    <section class="ss-member-hero ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-member-shell">
+          <div class="ss-eyebrow">
+            <span class="ss-eyebrow-dot"></span>
+            STELLA & SAGE DASHBOARD
+          </div>
+
+          <h1 class="ss-member-title">{{ section.settings.welcome_prefix | escape }}{{ welcome_name | escape }}.</h1>
+          <p class="ss-member-sub">{{ section.settings.greeting_sub | escape }}</p>
+
+          <div class="ss-action-row">
+            {%- if has_storefront -%}
+              {%- assign tags_arr = storefront_tags | split: '||' -%}
               {%- for t in tags_arr -%}
                 {%- if t != blank -%}
                   {%- assign s_handle = t | remove: 'b2b-' | strip -%}
                   {%- assign s_url = '/pages/' | append: s_handle -%}
                   {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
+
                   {%- if store_meta != blank -%}
                     {%- for mo in store_meta -%}
                       {%- assign mo_page = mo.page.value | default: mo.page -%}
                       {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
                       {%- assign mo_h = '' -%}
+
                       {%- if mo_page != blank and mo_page.handle != blank -%}
                         {%- assign mo_h = mo_page.handle | downcase | strip -%}
                       {%- elsif mo_slug != blank -%}
                         {%- assign mo_h = mo_slug | downcase | strip -%}
                       {%- endif -%}
+
                       {%- if mo_h == s_handle -%}
                         {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
                         {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
@@ -85,154 +96,422 @@
                       {%- endif -%}
                     {%- endfor -%}
                   {%- endif -%}
-                  <a class="ldh-pill ldh-pill--primary" href="{{ s_url }}">Open {{ s_name | escape }} →</a>
-                {%- endif -%}
-              {%- endfor -%}
-            {%- else -%}
-              {%- comment -%}Multiple stores — tile row{%- endcomment -%}
-              {%- for t in tags_arr -%}
-                {%- if t != blank -%}
-                  {%- assign s_handle = t | remove: 'b2b-' | strip -%}
-                  {%- assign s_url = '/pages/' | append: s_handle -%}
-                  {%- assign s_name = s_handle | replace: '-', ' ' | capitalize -%}
-                  {%- if store_meta != blank -%}
-                    {%- for mo in store_meta -%}
-                      {%- assign mo_page = mo.page.value | default: mo.page -%}
-                      {%- assign mo_slug = mo.slug.value | default: mo.slug -%}
-                      {%- assign mo_h = '' -%}
-                      {%- if mo_page != blank and mo_page.handle != blank -%}
-                        {%- assign mo_h = mo_page.handle | downcase | strip -%}
-                      {%- elsif mo_slug != blank -%}
-                        {%- assign mo_h = mo_slug | downcase | strip -%}
-                      {%- endif -%}
-                      {%- if mo_h == s_handle -%}
-                        {%- assign mo_name = mo.display_name.value | default: mo.display_name -%}
-                        {%- if mo_name != blank -%}{%- assign s_name = mo_name -%}{%- endif -%}
-                        {%- if mo_page != blank and mo_page.url != blank -%}{%- assign s_url = mo_page.url -%}{%- endif -%}
-                        {%- break -%}
-                      {%- endif -%}
-                    {%- endfor -%}
-                  {%- endif -%}
-                  <a class="ldh-pill ldh-pill--store" href="{{ s_url }}">{{ s_name | escape }} →</a>
+
+                  <a class="ss-pill ss-pill--primary" href="{{ s_url }}">Open {{ s_name | escape }} →</a>
                 {%- endif -%}
               {%- endfor -%}
             {%- endif -%}
-          {%- endif -%}
-          <a class="ldh-pill ldh-pill--secondary" href="{{ dashboard_url }}?stay=1">{{ section.settings.dashboard_label | escape }}</a>
-          <a class="ldh-pill ldh-pill--secondary" href="{{ routes.account_url }}">{{ section.settings.orders_label | escape }}</a>
+
+            <a class="ss-pill ss-pill--glass" href="{{ dashboard_url }}?stay=1">{{ section.settings.dashboard_label | escape }}</a>
+            <a class="ss-pill ss-pill--glass" href="{{ routes.account_url }}">{{ section.settings.orders_label | escape }}</a>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="ldh-section ldh-centered ldh-reveal">
-      <div class="ldh-wrap ldh-wrap--narrow">
-        <h2 class="ldh-h2">{{ section.settings.second_store_headline | escape }}</h2>
-        <p class="ldh-body">{{ section.settings.second_store_body | escape }}</p>
-        <a class="ldh-btn ldh-btn--outline" href="{{ request_url }}">{{ section.settings.second_store_cta | escape }} →</a>
+    <section class="ss-section ss-reveal">
+      <div class="ss-wrap ss-wrap--narrow ss-center">
+        <div class="ss-mini-kicker">CREATE ANOTHER STORE</div>
+        <h2 class="ss-h2">{{ section.settings.second_store_headline | escape }}</h2>
+        <p class="ss-body">{{ section.settings.second_store_body | escape }}</p>
+        <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.second_store_cta | escape }} →</a>
       </div>
-    </div>
+    </section>
 
   {%- else -%}
 
-    {%- comment -%}======= LOGGED-OUT VIEW ======={%- endcomment -%}
+    {%- comment -%} =========================
+      LOGGED-OUT VIEW
+    ========================== {%- endcomment -%}
 
-    {%- comment -%}Hero{%- endcomment -%}
-    <div class="ldh-section ldh-hero ldh-reveal">
-      <div class="ldh-wrap ldh-hero-wrap">
-        <h1 class="ldh-hero-h1">{{ section.settings.hero_headline | newline_to_br }}</h1>
-        <p class="ldh-hero-sub">{{ section.settings.hero_sub | escape }}</p>
-        <div class="ldh-hero-cta-wrap">
-          <a class="ldh-btn ldh-btn--primary" href="{{ request_url }}">{{ section.settings.hero_cta_label | escape }}</a>
-          <a class="ldh-btn ldh-btn--outline ldh-btn--signin" href="{{ routes.storefront_login_url }}?return_to={{ dashboard_url | url_encode }}">{{ section.settings.hero_signin_label | escape }}</a>
-          <p class="ldh-hero-caption">{{ section.settings.hero_caption | escape }}</p>
-        </div>
-      </div>
-    </div>
+    <div class="ss-bg-orb ss-bg-orb--one"></div>
+    <div class="ss-bg-orb ss-bg-orb--two"></div>
 
-    {%- comment -%}Speed proof{%- endcomment -%}
-    <div class="ldh-section ldh-speed ldh-reveal">
-      <div class="ldh-wrap ldh-wrap--narrow ldh-centered-text">
-        <h2 class="ldh-h2">{{ section.settings.speed_headline | escape }}</h2>
-        <p class="ldh-body">{{ section.settings.speed_sub | escape }}</p>
-        <div class="ldh-stats-row">
-          <div class="ldh-stat ldh-reveal" data-delay="0">
-            <div class="ldh-stat-num">{{ section.settings.stat1_num | escape }}</div>
-            <div class="ldh-stat-label">{{ section.settings.stat1_label | escape }}</div>
+    <section class="ss-hero ss-reveal">
+      <div class="ss-wrap ss-hero-grid">
+        <div class="ss-hero-copy">
+          <div class="ss-eyebrow">
+            <span class="ss-eyebrow-dot"></span>
+            VETERAN OWNED · PRIVATE GROUP STORES
           </div>
-          <div class="ldh-stat ldh-reveal" data-delay="80">
-            <div class="ldh-stat-num">{{ section.settings.stat2_num | escape }}</div>
-            <div class="ldh-stat-label">{{ section.settings.stat2_label | escape }}</div>
+
+          <h1 class="ss-hero-title">{{ section.settings.hero_headline | newline_to_br }}</h1>
+          <p class="ss-hero-sub">{{ section.settings.hero_sub | escape }}</p>
+
+          <div class="ss-hero-actions">
+            <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.hero_cta_label | escape }}</a>
+            <a class="ss-btn ss-btn--light" href="{{ login_url }}?return_to={{ dashboard_url | url_encode }}">{{ section.settings.hero_signin_label | escape }}</a>
           </div>
-          <div class="ldh-stat ldh-reveal" data-delay="160">
-            <div class="ldh-stat-num">{{ section.settings.stat3_num | escape }}</div>
-            <div class="ldh-stat-label">{{ section.settings.stat3_label | escape }}</div>
+
+          <div class="ss-hero-proofline">
+            <span>{{ section.settings.hero_caption | escape }}</span>
           </div>
         </div>
-      </div>
-    </div>
 
-    {%- comment -%}How it works{%- endcomment -%}
-    <div class="ldh-section ldh-steps-section ldh-reveal">
-      <div class="ldh-wrap ldh-wrap--medium">
-        <h2 class="ldh-h2">{{ section.settings.steps_headline | escape }}</h2>
-        <div class="ldh-steps">
-          <div class="ldh-step ldh-reveal" data-delay="0">
-            <div class="ldh-step-num">
-              <div class="ldh-step-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-              </div>
-              01
+        <div class="ss-hero-visual ss-reveal" data-delay="120" aria-label="Private store dashboard preview">
+          <div class="ss-device-card">
+            <div class="ss-device-topbar">
+              <span></span><span></span><span></span>
             </div>
-            <div class="ldh-step-body">
-              <strong class="ldh-step-title">{{ section.settings.step1_title | escape }}</strong>
-              <p class="ldh-step-desc">{{ section.settings.step1_desc | escape }}</p>
+
+            <div class="ss-dashboard-preview">
+              <div class="ss-preview-head">
+                <div>
+                  <p>PRIVATE STORE</p>
+                  <h3>Vista Raptors</h3>
+                </div>
+                <div class="ss-live-badge">Live</div>
+              </div>
+
+              <div class="ss-product-strip">
+                <div class="ss-product-card">
+                  <div class="ss-shirt ss-shirt--black">
+                    <div class="ss-shirt-logo">VR</div>
+                  </div>
+                  <p>Team Tee</p>
+                </div>
+
+                <div class="ss-product-card">
+                  <div class="ss-shirt ss-shirt--sand">
+                    <div class="ss-shirt-logo">VR</div>
+                  </div>
+                  <p>Hoodie</p>
+                </div>
+
+                <div class="ss-product-card">
+                  <div class="ss-hat">
+                    <div class="ss-hat-logo">VR</div>
+                  </div>
+                  <p>Hat</p>
+                </div>
+              </div>
+
+              <div class="ss-dashboard-tools">
+                <div class="ss-tool-row">
+                  <span class="ss-tool-icon"></span>
+                  <div>
+                    <strong>Share one link</strong>
+                    <small>Everyone orders direct.</small>
+                  </div>
+                </div>
+                <div class="ss-tool-row">
+                  <span class="ss-tool-icon"></span>
+                  <div>
+                    <strong>Edit placement</strong>
+                    <small>Dial in colors and logo size.</small>
+                  </div>
+                </div>
+                <div class="ss-tool-row">
+                  <span class="ss-tool-icon"></span>
+                  <div>
+                    <strong>Manage products</strong>
+                    <small>Hide, delete, or build more.</small>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="ldh-step ldh-reveal" data-delay="80">
-            <div class="ldh-step-num">
-              <div class="ldh-step-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              </div>
-              02
+
+          <div class="ss-floating-card ss-floating-card--top">
+            <strong>2 min</strong>
+            <span>form</span>
+          </div>
+
+          <div class="ss-floating-card ss-floating-card--bottom">
+            <strong>~15 min</strong>
+            <span>store build</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-proof-bar ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-proof-grid">
+          <div class="ss-proof-item">
+            <strong>{{ section.settings.stat1_num | escape }}</strong>
+            <span>{{ section.settings.stat1_label | escape }}</span>
+          </div>
+          <div class="ss-proof-item">
+            <strong>{{ section.settings.stat2_num | escape }}</strong>
+            <span>{{ section.settings.stat2_label | escape }}</span>
+          </div>
+          <div class="ss-proof-item">
+            <strong>{{ section.settings.stat3_num | escape }}</strong>
+            <span>{{ section.settings.stat3_label | escape }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-pain-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-section-head">
+          <div class="ss-mini-kicker">THE REAL PROBLEM</div>
+          <h2 class="ss-h2">Stop being the unpaid shirt manager.</h2>
+          <p class="ss-body">Group merch should not mean chasing sizes, collecting Venmo payments, tracking spreadsheets, and answering the same text over and over.</p>
+        </div>
+
+        <div class="ss-compare-grid">
+          <div class="ss-compare-card ss-compare-card--old">
+            <div class="ss-card-label">THE OLD WAY</div>
+            <h3>One person gets stuck with everything.</h3>
+            <ul>
+              <li>Collect every size manually</li>
+              <li>Chase payments in Venmo</li>
+              <li>Deal with late orders</li>
+              <li>Track everything in a spreadsheet</li>
+              <li>Handle mistakes yourself</li>
+            </ul>
+          </div>
+
+          <div class="ss-compare-card ss-compare-card--new">
+            <div class="ss-card-label">THE STELLA & SAGE WAY</div>
+            <h3>Create the store. Share the link. You’re done.</h3>
+            <ul>
+              <li>Everyone orders directly</li>
+              <li>No minimums or upfront inventory</li>
+              <li>No size collection</li>
+              <li>No payment chasing</li>
+              <li>Reorder anytime</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-process-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-section-head ss-center">
+          <div class="ss-mini-kicker">HOW IT WORKS</div>
+          <h2 class="ss-h2">{{ section.settings.steps_headline | escape }}</h2>
+          <p class="ss-body">A private merch store without the slow meetings, minimum order pressure, or group chat chaos.</p>
+        </div>
+
+        <div class="ss-steps-grid">
+          <div class="ss-step-card ss-reveal" data-delay="0">
+            <div class="ss-step-num">01</div>
+            <h3>{{ section.settings.step1_title | escape }}</h3>
+            <p>{{ section.settings.step1_desc | escape }}</p>
+          </div>
+
+          <div class="ss-step-card ss-reveal" data-delay="90">
+            <div class="ss-step-num">02</div>
+            <h3>{{ section.settings.step2_title | escape }}</h3>
+            <p>{{ section.settings.step2_desc | escape }}</p>
+          </div>
+
+          <div class="ss-step-card ss-reveal" data-delay="180">
+            <div class="ss-step-num">03</div>
+            <h3>{{ section.settings.step3_title | escape }}</h3>
+            <p>{{ section.settings.step3_desc | escape }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-examples-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-section-head">
+          <div class="ss-mini-kicker">BUILT FOR REAL GROUPS</div>
+          <h2 class="ss-h2">One system. Almost any group.</h2>
+          <p class="ss-body">Teams, units, trips, businesses, fundraisers, families — if people need to order gear without one person managing chaos, it fits.</p>
+        </div>
+
+        <div class="ss-example-grid">
+          <div class="ss-example-card">
+            <div class="ss-example-art ss-example-art--team">
+              <span>RAPTORS</span>
             </div>
-            <div class="ldh-step-body">
-              <strong class="ldh-step-title">{{ section.settings.step2_title | escape }}</strong>
-              <p class="ldh-step-desc">{{ section.settings.step2_desc | escape }}</p>
+            <h3>Youth sports teams</h3>
+            <p>Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey.</p>
+          </div>
+
+          <div class="ss-example-card">
+            <div class="ss-example-art ss-example-art--unit">
+              <span>UNIT</span>
+            </div>
+            <h3>Military & first responders</h3>
+            <p>Private storefronts for units, stations, departments, classes, teams, and special events.</p>
+          </div>
+
+          <div class="ss-example-card">
+            <div class="ss-example-art ss-example-art--trip">
+              <span>TRIP</span>
+            </div>
+            <h3>Trips, parties & reunions</h3>
+            <p>Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events.</p>
+          </div>
+
+          <div class="ss-example-card">
+            <div class="ss-example-art ss-example-art--business">
+              <span>CO.</span>
+            </div>
+            <h3>Small businesses & fundraisers</h3>
+            <p>Simple merch stores without buying boxes of shirts or managing orders by hand.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-dashboard-section ss-reveal">
+      <div class="ss-wrap ss-dashboard-grid">
+        <div>
+          <div class="ss-mini-kicker">YOUR HOME BASE</div>
+          <h2 class="ss-h2">Every store lives in one clean dashboard.</h2>
+          <p class="ss-body">Admins can manage products, edit placement, choose colors, hide items, delete products, build new merch, and share the storefront link. Members just shop.</p>
+
+          <div class="ss-feature-list">
+            <div>
+              <strong>Admin tools</strong>
+              <span>Edit, hide, delete, rebuild, and share.</span>
+            </div>
+            <div>
+              <strong>Member shopping</strong>
+              <span>No confusing admin controls for normal buyers.</span>
+            </div>
+            <div>
+              <strong>Reorder forever</strong>
+              <span>Your group can come back later without starting over.</span>
             </div>
           </div>
-          <div class="ldh-step ldh-reveal" data-delay="160">
-            <div class="ldh-step-num">
-              <div class="ldh-step-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-              </div>
-              03
+        </div>
+
+        <div class="ss-admin-panel" aria-label="Dashboard tools preview">
+          <div class="ss-admin-top">
+            <div>
+              <p>DASHBOARD</p>
+              <h3>My Stores</h3>
             </div>
-            <div class="ldh-step-body">
-              <strong class="ldh-step-title">{{ section.settings.step3_title | escape }}</strong>
-              <p class="ldh-step-desc">{{ section.settings.step3_desc | escape }}</p>
+            <button type="button">Copy Link</button>
+          </div>
+
+          <div class="ss-store-row">
+            <div class="ss-store-dot"></div>
+            <div>
+              <strong>Raptors Football</strong>
+              <span>Live · 12 products</span>
+            </div>
+            <em>Manage</em>
+          </div>
+
+          <div class="ss-store-row">
+            <div class="ss-store-dot ss-store-dot--gold"></div>
+            <div>
+              <strong>Family Reunion</strong>
+              <span>Building · products generating</span>
+            </div>
+            <em>View</em>
+          </div>
+
+          <div class="ss-admin-actions">
+            <span>Edit placement</span>
+            <span>Build new product</span>
+            <span>Hide product</span>
+            <span>Delete product</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-roles-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-section-head ss-center">
+          <div class="ss-mini-kicker">SIMPLE ACCESS</div>
+          <h2 class="ss-h2">Admins manage. Members order.</h2>
+          <p class="ss-body">The store feels simple because each person only sees what they need.</p>
+        </div>
+
+        <div class="ss-role-grid">
+          <div class="ss-role-card">
+            <span>ADMIN</span>
+            <h3>For the person running the store</h3>
+            <p>Create the store, manage products, edit placement, choose colors, and share the link.</p>
+          </div>
+
+          <div class="ss-role-card">
+            <span>MEMBER</span>
+            <h3>For everyone ordering</h3>
+            <p>Open the link, pick a product, choose size and color, checkout, and reorder later.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-section ss-trust-section ss-reveal">
+      <div class="ss-wrap">
+        <div class="ss-trust-shell">
+          <div>
+            <div class="ss-mini-kicker">WHY IT WORKS</div>
+            <h2 class="ss-h2">Built for people who do not have time to manage merch.</h2>
+            <p class="ss-body">Stella & Sage removes the annoying parts of group apparel: collecting sizes, handling payments, placing bulk orders, and being the person everyone texts when they need another shirt.</p>
+          </div>
+
+          <div class="ss-trust-points">
+            <div>
+              <strong>Veteran owned</strong>
+              <span>Built by someone who understands teams, units, and group chaos.</span>
+            </div>
+            <div>
+              <strong>No minimums</strong>
+              <span>People order what they need, when they need it.</span>
+            </div>
+            <div>
+              <strong>No inventory</strong>
+              <span>No boxes of extra shirts sitting in your garage.</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    {%- comment -%}Final CTA{%- endcomment -%}
-    <div class="ldh-section ldh-final ldh-reveal">
-      <div class="ldh-wrap ldh-wrap--narrow ldh-centered-text">
-        <h2 class="ldh-h2 ldh-h2--large">{{ section.settings.final_headline | escape }}</h2>
-        <p class="ldh-body">{{ section.settings.final_sub | escape }}</p>
-        <a class="ldh-btn ldh-btn--primary" href="{{ request_url }}">{{ section.settings.final_cta_label | escape }} →</a>
+    <section class="ss-section ss-faq-section ss-reveal">
+      <div class="ss-wrap ss-wrap--medium">
+        <div class="ss-section-head ss-center">
+          <div class="ss-mini-kicker">FAQ</div>
+          <h2 class="ss-h2">The questions people ask first.</h2>
+        </div>
+
+        <div class="ss-faq-list">
+          <details>
+            <summary>Do I have to collect everyone’s sizes?</summary>
+            <p>No. Everyone orders their own size directly from the private storefront.</p>
+          </details>
+
+          <details>
+            <summary>Is there a minimum order?</summary>
+            <p>No. The whole point is to avoid minimums, bulk order pressure, and upfront inventory.</p>
+          </details>
+
+          <details>
+            <summary>How long does setup take?</summary>
+            <p>The form takes about 2 minutes. The automated store build usually takes about 15 minutes.</p>
+          </details>
+
+          <details>
+            <summary>Can I edit products after the store is built?</summary>
+            <p>Yes. Store admins can manage products, adjust placement, choose colors, hide items, delete products, and build more.</p>
+          </details>
+
+          <details>
+            <summary>Who can use this?</summary>
+            <p>Sports teams, military units, first responders, families, bachelor trips, fundraisers, small businesses, school groups, and almost any group that needs merch.</p>
+          </details>
+        </div>
       </div>
-    </div>
+    </section>
+
+    <section class="ss-final-cta ss-reveal">
+      <div class="ss-wrap ss-wrap--narrow ss-center">
+        <div class="ss-mini-kicker">READY WHEN YOU ARE</div>
+        <h2 class="ss-final-title">{{ section.settings.final_headline | escape }}</h2>
+        <p class="ss-final-sub">{{ section.settings.final_sub | escape }}</p>
+        <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.final_cta_label | escape }} →</a>
+      </div>
+    </section>
 
   {%- endif -%}
 
-  {%- comment -%}
-    Marquee — always visible.
-    Items are intentionally duplicated to create a seamless infinite scroll loop:
-    the CSS animation shifts the track by -50%, revealing the duplicate set,
-    then loops — producing continuous motion without a visible jump.
-  {%- endcomment -%}
   <div class="ss-marquee-wrap">
     <div class="ss-marquee-track">
       <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
@@ -249,6 +528,7 @@
       <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
       <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
       <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
+
       <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
       <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
       <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
@@ -266,12 +546,8 @@
     </div>
   </div>
 
-  {%- comment -%}
-    Dashboard image kept in schema for theme editor compatibility.
-    Hidden via CSS — user can re-enable in theme editor by removing display:none below.
-  {%- endcomment -%}
   {%- if section.settings.dashboard_image != blank -%}
-    <div class="ldh-dashboard-img-hidden" aria-hidden="true">
+    <div class="ss-dashboard-img-hidden" aria-hidden="true">
       <img src="{{ section.settings.dashboard_image | image_url: width: 1400 }}" alt="" loading="lazy" width="{{ section.settings.dashboard_image.width }}" height="{{ section.settings.dashboard_image.height }}">
     </div>
   {%- endif -%}
@@ -279,411 +555,1419 @@
 </section>
 
 <style>
-  /* ===== RESET & BASE ===== */
-  .ldh {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    color: #0b0b0b;
-    background: #fff;
+  /* =========================
+     STELLA & SAGE PREMIUM HOME
+  ========================== */
+
+  .ss-home,
+  .ss-home * {
+    box-sizing: border-box;
+  }
+
+  .ss-home {
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #11100e;
+    background:
+      radial-gradient(circle at 18% 5%, rgba(183, 163, 106, 0.22), transparent 28%),
+      radial-gradient(circle at 80% 8%, rgba(255, 255, 255, 0.85), transparent 22%),
+      linear-gradient(180deg, #f7f2e8 0%, #fffdf8 22%, #ffffff 48%, #faf7ef 100%);
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
-  .ldh-wrap {
-    max-width: 1100px;
+  .ss-wrap {
+    width: min(1180px, calc(100% - 44px));
     margin: 0 auto;
-    padding: 0 24px;
   }
-  .ldh-wrap--narrow { max-width: 680px; }
-  .ldh-wrap--medium { max-width: 860px; }
-  .ldh-centered-text { text-align: center; }
 
-  /* ===== SCROLL REVEAL ===== */
+  .ss-wrap--narrow {
+    max-width: 760px;
+  }
+
+  .ss-wrap--medium {
+    max-width: 920px;
+  }
+
+  .ss-center {
+    text-align: center;
+  }
+
+  .ss-bg-orb {
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    filter: blur(12px);
+    opacity: .55;
+  }
+
+  .ss-bg-orb--one {
+    width: 420px;
+    height: 420px;
+    top: -160px;
+    left: -120px;
+    background: rgba(183, 163, 106, 0.26);
+  }
+
+  .ss-bg-orb--two {
+    width: 520px;
+    height: 520px;
+    top: 240px;
+    right: -220px;
+    background: rgba(14, 14, 14, 0.08);
+  }
+
   @media (prefers-reduced-motion: no-preference) {
-    .ldh-reveal {
+    .ss-reveal {
       opacity: 0;
-      transform: translateY(14px);
-      transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+      transform: translateY(18px);
+      transition: opacity 560ms ease, transform 560ms ease;
     }
-    .ldh-reveal.is-visible {
+
+    .ss-reveal.is-visible {
       opacity: 1;
       transform: translateY(0);
     }
   }
 
-  /* ===== SECTIONS ===== */
-  .ldh-section {
-    padding: 100px 0;
-  }
-  @media (max-width: 600px) {
-    .ldh-section { padding: 60px 0; }
-  }
-
-  /* ===== TYPOGRAPHY ===== */
-  .ldh-h2 {
-    font-size: clamp(28px, 4vw, 52px);
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    line-height: 1.08;
-    margin: 0 0 16px;
-    color: #0b0b0b;
-  }
-  .ldh-h2--large {
-    font-size: clamp(32px, 5vw, 64px);
-  }
-  .ldh-body {
-    font-size: clamp(16px, 2vw, 20px);
-    color: rgba(0,0,0,.6);
-    line-height: 1.6;
-    margin: 0 0 40px;
-    font-weight: 400;
-  }
-
-  /* ===== BUTTONS ===== */
-  .ldh-btn {
-    display: inline-block;
-    padding: 16px 36px;
-    border-radius: 100px;
-    font-weight: 700;
-    font-size: 16px;
-    text-decoration: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    cursor: pointer;
-  }
-  .ldh-btn--primary {
-    background: #0b0b0b;
-    color: #fff;
-    border: 1px solid rgba(183,163,106,.5);
-  }
-  .ldh-btn--primary:hover { opacity: .88; transform: translateY(-1px); }
-  .ldh-btn--outline {
-    background: transparent;
-    color: #0b0b0b;
-    border: 1.5px solid rgba(0,0,0,.25);
-  }
-  .ldh-btn--outline:hover { border-color: #0b0b0b; }
-
-  /* ===== HERO (LOGGED-OUT) ===== */
-  .ldh-hero {
-    padding-top: 140px;
-    padding-bottom: 140px;
-    text-align: center;
-  }
-  @media (max-width: 600px) {
-    .ldh-hero { padding-top: 80px; padding-bottom: 80px; }
-  }
-  .ldh-hero-wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
-  .ldh-hero-h1 {
-    font-size: clamp(48px, 7vw, 96px);
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    line-height: 1.04;
-    margin: 0 0 24px;
-    color: #0b0b0b;
-  }
-  .ldh-hero-sub {
-    font-size: clamp(17px, 2.2vw, 22px);
-    color: rgba(0,0,0,.58);
-    line-height: 1.6;
-    margin: 0 auto 40px;
-    max-width: 560px;
-    font-weight: 400;
-  }
-  .ldh-hero-cta-wrap {
-    display: flex;
-    flex-direction: column;
+  .ss-eyebrow,
+  .ss-mini-kicker {
+    display: inline-flex;
     align-items: center;
-    gap: 14px;
-  }
-  .ldh-hero-caption {
-    font-size: 13px;
-    color: rgba(0,0,0,.42);
-    margin: 0;
-    letter-spacing: 0.01em;
+    gap: 10px;
+    margin-bottom: 18px;
+    color: rgba(17, 16, 14, .58);
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: .14em;
+    text-transform: uppercase;
   }
 
-  /* ===== SPEED PROOF (LOGGED-OUT) ===== */
-  .ldh-speed {
-    background: #faf9f6;
-    border-top: 1px solid rgba(0,0,0,.06);
-    border-bottom: 1px solid rgba(0,0,0,.06);
+  .ss-eyebrow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #b7a36a;
+    box-shadow: 0 0 0 7px rgba(183, 163, 106, .15);
   }
-  .ldh-stats-row {
-    display: flex;
-    gap: 0;
+
+  .ss-h2 {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(34px, 5vw, 68px);
+    line-height: .98;
+    letter-spacing: -.055em;
+    font-weight: 950;
+  }
+
+  .ss-body {
+    margin: 18px 0 0;
+    color: rgba(17, 16, 14, .64);
+    font-size: clamp(16px, 2vw, 21px);
+    line-height: 1.58;
+    font-weight: 450;
+  }
+
+  .ss-section {
+    position: relative;
+    padding: 104px 0;
+  }
+
+  .ss-section-head {
+    max-width: 760px;
+    margin-bottom: 44px;
+  }
+
+  .ss-section-head.ss-center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ss-btn,
+  .ss-pill {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    margin-top: 48px;
-    border: 1px solid rgba(0,0,0,.09);
-    border-radius: 16px;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease,
+      background 180ms ease,
+      border-color 180ms ease,
+      opacity 180ms ease;
+  }
+
+  .ss-btn {
+    min-height: 54px;
+    padding: 0 25px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 850;
+    letter-spacing: -.01em;
+  }
+
+  .ss-btn--dark {
+    color: #fff;
+    background: #11100e;
+    border: 1px solid rgba(183, 163, 106, .55);
+    box-shadow: 0 18px 44px rgba(17, 16, 14, .18);
+  }
+
+  .ss-btn--dark:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 24px 62px rgba(17, 16, 14, .24);
+  }
+
+  .ss-btn--light {
+    color: #11100e;
+    background: rgba(255, 255, 255, .72);
+    border: 1px solid rgba(17, 16, 14, .12);
+    box-shadow: 0 12px 34px rgba(17, 16, 14, .08);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .ss-btn--light:hover {
+    transform: translateY(-2px);
+    border-color: rgba(17, 16, 14, .22);
+  }
+
+  /* HERO */
+
+  .ss-hero {
+    position: relative;
+    padding: 118px 0 86px;
+  }
+
+  .ss-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(360px, .98fr);
+    gap: 56px;
+    align-items: center;
+  }
+
+  .ss-hero-title {
+    max-width: 760px;
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(54px, 8.4vw, 112px);
+    line-height: .9;
+    letter-spacing: -.075em;
+    font-weight: 950;
+  }
+
+  .ss-hero-sub {
+    max-width: 620px;
+    margin: 25px 0 0;
+    color: rgba(17, 16, 14, .66);
+    font-size: clamp(18px, 2.2vw, 23px);
+    line-height: 1.55;
+    font-weight: 450;
+  }
+
+  .ss-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    align-items: center;
+    margin-top: 34px;
+  }
+
+  .ss-hero-proofline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    color: rgba(17, 16, 14, .50);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .ss-hero-proofline::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: rgba(183, 163, 106, .85);
+  }
+
+  .ss-hero-visual {
+    position: relative;
+    min-height: 570px;
+  }
+
+  .ss-device-card {
+    position: relative;
+    width: 100%;
+    border-radius: 34px;
+    padding: 13px;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.85), rgba(255,255,255,.42)),
+      linear-gradient(145deg, rgba(183,163,106,.32), rgba(17,16,14,.06));
+    border: 1px solid rgba(255,255,255,.8);
+    box-shadow:
+      0 45px 120px rgba(17, 16, 14, .20),
+      inset 0 1px 0 rgba(255,255,255,.86);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .ss-device-topbar {
+    height: 44px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ss-device-topbar span {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(17, 16, 14, .18);
+  }
+
+  .ss-dashboard-preview {
+    border-radius: 25px;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(183,163,106,.20), transparent 30%),
+      linear-gradient(180deg, #141311, #070706);
+    color: #fff;
+    min-height: 470px;
     overflow: hidden;
   }
-  .ldh-stat {
-    flex: 1;
-    padding: 40px 24px;
-    border-right: 1px solid rgba(0,0,0,.09);
-    text-align: center;
-  }
-  .ldh-stat:last-child { border-right: none; }
-  .ldh-stat-num {
-    font-size: clamp(36px, 5vw, 56px);
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    color: rgba(183,163,106,1);
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-  .ldh-stat-label {
-    font-size: 13px;
-    color: rgba(0,0,0,.55);
-    font-weight: 500;
-    line-height: 1.4;
-  }
-  @media (max-width: 600px) {
-    .ldh-stats-row {
-      flex-direction: column;
-      border-radius: 12px;
-    }
-    .ldh-stat {
-      border-right: none;
-      border-bottom: 1px solid rgba(0,0,0,.09);
-      padding: 28px 16px;
-    }
-    .ldh-stat:last-child { border-bottom: none; }
+
+  .ss-preview-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
   }
 
-  /* ===== STEPS (LOGGED-OUT) ===== */
-  .ldh-steps-section { background: #fff; }
-  .ldh-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-top: 56px;
+  .ss-preview-head p,
+  .ss-admin-top p {
+    margin: 0 0 6px;
+    color: rgba(255,255,255,.42);
+    font-size: 11px;
+    letter-spacing: .14em;
+    font-weight: 850;
   }
-  .ldh-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 40px;
-    padding: 40px 0;
-    border-bottom: 1px solid rgba(0,0,0,.07);
-  }
-  .ldh-step:last-child { border-bottom: none; }
-  .ldh-step-num {
-    font-size: clamp(56px, 8vw, 96px);
-    font-weight: 900;
-    letter-spacing: -0.04em;
+
+  .ss-preview-head h3,
+  .ss-admin-top h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 30px;
+    letter-spacing: -.04em;
     line-height: 1;
-    color: rgba(183,163,106,.4);
-    flex-shrink: 0;
-    width: 120px;
-    text-align: right;
+  }
+
+  .ss-live-badge {
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: rgba(183, 163, 106, .18);
+    border: 1px solid rgba(183, 163, 106, .35);
+    color: #f2df9b;
+    font-size: 12px;
+    font-weight: 850;
+  }
+
+  .ss-product-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 11px;
+    margin-top: 28px;
+  }
+
+  .ss-product-card {
+    min-height: 156px;
+    padding: 12px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.09);
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
   }
-  .ldh-step-icon {
-    width: 40px;
-    height: 40px;
-    background: rgba(183,163,106,0.12);
-    border-radius: 10px;
+
+  .ss-product-card p {
+    margin: 8px 0 0;
+    color: rgba(255,255,255,.68);
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .ss-shirt {
+    position: relative;
+    width: 74px;
+    height: 90px;
+    margin-top: 4px;
+    border-radius: 20px 20px 15px 15px;
+    clip-path: polygon(20% 0, 35% 8%, 65% 8%, 80% 0, 100% 22%, 84% 38%, 84% 100%, 16% 100%, 16% 38%, 0 22%);
+    box-shadow: inset 0 14px 22px rgba(255,255,255,.06);
+  }
+
+  .ss-shirt--black { background: #111; border: 1px solid rgba(255,255,255,.14); }
+  .ss-shirt--sand { background: #d9c9a5; }
+
+  .ss-shirt-logo,
+  .ss-hat-logo {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #11100e;
+    background: #f4e2a6;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: -.04em;
+  }
+
+  .ss-hat {
+    position: relative;
+    width: 88px;
+    height: 62px;
+    margin-top: 24px;
+    background: #f2f0e9;
+    border-radius: 999px 999px 18px 18px;
+  }
+
+  .ss-hat::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: -10px;
+    height: 18px;
+    border-radius: 999px;
+    background: #11100e;
+  }
+
+  .ss-hat-logo {
+    top: 8px;
+    bottom: auto;
+    width: 28px;
+    height: 28px;
+    font-size: 9px;
+  }
+
+  .ss-dashboard-tools {
+    margin-top: 25px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .ss-tool-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    gap: 12px;
+    padding: 13px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.08);
   }
-  .ldh-step-icon svg {
-    width: 20px;
-    height: 20px;
-    stroke: rgba(183,163,106,1);
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+
+  .ss-tool-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background:
+      linear-gradient(145deg, rgba(183,163,106,.95), rgba(243,222,154,.70));
+    flex: 0 0 auto;
   }
-  .ldh-step-body { padding-top: 8px; flex: 1; }
-  .ldh-step-title {
+
+  .ss-tool-row strong {
     display: block;
-    font-size: clamp(18px, 2.5vw, 24px);
-    font-weight: 700;
-    color: #0b0b0b;
-    margin-bottom: 10px;
-    letter-spacing: -0.01em;
-  }
-  .ldh-step-desc {
-    font-size: clamp(15px, 1.8vw, 18px);
-    color: rgba(0,0,0,.6);
-    line-height: 1.6;
-    margin: 0;
-  }
-  @media (max-width: 600px) {
-    .ldh-step {
-      flex-direction: column;
-      gap: 12px;
-      padding: 32px 0;
-    }
-    .ldh-step-num {
-      font-size: 48px;
-      width: auto;
-      text-align: left;
-      align-items: flex-start;
-      flex-direction: row;
-      align-items: center;
-    }
-  }
-
-  /* ===== FINAL CTA (LOGGED-OUT) ===== */
-  .ldh-final {
-    background: #faf9f6;
-    border-top: 1px solid rgba(0,0,0,.06);
-  }
-  .ldh-final .ldh-h2 { margin-bottom: 20px; }
-
-  /* ===== LOGGED-IN: WELCOME ===== */
-  .ldh-welcome {
-    padding-top: 80px;
-    padding-bottom: 60px;
-    border-bottom: 1px solid rgba(0,0,0,.07);
-  }
-  .ldh-welcome-h1 {
-    font-size: clamp(32px, 5vw, 60px);
-    font-weight: 900;
-    letter-spacing: -0.02em;
+    color: rgba(255,255,255,.92);
+    font-size: 14px;
     line-height: 1.1;
-    margin: 0 0 14px;
-    position: relative;
   }
 
-  /* Gold underline flourish — draws in under the name on scroll-reveal */
-  .ldh-welcome-h1::after {
-    content: '';
+  .ss-tool-row small {
+    display: block;
+    margin-top: 3px;
+    color: rgba(255,255,255,.46);
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .ss-floating-card {
     position: absolute;
+    padding: 15px 17px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.78);
+    border: 1px solid rgba(255,255,255,.88);
+    box-shadow: 0 22px 70px rgba(17,16,14,.16);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .ss-floating-card strong {
+    display: block;
+    color: #11100e;
+    font-size: 26px;
+    letter-spacing: -.055em;
+    line-height: 1;
+  }
+
+  .ss-floating-card span {
+    display: block;
+    margin-top: 4px;
+    color: rgba(17,16,14,.52);
+    font-size: 12px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+
+  .ss-floating-card--top {
+    top: 44px;
+    right: -12px;
+  }
+
+  .ss-floating-card--bottom {
+    left: -18px;
+    bottom: 62px;
+  }
+
+  /* PROOF BAR */
+
+  .ss-proof-bar {
+    padding: 0 0 42px;
+  }
+
+  .ss-proof-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-radius: 28px;
+    overflow: hidden;
+    background: rgba(255,255,255,.68);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 24px 80px rgba(17,16,14,.08);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .ss-proof-item {
+    padding: 30px 24px;
+    border-right: 1px solid rgba(17,16,14,.075);
+    text-align: center;
+  }
+
+  .ss-proof-item:last-child {
+    border-right: 0;
+  }
+
+  .ss-proof-item strong {
+    display: block;
+    color: #b7a36a;
+    font-size: clamp(34px, 4.4vw, 58px);
+    line-height: .92;
+    letter-spacing: -.06em;
+    font-weight: 950;
+  }
+
+  .ss-proof-item span {
+    display: block;
+    margin-top: 8px;
+    color: rgba(17,16,14,.56);
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 750;
+  }
+
+  /* PAIN / SOLUTION */
+
+  .ss-pain-section {
+    background: #fff;
+  }
+
+  .ss-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .ss-compare-card {
+    min-height: 430px;
+    padding: clamp(24px, 4vw, 42px);
+    border-radius: 34px;
+    border: 1px solid rgba(17,16,14,.09);
+    box-shadow: 0 24px 80px rgba(17,16,14,.06);
+  }
+
+  .ss-compare-card--old {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.88), rgba(250,248,243,.96));
+  }
+
+  .ss-compare-card--new {
+    color: #fff;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(183,163,106,.30), transparent 35%),
+      linear-gradient(180deg, #171613, #080807);
+  }
+
+  .ss-card-label {
+    margin-bottom: 22px;
+    color: #b7a36a;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .14em;
+  }
+
+  .ss-compare-card h3 {
+    max-width: 500px;
+    margin: 0 0 24px;
+    font-size: clamp(26px, 3.5vw, 42px);
+    line-height: 1;
+    letter-spacing: -.05em;
+    font-weight: 950;
+  }
+
+  .ss-compare-card--old h3 {
+    color: #11100e;
+  }
+
+  .ss-compare-card ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 13px;
+  }
+
+  .ss-compare-card li {
+    position: relative;
+    padding-left: 30px;
+    color: rgba(17,16,14,.62);
+    font-size: 16px;
+    line-height: 1.35;
+    font-weight: 650;
+  }
+
+  .ss-compare-card--new li {
+    color: rgba(255,255,255,.72);
+  }
+
+  .ss-compare-card li::before {
+    content: "";
+    position: absolute;
+    top: .35em;
     left: 0;
-    bottom: -9px;
-    height: 3px;
-    width: 0%;
-    border-radius: 2px;
-    background: rgba(183,163,106,1);
-    transition: width 700ms ease-out 180ms;
+    width: 17px;
+    height: 17px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.11);
   }
-  .ldh-welcome.is-visible .ldh-welcome-h1::after {
-    width: 56%;
+
+  .ss-compare-card--new li::before {
+    background: #b7a36a;
+    box-shadow: 0 0 0 5px rgba(183,163,106,.15);
   }
-  @media (prefers-reduced-motion: reduce) {
-    .ldh-welcome-h1::after {
-      width: 56%;
-      transition: none;
-    }
+
+  /* PROCESS */
+
+  .ss-process-section {
+    background: #faf7ef;
+    border-top: 1px solid rgba(17,16,14,.06);
+    border-bottom: 1px solid rgba(17,16,14,.06);
   }
-  .ldh-welcome-sub {
-    font-size: clamp(15px, 2vw, 18px);
-    color: rgba(0,0,0,.6);
-    margin: 0 0 32px;
+
+  .ss-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .ss-step-card {
+    min-height: 310px;
+    padding: 28px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.70);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 20px 70px rgba(17,16,14,.055);
+  }
+
+  .ss-step-num {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 42px;
+    border-radius: 18px;
+    color: #11100e;
+    background: rgba(183,163,106,.23);
+    font-size: 14px;
+    font-weight: 950;
+    letter-spacing: -.02em;
+  }
+
+  .ss-step-card h3 {
+    margin: 0;
+    color: #11100e;
+    font-size: 25px;
+    line-height: 1.05;
+    letter-spacing: -.04em;
+    font-weight: 930;
+  }
+
+  .ss-step-card p {
+    margin: 12px 0 0;
+    color: rgba(17,16,14,.61);
+    font-size: 15px;
+    line-height: 1.52;
+    font-weight: 520;
+  }
+
+  /* EXAMPLES */
+
+  .ss-examples-section {
+    background: #fff;
+  }
+
+  .ss-example-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .ss-example-card {
+    padding: 13px;
+    border-radius: 30px;
+    background: #fff;
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 22px 70px rgba(17,16,14,.06);
+  }
+
+  .ss-example-art {
+    height: 178px;
+    border-radius: 22px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .ss-example-art span {
+    color: #fff;
+    font-size: 31px;
+    font-weight: 950;
+    letter-spacing: -.06em;
+    transform: skewX(-7deg);
+    text-shadow: 0 12px 34px rgba(0,0,0,.22);
+  }
+
+  .ss-example-art--team {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255,255,255,.18), transparent 34%),
+      linear-gradient(145deg, #173a7a, #11100e);
+  }
+
+  .ss-example-art--unit {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(183,163,106,.28), transparent 34%),
+      linear-gradient(145deg, #293224, #090a08);
+  }
+
+  .ss-example-art--trip {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255,255,255,.20), transparent 34%),
+      linear-gradient(145deg, #b76d45, #22110c);
+  }
+
+  .ss-example-art--business {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(183,163,106,.26), transparent 34%),
+      linear-gradient(145deg, #242424, #090909);
+  }
+
+  .ss-example-card h3 {
+    margin: 20px 12px 0;
+    color: #11100e;
+    font-size: 19px;
+    line-height: 1.1;
+    letter-spacing: -.03em;
+    font-weight: 920;
+  }
+
+  .ss-example-card p {
+    margin: 9px 12px 16px;
+    color: rgba(17,16,14,.58);
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 520;
+  }
+
+  /* DASHBOARD */
+
+  .ss-dashboard-section {
+    background:
+      radial-gradient(circle at 80% 20%, rgba(183,163,106,.18), transparent 26%),
+      linear-gradient(180deg, #11100e, #070706);
+    color: #fff;
+  }
+
+  .ss-dashboard-section .ss-h2 {
+    color: #fff;
+  }
+
+  .ss-dashboard-section .ss-body {
+    color: rgba(255,255,255,.62);
+  }
+
+  .ss-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(360px, 1fr);
+    gap: 52px;
+    align-items: center;
+  }
+
+  .ss-feature-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 30px;
+  }
+
+  .ss-feature-list div {
+    padding: 17px 18px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.09);
+  }
+
+  .ss-feature-list strong {
+    display: block;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  .ss-feature-list span {
+    display: block;
+    margin-top: 4px;
+    color: rgba(255,255,255,.52);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .ss-admin-panel {
+    padding: 22px;
+    border-radius: 34px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.11);
+    box-shadow: 0 40px 120px rgba(0,0,0,.34);
+  }
+
+  .ss-admin-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .ss-admin-top button {
+    border: 0;
+    border-radius: 999px;
+    padding: 11px 15px;
+    color: #11100e;
+    background: #f4e2a6;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .ss-store-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 16px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.08);
+    margin-bottom: 11px;
+  }
+
+  .ss-store-row strong {
+    display: block;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  .ss-store-row span {
+    display: block;
+    margin-top: 3px;
+    color: rgba(255,255,255,.48);
+    font-size: 12px;
+  }
+
+  .ss-store-row em {
+    margin-left: auto;
+    color: #f4e2a6;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 850;
+  }
+
+  .ss-store-dot {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    background: #244b9b;
+  }
+
+  .ss-store-dot--gold {
+    background: #b7a36a;
+  }
+
+  .ss-admin-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .ss-admin-actions span {
+    padding: 13px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+    color: rgba(255,255,255,.68);
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  /* ROLES */
+
+  .ss-roles-section {
+    background: #faf7ef;
+  }
+
+  .ss-role-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .ss-role-card {
+    padding: clamp(24px, 4vw, 40px);
+    border-radius: 34px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 24px 80px rgba(17,16,14,.055);
+  }
+
+  .ss-role-card span {
+    color: #b7a36a;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .14em;
+  }
+
+  .ss-role-card h3 {
+    margin: 22px 0 0;
+    color: #11100e;
+    font-size: clamp(25px, 3vw, 38px);
+    line-height: 1.02;
+    letter-spacing: -.05em;
+    font-weight: 950;
+  }
+
+  .ss-role-card p {
+    margin: 14px 0 0;
+    color: rgba(17,16,14,.62);
+    font-size: 16px;
+    line-height: 1.52;
+    font-weight: 520;
+  }
+
+  /* TRUST */
+
+  .ss-trust-section {
+    background: #fff;
+  }
+
+  .ss-trust-shell {
+    display: grid;
+    grid-template-columns: minmax(0, .95fr) minmax(320px, .75fr);
+    gap: 42px;
+    align-items: start;
+    padding: clamp(28px, 5vw, 54px);
+    border-radius: 40px;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(183,163,106,.20), transparent 34%),
+      linear-gradient(180deg, #fbf8ef, #fff);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 30px 110px rgba(17,16,14,.075);
+  }
+
+  .ss-trust-points {
+    display: grid;
+    gap: 13px;
+  }
+
+  .ss-trust-points div {
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.78);
+    border: 1px solid rgba(17,16,14,.08);
+  }
+
+  .ss-trust-points strong {
+    display: block;
+    color: #11100e;
+    font-size: 16px;
+    font-weight: 920;
+  }
+
+  .ss-trust-points span {
+    display: block;
+    margin-top: 5px;
+    color: rgba(17,16,14,.58);
+    font-size: 13px;
+    line-height: 1.42;
+  }
+
+  /* FAQ */
+
+  .ss-faq-section {
+    background: #faf7ef;
+    border-top: 1px solid rgba(17,16,14,.06);
+    border-bottom: 1px solid rgba(17,16,14,.06);
+  }
+
+  .ss-faq-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 38px;
+  }
+
+  .ss-faq-list details {
+    border-radius: 22px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.08);
+    overflow: hidden;
+  }
+
+  .ss-faq-list summary {
+    cursor: pointer;
+    padding: 20px 22px;
+    color: #11100e;
+    font-size: 16px;
+    font-weight: 900;
+    list-style: none;
+  }
+
+  .ss-faq-list summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ss-faq-list summary::after {
+    content: "+";
+    float: right;
+    color: #b7a36a;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .ss-faq-list details[open] summary::after {
+    content: "–";
+  }
+
+  .ss-faq-list p {
+    margin: 0;
+    padding: 0 22px 22px;
+    color: rgba(17,16,14,.62);
+    font-size: 15px;
     line-height: 1.5;
   }
-  .ldh-action-row {
+
+  /* FINAL CTA */
+
+  .ss-final-cta {
+    position: relative;
+    padding: 118px 0;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(183,163,106,.26), transparent 32%),
+      linear-gradient(180deg, #fff, #f8f3e8);
+  }
+
+  .ss-final-title {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(42px, 6vw, 82px);
+    line-height: .96;
+    letter-spacing: -.065em;
+    font-weight: 950;
+  }
+
+  .ss-final-sub {
+    margin: 18px auto 30px;
+    max-width: 560px;
+    color: rgba(17,16,14,.62);
+    font-size: clamp(17px, 2vw, 22px);
+    line-height: 1.5;
+    font-weight: 500;
+  }
+
+  /* LOGGED-IN */
+
+  .ss-member-hero {
+    position: relative;
+    padding: 94px 0 74px;
+  }
+
+  .ss-member-shell {
+    padding: clamp(28px, 6vw, 66px);
+    border-radius: 40px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(183,163,106,.24), transparent 28%),
+      linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,255,255,.56));
+    border: 1px solid rgba(255,255,255,.8);
+    box-shadow: 0 34px 120px rgba(17,16,14,.10);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .ss-member-title {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(44px, 7vw, 90px);
+    line-height: .94;
+    letter-spacing: -.065em;
+    font-weight: 950;
+  }
+
+  .ss-member-sub {
+    max-width: 680px;
+    margin: 18px 0 0;
+    color: rgba(17,16,14,.62);
+    font-size: clamp(17px, 2vw, 22px);
+    line-height: 1.5;
+  }
+
+  .ss-action-row {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    align-items: center;
+    margin-top: 32px;
   }
-  .ldh-pill {
-    display: inline-block;
-    padding: 12px 24px;
-    border-radius: 100px;
-    font-weight: 700;
-    font-size: 15px;
-    text-decoration: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    white-space: nowrap;
+
+  .ss-pill {
+    min-height: 46px;
+    padding: 0 19px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 850;
   }
-  .ldh-pill--primary {
-    background: #0b0b0b;
+
+  .ss-pill--primary {
     color: #fff;
-    border: 1px solid rgba(183,163,106,.5);
+    background: #11100e;
+    border: 1px solid rgba(183,163,106,.55);
+    box-shadow: 0 16px 44px rgba(17,16,14,.16);
   }
-  .ldh-pill--primary:hover { opacity: .88; transform: translateY(-1px); }
-  .ldh-pill--store {
-    background: rgba(183,163,106,.12);
-    color: #5a4f2e;
-    border: 1px solid rgba(183,163,106,.4);
-  }
-  .ldh-pill--store:hover { background: rgba(183,163,106,.22); }
-  .ldh-pill--secondary {
-    background: #fff;
-    color: #0b0b0b;
-    border: 1.5px solid rgba(0,0,0,.18);
-  }
-  .ldh-pill--secondary:hover { border-color: #0b0b0b; }
 
-  /* ===== LOGGED-IN: SECOND STORE ===== */
-  .ldh-centered { text-align: center; }
+  .ss-pill--primary:hover,
+  .ss-pill--glass:hover {
+    transform: translateY(-2px);
+  }
 
-  /* ===== MARQUEE ===== */
+  .ss-pill--glass {
+    color: #11100e;
+    background: rgba(255,255,255,.66);
+    border: 1px solid rgba(17,16,14,.12);
+  }
+
+  /* MARQUEE */
+
   .ss-marquee-wrap {
     overflow: hidden;
-    border-top: 1px solid rgba(0,0,0,.06);
-    border-bottom: 1px solid rgba(0,0,0,.06);
-    padding: 14px 0;
-    background: #faf9f6;
+    border-top: 1px solid rgba(17,16,14,.06);
+    border-bottom: 1px solid rgba(17,16,14,.06);
+    padding: 15px 0;
+    background: rgba(255,255,255,.72);
   }
+
   .ss-marquee-track {
     display: flex;
     gap: 0;
-    animation: ssMarquee 28s linear infinite;
+    width: max-content;
+    animation: ssMarquee 30s linear infinite;
     white-space: nowrap;
     will-change: transform;
   }
+
   .ss-marquee-item {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    color: rgba(0,0,0,.5);
-    padding: 0 32px;
+    padding: 0 30px;
+    color: rgba(17,16,14,.52);
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: .11em;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
+
   .ss-marquee-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: rgba(183,163,106,.7);
-    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(183,163,106,.8);
   }
+
   @keyframes ssMarquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .ss-marquee-track { animation: none; }
+
+  .ss-dashboard-img-hidden {
+    display: none;
   }
 
-  /* ===== HIDDEN DASHBOARD IMAGE ===== */
-  /* Dashboard image is kept in the schema for theme editor access.
-     Remove this rule to re-enable it on the live page. */
-  .ldh-dashboard-img-hidden { display: none; }
+  /* RESPONSIVE */
+
+  @media (max-width: 980px) {
+    .ss-hero {
+      padding-top: 78px;
+    }
+
+    .ss-hero-grid,
+    .ss-dashboard-grid,
+    .ss-trust-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .ss-hero-copy {
+      text-align: center;
+    }
+
+    .ss-hero-title,
+    .ss-hero-sub {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .ss-hero-actions,
+    .ss-hero-proofline {
+      justify-content: center;
+    }
+
+    .ss-hero-visual {
+      min-height: auto;
+      max-width: 560px;
+      margin: 12px auto 0;
+    }
+
+    .ss-floating-card--top {
+      right: 10px;
+    }
+
+    .ss-floating-card--bottom {
+      left: 10px;
+      bottom: 34px;
+    }
+
+    .ss-example-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ss-steps-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ss-step-card {
+      min-height: auto;
+    }
+
+    .ss-step-num {
+      margin-bottom: 26px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .ss-wrap {
+      width: min(100% - 32px, 1180px);
+    }
+
+    .ss-section {
+      padding: 74px 0;
+    }
+
+    .ss-hero {
+      padding: 58px 0 46px;
+    }
+
+    .ss-hero-title {
+      font-size: clamp(48px, 14vw, 70px);
+      letter-spacing: -.07em;
+    }
+
+    .ss-hero-sub {
+      font-size: 17px;
+    }
+
+    .ss-hero-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ss-btn {
+      width: 100%;
+    }
+
+    .ss-device-card {
+      border-radius: 28px;
+      padding: 10px;
+    }
+
+    .ss-dashboard-preview {
+      min-height: auto;
+      padding: 18px;
+      border-radius: 22px;
+    }
+
+    .ss-preview-head h3,
+    .ss-admin-top h3 {
+      font-size: 24px;
+    }
+
+    .ss-product-strip {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ss-product-card:nth-child(3) {
+      grid-column: 1 / -1;
+      min-height: 128px;
+    }
+
+    .ss-floating-card {
+      display: none;
+    }
+
+    .ss-proof-grid,
+    .ss-compare-grid,
+    .ss-role-grid,
+    .ss-example-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ss-proof-item {
+      border-right: 0;
+      border-bottom: 1px solid rgba(17,16,14,.075);
+    }
+
+    .ss-proof-item:last-child {
+      border-bottom: 0;
+    }
+
+    .ss-compare-card {
+      min-height: auto;
+    }
+
+    .ss-admin-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .ss-member-hero {
+      padding: 54px 0 48px;
+    }
+
+    .ss-action-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ss-pill {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .ss-hero-title {
+      font-size: 47px;
+    }
+
+    .ss-h2 {
+      font-size: 36px;
+    }
+
+    .ss-final-title {
+      font-size: 42px;
+    }
+
+    .ss-example-art {
+      height: 150px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ss-reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .ss-marquee-track {
+      animation: none;
+    }
+
+    .ss-btn,
+    .ss-pill {
+      transition: none;
+    }
+  }
 </style>
 
 <script>
-(function(){
-  /* ===== SCROLL REVEAL ===== */
+(function() {
+  var root = document.getElementById('ss-home-{{ section.id }}');
+  if (!root) return;
+
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!prefersReducedMotion) {
-    var revealEls = document.querySelectorAll('#ldh-{{ section.id }} .ldh-reveal');
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            var delay = entry.target.getAttribute('data-delay') || 0;
-            setTimeout(function() {
-              entry.target.classList.add('is-visible');
-            }, parseInt(delay, 10));
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1 });
-      revealEls.forEach(function(el) { io.observe(el); });
-    } else {
-      revealEls.forEach(function(el) { el.classList.add('is-visible'); });
-    }
+  var revealEls = root.querySelectorAll('.ss-reveal');
+
+  if (prefersReducedMotion) {
+    revealEls.forEach(function(el) {
+      el.classList.add('is-visible');
+    });
+    return;
+  }
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+
+        var delay = parseInt(entry.target.getAttribute('data-delay') || '0', 10);
+        window.setTimeout(function() {
+          entry.target.classList.add('is-visible');
+        }, delay);
+
+        io.unobserve(entry.target);
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    revealEls.forEach(function(el) {
+      io.observe(el);
+    });
+  } else {
+    revealEls.forEach(function(el) {
+      el.classList.add('is-visible');
+    });
   }
 })();
 </script>
