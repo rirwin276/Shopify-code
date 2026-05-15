@@ -641,31 +641,28 @@
 
 
   /* ============================================================
-     Stella & Sage Premium Header — V3 Balanced Center Fix
+     Stella & Sage Premium Header — V4 Clean Balanced
      Purpose:
-     - Restore true viewport-centered logo.
-     - Keep left nav and right icons pushed to the edges evenly.
-     - Make header row height match logo size with balanced top/bottom padding.
+     - Remove the empty lower header band that was creating bottom padding.
+     - Keep the logo centered in the viewport.
+     - Vertically center nav/menu/actions with the logo.
      - Preserve Shopify menu/search/account/cart logic.
      ============================================================ */
 
   body:has(> #header-group > header) {
-    --header-height: 92px;
+    --header-height: 82px;
   }
 
   #header-component {
-    --ss-header-cream: #fffdf9;
-    --ss-header-cream-2: #fbf8f1;
     --ss-header-ink: #11100e;
-    --ss-header-muted: rgba(17, 16, 14, 0.58);
-    --ss-header-border: rgba(17, 16, 14, 0.075);
+    --ss-header-muted: rgba(17, 16, 14, 0.64);
+    --ss-header-border: rgba(17, 16, 14, 0.065);
     --ss-header-gold: #a9955d;
-
     background:
-      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.055), transparent 30%),
-      linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(255, 255, 255, 0.96));
+      radial-gradient(circle at 50% 0%, rgba(183, 163, 106, 0.045), transparent 32%),
+      linear-gradient(180deg, rgba(255, 253, 249, 0.99), rgba(255, 255, 255, 0.97));
     border-bottom: 1px solid var(--ss-header-border);
-    box-shadow: 0 10px 34px rgba(17, 16, 14, 0.035);
+    box-shadow: 0 8px 26px rgba(17, 16, 14, 0.028);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
   }
@@ -675,39 +672,36 @@
     border-color: var(--ss-header-border) !important;
   }
 
+  /* The bottom desktop row was rendering as an empty band. Hide it unless mobile nav needs its own row. */
+  #header-component .header__row--bottom {
+    display: none !important;
+  }
+
   #header-component .header__row--top {
-    min-height: 92px !important;
-    height: 92px !important;
+    min-height: 82px !important;
+    height: 82px !important;
     display: flex !important;
     align-items: center !important;
+    border-bottom-width: 0 !important;
   }
 
   #header-component .header__row--top .header__columns,
   #header-component .header__row--top .header__columns.spacing-style {
+    position: relative !important;
     width: 100% !important;
     max-width: none !important;
-    min-height: 92px !important;
-    height: 92px !important;
+    min-height: 82px !important;
+    height: 82px !important;
     margin: 0 !important;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-    padding-inline-start: clamp(28px, 3.8vw, 70px) !important;
-    padding-inline-end: clamp(28px, 3.8vw, 70px) !important;
+    padding-block: 0 !important;
+    padding-inline-start: clamp(34px, 3.8vw, 76px) !important;
+    padding-inline-end: clamp(34px, 3.8vw, 76px) !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
     grid-template-areas: 'left center right' !important;
     align-items: center !important;
-    column-gap: clamp(18px, 2.4vw, 42px) !important;
+    column-gap: clamp(16px, 2.4vw, 40px) !important;
     box-sizing: border-box !important;
-  }
-
-  #header-component .header__row--bottom .header__columns,
-  #header-component .header__row--bottom .header__columns.spacing-style {
-    min-height: 40px !important;
-    height: 40px !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    align-items: center !important;
   }
 
   #header-component .spacing-style {
@@ -718,16 +712,19 @@
   #header-component .header__column--left {
     grid-area: left !important;
     justify-content: flex-start !important;
+    align-items: center !important;
   }
 
   #header-component .header__column--center {
     grid-area: center !important;
     justify-content: center !important;
+    align-items: center !important;
   }
 
   #header-component .header__column--right {
     grid-area: right !important;
     justify-content: flex-end !important;
+    align-items: center !important;
   }
 
   #header-component .header__column,
@@ -735,11 +732,26 @@
   #header-component .header__column--center,
   #header-component .header__column--right,
   #header-component header-menu,
-  #header-component header-actions {
-    min-height: 72px !important;
-    height: 72px !important;
+  #header-component header-actions,
+  #header-component .menu-list,
+  #header-component .menu-list__list,
+  #header-component .overflow-menu::part(list) {
+    min-height: 82px !important;
+    height: 82px !important;
+    display: flex !important;
     align-items: center !important;
     align-self: center !important;
+  }
+
+  #header-component .header__column--left header-menu,
+  #header-component .header__column--left .menu-list,
+  #header-component .header__column--left .menu-list__list,
+  #header-component .header__column--left .overflow-menu::part(list) {
+    justify-content: flex-start !important;
+  }
+
+  #header-component .header__column--right header-actions {
+    justify-content: flex-end !important;
   }
 
   #header-component .header-logo,
@@ -751,8 +763,8 @@
     align-items: center !important;
     justify-content: center !important;
     line-height: 0 !important;
-    height: 72px !important;
-    max-height: 72px !important;
+    height: 64px !important;
+    max-height: 64px !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -762,19 +774,26 @@
   #header-component .header__heading-logo,
   #header-component .header__heading-logo-wrapper img {
     display: block !important;
+    max-height: 64px !important;
     height: auto !important;
-    max-height: 70px !important;
     width: auto !important;
     object-fit: contain !important;
     margin: 0 auto !important;
-    filter: drop-shadow(0 8px 16px rgba(17, 16, 14, 0.045));
+    filter: drop-shadow(0 8px 16px rgba(17, 16, 14, 0.035));
   }
 
-  #header-component header-menu,
-  #header-component .menu-list,
-  #header-component .menu-list__list,
-  #header-component .overflow-menu::part(list) {
+  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
+  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link,
+  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link {
+    margin-block: 0 !important;
+    padding-block: 0 !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    display: inline-flex !important;
     align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease !important;
   }
 
   #header-component .menu-list__link,
@@ -783,26 +802,16 @@
   #header-component .menu-list__list-item > button {
     color: rgba(17, 16, 14, 0.78) !important;
     font-size: 15px !important;
-    font-weight: 650 !important;
+    font-weight: 680 !important;
     letter-spacing: -0.018em !important;
     text-decoration: none !important;
+    line-height: 1 !important;
   }
 
   #header-component .menu-list__link:hover,
   #header-component .menu-list__list-item > a:hover,
   #header-component .menu-list__list-item > button:hover {
     color: var(--ss-header-ink) !important;
-  }
-
-  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
-  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link,
-  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link {
-    border-radius: 999px !important;
-    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease !important;
-  }
-
-  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link:hover,
-  #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link:hover {
     background: rgba(17, 16, 14, 0.045) !important;
     transform: translateY(-1px);
   }
@@ -818,6 +827,12 @@
   #header-component .search-action,
   #header-component .account-actions,
   #header-component .cart-action {
+    min-width: 42px !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     border-radius: 999px !important;
   }
 
@@ -851,24 +866,27 @@
 
   @media screen and (max-width: 749px) {
     body:has(> #header-group > header) {
-      --header-height: 56px;
+      --header-height: 54px;
     }
 
     #header-component {
-      box-shadow: 0 8px 26px rgba(17, 16, 14, 0.035);
+      box-shadow: 0 8px 24px rgba(17, 16, 14, 0.032);
+    }
+
+    #header-component .header__row--bottom {
+      display: none !important;
     }
 
     #header-component .header__row--top {
-      min-height: 56px !important;
-      height: 56px !important;
+      min-height: 54px !important;
+      height: 54px !important;
     }
 
     #header-component .header__row--top .header__columns,
     #header-component .header__row--top .header__columns.spacing-style {
-      min-height: 56px !important;
-      height: 56px !important;
-      padding-top: 6px !important;
-      padding-bottom: 6px !important;
+      min-height: 54px !important;
+      height: 54px !important;
+      padding-block: 0 !important;
       padding-inline-start: 10px !important;
       padding-inline-end: 10px !important;
       grid-template-columns: 42px 42px 1fr 42px 42px !important;
@@ -882,8 +900,8 @@
     #header-component .header__column--right,
     #header-component header-menu,
     #header-component header-actions {
-      min-height: 44px !important;
-      height: 44px !important;
+      min-height: 54px !important;
+      height: 54px !important;
     }
 
     #header-component .header-logo,
@@ -909,10 +927,12 @@
     #header-component .cart-action {
       min-width: 38px !important;
       min-height: 38px !important;
+      height: 38px !important;
     }
 
     #header-component .header__row--mobile {
-      min-height: 42px !important;
+      min-height: 0 !important;
+      height: auto !important;
       overflow-x: auto !important;
       -webkit-overflow-scrolling: touch;
     }
