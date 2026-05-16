@@ -1,0 +1,873 @@
+{% comment %}
+  Stella & Sage — About Page Section
+  File: sections/ss-about-page.liquid
+
+  Purpose:
+  - Replaces the old Custom Liquid About page content.
+  - Keeps the story personal and veteran-owned.
+  - Removes SEAL / Naval Special Warfare-specific language.
+  - Premium Apple-style layout with restrained gold accents.
+{% endcomment %}
+
+<section class="ss-about-page" id="ss-about-{{ section.id }}">
+  <div class="ss-about-wrap">
+
+    <header class="ss-about-hero">
+      <div class="ss-about-hero-copy">
+        <div class="ss-about-kicker">Who we are</div>
+
+        <h1 class="ss-about-h1">
+          {{ section.settings.hero_title }}
+        </h1>
+
+        <p class="ss-about-sub">
+          {{ section.settings.hero_subtitle }}
+        </p>
+
+        <div class="ss-about-badges" aria-label="Company highlights">
+          <span class="ss-about-badge ss-about-badge--dark">{{ section.settings.badge_1 }}</span>
+          <span class="ss-about-badge">{{ section.settings.badge_2 }}</span>
+          <span class="ss-about-badge">{{ section.settings.badge_3 }}</span>
+          <span class="ss-about-badge">{{ section.settings.badge_4 }}</span>
+        </div>
+      </div>
+
+      <aside class="ss-about-founder-card" aria-label="Founder note">
+        <div class="ss-founder-top">
+          <div class="ss-founder-avatar">S&amp;S</div>
+          <div class="ss-founder-meta">
+            <strong>Built from the problem</strong>
+            <span>Not from a boardroom</span>
+          </div>
+        </div>
+
+        <div class="ss-founder-quote">
+          The best systems make the hard thing feel obvious.
+        </div>
+
+        <p class="ss-founder-note">
+          Group gear should not require one person to become the cashier, spreadsheet manager, designer, and customer service department.
+        </p>
+
+        <div class="ss-founder-mini">
+          <div>2-minute request form</div>
+          <div>About 15-minute automated build</div>
+          <div>One link for the whole group</div>
+        </div>
+      </aside>
+    </header>
+
+    <section class="ss-about-section">
+      <div class="ss-section-grid">
+        <div class="ss-section-label">The old way</div>
+
+        <div>
+          <h2 class="ss-about-h2">One person always got stuck with everything.</h2>
+
+          <p class="ss-about-copy">
+            The idea for Stella &amp; Sage did not start as a software idea. It started with a simple frustration: every group order seemed to turn one person into the unpaid manager.
+          </p>
+
+          <p class="ss-about-copy">
+            That person collected sizes, collected money, answered texts, chased late people, talked to the printer, fixed mistakes, and handled the reorders. It was accepted as normal because there was not a better system sitting in front of people.
+          </p>
+
+          <div class="ss-quote-block">
+            Group apparel should not require a spreadsheet, a payment app, and a hundred follow-up texts.
+          </div>
+
+          <p class="ss-about-copy">
+            The old way was not broken because people were doing it wrong. It was broken because the process was still manual. Stella &amp; Sage was built to move that workflow into a cleaner, faster, more modern system.
+          </p>
+
+          <div class="ss-story-cards">
+            <div class="ss-story-card">
+              <span>01</span>
+              <h3>No size chasing</h3>
+              <p>Everyone chooses their own size and color when they order.</p>
+            </div>
+
+            <div class="ss-story-card">
+              <span>02</span>
+              <h3>No payment collecting</h3>
+              <p>Members checkout directly. The organizer does not become the bank.</p>
+            </div>
+
+            <div class="ss-story-card">
+              <span>03</span>
+              <h3>No bulk-order chaos</h3>
+              <p>No guessing quantities, storing extra shirts, or managing reorders by hand.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-about-section">
+      <div class="ss-section-grid">
+        <div class="ss-section-label">Why it exists</div>
+
+        <div>
+          <h2 class="ss-about-h2">A better system was overdue.</h2>
+
+          <p class="ss-about-copy">
+            A lot of group merch still runs like it did years ago: collect sizes, collect money, place one big order, and hope nothing goes wrong.
+          </p>
+
+          <p class="ss-about-copy">
+            That made sense when there was no better option. But groups today should be able to launch a private storefront, share one link, and let every member order for themselves.
+          </p>
+
+          <p class="ss-about-copy">
+            The future is simple: <strong>every group gets its own store, every member orders directly, and the organizer gets their time back.</strong>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-about-section">
+      <div class="ss-section-grid">
+        <div class="ss-section-label">The name</div>
+
+        <div>
+          <h2 class="ss-about-h2">The name is personal.</h2>
+
+          <p class="ss-about-copy">
+            Stella and Sage are my daughters’ middle names. I built this company for them, but also around the kind of lesson I want them to grow up seeing.
+          </p>
+
+          <p class="ss-about-copy">
+            When something is frustrating, outdated, or harder than it needs to be, you can either complain about it or build a better way.
+          </p>
+
+          <p class="ss-about-copy">
+            Stella &amp; Sage is built on that idea: simple tools, real usefulness, and enough grit to keep solving the unglamorous problems people deal with every day.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-about-section">
+      <div class="ss-dark-panel">
+        <div class="ss-section-grid">
+          <div class="ss-section-label ss-section-label--dark">What makes it different</div>
+
+          <div>
+            <h2 class="ss-about-h2">This is not just a print shop.</h2>
+
+            <p class="ss-about-copy">
+              A normal print shop sells products. Stella &amp; Sage builds the system around the products.
+            </p>
+
+            <p class="ss-about-copy">
+              The storefront, dashboard, product tools, sharing, reordering, admin access, and member experience all matter because the hard part is not just printing a shirt. The hard part is organizing people.
+            </p>
+
+            <div class="ss-mission-list">
+              <div class="ss-mission-item">
+                <span class="ss-mission-dot"></span>
+                <div>
+                  <strong>2-minute request form</strong>
+                  <span>Tell us the group name, logo, colors, and what kind of store you need.</span>
+                </div>
+              </div>
+
+              <div class="ss-mission-item">
+                <span class="ss-mission-dot"></span>
+                <div>
+                  <strong>About 15-minute automated build</strong>
+                  <span>Your private storefront and branded products are generated for the group.</span>
+                </div>
+              </div>
+
+              <div class="ss-mission-item">
+                <span class="ss-mission-dot"></span>
+                <div>
+                  <strong>One link to share</strong>
+                  <span>Everyone orders directly from the store. No spreadsheet. No Venmo chain.</span>
+                </div>
+              </div>
+
+              <div class="ss-mission-item">
+                <span class="ss-mission-dot"></span>
+                <div>
+                  <strong>Dashboard control</strong>
+                  <span>Admins can manage products, edit placement, hide items, delete products, and build more later.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-about-section">
+      <div class="ss-section-grid">
+        <div class="ss-section-label">The gear</div>
+
+        <div>
+          <h2 class="ss-about-h2">The platform matters. The gear still has to be worth wearing.</h2>
+
+          <p class="ss-about-copy">
+            The system is the big unlock, but the product still matters. We focus on practical, comfortable apparel that works for teams, families, units, businesses, fundraisers, and events.
+          </p>
+
+          <p class="ss-about-copy">
+            Some items are built for premium everyday wear. Some are made for kids, practices, and rough use. The goal is not to overload people with endless choices. The goal is to give every group a clean store with gear that makes sense.
+          </p>
+
+          <div class="ss-values-grid">
+            <div class="ss-value-card">
+              <strong>Comfort first</strong>
+              <p>If people do not want to wear it, it does not belong in the store.</p>
+            </div>
+
+            <div class="ss-value-card">
+              <strong>Simple choices</strong>
+              <p>Enough options to feel custom, not so many that ordering becomes confusing.</p>
+            </div>
+
+            <div class="ss-value-card">
+              <strong>No upfront inventory</strong>
+              <p>Groups should not need boxes of extra shirts sitting in a garage.</p>
+            </div>
+
+            <div class="ss-value-card">
+              <strong>Built to reorder</strong>
+              <p>The store stays organized so people can come back later when they need more.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-about-section ss-about-section--last">
+      <div class="ss-about-final">
+        <h2>Built for the person who used to get stuck with the job.</h2>
+
+        <p>
+          If you have ever collected sizes, chased payments, managed a group order, or answered the same “can I still get one?” text five times, Stella &amp; Sage was built for you.
+        </p>
+
+        <div class="ss-about-actions">
+          <a class="ss-about-btn ss-about-btn--dark" href="{{ section.settings.primary_cta_url }}">
+            {{ section.settings.primary_cta_label }} →
+          </a>
+          <a class="ss-about-btn ss-about-btn--light" href="{{ section.settings.secondary_cta_url }}">
+            {{ section.settings.secondary_cta_label }}
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</section>
+
+<style>
+  #ss-about-{{ section.id }},
+  #ss-about-{{ section.id }} * {
+    box-sizing: border-box;
+  }
+
+  #ss-about-{{ section.id }} {
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #11100e;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(183,163,106,.075), transparent 30%),
+      linear-gradient(180deg, #fbfaf7 0%, #ffffff 42%, #fbfaf7 100%);
+    padding: 78px 20px 96px;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-wrap {
+    width: min(1060px, 100%);
+    margin: 0 auto;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 48px;
+    align-items: center;
+    padding-bottom: 76px;
+    border-bottom: 1px solid rgba(17,16,14,.08);
+  }
+
+  #ss-about-{{ section.id }} .ss-about-kicker,
+  #ss-about-{{ section.id }} .ss-section-label {
+    color: rgba(17,16,14,.50);
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-kicker::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #a9955d;
+    box-shadow: 0 0 0 7px rgba(183,163,106,.08);
+  }
+
+  #ss-about-{{ section.id }} .ss-about-h1 {
+    max-width: 790px;
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: .94;
+    letter-spacing: -.07em;
+    font-weight: 950;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-sub {
+    max-width: 710px;
+    margin: 24px 0 0;
+    color: rgba(17,16,14,.66);
+    font-size: clamp(18px, 2vw, 22px);
+    line-height: 1.55;
+    font-weight: 470;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 30px;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    padding: 0 15px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.09);
+    box-shadow: 0 12px 34px rgba(17,16,14,.06);
+    color: rgba(17,16,14,.78);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-badge--dark {
+    color: #fff;
+    background: #11100e;
+    border-color: rgba(183,163,106,.24);
+  }
+
+  #ss-about-{{ section.id }} .ss-about-founder-card {
+    min-height: auto;
+    border-radius: 38px;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 24% 0%, rgba(183,163,106,.11), transparent 34%),
+      linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.60));
+    border: 1px solid rgba(255,255,255,.84);
+    box-shadow: 0 38px 120px rgba(17,16,14,.12);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    overflow: hidden;
+  }
+
+  #ss-about-{{ section.id }} .ss-founder-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  #ss-about-{{ section.id }} .ss-founder-avatar {
+    width: 62px;
+    height: 62px;
+    border-radius: 22px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background:
+      radial-gradient(circle at 35% 20%, rgba(255,255,255,.25), transparent 36%),
+      linear-gradient(180deg, #1c1b18, #060606);
+    font-size: 18px;
+    font-weight: 950;
+    letter-spacing: -.04em;
+    box-shadow: 0 18px 44px rgba(17,16,14,.18);
+  }
+
+  #ss-about-{{ section.id }} .ss-founder-meta strong {
+    display: block;
+    color: #11100e;
+    font-size: 16px;
+    font-weight: 950;
+    letter-spacing: -.02em;
+  }
+
+  #ss-about-{{ section.id }} .ss-founder-meta span {
+    display: block;
+    margin-top: 3px;
+    color: rgba(17,16,14,.52);
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+
+  #ss-about-{{ section.id }} .ss-founder-quote {
+    margin: 48px 0 0;
+    color: #11100e;
+    font-size: 28px;
+    line-height: 1.08;
+    letter-spacing: -.05em;
+    font-weight: 940;
+  }
+
+  #ss-about-{{ section.id }} .ss-founder-note {
+    margin: 18px 0 0;
+    color: rgba(17,16,14,.58);
+    font-size: 15px;
+    line-height: 1.55;
+    font-weight: 520;
+  }
+
+  #ss-about-{{ section.id }} .ss-founder-mini {
+    position: static;
+    margin-top: 24px;
+    display: grid;
+    gap: 10px;
+  }
+
+  #ss-about-{{ section.id }} .ss-founder-mini div {
+    padding: 13px 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.66);
+    border: 1px solid rgba(17,16,14,.07);
+    color: rgba(17,16,14,.66);
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 740;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-section {
+    padding: 84px 0;
+    border-bottom: 1px solid rgba(17,16,14,.08);
+  }
+
+  #ss-about-{{ section.id }} .ss-about-section--last {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  #ss-about-{{ section.id }} .ss-section-grid {
+    display: grid;
+    grid-template-columns: 330px minmax(0, 1fr);
+    gap: 62px;
+    align-items: start;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-h2 {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(34px, 4.6vw, 62px);
+    line-height: .98;
+    letter-spacing: -.058em;
+    font-weight: 950;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-copy {
+    margin: 22px 0 0;
+    color: rgba(17,16,14,.66);
+    font-size: 18px;
+    line-height: 1.7;
+    font-weight: 470;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-copy strong {
+    color: #11100e;
+    font-weight: 850;
+  }
+
+  #ss-about-{{ section.id }} .ss-quote-block {
+    margin: 30px 0;
+    padding: 24px 28px;
+    border-left: 4px solid #11100e;
+    border-radius: 0 22px 22px 0;
+    background: rgba(17,16,14,.035);
+    color: rgba(17,16,14,.72);
+    font-size: 18px;
+    line-height: 1.62;
+    font-style: italic;
+    font-weight: 560;
+  }
+
+  #ss-about-{{ section.id }} .ss-story-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 34px;
+  }
+
+  #ss-about-{{ section.id }} .ss-story-card {
+    min-height: 230px;
+    padding: 24px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 24px 80px rgba(17,16,14,.055);
+  }
+
+  #ss-about-{{ section.id }} .ss-story-card span {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 32px;
+    border-radius: 17px;
+    background: rgba(183,163,106,.10);
+    color: #11100e;
+    font-size: 14px;
+    font-weight: 950;
+  }
+
+  #ss-about-{{ section.id }} .ss-story-card h3 {
+    margin: 0;
+    color: #11100e;
+    font-size: 20px;
+    line-height: 1.08;
+    letter-spacing: -.04em;
+    font-weight: 950;
+  }
+
+  #ss-about-{{ section.id }} .ss-story-card p {
+    margin: 10px 0 0;
+    color: rgba(17,16,14,.60);
+    font-size: 14px;
+    line-height: 1.48;
+    font-weight: 520;
+  }
+
+  #ss-about-{{ section.id }} .ss-dark-panel {
+    padding: clamp(30px, 5vw, 58px);
+    border-radius: 40px;
+    background:
+      radial-gradient(circle at 14% 0%, rgba(183,163,106,.10), transparent 36%),
+      linear-gradient(180deg, #151410, #070706);
+    color: #fff;
+    box-shadow: 0 40px 130px rgba(17,16,14,.20);
+  }
+
+  #ss-about-{{ section.id }} .ss-dark-panel .ss-about-h2 {
+    color: #fff;
+  }
+
+  #ss-about-{{ section.id }} .ss-dark-panel .ss-about-copy {
+    color: rgba(255,255,255,.64);
+  }
+
+  #ss-about-{{ section.id }} .ss-dark-panel .ss-about-copy strong {
+    color: #fff;
+  }
+
+  #ss-about-{{ section.id }} .ss-section-label--dark {
+    color: rgba(255,255,255,.48);
+  }
+
+  #ss-about-{{ section.id }} .ss-mission-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  #ss-about-{{ section.id }} .ss-mission-item {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.09);
+  }
+
+  #ss-about-{{ section.id }} .ss-mission-dot {
+    width: 11px;
+    height: 11px;
+    margin-top: 5px;
+    border-radius: 999px;
+    background: #a9955d;
+    box-shadow: 0 0 0 5px rgba(183,163,106,.08);
+    flex: 0 0 auto;
+  }
+
+  #ss-about-{{ section.id }} .ss-mission-item strong {
+    display: block;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+  }
+
+  #ss-about-{{ section.id }} .ss-mission-item span {
+    display: block;
+    margin-top: 4px;
+    color: rgba(255,255,255,.54);
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 520;
+  }
+
+  #ss-about-{{ section.id }} .ss-values-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 34px;
+  }
+
+  #ss-about-{{ section.id }} .ss-value-card {
+    padding: 22px;
+    border-radius: 26px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.08);
+  }
+
+  #ss-about-{{ section.id }} .ss-value-card strong {
+    display: block;
+    color: #11100e;
+    font-size: 17px;
+    font-weight: 930;
+    letter-spacing: -.025em;
+  }
+
+  #ss-about-{{ section.id }} .ss-value-card p {
+    margin: 8px 0 0;
+    color: rgba(17,16,14,.60);
+    font-size: 14px;
+    line-height: 1.48;
+    font-weight: 520;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-final {
+    text-align: center;
+    padding: 88px 20px;
+    border-radius: 42px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(183,163,106,.09), transparent 34%),
+      linear-gradient(180deg, #fff, #fbf8f1);
+    border: 1px solid rgba(17,16,14,.07);
+    box-shadow: 0 30px 100px rgba(17,16,14,.065);
+  }
+
+  #ss-about-{{ section.id }} .ss-about-final h2 {
+    max-width: 800px;
+    margin: 0 auto;
+    color: #11100e;
+    font-size: clamp(40px, 5.5vw, 76px);
+    line-height: .96;
+    letter-spacing: -.065em;
+    font-weight: 950;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-final p {
+    max-width: 660px;
+    margin: 20px auto 0;
+    color: rgba(17,16,14,.62);
+    font-size: 18px;
+    line-height: 1.6;
+    font-weight: 500;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-btn {
+    min-height: 54px;
+    padding: 0 25px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 900;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-btn--dark {
+    color: #fff;
+    background: #11100e;
+    border: 1px solid rgba(183,163,106,.24);
+    box-shadow: 0 18px 44px rgba(17,16,14,.18);
+  }
+
+  #ss-about-{{ section.id }} .ss-about-btn--light {
+    color: #11100e;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.12);
+    box-shadow: 0 12px 34px rgba(17,16,14,.08);
+  }
+
+  #ss-about-{{ section.id }} .ss-about-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 900px) {
+    #ss-about-{{ section.id }} {
+      padding-top: 54px;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-hero,
+    #ss-about-{{ section.id }} .ss-section-grid {
+      grid-template-columns: 1fr;
+      gap: 34px;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-founder-card {
+      max-width: 520px;
+      width: 100%;
+    }
+
+    #ss-about-{{ section.id }} .ss-story-cards,
+    #ss-about-{{ section.id }} .ss-values-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-section {
+      padding: 66px 0;
+    }
+  }
+
+  @media (max-width: 560px) {
+    #ss-about-{{ section.id }} {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-h1 {
+      font-size: 47px;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-sub,
+    #ss-about-{{ section.id }} .ss-about-copy {
+      font-size: 16px;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-badges {
+      gap: 8px;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-badge {
+      width: 100%;
+      justify-content: center;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-founder-card {
+      border-radius: 30px;
+      padding: 20px;
+    }
+
+    #ss-about-{{ section.id }} .ss-founder-quote {
+      font-size: 24px;
+      margin-top: 34px;
+    }
+
+    #ss-about-{{ section.id }} .ss-dark-panel,
+    #ss-about-{{ section.id }} .ss-about-final {
+      border-radius: 30px;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-actions {
+      flex-direction: column;
+    }
+
+    #ss-about-{{ section.id }} .ss-about-btn {
+      width: 100%;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "SS About Page",
+  "settings": [
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Hero title",
+      "default": "Built to end the clipboard era."
+    },
+    {
+      "type": "textarea",
+      "id": "hero_subtitle",
+      "label": "Hero subtitle",
+      "default": "Stella & Sage is a veteran-owned platform built to make group apparel simple: no spreadsheets, no payment chasing, no size tallying, and no one stuck managing the whole order by hand."
+    },
+    {
+      "type": "text",
+      "id": "badge_1",
+      "label": "Badge 1",
+      "default": "Veteran Owned"
+    },
+    {
+      "type": "text",
+      "id": "badge_2",
+      "label": "Badge 2",
+      "default": "Est. 2024"
+    },
+    {
+      "type": "text",
+      "id": "badge_3",
+      "label": "Badge 3",
+      "default": "Family Built"
+    },
+    {
+      "type": "text",
+      "id": "badge_4",
+      "label": "Badge 4",
+      "default": "Modern Group Stores"
+    },
+    {
+      "type": "text",
+      "id": "primary_cta_label",
+      "label": "Primary CTA label",
+      "default": "Start a storefront"
+    },
+    {
+      "type": "text",
+      "id": "primary_cta_url",
+      "label": "Primary CTA URL",
+      "default": "/pages/private-storefronts"
+    },
+    {
+      "type": "text",
+      "id": "secondary_cta_label",
+      "label": "Secondary CTA label",
+      "default": "Go to dashboard"
+    },
+    {
+      "type": "text",
+      "id": "secondary_cta_url",
+      "label": "Secondary CTA URL",
+      "default": "/pages/portal"
+    }
+  ],
+  "presets": [
+    {
+      "name": "SS About Page"
+    }
+  ]
+}
+{% endschema %}

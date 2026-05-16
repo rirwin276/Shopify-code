@@ -1,9 +1,10 @@
 {% comment %}
-  EXPLAINER PAGE — "DOWN & DIRTY" PROFESSIONAL
-  Focus: Solving the hassle of group orders.
-  - Logic: Smart "Request" button.
-  - If Logged In: Goes straight to Form.
-  - If Logged Out: Goes to Login -> Then automatically redirects to Form.
+  EXPLAINER PAGE — STELLA & SAGE PREMIUM HOW IT WORKS
+  Purpose: Public explanation page for /pages/private-storefronts.
+  Keeps smart request button logic:
+  - Logged in: goes straight to request form.
+  - Logged out: goes to login, then returns to request form.
+  Correct promise: 2-minute form + about 15-minute automated build.
 {% endcomment %}
 
 {% assign form_page_url = '/pages/request-storefront-form' %}
@@ -17,117 +18,291 @@
   {%- assign request_cta_url = routes.storefront_login_url | append: '?return_to=' | append: encoded_return -%}
 {%- endif -%}
 
-{{ 'ss-wow.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
 <section class="ssx" data-ss-exp>
+  <div class="ssx-orb ssx-orb--one" aria-hidden="true"></div>
+  <div class="ssx-orb ssx-orb--two" aria-hidden="true"></div>
+
   <div class="ssx-wrap">
 
-    <header class="ssx-hero ss-reveal">
-      <div class="ssx-heroContent">
-        <h1 class="ssx-h1">{{ section.settings.title }}</h1>
-        <p class="ssx-sub">{{ section.settings.subtitle }}</p>
+    <header class="ssx-hero ssx-reveal">
+      <div class="ssx-hero-copy">
+        <div class="ssx-eyebrow"><span></span>PRIVATE GROUP STOREFRONTS</div>
+        <h1 class="ssx-h1">Private storefronts for teams, units, trips, and groups.</h1>
+        <p class="ssx-sub">Fill out a 2-minute form. Stella &amp; Sage builds your private merch store in about 15 minutes. Share one link, and everyone orders their own gear directly.</p>
 
         <div class="ssx-actions">
-          <a class="ssx-btn ssx-btn--solid" href="{{ request_cta_url }}">{{ section.settings.btn_request | escape }}</a>
-          <a class="ssx-btn ssx-btn--ghost" href="{{ dashboard_url }}">{{ section.settings.btn_back | escape }}</a>
+          <a class="ssx-btn ssx-btn--solid" href="{{ request_cta_url }}">Start a storefront →</a>
+          <a class="ssx-btn ssx-btn--ghost" href="{{ dashboard_url }}">Back to Dashboard</a>
+        </div>
+
+        <div class="ssx-proofline">No minimums · No inventory · No Venmo chasing · No size spreadsheets</div>
+      </div>
+
+      <div class="ssx-hero-card" aria-label="Private storefront preview">
+        <div class="ssx-device-top"><i></i><i></i><i></i></div>
+        <div class="ssx-preview-head">
+          <div>
+            <small>PRIVATE STORE</small>
+            <strong>Raptors Football</strong>
+          </div>
+          <span>Live</span>
+        </div>
+        <div class="ssx-preview-products">
+          <div class="ssx-preview-product">
+            <div class="ssx-shirt ssx-shirt--black"><b>RF</b></div>
+            <p>Team Tee</p>
+          </div>
+          <div class="ssx-preview-product">
+            <div class="ssx-shirt ssx-shirt--cream"><b>RF</b></div>
+            <p>Hoodie</p>
+          </div>
+          <div class="ssx-preview-product">
+            <div class="ssx-hat"><b>RF</b></div>
+            <p>Hat</p>
+          </div>
+        </div>
+        <div class="ssx-preview-rows">
+          <div><span></span><p><strong>Share one link</strong><em>Everyone orders direct.</em></p></div>
+          <div><span></span><p><strong>Admin dashboard</strong><em>Edit, hide, delete, and build more.</em></p></div>
+          <div><span></span><p><strong>No middleman</strong><em>No chasing sizes or payments.</em></p></div>
         </div>
       </div>
     </header>
 
-    <section class="ssx-sec ssx-problem">
-      <div class="ssx-grid50">
-        <div class="ssx-textBox ss-reveal ss-reveal--left">
-          <div class="ssx-kicker">The Problem</div>
-          <h2 class="ssx-h2">{{ section.settings.problem_title }}</h2>
-          <p class="ssx-lead">{{ section.settings.problem_text }}</p>
-          <ul class="ssx-checkList">
-            <li>Your store goes live in under 2 minutes — no waiting.</li>
-            <li>Share one link. Your team picks their size and pays online.</li>
-            <li>No more chasing people for Venmo payments.</li>
-            <li>No more tallying sizes in spreadsheets.</li>
-            <li>No minimums. No upfront inventory. Ships directly to each person.</li>
+    <section class="ssx-sec ssx-compare ssx-reveal">
+      <div class="ssx-sec-head">
+        <div class="ssx-kicker">The Problem</div>
+        <h2 class="ssx-h2">Stop being the unpaid merch manager.</h2>
+        <p class="ssx-lead">Group gear sounds simple until one person gets stuck collecting sizes, chasing payments, managing spreadsheets, answering texts, placing the order, and fixing mistakes. Stella &amp; Sage removes you from the middle of the transaction.</p>
+      </div>
+
+      <div class="ssx-compare-grid">
+        <article class="ssx-compare-card ssx-compare-card--old">
+          <div class="ssx-card-label">THE OLD WAY</div>
+          <h3>One person gets stuck doing the work.</h3>
+          <ul>
+            <li>Collect everyone’s size</li>
+            <li>Chase Venmo or cash payments</li>
+            <li>Track orders in a spreadsheet</li>
+            <li>Handle late people and last-minute changes</li>
+            <li>Risk ordering the wrong sizes</li>
+            <li>Store extra shirts or inventory</li>
+            <li>Become the person everyone texts for reorders</li>
           </ul>
-          <div class="ssx-productline">
-            <strong>Available products:</strong> T-shirts, hoodies, hats, long-sleeves &amp; more — all print-on-demand, DTF-ready.
-          </div>
+        </article>
+
+        <article class="ssx-compare-card ssx-compare-card--new">
+          <div class="ssx-card-label">THE STELLA &amp; SAGE WAY</div>
+          <h3>Create the store. Share the link. You’re done.</h3>
+          <ul>
+            <li>Create the store</li>
+            <li>Share one link</li>
+            <li>Everyone chooses their own size and color</li>
+            <li>Everyone pays online</li>
+            <li>Products ship directly</li>
+            <li>No minimums</li>
+            <li>People can reorder later</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="ssx-sec ssx-process ssx-reveal">
+      <div class="ssx-sec-head ssx-center">
+        <div class="ssx-kicker">How It Works</div>
+        <h2 class="ssx-h2">Two minutes to request. About fifteen to build.</h2>
+        <p class="ssx-lead">A private merch store without slow meetings, minimum order pressure, or group chat chaos.</p>
+      </div>
+
+      <div class="ssx-steps4">
+        <article class="ssx-step ssx-reveal" data-delay="0">
+          <div class="ssx-step-num">01</div>
+          <h3>Tell us about your group</h3>
+          <p>Submit your group name, logo, colors, and a few basic details. The form takes about 2 minutes.</p>
+        </article>
+
+        <article class="ssx-step ssx-reveal" data-delay="80">
+          <div class="ssx-step-num">02</div>
+          <h3>We build the store</h3>
+          <p>Stella &amp; Sage automatically prepares your private storefront and creates branded products with your logo. Most stores are ready in about 15 minutes.</p>
+        </article>
+
+        <article class="ssx-step ssx-reveal" data-delay="160">
+          <div class="ssx-step-num">03</div>
+          <h3>Share the link</h3>
+          <p>Once the store is live, send one link to your team, unit, family, business, or event group. Members order directly from the store.</p>
+        </article>
+
+        <article class="ssx-step ssx-reveal" data-delay="240">
+          <div class="ssx-step-num">04</div>
+          <h3>Manage it anytime</h3>
+          <p>Admins can return to the dashboard to view products, adjust placement, choose colors, hide products, delete products, or build more merch later.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="ssx-sec ssx-dashboard ssx-reveal">
+      <div class="ssx-dashboard-grid">
+        <div class="ssx-dashboard-copy">
+          <div class="ssx-kicker">Built-in Dashboard</div>
+          <h2 class="ssx-h2">Your store gets a home base.</h2>
+          <p class="ssx-lead">Every storefront you create or join lives in your dashboard. Admins get management tools. Members get a clean shopping experience.</p>
+          <div class="ssx-mini-note">Admins manage. Members shop. Nobody gets confused.</div>
         </div>
-        <div class="ssx-cardBox ss-reveal ss-reveal--right">
-          <div class="ssx-quoteCard">
-            "Finally, I can stop being the unpaid 'T-Shirt Guy' for my unit."
+
+        <div class="ssx-dashboard-panel">
+          <div class="ssx-panel-top">
+            <div>
+              <small>DASHBOARD</small>
+              <strong>Store Controls</strong>
+            </div>
+            <span>Admin</span>
           </div>
-          <div class="ssx-quoteCard">
-            "The Team Mom retired. Parents order their own gear now."
+          <div class="ssx-panel-grid">
+            <div>Edit logo placement</div>
+            <div>Adjust colors</div>
+            <div>Hide products</div>
+            <div>Delete products</div>
+            <div>Build more merch</div>
+            <div>Copy share link</div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="ssx-sec">
-      <div class="ssx-secHead">
-        <h2 class="ssx-h2 center-text">Streamlined Process</h2>
+    <section class="ssx-sec ssx-access ssx-reveal">
+      <div class="ssx-sec-head ssx-center">
+        <div class="ssx-kicker">Store Access</div>
+        <h2 class="ssx-h2">You control who gets in.</h2>
+        <p class="ssx-lead">Private storefronts can be shared in the way that fits your group. Keep it tighter with email invites, or make it easy by sharing a direct link with your group chat.</p>
       </div>
 
-      <div class="ssx-steps3">
-        <div class="ssx-step ss-reveal" data-stagger="true">
-          <div class="ssx-stepNum">01</div>
-          <div class="ssx-stepContent">
-            <h3 class="ssx-h3">Request It</h3>
-            <p>Fill out a simple form. Submit your logo. We set up the backend structure for you.</p>
+      <div class="ssx-access-grid">
+        <article class="ssx-access-card">
+          <div class="ssx-access-icon">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
+          <h3>Invite by email</h3>
+          <p>Best for units, organizations, teams, or private groups that want tighter access control.</p>
+        </article>
+
+        <article class="ssx-access-card">
+          <div class="ssx-access-icon">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <h3>Share a direct link</h3>
+          <p>Best for sports teams, family trips, bachelor parties, fundraisers, and casual groups where easy access matters most.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="ssx-sec ssx-for ssx-reveal">
+      <div class="ssx-sec-head">
+        <div class="ssx-kicker">Built for Real Groups</div>
+        <h2 class="ssx-h2">If people need gear, this makes it easier.</h2>
+        <p class="ssx-lead">If you have a group chat and people need shirts, hats, hoodies, or team gear, this is what Stella &amp; Sage was built for.</p>
+      </div>
+
+      <div class="ssx-chip-grid" aria-label="Example group types">
+        <span>Youth sports teams</span>
+        <span>Travel ball teams</span>
+        <span>Military units</span>
+        <span>First responders</span>
+        <span>Police &amp; fire departments</span>
+        <span>Family reunions</span>
+        <span>Bachelor trips</span>
+        <span>School groups</span>
+        <span>Small businesses</span>
+        <span>Fundraisers</span>
+        <span>Gyms &amp; clubs</span>
+        <span>Fantasy leagues</span>
+      </div>
+    </section>
+
+    <section class="ssx-sec ssx-ordering ssx-reveal">
+      <div class="ssx-ordering-card">
+        <div>
+          <div class="ssx-kicker">Ordering</div>
+          <h2 class="ssx-h2">No bulk order required.</h2>
+          <p class="ssx-lead">Members order what they want, when they want it. You do not need to guess quantities, collect money, or hold inventory.</p>
         </div>
-        <div class="ssx-step ss-reveal" data-stagger="true">
-          <div class="ssx-stepNum">02</div>
-          <div class="ssx-stepContent">
-            <h3 class="ssx-h3">We Build It</h3>
-            <p>We create a private store with your branded gear in under 2 minutes. No inventory risk. No setup stress.</p>
-          </div>
+        <div class="ssx-order-list">
+          <span>No minimum order</span>
+          <span>No upfront inventory</span>
+          <span>No bulk-size guessing</span>
+          <span>Direct online checkout</span>
+          <span>Products ship directly</span>
+          <span>Reorder later</span>
         </div>
-        <div class="ssx-step ss-reveal" data-stagger="true">
-          <div class="ssx-stepNum">03</div>
-          <div class="ssx-stepContent">
-            <h3 class="ssx-h3">You Invite</h3>
-            <p>Send one link. Members click it, choose their size, pay online, and it ships directly to their door.</p>
-          </div>
+        <p class="ssx-product-note">Available products can include shirts, hoodies, hats, long sleeves, and more depending on the store setup.</p>
+      </div>
+    </section>
+
+    <section class="ssx-sec ssx-trust ssx-reveal">
+      <div class="ssx-trust-shell">
+        <div>
+          <div class="ssx-kicker">Veteran Owned &amp; Operated</div>
+          <h2 class="ssx-h2">Built for people who know group chaos.</h2>
+          <p class="ssx-lead">Stella &amp; Sage was built to make group apparel easier for real teams, units, families, businesses, and events. The goal is simple: remove the middleman work and give every group a clean private store they can use anytime.</p>
+        </div>
+        <div class="ssx-trust-points">
+          <div><strong>Veteran owned</strong><span>Built by someone who understands teams, units, and group chaos.</span></div>
+          <div><strong>No minimums</strong><span>Members order individually without bulk order pressure.</span></div>
+          <div><strong>No upfront inventory</strong><span>No boxes of extra shirts sitting in your garage.</span></div>
+          <div><strong>Admin + member access</strong><span>Store admins manage. Members shop.</span></div>
         </div>
       </div>
     </section>
 
-    <section class="ssx-sec ssx-access">
-      <div class="ssx-grid50">
-        <div class="ssx-textBox ss-reveal ss-reveal--left">
-          <div class="ssx-kicker">Security & Access</div>
-          <h2 class="ssx-h2">{{ section.settings.access_title }}</h2>
-          <p class="ssx-lead">{{ section.settings.access_text }}</p>
-        </div>
-        <div class="ssx-accessOptions ss-reveal ss-reveal--right">
-          <div class="ssx-opt">
-            <div class="ssx-optIcon">
-              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </div>
-            <div class="ssx-optBody">
-              <strong>Secure Invite (Email)</strong>
-              <p>Type their email in your dashboard. They get instant access. Best for secure units or exclusive groups.</p>
-            </div>
-          </div>
-          <div class="ssx-opt">
-            <div class="ssx-optIcon">
-              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            </div>
-            <div class="ssx-optBody">
-              <strong>Direct Link (Easy)</strong>
-              <p>Copy a shareable link. Send it to the group chat. Anyone with the link can join.</p>
-            </div>
-          </div>
-        </div>
+    <section class="ssx-sec ssx-faq ssx-reveal">
+      <div class="ssx-sec-head ssx-center">
+        <div class="ssx-kicker">FAQ</div>
+        <h2 class="ssx-h2">The questions people ask first.</h2>
+      </div>
+
+      <div class="ssx-faq-list">
+        <details>
+          <summary>Do I have to collect everyone’s sizes?</summary>
+          <p>No. Each person chooses their own size and color when they order.</p>
+        </details>
+        <details>
+          <summary>Do I have to collect payments?</summary>
+          <p>No. Members checkout directly from the storefront.</p>
+        </details>
+        <details>
+          <summary>Is there a minimum order?</summary>
+          <p>No. People can order individually.</p>
+        </details>
+        <details>
+          <summary>How long does setup take?</summary>
+          <p>The request form takes about 2 minutes. The automated store build usually takes about 15 minutes.</p>
+        </details>
+        <details>
+          <summary>Can people order later?</summary>
+          <p>Yes. The store is designed so members can come back and reorder later.</p>
+        </details>
+        <details>
+          <summary>Can I edit products after the store is created?</summary>
+          <p>Yes. Admins can use the dashboard to manage products, adjust placement and colors, hide products, delete products, or build more merch.</p>
+        </details>
+        <details>
+          <summary>Who can access the store?</summary>
+          <p>That depends on how you share it. You can invite people directly or share a link with your group.</p>
+        </details>
+        <details>
+          <summary>What kind of groups is this for?</summary>
+          <p>Teams, units, first responders, families, trips, businesses, fundraisers, school groups, clubs, and events.</p>
+        </details>
       </div>
     </section>
 
-    <section class="ssx-sec ssx-final ss-reveal">
-      <div class="ssx-finalCard">
-        <h2 class="ssx-h2">Ready to stop being the middleman?</h2>
-        <p class="ssx-lead">Takes 2 minutes to request. We do the rest.</p>
-        <a class="ssx-btn ssx-btn--solid ssx-btn--lg" href="{{ request_cta_url }}">{{ section.settings.btn_request | escape }} →</a>
-        <p class="ssx-fine">No inventory. No minimums. Ships direct to your team.</p>
+    <section class="ssx-final ssx-reveal">
+      <div class="ssx-final-card">
+        <div class="ssx-kicker">READY WHEN YOU ARE</div>
+        <h2>Ready to stop being the middleman?</h2>
+        <p>Create the store, share the link, and let everyone order for themselves.</p>
+        <a class="ssx-btn ssx-btn--solid ssx-btn--final" href="{{ request_cta_url }}">Start a storefront →</a>
+        <div class="ssx-fine">2-minute form · About 15-minute build · No minimums · No upfront inventory</div>
       </div>
     </section>
 
@@ -135,145 +310,1035 @@
 </section>
 
 <style>
-  .ssx{ padding: 40px 0 80px; }
-  .ssx-wrap{ max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-  .center-text{ text-align: center; }
+  .ssx,
+  .ssx * { box-sizing: border-box; }
+
+  .ssx {
+    position: relative;
+    overflow: hidden;
+    padding: 54px 0 92px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #11100e;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(183,163,106,.13), transparent 28%),
+      linear-gradient(180deg, #fffdf8 0%, #ffffff 40%, #faf7ef 100%);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .ssx-wrap {
+    position: relative;
+    z-index: 1;
+    width: min(1120px, calc(100% - 44px));
+    margin: 0 auto;
+  }
+
+  .ssx-orb {
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    filter: blur(20px);
+    opacity: .45;
+  }
+
+  .ssx-orb--one {
+    width: 380px;
+    height: 380px;
+    top: -170px;
+    left: -130px;
+    background: rgba(183,163,106,.20);
+  }
+
+  .ssx-orb--two {
+    width: 460px;
+    height: 460px;
+    top: 360px;
+    right: -230px;
+    background: rgba(17,16,14,.07);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ssx-reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 560ms ease, transform 560ms ease;
+    }
+
+    .ssx-reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .ssx-center { text-align: center; }
+
+  .ssx-eyebrow,
+  .ssx-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 17px;
+    color: rgba(17,16,14,.56);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .ssx-eyebrow span {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #b7a36a;
+    box-shadow: 0 0 0 7px rgba(183,163,106,.14);
+  }
+
+  .ssx-h1,
+  .ssx-h2 {
+    margin: 0;
+    color: #11100e;
+    font-weight: 950;
+    letter-spacing: -.06em;
+  }
+
+  .ssx-h1 {
+    max-width: 850px;
+    font-size: clamp(48px, 7.1vw, 92px);
+    line-height: .93;
+  }
+
+  .ssx-h2 {
+    font-size: clamp(34px, 4.9vw, 66px);
+    line-height: .98;
+  }
+
+  .ssx-sub,
+  .ssx-lead {
+    margin: 20px 0 0;
+    color: rgba(17,16,14,.64);
+    font-size: clamp(17px, 2vw, 22px);
+    line-height: 1.56;
+    font-weight: 500;
+  }
+
+  .ssx-sub {
+    max-width: 680px;
+  }
+
+  .ssx-lead {
+    max-width: 740px;
+  }
+
+  .ssx-sec {
+    padding: 94px 0 0;
+  }
+
+  .ssx-sec-head {
+    max-width: 780px;
+    margin-bottom: 38px;
+  }
+
+  .ssx-sec-head.ssx-center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ssx-btn {
+    min-height: 54px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 25px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .ssx-btn--solid {
+    color: #fff;
+    background: #11100e;
+    border: 1px solid rgba(183,163,106,.48);
+    box-shadow: 0 18px 44px rgba(17,16,14,.18);
+  }
+
+  .ssx-btn--solid:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 24px 62px rgba(17,16,14,.23);
+  }
+
+  .ssx-btn--ghost {
+    color: #11100e;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.12);
+    box-shadow: 0 12px 34px rgba(17,16,14,.07);
+  }
+
+  .ssx-btn--ghost:hover {
+    transform: translateY(-2px);
+    border-color: rgba(17,16,14,.22);
+  }
 
   /* HERO */
-  .ssx-hero{
-    text-align: center;
-    padding: 60px 20px;
-    background: linear-gradient(180deg, rgba(0,0,0,.03), transparent);
-    border-radius: 30px;
-    margin-bottom: 50px;
+  .ssx-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, .68fr);
+    gap: 42px;
+    align-items: center;
+    padding: 74px 0 30px;
   }
-  .ssx-h1{
-    font-size: clamp(38px, 5vw, 64px);
+
+  .ssx-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .ssx-proofline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    color: rgba(17,16,14,.48);
+    font-size: 13px;
+    font-weight: 750;
+  }
+
+  .ssx-proofline::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: rgba(183,163,106,.82);
+  }
+
+  .ssx-hero-card {
+    border-radius: 34px;
+    padding: 14px;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.86), rgba(255,255,255,.50)),
+      linear-gradient(145deg, rgba(183,163,106,.20), rgba(17,16,14,.05));
+    border: 1px solid rgba(255,255,255,.82);
+    box-shadow: 0 42px 110px rgba(17,16,14,.16);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .ssx-device-top {
+    height: 35px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 12px;
+  }
+
+  .ssx-device-top i {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.16);
+  }
+
+  .ssx-preview-head,
+  .ssx-preview-products,
+  .ssx-preview-rows {
+    background: #11100e;
+  }
+
+  .ssx-preview-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 22px 22px 16px;
+    border-radius: 25px 25px 0 0;
+    color: #fff;
+  }
+
+  .ssx-preview-head small {
+    display: block;
+    margin-bottom: 6px;
+    color: rgba(255,255,255,.42);
+    font-size: 10px;
+    letter-spacing: .14em;
+    font-weight: 900;
+  }
+
+  .ssx-preview-head strong {
+    display: block;
+    color: #fff;
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: -.045em;
+  }
+
+  .ssx-preview-head span {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(183,163,106,.18);
+    border: 1px solid rgba(183,163,106,.32);
+    color: #f2df9b;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .ssx-preview-products {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 8px 22px 18px;
+  }
+
+  .ssx-preview-product {
+    min-height: 130px;
+    border-radius: 18px;
+    padding: 10px;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .ssx-preview-product p {
+    margin: 8px 0 0;
+    color: rgba(255,255,255,.68);
+    font-size: 11px;
+    font-weight: 850;
+  }
+
+  .ssx-shirt {
+    position: relative;
+    width: 62px;
+    height: 76px;
+    margin-top: 4px;
+    border-radius: 18px 18px 13px 13px;
+    clip-path: polygon(20% 0,35% 8%,65% 8%,80% 0,100% 22%,84% 38%,84% 100%,16% 100%,16% 38%,0 22%);
+  }
+
+  .ssx-shirt--black { background: #111; border: 1px solid rgba(255,255,255,.14); }
+  .ssx-shirt--cream { background: #d9c9a5; }
+
+  .ssx-shirt b,
+  .ssx-hat b {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #11100e;
+    background: #f4e2a6;
+    font-size: 10px;
     font-weight: 950;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin: 0 0 16px;
-    max-width: 20ch;
-    margin-left: auto; margin-right: auto;
-  }
-  .ssx-sub{
-    font-size: 18px;
-    color: rgba(0,0,0,.65);
-    max-width: 65ch;
-    margin: 0 auto 24px;
-    line-height: 1.5;
-    font-weight: 600;
-  }
-  .ssx-actions{ display:flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-
-  .ssx-btn{
-    display:inline-flex; align-items:center; justify-content:center;
-    padding: 14px 24px; border-radius: 999px;
-    font-weight: 800; text-decoration:none;
-    transition: transform .15s ease;
-  }
-  .ssx-btn:hover{ transform: translateY(-2px); }
-  .ssx-btn--solid{ background:#111; color:#fff; }
-  .ssx-btn--ghost{ background:#fff; color:#111; border: 1px solid rgba(0,0,0,.15); }
-
-  /* SECTIONS GENERAL */
-  .ssx-sec{ margin-bottom: 80px; }
-  .ssx-kicker{
-    text-transform: uppercase; letter-spacing: 0.1em;
-    font-size: 12px; font-weight: 800; opacity: 0.6;
-    margin-bottom: 10px;
-  }
-  .ssx-h2{ font-size: 32px; font-weight: 900; margin: 0 0 16px; letter-spacing: -0.02em; }
-  .ssx-lead{ font-size: 17px; line-height: 1.6; color: rgba(0,0,0,.7); margin: 0 0 20px; font-weight: 500; }
-  .ssx-h3{ font-size: 20px; font-weight: 800; margin: 0 0 8px; }
-
-  /* GRID 50/50 */
-  .ssx-grid50{ display:grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-
-  /* CHECKLIST */
-  .ssx-checkList{ list-style: none; padding: 0; margin: 0; }
-  .ssx-checkList li{
-    position: relative; padding-left: 24px; margin-bottom: 10px;
-    font-weight: 700; color: rgba(0,0,0,.8);
-  }
-  .ssx-checkList li::before{
-    content: '✓'; position: absolute; left: 0; color: green; font-weight: 900;
   }
 
-  /* QUOTE CARDS */
-  .ssx-cardBox{ display:flex; flex-direction: column; gap: 16px; }
-  .ssx-quoteCard{
-    background: #f4f4f4; padding: 20px; border-radius: 16px;
-    font-style: italic; font-weight: 600; color: #444;
-    border-left: 4px solid #111;
+  .ssx-hat {
+    position: relative;
+    width: 74px;
+    height: 52px;
+    margin-top: 20px;
+    background: #f2f0e9;
+    border-radius: 999px 999px 16px 16px;
+  }
+
+  .ssx-hat::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: -8px;
+    height: 15px;
+    border-radius: 999px;
+    background: #070706;
+  }
+
+  .ssx-hat b {
+    top: 7px;
+    bottom: auto;
+    width: 25px;
+    height: 25px;
+    font-size: 8px;
+  }
+
+  .ssx-preview-rows {
+    display: grid;
+    gap: 10px;
+    padding: 0 22px 22px;
+    border-radius: 0 0 25px 25px;
+  }
+
+  .ssx-preview-rows div {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 13px;
+    border-radius: 17px;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+
+  .ssx-preview-rows span {
+    width: 31px;
+    height: 31px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(183,163,106,.95), rgba(243,222,154,.72));
+    flex: 0 0 auto;
+  }
+
+  .ssx-preview-rows p {
+    margin: 0;
+  }
+
+  .ssx-preview-rows strong,
+  .ssx-preview-rows em {
+    display: block;
+  }
+
+  .ssx-preview-rows strong {
+    color: rgba(255,255,255,.92);
+    font-size: 13px;
+    line-height: 1.1;
+  }
+
+  .ssx-preview-rows em {
+    margin-top: 3px;
+    color: rgba(255,255,255,.46);
+    font-size: 12px;
+    line-height: 1.25;
+    font-style: normal;
+  }
+
+  /* COMPARE */
+  .ssx-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .ssx-compare-card {
+    min-height: 470px;
+    padding: clamp(24px, 4vw, 42px);
+    border-radius: 34px;
+    border: 1px solid rgba(17,16,14,.09);
+    box-shadow: 0 24px 80px rgba(17,16,14,.06);
+  }
+
+  .ssx-compare-card--old {
+    background: rgba(255,255,255,.76);
+  }
+
+  .ssx-compare-card--new {
+    color: #fff;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(183,163,106,.28), transparent 35%),
+      linear-gradient(180deg, #171613, #080807);
+  }
+
+  .ssx-card-label {
+    margin-bottom: 22px;
+    color: #b7a36a;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .14em;
+  }
+
+  .ssx-compare-card h3 {
+    max-width: 500px;
+    margin: 0 0 24px;
+    font-size: clamp(27px, 3.3vw, 42px);
+    line-height: 1;
+    letter-spacing: -.05em;
+    font-weight: 950;
+  }
+
+  .ssx-compare-card ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 12px;
+  }
+
+  .ssx-compare-card li {
+    position: relative;
+    padding-left: 30px;
+    color: rgba(17,16,14,.62);
+    font-size: 15px;
+    line-height: 1.36;
+    font-weight: 700;
+  }
+
+  .ssx-compare-card--new li {
+    color: rgba(255,255,255,.72);
+  }
+
+  .ssx-compare-card li::before {
+    content: "";
+    position: absolute;
+    top: .38em;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.11);
+  }
+
+  .ssx-compare-card--new li::before {
+    background: #b7a36a;
+    box-shadow: 0 0 0 5px rgba(183,163,106,.14);
   }
 
   /* STEPS */
-  .ssx-steps3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; }
-  .ssx-step{
-    background: #fff; border: 1px solid #eee; border-radius: 20px;
-    padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,.04);
-  }
-  .ssx-stepNum{
-    font-size: 40px; font-weight: 900; color: rgba(0,0,0,.08); line-height: 1; margin-bottom: 12px;
-  }
-  .ssx-stepContent p{ margin: 0; opacity: 0.7; font-size: 15px; line-height: 1.5; }
-
-  /* ACCESS OPTIONS */
-  .ssx-accessOptions{ display:flex; flex-direction: column; gap: 16px; }
-  .ssx-opt{
-    display:flex; align-items: flex-start; gap: 16px;
-    background: #fff; padding: 16px; border-radius: 16px;
-    border: 1px solid rgba(0,0,0,.1);
-  }
-  .ssx-optIcon{
-    background: #111;
-    color: #fff;
-    border-radius: 12px;
-    width: 44px; height: 44px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-  .ssx-optIcon svg{ width: 20px; height: 20px; }
-  .ssx-optBody p{ margin: 4px 0 0; font-size: 14px; opacity: 0.7; }
-
-  /* FINAL CTA */
-  .ssx-final { margin-bottom: 0; }
-  .ssx-finalCard {
-    background: #0b0b0b;
-    color: #fff;
-    border-radius: 24px;
-    padding: 60px 40px;
-    text-align: center;
-  }
-  .ssx-finalCard .ssx-h2 { color: #fff; margin-bottom: 12px; }
-  .ssx-finalCard .ssx-lead { color: rgba(255,255,255,0.7); margin-bottom: 32px; }
-  .ssx-btn--lg { padding: 18px 40px; font-size: 18px; }
-  .ssx-fine { margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.4); }
-  @media(max-width:600px) {
-    .ssx-finalCard { padding: 40px 24px; }
+  .ssx-steps4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
   }
 
-  /* MOBILE */
-  @media(max-width: 800px){
-    .ssx-grid50{ grid-template-columns: 1fr; gap: 24px; }
-    .ssx-steps3{ grid-template-columns: 1fr; }
-    .ssx-h1{ font-size: 36px; }
-    .ssx-hero{ padding: 40px 16px; }
+  .ssx-step {
+    min-height: 320px;
+    padding: 25px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 20px 70px rgba(17,16,14,.055);
   }
 
-  .ssx-productline {
-    margin-top: 16px;
+  .ssx-step-num {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 40px;
+    border-radius: 18px;
+    color: #11100e;
+    background: rgba(183,163,106,.20);
     font-size: 14px;
-    font-weight: 600;
-    color: rgba(0,0,0,.65);
+    font-weight: 950;
+  }
+
+  .ssx-step h3 {
+    margin: 0;
+    color: #11100e;
+    font-size: 22px;
+    line-height: 1.05;
+    letter-spacing: -.04em;
+    font-weight: 930;
+  }
+
+  .ssx-step p {
+    margin: 12px 0 0;
+    color: rgba(17,16,14,.61);
+    font-size: 14px;
     line-height: 1.5;
-    padding: 12px 16px;
-    background: rgba(0,0,0,0.04);
-    border-radius: 12px;
-    border-left: 3px solid #111;
+    font-weight: 540;
+  }
+
+  /* DASHBOARD */
+  .ssx-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .92fr) minmax(320px, .8fr);
+    gap: 38px;
+    align-items: center;
+    padding: clamp(28px, 5vw, 54px);
+    border-radius: 40px;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(183,163,106,.20), transparent 34%),
+      linear-gradient(180deg, #fbf8ef, #fff);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 30px 110px rgba(17,16,14,.075);
+  }
+
+  .ssx-mini-note {
+    margin-top: 22px;
+    display: inline-flex;
+    padding: 13px 16px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.06);
+    color: rgba(17,16,14,.68);
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .ssx-dashboard-panel {
+    padding: 22px;
+    border-radius: 34px;
+    background: #11100e;
+    color: #fff;
+    box-shadow: 0 40px 120px rgba(17,16,14,.26);
+  }
+
+  .ssx-panel-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+
+  .ssx-panel-top small {
+    display: block;
+    color: rgba(255,255,255,.42);
+    font-size: 10px;
+    letter-spacing: .14em;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+
+  .ssx-panel-top strong {
+    display: block;
+    color: #fff;
+    font-size: 25px;
+    letter-spacing: -.04em;
+  }
+
+  .ssx-panel-top span {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(183,163,106,.18);
+    border: 1px solid rgba(183,163,106,.32);
+    color: #f2df9b;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .ssx-panel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .ssx-panel-grid div {
+    padding: 14px;
+    border-radius: 17px;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.08);
+    color: rgba(255,255,255,.72);
+    font-size: 12px;
+    line-height: 1.25;
+    text-align: center;
+    font-weight: 850;
+  }
+
+  /* ACCESS */
+  .ssx-access-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .ssx-access-card {
+    padding: clamp(24px, 4vw, 38px);
+    border-radius: 34px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 24px 80px rgba(17,16,14,.055);
+  }
+
+  .ssx-access-icon {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 28px;
+    border-radius: 18px;
+    color: #11100e;
+    background: rgba(183,163,106,.20);
+  }
+
+  .ssx-access-icon svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .ssx-access-card h3 {
+    margin: 0;
+    color: #11100e;
+    font-size: 28px;
+    line-height: 1.02;
+    letter-spacing: -.045em;
+    font-weight: 950;
+  }
+
+  .ssx-access-card p {
+    margin: 12px 0 0;
+    color: rgba(17,16,14,.61);
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 540;
+  }
+
+  /* FOR */
+  .ssx-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .ssx-chip-grid span {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 12px 34px rgba(17,16,14,.05);
+    color: rgba(17,16,14,.68);
+    font-size: 14px;
+    font-weight: 850;
+  }
+
+  /* ORDERING */
+  .ssx-ordering-card {
+    padding: clamp(28px, 5vw, 54px);
+    border-radius: 40px;
+    background:
+      radial-gradient(circle at 90% 10%, rgba(183,163,106,.16), transparent 30%),
+      linear-gradient(180deg, #11100e, #070706);
+    color: #fff;
+    box-shadow: 0 40px 120px rgba(17,16,14,.22);
+  }
+
+  .ssx-ordering-card .ssx-h2 {
+    color: #fff;
+  }
+
+  .ssx-ordering-card .ssx-lead {
+    color: rgba(255,255,255,.62);
+  }
+
+  .ssx-order-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  .ssx-order-list span {
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.075);
+    border: 1px solid rgba(255,255,255,.08);
+    color: rgba(255,255,255,.74);
+    font-size: 13px;
+    line-height: 1.25;
+    text-align: center;
+    font-weight: 850;
+  }
+
+  .ssx-product-note {
+    margin: 20px 0 0;
+    color: rgba(255,255,255,.48);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  /* TRUST */
+  .ssx-trust-shell {
+    display: grid;
+    grid-template-columns: minmax(0, .96fr) minmax(320px, .72fr);
+    gap: 38px;
+    align-items: start;
+  }
+
+  .ssx-trust-points {
+    display: grid;
+    gap: 12px;
+  }
+
+  .ssx-trust-points div {
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 18px 54px rgba(17,16,14,.05);
+  }
+
+  .ssx-trust-points strong,
+  .ssx-trust-points span {
+    display: block;
+  }
+
+  .ssx-trust-points strong {
+    color: #11100e;
+    font-size: 16px;
+    font-weight: 930;
+  }
+
+  .ssx-trust-points span {
+    margin-top: 5px;
+    color: rgba(17,16,14,.58);
+    font-size: 13px;
+    line-height: 1.42;
+  }
+
+  /* FAQ */
+  .ssx-faq-list {
+    max-width: 880px;
+    margin: 0 auto;
+    display: grid;
+    gap: 12px;
+  }
+
+  .ssx-faq-list details {
+    border-radius: 22px;
+    background: rgba(255,255,255,.74);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 18px 54px rgba(17,16,14,.045);
+    overflow: hidden;
+  }
+
+  .ssx-faq-list summary {
+    cursor: pointer;
+    padding: 20px 22px;
+    color: #11100e;
+    font-size: 16px;
+    font-weight: 920;
+    list-style: none;
+  }
+
+  .ssx-faq-list summary::-webkit-details-marker { display: none; }
+
+  .ssx-faq-list summary::after {
+    content: "+";
+    float: right;
+    color: #b7a36a;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .ssx-faq-list details[open] summary::after { content: "–"; }
+
+  .ssx-faq-list p {
+    margin: 0;
+    padding: 0 22px 22px;
+    color: rgba(17,16,14,.62);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* FINAL */
+  .ssx-final {
+    padding-top: 100px;
+  }
+
+  .ssx-final-card {
+    padding: clamp(34px, 6vw, 72px);
+    border-radius: 42px;
+    text-align: center;
+    color: #fff;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(183,163,106,.24), transparent 32%),
+      linear-gradient(180deg, #141311, #070706);
+    box-shadow: 0 44px 130px rgba(17,16,14,.24);
+  }
+
+  .ssx-final-card .ssx-kicker {
+    color: rgba(255,255,255,.48);
+  }
+
+  .ssx-final-card h2 {
+    max-width: 760px;
+    margin: 0 auto;
+    color: #fff;
+    font-size: clamp(40px, 6vw, 82px);
+    line-height: .96;
+    letter-spacing: -.065em;
+    font-weight: 950;
+  }
+
+  .ssx-final-card p {
+    max-width: 620px;
+    margin: 18px auto 30px;
+    color: rgba(255,255,255,.66);
+    font-size: clamp(17px, 2vw, 22px);
+    line-height: 1.5;
+  }
+
+  .ssx-btn--final {
+    background: #fff;
+    color: #11100e;
+    border-color: rgba(255,255,255,.2);
+  }
+
+  .ssx-fine {
+    margin-top: 20px;
+    color: rgba(255,255,255,.42);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 980px) {
+    .ssx-hero,
+    .ssx-dashboard-grid,
+    .ssx-trust-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .ssx-hero-copy {
+      text-align: center;
+    }
+
+    .ssx-h1,
+    .ssx-sub,
+    .ssx-lead {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .ssx-actions,
+    .ssx-proofline {
+      justify-content: center;
+    }
+
+    .ssx-hero-card {
+      max-width: 560px;
+      margin: 8px auto 0;
+    }
+
+    .ssx-steps4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 760px) {
+    .ssx {
+      padding: 34px 0 72px;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(183,163,106,.07), transparent 28%),
+        linear-gradient(180deg, #fffdf8 0%, #ffffff 45%, #fbf8ef 100%);
+    }
+
+    .ssx-wrap {
+      width: min(100% - 32px, 1120px);
+    }
+
+    .ssx-hero {
+      padding: 42px 0 18px;
+      gap: 28px;
+    }
+
+    .ssx-h1 {
+      font-size: clamp(44px, 13vw, 62px);
+      letter-spacing: -.07em;
+    }
+
+    .ssx-h2 {
+      font-size: 38px;
+    }
+
+    .ssx-sub,
+    .ssx-lead {
+      font-size: 16px;
+    }
+
+    .ssx-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .ssx-btn {
+      width: 100%;
+    }
+
+    .ssx-proofline {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .ssx-compare-grid,
+    .ssx-steps4,
+    .ssx-access-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ssx-compare-card,
+    .ssx-step {
+      min-height: auto;
+    }
+
+    .ssx-step-num {
+      margin-bottom: 26px;
+    }
+
+    .ssx-preview-products {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .ssx-preview-product:nth-child(3) {
+      grid-column: 1 / -1;
+      min-height: 112px;
+    }
+
+    .ssx-order-list,
+    .ssx-panel-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ssx-sec {
+      padding-top: 74px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .ssx-h1 { font-size: 42px; }
+    .ssx-h2 { font-size: 34px; }
+    .ssx-final-card h2 { font-size: 40px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ssx-reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .ssx-btn {
+      transition: none;
+    }
   }
 </style>
+
+<script>
+(function() {
+  var root = document.querySelector('[data-ss-exp]');
+  if (!root) return;
+
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var revealEls = root.querySelectorAll('.ssx-reveal');
+
+  if (prefersReducedMotion) {
+    revealEls.forEach(function(el) { el.classList.add('is-visible'); });
+    return;
+  }
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var delay = parseInt(entry.target.getAttribute('data-delay') || '0', 10);
+        window.setTimeout(function() {
+          entry.target.classList.add('is-visible');
+        }, delay);
+        io.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(function(el) { io.observe(el); });
+  } else {
+    revealEls.forEach(function(el) { el.classList.add('is-visible'); });
+  }
+})();
+</script>
 
 {% schema %}
 {
