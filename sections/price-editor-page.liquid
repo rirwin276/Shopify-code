@@ -105,10 +105,38 @@
     box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
   }
   .pe-spinner {
-    text-align: center;
-    padding: 32px;
-    color: var(--ap-gray);
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .pe-spinner.ok {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #047857;
+  }
+  .pe-spinner.err {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+  .pe-spinner.hidden {
+    display: none;
+  }
+  .pe-spinner-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 0 0 4px rgba(29,78,216,0.14);
+    flex: 0 0 auto;
   }
   .pe-actions {
     margin-top: 24px;
@@ -244,10 +272,125 @@
       <p>Set global retail prices. Optionally apply changes to existing active Shopify products.</p>
     </div>
 
-    <div id="peSpinner" class="pe-spinner">⏳ Loading prices…</div>
-    <div id="peTable" style="display:none;"></div>
+    <div id="peSpinner" class="pe-spinner">
+      <span class="pe-spinner-dot" aria-hidden="true"></span>
+      <span id="peSpinnerText">Loading latest prices…</span>
+    </div>
 
-    <div class="pe-actions" id="peActions" style="display:none;">
+    <div id="peTable">
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          BC3413 Classic Tee
+          <span>Front print only (back-only = same price)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3413_front" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          BC3413 Classic Tee
+          <span>Front + back print</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3413_front_back" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          BC3001Y Youth T-Shirt
+          <span>Front print only (back-only = same price)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3001Y_front" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          BC3001Y Youth T-Shirt
+          <span>Front + back print</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3001Y_front_back" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          M2580 Hoodie
+          <span>Front print only (back-only = same price)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="M2580_front" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          M2580 Hoodie
+          <span>Front + back print</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="M2580_front_back" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          BC3001 Adult Tee
+          <span>Front print only (back-only = same price)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3001_front" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          NL6733 Tank Top
+          <span>Front print</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="NL6733_front" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          CC1467Y Youth Hoodie
+          <span>Front print</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="CC1467Y_front" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          MC1790 Tank Top
+          <span>Front print</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="MC1790_front" value="">
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">
+          Otto 39-165 Hat
+          <span>Front print</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="39165_front" value="">
+        </div>
+      </div>
+    </div>
+
+    <div class="pe-actions" id="peActions">
       <button id="peSaveBtn" class="pe-btn" type="button">💾 Save Prices</button>
       <div id="peStatus" class="pe-status"></div>
       <div id="peJobStatus" class="pe-job"></div>
@@ -272,19 +415,6 @@
 (function() {
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var SECRET = {{ editor_secret | json }};
-  var PRICE_MODULES = {
-    'BC3413_front':      { label: 'BC3413 Classic Tee',     sub: 'Front print only (back-only = same price)' },
-    'BC3413_front_back': { label: 'BC3413 Classic Tee',     sub: 'Front + back print' },
-    'M2580_front':       { label: 'M2580 Hoodie',           sub: 'Front print only (back-only = same price)' },
-    'M2580_front_back':  { label: 'M2580 Hoodie',           sub: 'Front + back print' },
-    'BC3001_front':      { label: 'BC3001 Adult Tee',       sub: 'Front print only (back-only = same price)' },
-    'BC3001Y_front':     { label: 'BC3001Y Youth T-Shirt',  sub: 'Front print only (back-only = same price)' },
-    'BC3001Y_front_back':{ label: 'BC3001Y Youth T-Shirt',  sub: 'Front + back print' },
-    'NL6733_front':      { label: 'NL6733 Tank Top',        sub: 'Front print' },
-    'CC1467Y_front':     { label: 'CC1467Y Youth Hoodie',   sub: 'Front print' },
-    'MC1790_front':      { label: 'MC1790 Tank Top',        sub: 'Front print' },
-    '39165_front':       { label: 'Otto 39-165 Hat',        sub: 'Front print' }
-  };
 
   function headers() {
     return {
@@ -305,58 +435,20 @@
     el.style.display = visible ? 'block' : 'none';
   }
 
-  function renderPricingTable(prices) {
-    var table = document.getElementById('peTable');
-    table.innerHTML = '';
+  function setLoadState(msg, type) {
+    var el = document.getElementById('peSpinner');
+    var text = document.getElementById('peSpinnerText');
+    text.textContent = msg || '';
+    el.className = 'pe-spinner' + (type ? ' ' + type : '');
+    if (!msg) el.classList.add('hidden');
+  }
 
-    Object.keys(PRICE_MODULES).forEach(function(key) {
-      var info = PRICE_MODULES[key];
+  function applyPrices(prices) {
+    document.querySelectorAll('.ap-price-input').forEach(function(input) {
+      var key = input.getAttribute('data-module');
       var rawValue = prices && prices[key] != null ? Number(prices[key]) : NaN;
-      var value = Number.isFinite(rawValue) ? String(rawValue) : '';
-
-      var row = document.createElement('div');
-      row.className = 'ap-price-row';
-
-      var label = document.createElement('div');
-      label.className = 'ap-price-label';
-      label.textContent = info.label;
-
-      var sub = document.createElement('span');
-      sub.textContent = info.sub;
-      label.appendChild(sub);
-
-      var inputWrap = document.createElement('div');
-      inputWrap.style.display = 'flex';
-      inputWrap.style.alignItems = 'center';
-      inputWrap.style.gap = '6px';
-
-      var dollar = document.createElement('span');
-      dollar.style.fontSize = '16px';
-      dollar.style.fontWeight = '700';
-      dollar.style.color = 'var(--ap-gray)';
-      dollar.textContent = '$';
-
-      var input = document.createElement('input');
-      input.className = 'ap-price-input';
-      input.type = 'number';
-      input.min = '1';
-      input.max = '999';
-      input.step = '1';
-      input.setAttribute('data-module', key);
-      input.value = value;
-
-      inputWrap.appendChild(dollar);
-      inputWrap.appendChild(input);
-
-      row.appendChild(label);
-      row.appendChild(inputWrap);
-
-      table.appendChild(row);
+      input.value = Number.isFinite(rawValue) ? String(rawValue) : '';
     });
-
-    document.getElementById('peSpinner').style.display = 'none';
-    table.style.display = 'block';
-    document.getElementById('peActions').style.display = 'flex';
   }
 
   function collectPrices() {
@@ -381,10 +473,11 @@
       })
       .then(function(data) {
         var prices = data && data.prices ? data.prices : data;
-        renderPricingTable(prices || {});
+        applyPrices(prices || {});
+        setLoadState('Latest prices loaded.', 'ok');
       })
       .catch(function(err) {
-        document.getElementById('peSpinner').style.display = 'none';
+        setLoadState('Could not load current prices. You can still edit values and save new pricing.', 'err');
         setStatus('❌ ' + err.message, 'err');
       });
   }
