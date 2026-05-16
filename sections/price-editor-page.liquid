@@ -116,14 +116,6 @@
     flex-direction: column;
     gap: 12px;
   }
-  .pe-apply-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--ap-text);
-    font-size: 14px;
-    font-weight: 600;
-  }
   .pe-btn {
     display: inline-flex;
     align-items: center;
@@ -162,6 +154,80 @@
     font-weight: 600;
   }
 
+  /* ── MODAL ─────────────────────────────────────────────── */
+  .pe-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.55);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .pe-modal-overlay.open { display: flex; }
+  .pe-modal {
+    background: var(--ap-card);
+    border: 1px solid var(--ap-border);
+    border-radius: var(--ap-radius);
+    box-shadow: 0 24px 64px rgba(15,23,42,0.2);
+    padding: 32px 28px 24px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+  }
+  .pe-modal h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ap-text);
+    letter-spacing: -0.01em;
+  }
+  .pe-modal p {
+    margin: 0 0 22px;
+    color: var(--ap-gray);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .pe-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pe-modal-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--ap-font);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pe-modal-btn--primary {
+    background: var(--ap-accent);
+    color: #fff;
+  }
+  .pe-modal-btn--primary:hover { background: #1e293b; transform: translateY(-1px); }
+  .pe-modal-btn--secondary {
+    background: #f1f5f9;
+    color: var(--ap-text);
+    border: 1.5px solid var(--ap-border);
+  }
+  .pe-modal-btn--secondary:hover { background: #e2e8f0; transform: translateY(-1px); }
+  .pe-modal-btn--ghost {
+    background: none;
+    color: var(--ap-gray);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .pe-modal-btn--ghost:hover { color: var(--ap-text); }
+
   @media (max-width: 720px) {
     .pe-wrap { padding: 20px 14px 46px; }
     .pe-card { padding: 18px; }
@@ -182,14 +248,22 @@
     <div id="peTable" style="display:none;"></div>
 
     <div class="pe-actions" id="peActions" style="display:none;">
-      <label class="pe-apply-wrap" for="peApplyExisting">
-        <input id="peApplyExisting" type="checkbox" checked>
-        <span>Apply to Existing Products</span>
-      </label>
-
       <button id="peSaveBtn" class="pe-btn" type="button">💾 Save Prices</button>
       <div id="peStatus" class="pe-status"></div>
       <div id="peJobStatus" class="pe-job"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APPLY MODAL -->
+<div class="pe-modal-overlay" id="peModal" role="dialog" aria-modal="true" aria-labelledby="peModalTitle">
+  <div class="pe-modal">
+    <h2 id="peModalTitle">💾 Prices saved!</h2>
+    <p>Do you want to apply the new prices to <strong>existing active products</strong> right now, or save them for <strong>future builds only</strong>?</p>
+    <div class="pe-modal-actions">
+      <button class="pe-modal-btn pe-modal-btn--primary" id="peModalApplyNow">⚡ Apply Now</button>
+      <button class="pe-modal-btn pe-modal-btn--secondary" id="peModalFutureOnly">📅 Future Builds Only</button>
+      <button class="pe-modal-btn pe-modal-btn--ghost" id="peModalCancel">Cancel</button>
     </div>
   </div>
 </div>
@@ -199,14 +273,16 @@
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var SECRET = {{ editor_secret | json }};
   var PRICE_MODULES = {
-    'BC3413_front':      { label: 'BC3413 Classic Tee',     sub: 'Front print only' },
+    'BC3413_front':      { label: 'BC3413 Classic Tee',     sub: 'Front print only (back-only = same price)' },
     'BC3413_front_back': { label: 'BC3413 Classic Tee',     sub: 'Front + back print' },
-    'M2580_front':       { label: 'M2580 Hoodie',           sub: 'Front print only' },
+    'M2580_front':       { label: 'M2580 Hoodie',           sub: 'Front print only (back-only = same price)' },
     'M2580_front_back':  { label: 'M2580 Hoodie',           sub: 'Front + back print' },
+    'BC3001_front':      { label: 'BC3001 Adult Tee',       sub: 'Front print only (back-only = same price)' },
+    'BC3001Y_front':     { label: 'BC3001Y Youth T-Shirt',  sub: 'Front print only (back-only = same price)' },
+    'BC3001Y_front_back':{ label: 'BC3001Y Youth T-Shirt',  sub: 'Front + back print' },
     'NL6733_front':      { label: 'NL6733 Tank Top',        sub: 'Front print' },
     'CC1467Y_front':     { label: 'CC1467Y Youth Hoodie',   sub: 'Front print' },
     'MC1790_front':      { label: 'MC1790 Tank Top',        sub: 'Front print' },
-    'BC3001Y_front':     { label: 'BC3001Y Youth T-Shirt',  sub: 'Front print' },
     '39165_front':       { label: 'Otto 39-165 Hat',        sub: 'Front print' }
   };
 
@@ -360,9 +436,8 @@
     tick();
   }
 
-  function savePrices() {
+  function savePrices(applyExisting) {
     var btn = document.getElementById('peSaveBtn');
-    var applyExisting = document.getElementById('peApplyExisting').checked;
     var payload = {
       prices: collectPrices(),
       apply_to_existing: applyExisting,
@@ -403,7 +478,39 @@
       });
   }
 
-  document.getElementById('peSaveBtn').addEventListener('click', savePrices);
+  function openModal() {
+    document.getElementById('peModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('peModal').classList.remove('open');
+  }
+
+  document.getElementById('peSaveBtn').addEventListener('click', function() {
+    var prices = collectPrices();
+    if (Object.keys(prices).length === 0) {
+      setStatus('⚠️ Please enter at least one price before saving.', 'err');
+      return;
+    }
+    openModal();
+  });
+
+  document.getElementById('peModalApplyNow').addEventListener('click', function() {
+    closeModal();
+    savePrices(true);
+  });
+
+  document.getElementById('peModalFutureOnly').addEventListener('click', function() {
+    closeModal();
+    savePrices(false);
+  });
+
+  document.getElementById('peModalCancel').addEventListener('click', closeModal);
+
+  document.getElementById('peModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
   loadPrices();
 })();
 </script>
