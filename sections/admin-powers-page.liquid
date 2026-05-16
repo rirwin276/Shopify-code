@@ -4532,6 +4532,15 @@
     });
   });
 
+  // Auto-open tab from URL hash on load
+  (function() {
+    var hash = window.location.hash;
+    if (hash === '#apPanelPricing') {
+      var btn = document.getElementById('apTabBtnPricing');
+      if (btn) btn.click();
+    }
+  })();
+
 })();
 </script>
 {% endif %}
