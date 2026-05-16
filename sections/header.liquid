@@ -268,6 +268,29 @@
   {% endif %}
 </header-component>
 
+  {%- comment -%}
+    Stella & Sage custom mobile mini nav
+    - Mobile only.
+    - Replaces Shopify overflow/More menu on phones so the header stays tiny and clean.
+    - Desktop header remains handled by the normal Shopify header logic above.
+  {%- endcomment -%}
+  <div class="ss-mobile-mini-nav" data-ss-mobile-nav>
+    <button class="ss-mobile-mini-nav__button" type="button" aria-label="Open menu" aria-expanded="false" data-ss-mobile-nav-button>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="ss-mobile-mini-nav__panel" aria-label="Mobile navigation" data-ss-mobile-nav-panel>
+      <a href="/">Home</a>
+      <a href="/pages/portal">Dashboard</a>
+      <a href="/pages/private-storefronts">How it works</a>
+      <a href="/pages/about-us">About us</a>
+      <a href="/pages/support">Support</a>
+      <a href="/pages/resources">Resources</a>
+    </nav>
+  </div>
+
 <script
   src="{{ 'header.js' | asset_url }}"
   type="module"
@@ -638,7 +661,549 @@
       margin-top: calc(var(--header-height) * var(--transparent-header-offset-boolean) * -1);
     }
   }
+
+
+  /* ============================================================
+     STELLA & SAGE PREMIUM HEADER — V7 STABLE CLEAN
+     Purpose:
+     - Roll back the broken overflow/menu experiments.
+     - Keep Shopify's original header logic intact.
+     - Make desktop nav fit so the unwanted "More" overflow is avoided.
+     - Center nav/logo/actions vertically with balanced top/bottom padding.
+     - Keep mobile clean and compact without turning menu items into icons.
+     ============================================================ */
+
+  #header-component {
+    --ss-cream: #fbf8f1;
+    --ss-cream-2: #fffdf9;
+    --ss-ink: #11100e;
+    --ss-gold: #a9955d;
+    --ss-line: rgba(17, 16, 14, 0.075);
+    background:
+      radial-gradient(circle at 50% -20%, rgba(183, 163, 106, 0.075), transparent 32%),
+      linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.90));
+    border-bottom: 1px solid var(--ss-line);
+    box-shadow: 0 10px 34px rgba(17, 16, 14, 0.035);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  #header-component .header__row {
+    background: transparent !important;
+  }
+
+  #header-component .header__row--top .header__columns {
+    min-height: 82px !important;
+    padding-block: 0 !important;
+    align-items: center !important;
+  }
+
+  #header-component .header__columns {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    grid-template-areas: 'left center right' !important;
+    column-gap: clamp(18px, 3vw, 42px) !important;
+  }
+
+  #header-component .header__column,
+  #header-component .header__column--left,
+  #header-component .header__column--center,
+  #header-component .header__column--right {
+    align-items: center !important;
+  }
+
+  #header-component .header__column--left {
+    justify-content: flex-start !important;
+    gap: clamp(12px, 1.5vw, 22px) !important;
+  }
+
+  #header-component .header__column--center {
+    justify-content: center !important;
+  }
+
+  #header-component .header__column--right {
+    justify-content: flex-end !important;
+    gap: clamp(10px, 1.3vw, 18px) !important;
+  }
+
+  /* Logo: centered, intentional, and matched to row height */
+  #header-component .header-logo,
+  #header-component .header-logo a,
+  #header-component .header-logo__link,
+  #header-component .header-logo__image-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  #header-component .header-logo img,
+  #header-component .header-logo svg,
+  #header-component .header-logo__image,
+  #header-component .header-logo__image-container img {
+    max-height: 64px !important;
+    width: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  /* Desktop nav: smaller gap so all six links fit instead of collapsing into More */
+  @media screen and (min-width: 750px) {
+    #header-component header-menu,
+    #header-component .menu-list,
+    #header-component .menu-list__list,
+    #header-component .overflow-menu::part(list) {
+      display: flex !important;
+      align-items: center !important;
+      gap: clamp(12px, 1.35vw, 24px) !important;
+    }
+
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link[aria-haspopup],
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link,
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link {
+      margin: 0 !important;
+      padding: 10px 0 !important;
+      color: rgba(17, 16, 14, 0.78) !important;
+      font-size: clamp(14px, 1.05vw, 16px) !important;
+      line-height: 1 !important;
+      font-weight: 760 !important;
+      letter-spacing: -0.02em !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+      transition: color 180ms ease, opacity 180ms ease, transform 180ms ease;
+    }
+
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__link:hover,
+    #header-component .menu-list__list-item:where(:not([slot='overflow'])) > button.menu-list__link:hover {
+      color: var(--ss-ink) !important;
+      transform: translateY(-1px);
+    }
+
+    /* Keep overflow from becoming the main desktop experience. If the nav fits, this never matters.
+       If Shopify still creates a More item at odd browser zooms, make it a small clean menu button. */
+    #header-component .menu-list__list-item[slot='overflow'] > .menu-list__link,
+    #header-component .menu-list__list-item[slot='overflow'] > button.menu-list__link {
+      width: 42px !important;
+      height: 42px !important;
+      min-width: 42px !important;
+      padding: 0 !important;
+      border-radius: 999px !important;
+      background: rgba(17, 16, 14, 0.045) !important;
+      border: 1px solid rgba(17, 16, 14, 0.075) !important;
+      color: transparent !important;
+      font-size: 0 !important;
+      overflow: hidden !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    #header-component .menu-list__list-item[slot='overflow'] > .menu-list__link::before,
+    #header-component .menu-list__list-item[slot='overflow'] > button.menu-list__link::before {
+      content: "☰" !important;
+      color: var(--ss-ink) !important;
+      font-size: 22px !important;
+      line-height: 1 !important;
+      font-weight: 900 !important;
+    }
+  }
+
+  /* Header actions: clean circular Apple-like controls */
+  #header-component header-actions,
+  #header-component .header-actions,
+  #header-component .header-actions__action,
+  #header-component .search-action,
+  #header-component .account-actions,
+  #header-component .cart-icon,
+  #header-component .header__icon {
+    align-items: center !important;
+  }
+
+  #header-component .header-actions__action,
+  #header-component .search-action,
+  #header-component .account-actions a,
+  #header-component .cart-icon,
+  #header-component .header__icon {
+    min-width: 42px !important;
+    min-height: 42px !important;
+    border-radius: 999px !important;
+  }
+
+  #header-component .account-actions a,
+  #header-component .header-actions__action:is(:hover, :focus-visible),
+  #header-component .search-action:is(:hover, :focus-visible),
+  #header-component .cart-icon:is(:hover, :focus-visible) {
+    background: rgba(17, 16, 14, 0.045) !important;
+  }
+
+  /* Prevent the giant full-width overflow/menu sheet from inheriting our icon styling.
+     This leaves Shopify's menu links readable if overflow opens. */
+  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu,
+  #header-component .menu-list__list-item[slot='overflow'] .menu-drawer,
+  #header-component .menu-list__list-item[slot='overflow'] [popover] {
+    color: var(--ss-ink) !important;
+    font-size: 15px !important;
+  }
+
+  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu .menu-list__link,
+  #header-component .menu-list__list-item[slot='overflow'] .menu-drawer .menu-list__link,
+  #header-component .menu-list__list-item[slot='overflow'] [popover] .menu-list__link {
+    color: rgba(17, 16, 14, 0.78) !important;
+    font-size: 15px !important;
+    background: transparent !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    border-radius: 12px !important;
+    padding: 12px 14px !important;
+  }
+
+  #header-component .menu-list__list-item[slot='overflow'] .menu-list__submenu .menu-list__link::before,
+  #header-component .menu-list__list-item[slot='overflow'] .menu-drawer .menu-list__link::before,
+  #header-component .menu-list__list-item[slot='overflow'] [popover] .menu-list__link::before {
+    content: none !important;
+  }
+
+  /* Mobile: compact header, no giant vertical waste */
+  @media screen and (max-width: 749px) {
+    #header-component .header__row--top .header__columns {
+      min-height: 58px !important;
+      padding-block: 0 !important;
+    }
+
+    #header-component .header__columns {
+      --header-mobile-bookend: 42px;
+      grid-template-columns: 42px 42px 1fr 42px 42px !important;
+      column-gap: 0 !important;
+      align-items: center !important;
+    }
+
+    #header-component .header-logo img,
+    #header-component .header-logo svg,
+    #header-component .header-logo__image,
+    #header-component .header-logo__image-container img {
+      max-height: 48px !important;
+    }
+
+    #header-component .header-actions__action,
+    #header-component .search-action,
+    #header-component .account-actions a,
+    #header-component .cart-icon,
+    #header-component .header__icon {
+      min-width: 38px !important;
+      min-height: 38px !important;
+    }
+  }
+
+
+  /* ============================================================
+     Stella & Sage V8 — MOBILE ONLY CLEANUP
+     Goal: tiny, minimal, no broken Shopify More sheet.
+     Desktop stays as-is from the stable version.
+     ============================================================ */
+
+  .ss-mobile-mini-nav {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .header-section {
+      position: relative !important;
+      z-index: 50;
+    }
+
+    #header-component {
+      box-shadow: 0 8px 24px rgba(17, 16, 14, 0.035) !important;
+      border-bottom: 1px solid rgba(17, 16, 14, 0.06) !important;
+      background: rgba(255, 255, 255, 0.94) !important;
+      backdrop-filter: blur(18px) !important;
+      -webkit-backdrop-filter: blur(18px) !important;
+    }
+
+    #header-component .header__row--top .header__columns {
+      min-height: 50px !important;
+      height: 50px !important;
+      padding-block: 0 !important;
+      padding-inline: 12px !important;
+      align-items: center !important;
+    }
+
+    #header-component .header__columns {
+      display: grid !important;
+      grid-template-columns: 48px 1fr auto !important;
+      grid-template-areas: 'left center right' !important;
+      column-gap: 8px !important;
+      align-items: center !important;
+    }
+
+    /* Kill the Shopify mobile/overflow menu that created the giant broken sheet. */
+    #header-component header-menu,
+    #header-component .menu-list,
+    #header-component .overflow-menu,
+    #header-component .header__row--mobile {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    /* Hide the duplicate left mobile search. Keep right-side account/cart/search actions clean. */
+    #header-component .desktop\:hidden.search-action,
+    #header-component .desktop\:hidden .search-action,
+    #header-component .header__columns > .search-action {
+      display: none !important;
+    }
+
+    #header-component .header-logo {
+      grid-area: center !important;
+      justify-self: center !important;
+      align-self: center !important;
+      margin: 0 !important;
+    }
+
+    #header-component .header-logo,
+    #header-component .header-logo a,
+    #header-component .header-logo__link,
+    #header-component .header-logo__image-container {
+      max-height: 44px !important;
+      height: 44px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    #header-component .header-logo img,
+    #header-component .header-logo svg,
+    #header-component .header-logo__image,
+    #header-component .header-logo__image-container img {
+      max-height: 42px !important;
+      width: auto !important;
+      object-fit: contain !important;
+      display: block !important;
+    }
+
+    #header-component header-actions,
+    #header-component .header-actions {
+      grid-area: right !important;
+      justify-self: end !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+    }
+
+    #header-component .header-actions__action,
+    #header-component .search-action,
+    #header-component .account-actions a,
+    #header-component .cart-icon,
+    #header-component .header__icon {
+      min-width: 34px !important;
+      width: 34px !important;
+      min-height: 34px !important;
+      height: 34px !important;
+      border-radius: 999px !important;
+    }
+
+    .ss-mobile-mini-nav {
+      display: block;
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 80;
+    }
+
+    .ss-mobile-mini-nav__button {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border: 1px solid rgba(17, 16, 14, 0.08);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 10px 28px rgba(17, 16, 14, 0.07);
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ss-mobile-mini-nav__button span {
+      width: 15px;
+      height: 2px;
+      border-radius: 999px;
+      background: #11100e;
+      display: block;
+    }
+
+    .ss-mobile-mini-nav__panel {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: calc(100% + 8px);
+      width: min(226px, calc(100vw - 24px));
+      padding: 8px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(183, 163, 106, 0.10), transparent 32%),
+        rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(17, 16, 14, 0.08);
+      box-shadow: 0 26px 70px rgba(17, 16, 14, 0.16);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .ss-mobile-mini-nav.is-open .ss-mobile-mini-nav__panel {
+      display: grid;
+      gap: 3px;
+    }
+
+    .ss-mobile-mini-nav__panel a {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 0 13px;
+      border-radius: 16px;
+      color: rgba(17, 16, 14, 0.82);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+
+    .ss-mobile-mini-nav__panel a:hover,
+    .ss-mobile-mini-nav__panel a:focus-visible {
+      background: rgba(17, 16, 14, 0.045);
+      color: #11100e;
+      outline: none;
+    }
+
+    /* Mobile-only scroll reveal: hide while scrolling down, show immediately on scroll up. */
+    .header-section {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 70 !important;
+      transform: translateY(0);
+      transition: transform 220ms cubic-bezier(.22, .61, .36, 1), box-shadow 220ms ease;
+      will-change: transform;
+    }
+
+    .header-section.ss-mobile-header-hidden {
+      transform: translateY(-100%) !important;
+    }
+
+    .header-section.ss-mobile-header-visible {
+      transform: translateY(0) !important;
+    }
+  }
+
 {% endstylesheet %}
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var nav = document.querySelector('[data-ss-mobile-nav]');
+  var headerSection = document.querySelector('.header-section');
+  var mobileQuery = window.matchMedia('(max-width: 749px)');
+
+  var btn = nav ? nav.querySelector('[data-ss-mobile-nav-button]') : null;
+
+  function closeMenu() {
+    if (!nav || !btn) return;
+    nav.classList.remove('is-open');
+    btn.setAttribute('aria-expanded', 'false');
+  }
+
+  function openHeader() {
+    if (!headerSection) return;
+    headerSection.classList.remove('ss-mobile-header-hidden');
+    headerSection.classList.add('ss-mobile-header-visible');
+  }
+
+  function hideHeader() {
+    if (!headerSection || !mobileQuery.matches) return;
+    if (nav && nav.classList.contains('is-open')) return;
+    headerSection.classList.add('ss-mobile-header-hidden');
+    headerSection.classList.remove('ss-mobile-header-visible');
+  }
+
+  function resetHeaderForDesktop() {
+    if (!headerSection) return;
+    if (!mobileQuery.matches) {
+      headerSection.classList.remove('ss-mobile-header-hidden');
+      headerSection.classList.remove('ss-mobile-header-visible');
+      closeMenu();
+    }
+  }
+
+  function toggleMenu(event) {
+    if (!nav || !btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+    openHeader();
+    var open = nav.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  if (btn) {
+    btn.addEventListener('click', toggleMenu);
+  }
+
+  document.addEventListener('click', function(event) {
+    if (nav && !nav.contains(event.target)) closeMenu();
+  });
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeMenu();
+      openHeader();
+    }
+  });
+
+  var lastScrollY = window.scrollY || 0;
+  var ticking = false;
+
+  function handleMobileScroll() {
+    if (!mobileQuery.matches) {
+      resetHeaderForDesktop();
+      lastScrollY = window.scrollY || 0;
+      ticking = false;
+      return;
+    }
+
+    var currentY = window.scrollY || 0;
+    var delta = currentY - lastScrollY;
+
+    closeMenu();
+
+    if (currentY <= 8) {
+      openHeader();
+    } else if (delta > 6) {
+      hideHeader();
+    } else if (delta < -4) {
+      openHeader();
+    }
+
+    lastScrollY = currentY;
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(handleMobileScroll);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  if (mobileQuery.addEventListener) {
+    mobileQuery.addEventListener('change', resetHeaderForDesktop);
+  } else if (mobileQuery.addListener) {
+    mobileQuery.addListener(resetHeaderForDesktop);
+  }
+
+  openHeader();
+});
+</script>
 
 {% unless request.design_mode %}
   <script type="module">

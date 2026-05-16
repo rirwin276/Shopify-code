@@ -1,7 +1,11 @@
 {% comment %}
-  PRIVATE STORE HERO — MOBILE "PRIDE" VERSION
-  - Desktop: Standard layout.
-  - Mobile: HUGE Logo (150px) + Name. Everything else hidden.
+  PRIVATE STORE HERO — PREMIUM STOREFRONT V3
+  - Desktop: premium full hero.
+  - Mobile: ultra-compact shopping-first hero so products appear immediately.
+  - Keeps member/admin access logic.
+  - Adds admin-only Admin Powers link on desktop + mobile.
+  - Adds admin-only Share Store popup with copy link + QR code.
+  - Keeps product grid logo overlay logic from previous section.
 {% endcomment %}
 
 {% assign handle = collection.handle | downcase | strip %}
@@ -25,82 +29,200 @@
   {% endfor %}
 {% endif %}
 
-{% unless customer %}
-  <section class="ps-hero">
-    <div class="ps-wrap ps-center">
-      <h1 class="ps-title">Sign in to access your private store</h1>
-      <p class="ps-sub">You must be logged in to view this storefront.</p>
-      <div class="ps-actions">
-        <a class="ps-btn ps-btn-solid" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">Sign in</a>
-        <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
-      </div>
-    </div>
-  </section>
-  {% break %}
-{% endunless %}
-
-{% unless allowed %}
-  <section class="ps-hero">
-    <div class="ps-wrap ps-center">
-      <h1 class="ps-title">Access required</h1>
-      <p class="ps-sub">You don’t currently have access to this private store.</p>
-      <div class="ps-actions">
-        <a class="ps-btn ps-btn-solid" href="/pages/portal">Request access</a>
-        <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
-      </div>
-    </div>
-  </section>
-  {% break %}
-{% endunless %}
-
 {% assign entry = shop.metaobjects.custom_shop[handle] %}
 {% assign store_name = collection.title %}
 {% assign store_logo = blank %}
+{% assign join_mode = 'secure' %}
+{% assign join_code = '' %}
 
 {% if entry %}
   {% assign n = entry.name.value | default: entry.name %}
   {% if n != blank %}{% assign store_name = n %}{% endif %}
+
   {% assign l = entry.logo.value | default: entry.logo %}
   {% if l != blank %}{% assign store_logo = l %}{% endif %}
+
+  {% assign raw_jm = entry.join_mode.value | default: entry.join_mode %}
+  {% assign jm = raw_jm | strip | downcase %}
+  {% if jm == 'public' %}{% assign join_mode = 'public' %}{% endif %}
+
+  {% assign join_code = entry.join_code.value | default: entry.join_code | default: '' | strip %}
 {% endif %}
 
 {% assign logo_url = store_logo | image_url: width: 400 %}
+{% assign join_link = shop.url | append: '/pages/join-store?shop=' | append: handle %}
+{% if join_code != blank %}
+  {% assign join_link = join_link | append: '&code=' | append: join_code %}
+{% endif %}
 
-<section class="ps-hero">
-  <div class="ps-wrap ps-center">
-    <div class="ps-logo">
-      {% if store_logo != blank %}
-        {{ store_logo | image_url: width: 420 | image_tag: class: 'ps-logo-img', loading: 'lazy', alt: store_name }}
-      {% else %}
-        <span class="ps-logo-fallback">{{ store_name | slice: 0, 1 | upcase }}</span>
-      {% endif %}
-    </div>
+{% if customer and allowed %}
 
-    <h1 class="ps-title">{{ store_name }}</h1>
-    
-    {%- comment -%} HIDDEN ON MOBILE {%- endcomment -%}
-    <p class="ps-sub mobile-hide">Your private storefront for approved items, quick reorders, and custom requests.</p>
+  {% if is_admin %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  {% endif %}
 
-    <div class="ps-actions mobile-hide">
-      <a class="ps-btn ps-btn-ghost" href="/pages/portal">← Dashboard</a>
+  <section class="ps-hero" id="ps-storefront-{{ section.id }}">
+    <div class="ps-shell">
+      <div class="ps-hero-card">
+
+        <div class="ps-hero-main">
+          <div class="ps-logo">
+            {% if store_logo != blank %}
+              {{ store_logo | image_url: width: 520 | image_tag: class: 'ps-logo-img', loading: 'eager', alt: store_name }}
+            {% else %}
+              <span class="ps-logo-fallback">{{ store_name | slice: 0, 1 | upcase }}</span>
+            {% endif %}
+          </div>
+
+          <div class="ps-copy">
+            <div class="ps-eyebrow">
+              <span class="ps-live-dot"></span>
+              Private Storefront
+            </div>
+
+            <h1 class="ps-title">{{ store_name }}</h1>
+
+            <p class="ps-sub">
+              Approved gear for your group. Choose your size, checkout directly, and come back anytime for reorders.
+            </p>
+
+            <div class="ps-meta-row">
+              <span>{{ collection.products_count }} {% if collection.products_count == 1 %}item{% else %}items{% endif %}</span>
+              <span>Direct checkout</span>
+              <span>Reorder anytime</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ps-action-panel">
+          <div class="ps-action-panel-title">Store actions</div>
+
+          <a class="ps-btn ps-btn-solid ps-shop-anchor" href="#ProductGridContainer">
+            Shop products ↓
+          </a>
+
+          <a class="ps-btn ps-btn-ghost" href="/pages/portal">
+            ← Dashboard
+          </a>
+
+          {% if is_admin %}
+            <button class="ps-btn ps-btn-soft" id="psShareStoreBtn" type="button">
+              🔗 Share Store
+            </button>
+
+            <a class="ps-btn ps-btn-admin" href="/pages/admin-powers?shop={{ handle | url_encode }}">
+              Admin Powers
+            </a>
+          {% endif %}
+        </div>
+
+      </div>
+
       {% if is_admin %}
-        <a class="ps-btn ps-btn-solid" href="/pages/admin-powers?shop={{ handle | url_encode }}">Admin Powers</a>
+        <div class="ps-admin-mobile-bar" aria-label="Admin quick actions">
+          <button class="ps-mobile-pill" id="psShareStoreBtnMobile" type="button">🔗 Share</button>
+          <a class="ps-mobile-pill ps-mobile-pill--dark" href="/pages/admin-powers?shop={{ handle | url_encode }}">Admin</a>
+        </div>
       {% endif %}
     </div>
+  </section>
 
-    <div class="ps-divider mobile-hide" aria-hidden="true"></div>
-  </div>
-</section>
+  {% if is_admin %}
+    <div class="ps-share-overlay" id="psShareOverlay" aria-hidden="true">
+      <div class="ps-share-dialog" role="dialog" aria-modal="true" aria-labelledby="psShareTitle">
+        <button class="ps-share-close" id="psShareClose" type="button" aria-label="Close share options">✕</button>
+
+        <div class="ps-share-head">
+          <div class="ps-share-icon">🔗</div>
+          <div>
+            <h2 id="psShareTitle">Share this store</h2>
+            <p>Send this link to parents, teammates, members, or anyone who needs to shop this storefront.</p>
+          </div>
+        </div>
+
+        <div class="ps-share-tabs" role="tablist">
+          <button class="ps-share-tab active" type="button" data-ps-share-tab="link">Copy Link</button>
+          <button class="ps-share-tab" type="button" data-ps-share-tab="qr">QR Code</button>
+        </div>
+
+        <div class="ps-share-panel active" data-ps-share-panel="link">
+          <label class="ps-share-label" for="psJoinLink">Store invite link</label>
+          <div class="ps-copy-row">
+            <input id="psJoinLink" class="ps-copy-input" value="{{ join_link | escape }}" readonly>
+            <button id="psCopyJoinLink" class="ps-copy-button" type="button">Copy</button>
+          </div>
+          <p class="ps-share-helper">
+            New users will be asked to sign in or create an account. After joining, this store will appear on their dashboard.
+          </p>
+        </div>
+
+        <div class="ps-share-panel" data-ps-share-panel="qr">
+          <div class="ps-qr-box">
+            <div id="psQRCode"></div>
+            <p>Great for team meetings, flyers, group texts, or in-person signups.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+{% elsif customer and allowed == false %}
+
+  <section class="ps-hero ps-hero--auth">
+    <div class="ps-wrap ps-center">
+      <div class="ps-auth-card">
+        <div class="ps-auth-icon">🚫</div>
+        <h1 class="ps-title">Access required</h1>
+        <p class="ps-sub">You do not currently have access to this private store.</p>
+        <div class="ps-actions">
+          <a class="ps-btn ps-btn-solid" href="/pages/portal">Request access</a>
+          <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% else %}
+
+  <section class="ps-hero ps-hero--auth">
+    <div class="ps-wrap ps-center">
+      <div class="ps-auth-card">
+        <div class="ps-auth-icon">🔒</div>
+        <h1 class="ps-title">Sign in to access your private store</h1>
+        <p class="ps-sub">This storefront is private. Sign in to view approved products and reorders.</p>
+        <div class="ps-actions">
+          <a class="ps-btn ps-btn-solid" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">Sign in</a>
+          <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endif %}
 
 {%- comment -%} --- GRID LOGO OVERLAY LOGIC --- {%- endcomment -%}
 <style>
   .card__inner { position: relative !important; overflow: visible !important; }
+
   .ss-grid-overlay {
-    position: absolute; top: 20%; left: 20%; width: 60%; height: 60%;
-    z-index: 5; pointer-events: none;
-    display: flex; align-items: center; justify-content: center;
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    width: 60%;
+    height: 60%;
+    z-index: 5;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .ss-grid-overlay img { position: absolute; width: auto; max-width: 100%; height: auto; }
+
+  .ss-grid-overlay img {
+    position: absolute;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+  }
 </style>
 
 <script>
@@ -109,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function() {
     {% assign pos = p.metafields.custom.logo_position %}
     {% if pos != blank and pos != "approved" and pos != "DELETED" %}
       (function() {
-        const card = document.querySelector('[data-product-id="{{ p.id }}"] .card__inner') || 
+        const card = document.querySelector('[data-product-id="{{ p.id }}"] .card__inner') ||
                      document.querySelector('.card[data-id="{{ p.id }}"] .card__inner');
         if (card && !card.querySelector('.ss-grid-overlay')) {
           const overlay = document.createElement('div');
@@ -124,75 +246,797 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 <style>
-  /* BASE STYLES (Desktop) */
-  .ps-hero {
-    padding: 38px 16px 18px;
-    background-color: #fff;
-    background-image: radial-gradient(circle, rgba(0,0,0,.035) 1px, transparent 1px);
-    background-size: 32px 32px;
+  #ps-storefront-{{ section.id }},
+  #ps-storefront-{{ section.id }} * {
+    box-sizing: border-box;
   }
-  .ps-wrap { max-width: 980px; margin: 0 auto; }
-  .ps-center { text-align: center; }
-  
-  .ps-logo {
-    width: 140px; height: 140px; margin: 0 auto 14px;
-    display:flex; align-items:center; justify-content:center;
+
+  #ps-storefront-{{ section.id }} {
     position: relative;
-    box-shadow: 0 2px 12px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.03);
-  }
-  .ps-logo-img { max-width: 100%; max-height: 100%; object-fit: contain; display:block; position: relative; z-index: 1; }
-  .ps-logo-fallback { font-weight: 900; font-size: 46px; opacity: .35; position: relative; z-index: 1; }
-  
-  .ps-title { margin: 0; font-size: clamp(38px, 5vw, 64px); font-weight: 700; letter-spacing: -0.025em; line-height: 1.02; }
-  .ps-sub { margin: 10px auto 0; max-width: 720px; color: rgba(0,0,0,.55); font-size: 16px; }
-  
-  .ps-actions { margin-top: 18px; display:flex; gap: 12px; justify-content:center; flex-wrap: wrap; }
-  .ps-btn { display:inline-flex; align-items:center; justify-content:center; padding: 12px 24px; border-radius: 999px; text-decoration:none; font-weight: 800; border: 1px solid rgba(0,0,0,.14); font-size: 14px; transition: opacity .15s ease, box-shadow .15s ease; }
-  .ps-btn:hover{ opacity: .92; box-shadow: 0 4px 14px rgba(0,0,0,.10); }
-  .ps-btn-solid { background: #111; color: #fff; border-color: rgba(183,163,106,.55); }
-  .ps-btn-ghost { background: #f4f4f4; color: #111; border: none; }
-  
-  /* Neutral horizontal divider */
-  .ps-divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.09) 50%, transparent 100%);
-    margin: 28px auto 0;
-    max-width: 760px;
-    border: none;
+    overflow: hidden;
+    padding: 34px 20px 30px;
+    background:
+      radial-gradient(circle at 18% 0%, rgba(183,163,106,.10), transparent 30%),
+      radial-gradient(circle at 82% 12%, rgba(255,255,255,.90), transparent 25%),
+      linear-gradient(180deg, #fbf8f1 0%, #fffdf9 42%, #ffffff 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #11100e;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
-  /* Entrance animations — respect reduced-motion */
-  @media (prefers-reduced-motion: no-preference){
-    @keyframes ps-fadein-scale{
-      from{ opacity: 0; transform: scale(.95); }
-      to{ opacity: 1; transform: scale(1); }
-    }
-    @keyframes ps-fadeup{
-      from{ opacity: 0; transform: translateY(10px); }
-      to{ opacity: 1; transform: translateY(0); }
-    }
-    .ps-logo{ animation: ps-fadein-scale 400ms ease both; }
-    .ps-title{ animation: ps-fadeup 400ms ease 90ms both; }
-    .ps-sub{ animation: ps-fadeup 400ms ease 160ms both; }
-    .ps-actions{ animation: ps-fadeup 400ms ease 220ms both; }
+  #ps-storefront-{{ section.id }} .ps-shell {
+    width: min(1440px, 100%);
+    margin: 0 auto;
   }
 
-  /* --- MOBILE OPTIMIZATION --- */
+  #ps-storefront-{{ section.id }} .ps-hero-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 34px;
+    align-items: center;
+    min-height: 310px;
+    padding: clamp(28px, 4vw, 56px);
+    border-radius: 44px;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(183,163,106,.13), transparent 34%),
+      linear-gradient(135deg, rgba(255,255,255,.86), rgba(255,255,255,.56));
+    border: 1px solid rgba(255,255,255,.86);
+    box-shadow: 0 34px 120px rgba(17,16,14,.10);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-hero-main {
+    display: flex;
+    align-items: center;
+    gap: clamp(22px, 3.2vw, 42px);
+    min-width: 0;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-logo {
+    width: clamp(126px, 14vw, 210px);
+    height: clamp(126px, 14vw, 210px);
+    border-radius: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.66));
+    border: 1px solid rgba(17,16,14,.07);
+    box-shadow: 0 22px 70px rgba(17,16,14,.08);
+    overflow: hidden;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-logo-img {
+    width: 86%;
+    height: 86%;
+    object-fit: contain;
+    display: block;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-logo-fallback {
+    color: #11100e;
+    font-size: 58px;
+    font-weight: 950;
+    letter-spacing: -.06em;
+    opacity: .28;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-copy {
+    min-width: 0;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 34px;
+    padding: 0 13px;
+    margin-bottom: 16px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.045);
+    color: rgba(17,16,14,.56);
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #10b981;
+    box-shadow: 0 0 0 6px rgba(16,185,129,.10);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-title {
+    max-width: 900px;
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: .92;
+    letter-spacing: -.075em;
+    font-weight: 950;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-sub {
+    max-width: 660px;
+    margin: 18px 0 0;
+    color: rgba(17,16,14,.62);
+    font-size: clamp(17px, 1.7vw, 22px);
+    line-height: 1.5;
+    font-weight: 480;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 22px;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-meta-row span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.07);
+    color: rgba(17,16,14,.62);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .075em;
+    text-transform: uppercase;
+    box-shadow: 0 10px 28px rgba(17,16,14,.045);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-action-panel {
+    display: grid;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.62);
+    border: 1px solid rgba(17,16,14,.07);
+    box-shadow: 0 20px 70px rgba(17,16,14,.055);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-action-panel-title {
+    color: rgba(17,16,14,.46);
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    padding: 2px 4px 4px;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-btn,
+  .ps-share-dialog .ps-btn {
+    min-height: 50px;
+    padding: 0 20px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    text-decoration: none;
+    border: 1px solid rgba(17,16,14,.10);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 900;
+    white-space: nowrap;
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-btn-solid {
+    color: #fff;
+    background: #11100e;
+    border-color: rgba(183,163,106,.26);
+    box-shadow: 0 18px 44px rgba(17,16,14,.16);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-btn-ghost {
+    color: #11100e;
+    background: rgba(255,255,255,.75);
+    box-shadow: 0 12px 34px rgba(17,16,14,.07);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-btn-soft {
+    color: #11100e;
+    background: rgba(183,163,106,.12);
+    border-color: rgba(183,163,106,.16);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-btn-admin {
+    color: #11100e;
+    background: rgba(255,255,255,.88);
+    border-color: rgba(17,16,14,.12);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn {
+    width: 100%;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-admin-mobile-bar {
+    display: none;
+  }
+
+  .ps-hero--auth {
+    padding: 70px 20px;
+    background:
+      radial-gradient(circle at 18% 0%, rgba(183,163,106,.10), transparent 30%),
+      linear-gradient(180deg, #fbf8f1 0%, #ffffff 100%);
+  }
+
+  .ps-auth-card {
+    width: min(560px, 100%);
+    margin: 0 auto;
+    padding: 42px 28px;
+    border-radius: 34px;
+    background: rgba(255,255,255,.78);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 28px 100px rgba(17,16,14,.075);
+  }
+
+  .ps-auth-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 22px;
+    background: rgba(183,163,106,.12);
+    font-size: 28px;
+  }
+
+  .ps-wrap {
+    width: min(980px, 100%);
+    margin: 0 auto;
+  }
+
+  .ps-center {
+    text-align: center;
+  }
+
+  .ps-share-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+    background: rgba(17,16,14,.56);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .ps-share-overlay.open {
+    display: flex;
+  }
+
+  .ps-share-dialog {
+    width: min(560px, 100%);
+    position: relative;
+    padding: 24px;
+    border-radius: 34px;
+    background:
+      radial-gradient(circle at 16% 0%, rgba(183,163,106,.11), transparent 34%),
+      linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.92));
+    border: 1px solid rgba(255,255,255,.80);
+    box-shadow: 0 34px 120px rgba(0,0,0,.30);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #11100e;
+  }
+
+  .ps-share-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(17,16,14,.10);
+    border-radius: 14px;
+    background: rgba(255,255,255,.78);
+    color: #11100e;
+    font-size: 16px;
+    font-weight: 950;
+    cursor: pointer;
+  }
+
+  .ps-share-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding-right: 44px;
+    margin-bottom: 20px;
+  }
+
+  .ps-share-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    background: rgba(183,163,106,.12);
+    flex: 0 0 auto;
+    font-size: 22px;
+  }
+
+  .ps-share-head h2 {
+    margin: 0;
+    color: #11100e;
+    font-size: 24px;
+    line-height: 1.05;
+    letter-spacing: -.045em;
+    font-weight: 950;
+  }
+
+  .ps-share-head p {
+    margin: 8px 0 0;
+    color: rgba(17,16,14,.62);
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .ps-share-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 5px;
+    border-radius: 18px;
+    background: rgba(17,16,14,.045);
+    margin-bottom: 18px;
+  }
+
+  .ps-share-tab {
+    min-height: 42px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: rgba(17,16,14,.58);
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .ps-share-tab.active {
+    background: #fff;
+    color: #11100e;
+    box-shadow: 0 10px 26px rgba(17,16,14,.075);
+  }
+
+  .ps-share-panel {
+    display: none;
+  }
+
+  .ps-share-panel.active {
+    display: block;
+  }
+
+  .ps-share-label {
+    display: block;
+    margin: 0 0 8px;
+    color: rgba(17,16,14,.48);
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .ps-copy-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .ps-copy-input {
+    min-width: 0;
+    flex: 1;
+    min-height: 50px;
+    padding: 0 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(17,16,14,.10);
+    background: rgba(255,255,255,.82);
+    color: rgba(17,16,14,.72);
+    font-size: 13px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .ps-copy-button {
+    min-height: 50px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 16px;
+    background: #11100e;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 950;
+    cursor: pointer;
+  }
+
+  .ps-share-helper {
+    margin: 12px 0 0;
+    color: rgba(17,16,14,.58);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .ps-qr-box {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    padding: 20px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.08);
+  }
+
+  .ps-qr-box canvas,
+  .ps-qr-box img {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .ps-qr-box p {
+    max-width: 320px;
+    margin: 0;
+    text-align: center;
+    color: rgba(17,16,14,.58);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes ps-fadeup {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #ps-storefront-{{ section.id }} .ps-hero-card {
+      animation: ps-fadeup 420ms ease both;
+    }
+  }
+
+  @media (max-width: 990px) {
+    #ps-storefront-{{ section.id }} .ps-hero-card {
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: center;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel-title {
+      grid-column: 1 / -1;
+    }
+  }
+
   @media (max-width: 768px) {
-    /* Hide the clutter */
-    .mobile-hide { display: none !important; }
-    
-    /* Padding: Enough top space so the logo doesn't hit the nav bar */
-    .ps-hero { padding: 30px 16px 10px 16px; }
-    
-    /* BIG LOGO: Increased from 80px to 150px */
-    .ps-logo { width: 150px; height: 150px; margin-bottom: 12px; }
-    
-    /* Title: Balanced size */
-    .ps-title { font-size: 32px; margin-bottom: 10px; }
+    #ps-storefront-{{ section.id }} {
+      padding: 8px 10px 8px;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(183,163,106,.07), transparent 24%),
+        linear-gradient(180deg, #fbf8f1 0%, #fffdf9 34%, #ffffff 100%);
+    }
+
+    #ps-storefront-{{ section.id }} .ps-shell {
+      width: 100%;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-hero-card {
+      min-height: auto;
+      padding: 12px;
+      border-radius: 22px;
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 11px;
+      align-items: center;
+      text-align: left;
+      box-shadow: 0 14px 44px rgba(17,16,14,.075);
+    }
+
+    #ps-storefront-{{ section.id }} .ps-hero-main {
+      display: contents;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-logo {
+      width: 72px;
+      height: 72px;
+      margin: 0;
+      border-radius: 18px;
+      box-shadow: 0 10px 26px rgba(17,16,14,.07);
+    }
+
+    #ps-storefront-{{ section.id }} .ps-logo-img {
+      width: 88%;
+      height: 88%;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-copy {
+      min-width: 0;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-eyebrow {
+      display: none;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-title {
+      font-size: clamp(27px, 8.5vw, 38px);
+      line-height: .94;
+      letter-spacing: -.065em;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-sub {
+      display: none;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-meta-row {
+      margin-top: 7px;
+      gap: 5px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-meta-row span {
+      min-height: 23px;
+      padding: 0 8px;
+      font-size: 9px;
+      letter-spacing: .055em;
+      box-shadow: none;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-meta-row span:nth-child(n+3) {
+      display: none;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      width: 100%;
+      padding: 8px;
+      border-radius: 18px;
+      box-shadow: none;
+      background: rgba(255,255,255,.64);
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel-title {
+      display: none;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-btn {
+      width: 100%;
+      min-height: 38px;
+      padding: 0 10px;
+      font-size: 12px;
+      border-radius: 999px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-shop-anchor {
+      display: none;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn-ghost {
+      order: 4;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn-soft {
+      order: 1;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn-admin {
+      order: 2;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-admin-mobile-bar {
+      display: none;
+    }
+
+    .ps-share-overlay {
+      align-items: flex-end;
+      padding: 12px;
+    }
+
+    .ps-share-dialog {
+      border-radius: 28px;
+      padding: 18px;
+      max-height: calc(100vh - 24px);
+      overflow-y: auto;
+    }
+
+    .ps-share-head {
+      display: block;
+      padding-right: 42px;
+    }
+
+    .ps-share-icon {
+      width: 46px;
+      height: 46px;
+      margin-bottom: 12px;
+    }
+
+    .ps-share-head h2 {
+      font-size: 25px;
+    }
+
+    .ps-copy-row {
+      flex-direction: column;
+    }
+
+    .ps-copy-button {
+      width: 100%;
+    }
+
+    .ps-hero--auth {
+      padding: 30px 14px;
+    }
+
+    .ps-auth-card {
+      padding: 30px 18px;
+      border-radius: 28px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    #ps-storefront-{{ section.id }} .ps-hero-card {
+      grid-template-columns: 64px minmax(0, 1fr);
+      padding: 10px;
+      gap: 10px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-title {
+      font-size: 26px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-meta-row span {
+      font-size: 8.5px;
+      padding: 0 7px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-action-panel {
+      padding: 7px;
+      gap: 6px;
+    }
+
+    #ps-storefront-{{ section.id }} .ps-btn {
+      min-height: 36px;
+      font-size: 11.5px;
+    }
   }
 </style>
 
+{% if is_admin %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const overlay = document.getElementById("psShareOverlay");
+  const openBtn = document.getElementById("psShareStoreBtn");
+  const openBtnMobile = document.getElementById("psShareStoreBtnMobile");
+  const closeBtn = document.getElementById("psShareClose");
+  const copyBtn = document.getElementById("psCopyJoinLink");
+  const input = document.getElementById("psJoinLink");
+  const qrBox = document.getElementById("psQRCode");
+  const tabs = document.querySelectorAll("[data-ps-share-tab]");
+  const panels = document.querySelectorAll("[data-ps-share-panel]");
+  let qrMade = false;
+
+  function openShare() {
+    if (!overlay) return;
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    if (!qrMade && qrBox && window.QRCode && input) {
+      qrBox.innerHTML = "";
+      new QRCode(qrBox, {
+        text: input.value,
+        width: 180,
+        height: 180,
+        colorDark: "#11100e",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+      qrMade = true;
+    }
+  }
+
+  function closeShare() {
+    if (!overlay) return;
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  if (openBtn) openBtn.addEventListener("click", openShare);
+  if (openBtnMobile) openBtnMobile.addEventListener("click", openShare);
+  if (closeBtn) closeBtn.addEventListener("click", closeShare);
+
+  if (overlay) {
+    overlay.addEventListener("click", function(e) {
+      if (e.target === overlay) closeShare();
+    });
+  }
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closeShare();
+  });
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener("click", function() {
+      const target = tab.getAttribute("data-ps-share-tab");
+
+      tabs.forEach(function(t) {
+        t.classList.toggle("active", t === tab);
+      });
+
+      panels.forEach(function(panel) {
+        panel.classList.toggle("active", panel.getAttribute("data-ps-share-panel") === target);
+      });
+    });
+  });
+
+  if (copyBtn && input) {
+    copyBtn.addEventListener("click", function() {
+      const original = copyBtn.textContent;
+      const text = input.value;
+
+      function copied() {
+        copyBtn.textContent = "Copied";
+        setTimeout(function() {
+          copyBtn.textContent = original;
+        }, 1600);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(copied).catch(function() {
+          input.select();
+          document.execCommand("copy");
+          copied();
+        });
+      } else {
+        input.select();
+        document.execCommand("copy");
+        copied();
+      }
+    });
+  }
+});
+</script>
+{% endif %}
+
 {% schema %}
-{ "name": "Private Store Hero", "settings": [], "presets": [{ "name": "Private Store Hero" }] }
+{
+  "name": "Private Store Hero",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Private Store Hero"
+    }
+  ]
+}
 {% endschema %}
