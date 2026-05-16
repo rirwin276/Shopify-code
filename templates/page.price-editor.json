@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "price-editor-page": {
+      "type": "price-editor-page",
+      "settings": {}
+    }
+  },
+  "order": [
+    "price-editor-page"
+  ]
+}

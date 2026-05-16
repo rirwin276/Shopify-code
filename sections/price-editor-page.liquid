@@ -1,0 +1,421 @@
+{%- assign is_super_admin = false -%}
+{%- if customer -%}
+  {%- if customer.email == 'ryan.irwin@stellaandsagecompany.com' -%}
+    {%- assign is_super_admin = true -%}
+  {%- endif -%}
+  {%- for t in customer.tags -%}
+    {%- assign tag_down = t | downcase | strip -%}
+    {%- if tag_down == 'super-admin' -%}
+      {%- assign is_super_admin = true -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py. {% endcomment -%}
+{%- assign fallback_editor_secret = 'stellasage-god-mode-2026-xK9mP' -%}
+{%- assign mf_editor_secret = shop.metafields.custom.editor_secret.value | default: shop.metafields.custom.editor_secret -%}
+{%- assign editor_secret = mf_editor_secret | default: fallback_editor_secret -%}
+
+{%- if is_super_admin == false -%}
+  <script>window.location.replace('/pages/portal');</script>
+  <noscript><meta http-equiv="refresh" content="0; url=/pages/portal"></noscript>
+{%- else -%}
+
+{%- style -%}
+  :root {
+    --ap-bg: #f0f4f8;
+    --ap-card: #ffffff;
+    --ap-text: #0f172a;
+    --ap-gray: #64748b;
+    --ap-border: #e2e8f0;
+    --ap-accent: #0f172a;
+    --ap-accent2: #6366f1;
+    --ap-success: #10b981;
+    --ap-danger: #ef4444;
+    --ap-shadow: 0 4px 16px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.04);
+    --ap-radius: 18px;
+    --ap-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  }
+
+  .pe-wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    font-family: var(--ap-font);
+    color: var(--ap-text);
+  }
+  .pe-card {
+    background: var(--ap-card);
+    border: 1px solid var(--ap-border);
+    border-radius: var(--ap-radius);
+    box-shadow: var(--ap-shadow);
+    padding: 28px;
+  }
+  .pe-head {
+    margin-bottom: 18px;
+  }
+  .pe-head h1 {
+    margin: 0 0 8px;
+    font-size: clamp(24px, 4vw, 34px);
+    letter-spacing: -0.02em;
+  }
+  .pe-head p {
+    margin: 0;
+    color: var(--ap-gray);
+    font-size: 14px;
+  }
+  .ap-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--ap-border);
+  }
+  .ap-price-row:last-child { border-bottom: none; }
+  .ap-price-label {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ap-text);
+  }
+  .ap-price-label span {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ap-gray);
+    margin-top: 2px;
+  }
+  .ap-price-input {
+    width: 90px;
+    padding: 9px 12px;
+    border: 1.5px solid var(--ap-border);
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    font-family: var(--ap-font);
+    background: #fff;
+    color: var(--ap-text);
+    box-sizing: border-box;
+  }
+  .ap-price-input:focus {
+    outline: none;
+    border-color: var(--ap-accent2);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+  }
+  .pe-spinner {
+    text-align: center;
+    padding: 32px;
+    color: var(--ap-gray);
+    font-size: 14px;
+  }
+  .pe-actions {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .pe-apply-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ap-text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .pe-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-height: 44px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--ap-font);
+    border: none;
+    background: var(--ap-accent);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pe-btn:hover { background: #1e293b; transform: translateY(-1px); }
+  .pe-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+  .pe-status {
+    min-height: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .pe-status.ok { color: #047857; }
+  .pe-status.err { color: #b91c1c; }
+  .pe-job {
+    display: none;
+    margin-top: 8px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 720px) {
+    .pe-wrap { padding: 20px 14px 46px; }
+    .pe-card { padding: 18px; }
+    .ap-price-row { gap: 10px; }
+    .ap-price-input { width: 84px; }
+    .pe-btn { width: 100%; }
+  }
+{%- endstyle -%}
+
+<div class="pe-wrap">
+  <div class="pe-card">
+    <div class="pe-head">
+      <h1>Price Editor</h1>
+      <p>Set global retail prices. Optionally apply changes to existing active Shopify products.</p>
+    </div>
+
+    <div id="peSpinner" class="pe-spinner">⏳ Loading prices…</div>
+    <div id="peTable" style="display:none;"></div>
+
+    <div class="pe-actions" id="peActions" style="display:none;">
+      <label class="pe-apply-wrap" for="peApplyExisting">
+        <input id="peApplyExisting" type="checkbox" checked>
+        <span>Apply to Existing Products</span>
+      </label>
+
+      <button id="peSaveBtn" class="pe-btn" type="button">💾 Save Prices</button>
+      <div id="peStatus" class="pe-status"></div>
+      <div id="peJobStatus" class="pe-job"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var RAILWAY = 'https://printfulautomation-production.up.railway.app';
+  var SECRET = {{ editor_secret | json }};
+  var PRICE_MODULES = {
+    'BC3413_front':      { label: 'BC3413 Classic Tee',     sub: 'Front print only' },
+    'BC3413_front_back': { label: 'BC3413 Classic Tee',     sub: 'Front + back print' },
+    'M2580_front':       { label: 'M2580 Hoodie',           sub: 'Front print only' },
+    'M2580_front_back':  { label: 'M2580 Hoodie',           sub: 'Front + back print' },
+    'NL6733_front':      { label: 'NL6733 Tank Top',        sub: 'Front print' },
+    'CC1467Y_front':     { label: 'CC1467Y Youth Hoodie',   sub: 'Front print' },
+    'MC1790_front':      { label: 'MC1790 Tank Top',        sub: 'Front print' },
+    'BC3001Y_front':     { label: 'BC3001Y Youth T-Shirt',  sub: 'Front print' },
+    '39165_front':       { label: 'Otto 39-165 Hat',        sub: 'Front print' }
+  };
+
+  function headers() {
+    return {
+      'Content-Type': 'application/json',
+      'X-Editor-Secret': SECRET
+    };
+  }
+
+  function setStatus(msg, type) {
+    var el = document.getElementById('peStatus');
+    el.textContent = msg || '';
+    el.className = 'pe-status' + (type ? ' ' + type : '');
+  }
+
+  function setJobStatus(msg, visible) {
+    var el = document.getElementById('peJobStatus');
+    el.textContent = msg || '';
+    el.style.display = visible ? 'block' : 'none';
+  }
+
+  function renderPricingTable(prices) {
+    var table = document.getElementById('peTable');
+    table.innerHTML = '';
+
+    Object.keys(PRICE_MODULES).forEach(function(key) {
+      var info = PRICE_MODULES[key];
+      var rawValue = prices && prices[key] != null ? Number(prices[key]) : NaN;
+      var value = Number.isFinite(rawValue) ? String(rawValue) : '';
+
+      var row = document.createElement('div');
+      row.className = 'ap-price-row';
+
+      var label = document.createElement('div');
+      label.className = 'ap-price-label';
+      label.textContent = info.label;
+
+      var sub = document.createElement('span');
+      sub.textContent = info.sub;
+      label.appendChild(sub);
+
+      var inputWrap = document.createElement('div');
+      inputWrap.style.display = 'flex';
+      inputWrap.style.alignItems = 'center';
+      inputWrap.style.gap = '6px';
+
+      var dollar = document.createElement('span');
+      dollar.style.fontSize = '16px';
+      dollar.style.fontWeight = '700';
+      dollar.style.color = 'var(--ap-gray)';
+      dollar.textContent = '$';
+
+      var input = document.createElement('input');
+      input.className = 'ap-price-input';
+      input.type = 'number';
+      input.min = '1';
+      input.max = '999';
+      input.step = '1';
+      input.setAttribute('data-module', key);
+      input.value = value;
+
+      inputWrap.appendChild(dollar);
+      inputWrap.appendChild(input);
+
+      row.appendChild(label);
+      row.appendChild(inputWrap);
+
+      table.appendChild(row);
+    });
+
+    document.getElementById('peSpinner').style.display = 'none';
+    table.style.display = 'block';
+    document.getElementById('peActions').style.display = 'flex';
+  }
+
+  function collectPrices() {
+    var prices = {};
+    document.querySelectorAll('.ap-price-input').forEach(function(inp) {
+      var key = inp.getAttribute('data-module');
+      var val = parseFloat(inp.value);
+      if (key && Number.isFinite(val) && val > 0) prices[key] = val;
+    });
+    return prices;
+  }
+
+  function loadPrices() {
+    fetch(RAILWAY + '/api/pricing', {
+      method: 'GET',
+      headers: headers(),
+      cache: 'no-store'
+    })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Failed to load prices (' + r.status + ')');
+        return r.json();
+      })
+      .then(function(data) {
+        var prices = data && data.prices ? data.prices : data;
+        renderPricingTable(prices || {});
+      })
+      .catch(function(err) {
+        document.getElementById('peSpinner').style.display = 'none';
+        setStatus('❌ ' + err.message, 'err');
+      });
+  }
+
+  function pollJob(jobId) {
+    var attempts = 0;
+    var maxAttempts = 120;
+
+    function tick() {
+      attempts += 1;
+      fetch(RAILWAY + '/job/' + encodeURIComponent(jobId), {
+        method: 'GET',
+        headers: { 'X-Editor-Secret': SECRET },
+        cache: 'no-store'
+      })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Failed to poll job (' + r.status + ')');
+        return r.json();
+      })
+      .then(function(job) {
+        var state = (job.status || job.state || 'running').toLowerCase();
+        var progress = job.progress || job.percent || job.pct || '';
+        var countText = '';
+        if (job.processed != null && job.total != null) {
+          countText = ' • ' + job.processed + '/' + job.total;
+        }
+
+        setJobStatus('⏳ Repricing job ' + state + (progress !== '' ? ' • ' + progress + '%' : '') + countText, true);
+
+        if (state === 'completed' || state === 'complete' || state === 'success') {
+          setJobStatus('✅ Repricing complete.', true);
+          return;
+        }
+        if (state === 'failed' || state === 'error' || state === 'cancelled') {
+          setJobStatus('❌ Repricing failed: ' + (job.error || state), true);
+          return;
+        }
+        if (attempts < maxAttempts) {
+          setTimeout(tick, 2500);
+        } else {
+          setJobStatus('⚠️ Repricing still running. Refresh later to check status.', true);
+        }
+      })
+      .catch(function(err) {
+        setJobStatus('⚠️ Job status unavailable: ' + err.message, true);
+      });
+    }
+
+    tick();
+  }
+
+  function savePrices() {
+    var btn = document.getElementById('peSaveBtn');
+    var applyExisting = document.getElementById('peApplyExisting').checked;
+    var payload = {
+      prices: collectPrices(),
+      apply_to_existing: applyExisting,
+      apply_now: applyExisting
+    };
+
+    btn.disabled = true;
+    setStatus(applyExisting ? '⏳ Saving prices and starting repricing…' : '⏳ Saving prices…');
+    setJobStatus('', false);
+
+    fetch(RAILWAY + '/api/pricing', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(payload)
+    })
+      .then(function(r) {
+        return r.json().catch(function() { return {}; }).then(function(data) {
+          if (!r.ok || data.status === 'error') {
+            throw new Error(data.error || ('Failed to save prices (' + r.status + ')'));
+          }
+          return data;
+        });
+      })
+      .then(function(data) {
+        setStatus('✅ Prices saved.', 'ok');
+        var jobId = data.job_id || data.jobId || (data.job && (data.job.id || data.job.job_id));
+        if (applyExisting && jobId) {
+          pollJob(jobId);
+        } else if (applyExisting) {
+          setJobStatus('✅ Repricing started in the background.', true);
+        }
+      })
+      .catch(function(err) {
+        setStatus('❌ ' + err.message, 'err');
+      })
+      .finally(function() {
+        btn.disabled = false;
+      });
+  }
+
+  document.getElementById('peSaveBtn').addEventListener('click', savePrices);
+  loadPrices();
+})();
+</script>
+
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Price Editor Page",
+  "settings": [],
+  "presets": [
+    { "name": "Price Editor Page" }
+  ]
+}
+{% endschema %}
