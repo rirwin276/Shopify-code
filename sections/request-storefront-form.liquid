@@ -1,22 +1,22 @@
 {% comment %}
   STELLA & SAGE — STORE REQUEST FORM (RAILWAY ONLY) — SINGLE PAGE (NO WIZARD)
+
   - NO Make.com
-  - Uses Studio Uploader popup editor (iframe modal) for Main + Secondary images
+  - Uses Studio Uploader popup editor (iframe modal) for the Main Logo
   - Editor returns session_id + finalize_url via postMessage
   - Shopify fetches finalize JSON -> fetches final_image_url blob -> injects into <input type="file">
   - Submit is BLOCKED until Main image is actually saved/injected (photo ready)
-  - On submit: immediately shows the 90s provisioning screen (no “Sending to HQ” phase)
+  - On submit: immediately shows the 90s provisioning screen
   - If Railway fails: returns to form and shows the error
+  - After provisioning screen completes: redirects to dashboard with new_store=1 + store_handle param
 
   REQUIRED on FastAPI (app.py):
   - CORS enabled for your Shopify domain(s)
-  - GET /ui supports embed mode + return=postmessage + slot=main|secondary
-  - POST /api/storefront-request accepts fields + files (optional) + *_session_id (optional)
+  - GET /ui supports embed mode + return=postmessage + slot=main
+  - POST /api/storefront-request accepts fields + files + main_session_id
 
-  PATCH:
-  - Supports new app.py finalize contract:
-    POST /finalize/{session_id} => JSON
-    GET  /final-file/{session_id} => actual PNG
+  NOTE:
+  - Secondary logo upload has been removed. Pro Builders now handle additional/custom images.
 {% endcomment %}
 
 {% schema %}
@@ -47,6 +47,7 @@
 
 {{ 'ss-wow.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
+
 <div class="sf-container">
   <div class="sf-header ss-reveal">
     <h1 class="sf-h1">Request a Storefront</h1>
@@ -83,7 +84,6 @@
         <input type="hidden" name="customer_email" id="SF_CUST_EMAIL" value="{{ customer.email }}">
 
         <input type="hidden" name="main_session_id" id="SF_MAIN_SESSION" value="">
-        <input type="hidden" name="secondary_session_id" id="SF_SEC_SESSION" value="">
         <input type="hidden" name="type_of_store" id="SF_TYPE_OF_STORE" value="">
 
         <div class="sf-block ss-reveal" data-stagger="true">
@@ -221,13 +221,13 @@
         <div class="sf-divider"></div>
 
         <div class="sf-block ss-reveal" data-stagger="true">
-          <div class="sf-legend">Logos</div>
+          <div class="sf-legend">Logo</div>
 
           <div class="sf-field">
-            <label class="sf-label">Main Logo (Required) *</label>
+            <label class="sf-label">Main Logo / Store Image *</label>
 
-            <div class="sf-file-drop" id="MainLogoDrop" onclick="openUploaderModal('main')">
-              <span id="MainLogoText">🪄 Add & edit Main Logo</span>
+            <div class="sf-file-drop" id="MainLogoDrop" onclick="openUploaderModal()">
+              <span id="MainLogoText">🪄 Add & edit logo</span>
               <input
                 type="file"
                 id="MainLogo"
@@ -247,47 +247,13 @@
                 <div class="sf-quality-sub" id="MainLogoQualitySub"></div>
 
                 <div class="sf-actions sf-hidden" id="MainLogoActions">
-                  <button type="button" class="sf-action-btn" onclick="return openUploaderModal('main')">Edit</button>
-                  <button type="button" class="sf-action-btn sf-action-btn--ghost" onclick="return clearEdited('main')">Remove</button>
+                  <button type="button" class="sf-action-btn" onclick="return openUploaderModal()">Edit</button>
+                  <button type="button" class="sf-action-btn sf-action-btn--ghost" onclick="return clearEdited()">Remove</button>
                 </div>
               </div>
             </div>
 
             <div class="sf-mini-status sf-hidden" id="MainLogoPending">
-              Saving your image… please wait.
-            </div>
-          </div>
-
-          <div class="sf-field">
-            <label class="sf-label">Secondary Logo (Optional)</label>
-
-            <div class="sf-file-drop sf-file-drop--secondary" id="SecLogoDrop" onclick="openUploaderModal('secondary')">
-              <span id="SecLogoText">🪄 Add & edit Secondary Logo</span>
-              <input
-                type="file"
-                id="SecLogo"
-                name="storefront_logo_secondary"
-                class="sf-file-input"
-                accept="image/png, image/jpeg, image/webp"
-              >
-            </div>
-
-            <div class="sf-preview-row sf-hidden" id="SecLogoPreviewRow">
-              <img id="SecLogoPreview" class="sf-preview-img" alt="Secondary logo preview" width="74" height="74" loading="lazy">
-              <div class="sf-preview-meta">
-                <div class="sf-badge-row">
-                  <span class="sf-badge sf-badge--neutral" id="SecLogoBadge">Checking…</span>
-                </div>
-                <div class="sf-quality-sub" id="SecLogoQualitySub"></div>
-
-                <div class="sf-actions sf-hidden" id="SecLogoActions">
-                  <button type="button" class="sf-action-btn" onclick="return openUploaderModal('secondary')">Edit</button>
-                  <button type="button" class="sf-action-btn sf-action-btn--ghost" onclick="return clearEdited('secondary')">Remove</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="sf-mini-status sf-hidden" id="SecLogoPending">
               Saving your image… please wait.
             </div>
 
@@ -321,7 +287,7 @@
         <div class="sf-provision-card">
           <div class="sf-spinner sf-spinner--big"></div>
           <div class="sf-provision-title">Creating your storefront…</div>
-          <div class="sf-provision-sub">This usually takes about a minute.</div>
+          <div class="sf-provision-sub">This usually takes about a minute. Your full product build will continue on your dashboard.</div>
 
           <div class="sf-progress">
             <div id="sf-progress-bar" class="sf-progress-bar"></div>
@@ -371,12 +337,10 @@
   const SF_IS_ADMIN = (SF_USER_EMAIL === SF_ADMIN_EMAIL);
 
   const sfQualityState = {
-    main: { tier: null, okToSubmit: false, hasFile: false, pending: false },
-    secondary: { tier: null, okToSubmit: true, hasFile: false, pending: false }
+    main: { tier: null, okToSubmit: false, hasFile: false, pending: false }
   };
 
   let sfToastTimer = null;
-  let sfActiveSlot = "main";
   let sfProvisionTimer = null;
   let sfProvisionStart = 0;
   let sfProvisionWasShown = false;
@@ -487,9 +451,7 @@
     form.addEventListener('change', (e) => clearIfValid(e.target), { passive: true });
   }
 
-  function openUploaderModal(slot) {
-    sfActiveSlot = slot === "secondary" ? "secondary" : "main";
-
+  function openUploaderModal() {
     const modal = document.getElementById("sf-uploader-modal");
     const iframe = document.getElementById("sf-uploader-iframe");
     const chip = document.getElementById("sf-modal-slot");
@@ -501,19 +463,19 @@
       return;
     }
 
-    if (chip) chip.textContent = sfActiveSlot;
+    if (chip) chip.textContent = "main";
 
-    // Escape any transformed ancestor (belt-and-suspenders fix)
     if (modal.parentNode !== document.body) {
       document.body.appendChild(modal);
     }
 
-    const src = SF_UPLOADER_BASE + "/ui?embed=1&return=postmessage&slot=" + encodeURIComponent(sfActiveSlot);
+    const src = SF_UPLOADER_BASE + "/ui?embed=1&return=postmessage&slot=main";
     iframe.src = src;
 
     modal.classList.remove("sf-hidden");
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+    return false;
   }
 
   function closeUploaderModal() {
@@ -539,11 +501,10 @@
       return;
     }
 
-    const slot = (msg.slot === "secondary") ? "secondary" : "main";
     const finalizeUrl = msg.finalize_url || "";
     const directFinalImageUrl = msg.final_image_url || "";
     const sessionId = msg.session_id || "";
-    const filename = msg.filename || (slot === "main" ? "main_logo.png" : "secondary_logo.png");
+    const filename = msg.filename || "main_logo.png";
     const mime = msg.mime || "image/png";
 
     if (!finalizeUrl || !sessionId) {
@@ -552,7 +513,7 @@
       return;
     }
 
-    setPending(slot, true);
+    setPending(true);
 
     try {
       const finalizeRes = await fetch(finalizeUrl, {
@@ -596,40 +557,33 @@
 
       const file = new File([blob], filename, { type: mime });
 
-      const input = document.getElementById(slot === "main" ? "MainLogo" : "SecLogo");
+      const input = document.getElementById("MainLogo");
       if (input) {
         const dt = new DataTransfer();
         dt.items.add(file);
         input.files = dt.files;
       }
 
-      if (slot === "main") {
-        const hs = document.getElementById("SF_MAIN_SESSION");
-        if (hs) hs.value = sessionId;
-      } else {
-        const hs = document.getElementById("SF_SEC_SESSION");
-        if (hs) hs.value = sessionId;
-      }
+      const hs = document.getElementById("SF_MAIN_SESSION");
+      if (hs) hs.value = sessionId;
 
-      await applyEditedPreview(slot, file);
+      await applyEditedPreview(file);
       closeUploaderModal();
     } catch (err) {
       console.error(err);
       sfToastShow("Could not save that image. Please try again.");
     } finally {
-      setPending(slot, false);
+      setPending(false);
       updateSubmitEnabled();
     }
   });
 
-  function setPending(slot, on) {
-    const isMain = (slot === "main");
-    const pendingId = isMain ? "MainLogoPending" : "SecLogoPending";
-    const badgeId = isMain ? "MainLogoBadge" : "SecLogoBadge";
-    const subId = isMain ? "MainLogoQualitySub" : "SecLogoQualitySub";
+  function setPending(on) {
+    const pendingId = "MainLogoPending";
+    const badgeId = "MainLogoBadge";
+    const subId = "MainLogoQualitySub";
 
-    if (isMain) sfQualityState.main.pending = !!on;
-    else sfQualityState.secondary.pending = !!on;
+    sfQualityState.main.pending = !!on;
 
     const p = document.getElementById(pendingId);
     if (p) p.classList.toggle("sf-hidden", !on);
@@ -640,16 +594,14 @@
     }
   }
 
-  async function applyEditedPreview(slot, file) {
-    const isMain = (slot === "main");
-
-    const textId = isMain ? "MainLogoText" : "SecLogoText";
-    const rowId = isMain ? "MainLogoPreviewRow" : "SecLogoPreviewRow";
-    const imgId = isMain ? "MainLogoPreview" : "SecLogoPreview";
-    const badgeId = isMain ? "MainLogoBadge" : "SecLogoBadge";
-    const subId = isMain ? "MainLogoQualitySub" : "SecLogoQualitySub";
-    const actionsId = isMain ? "MainLogoActions" : "SecLogoActions";
-    const dropId = isMain ? "MainLogoDrop" : "SecLogoDrop";
+  async function applyEditedPreview(file) {
+    const textId = "MainLogoText";
+    const rowId = "MainLogoPreviewRow";
+    const imgId = "MainLogoPreview";
+    const badgeId = "MainLogoBadge";
+    const subId = "MainLogoQualitySub";
+    const actionsId = "MainLogoActions";
+    const dropId = "MainLogoDrop";
 
     const labelEl = document.getElementById(textId);
     if (labelEl) labelEl.innerText = "✅ Ready";
@@ -705,15 +657,9 @@
       setBadge(badgeId, tier, headline);
       setText(subId, sub);
 
-      if (isMain) {
-        sfQualityState.main.hasFile = true;
-        sfQualityState.main.tier = tier;
-        sfQualityState.main.okToSubmit = (tier !== "bad");
-      } else {
-        sfQualityState.secondary.hasFile = true;
-        sfQualityState.secondary.tier = tier;
-        sfQualityState.secondary.okToSubmit = (tier !== "bad");
-      }
+      sfQualityState.main.hasFile = true;
+      sfQualityState.main.tier = tier;
+      sfQualityState.main.okToSubmit = (tier !== "bad");
 
       updateSubmitEnabled();
     };
@@ -722,15 +668,9 @@
       setBadge(badgeId, "bad", "Bad");
       setText(subId, "Preview failed to load. Please try again.");
 
-      if (isMain) {
-        sfQualityState.main.hasFile = false;
-        sfQualityState.main.tier = "bad";
-        sfQualityState.main.okToSubmit = false;
-      } else {
-        sfQualityState.secondary.hasFile = false;
-        sfQualityState.secondary.tier = "bad";
-        sfQualityState.secondary.okToSubmit = false;
-      }
+      sfQualityState.main.hasFile = false;
+      sfQualityState.main.tier = "bad";
+      sfQualityState.main.okToSubmit = false;
 
       updateSubmitEnabled();
     };
@@ -738,44 +678,30 @@
     image.src = url;
   }
 
-  function clearEdited(slot) {
-    const isMain = (slot === "main");
-    const inputId = isMain ? "MainLogo" : "SecLogo";
-    const previewImgId = isMain ? "MainLogoPreview" : "SecLogoPreview";
-    const input = document.getElementById(inputId);
+  function clearEdited() {
+    const input = document.getElementById("MainLogo");
+    const previewImg = document.getElementById("MainLogoPreview");
 
     if (input) input.value = "";
 
-    const previewImg = document.getElementById(previewImgId);
     if (previewImg && previewImg.dataset.objectUrl) {
       try { URL.revokeObjectURL(previewImg.dataset.objectUrl); } catch (e) {}
       delete previewImg.dataset.objectUrl;
       previewImg.removeAttribute("src");
     }
 
-    if (isMain) {
-      sfQualityState.main = { tier: null, okToSubmit: false, hasFile: false, pending: false };
-      hideEl("MainLogoPreviewRow", true);
-      hideEl("MainLogoActions", true);
-      hideEl("MainLogoPending", true);
-      setBadge("MainLogoBadge", "neutral", "Checking…");
-      setText("MainLogoQualitySub", "");
-      const t = document.getElementById("MainLogoText");
-      if (t) t.innerText = "🪄 Add & edit Main Logo";
-      const hs = document.getElementById("SF_MAIN_SESSION");
-      if (hs) hs.value = "";
-    } else {
-      sfQualityState.secondary = { tier: null, okToSubmit: true, hasFile: false, pending: false };
-      hideEl("SecLogoPreviewRow", true);
-      hideEl("SecLogoActions", true);
-      hideEl("SecLogoPending", true);
-      setBadge("SecLogoBadge", "neutral", "Checking…");
-      setText("SecLogoQualitySub", "");
-      const t = document.getElementById("SecLogoText");
-      if (t) t.innerText = "🪄 Add & edit Secondary Logo";
-      const hs = document.getElementById("SF_SEC_SESSION");
-      if (hs) hs.value = "";
-    }
+    sfQualityState.main = { tier: null, okToSubmit: false, hasFile: false, pending: false };
+    hideEl("MainLogoPreviewRow", true);
+    hideEl("MainLogoActions", true);
+    hideEl("MainLogoPending", true);
+    setBadge("MainLogoBadge", "neutral", "Checking…");
+    setText("MainLogoQualitySub", "");
+
+    const t = document.getElementById("MainLogoText");
+    if (t) t.innerText = "🪄 Add & edit logo";
+
+    const hs = document.getElementById("SF_MAIN_SESSION");
+    if (hs) hs.value = "";
 
     updateSubmitEnabled();
     return false;
@@ -826,6 +752,7 @@
     });
 
     generateHandle();
+
     const handle = (document.getElementById("HiddenHandle")?.value || "").trim();
     if (!handle) {
       markFieldError(document.getElementById("StoreName"));
@@ -839,22 +766,10 @@
     } else if (sfQualityState.main.pending) {
       markFieldError(mainDrop);
       ok = false;
-      showInlineError("Please wait — your main logo is still saving.");
+      showInlineError("Please wait — your logo is still saving.");
     } else if (sfQualityState.main.tier === "bad") {
       markFieldError(mainDrop);
       ok = false;
-    }
-
-    const secDrop = document.getElementById("SecLogoDrop");
-    if (sfQualityState.secondary.hasFile) {
-      if (sfQualityState.secondary.pending) {
-        markFieldError(secDrop);
-        ok = false;
-        showInlineError("Please wait — your secondary logo is still saving.");
-      } else if (sfQualityState.secondary.tier === "bad") {
-        markFieldError(secDrop);
-        ok = false;
-      }
     }
 
     if (!ok) {
@@ -870,7 +785,6 @@
     if (!btn) return;
 
     const isMainReady = sfQualityState.main.hasFile && !sfQualityState.main.pending && sfQualityState.main.okToSubmit;
-    const isSecOk = (!sfQualityState.secondary.hasFile) || (!sfQualityState.secondary.pending && sfQualityState.secondary.okToSubmit);
 
     const handle = (document.getElementById("HiddenHandle")?.value || "").trim();
     const hasHandle = !!handle;
@@ -878,9 +792,19 @@
     const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
     const limited = (!SF_IS_ADMIN && parseInt(localStorage.getItem(STORAGE_KEY) || 0) >= 3);
 
-    const enabled = !limited && isMainReady && isSecOk && hasHandle;
+    const enabled = !limited && isMainReady && hasHandle;
     btn.disabled = !enabled;
     btn.style.opacity = enabled ? "1" : "0.6";
+  }
+
+  function buildDashboardRedirectUrl() {
+    const handle = (document.getElementById("HiddenHandle")?.value || "").trim();
+
+    if (handle) {
+      return "/pages/portal?new_store=1&store_handle=" + encodeURIComponent(handle);
+    }
+
+    return "/pages/portal?new_store=1";
   }
 
   function startProvisioning90s() {
@@ -931,9 +855,10 @@
     sfProvisionTimer = setInterval(() => {
       const pct = Math.min(100, ((Date.now() - sfProvisionStart) / total) * 100);
       if (bar) bar.style.width = pct.toFixed(2) + '%';
+
       if (pct >= 100) {
         clearInterval(sfProvisionTimer);
-        window.location.href = "/pages/portal";
+        window.location.href = buildDashboardRedirectUrl();
       }
     }, 180);
   }
@@ -994,19 +919,20 @@
     const form = document.getElementById('sf-request-form');
     const formData = new FormData(form);
 
-    // Build type_of_store from org_type + conditional sub-field
     (function() {
       const orgType = (document.getElementById('OrgType')?.value || "").trim();
       const sportVal = (document.getElementById('SportInput')?.value || "").trim();
       const branchVal = (document.getElementById('BranchInput')?.value || "").trim();
+
       let typeOfStore = "";
       if (orgType === "Sports Team" && sportVal) {
-        typeOfStore = sportVal; // e.g. "softball"
+        typeOfStore = sportVal;
       } else if (orgType === "Military Unit" && branchVal) {
-        typeOfStore = branchVal; // e.g. "Army"
+        typeOfStore = branchVal;
       } else if (orgType) {
-        typeOfStore = orgType; // e.g. "Small Business", "Other"
+        typeOfStore = orgType;
       }
+
       const tosEl = document.getElementById('SF_TYPE_OF_STORE');
       if (tosEl) tosEl.value = typeOfStore;
       if (typeOfStore) formData.set("type_of_store", typeOfStore);
@@ -1022,19 +948,16 @@
     }
 
     const mainInput = document.getElementById("MainLogo");
-    const secInput  = document.getElementById("SecLogo");
 
     if (!mainInput || !mainInput.files || mainInput.files.length === 0 || (mainInput.files[0] && mainInput.files[0].size === 0)) {
       formData.delete("storefront_logo_file");
     }
-    if (!secInput || !secInput.files || secInput.files.length === 0 || (secInput.files[0] && secInput.files[0].size === 0)) {
-      formData.delete("storefront_logo_secondary");
-    }
 
     const ms = (document.getElementById("SF_MAIN_SESSION")?.value || "").trim();
-    const ss = (document.getElementById("SF_SEC_SESSION")?.value || "").trim();
     if (!ms) formData.delete("main_session_id");
-    if (!ss) formData.delete("secondary_session_id");
+
+    formData.delete("secondary_session_id");
+    formData.delete("storefront_logo_secondary");
 
     try {
       const res = await fetch(endpoint, {
@@ -1148,7 +1071,6 @@
   .sf-file-drop { border: 2px dashed #ddd; border-radius: 14px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; position: relative; font-weight: 900; }
   .sf-file-drop:hover { border-color: #999; background: #f0f0f0; }
   .sf-file-input { display: none; }
-  .sf-file-drop--secondary { padding: 18px; border-style: solid; border-width: 1px; font-weight: 900; }
 
   .sf-preview-row { margin-top: 12px; display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid #eee; border-radius: 14px; background: #fafafa; }
   .sf-preview-img { width: 74px; height: 74px; border-radius: 14px; object-fit: contain; background: #fff; border: 1px solid #e6e6e6; }
