@@ -1,611 +1,1555 @@
-<div class="res-wrap">
+{% comment %}
+  Stella & Sage — Resources / Logo Launch Helper
+  - Guided prompt helper, not a simple prompt dump.
+  - Category picker and prompt library are visually connected.
+  - Gold/background styling matches toned Stella & Sage homepage/dashboard system.
+  - User-editable prompt fields are highlighted with <mark>.
+  - Copy button copies clean text from rendered prompt.
+{% endcomment %}
 
-  <div class="res-hero">
-    <h1 class="res-h1">{{ section.settings.title }}</h1>
-    <p class="res-sub">{{ section.settings.subtitle }}</p>
-  </div>
+<section class="ss-resources" id="ss-resources-{{ section.id }}">
+  <div class="ss-res-wrap">
 
-  <div class="res-context-banner">
-    <span role="img" aria-label="Tip">💡</span> <strong>How to use this page:</strong> Generate your logo using the prompts below, then paste it into your <a href="/pages/request-storefront-form">storefront request form</a>.
-  </div>
+    <header class="ss-res-hero">
+      <div class="ss-res-kicker">Logo Launch Helper</div>
+      <h1 class="ss-res-h1">{{ section.settings.title }}</h1>
+      <p class="ss-res-sub">{{ section.settings.subtitle }}</p>
 
-  <!-- TAB BAR -->
-  <div class="res-tabs" role="tablist">
-    <button class="res-tab res-tab--active" role="tab" aria-selected="true"  data-tab="sports"    onclick="resShowTab('sports',this)">🏅 Sports Teams</button>
-    <button class="res-tab"               role="tab" aria-selected="false" data-tab="vacation"  onclick="resShowTab('vacation',this)">🏖️ Family Vacation</button>
-    <button class="res-tab"               role="tab" aria-selected="false" data-tab="weddings"  onclick="resShowTab('weddings',this)">💍 Weddings &amp; Parties</button>
-    <button class="res-tab"               role="tab" aria-selected="false" data-tab="groups"    onclick="resShowTab('groups',this)">🎲 Groups &amp; Other</button>
-  </div>
+      <div class="ss-res-hero-actions">
+        <a class="ss-res-btn ss-res-btn--dark" href="/pages/request-storefront-form">Request a storefront →</a>
+        <a class="ss-res-btn ss-res-btn--light" href="#logo-helper">Browse prompts</a>
+      </div>
+    </header>
 
-  <!-- ========== TAB 1 — SPORTS TEAMS ========== -->
-  <div class="res-panel" id="res-panel-sports">
+    <section class="ss-res-flow" aria-label="How to use this page">
+      <div class="ss-flow-card">
+        <span>01</span>
+        <h3>Pick a prompt</h3>
+        <p>Choose the logo style that fits your team, trip, event, business, or group.</p>
+      </div>
 
-    <div class="res-card">
-      <div class="res-card-title">Clean Team Wordmark</div>
-      <div class="res-prompt" id="res-prompt-sports-1">Create a bold, clean sports team logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
+      <div class="ss-flow-card">
+        <span>02</span>
+        <h3>Generate your logo</h3>
+        <p>Paste the prompt into ChatGPT and replace the highlighted parts.</p>
+      </div>
 
-Style: Strong athletic font with a slight forward slant. Thick solid lettering. Simple underline or swoosh. Optional small icon: <mark>[ICON – e.g. baseball, football, cleat]</mark>.
+      <div class="ss-flow-card">
+        <span>03</span>
+        <h3>Upload it</h3>
+        <p>Use the finished logo when you request your Stella &amp; Sage storefront.</p>
+      </div>
+    </section>
 
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+    <section class="ss-res-warning">
+      <div class="ss-warning-icon">!</div>
+      <div>
+        <strong>Important before you upload</strong>
+        <p>Your logo should have a transparent background, no extra padding, no mockup, and no empty space around it. The artwork should be tightly cropped, centered, crisp, and high resolution.</p>
+      </div>
+    </section>
 
-Logo Requirements:
-- Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-sports-1')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+    <section class="ss-logo-helper" id="logo-helper">
+      <div class="ss-helper-head">
+        <div>
+          <div class="ss-res-kicker">Prompt Library</div>
+          <h2>Choose a logo type. The prompts update below.</h2>
+          <p>Pick the closest category, open a prompt, replace the highlighted parts, then copy it into ChatGPT.</p>
+        </div>
+      </div>
 
-    <div class="res-card">
-      <div class="res-card-title">Mascot-Style Logo</div>
-      <div class="res-prompt" id="res-prompt-sports-2">Create a bold mascot sports logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>". The mascot is a <mark>[MASCOT – e.g. bulldog, hawk, tiger, bear]</mark>.
+      <div class="ss-res-categories" aria-label="Prompt categories">
+        <button class="ss-cat-card ss-cat-card--active" type="button" data-res-category="sports">
+          <span>🏅</span>
+          <strong>Sports Teams</strong>
+          <p>Wordmarks, mascots, badges, and hat-ready logos.</p>
+        </button>
 
-Style: Aggressive or energetic expression. Thick outlines. Cartoon-like but not childish. Mascot centered with team name integrated below or around it.
+        <button class="ss-cat-card" type="button" data-res-category="vacation">
+          <span>🏖️</span>
+          <strong>Family Trips</strong>
+          <p>Vacation crews, reunions, lake trips, and beach weeks.</p>
+        </button>
 
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+        <button class="ss-cat-card" type="button" data-res-category="parties">
+          <span>💍</span>
+          <strong>Weddings &amp; Parties</strong>
+          <p>Bachelor trips, bachelorette parties, and wedding marks.</p>
+        </button>
 
-Logo Requirements:
-- Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-sports-2')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+        <button class="ss-cat-card" type="button" data-res-category="groups">
+          <span>🎲</span>
+          <strong>Groups &amp; Fundraisers</strong>
+          <p>Clubs, businesses, charity events, and work teams.</p>
+        </button>
+      </div>
 
-    <div class="res-card">
-      <div class="res-card-title">Badge / Crest Style</div>
-      <div class="res-prompt" id="res-prompt-sports-3">Create a badge-style crest logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
+      <div class="ss-active-label" aria-live="polite">
+        <span>Showing prompts for:</span>
+        <strong data-active-category-label>Sports Teams</strong>
+      </div>
 
-Design: Circular or shield shape. Team name wraps around the outside. Centered icon: <mark>[ICON – e.g. crossed bats, soccer ball, hockey stick]</mark>. Clean symmetrical layout.
+      <div class="ss-prompt-library" id="prompt-library">
 
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+        <div class="ss-prompt-panel" data-panel="sports">
 
-Logo Requirements:
-- Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-sports-3')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for teams</span>
+                  <span>Shirts + hoodies</span>
+                </div>
+                <h3>Clean Team Wordmark</h3>
+                <p>Bold athletic lettering with a simple icon or underline.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
 
-    <div class="res-card">
-      <div class="res-card-title">Minimal Icon + Text (Best for Hats)</div>
-      <div class="res-prompt" id="res-prompt-sports-4">Create a minimal sports logo for a <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
+            <div class="ss-prompt-body">
+              <pre id="prompt-sports-1">Create a bold, clean sports team logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
 
-Design: Small simple icon (e.g. <mark>[ICON]</mark>) with bold team name beside or below it. Nothing else.
+Style:
+Strong athletic font with a slight forward slant. Thick solid lettering. Simple underline or swoosh. Optional small icon: <mark>[ICON — e.g. baseball, football, cleat, lightning bolt]</mark>.
 
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: black or white
-
-Logo Requirements:
-- Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-sports-4')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
-
-  </div><!-- /panel sports -->
-
-  <!-- ========== TAB 2 — FAMILY VACATION ========== -->
-  <div class="res-panel res-panel--hidden" id="res-panel-vacation">
-
-    <div class="res-card">
-      <div class="res-card-title">Classic Vacation Logo</div>
-      <div class="res-prompt" id="res-prompt-vacation-1">Create a fun, bold family vacation logo for a group called "<mark>[FAMILY LAST NAME]</mark> Family <mark>[YEAR]</mark>".
-
-Destination or theme: <mark>[DESTINATION – e.g. beach trip, mountain cabin, lake house, cruise]</mark>.
-
-Style: Warm and friendly font. Add a simple destination icon (e.g. palm tree, waves, mountains, campfire). Playful but clean.
-
-Colors: Primary: <mark>[PRIMARY COLOR – e.g. teal, navy, sunset orange]</mark> / Secondary: <mark>[SECONDARY COLOR – e.g. white, gold]</mark>
-
-Logo Requirements:
-- Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-vacation-1')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
-
-    <div class="res-card">
-      <div class="res-card-title">Family Reunion Badge</div>
-      <div class="res-prompt" id="res-prompt-vacation-2">Create a vintage badge-style family reunion logo. Group name: "<mark>[FAMILY LAST NAME]</mark> Family Reunion <mark>[YEAR]</mark>".
-
-Design: Oval or circular badge. Family name + year displayed prominently. Small center icon: <mark>[ICON – e.g. family tree, anchor, state shape, house]</mark>.
-
-Style: Slightly retro. Bold text. Simple solid lines.
-
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
 
 Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
 - Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-vacation-2')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-1">Copy Prompt</button>
+            </div>
+          </article>
 
-    <div class="res-card">
-      <div class="res-card-title">🎮 GTA-Style Family Vacation Crew (FUN)</div>
-      <div class="res-prompt" id="res-prompt-vacation-3">Create a bold GTA-style crew logo for a family vacation group called "The <mark>[FAMILY LAST NAME]</mark> Crew – <mark>[YEAR]</mark>".
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for mascots</span>
+                  <span>Youth sports</span>
+                </div>
+                <h3>Mascot-Style Logo</h3>
+                <p>Energetic mascot art with team name built into the design.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-sports-2">Create a bold mascot sports logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>". The mascot is a <mark>[MASCOT — e.g. bulldog, hawk, tiger, bear, raptor]</mark>.
+
+Style:
+Aggressive or energetic expression. Thick outlines. Cartoon-like but not childish. Mascot centered with team name integrated below or around it.
+
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
+- Thick, bold outlines — no thin lines
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-2">Copy Prompt</button>
+            </div>
+          </article>
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for badges</span>
+                  <span>Classic team look</span>
+                </div>
+                <h3>Badge / Crest Style</h3>
+                <p>A circular or shield-style team mark with a center icon.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-sports-3">Create a badge-style crest logo for a youth <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
+
+Design:
+Circular or shield shape. Team name wraps around the outside. Centered icon: <mark>[ICON — e.g. crossed bats, soccer ball, hockey stick, football helmet]</mark>. Clean symmetrical layout.
+
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
+- Thick, bold outlines — no thin lines
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-3">Copy Prompt</button>
+            </div>
+          </article>
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for hats</span>
+                  <span>Simple logo</span>
+                </div>
+                <h3>Minimal Icon + Text</h3>
+                <p>A small, clean logo that works well on hats and left-chest prints.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-sports-4">Create a minimal sports logo for a <mark>[SPORT TYPE]</mark> team named "<mark>[TEAM NAME]</mark>".
+
+Design:
+Small simple icon: <mark>[ICON — e.g. ball, cleat, helmet, lightning bolt, paw]</mark> with bold team name beside or below it. Nothing extra.
+
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: black or white
+
+Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
+- Thick, bold outlines — no thin lines
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-sports-4">Copy Prompt</button>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="ss-prompt-panel ss-hidden" data-panel="vacation">
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for trips</span>
+                  <span>Family shirts</span>
+                </div>
+                <h3>Classic Vacation Logo</h3>
+                <p>Friendly vacation logo for beach trips, cabins, cruises, and lake houses.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-vacation-1">Create a fun, bold family vacation logo for a group called "<mark>[FAMILY LAST NAME]</mark> Family <mark>[YEAR]</mark>".
+
+Destination or theme:
+<mark>[DESTINATION — e.g. beach trip, mountain cabin, lake house, cruise]</mark>
+
+Style:
+Warm and friendly font. Add a simple destination icon such as palm tree, waves, mountains, campfire, boat, or camper van. Playful but clean.
+
+Colors:
+Primary: <mark>[PRIMARY COLOR — e.g. teal, navy, sunset orange]</mark>
+Secondary: <mark>[SECONDARY COLOR — e.g. white, cream, muted gold]</mark>
+
+Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
+- Thick, bold outlines — no thin lines
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-1">Copy Prompt</button>
+            </div>
+          </article>
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for reunions</span>
+                  <span>Classic badge</span>
+                </div>
+                <h3>Family Reunion Badge</h3>
+                <p>A clean badge logo with family name, year, and a simple symbol.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-vacation-2">Create a vintage badge-style family reunion logo. Group name: "<mark>[FAMILY LAST NAME]</mark> Family Reunion <mark>[YEAR]</mark>".
+
+Design:
+Oval or circular badge. Family name and year displayed prominently. Small center icon: <mark>[ICON — e.g. family tree, anchor, state shape, house, lake, mountain]</mark>.
+
+Style:
+Slightly retro. Bold text. Simple solid lines. Clean and easy to read.
+
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
+- Thick, bold outlines — no thin lines
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-2">Copy Prompt</button>
+            </div>
+          </article>
+
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for fun shirts</span>
+                  <span>Big personality</span>
+                </div>
+                <h3>Vacation Crew Logo</h3>
+                <p>A bold illustrated crew-style logo for families or friend groups.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-vacation-3">Create a bold illustrated crew logo for a family vacation group called "The <mark>[FAMILY LAST NAME]</mark> Crew — <mark>[YEAR]</mark>".
 
 The crew members are:
-- Dad: <mark>[DESCRIBE DAD IN 1 SENTENCE – e.g. "the retired cop who still thinks he's in charge"]</mark>
-- Mom: <mark>[DESCRIBE MOM IN 1 SENTENCE – e.g. "the planner who packed 6 bags and a spreadsheet"]</mark>
-- Kid 1: <mark>[DESCRIBE KID 1 – e.g. "the 10-year-old who only cares about screen time"]</mark>
-- Kid 2: <mark>[DESCRIBE KID 2 – e.g. "the 7-year-old who will definitely get lost at the beach"]</mark>
+- Person 1: <mark>[DESCRIBE PERSON 1 IN 1 SENTENCE]</mark>
+- Person 2: <mark>[DESCRIBE PERSON 2 IN 1 SENTENCE]</mark>
+- Person 3: <mark>[DESCRIBE PERSON 3 IN 1 SENTENCE]</mark>
+- Person 4: <mark>[DESCRIBE PERSON 4 IN 1 SENTENCE]</mark>
 (Add more family members as needed)
 
-Destination: <mark>[DESTINATION – e.g. Myrtle Beach, the mountains, Florida, a cruise]</mark>
+Destination:
+<mark>[DESTINATION — e.g. Myrtle Beach, the mountains, Florida, a cruise, lake house]</mark>
 
-Style: Bold GTA Grand Theft Auto loading screen art style. Strong outlined characters or silhouettes. Gritty-fun, action-poster feel. Family name as the main title in bold block letters. Year below.
+Style:
+Bold poster-style family crew logo. Fun, energetic, and clean. Strong outlined characters or simple silhouettes. Family name as the main title in bold block letters. Year below.
 
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
-
-Logo Requirements:
-- Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-vacation-3')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
-
-    <div class="res-card">
-      <div class="res-card-title">Matching Vacation Crew Tee</div>
-      <div class="res-prompt" id="res-prompt-vacation-4">Create a matching group t-shirt logo for a family vacation. Trip name: "<mark>[TRIP NAME – e.g. Beach Week 2025, Smith Family Florida Trip]</mark>".
-
-Style: Fun and casual. Bold statement text. Add a relevant icon (e.g. flip flops, waves, camper van, sunglasses, campfire). Year or destination below the name.
-
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
 
 Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
 - Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-vacation-4')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-3">Copy Prompt</button>
+            </div>
+          </article>
 
-  </div><!-- /panel vacation -->
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for matching tees</span>
+                  <span>Simple event mark</span>
+                </div>
+                <h3>Matching Vacation Crew Tee</h3>
+                <p>A simple wearable logo for matching group trip shirts.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
 
-  <!-- ========== TAB 3 — WEDDINGS & PARTIES ========== -->
-  <div class="res-panel res-panel--hidden" id="res-panel-weddings">
+            <div class="ss-prompt-body">
+              <pre id="prompt-vacation-4">Create a matching group t-shirt logo for a family vacation. Trip name: "<mark>[TRIP NAME — e.g. Beach Week 2025, Smith Family Florida Trip]</mark>".
 
-    <div class="res-card">
-      <div class="res-card-title">Wedding Monogram</div>
-      <div class="res-prompt" id="res-prompt-weddings-1">Create a clean, elegant wedding logo using the initials "<mark>[INITIAL 1]</mark>" and "<mark>[INITIAL 2]</mark>" and the date "<mark>[MONTH YEAR – e.g. June 2025]</mark>".
+Style:
+Fun and casual. Bold statement text. Add a relevant icon such as flip flops, waves, camper van, sunglasses, palm tree, mountain, or campfire. Year or destination below the name.
 
-Style: Classic serif or elegant script. Initials interlocked or side-by-side. Minimal decorative element (e.g. thin wreath, simple floral, single ring).
-
-Colors: Primary: <mark>[COLOR – e.g. dusty rose, navy, sage green]</mark> / Secondary: <mark>[COLOR – e.g. gold, white, cream]</mark>
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
 
 Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
 - Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-weddings-1')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-vacation-4">Copy Prompt</button>
+            </div>
+          </article>
 
-    <div class="res-card">
-      <div class="res-card-title">Bachelorette / Bach Party</div>
-      <div class="res-prompt" id="res-prompt-weddings-2">Create a fun, bold bachelorette party logo for "<mark>[BRIDE'S NAME]</mark>'s Bach Party" in <mark>[DESTINATION or THEME – e.g. Nashville, Palm Springs, Disco Night, beach]</mark>.
+        </div>
 
-Style: Playful and celebratory. Icon: <mark>[ICON – e.g. cowboy hat, palm tree, disco ball, champagne flute, flamingo]</mark>. Mix of bold and script font.
+        <div class="ss-prompt-panel ss-hidden" data-panel="parties">
 
-Colors: Primary: <mark>[COLOR – e.g. hot pink, black]</mark> / Secondary: <mark>[COLOR – e.g. white, gold]</mark>
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for weddings</span>
+                  <span>Clean monogram</span>
+                </div>
+                <h3>Wedding Monogram</h3>
+                <p>Elegant initials and date mark for wedding gear or gifts.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-parties-1">Create a clean, elegant wedding logo using the initials "<mark>[INITIAL 1]</mark>" and "<mark>[INITIAL 2]</mark>" and the date "<mark>[MONTH YEAR — e.g. June 2025]</mark>".
+
+Style:
+Classic serif or elegant script. Initials interlocked or side-by-side. Minimal decorative element such as a wreath, simple floral, single ring, or small line detail.
+
+Colors:
+Primary: <mark>[COLOR — e.g. dusty rose, navy, sage green]</mark>
+Secondary: <mark>[COLOR — e.g. cream, white, muted gold]</mark>
 
 Logo Requirements:
-- Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-weddings-2')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
+- Thick, readable linework — avoid ultra-thin lines
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-1">Copy Prompt</button>
+            </div>
+          </article>
 
-    <div class="res-card">
-      <div class="res-card-title">Bachelor / Groom Squad</div>
-      <div class="res-prompt" id="res-prompt-weddings-3">Create a bold bachelor party logo for "<mark>[GROOM'S NAME]</mark>'s Last Ride" or "<mark>[GROUP NAME]</mark>".
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for bachelorette</span>
+                  <span>Fun shirts</span>
+                </div>
+                <h3>Bachelorette / Bach Party</h3>
+                <p>Playful party logo for destination trips and matching tees.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
 
-Theme: <mark>[ACTIVITY or DESTINATION – e.g. golf trip, Vegas weekend, hunting trip, mountain cabin]</mark>.
+            <div class="ss-prompt-body">
+              <pre id="prompt-parties-2">Create a fun, bold bachelorette party logo for "<mark>[BRIDE'S NAME]</mark>'s Bach Party" in <mark>[DESTINATION OR THEME — e.g. Nashville, Palm Springs, disco night, beach weekend]</mark>.
 
-Style: Strong and masculine. Icon: <mark>[ICON – e.g. golf flag, dice, deer skull, mountain, beer mug]</mark>. Rugged or classic block lettering.
+Style:
+Playful and celebratory. Icon: <mark>[ICON — e.g. cowboy hat, palm tree, disco ball, champagne flute, flamingo]</mark>. Mix of bold and script font.
 
-Colors: Primary: <mark>[COLOR – e.g. black, forest green, navy]</mark> / Secondary: <mark>[COLOR – e.g. white, gold, orange]</mark>
-
-Logo Requirements:
-- Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-weddings-3')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
-
-  </div><!-- /panel weddings -->
-
-  <!-- ========== TAB 4 — GROUPS & OTHER ========== -->
-  <div class="res-panel res-panel--hidden" id="res-panel-groups">
-
-    <div class="res-card">
-      <div class="res-card-title">Club or Organization</div>
-      <div class="res-prompt" id="res-prompt-groups-1">Create a clean group logo for "<mark>[GROUP NAME]</mark>".
-
-Group type: <mark>[TYPE – e.g. neighborhood watch, hunting club, car club, book club, work team]</mark>.
-
-Style: Professional but approachable. Add a simple relevant icon. Bold readable font.
-
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+Colors:
+Primary: <mark>[COLOR — e.g. hot pink, black, teal]</mark>
+Secondary: <mark>[COLOR — e.g. white, cream, muted gold]</mark>
 
 Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
 - Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-groups-1')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-2">Copy Prompt</button>
+            </div>
+          </article>
 
-    <div class="res-card">
-      <div class="res-card-title">Fundraiser / Charity Event</div>
-      <div class="res-prompt" id="res-prompt-groups-2">Create a bold event logo for "<mark>[EVENT NAME]</mark>" benefiting "<mark>[CAUSE OR ORGANIZATION]</mark>". Year: <mark>[YEAR]</mark>.
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for bachelor trips</span>
+                  <span>Rugged logo</span>
+                </div>
+                <h3>Bachelor / Groom Squad</h3>
+                <p>Bold logo for golf trips, cabins, Vegas weekends, or groom squads.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
 
-Style: Warm and community-focused. Simple icon related to the cause (e.g. ribbon, heart, raised hand, star). Bold and easy to read.
+            <div class="ss-prompt-body">
+              <pre id="prompt-parties-3">Create a bold bachelor party logo for "<mark>[GROOM'S NAME]</mark>'s Last Ride" or "<mark>[GROUP NAME]</mark>".
 
-Colors: Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+Theme:
+<mark>[ACTIVITY OR DESTINATION — e.g. golf trip, Vegas weekend, fishing trip, mountain cabin]</mark>
+
+Style:
+Strong and clean. Icon: <mark>[ICON — e.g. golf flag, dice, fish, mountain, beer mug]</mark>. Rugged or classic block lettering.
+
+Colors:
+Primary: <mark>[COLOR — e.g. black, forest green, navy]</mark>
+Secondary: <mark>[COLOR — e.g. white, cream, orange]</mark>
 
 Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
 - Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-groups-2')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-parties-3">Copy Prompt</button>
+            </div>
+          </article>
 
-    <div class="res-card">
-      <div class="res-card-title">Work Team / Company Event</div>
-      <div class="res-prompt" id="res-prompt-groups-3">Create a fun team logo for "<mark>[COMPANY OR TEAM NAME]</mark>" for a <mark>[EVENT TYPE – e.g. company picnic, team retreat, holiday party]</mark>. Year: <mark>[YEAR]</mark>.
+        </div>
 
-Style: Professional but fun. Add a simple icon (e.g. star, lightning bolt, trophy). Bold clean font.
+        <div class="ss-prompt-panel ss-hidden" data-panel="groups">
 
-Colors: Company colors — Primary: <mark>[PRIMARY COLOR]</mark> / Secondary: <mark>[SECONDARY COLOR]</mark>
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for clubs</span>
+                  <span>Simple group logo</span>
+                </div>
+                <h3>Club or Organization</h3>
+                <p>A clean mark for clubs, work groups, neighborhood groups, or teams.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
+
+            <div class="ss-prompt-body">
+              <pre id="prompt-groups-1">Create a clean group logo for "<mark>[GROUP NAME]</mark>".
+
+Group type:
+<mark>[TYPE — e.g. neighborhood group, hunting club, car club, book club, work team, gym group]</mark>
+
+Style:
+Professional but approachable. Add a simple relevant icon. Bold readable font. Clean enough to work on shirts, hoodies, and hats.
+
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
 
 Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
 - Thick, bold outlines — no thin lines
-- Crisp, defined borders on all shapes
-- Minimal empty space inside the logo
-- No gradients, shadows, or textures
-- High contrast only
-- White or transparent background
-- Vector-style, print-ready for DTF and embroidery</div>
-      <button class="res-copy-btn" onclick="resCopy(this,'res-prompt-groups-3')">📋 Copy Prompt</button>
-      <div class="res-note">💡 Replace all highlighted sections before pasting into ChatGPT.</div>
-    </div>
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-1">Copy Prompt</button>
+            </div>
+          </article>
 
-  </div><!-- /panel groups -->
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for fundraisers</span>
+                  <span>Community events</span>
+                </div>
+                <h3>Fundraiser / Charity Event</h3>
+                <p>A warm, readable event mark for charity or community campaigns.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
 
-  <!-- ========== FREE TOOLS SECTION ========== -->
-  <div class="res-tools-sec">
-    <h2 class="res-tools-title">Free Tools to Polish Your Logo</h2>
-    <div class="res-tools-grid">
+            <div class="ss-prompt-body">
+              <pre id="prompt-groups-2">Create a bold event logo for "<mark>[EVENT NAME]</mark>" benefiting "<mark>[CAUSE OR ORGANIZATION]</mark>". Year: <mark>[YEAR]</mark>.
 
-      <a class="res-tool-card" href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
-        <div class="res-tool-name">ChatGPT / DALL·E 3</div>
-        <div class="res-tool-desc">Generate your logo using the prompts above</div>
-      </a>
+Style:
+Warm and community-focused. Simple icon related to the cause such as ribbon, heart, raised hand, star, shield, or local symbol. Bold and easy to read.
 
-      <a class="res-tool-card" href="https://www.remove.bg" target="_blank" rel="noopener noreferrer">
-        <div class="res-tool-name">Remove.bg</div>
-        <div class="res-tool-desc">Remove the background from your logo for free</div>
-      </a>
+Colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
 
-      <a class="res-tool-card" href="https://upscayl.org" target="_blank" rel="noopener noreferrer">
-        <div class="res-tool-name">Upscayl</div>
-        <div class="res-tool-desc">Upscale your image resolution (free desktop app)</div>
-      </a>
+Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
+- Thick, bold outlines — no thin lines
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-2">Copy Prompt</button>
+            </div>
+          </article>
 
-      <a class="res-tool-card" href="https://icons8.com/upscaler" target="_blank" rel="noopener noreferrer">
-        <div class="res-tool-name">Icons8 Upscaler</div>
-        <div class="res-tool-desc">Free online AI image upscaler</div>
-      </a>
+          <article class="ss-prompt-card">
+            <div class="ss-prompt-top">
+              <div>
+                <div class="ss-prompt-tags">
+                  <span>Best for work teams</span>
+                  <span>Company events</span>
+                </div>
+                <h3>Work Team / Company Event</h3>
+                <p>A clean, professional event logo that still feels fun.</p>
+              </div>
+              <button class="ss-view-btn" type="button">View Prompt</button>
+            </div>
 
-      <a class="res-tool-card" href="https://www.photopea.com" target="_blank" rel="noopener noreferrer">
-        <div class="res-tool-name">Photopea</div>
-        <div class="res-tool-desc">Free browser-based Photoshop alternative</div>
-      </a>
+            <div class="ss-prompt-body">
+              <pre id="prompt-groups-3">Create a fun team logo for "<mark>[COMPANY OR TEAM NAME]</mark>" for a <mark>[EVENT TYPE — e.g. company picnic, team retreat, holiday party, sales kickoff]</mark>. Year: <mark>[YEAR]</mark>.
 
-      <a class="res-tool-card" href="https://www.canva.com" target="_blank" rel="noopener noreferrer">
-        <div class="res-tool-name">Canva</div>
-        <div class="res-tool-desc">Polish text, colors, and layout with ease</div>
-      </a>
+Style:
+Professional but fun. Add a simple icon such as star, lightning bolt, trophy, mountain, handshake, or company-related symbol. Bold clean font.
 
-    </div>
+Colors:
+Company colors:
+Primary: <mark>[PRIMARY COLOR]</mark>
+Secondary: <mark>[SECONDARY COLOR]</mark>
+
+Logo Requirements:
+- Transparent background only
+- No background color, no mockup, no shirt, no scene
+- Remove all extra padding or empty space around the artwork
+- Crop tightly to the outer edge of the design
+- Center the artwork perfectly
+- High resolution, crisp edges, no blur
+- Thick, bold outlines — no thin lines
+- Crisp, readable text
+- Minimal tiny details
+- High contrast colors only
+- Simple vector-style artwork
+- No gradients, shadows, textures, or realistic effects</pre>
+              <button class="ss-copy-btn" type="button" data-copy-target="prompt-groups-3">Copy Prompt</button>
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <section class="ss-checklist-section">
+      <div class="ss-res-section-head">
+        <div class="ss-res-kicker">Upload Checklist</div>
+        <h2>What makes a logo upload-ready?</h2>
+        <p>Before you submit your storefront request, try to make sure your image checks these boxes.</p>
+      </div>
+
+      <div class="ss-check-grid">
+        <div class="ss-check-card">
+          <strong>Transparent background</strong>
+          <span>No white box, no photo background, no shirt mockup.</span>
+        </div>
+        <div class="ss-check-card">
+          <strong>No extra padding</strong>
+          <span>The logo should be tightly cropped to the artwork.</span>
+        </div>
+        <div class="ss-check-card">
+          <strong>High resolution</strong>
+          <span>Crisp edges, readable text, and no blurry screenshots.</span>
+        </div>
+        <div class="ss-check-card">
+          <strong>Bold and readable</strong>
+          <span>Thick lines and simple shapes print better than tiny details.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="ss-tools-section">
+      <div class="ss-res-section-head">
+        <div class="ss-res-kicker">Free Tools</div>
+        <h2>Useful tools to clean up your logo.</h2>
+        <p>You do not need to use all of these. They are here if your logo needs background removal, cleanup, or upscaling before upload.</p>
+      </div>
+
+      <div class="ss-tools-grid">
+        <a class="ss-tool-card" href="https://chat.openai.com" target="_blank" rel="noopener noreferrer">
+          <span>Generate</span>
+          <strong>ChatGPT / Image Generator</strong>
+          <p>Use the prompts above to create your first logo concept.</p>
+        </a>
+
+        <a class="ss-tool-card" href="https://www.remove.bg" target="_blank" rel="noopener noreferrer">
+          <span>Clean</span>
+          <strong>Remove.bg</strong>
+          <p>Remove unwanted backgrounds from simple logo files.</p>
+        </a>
+
+        <a class="ss-tool-card" href="https://www.photopea.com" target="_blank" rel="noopener noreferrer">
+          <span>Edit</span>
+          <strong>Photopea</strong>
+          <p>Free browser-based editor for cleanup, cropping, and small fixes.</p>
+        </a>
+
+        <a class="ss-tool-card" href="https://upscayl.org" target="_blank" rel="noopener noreferrer">
+          <span>Improve</span>
+          <strong>Upscayl</strong>
+          <p>Free desktop upscaler for improving image resolution.</p>
+        </a>
+
+        <a class="ss-tool-card" href="https://icons8.com/upscaler" target="_blank" rel="noopener noreferrer">
+          <span>Improve</span>
+          <strong>Icons8 Upscaler</strong>
+          <p>Online upscaler for logos that need more resolution.</p>
+        </a>
+
+        <a class="ss-tool-card" href="https://www.canva.com" target="_blank" rel="noopener noreferrer">
+          <span>Design</span>
+          <strong>Canva</strong>
+          <p>Useful for layout ideas, text treatments, and quick visual polish.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="ss-res-final">
+      <h2>Ready to build your store?</h2>
+      <p>Once your logo looks clean, centered, and background-free, upload it with your storefront request.</p>
+      <a class="ss-res-btn ss-res-btn--dark" href="/pages/request-storefront-form">Start the request →</a>
+    </section>
+
   </div>
-
-</div><!-- /res-wrap -->
+</section>
 
 <style>
-  .res-wrap {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding: 40px 20px 80px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  #ss-resources-{{ section.id }},
+  #ss-resources-{{ section.id }} * {
+    box-sizing: border-box;
   }
 
-  /* HERO */
-  .res-hero {
+  #ss-resources-{{ section.id }} {
+    position: relative;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: #11100e;
+    background:
+      radial-gradient(circle at 18% 5%, rgba(183, 163, 106, 0.10), transparent 30%),
+      radial-gradient(circle at 80% 8%, rgba(255, 255, 255, 0.85), transparent 22%),
+      linear-gradient(180deg, #fbf8f1 0%, #fffdf9 22%, #ffffff 50%, #fbfaf7 100%);
+    padding: 78px 20px 96px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-wrap {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-hero {
+    max-width: 850px;
+    margin: 0 auto 42px;
     text-align: center;
-    margin-bottom: 40px;
   }
-  .res-h1 {
-    font-size: clamp(32px, 5vw, 52px);
+
+  #ss-resources-{{ section.id }} .ss-res-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(17,16,14,.50);
+    font-size: 12px;
     font-weight: 950;
-    letter-spacing: -0.03em;
-    margin: 0 0 14px;
-    line-height: 1.05;
-  }
-  .res-sub {
-    font-size: 17px;
-    color: rgba(0,0,0,.65);
-    max-width: 65ch;
-    margin: 0 auto;
-    font-weight: 500;
-    line-height: 1.5;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
   }
 
-  /* TABS */
-  .res-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 30px;
-  }
-  .res-tab {
-    padding: 10px 20px;
+  #ss-resources-{{ section.id }} .ss-res-kicker::before {
+    content: "";
+    width: 8px;
+    height: 8px;
     border-radius: 999px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-    background: #ebebeb;
-    color: #333;
-    transition: background .15s ease, color .15s ease;
-  }
-  .res-tab--active {
-    background: #111;
-    color: #fff;
-  }
-  .res-tab:hover:not(.res-tab--active) {
-    background: #d5d5d5;
+    background: #a9955d;
+    box-shadow: 0 0 0 7px rgba(183,163,106,.08);
   }
 
-  /* PANELS */
-  .res-panel {
+  #ss-resources-{{ section.id }} .ss-res-h1 {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: .94;
+    letter-spacing: -.07em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-sub {
+    max-width: 720px;
+    margin: 22px auto 0;
+    color: rgba(17,16,14,.66);
+    font-size: clamp(17px, 2vw, 22px);
+    line-height: 1.55;
+    font-weight: 470;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-hero-actions {
     display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-  .res-panel--hidden {
-    display: none;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
   }
 
-  /* PROMPT CARDS */
-  .res-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 20px;
-    box-shadow: 0 8px 28px rgba(0,0,0,.06);
-    padding: 28px;
-  }
-  .res-card-title {
-    font-size: 18px;
-    font-weight: 900;
-    margin-bottom: 14px;
-    color: #111;
-  }
-  .res-prompt {
-    font-family: monospace;
-    white-space: pre-wrap;
-    background: #f7f7f7;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 16px;
-    font-size: 14px;
-    line-height: 1.7;
-    color: #222;
-    margin-bottom: 14px;
-  }
-  .res-prompt mark {
-    background: #FFE000;
-    color: #111;
-    font-weight: 700;
-    border-radius: 3px;
-    padding: 0 3px;
-  }
-  .res-copy-btn {
+  #ss-resources-{{ section.id }} .ss-res-btn {
+    min-height: 54px;
+    padding: 0 25px;
+    border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 11px 22px;
-    border-radius: 999px;
-    border: none;
-    background: #111;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: transform .15s ease;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 900;
+    transition: transform 180ms ease, box-shadow 180ms ease;
   }
-  .res-copy-btn:hover {
+
+  #ss-resources-{{ section.id }} .ss-res-btn:hover {
     transform: translateY(-2px);
   }
-  .res-note {
-    margin-top: 10px;
+
+  #ss-resources-{{ section.id }} .ss-res-btn--dark {
+    color: #fff;
+    background: #11100e;
+    border: 1px solid rgba(183,163,106,.28);
+    box-shadow: 0 18px 44px rgba(17,16,14,.18);
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-btn--light {
+    color: #11100e;
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(17,16,14,.12);
+    box-shadow: 0 12px 34px rgba(17,16,14,.08);
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-flow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 46px 0 18px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-flow-card {
+    padding: 24px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 24px 80px rgba(17,16,14,.055);
+  }
+
+  #ss-resources-{{ section.id }} .ss-flow-card span {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 26px;
+    border-radius: 16px;
+    background: rgba(183,163,106,.12);
+    color: #11100e;
     font-size: 13px;
-    color: rgba(0,0,0,.55);
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-flow-card h3 {
+    margin: 0;
+    color: #11100e;
+    font-size: 21px;
+    line-height: 1.08;
+    letter-spacing: -.04em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-flow-card p {
+    margin: 9px 0 0;
+    color: rgba(17,16,14,.60);
+    font-size: 14px;
+    line-height: 1.48;
+    font-weight: 520;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-warning {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 20px;
+    border-radius: 26px;
+    margin: 18px 0 44px;
+    background: linear-gradient(180deg, rgba(17,16,14,.035), rgba(17,16,14,.02));
+    border: 1px solid rgba(17,16,14,.08);
+  }
+
+  #ss-resources-{{ section.id }} .ss-warning-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #11100e;
+    background: rgba(183,163,106,.12);
+    font-size: 18px;
+    font-weight: 950;
+    flex: 0 0 auto;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-warning strong {
+    display: block;
+    color: #11100e;
+    font-size: 15px;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-warning p {
+    margin: 5px 0 0;
+    color: rgba(17,16,14,.62);
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 520;
+  }
+
+  #ss-resources-{{ section.id }} .ss-logo-helper {
+    padding: clamp(22px, 4vw, 34px);
+    border-radius: 42px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(183,163,106,.10), transparent 35%),
+      linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,255,255,.56));
+    border: 1px solid rgba(255,255,255,.80);
+    box-shadow: 0 34px 120px rgba(17,16,14,.10);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  #ss-resources-{{ section.id }} .ss-helper-head {
+    max-width: 840px;
+    margin-bottom: 24px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-helper-head h2 {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(34px, 4.6vw, 58px);
+    line-height: .98;
+    letter-spacing: -.058em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-helper-head p {
+    max-width: 690px;
+    margin: 16px 0 0;
+    color: rgba(17,16,14,.64);
+    font-size: 16px;
+    line-height: 1.58;
+    font-weight: 480;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-categories {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-cat-card {
+    appearance: none;
+    text-align: left;
+    cursor: pointer;
+    min-height: 172px;
+    padding: 22px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 20px 70px rgba(17,16,14,.045);
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
+  }
+
+  #ss-resources-{{ section.id }} .ss-cat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 28px 86px rgba(17,16,14,.075);
+  }
+
+  #ss-resources-{{ section.id }} .ss-cat-card--active {
+    background:
+      radial-gradient(circle at 15% 0%, rgba(183,163,106,.15), transparent 36%),
+      linear-gradient(180deg, #171613, #080807);
+    border-color: rgba(183,163,106,.22);
+    color: #fff;
+  }
+
+  #ss-resources-{{ section.id }} .ss-cat-card span {
+    display: block;
+    font-size: 26px;
+    margin-bottom: 24px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-cat-card strong {
+    display: block;
+    color: inherit;
+    font-size: 18px;
+    line-height: 1.08;
+    letter-spacing: -.035em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-cat-card p {
+    margin: 9px 0 0;
+    color: rgba(17,16,14,.58);
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 520;
+  }
+
+  #ss-resources-{{ section.id }} .ss-cat-card--active p {
+    color: rgba(255,255,255,.58);
+  }
+
+  #ss-resources-{{ section.id }} .ss-active-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 14px;
+    margin: 2px 0 18px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.045);
+    color: rgba(17,16,14,.58);
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  #ss-resources-{{ section.id }} .ss-active-label strong {
+    color: #11100e;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-panel {
+    display: grid;
+    gap: 16px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-hidden {
+    display: none !important;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-card {
+    border-radius: 30px;
+    background: rgba(255,255,255,.88);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 24px 80px rgba(17,16,14,.045);
+    overflow: hidden;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    padding: 24px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-tags span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(17,16,14,.045);
+    color: rgba(17,16,14,.62);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-card h3 {
+    margin: 0;
+    color: #11100e;
+    font-size: 25px;
+    line-height: 1.04;
+    letter-spacing: -.045em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-card p {
+    max-width: 650px;
+    margin: 9px 0 0;
+    color: rgba(17,16,14,.58);
+    font-size: 14px;
+    line-height: 1.48;
+    font-weight: 520;
+  }
+
+  #ss-resources-{{ section.id }} .ss-view-btn,
+  #ss-resources-{{ section.id }} .ss-copy-btn {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    white-space: nowrap;
+    transition: transform 180ms ease, background 180ms ease;
+  }
+
+  #ss-resources-{{ section.id }} .ss-view-btn {
+    color: #11100e;
+    background: rgba(17,16,14,.06);
+  }
+
+  #ss-resources-{{ section.id }} .ss-view-btn:hover,
+  #ss-resources-{{ section.id }} .ss-copy-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-body {
+    display: none;
+    padding: 0 24px 24px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-card.is-open .ss-prompt-body {
+    display: block;
+  }
+
+  #ss-resources-{{ section.id }} .ss-prompt-card.is-open .ss-view-btn {
+    color: #fff;
+    background: #11100e;
+  }
+
+  #ss-resources-{{ section.id }} pre {
+    margin: 0 0 14px;
+    padding: 18px;
+    border-radius: 20px;
+    background: #f7f7f4;
+    border: 1px solid rgba(17,16,14,.08);
+    white-space: pre-wrap;
+    color: rgba(17,16,14,.82);
+    font-size: 13px;
+    line-height: 1.65;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+
+  #ss-resources-{{ section.id }} pre mark {
+    background: rgba(183,163,106,.22);
+    color: #11100e;
+    border: 1px solid rgba(183,163,106,.22);
+    border-radius: 6px;
+    padding: 1px 5px;
+    font-weight: 850;
+  }
+
+  #ss-resources-{{ section.id }} .ss-copy-btn {
+    color: #fff;
+    background: #11100e;
+  }
+
+  #ss-resources-{{ section.id }} .ss-checklist-section,
+  #ss-resources-{{ section.id }} .ss-tools-section {
+    padding-top: 86px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-section-head {
+    max-width: 790px;
+    margin-bottom: 34px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-section-head h2 {
+    margin: 0;
+    color: #11100e;
+    font-size: clamp(34px, 4.6vw, 62px);
+    line-height: .98;
+    letter-spacing: -.058em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-section-head p {
+    max-width: 680px;
+    margin: 17px 0 0;
+    color: rgba(17,16,14,.64);
+    font-size: 17px;
+    line-height: 1.6;
+    font-weight: 480;
+  }
+
+  #ss-resources-{{ section.id }} .ss-check-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-check-card {
+    padding: 22px;
+    border-radius: 26px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 20px 70px rgba(17,16,14,.045);
+  }
+
+  #ss-resources-{{ section.id }} .ss-check-card strong {
+    display: block;
+    color: #11100e;
+    font-size: 16px;
+    font-weight: 930;
+    letter-spacing: -.025em;
+  }
+
+  #ss-resources-{{ section.id }} .ss-check-card span {
+    display: block;
+    margin-top: 8px;
+    color: rgba(17,16,14,.60);
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 520;
+  }
+
+  #ss-resources-{{ section.id }} .ss-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  #ss-resources-{{ section.id }} .ss-tool-card {
+    display: block;
+    min-height: 180px;
+    padding: 22px;
+    border-radius: 28px;
+    background: rgba(255,255,255,.76);
+    border: 1px solid rgba(17,16,14,.08);
+    box-shadow: 0 20px 70px rgba(17,16,14,.045);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  #ss-resources-{{ section.id }} .ss-tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 28px 90px rgba(17,16,14,.08);
+  }
+
+  #ss-resources-{{ section.id }} .ss-tool-card span {
+    display: inline-flex;
+    margin-bottom: 34px;
+    min-height: 28px;
+    padding: 0 10px;
+    align-items: center;
+    border-radius: 999px;
+    color: #11100e;
+    background: rgba(183,163,106,.12);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  #ss-resources-{{ section.id }} .ss-tool-card strong {
+    display: block;
+    color: #11100e;
+    font-size: 18px;
+    line-height: 1.08;
+    letter-spacing: -.035em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-tool-card p {
+    margin: 9px 0 0;
+    color: rgba(17,16,14,.60);
+    font-size: 13px;
+    line-height: 1.48;
+    font-weight: 520;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-final {
+    margin-top: 90px;
+    text-align: center;
+    padding: 82px 20px;
+    border-radius: 42px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(183,163,106,.11), transparent 34%),
+      linear-gradient(180deg, #fff, #f8f3e8);
+    border: 1px solid rgba(17,16,14,.07);
+    box-shadow: 0 30px 100px rgba(17,16,14,.065);
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-final h2 {
+    max-width: 760px;
+    margin: 0 auto;
+    color: #11100e;
+    font-size: clamp(40px, 5.5vw, 76px);
+    line-height: .96;
+    letter-spacing: -.065em;
+    font-weight: 950;
+  }
+
+  #ss-resources-{{ section.id }} .ss-res-final p {
+    max-width: 620px;
+    margin: 20px auto 30px;
+    color: rgba(17,16,14,.62);
+    font-size: 18px;
+    line-height: 1.6;
     font-weight: 500;
   }
 
-  /* FREE TOOLS */
-  .res-tools-sec {
-    margin-top: 60px;
-  }
-  .res-tools-title {
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    margin: 0 0 20px;
-    color: #111;
-  }
-  .res-tools-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-  .res-tool-card {
-    display: block;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 20px;
-    box-shadow: 0 6px 20px rgba(0,0,0,.05);
-    padding: 20px 22px;
-    text-decoration: none;
-    color: inherit;
-    transition: transform .15s ease, box-shadow .15s ease;
-  }
-  .res-tool-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 28px rgba(0,0,0,.09);
-  }
-  .res-tool-name {
-    font-size: 16px;
-    font-weight: 800;
-    color: #111;
-    margin-bottom: 4px;
-  }
-  .res-tool-desc {
-    font-size: 13px;
-    color: rgba(0,0,0,.6);
-    line-height: 1.4;
+  @media (max-width: 980px) {
+    #ss-resources-{{ section.id }} .ss-res-flow,
+    #ss-resources-{{ section.id }} .ss-res-categories,
+    #ss-resources-{{ section.id }} .ss-check-grid,
+    #ss-resources-{{ section.id }} .ss-tools-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
-  /* MOBILE */
-  @media (max-width: 640px) {
-    .res-tools-grid {
+  @media (max-width: 680px) {
+    #ss-resources-{{ section.id }} {
+      padding: 54px 16px 80px;
+    }
+
+    #ss-resources-{{ section.id }} .ss-res-h1 {
+      font-size: 47px;
+    }
+
+    #ss-resources-{{ section.id }} .ss-res-flow,
+    #ss-resources-{{ section.id }} .ss-res-categories,
+    #ss-resources-{{ section.id }} .ss-check-grid,
+    #ss-resources-{{ section.id }} .ss-tools-grid {
       grid-template-columns: 1fr;
     }
-    .res-tabs {
-      gap: 6px;
-    }
-    .res-tab {
-      padding: 9px 14px;
-      font-size: 13px;
-    }
-  }
 
-  .res-context-banner {
-    background: #fffbe6;
-    border: 1px solid rgba(0,0,0,0.10);
-    border-radius: 14px;
-    padding: 14px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 28px;
-    line-height: 1.5;
-  }
-  .res-context-banner a {
-    color: #111;
-    text-decoration: underline;
-    font-weight: 800;
+    #ss-resources-{{ section.id }} .ss-res-hero-actions {
+      flex-direction: column;
+    }
+
+    #ss-resources-{{ section.id }} .ss-res-btn {
+      width: 100%;
+    }
+
+    #ss-resources-{{ section.id }} .ss-logo-helper {
+      border-radius: 30px;
+      padding: 18px;
+    }
+
+    #ss-resources-{{ section.id }} .ss-helper-head h2,
+    #ss-resources-{{ section.id }} .ss-res-section-head h2,
+    #ss-resources-{{ section.id }} .ss-res-final h2 {
+      font-size: 40px;
+    }
+
+    #ss-resources-{{ section.id }} .ss-prompt-top {
+      flex-direction: column;
+    }
+
+    #ss-resources-{{ section.id }} .ss-view-btn,
+    #ss-resources-{{ section.id }} .ss-copy-btn {
+      width: 100%;
+    }
+
+    #ss-resources-{{ section.id }} .ss-res-warning {
+      flex-direction: column;
+    }
+
+    #ss-resources-{{ section.id }} .ss-active-label {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+      flex-wrap: wrap;
+    }
   }
 </style>
 
 <script>
-  function resShowTab(tabId, btn) {
-    document.querySelectorAll('.res-panel').forEach(function(p) {
-      p.classList.add('res-panel--hidden');
-    });
-    document.querySelectorAll('.res-tab').forEach(function(t) {
-      t.classList.remove('res-tab--active');
-      t.setAttribute('aria-selected', 'false');
-    });
-    document.getElementById('res-panel-' + tabId).classList.remove('res-panel--hidden');
-    btn.classList.add('res-tab--active');
-    btn.setAttribute('aria-selected', 'true');
-  }
+  (function() {
+    var root = document.getElementById('ss-resources-{{ section.id }}');
+    if (!root) return;
 
-  function resCopy(btn, promptId) {
-    const el = document.getElementById(promptId);
-    const text = el.innerText;
-    const orig = btn.textContent;
-    navigator.clipboard.writeText(text).then(function() {
-      btn.textContent = '✅ Copied!';
-      setTimeout(function() { btn.textContent = orig; }, 2000);
-    }).catch(function() {
-      btn.textContent = '⚠️ Copy failed';
-      setTimeout(function() { btn.textContent = orig; }, 2000);
+    var categoryButtons = root.querySelectorAll('[data-res-category]');
+    var panels = root.querySelectorAll('[data-panel]');
+    var activeLabel = root.querySelector('[data-active-category-label]');
+
+    var labels = {
+      sports: 'Sports Teams',
+      vacation: 'Family Trips',
+      parties: 'Weddings & Parties',
+      groups: 'Groups & Fundraisers'
+    };
+
+    categoryButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        var target = button.getAttribute('data-res-category');
+
+        categoryButtons.forEach(function(btn) {
+          btn.classList.remove('ss-cat-card--active');
+        });
+
+        panels.forEach(function(panel) {
+          if (panel.getAttribute('data-panel') === target) {
+            panel.classList.remove('ss-hidden');
+          } else {
+            panel.classList.add('ss-hidden');
+          }
+        });
+
+        button.classList.add('ss-cat-card--active');
+
+        if (activeLabel && labels[target]) {
+          activeLabel.textContent = labels[target];
+        }
+
+        var library = root.querySelector('#prompt-library');
+        if (library && window.innerWidth < 900) {
+          library.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
-  }
+
+    root.querySelectorAll('.ss-view-btn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var card = button.closest('.ss-prompt-card');
+        if (!card) return;
+
+        var isOpen = card.classList.toggle('is-open');
+        button.textContent = isOpen ? 'Hide Prompt' : 'View Prompt';
+      });
+    });
+
+    root.querySelectorAll('.ss-copy-btn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var targetId = button.getAttribute('data-copy-target');
+        var target = root.querySelector('#' + targetId);
+        if (!target) return;
+
+        var text = target.innerText || target.textContent;
+        var original = button.textContent;
+
+        function copied() {
+          button.textContent = 'Copied';
+          setTimeout(function() {
+            button.textContent = original;
+          }, 1800);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(copied).catch(function() {
+            button.textContent = 'Copy failed';
+            setTimeout(function() {
+              button.textContent = original;
+            }, 1800);
+          });
+        } else {
+          var textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'absolute';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+
+          try {
+            document.execCommand('copy');
+            copied();
+          } catch (err) {
+            button.textContent = 'Copy failed';
+            setTimeout(function() {
+              button.textContent = original;
+            }, 1800);
+          }
+
+          document.body.removeChild(textarea);
+        }
+      });
+    });
+  })();
 </script>
 
 {% schema %}
 {
   "name": "Resources Page",
   "settings": [
-    { "type": "text", "id": "title", "label": "Page Title", "default": "Logo Resources" },
-    { "type": "textarea", "id": "subtitle", "label": "Subtitle", "default": "Use these free ChatGPT prompts to generate a logo for your storefront. Fill in the highlighted sections, then paste into ChatGPT." }
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Page Title",
+      "default": "Need a logo? Start here."
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Pick the type of store you are building, copy a prompt, generate a clean logo in ChatGPT, then upload it when you request your Stella & Sage storefront."
+    }
   ],
-  "presets": [{ "name": "Resources Page" }]
+  "presets": [
+    {
+      "name": "Resources Page"
+    }
+  ]
 }
 {% endschema %}
