@@ -230,6 +230,32 @@
                     </div>
                   </div>
                 {% endif %}
+                {% if is_god %}
+                  <!-- PRICE EDITOR CARD -->
+                  <div class="ss-store-card ss-clickrow ss-pricing-card" role="link" tabindex="0" data-href="/pages/price-editor" style="border-color: #7c3aed; box-shadow: 0 0 0 1px rgba(124,58,237,0.15), 0 10px 24px rgba(124,58,237,0.08);">
+                    <div class="ss-col-identity">
+                      <div class="ss-logo-frame" style="background:#f5f3ff; border-color:#ddd6fe;">
+                        <span style="font-size:24px;">💰</span>
+                      </div>
+                      <div class="ss-identity-text">
+                        <h3 class="ss-card-title" style="color:#5b21b6;">Price Editor</h3>
+                        <span class="ss-card-subtitle" style="background:#ede9fe; color:#5b21b6; border-color:#c4b5fd;">Super Admin</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-engine">
+                      <div class="ss-status-finished" style="background:#f5f3ff; border-color:#c4b5fd;">
+                        <span class="ss-dot-live" style="background:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,0.2);"></span>
+                        <span class="ss-status-text" style="color:#5b21b6;">GLOBAL PRICING</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-controls">
+                      <a href="/pages/price-editor" class="ss-open-btn" style="background:#7c3aed;">
+                        <span>Edit Prices</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </a>
+                    </div>
+                  </div>
+                {% endif %}
 
                 {% for raw_handle in handles_array %}
                   {% assign handle = raw_handle | strip %}
@@ -1395,6 +1421,12 @@
   @media (max-width: 768px) {
     .ss-user-pill { display: none !important; }
     .ss-block-hero { display: none !important; }
+  }
+
+  /* ── PRICING CARD ──────────────────────────────────── */
+  .ss-pricing-card:hover {
+    box-shadow: 0 0 0 2px rgba(124,58,237,0.40), 0 18px 40px rgba(124,58,237,0.14) !important;
+    border-color: rgba(124,58,237,0.55) !important;
   }
 
   /* God Mode: new store notification badge */
