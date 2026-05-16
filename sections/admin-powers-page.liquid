@@ -1991,6 +1991,29 @@
     .ap-add-product-row .ap-product-row__actions {
       grid-template-columns: 1fr !important;
     }
+  /* ── PRICING TABLE ─────────────────────────────────────── */
+  .ap-price-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 14px 0;
+    border-bottom: 1px solid var(--ap-border);
+  }
+  .ap-price-row:last-child { border-bottom: none; }
+  .ap-price-label {
+    flex: 1; font-size: 14px; font-weight: 700; color: var(--ap-text);
+  }
+  .ap-price-label span {
+    display: block; font-size: 11px; font-weight: 500; color: var(--ap-gray); margin-top: 2px;
+  }
+  .ap-price-input {
+    width: 90px; padding: 9px 12px; border: 1.5px solid var(--ap-border);
+    border-radius: 10px; font-size: 16px; font-weight: 700; text-align: center;
+    font-family: var(--ap-font); background: #fff; color: var(--ap-text);
+    box-sizing: border-box;
+  }
+  .ap-price-input:focus {
+    outline: none; border-color: var(--ap-accent2);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+
   }
 
 {%- endstyle -%}
@@ -2187,6 +2210,9 @@
         <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers"><span class="ap-tab-icon">👥</span><span class="ap-tab-label">Members</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings"><span class="ap-tab-icon">⚙️</span><span class="ap-tab-label">Settings</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger"><span class="ap-tab-icon">☠️</span><span class="ap-tab-label">Danger</span></button>
+        {% if is_super_admin %}
+        <button class="ap-main-tab-btn" id="apTabBtnPricing" data-main-tab="apPanelPricing" role="tab" aria-selected="false" aria-controls="apPanelPricing"><span class="ap-tab-icon">💰</span><span class="ap-tab-label">Pricing</span></button>
+        {% endif %}
       </div>
     </div>
 
@@ -2387,6 +2413,36 @@
       </div>
 
     </div><!-- /apPanelDanger -->
+
+    {% if is_super_admin %}
+    <div id="apPanelPricing" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnPricing">
+
+      <p style="margin:0 0 20px;font-size:13px;color:var(--ap-gray);">
+        Set retail prices for each product type. Changes apply across <strong>all stores</strong>.
+        Each price is the final customer price — the system keeps the margin automatically.
+      </p>
+
+      <div id="apPricingSpinner" style="text-align:center;padding:32px;color:var(--ap-gray);font-size:14px;">⏳ Loading prices…</div>
+
+      <div id="apPricingTable" style="display:none;">
+        <!-- Rows injected by JS -->
+      </div>
+
+      <div id="apPricingError" class="ap-status err" style="display:none;"></div>
+
+      <div id="apPricingActions" style="display:none;margin-top:24px;">
+        <div style="margin-bottom:16px;padding:12px 14px;background:#fef9c3;border:1px solid #fde047;border-radius:10px;font-size:13px;color:#713f12;">
+          ⚠️ Price changes will update all active Shopify products with the matching product tag.
+        </div>
+        <div class="ap-btn-row">
+          <button id="apBtnPricingApplyNow" class="ap-btn ap-btn--primary">✅ Apply Now</button>
+          <button id="apBtnPricingSchedule" class="ap-btn ap-btn--outline">🕒 Schedule for 3am Tonight</button>
+        </div>
+        <div id="apStatusPricing" class="ap-status"></div>
+      </div>
+
+    </div>
+    {% endif %}
 
   </div><!-- /.ap-main-card -->
 
@@ -4322,6 +4378,163 @@
   }
 })();
 </script>
+
+{% if is_super_admin %}
+<script>
+(function() {
+  var RAILWAY = 'https://printfulautomation-production.up.railway.app';
+  var SECRET  = SSAP.editorSecret;
+
+  // Human-readable labels for each module ID
+  var PRICE_LABELS = {
+    'BC3413_front':      { label: 'BC3413 T-Shirt',        sub: 'Front print only' },
+    'BC3413_front_back': { label: 'BC3413 T-Shirt',        sub: 'Front + back print' },
+    'M2580_front':       { label: 'M2580 Hoodie',          sub: 'Front print' },
+    'BC3001_front':      { label: 'BC3001 T-Shirt',        sub: 'Front print' },
+    'NL6733_front':      { label: 'NL6733 Tank Top',       sub: 'Front print' },
+    'CC1467Y_front':     { label: 'CC1467Y Youth Hoodie',  sub: 'Front print' },
+    'MC1790_front':      { label: 'MC1790 Tank Top',       sub: 'Front print' },
+    'BC3001Y_front':     { label: 'BC3001Y Youth T-Shirt', sub: 'Front print' },
+    '39165_front':       { label: 'Otto 39-165 Hat',       sub: 'Front print' },
+  };
+
+  var currentPrices = {};
+  var pricingLoaded = false;
+
+  // Load prices when tab is first clicked
+  document.getElementById('apTabBtnPricing').addEventListener('click', function() {
+    if (!pricingLoaded) loadPrices();
+  });
+
+  function loadPrices() {
+    document.getElementById('apPricingSpinner').style.display = 'block';
+    document.getElementById('apPricingTable').style.display = 'none';
+    document.getElementById('apPricingActions').style.display = 'none';
+    document.getElementById('apPricingError').style.display = 'none';
+
+    fetch(RAILWAY + '/admin/pricing?secret=' + encodeURIComponent(SECRET))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.status !== 'ok') throw new Error(data.error || 'Failed to load prices');
+        currentPrices = data.prices || {};
+        renderPricingTable(currentPrices);
+        pricingLoaded = true;
+      })
+      .catch(function(err) {
+        document.getElementById('apPricingSpinner').style.display = 'none';
+        var errEl = document.getElementById('apPricingError');
+        errEl.textContent = '❌ ' + err.message;
+        errEl.style.display = 'block';
+      });
+  }
+
+  function renderPricingTable(prices) {
+    var table = document.getElementById('apPricingTable');
+    var html = '';
+    Object.keys(PRICE_LABELS).forEach(function(key) {
+      var info = PRICE_LABELS[key];
+      var val = prices[key] || '';
+      html += '<div class="ap-price-row">' +
+        '<div class="ap-price-label">' + info.label + '<span>' + info.sub + '</span></div>' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+        '<span style="font-size:16px;font-weight:700;color:var(--ap-gray);">$</span>' +
+        '<input class="ap-price-input" type="number" min="1" max="999" step="1" ' +
+        'data-module="' + key + '" value="' + val + '" />' +
+        '</div>' +
+        '</div>';
+    });
+    table.innerHTML = html;
+    document.getElementById('apPricingSpinner').style.display = 'none';
+    table.style.display = 'block';
+    document.getElementById('apPricingActions').style.display = 'block';
+  }
+
+  function collectPrices() {
+    var prices = {};
+    document.querySelectorAll('.ap-price-input').forEach(function(inp) {
+      var key = inp.getAttribute('data-module');
+      var val = parseFloat(inp.value);
+      if (key && !isNaN(val) && val > 0) prices[key] = val;
+    });
+    return prices;
+  }
+
+  function setStatus(msg, type) {
+    var el = document.getElementById('apStatusPricing');
+    el.textContent = msg;
+    el.className = 'ap-status ' + (type || '');
+  }
+
+  function setBtnsDisabled(disabled) {
+    document.getElementById('apBtnPricingApplyNow').disabled = disabled;
+    document.getElementById('apBtnPricingSchedule').disabled = disabled;
+  }
+
+  // Apply Now
+  document.getElementById('apBtnPricingApplyNow').addEventListener('click', function() {
+    var prices = collectPrices();
+    setBtnsDisabled(true);
+    setStatus('⏳ Saving prices and applying to all products…', '');
+    fetch(RAILWAY + '/admin/pricing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: SECRET, prices: prices, apply_now: true })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status !== 'ok') throw new Error(data.error || 'Failed');
+      setStatus('✅ Prices saved! Applying to products in the background — this may take a few minutes.', 'ok');
+      currentPrices = prices;
+    })
+    .catch(function(err) {
+      setStatus('❌ ' + err.message, 'err');
+    })
+    .finally(function() { setBtnsDisabled(false); });
+  });
+
+  // Schedule for 3am
+  document.getElementById('apBtnPricingSchedule').addEventListener('click', function() {
+    var prices = collectPrices();
+    var now = new Date();
+    var target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 3, 0, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1); // already past 3am, schedule tomorrow
+    var msUntil = target - now;
+    var hoursUntil = (msUntil / 3600000).toFixed(1);
+
+    setBtnsDisabled(true);
+    setStatus('⏳ Saving prices…', '');
+
+    // First save to metaobject immediately
+    fetch(RAILWAY + '/admin/pricing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: SECRET, prices: prices, apply_now: false })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status !== 'ok') throw new Error(data.error || 'Failed to save');
+      setStatus('✅ Prices saved. Scheduled to apply in ' + hoursUntil + ' hours (3am tonight). Keep this tab open or it will apply next time you click Apply Now.', 'ok');
+      currentPrices = prices;
+      setBtnsDisabled(false);
+
+      // Schedule the apply call
+      setTimeout(function() {
+        fetch(RAILWAY + '/admin/pricing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret: SECRET, prices: prices, apply_now: true })
+        }).catch(function() {});
+      }, msUntil);
+    })
+    .catch(function(err) {
+      setStatus('❌ ' + err.message, 'err');
+      setBtnsDisabled(false);
+    });
+  });
+
+})();
+</script>
+{% endif %}
 
 {%- endif -%}
 
