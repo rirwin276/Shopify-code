@@ -325,6 +325,7 @@
                     {% assign entry = shop.metaobjects.custom_shop[handle] %}
                     {% assign tile_logo_clean = blank %}
                     {% assign tile_logo_file = blank %}
+                    {% assign tile_onboarding_image = blank %}
                     {% assign tile_name = handle | replace: '-', ' ' | capitalize %}
                     {% assign is_fully_ready = false %}
                     {% assign collection_handle = handle %}
@@ -343,6 +344,11 @@
 
                       {% assign lf = entry.logo.value | default: entry.logo %}
                       {% if lf != blank %}{% assign tile_logo_file = lf %}{% endif %}
+                      {% if tile_logo_clean != blank %}
+                        {% assign tile_onboarding_image = tile_logo_clean %}
+                      {% elsif tile_logo_file != blank %}
+                        {% assign tile_onboarding_image = tile_logo_file | image_url: width: 1200 %}
+                      {% endif %}
 
                       {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
                       {% if ch != blank %}{% assign collection_handle = ch | strip %}{% endif %}
@@ -378,6 +384,8 @@
                       data-ss-products="{{ product_count }}"
                       data-ss-ready="{% if is_fully_ready and tile_is_sleeping == false and tile_is_waking == false %}1{% else %}0{% endif %}"
                       data-ss-building="{% if tile_is_waking %}1{% elsif tile_is_sleeping == false and is_fully_ready == false %}1{% else %}0{% endif %}"
+                      data-ss-onboarding-admin="{% if tile_is_admin or is_god %}1{% else %}0{% endif %}"
+                      data-ss-onboarding-image="{{ tile_onboarding_image | escape }}"
                       data-admin-href="{{ admin_url }}"
                       data-ss-bootstrapper="{% if tile_is_admin or is_god %}1{% else %}0{% endif %}"
                       data-ss-sleep-status="{% if tile_is_sleeping %}sleeping{% elsif tile_is_waking %}waking{% else %}active{% endif %}"
@@ -611,7 +619,7 @@
 
         <div class="ss-onboardingLogoShell" id="ssOnboardingLogoShell">
           <span id="ssOnboardingLogoFallback">S&amp;S</span>
-          <img id="ssOnboardingLogoImg" alt="Store logo preview" loading="eager">
+          <img id="ssOnboardingLogoImg" alt="Store logo preview" loading="eager" decoding="async" fetchpriority="high">
         </div>
 
         <div class="ss-onboardingShotShell" id="ssOnboardingShotShell" aria-hidden="true">
@@ -732,17 +740,11 @@
     // ---------------------------
     function initNewStoreOnboarding(){
       var params = new URLSearchParams(window.location.search || '');
-      var shouldShow = params.get('new_store') === '1';
+      var storeHandle = (params.get('store_handle') || '').trim();
+      var shouldShow = params.get('new_store') === '1' || !!storeHandle;
       if(!shouldShow) return;
 
-      var storeHandle = (params.get('store_handle') || '').trim();
-      var storageKey = storeHandle ? ('ss-new-store-onboarding-seen-' + storeHandle) : 'ss-new-store-onboarding-seen-generic';
       var forceOnboarding = params.get('force_onboarding') === '1' || params.get('test_onboarding') === '1';
-
-      if(!forceOnboarding && localStorage.getItem(storageKey) === '1'){
-        try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
-        return;
-      }
 
       var modal = document.getElementById('ssNewStoreOnboarding');
       if(!modal) return;
@@ -757,14 +759,28 @@
         });
       }
       if(!card){
-        card = document.querySelector('.ss-store-card[data-ss-building="1"]') || document.querySelector('.ss-store-card[data-ss-handle]');
+        card = document.querySelector('.ss-store-card[data-ss-building="1"][data-ss-onboarding-admin="1"]') || document.querySelector('.ss-store-card[data-ss-handle][data-ss-onboarding-admin="1"]');
+      }
+      if(!card) return;
+      if(!storeHandle) storeHandle = (card.getAttribute('data-ss-handle') || '').trim();
+
+      var storageKey = storeHandle ? ('ss-new-store-onboarding-seen-' + storeHandle) : 'ss-new-store-onboarding-seen-generic';
+      if(!forceOnboarding && localStorage.getItem(storageKey) === '1'){
+        try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
+        return;
+      }
+
+      var isStoreAdmin = card.getAttribute('data-ss-onboarding-admin') === '1';
+      if(!isStoreAdmin && !forceOnboarding){
+        try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
+        return;
       }
 
       var storeName = 'your store';
-      var logoSrc = '';
-      if(card){
-        var title = card.querySelector('.ss-card-title');
-        if(title && title.textContent.trim()) storeName = title.textContent.trim();
+      var logoSrc = card.getAttribute('data-ss-onboarding-image') || '';
+      var title = card.querySelector('.ss-card-title');
+      if(title && title.textContent.trim()) storeName = title.textContent.trim();
+      if(!logoSrc){
         var img = card.querySelector('.ss-logo-frame img');
         if(img && img.getAttribute('src')) logoSrc = img.getAttribute('src');
       }
@@ -800,13 +816,20 @@
         }
       ];
 
+      function withFreshToken(src){
+        if(!src) return '';
+        if(src.indexOf('ssv=') > -1) return src;
+        if(src.indexOf('cdn.shopify.com') === -1 && src.indexOf('logo_clean') === -1) return src;
+        return src + (src.indexOf('?') === -1 ? '?' : '&') + 'ssv=' + Date.now();
+      }
+
       if(fallback){
         var initials = storeName.split(/\s+/).filter(Boolean).slice(0,2).map(function(w){ return w.charAt(0); }).join('').toUpperCase();
         fallback.textContent = initials || 'S&S';
       }
       if(logoImg && logoShell){
         if(logoSrc){
-          logoImg.src = logoSrc;
+          logoImg.src = withFreshToken(logoSrc);
           logoShell.classList.add('has-img');
         } else {
           logoImg.removeAttribute('src');
@@ -1774,7 +1797,9 @@
   .ss-onboardingBackdrop {
     position: absolute;
     inset: 0;
-    background: rgba(15,23,42,0.56);
+    background:
+      radial-gradient(circle at 24% 18%, rgba(212,176,106,0.22), transparent 40%),
+      rgba(15,23,42,0.58);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
   }
@@ -1782,10 +1807,11 @@
     position: relative;
     width: min(1360px, calc(100vw - 56px));
     min-height: 660px;
-    background: rgba(255,255,255,0.92);
-    border: 1px solid rgba(255,255,255,0.72);
+    background:
+      linear-gradient(146deg, rgba(255,252,242,0.97) 0%, rgba(248,241,222,0.95) 54%, rgba(255,255,255,0.94) 100%);
+    border: 1px solid rgba(203,167,97,0.36);
     border-radius: 30px;
-    box-shadow: 0 30px 110px rgba(15,23,42,0.34);
+    box-shadow: 0 34px 120px rgba(15,23,42,0.34), inset 0 1px 0 rgba(255,255,255,0.72);
     display: grid;
     grid-template-columns: 1.22fr 0.78fr;
     overflow: hidden;
@@ -1818,9 +1844,9 @@
     justify-content: center;
     min-height: 100%;
     background:
-      radial-gradient(circle at 42% 35%, rgba(43,109,232,0.24), transparent 34%),
-      radial-gradient(circle at 55% 62%, rgba(16,185,129,0.18), transparent 34%),
-      linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      radial-gradient(circle at 20% 24%, rgba(212,176,106,0.48), transparent 42%),
+      radial-gradient(circle at 70% 66%, rgba(166,124,58,0.24), transparent 38%),
+      linear-gradient(170deg, #22180a 0%, #30210d 40%, #4b3415 100%);
     padding: 34px;
     color: #fff;
   }
@@ -1838,12 +1864,12 @@
   .ss-onboardingLogoShell {
     position: relative;
     z-index: 1;
-    width: 180px;
-    height: 180px;
-    border-radius: 38px;
-    background: rgba(255,255,255,0.96);
-    border: 1px solid rgba(255,255,255,0.65);
-    box-shadow: 0 30px 70px rgba(0,0,0,0.28);
+    width: clamp(220px, 30vw, 300px);
+    height: clamp(220px, 30vw, 300px);
+    border-radius: 44px;
+    background: linear-gradient(162deg, rgba(255,255,255,0.98), rgba(248,241,222,0.94));
+    border: 1px solid rgba(226,194,132,0.65);
+    box-shadow: 0 34px 84px rgba(0,0,0,0.30);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1860,7 +1886,9 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 14px;
+    padding: 18px;
+    transform: translateZ(0);
+    image-rendering: auto;
   }
   .ss-onboardingLogoShell.has-img span { display: none; }
   .ss-onboardingLogoShell.has-img img { display: block; }
@@ -1954,8 +1982,8 @@
     margin-bottom: 14px;
     padding: 7px 11px;
     border-radius: 999px;
-    background: rgba(43,109,232,0.08);
-    color: rgba(43,109,232,0.98);
+    background: rgba(199,156,80,0.15);
+    color: rgba(120,82,24,0.98);
     font-size: 11px;
     font-weight: 900;
     letter-spacing: 0.12em;
@@ -2037,7 +2065,7 @@
   }
   .ss-onboardingDots span.is-active {
     width: 24px;
-    background: #2b6de8;
+    background: linear-gradient(135deg, #c89f56, #9e6e2a);
   }
   .ss-onboardingBtns { display: flex; gap: 10px; align-items: center; }
   .ss-onboardingBack,
@@ -2056,9 +2084,9 @@
   }
   .ss-onboardingNext {
     min-width: 92px;
-    background: #0f172a;
+    background: linear-gradient(135deg, #c89f56, #9e6e2a);
     color: #fff;
-    box-shadow: 0 14px 30px rgba(15,23,42,0.18);
+    box-shadow: 0 14px 30px rgba(120,82,24,0.28);
   }
   @media (max-width: 760px) {
     .ss-onboardingOverlay {
@@ -2088,8 +2116,8 @@
       min-height: 300px;
       padding: 20px 14px 18px;
     }
-    .ss-onboardingLogoShell { width: 118px; height: 118px; border-radius: 28px; }
-    .ss-onboardingLogoShell span { font-size: 30px; }
+    .ss-onboardingLogoShell { width: 170px; height: 170px; border-radius: 32px; }
+    .ss-onboardingLogoShell span { font-size: 36px; }
     .ss-onboardingShotShell {
       width: 100%;
       max-width: 430px;
