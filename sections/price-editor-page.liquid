@@ -69,7 +69,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 14px 0;
+    padding: 16px 0;
     border-bottom: 1px solid var(--ap-border);
   }
   .ap-price-row:last-child { border-bottom: none; }
@@ -86,9 +86,39 @@
     color: var(--ap-gray);
     margin-top: 2px;
   }
+  /* grouped row: two inputs side-by-side */
+  .ap-inputs-group {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .ap-input-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+  .ap-col-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ap-gray);
+    white-space: nowrap;
+  }
+  .ap-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .ap-dollar {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ap-gray);
+  }
   .ap-price-input {
-    width: 90px;
-    padding: 9px 12px;
+    width: 84px;
+    padding: 9px 10px;
     border: 1.5px solid var(--ap-border);
     border-radius: 10px;
     font-size: 16px;
@@ -256,11 +286,47 @@
   }
   .pe-modal-btn--ghost:hover { color: var(--ap-text); }
 
+  /* schedule time picker in modal */
+  .pe-schedule-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    margin: -4px 0 12px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid var(--ap-border);
+    border-radius: 12px;
+  }
+  .pe-schedule-row label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ap-text);
+    white-space: nowrap;
+  }
+  #peScheduleTime {
+    padding: 8px 12px;
+    border: 1.5px solid var(--ap-border);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--ap-font);
+    color: var(--ap-text);
+    background: #fff;
+    cursor: pointer;
+  }
+  #peScheduleTime:focus {
+    outline: none;
+    border-color: var(--ap-accent2);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+  }
+
   @media (max-width: 720px) {
     .pe-wrap { padding: 20px 14px 46px; }
     .pe-card { padding: 18px; }
-    .ap-price-row { gap: 10px; }
-    .ap-price-input { width: 84px; }
+    .ap-price-row { gap: 10px; flex-wrap: wrap; }
+    .ap-inputs-group { gap: 8px; }
+    .ap-price-input { width: 76px; }
     .pe-btn { width: 100%; }
   }
 {%- endstyle -%}
@@ -278,74 +344,84 @@
     </div>
 
     <div id="peTable">
+      <!-- BC3413 Classic Tee — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
         <div class="ap-price-label">
           BC3413 Classic Tee
-          <span>Front print only (back-only = same price)</span>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3413_front" value="">
-        </div>
-      </div>
-      <div class="ap-price-row">
-        <div class="ap-price-label">
-          BC3413 Classic Tee
-          <span>Front + back print</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3413_front_back" value="">
-        </div>
-      </div>
-      <div class="ap-price-row">
-        <div class="ap-price-label">
-          BC3001Y Youth T-Shirt
-          <span>Front print only (back-only = same price)</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3001Y_front" value="">
+        <div class="ap-inputs-group">
+          <div class="ap-input-col">
+            <span class="ap-col-label">Front or Back</span>
+            <div class="ap-input-wrap">
+              <span class="ap-dollar">$</span>
+              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3413_front" value="">
+            </div>
+          </div>
+          <div class="ap-input-col">
+            <span class="ap-col-label">Two Images</span>
+            <div class="ap-input-wrap">
+              <span class="ap-dollar">$</span>
+              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3413_front_back" value="">
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- BC3001Y Youth T-Shirt — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
         <div class="ap-price-label">
           BC3001Y Youth T-Shirt
-          <span>Front + back print</span>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3001Y_front_back" value="">
+        <div class="ap-inputs-group">
+          <div class="ap-input-col">
+            <span class="ap-col-label">Front or Back</span>
+            <div class="ap-input-wrap">
+              <span class="ap-dollar">$</span>
+              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3001Y_front" value="">
+            </div>
+          </div>
+          <div class="ap-input-col">
+            <span class="ap-col-label">Two Images</span>
+            <div class="ap-input-wrap">
+              <span class="ap-dollar">$</span>
+              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3001Y_front_back" value="">
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- M2580 Hoodie — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
         <div class="ap-price-label">
           M2580 Hoodie
-          <span>Front print only (back-only = same price)</span>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="M2580_front" value="">
+        <div class="ap-inputs-group">
+          <div class="ap-input-col">
+            <span class="ap-col-label">Front or Back</span>
+            <div class="ap-input-wrap">
+              <span class="ap-dollar">$</span>
+              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="M2580_front" value="">
+            </div>
+          </div>
+          <div class="ap-input-col">
+            <span class="ap-col-label">Two Images</span>
+            <div class="ap-input-wrap">
+              <span class="ap-dollar">$</span>
+              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="M2580_front_back" value="">
+            </div>
+          </div>
         </div>
       </div>
-      <div class="ap-price-row">
-        <div class="ap-price-label">
-          M2580 Hoodie
-          <span>Front + back print</span>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="M2580_front_back" value="">
-        </div>
-      </div>
+
+      <!-- Single-input rows -->
       <div class="ap-price-row">
         <div class="ap-price-label">
           BC3001 Adult Tee
-          <span>Front print only (back-only = same price)</span>
+          <span>Front or Back</span>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="BC3001_front" value="">
+        <div class="ap-input-wrap">
+          <span class="ap-dollar">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3001_front" value="">
         </div>
       </div>
       <div class="ap-price-row">
@@ -353,9 +429,9 @@
           NL6733 Tank Top
           <span>Front print</span>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="NL6733_front" value="">
+        <div class="ap-input-wrap">
+          <span class="ap-dollar">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="NL6733_front" value="">
         </div>
       </div>
       <div class="ap-price-row">
@@ -363,9 +439,9 @@
           CC1467Y Youth Hoodie
           <span>Front print</span>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="CC1467Y_front" value="">
+        <div class="ap-input-wrap">
+          <span class="ap-dollar">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="CC1467Y_front" value="">
         </div>
       </div>
       <div class="ap-price-row">
@@ -373,9 +449,9 @@
           MC1790 Tank Top
           <span>Front print</span>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="MC1790_front" value="">
+        <div class="ap-input-wrap">
+          <span class="ap-dollar">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="MC1790_front" value="">
         </div>
       </div>
       <div class="ap-price-row">
@@ -383,9 +459,9 @@
           Otto 39-165 Hat
           <span>Front print</span>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="font-size:16px; font-weight:700; color:var(--ap-gray);">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="1" data-module="39165_front" value="">
+        <div class="ap-input-wrap">
+          <span class="ap-dollar">$</span>
+          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="39165_front" value="">
         </div>
       </div>
     </div>
@@ -401,10 +477,18 @@
 <!-- APPLY MODAL -->
 <div class="pe-modal-overlay" id="peModal" role="dialog" aria-modal="true" aria-labelledby="peModalTitle">
   <div class="pe-modal">
-    <h2 id="peModalTitle">💾 Prices saved!</h2>
-    <p>Do you want to apply the new prices to <strong>existing active products</strong> right now, or save them for <strong>future builds only</strong>?</p>
+    <h2 id="peModalTitle">💾 Save Prices</h2>
+    <p>How do you want to apply these changes?</p>
     <div class="pe-modal-actions">
-      <button class="pe-modal-btn pe-modal-btn--primary" id="peModalApplyNow">⚡ Apply Now</button>
+      <button class="pe-modal-btn pe-modal-btn--primary" id="peModalApplyNow">⚡ Apply Now to Existing Products</button>
+      <button class="pe-modal-btn pe-modal-btn--secondary" id="peModalScheduleBtn">🕐 Schedule for Later</button>
+      <div id="peScheduleSection" style="display:none;">
+        <div class="pe-schedule-row">
+          <label for="peScheduleTime">Run at:</label>
+          <input type="time" id="peScheduleTime" value="03:00">
+        </div>
+        <button class="pe-modal-btn pe-modal-btn--secondary" id="peModalScheduleConfirm" style="margin-top:0;">✅ Confirm Schedule</button>
+      </div>
       <button class="pe-modal-btn pe-modal-btn--secondary" id="peModalFutureOnly">📅 Future Builds Only</button>
       <button class="pe-modal-btn pe-modal-btn--ghost" id="peModalCancel">Cancel</button>
     </div>
@@ -415,6 +499,7 @@
 (function() {
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var SECRET = {{ editor_secret | json }};
+  var originalPrices = {};
 
   function headers() {
     return {
@@ -449,16 +534,26 @@
       var rawValue = prices && prices[key] != null ? Number(prices[key]) : NaN;
       input.value = Number.isFinite(rawValue) ? String(rawValue) : '';
     });
-  }
-
-  function collectPrices() {
-    var prices = {};
+    // snapshot the loaded values so we can diff later
+    originalPrices = {};
     document.querySelectorAll('.ap-price-input').forEach(function(inp) {
       var key = inp.getAttribute('data-module');
       var val = parseFloat(inp.value);
-      if (key && Number.isFinite(val) && val > 0) prices[key] = val;
+      if (key && Number.isFinite(val)) originalPrices[key] = val;
     });
-    return prices;
+  }
+
+  function collectChangedPrices() {
+    var changed = {};
+    document.querySelectorAll('.ap-price-input').forEach(function(inp) {
+      var key = inp.getAttribute('data-module');
+      var val = parseFloat(inp.value);
+      if (!key || !Number.isFinite(val) || val <= 0) return;
+      if (originalPrices[key] !== val) {
+        changed[key] = val;
+      }
+    });
+    return changed;
   }
 
   function loadPrices() {
@@ -478,7 +573,6 @@
       })
       .catch(function(err) {
         setLoadState('Could not load current prices. You can still edit values and save new pricing.', 'err');
-        setStatus('❌ ' + err.message, 'err');
       });
   }
 
@@ -529,16 +623,33 @@
     tick();
   }
 
-  function savePrices(applyExisting) {
+  function savePrices(applyExisting, scheduledTime) {
     var btn = document.getElementById('peSaveBtn');
+    var changedPrices = collectChangedPrices();
+
+    if (Object.keys(changedPrices).length === 0) {
+      setStatus('⚠️ No price changes detected.', 'err');
+      return;
+    }
+
     var payload = {
-      prices: collectPrices(),
+      prices: changedPrices,
       apply_to_existing: applyExisting,
-      apply_now: applyExisting
+      apply_now: applyExisting && !scheduledTime
     };
+    if (scheduledTime) {
+      payload.scheduled_time = scheduledTime;
+      payload.apply_to_existing = true;
+    }
 
     btn.disabled = true;
-    setStatus(applyExisting ? '⏳ Saving prices and starting repricing…' : '⏳ Saving prices…');
+    if (scheduledTime) {
+      setStatus('⏳ Saving prices and scheduling repricing for ' + scheduledTime + '…');
+    } else if (applyExisting) {
+      setStatus('⏳ Saving prices and starting repricing…');
+    } else {
+      setStatus('⏳ Saving prices…');
+    }
     setJobStatus('', false);
 
     fetch(RAILWAY + '/api/pricing', {
@@ -555,11 +666,17 @@
         });
       })
       .then(function(data) {
-        setStatus('✅ Prices saved.', 'ok');
+        // update snapshot so next save only sends newly changed values
+        Object.assign(originalPrices, changedPrices);
+        if (scheduledTime) {
+          setStatus('✅ Prices saved. Repricing scheduled for ' + scheduledTime + '.', 'ok');
+        } else {
+          setStatus('✅ Prices saved.', 'ok');
+        }
         var jobId = data.job_id || data.jobId || (data.job && (data.job.id || data.job.job_id));
-        if (applyExisting && jobId) {
+        if (applyExisting && !scheduledTime && jobId) {
           pollJob(jobId);
-        } else if (applyExisting) {
+        } else if (applyExisting && !scheduledTime) {
           setJobStatus('✅ Repricing started in the background.', true);
         }
       })
@@ -572,6 +689,8 @@
   }
 
   function openModal() {
+    // reset schedule section
+    document.getElementById('peScheduleSection').style.display = 'none';
     document.getElementById('peModal').classList.add('open');
   }
 
@@ -580,9 +699,9 @@
   }
 
   document.getElementById('peSaveBtn').addEventListener('click', function() {
-    var prices = collectPrices();
-    if (Object.keys(prices).length === 0) {
-      setStatus('⚠️ Please enter at least one price before saving.', 'err');
+    var changed = collectChangedPrices();
+    if (Object.keys(changed).length === 0) {
+      setStatus('⚠️ No price changes detected. Edit at least one value before saving.', 'err');
       return;
     }
     openModal();
@@ -590,12 +709,23 @@
 
   document.getElementById('peModalApplyNow').addEventListener('click', function() {
     closeModal();
-    savePrices(true);
+    savePrices(true, null);
+  });
+
+  document.getElementById('peModalScheduleBtn').addEventListener('click', function() {
+    var section = document.getElementById('peScheduleSection');
+    section.style.display = section.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.getElementById('peModalScheduleConfirm').addEventListener('click', function() {
+    var time = document.getElementById('peScheduleTime').value || '03:00';
+    closeModal();
+    savePrices(true, time);
   });
 
   document.getElementById('peModalFutureOnly').addEventListener('click', function() {
     closeModal();
-    savePrices(false);
+    savePrices(false, null);
   });
 
   document.getElementById('peModalCancel').addEventListener('click', closeModal);
