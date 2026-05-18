@@ -3276,6 +3276,13 @@
 
       // BC3413 placement editor — show for any product tagged bc3413_*
       var productTags = product.tags || [];
+      var _tagListForProCheck = Array.isArray(productTags)
+        ? productTags.map(function(t){ return String(t||'').toLowerCase().trim(); })
+        : String(productTags||'').split(',').map(function(t){ return t.toLowerCase().trim(); });
+      var isProEditorBuild = _tagListForProCheck.some(function(t){
+        return t === 'custom-build' || t.indexOf('custom-build--') === 0;
+      });
+      if(!isProEditorBuild){
       var isBc3413 = false;
       if(Array.isArray(productTags)){
         for(var ti = 0; ti < productTags.length; ti++){
@@ -3664,6 +3671,7 @@
         }
       }
       apPolishEditorButtons(actionsEl);
+      }
 
       row.appendChild(imgEl);
       row.appendChild(titleEl);
@@ -3975,39 +3983,14 @@
         'position: relative;',
       ].join('');
 
-      // Hoodie thumbnail — try to reuse an existing M2580 hoodie image, otherwise fallback
+      // Hoodie thumbnail — permanent black placeholder (no image reuse for hoodie flow)
       var hoodieImgEl = document.createElement('div');
       hoodieImgEl.style.cssText = [
         'width:52px;height:52px;border-radius:8px;flex-shrink:0;',
         'display:flex;align-items:center;justify-content:center;',
-        'background:rgba(16,185,129,0.1);font-size:28px;',
+        'background:#000000;font-size:28px;color:#ffffff;',
       ].join('');
       hoodieImgEl.textContent = '🧥';
-
-      (function(){
-        for(var _hi = 0; _hi < products.length; _hi++){
-          var _p = products[_hi];
-          var _tags = _p.tags || [];
-          var _tagText = Array.isArray(_tags) ? _tags.join(' ').toLowerCase() : String(_tags || '').toLowerCase();
-          var _titleText = String(_p.title || '').toLowerCase();
-          var _hasM2580 = _tagText.indexOf('m2580') >= 0 || _titleText.indexOf('hoodie') >= 0 || _titleText.indexOf('pullover') >= 0;
-
-          if(_hasM2580){
-            var _imgSrc = _p.featured_image || _p.image ||
-              (_p.images && _p.images[0] && (_p.images[0].src || _p.images[0])) || null;
-
-            if(_imgSrc){
-              var _realHoodieImg = document.createElement('img');
-              _realHoodieImg.src = _imgSrc;
-              _realHoodieImg.alt = 'Premium Pullover Hoodie';
-              _realHoodieImg.style.cssText = 'width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;';
-              _realHoodieImg.loading = 'lazy';
-              hoodieImgEl = _realHoodieImg;
-            }
-            break;
-          }
-        }
-      })();
 
       var hoodieTextWrap = document.createElement('div');
       hoodieTextWrap.style.cssText = 'flex:1;min-width:0;';
