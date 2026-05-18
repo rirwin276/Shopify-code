@@ -2049,6 +2049,7 @@
 {%- assign editor_pro_shirt_bc3413_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3413' -%}
 {%- assign editor_pro_shirt_bc3001y_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3001y' -%}
 {%- assign editor_pro_shirt_m2580_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/m2580' -%}
+{%- assign editor_pro_shirt_zip_hoodie_base_url = section.settings.editor_pro_shirt_zip_hoodie_base_url | default: '' -%}
 {%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
    Not actually secret — it's already in the public repo, only gates the editor page,
    and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
@@ -2092,6 +2093,7 @@
     SSAP.editorProShirtBc3413BaseUrl = {{ editor_pro_shirt_bc3413_base_url | json }};
     SSAP.editorProShirtBc3001yBaseUrl = {{ editor_pro_shirt_bc3001y_base_url | json }};
     SSAP.editorProShirtM2580BaseUrl = {{ editor_pro_shirt_m2580_base_url | json }};
+    SSAP.editorProShirtZipHoodieBaseUrl = {{ editor_pro_shirt_zip_hoodie_base_url | json }};
     SSAP.editorSecret = {{ editor_secret | json }};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
@@ -3983,14 +3985,14 @@
         'position: relative;',
       ].join('');
 
-      // Hoodie thumbnail — permanent black placeholder (no image reuse for hoodie flow)
+      // Hoodie thumbnail
       var hoodieImgEl = document.createElement('div');
       hoodieImgEl.style.cssText = [
         'width:52px;height:52px;border-radius:8px;flex-shrink:0;',
         'display:flex;align-items:center;justify-content:center;',
-        'background:#000000;font-size:28px;color:#ffffff;',
+        'background:rgba(16,185,129,0.1);font-size:28px;',
       ].join('');
-      hoodieImgEl.textContent = '🧥';
+      hoodieImgEl.textContent = '👕';
 
       var hoodieTextWrap = document.createElement('div');
       hoodieTextWrap.style.cssText = 'flex:1;min-width:0;';
@@ -4082,6 +4084,104 @@
 
       apBuilderCount++;
       if(apCustomBuildersContainer) apCustomBuildersContainer.appendChild(addHoodieCard);
+    }
+
+    // ── "Add New" card — Custom Premium Zip-Up Hoodie ─────────────────────────
+    if(SSAP.editorProShirtZipHoodieBaseUrl && SSAP.editorSecret){
+      var addZipHoodieCard = document.createElement('div');
+      addZipHoodieCard.className = 'ap-product-row ap-add-product-row';
+      addZipHoodieCard.style.cssText = [
+        'border: 2px dashed rgba(16,185,129,0.35);',
+        'background: rgba(16,185,129,0.05);',
+        'cursor: default;',
+        'position: relative;',
+      ].join('');
+
+      // Zip hoodie thumbnail — black background placeholder (no existing product image)
+      var zipHoodieImgEl = document.createElement('div');
+      zipHoodieImgEl.style.cssText = [
+        'width:52px;height:52px;border-radius:8px;flex-shrink:0;',
+        'display:flex;align-items:center;justify-content:center;',
+        'background:#000000;font-size:28px;color:#ffffff;',
+      ].join('');
+      zipHoodieImgEl.textContent = '🧥';
+
+      var zipHoodieTextWrap = document.createElement('div');
+      zipHoodieTextWrap.style.cssText = 'flex:1;min-width:0;overflow:hidden;';
+
+      var zipHoodieTitleEl = document.createElement('span');
+      zipHoodieTitleEl.style.cssText = 'font-size:14px;font-weight:700;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+      zipHoodieTitleEl.textContent = 'Custom Premium Zip-Up Hoodie';
+
+      var zipHoodieSubEl = document.createElement('span');
+      zipHoodieSubEl.style.cssText = 'font-size:12px;color:#64748b;display:block;margin-top:2px;';
+      zipHoodieSubEl.textContent = 'Front & back logo · Up to 2 colors · Separate listing';
+
+      zipHoodieTextWrap.appendChild(zipHoodieTitleEl);
+      zipHoodieTextWrap.appendChild(zipHoodieSubEl);
+
+      // Tooltip
+      var zipHoodieTooltip = document.createElement('div');
+      zipHoodieTooltip.className = 'ap-share-help-bubble';
+      zipHoodieTooltip.style.cssText = [
+        'position:absolute;',
+        'z-index:10070;',
+        'width:min(300px,calc(100vw - 40px));',
+        'pointer-events:none;',
+      ].join('');
+      zipHoodieTooltip.innerHTML = '<strong>Custom Premium Zip-Up Hoodie</strong>' +
+        ' Start with your logo and choose placement on the front or front + back, pick up to 2 garment colors,' +
+        ' and this will build as a separate zip-up hoodie listing in your storefront.';
+
+      var zipHoodieArrow = document.createElement('div');
+      zipHoodieArrow.className = 'ap-smart-tooltip-arrow';
+      zipHoodieArrow.style.width = '10px';
+      zipHoodieArrow.style.height = '10px';
+      zipHoodieTooltip.appendChild(zipHoodieArrow);
+      addZipHoodieCard.appendChild(zipHoodieTooltip);
+
+      apInstallSmartTooltip(addZipHoodieCard, zipHoodieTooltip, { arrow: zipHoodieArrow, gap: 10, margin: 12, zIndex: 10070 });
+
+      var zipHoodieActionsEl = document.createElement('div');
+      zipHoodieActionsEl.className = 'ap-product-row__actions';
+
+      var addZipHoodieBtn = document.createElement('button');
+      addZipHoodieBtn.type = 'button';
+      addZipHoodieBtn.style.cssText = [
+        'display:inline-flex;align-items:center;gap:6px;',
+        'padding:8px 16px;',
+        'background:#10b981;color:#ffffff;',
+        'border-radius:8px;font-size:13px;font-weight:700;',
+        'border:none;cursor:pointer;',
+        'transition:background 0.15s ease;',
+        'white-space:nowrap;flex-shrink:0;',
+      ].join('');
+      addZipHoodieBtn.innerHTML = '✨ Add to Store';
+      addZipHoodieBtn.title = 'Create a new Custom Premium Zip-Up Hoodie listing with your logo and color choices';
+      addZipHoodieBtn.addEventListener('mouseover', function(){ this.style.background='#059669'; });
+      addZipHoodieBtn.addEventListener('mouseout',  function(){ this.style.background='#10b981'; });
+
+      addZipHoodieBtn.addEventListener('click', function(){
+        var zipHoodieProUrl = SSAP.editorProShirtZipHoodieBaseUrl
+          + '?shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+          + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+          + '&mode=embedded';
+
+        if(SSAP.shopLogoSrc){
+          zipHoodieProUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
+        }
+
+        apOpenEditorModal(zipHoodieProUrl);
+      });
+
+      zipHoodieActionsEl.appendChild(addZipHoodieBtn);
+
+      addZipHoodieCard.appendChild(zipHoodieImgEl);
+      addZipHoodieCard.appendChild(zipHoodieTextWrap);
+      addZipHoodieCard.appendChild(zipHoodieActionsEl);
+
+      apBuilderCount++;
+      if(apCustomBuildersContainer) apCustomBuildersContainer.appendChild(addZipHoodieCard);
     }
 
     apRefreshProductEmptyStates(apMainCount, apCustomCount, apBuilderCount);
@@ -4309,7 +4409,14 @@
 {% schema %}
 {
   "name": "Admin Powers",
-  "settings": [],
+  "settings": [
+    {
+      "type": "text",
+      "id": "editor_pro_shirt_zip_hoodie_base_url",
+      "label": "Pro Shirt Editor — Zip Hoodie Base URL",
+      "default": ""
+    }
+  ],
   "presets": [
     { "name": "Admin Powers" }
   ]
