@@ -87,6 +87,14 @@
     {% # theme-check-disable ParserBlockingScript %}
     <script src="{{ 'storefront-context.js' | asset_url }}"></script>
     {% # theme-check-enable ParserBlockingScript %}
+
+    {%- comment -%}
+      Admin Powers: Pro Builder card registry/cleanup.
+      Runs only on the Admin Powers template so it does not affect normal storefront pages.
+    {%- endcomment -%}
+    {%- if template.suffix == 'admin-powers' -%}
+      <script src="{{ 'ss-admin-pro-builder-cards.js' | asset_url }}" defer></script>
+    {%- endif -%}
   </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
