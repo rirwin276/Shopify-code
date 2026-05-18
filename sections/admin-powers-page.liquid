@@ -3282,7 +3282,7 @@
         ? productTags.map(function(t){ return String(t||'').toLowerCase().trim(); })
         : String(productTags||'').split(',').map(function(t){ return t.toLowerCase().trim(); });
       var isProEditorBuild = _tagListForProCheck.some(function(t){
-        return t === 'custom-build' || t.indexOf('custom-build--') === 0;
+        return t === 'custom-build' || t.indexOf('custom-build--') === 0 || t.indexOf('pro-shirt') === 0 || t === 'pro-editor' || t === 'custom-pro';
       });
       if(!isProEditorBuild){
       var isBc3413 = false;
@@ -4413,8 +4413,7 @@
     {
       "type": "text",
       "id": "editor_pro_shirt_zip_hoodie_base_url",
-      "label": "Pro Shirt Editor — Zip Hoodie Base URL",
-      "default": ""
+      "label": "Pro Shirt Editor — Zip Hoodie Base URL"
     }
   ],
   "presets": [
