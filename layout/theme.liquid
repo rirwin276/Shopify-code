@@ -34,6 +34,36 @@
     <meta name="theme-color" content="">
     <link rel="canonical" href="{{ canonical_url }}">
 
+    {%- comment -%}
+      STELLA & SAGE ANTI-FLASH GUARD
+      Prevents internal dashboard/admin pages from briefly showing unstyled Liquid
+      content before the custom CSS/JS finishes applying. It only activates on
+      known internal pages and has a hard timeout fallback.
+    {%- endcomment -%}
+    <script>
+      (function () {
+        var path = window.location.pathname || '';
+        var isInternal = path.indexOf('/pages/portal') === 0 ||
+          path.indexOf('/pages/admin-powers') === 0 ||
+          path.indexOf('/pages/price-editor') === 0;
+        if (!isInternal) return;
+        document.documentElement.className += ' ss-internal-booting';
+        window.setTimeout(function () {
+          document.documentElement.className = document.documentElement.className.replace(/\bss-internal-booting\b/g, '');
+          document.documentElement.className += ' ss-internal-ready';
+        }, 1400);
+      })();
+    </script>
+    <style>
+      html.ss-internal-booting main.content-for-layout {
+        opacity: 0 !important;
+      }
+      html.ss-internal-ready main.content-for-layout {
+        opacity: 1 !important;
+        transition: opacity .16s ease-out;
+      }
+    </style>
+
     {%- if settings.favicon != blank -%}
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
     {%- endif -%}
@@ -94,6 +124,27 @@
     <script src="{{ 'ss-admin-pro-builder-cards.js' | asset_url }}" defer></script>
     <script src="{{ 'ss-admin-pro-builder-thumbnail-overrides.js' | asset_url }}" defer></script>
     <script src="{{ 'ss-pe-ls14003.js' | asset_url }}"></script>
+
+    <script>
+      (function () {
+        var path = window.location.pathname || '';
+        var isInternal = path.indexOf('/pages/portal') === 0 ||
+          path.indexOf('/pages/admin-powers') === 0 ||
+          path.indexOf('/pages/price-editor') === 0;
+        if (!isInternal) return;
+        function ready() {
+          document.documentElement.className = document.documentElement.className.replace(/\bss-internal-booting\b/g, '');
+          if (document.documentElement.className.indexOf('ss-internal-ready') === -1) {
+            document.documentElement.className += ' ss-internal-ready';
+          }
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function () { window.setTimeout(ready, 60); }, { once: true });
+        } else {
+          window.setTimeout(ready, 60);
+        }
+      })();
+    </script>
   </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
