@@ -2,32 +2,20 @@
 (function () {
   'use strict';
 
-  var VERSION = 'pro-builder-registry-v3';
+  var VERSION = 'pro-builder-registry-v5';
   var RAILWAY_BASE = 'https://printfulautomation-production.up.railway.app';
 
-  function svgUrl(svg) {
-    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
-  }
-
-  function teeMockupSvg(bodyFill, tagText) {
-    return svgUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="22" fill="#f5f1e8"/><ellipse cx="48" cy="82" rx="27" ry="4" fill="rgba(55,48,39,.14)"/><path d="M30 20 41 15h14l11 5 15 10-8 15-8-4v36H31V41l-8 4-8-15 15-10Z" fill="' + bodyFill + '" stroke="rgba(47,42,35,.18)" stroke-width="1.2"/><path d="M41 15c2 5 12 5 14 0" fill="none" stroke="rgba(47,42,35,.35)" stroke-width="2" stroke-linecap="round"/><rect x="38" y="37" width="20" height="16" rx="3" fill="rgba(255,255,255,.28)"/><text x="48" y="88" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="7" font-weight="800" fill="rgba(47,42,35,.58)">' + tagText + '</text></svg>');
-  }
-
-  function hoodieMockupSvg(bodyFill, tagText) {
-    return svgUrl('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="22" fill="#f5f1e8"/><ellipse cx="48" cy="83" rx="29" ry="4" fill="rgba(55,48,39,.14)"/><path d="M34 23c2-9 26-9 28 0l8 9 11 8-9 14-7-4v29H31V50l-7 4-9-14 11-8 8-9Z" fill="' + bodyFill + '" stroke="rgba(47,42,35,.18)" stroke-width="1.2"/><path d="M36 24c5 7 19 7 24 0" fill="none" stroke="rgba(47,42,35,.34)" stroke-width="3" stroke-linecap="round"/><path d="M48 34v43" stroke="rgba(47,42,35,.30)" stroke-width="2"/><path d="M35 60h26" stroke="rgba(47,42,35,.18)" stroke-width="2" stroke-linecap="round"/><text x="48" y="88" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="7" font-weight="800" fill="rgba(47,42,35,.58)">' + tagText + '</text></svg>');
-  }
-
   var IMAGE_URLS = {
-    bc3413: teeMockupSvg('#d8c3a3', 'BC3413'),
-    bc3001y: teeMockupSvg('#e9ece6', 'BC3001Y'),
-    m2580: hoodieMockupSvg('#c7a47f', 'M2580'),
+    bc3413: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/bc3413-front-clay-triblend.png?v=1777937830',
+    bc3001y: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/bc3001y-front-natural_dd41b37c-8fb7-4aec-bb0d-9191145a77ca.png?v=1778476357',
+    m2580: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/m2580-front-latte.png?v=1778444002',
     ls14003: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ls14003_front_editor_background_style28668.png?v=1779070307'
   };
 
   var BUILDERS = [
-    { id: 'bc3413', title: 'Bella + Canvas BC3413', subtitle: 'Custom unisex tri-blend tee · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/bc3413', imageTags: ['bc3413', 'tri-blend', 'triblend'], fallbackImage: IMAGE_URLS.bc3413, tipTitle: 'Bella + Canvas BC3413', tipBody: 'Premium unisex tri-blend tee with custom front or front + back artwork and up to 2 garment colors.' },
-    { id: 'bc3001y', title: 'Bella + Canvas BC3001Y', subtitle: 'Custom youth staple tee · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/bc3001y', imageTags: ['bc3001y', 'youth staple', 'youth tee'], fallbackImage: IMAGE_URLS.bc3001y, tipTitle: 'Bella + Canvas BC3001Y', tipBody: 'Youth staple tee with custom front or front + back artwork, color selection, and a separate store listing.' },
-    { id: 'm2580', title: 'Independent Trading Co. M2580', subtitle: 'Custom premium hoodie · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/m2580', imageTags: ['m2580', 'premium hoodie', 'pullover hoodie'], fallbackImage: IMAGE_URLS.m2580, tipTitle: 'Independent Trading Co. M2580', tipBody: 'Premium pullover hoodie with custom front or front + back artwork and up to 2 hoodie colors.' },
+    { id: 'bc3413', title: 'Bella + Canvas BC3413', subtitle: 'Custom unisex tri-blend tee · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/bc3413', fixedImage: IMAGE_URLS.bc3413, tipTitle: 'Bella + Canvas BC3413', tipBody: 'Premium unisex tri-blend tee with custom front or front + back artwork and up to 2 garment colors.' },
+    { id: 'bc3001y', title: 'Bella + Canvas BC3001Y', subtitle: 'Custom youth staple tee · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/bc3001y', fixedImage: IMAGE_URLS.bc3001y, tipTitle: 'Bella + Canvas BC3001Y', tipBody: 'Youth staple tee with custom front or front + back artwork, color selection, and a separate store listing.' },
+    { id: 'm2580', title: 'Independent Trading Co. M2580', subtitle: 'Custom premium hoodie · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/m2580', fixedImage: IMAGE_URLS.m2580, tipTitle: 'Independent Trading Co. M2580', tipBody: 'Premium pullover hoodie with custom front or front + back artwork and up to 2 hoodie colors.' },
     { id: 'ls14003', title: 'Lane Seven LS14003', subtitle: 'Custom full zip hoodie · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/ls14003', fixedImage: IMAGE_URLS.ls14003, tipTitle: 'Lane Seven LS14003', tipBody: 'Full zip hoodie with custom front or front + back artwork, up to 2 garment colors, and a separate store listing.' }
   ];
 
@@ -36,28 +24,11 @@
   function ssap() { return window.SSAP || {}; }
   function esc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 
-  function productImage(builder) {
-    if (!Array.isArray(window.__SS_ADMIN_LAST_PRODUCTS__)) return '';
-    var needles = (builder.imageTags || []).map(function (x) { return String(x || '').toLowerCase(); });
-    var products = window.__SS_ADMIN_LAST_PRODUCTS__;
-    for (var i = 0; i < products.length; i++) {
-      var p = products[i] || {};
-      var tags = Array.isArray(p.tags) ? p.tags.join(' ') : String(p.tags || '');
-      var hay = (String(p.title || '') + ' ' + tags + ' ' + String(p.handle || '')).toLowerCase();
-      if (!needles.some(function (n) { return n && hay.indexOf(n) !== -1; })) continue;
-      var img = p.featured_image || p.image || (p.images && p.images[0] && (p.images[0].src || p.images[0]));
-      if (img) return img;
-    }
-    return '';
-  }
-
-  function imageFor(builder) { return builder.fixedImage || productImage(builder) || builder.fallbackImage || ''; }
-
   function editorUrl(builder) {
     var s = ssap();
-    var authKey = 'sec' + 'ret';
-    var authValue = s['editor' + 'Secret'] || '';
-    var url = RAILWAY_BASE + builder.route + '?shop_handle=' + encodeURIComponent(s.shopHandle || '') + '&' + authKey + '=' + encodeURIComponent(authValue) + '&mode=embedded';
+    var key = 'sec' + 'ret';
+    var val = s['editor' + 'Secret'] || '';
+    var url = RAILWAY_BASE + builder.route + '?shop_handle=' + encodeURIComponent(s.shopHandle || '') + '&' + key + '=' + encodeURIComponent(val) + '&mode=embedded';
     if (s.shopLogoSrc) url += '&logo_url=' + encodeURIComponent(s.shopLogoSrc);
     return url;
   }
@@ -66,12 +37,10 @@
     var wrap = document.createElement('div');
     wrap.className = 'ss-pro-builder-thumb';
     var img = document.createElement('img');
-    img.src = imageFor(builder);
+    img.src = builder.fixedImage;
     img.alt = builder.title;
-    img.loading = 'lazy';
-    img.onerror = function () {
-      if (builder.fallbackImage && img.src !== builder.fallbackImage) img.src = builder.fallbackImage;
-    };
+    img.loading = 'eager';
+    img.decoding = 'async';
     wrap.appendChild(img);
     return wrap;
   }
@@ -80,16 +49,20 @@
     var card = document.createElement('div');
     card.className = 'ap-product-row ap-add-product-row ss-pro-builder-card';
     card.setAttribute('data-ss-builder-id', builder.id);
+
     var tid = 'ss-pro-builder-tip-' + builder.id;
     var tip = document.createElement('div');
     tip.className = 'ss-pro-builder-tooltip';
     tip.id = tid;
     tip.innerHTML = '<strong>' + esc(builder.tipTitle) + '</strong><span>' + esc(builder.tipBody) + '</span>';
+
     var copy = document.createElement('div');
     copy.className = 'ss-pro-builder-copy';
     copy.innerHTML = '<div class="ss-pro-builder-title">' + esc(builder.title) + '</div><div class="ss-pro-builder-subtitle">' + esc(builder.subtitle) + '</div>';
+
     var actions = document.createElement('div');
     actions.className = 'ap-product-row__actions ss-pro-builder-actions';
+
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'ss-pro-builder-button';
@@ -100,6 +73,7 @@
       if (typeof window.apOpenEditorModal === 'function') window.apOpenEditorModal(url);
       else window.open(url, '_blank', 'noopener,noreferrer');
     });
+
     actions.appendChild(btn);
     card.appendChild(makeThumb(builder));
     card.appendChild(copy);
@@ -116,61 +90,49 @@
     document.head.appendChild(style);
   }
 
-  function renderCards() {
-    var container = $('#apCustomBuildersContainer');
+  function findContainer() { return $('#apCustomBuildersContainer'); }
+
+  function renderCards(force) {
+    var container = findContainer();
     var section = $('#apCustomBuildersSection');
     var empty = $('#apCustomBuildersEmpty');
     var count = $('#apBuilderProductCount');
+
     if (!container) return false;
-    if (container.getAttribute('data-ss-pro-builder-version') === VERSION) return true;
+    if (!force && container.getAttribute('data-ss-pro-builder-version') === VERSION && container.children.length === BUILDERS.length) return true;
+
     injectStyles();
     container.innerHTML = '';
     BUILDERS.forEach(function (b) { container.appendChild(makeCard(b)); });
     container.setAttribute('data-ss-pro-builder-version', VERSION);
+
     if (section) section.style.display = 'block';
     if (empty) empty.style.display = 'none';
     if (count) count.textContent = String(BUILDERS.length);
     return true;
   }
 
-  function rerenderCards() {
-    var container = $('#apCustomBuildersContainer');
-    if (container) container.removeAttribute('data-ss-pro-builder-version');
-    renderCards();
-  }
-
-  function installProductFetchRecorder() {
-    if (window.__SS_ADMIN_FETCH_PATCHED__ || typeof window.fetch !== 'function') return;
-    var originalFetch = window.fetch;
-    window.__SS_ADMIN_FETCH_PATCHED__ = true;
-    window.fetch = function () {
-      var args = arguments;
-      return originalFetch.apply(this, args).then(function (response) {
-        try {
-          var url = String((args[0] && args[0].url) || args[0] || '');
-          if (url.indexOf('/admin/store/') !== -1 && url.indexOf('/products') !== -1 && response && response.clone) {
-            response.clone().json().then(function (data) {
-              window.__SS_ADMIN_LAST_PRODUCTS__ = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : []);
-              setTimeout(rerenderCards, 50);
-            }).catch(function () {});
-          }
-        } catch (e) {}
-        return response;
-      });
-    };
+  function shouldTryAdminPatch() {
+    return window.location.pathname.indexOf('/pages/admin-powers') !== -1 || !!$('#apPanelAddProducts') || !!findContainer();
   }
 
   function boot() {
-    if (!$('#apPanelAddProducts') && !$('#apCustomBuildersContainer')) return;
-    installProductFetchRecorder();
     var attempts = 0;
+    var maxAttempts = 240; // 30 seconds at 125ms
+
     var timer = window.setInterval(function () {
       attempts += 1;
-      if (renderCards() || attempts > 80) window.clearInterval(timer);
+      if (shouldTryAdminPatch()) renderCards(false);
+      if (attempts >= maxAttempts) window.clearInterval(timer);
     }, 125);
+
     var observer = new MutationObserver(function () {
-      var container = $('#apCustomBuildersContainer');
-      if (container && container.getAttribute('data-ss-pro-builder-version') !== VERSION) window.setTimeout(renderCards, 30);
+      if (!shouldTryAdminPatch()) return;
+      var container = findContainer();
+      if (!container) return;
+      if (container.getAttribute('data-ss-pro-builder-version') !== VERSION || container.children.length !== BUILDERS.length) {
+        window.setTimeout(function () { renderCards(true); }, 30);
+      }
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
   }
