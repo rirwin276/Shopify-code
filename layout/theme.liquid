@@ -89,13 +89,11 @@
     {% # theme-check-enable ParserBlockingScript %}
 
     {%- comment -%}
-      Admin Powers helpers.
-      These scripts self-guard and only run when the Admin Powers DOM exists.
-      Do not wrap in template.suffix checks because Shopify page routing can
-      serve /pages/admin-powers without exposing that suffix value here.
+      Admin / internal page helpers. These self-guard and only run on matching DOM/routes.
     {%- endcomment -%}
     <script src="{{ 'ss-admin-pro-builder-cards.js' | asset_url }}" defer></script>
     <script src="{{ 'ss-admin-pro-builder-thumbnail-overrides.js' | asset_url }}" defer></script>
+    <script src="{{ 'ss-pe-ls14003.js' | asset_url }}"></script>
   </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
