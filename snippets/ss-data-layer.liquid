@@ -94,7 +94,7 @@
           pre.onload = function () {
             img.removeAttribute('srcset');
             if (mappedSrcset) img.setAttribute('srcset', mappedSrcset);
-            img.setAttribute('sizes', '(max-width: 850px) 108px, 88px');
+            img.setAttribute('sizes', '(max-width: 850px) 104px, 88px');
             img.setAttribute('src', upgraded);
             img.dataset.ssDashboardMapped = upgraded;
           };
@@ -143,28 +143,28 @@
 
 <style>
   @media (max-width: 850px) {
-    .ss-portal .ss-bg { padding-top: 24px !important; padding-bottom: 30px !important; }
-    .ss-portal .ss-wrap { padding-left: 14px !important; padding-right: 14px !important; }
-    .ss-portal .ss-store-grid { gap: 10px !important; }
+    .ss-portal .ss-bg { padding-top: 18px !important; padding-bottom: 26px !important; }
+    .ss-portal .ss-wrap { padding-left: 12px !important; padding-right: 12px !important; }
+    .ss-portal .ss-store-grid { gap: 8px !important; }
     .ss-portal .ss-store-card {
-      border-radius: 22px !important;
+      border-radius: 20px !important;
       overflow: hidden !important;
-      border-color: rgba(15,23,42,.055) !important;
-      box-shadow: 0 14px 34px rgba(15,23,42,.05), inset 0 1px 0 rgba(255,255,255,.85) !important;
+      border-color: rgba(15,23,42,.052) !important;
+      box-shadow: 0 10px 26px rgba(15,23,42,.045), inset 0 1px 0 rgba(255,255,255,.86) !important;
     }
     .ss-portal .ss-col-identity {
-      padding: 12px 14px 6px !important;
-      gap: 12px !important;
+      padding: 9px 12px 4px !important;
+      gap: 10px !important;
       align-items: center !important;
     }
     .ss-portal .ss-logo-frame {
-      width: 108px !important;
-      height: 108px !important;
-      min-width: 108px !important;
-      border-radius: 20px !important;
-      background: rgba(255,255,255,.82) !important;
-      border: 1px solid rgba(15,23,42,.07) !important;
-      box-shadow: 0 10px 24px rgba(15,23,42,.065) !important;
+      width: 104px !important;
+      height: 104px !important;
+      min-width: 104px !important;
+      border-radius: 19px !important;
+      background: rgba(255,255,255,.84) !important;
+      border: 1px solid rgba(15,23,42,.065) !important;
+      box-shadow: 0 8px 20px rgba(15,23,42,.055) !important;
     }
     .ss-portal .ss-logo-frame img {
       padding: 0 !important;
@@ -175,61 +175,66 @@
     }
     .ss-portal .ss-identity-text { min-width: 0 !important; padding-top: 0 !important; }
     .ss-portal .ss-card-title {
-      font-size: 18px !important;
-      line-height: 1.04 !important;
-      margin-bottom: 4px !important;
+      font-size: 17px !important;
+      line-height: 1.02 !important;
+      margin-bottom: 3px !important;
       letter-spacing: -.04em !important;
     }
     .ss-portal .ss-card-subtitle {
       display: inline-flex !important;
       width: fit-content !important;
-      font-size: 10px !important;
-      padding: 3px 8px !important;
+      font-size: 9px !important;
+      padding: 3px 7px !important;
       border-radius: 999px !important;
-      letter-spacing: .12em !important;
+      letter-spacing: .11em !important;
       text-transform: uppercase !important;
     }
     .ss-portal .ss-card-product-count {
       display: block !important;
-      margin: 0 0 6px !important;
-      font-size: 12px !important;
+      margin: 0 0 5px !important;
+      font-size: 11px !important;
       font-weight: 850 !important;
       color: rgba(15,23,42,.46) !important;
       letter-spacing: .01em !important;
     }
-    .ss-portal .ss-col-engine { padding: 5px 14px 6px !important; }
-    .ss-portal .ss-status-finished, .ss-portal .ss-status-building { padding: 6px 11px !important; border-radius: 999px !important; }
-    .ss-portal .ss-status-text, .ss-portal .ss-status-text-building { font-size: 10px !important; letter-spacing: .10em !important; }
-    .ss-portal .ss-col-controls { padding: 7px 12px 12px !important; gap: 7px !important; }
-    .ss-portal .ss-admin-btn {
-      min-height: 38px !important;
-      padding: 7px 12px !important;
-      font-size: 11px !important;
+    .ss-portal .ss-col-engine { padding: 4px 12px 5px !important; }
+    .ss-portal .ss-status-finished, .ss-portal .ss-status-building {
+      padding: 5px 10px !important;
       border-radius: 999px !important;
-      letter-spacing: .14em !important;
-      background: rgba(255,255,255,.76) !important;
+      min-height: 32px !important;
+    }
+    .ss-portal .ss-status-text, .ss-portal .ss-status-text-building { font-size: 9px !important; letter-spacing: .095em !important; }
+    .ss-portal .ss-col-controls { padding: 5px 10px 10px !important; gap: 6px !important; }
+    .ss-portal .ss-admin-btn {
+      min-height: 34px !important;
+      padding: 6px 11px !important;
+      font-size: 10px !important;
+      border-radius: 999px !important;
+      letter-spacing: .13em !important;
+      background: rgba(255,255,255,.78) !important;
       color: rgba(87,73,36,.96) !important;
-      border-color: rgba(87,73,36,.16) !important;
+      border-color: rgba(87,73,36,.15) !important;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.78) !important;
     }
     .ss-portal .ss-open-btn {
-      min-height: 48px !important;
-      padding: 10px 15px !important;
-      font-size: 15px !important;
+      min-height: 44px !important;
+      padding: 8px 14px !important;
+      font-size: 14px !important;
       border-radius: 999px !important;
-      box-shadow: 0 14px 30px rgba(15,23,42,.155) !important;
+      box-shadow: 0 11px 24px rgba(15,23,42,.145) !important;
     }
-    .ss-portal .ss-leave-btn { min-height: 34px !important; padding: 7px 12px !important; font-size: 10px !important; border-radius: 999px !important; }
+    .ss-portal .ss-open-btn svg { width: 14px !important; height: 14px !important; }
+    .ss-portal .ss-leave-btn { min-height: 30px !important; padding: 6px 11px !important; font-size: 9px !important; border-radius: 999px !important; }
   }
 
   @media (max-width: 400px) {
     .ss-portal .ss-logo-frame {
-      width: 100px !important;
-      height: 100px !important;
-      min-width: 100px !important;
+      width: 94px !important;
+      height: 94px !important;
+      min-width: 94px !important;
     }
-    .ss-portal .ss-card-title { font-size: 17px !important; }
-    .ss-portal .ss-open-btn { min-height: 46px !important; }
+    .ss-portal .ss-card-title { font-size: 16px !important; }
+    .ss-portal .ss-open-btn { min-height: 42px !important; }
   }
 
   @media (min-width: 851px) {
