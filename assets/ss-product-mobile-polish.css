@@ -1,0 +1,267 @@
+/*
+  Stella & Sage — Product Page Mobile Polish
+  Purpose:
+  - Makes product pages feel closer to the premium gold/cream site language.
+  - Improves mobile spacing so the media, title, options, and purchase card sit cleaner.
+  - Keeps the existing Shopify product/variant system intact.
+*/
+
+body:has([data-template*="product"]),
+body.template-product {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(183, 163, 106, 0.08), transparent 28%),
+    linear-gradient(180deg, #fffdf8 0%, #ffffff 42%, #ffffff 100%);
+}
+
+/* Back pills above product */
+.ss-backbar {
+  max-width: 1180px !important;
+  margin: 12px auto 8px !important;
+  padding: 0 16px !important;
+  justify-content: center !important;
+}
+
+.ss-backbtn {
+  min-height: 48px !important;
+  padding: 0 22px !important;
+  border-radius: 999px !important;
+  font-size: clamp(15px, 4vw, 18px) !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.035em !important;
+  box-shadow: 0 12px 36px rgba(17, 16, 14, 0.075) !important;
+}
+
+.ss-backbtn--solid {
+  background: linear-gradient(135deg, #11100e 0%, #241f14 58%, #b7a36a 170%) !important;
+  color: #fff !important;
+  border-color: rgba(183, 163, 106, 0.36) !important;
+}
+
+.ss-backbtn--ghost {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(17, 16, 14, 0.10) !important;
+}
+
+/* Main product layout */
+.product-information,
+.product,
+product-information {
+  --ss-product-ink: #11100e;
+  --ss-product-muted: rgba(17, 16, 14, 0.62);
+  --ss-product-gold: #b7a36a;
+  --ss-product-gold-soft: rgba(183, 163, 106, 0.15);
+}
+
+/* Media gallery: keep product centered and reduce awkward mobile dead space */
+.product-media-gallery,
+.product__media-gallery,
+.product__media-wrapper,
+[data-product-media-gallery],
+media-gallery {
+  overflow: hidden;
+}
+
+.product-media-gallery img,
+.product__media-gallery img,
+.product__media-wrapper img,
+[data-product-media-gallery] img,
+media-gallery img {
+  object-fit: contain !important;
+}
+
+/* Product detail card */
+.product-information .product-details,
+.product__info-container,
+.product .product__info-wrapper,
+[data-product-information],
+product-information .product-details {
+  border-radius: 38px !important;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(183, 163, 106, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 246, 235, 0.84)) !important;
+  border: 1px solid rgba(183, 163, 106, 0.18) !important;
+  box-shadow: 0 24px 80px rgba(17, 16, 14, 0.08) !important;
+  overflow: hidden !important;
+}
+
+/* Hide duplicate lower storefront button if it exists inside product card */
+.product-information a[href*="/collections/"]:not(.ss-backbtn),
+.product__info-container a[href*="/collections/"]:not(.ss-backbtn),
+product-information a[href*="/collections/"]:not(.ss-backbtn) {
+  border-radius: 999px !important;
+}
+
+.product-information h1,
+.product__title,
+.product-title,
+[data-product-title] {
+  color: var(--ss-product-ink) !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.06em !important;
+  line-height: 1.03 !important;
+}
+
+.price,
+.product-information .price,
+.product__info-container .price {
+  color: rgba(17, 16, 14, 0.72) !important;
+  font-weight: 850 !important;
+}
+
+.product-form__input legend,
+variant-picker legend,
+.variant-picker__label,
+label[for*="Option"] {
+  color: rgba(17, 16, 14, 0.72) !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.product-form__input input[type="radio"] + label,
+variant-picker label,
+.variant-option,
+.swatch-input__label {
+  border-radius: 999px !important;
+  border: 1px solid rgba(17, 16, 14, 0.12) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  box-shadow: 0 8px 24px rgba(17, 16, 14, 0.045) !important;
+  font-weight: 850 !important;
+}
+
+.product-form__input input[type="radio"]:checked + label,
+variant-picker input[type="radio"]:checked + label,
+.swatch-input__input:checked + .swatch-input__label {
+  background: linear-gradient(135deg, #11100e 0%, #241f14 52%, #b7a36a 160%) !important;
+  color: #fff !important;
+  border-color: rgba(183, 163, 106, 0.50) !important;
+  box-shadow: 0 14px 34px rgba(17, 16, 14, 0.18) !important;
+}
+
+.product-form__submit,
+button[name="add"],
+.shopify-payment-button__button,
+.product-form button[type="submit"] {
+  min-height: 54px !important;
+  border-radius: 999px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.product-form__submit,
+button[name="add"],
+.product-form button[type="submit"] {
+  background: linear-gradient(135deg, #11100e 0%, #241f14 52%, #b7a36a 160%) !important;
+  color: #fff !important;
+  border: 1px solid rgba(183, 163, 106, 0.36) !important;
+  box-shadow: 0 18px 46px rgba(17, 16, 14, 0.18) !important;
+}
+
+.shopify-payment-button__button {
+  overflow: hidden !important;
+}
+
+.product__description,
+.product-information .rte,
+.product__info-container .rte,
+[data-product-description] {
+  border-radius: 26px !important;
+  background: rgba(255, 255, 255, 0.58) !important;
+  border: 1px solid rgba(17, 16, 14, 0.06) !important;
+}
+
+@media (max-width: 749px) {
+  .ss-backbar {
+    margin: 10px auto 2px !important;
+    padding: 0 14px !important;
+    gap: 10px !important;
+  }
+
+  .ss-backbtn {
+    min-height: 44px !important;
+    padding: 0 18px !important;
+    font-size: 16px !important;
+  }
+
+  /* Product media should be large, centered, and not waste space */
+  .product-media-gallery,
+  .product__media-gallery,
+  .product__media-wrapper,
+  [data-product-media-gallery],
+  media-gallery {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .product-media-gallery img,
+  .product__media-gallery img,
+  .product__media-wrapper img,
+  [data-product-media-gallery] img,
+  media-gallery img {
+    max-height: min(63vh, 560px) !important;
+    width: 100% !important;
+    object-fit: contain !important;
+  }
+
+  .product-information .product-details,
+  .product__info-container,
+  .product .product__info-wrapper,
+  [data-product-information],
+  product-information .product-details {
+    margin: 10px 10px 0 !important;
+    padding: 20px 14px 22px !important;
+    border-radius: 32px !important;
+  }
+
+  .product-information h1,
+  .product__title,
+  .product-title,
+  [data-product-title] {
+    font-size: clamp(29px, 8.2vw, 42px) !important;
+    margin-bottom: 8px !important;
+  }
+
+  .product-form__input,
+  variant-picker fieldset {
+    margin-top: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .product-form__input legend,
+  variant-picker legend,
+  .variant-picker__label {
+    text-align: center !important;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+
+  .product-form__input input[type="radio"] + label,
+  variant-picker label,
+  .variant-option,
+  .swatch-input__label {
+    min-height: 42px !important;
+    padding: 0 16px !important;
+  }
+
+  .product-form__submit,
+  button[name="add"],
+  .shopify-payment-button__button,
+  .product-form button[type="submit"] {
+    min-height: 56px !important;
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .ss-backbtn {
+    padding: 0 14px !important;
+    font-size: 15px !important;
+  }
+
+  .product-media-gallery img,
+  .product__media-gallery img,
+  .product__media-wrapper img,
+  [data-product-media-gallery] img,
+  media-gallery img {
+    max-height: min(58vh, 500px) !important;
+  }
+}
