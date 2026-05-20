@@ -35,8 +35,8 @@ body.template-product .product__info-container,
 body.template-product [data-product-information] {
   border-radius: 34px !important;
   background:
-    radial-gradient(circle at 18% 0%, rgba(183, 163, 106, 0.12), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,246,235,0.66)) !important;
+    radial-gradient(circle at 18% 0%, rgba(183, 163, 106, 0.10), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,246,235,0.58)) !important;
   border: 1px solid rgba(183, 163, 106, 0.16) !important;
   box-shadow: 0 24px 80px rgba(17, 16, 14, 0.08) !important;
   overflow: hidden !important;
@@ -68,6 +68,33 @@ body.template-product [data-product-title] {
 
 /* Remove the big oval/circle containers behind Color and Size groups. */
 body:has([data-template*="product"]) variant-picker,
+body:has([data-template*="product"]) variant-picker *,
+body:has([data-template*="product"]) .variant-picker,
+body:has([data-template*="product"]) .variant-picker *,
+body:has([data-template*="product"]) .product-form__input,
+body:has([data-template*="product"]) .product-form__input *,
+body:has([data-template*="product"]) .variant-picker__option,
+body:has([data-template*="product"]) .variant-picker__option *,
+body:has([data-template*="product"]) .variant-picker__option-values,
+body:has([data-template*="product"]) .variant-picker__option-values *,
+body:has([data-template*="product"]) .product-options,
+body:has([data-template*="product"]) .product-options *,
+body.template-product variant-picker,
+body.template-product variant-picker *,
+body.template-product .variant-picker,
+body.template-product .variant-picker *,
+body.template-product .product-form__input,
+body.template-product .product-form__input *,
+body.template-product .variant-picker__option,
+body.template-product .variant-picker__option *,
+body.template-product .variant-picker__option-values,
+body.template-product .variant-picker__option-values *,
+body.template-product .product-options,
+body.template-product .product-options * {
+  box-shadow: none !important;
+}
+
+body:has([data-template*="product"]) variant-picker,
 body:has([data-template*="product"]) .variant-picker,
 body:has([data-template*="product"]) .product-form__input,
 body:has([data-template*="product"]) .product-form__input fieldset,
@@ -86,7 +113,34 @@ body.template-product .product-options {
   background: transparent !important;
   background-color: transparent !important;
   border-color: transparent !important;
+  border-radius: 0 !important;
+}
+
+body:has([data-template*="product"]) variant-picker::before,
+body:has([data-template*="product"]) variant-picker::after,
+body:has([data-template*="product"]) .variant-picker::before,
+body:has([data-template*="product"]) .variant-picker::after,
+body:has([data-template*="product"]) .product-form__input::before,
+body:has([data-template*="product"]) .product-form__input::after,
+body:has([data-template*="product"]) .variant-picker__option::before,
+body:has([data-template*="product"]) .variant-picker__option::after,
+body:has([data-template*="product"]) .variant-picker__option-values::before,
+body:has([data-template*="product"]) .variant-picker__option-values::after,
+body.template-product variant-picker::before,
+body.template-product variant-picker::after,
+body.template-product .variant-picker::before,
+body.template-product .variant-picker::after,
+body.template-product .product-form__input::before,
+body.template-product .product-form__input::after,
+body.template-product .variant-picker__option::before,
+body.template-product .variant-picker__option::after,
+body.template-product .variant-picker__option-values::before,
+body.template-product .variant-picker__option-values::after {
+  display: none !important;
+  content: none !important;
+  background: transparent !important;
   box-shadow: none !important;
+  border: 0 !important;
 }
 
 body:has([data-template*="product"]) .product-form__input,
@@ -121,8 +175,8 @@ body.template-product .variant-option,
 body.template-product .swatch-input__label {
   border-radius: 999px !important;
   border: 1px solid rgba(17, 16, 14, 0.12) !important;
-  background: rgba(255, 255, 255, 0.82) !important;
-  box-shadow: 0 8px 24px rgba(17, 16, 14, 0.045) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  box-shadow: 0 8px 18px rgba(17, 16, 14, 0.045) !important;
   font-weight: 850 !important;
 }
 
@@ -132,10 +186,10 @@ body:has([data-template*="product"]) .swatch-input__input:checked + .swatch-inpu
 body.template-product .product-form__input input[type="radio"]:checked + label,
 body.template-product variant-picker input[type="radio"]:checked + label,
 body.template-product .swatch-input__input:checked + .swatch-input__label {
-  background: linear-gradient(135deg, #11100e 0%, #2a2518 48%, #b7a36a 160%) !important;
+  background: #000 !important;
   color: #fff !important;
-  border-color: rgba(183, 163, 106, 0.5) !important;
-  box-shadow: 0 14px 34px rgba(17, 16, 14, 0.18) !important;
+  border-color: rgba(17, 16, 14, 0.92) !important;
+  box-shadow: none !important;
 }
 
 body:has([data-template*="product"]) .product-form__submit,
