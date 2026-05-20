@@ -1,45 +1,18 @@
 /*
-  Stella & Sage — Product Page Premium Polish
-  Front-end only polish for product purchase pages.
+  Stella & Sage — Product Page Light Polish
+  Keep the native product page mostly intact. Only remove duplicate navigation,
+  lightly constrain oversized desktop media, and make carousel controls more obvious.
 */
 
 body:has([data-template*="product"]),
 body.template-product {
-  --ss-product-gold: #b7a36a;
-  --ss-product-gold-soft: rgba(183, 163, 106, 0.16);
   --ss-product-ink: #11100e;
-  --ss-product-muted: rgba(17, 16, 14, 0.62);
+  --ss-product-gold: #b7a36a;
 }
 
 body:has([data-template*="product"]) .content-for-layout,
 body.template-product .content-for-layout {
-  background:
-    radial-gradient(circle at 18% 0%, rgba(183, 163, 106, 0.08), transparent 30%),
-    linear-gradient(180deg, #fffdf8 0%, #ffffff 38%, #ffffff 100%);
-}
-
-body:has([data-template*="product"]) .product-information,
-body:has([data-template*="product"]) product-information,
-body:has([data-template*="product"]) .product__info-container,
-body.template-product .product-information,
-body.template-product product-information,
-body.template-product .product__info-container {
-  --color-background: 255 255 255;
-}
-
-body:has([data-template*="product"]) .product-information .product-details,
-body:has([data-template*="product"]) .product__info-container,
-body:has([data-template*="product"]) [data-product-information],
-body.template-product .product-information .product-details,
-body.template-product .product__info-container,
-body.template-product [data-product-information] {
-  border-radius: 34px !important;
-  background:
-    radial-gradient(circle at 18% 0%, rgba(183, 163, 106, 0.10), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,246,235,0.58)) !important;
-  border: 1px solid rgba(183, 163, 106, 0.16) !important;
-  box-shadow: 0 24px 80px rgba(17, 16, 14, 0.08) !important;
-  overflow: hidden !important;
+  background: linear-gradient(180deg, #fffdf8 0%, #ffffff 34%, #ffffff 100%);
 }
 
 /* Keep only the clean top back bar. Hide the duplicate in-card storefront back button. */
@@ -52,134 +25,32 @@ body.template-product [data-product-information] a[href*="/collections/"]:not(.s
   display: none !important;
 }
 
+/* Light premium card only — do not fight Shopify's native variant picker layout. */
+body:has([data-template*="product"]) .product-information .product-details,
+body:has([data-template*="product"]) .product__info-container,
+body:has([data-template*="product"]) [data-product-information],
+body.template-product .product-information .product-details,
+body.template-product .product__info-container,
+body.template-product [data-product-information] {
+  border-radius: 34px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  border: 1px solid rgba(17, 16, 14, 0.07) !important;
+  box-shadow: 0 24px 80px rgba(17, 16, 14, 0.06) !important;
+}
+
 body:has([data-template*="product"]) .product-information h1,
 body:has([data-template*="product"]) .product__title,
 body:has([data-template*="product"]) .product-title,
-body:has([data-template*="product"]) [data-product-title],
 body.template-product .product-information h1,
 body.template-product .product__title,
-body.template-product .product-title,
-body.template-product [data-product-title] {
+body.template-product .product-title {
   color: var(--ss-product-ink) !important;
-  font-weight: 950 !important;
-  letter-spacing: -0.055em !important;
-  line-height: 1.05 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.04em !important;
+  line-height: 1.08 !important;
 }
 
-/* Remove the big oval/circle containers behind Color and Size groups. */
-body:has([data-template*="product"]) variant-picker,
-body:has([data-template*="product"]) variant-picker *,
-body:has([data-template*="product"]) .variant-picker,
-body:has([data-template*="product"]) .variant-picker *,
-body:has([data-template*="product"]) .product-form__input,
-body:has([data-template*="product"]) .product-form__input *,
-body:has([data-template*="product"]) .variant-picker__option,
-body:has([data-template*="product"]) .variant-picker__option *,
-body:has([data-template*="product"]) .variant-picker__option-values,
-body:has([data-template*="product"]) .variant-picker__option-values *,
-body:has([data-template*="product"]) .product-options,
-body:has([data-template*="product"]) .product-options *,
-body.template-product variant-picker,
-body.template-product variant-picker *,
-body.template-product .variant-picker,
-body.template-product .variant-picker *,
-body.template-product .product-form__input,
-body.template-product .product-form__input *,
-body.template-product .variant-picker__option,
-body.template-product .variant-picker__option *,
-body.template-product .variant-picker__option-values,
-body.template-product .variant-picker__option-values *,
-body.template-product .product-options,
-body.template-product .product-options * {
-  box-shadow: none !important;
-}
-
-body:has([data-template*="product"]) variant-picker,
-body:has([data-template*="product"]) .variant-picker,
-body:has([data-template*="product"]) .product-form__input,
-body:has([data-template*="product"]) .product-form__input fieldset,
-body:has([data-template*="product"]) fieldset.product-form__input,
-body:has([data-template*="product"]) .variant-picker__option,
-body:has([data-template*="product"]) .variant-picker__option-values,
-body:has([data-template*="product"]) .product-options,
-body.template-product variant-picker,
-body.template-product .variant-picker,
-body.template-product .product-form__input,
-body.template-product .product-form__input fieldset,
-body.template-product fieldset.product-form__input,
-body.template-product .variant-picker__option,
-body.template-product .variant-picker__option-values,
-body.template-product .product-options {
-  background: transparent !important;
-  background-color: transparent !important;
-  border-color: transparent !important;
-  border-radius: 0 !important;
-}
-
-body:has([data-template*="product"]) variant-picker::before,
-body:has([data-template*="product"]) variant-picker::after,
-body:has([data-template*="product"]) .variant-picker::before,
-body:has([data-template*="product"]) .variant-picker::after,
-body:has([data-template*="product"]) .product-form__input::before,
-body:has([data-template*="product"]) .product-form__input::after,
-body:has([data-template*="product"]) .variant-picker__option::before,
-body:has([data-template*="product"]) .variant-picker__option::after,
-body:has([data-template*="product"]) .variant-picker__option-values::before,
-body:has([data-template*="product"]) .variant-picker__option-values::after,
-body.template-product variant-picker::before,
-body.template-product variant-picker::after,
-body.template-product .variant-picker::before,
-body.template-product .variant-picker::after,
-body.template-product .product-form__input::before,
-body.template-product .product-form__input::after,
-body.template-product .variant-picker__option::before,
-body.template-product .variant-picker__option::after,
-body.template-product .variant-picker__option-values::before,
-body.template-product .variant-picker__option-values::after {
-  display: none !important;
-  content: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  border: 0 !important;
-}
-
-body:has([data-template*="product"]) .product-form__input,
-body:has([data-template*="product"]) .variant-picker__option,
-body.template-product .product-form__input,
-body.template-product .variant-picker__option {
-  margin-bottom: 14px !important;
-  padding: 0 !important;
-}
-
-body:has([data-template*="product"]) .product-form__input legend,
-body:has([data-template*="product"]) variant-picker legend,
-body:has([data-template*="product"]) .variant-picker__label,
-body:has([data-template*="product"]) label[for*="Option"],
-body.template-product .product-form__input legend,
-body.template-product variant-picker legend,
-body.template-product .variant-picker__label,
-body.template-product label[for*="Option"] {
-  color: rgba(17, 16, 14, 0.74) !important;
-  font-weight: 850 !important;
-  letter-spacing: -0.02em !important;
-  margin-bottom: 8px !important;
-}
-
-body:has([data-template*="product"]) .product-form__input input[type="radio"] + label,
-body:has([data-template*="product"]) variant-picker label,
-body:has([data-template*="product"]) .variant-option,
-body:has([data-template*="product"]) .swatch-input__label,
-body.template-product .product-form__input input[type="radio"] + label,
-body.template-product variant-picker label,
-body.template-product .variant-option,
-body.template-product .swatch-input__label {
-  border-radius: 999px !important;
-  border: 1px solid rgba(17, 16, 14, 0.12) !important;
-  background: rgba(255, 255, 255, 0.88) !important;
-  box-shadow: 0 8px 18px rgba(17, 16, 14, 0.045) !important;
-  font-weight: 850 !important;
-}
-
+/* Keep the selected option simple and readable. */
 body:has([data-template*="product"]) .product-form__input input[type="radio"]:checked + label,
 body:has([data-template*="product"]) variant-picker input[type="radio"]:checked + label,
 body:has([data-template*="product"]) .swatch-input__input:checked + .swatch-input__label,
@@ -188,40 +59,55 @@ body.template-product variant-picker input[type="radio"]:checked + label,
 body.template-product .swatch-input__input:checked + .swatch-input__label {
   background: #000 !important;
   color: #fff !important;
-  border-color: rgba(17, 16, 14, 0.92) !important;
-  box-shadow: none !important;
-}
-
-body:has([data-template*="product"]) .product-form__submit,
-body:has([data-template*="product"]) button[name="add"],
-body:has([data-template*="product"]) .shopify-payment-button__button,
-body:has([data-template*="product"]) .button,
-body.template-product .product-form__submit,
-body.template-product button[name="add"],
-body.template-product .shopify-payment-button__button,
-body.template-product .button {
-  border-radius: 999px !important;
-  font-weight: 950 !important;
-  letter-spacing: -0.02em !important;
+  border-color: #000 !important;
 }
 
 body:has([data-template*="product"]) .product-form__submit,
 body:has([data-template*="product"]) button[name="add"],
 body.template-product .product-form__submit,
 body.template-product button[name="add"] {
-  background: linear-gradient(135deg, #11100e 0%, #241f14 52%, #b7a36a 150%) !important;
+  border-radius: 999px !important;
+  font-weight: 900 !important;
+  background: linear-gradient(135deg, #11100e 0%, #241f14 58%, #6f612f 150%) !important;
   color: #fff !important;
-  border: 1px solid rgba(183, 163, 106, 0.36) !important;
-  box-shadow: 0 18px 46px rgba(17, 16, 14, 0.18) !important;
+  border: 1px solid rgba(183, 163, 106, 0.30) !important;
 }
 
-body:has([data-template*="product"]) .product__media-wrapper,
-body:has([data-template*="product"]) .product-media-gallery,
-body:has([data-template*="product"]) media-gallery,
-body.template-product .product__media-wrapper,
-body.template-product .product-media-gallery,
-body.template-product media-gallery {
-  border-radius: 28px !important;
+/* Desktop: do not let the main product media become so tall that controls/thumbnails disappear. */
+@media (min-width: 990px) {
+  body:has([data-template*="product"]) media-gallery,
+  body:has([data-template*="product"]) .product-media-gallery,
+  body:has([data-template*="product"]) .product__media-wrapper,
+  body.template-product media-gallery,
+  body.template-product .product-media-gallery,
+  body.template-product .product__media-wrapper {
+    max-height: calc(100vh - 230px) !important;
+    min-height: 520px;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  body:has([data-template*="product"]) media-gallery img,
+  body:has([data-template*="product"]) .product__media img,
+  body:has([data-template*="product"]) .product-media-container img,
+  body.template-product media-gallery img,
+  body.template-product .product__media img,
+  body.template-product .product-media-container img {
+    max-height: calc(100vh - 250px) !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+  }
+
+  /* Make carousel arrows/dots easier to notice when the image is large. */
+  body:has([data-template*="product"]) media-gallery button,
+  body:has([data-template*="product"]) .product-media-gallery button,
+  body:has([data-template*="product"]) .product__media-wrapper button,
+  body.template-product media-gallery button,
+  body.template-product .product-media-gallery button,
+  body.template-product .product__media-wrapper button {
+    z-index: 5 !important;
+  }
 }
 
 @media (max-width: 749px) {
@@ -235,14 +121,9 @@ body.template-product media-gallery {
 
   body:has([data-template*="product"]) .ss-backbtn,
   body.template-product .ss-backbtn {
-    min-height: 46px !important;
-    padding: 0 18px !important;
-    font-size: 16px !important;
-  }
-
-  body:has([data-template*="product"]) .product-information,
-  body.template-product .product-information {
-    gap: 12px !important;
+    min-height: 44px !important;
+    padding: 0 16px !important;
+    font-size: 15px !important;
   }
 
   body:has([data-template*="product"]) .product-information .product-details,
@@ -254,34 +135,5 @@ body.template-product media-gallery {
     border-radius: 30px !important;
     margin-inline: 10px !important;
     padding: 18px 12px 20px !important;
-  }
-
-  body:has([data-template*="product"]) .product-information h1,
-  body:has([data-template*="product"]) .product__title,
-  body:has([data-template*="product"]) .product-title,
-  body.template-product .product-information h1,
-  body.template-product .product__title,
-  body.template-product .product-title {
-    font-size: clamp(28px, 8vw, 42px) !important;
-    text-align: left !important;
-  }
-
-  body:has([data-template*="product"]) .product__media-wrapper,
-  body:has([data-template*="product"]) .product-media-gallery,
-  body:has([data-template*="product"]) media-gallery,
-  body.template-product .product__media-wrapper,
-  body.template-product .product-media-gallery,
-  body.template-product media-gallery {
-    max-width: 100vw !important;
-    overflow: hidden !important;
-  }
-
-  body:has([data-template*="product"]) .product-media-container img,
-  body:has([data-template*="product"]) .product__media img,
-  body:has([data-template*="product"]) media-gallery img,
-  body.template-product .product-media-container img,
-  body.template-product .product__media img,
-  body.template-product media-gallery img {
-    object-fit: contain !important;
   }
 }
