@@ -34,15 +34,10 @@
         "dashboard_url": "/pages/portal",
         "request_url": "/pages/private-storefronts#request-storefront"
       }
-    },
-    "ss_demo_entry": {
-      "type": "ss-demo-entry",
-      "settings": {}
     }
   },
   "order": [
     "custom_liquid_kXiyBF",
-    "landing_dual_hub_rtcYFK",
-    "ss_demo_entry"
+    "landing_dual_hub_rtcYFK"
   ]
 }
