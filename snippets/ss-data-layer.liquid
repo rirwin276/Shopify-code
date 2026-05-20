@@ -1,39 +1,61 @@
 {% comment %}
   STELLA & SAGE - DATA LAYER
   Passes the "Grandma-Proofed" Pixelcut URL to JavaScript.
-  Also gently upgrades dashboard store-logo thumbnail URLs for sharper retina/mobile display.
+  Also upgrades dashboard store-logo thumbnails using the original Shopify MediaImage when available.
 {% endcomment %}
 
 <script>
   window.SS = window.SS || {};
   window.SS.config = window.SS.config || {};
+  window.SS.dashboardLogoMap = window.SS.dashboardLogoMap || {};
 
   {%- if collection and collection.handle -%}
     {%- assign store_handle = collection.handle -%}
-    
-    {%- comment -%} 
-      Load the metaobject. 
-      Note: We use the system key 'custom_shop' and look up by handle. 
-    {%- endcomment -%}
     {%- assign store_meta = shop.metaobjects.custom_shop[store_handle] -%}
-    
     {%- if store_meta -%}
       window.SS.config.storeHandle = "{{ store_handle }}";
-      
-      {%- comment -%} 
-        PRIORITY 1: The "Logo Clean Url" (Pixelcut transparent PNG).
-        We assume the key is 'logo_clean_url' based on your label.
-      {%- endcomment -%}
       {%- if store_meta.logo_clean_url != blank -%}
         window.SS.config.logoUrl = "{{ store_meta.logo_clean_url }}";
-        
-      {%- comment -%} PRIORITY 2: Fallback to raw upload if Pixelcut failed {%- endcomment -%}
       {%- elsif store_meta.logo != blank -%}
-        window.SS.config.logoUrl = "{{ store_meta.logo | image_url: width: 900 }}";
-        
+        window.SS.config.logoUrl = "{{ store_meta.logo | image_url: width: 1200 }}";
       {%- endif -%}
-      
     {%- endif -%}
+  {%- endif -%}
+
+  {%- comment -%}
+    Dashboard logo map.
+    The dashboard card HTML may use logo_clean_url, which can be a compressed/low-res processed URL.
+    For the dashboard thumbnail, prefer the original Shopify MediaImage at a large size, then fall back to clean URL.
+  {%- endcomment -%}
+  {%- if customer -%}
+    {%- assign ss_dash_handles_blob = '||' -%}
+    {%- for tag in customer.tags -%}
+      {%- assign tag_stripped = tag | strip -%}
+      {%- assign tag_down = tag_stripped | downcase -%}
+      {%- assign ss_dash_handle = '' -%}
+      {%- if tag_down contains 'storefront-admin--' -%}
+        {%- assign ss_dash_handle = tag_stripped | remove: 'storefront-admin--' | remove: 'STOREFRONT-ADMIN--' | strip -%}
+      {%- elsif tag_down contains 'storefront-member--' -%}
+        {%- assign ss_dash_handle = tag_stripped | remove: 'storefront-member--' | remove: 'STOREFRONT-MEMBER--' | strip -%}
+      {%- endif -%}
+      {%- if ss_dash_handle != blank -%}
+        {%- capture ss_dash_needle -%}||{{ ss_dash_handle }}||{%- endcapture -%}
+        {%- unless ss_dash_handles_blob contains ss_dash_needle -%}
+          {%- assign ss_dash_handles_blob = ss_dash_handles_blob | append: ss_dash_handle | append: '||' -%}
+          {%- assign ss_dash_entry = shop.metaobjects.custom_shop[ss_dash_handle] -%}
+          {%- if ss_dash_entry -%}
+            {%- assign ss_dash_logo_file = ss_dash_entry.logo.value | default: ss_dash_entry.logo -%}
+            {%- assign ss_dash_logo_clean = ss_dash_entry.logo_clean_url.value | default: ss_dash_entry.logo_clean_url -%}
+            {%- if ss_dash_logo_clean == blank -%}{%- assign ss_dash_logo_clean = ss_dash_entry.logo_clean.value | default: ss_dash_entry.logo_clean -%}{%- endif -%}
+            {%- if ss_dash_logo_file != blank -%}
+              window.SS.dashboardLogoMap[{{ ss_dash_handle | json }}] = {{ ss_dash_logo_file | image_url: width: 1200 | json }};
+            {%- elsif ss_dash_logo_clean != blank -%}
+              window.SS.dashboardLogoMap[{{ ss_dash_handle | json }}] = {{ ss_dash_logo_clean | json }};
+            {%- endif -%}
+          {%- endif -%}
+        {%- endunless -%}
+      {%- endif -%}
+    {%- endfor -%}
   {%- endif -%}
 
   (function () {
@@ -44,23 +66,30 @@
       if (!src || src.indexOf('cdn.shopify.com') === -1) return src;
       try {
         var url = new URL(src, window.location.origin);
-        url.searchParams.set('width', '900');
+        url.searchParams.set('width', '1200');
         return url.toString();
       } catch (e) {
-        if (src.indexOf('width=') !== -1) return src.replace(/width=\d+/g, 'width=900');
-        return src + (src.indexOf('?') === -1 ? '?' : '&') + 'width=900';
+        if (src.indexOf('width=') !== -1) return src.replace(/width=\d+/g, 'width=1200');
+        return src + (src.indexOf('?') === -1 ? '?' : '&') + 'width=1200';
       }
     }
 
     function sharpenDashboardLogos() {
-      var imgs = document.querySelectorAll('.ss-logo-frame img');
-      imgs.forEach(function (img, index) {
-        if (!img || img.dataset.ssQualityUpgraded === '1') return;
+      var cards = document.querySelectorAll('.ss-store-card[data-ss-handle]');
+      cards.forEach(function (card, index) {
+        var img = card.querySelector('.ss-logo-frame img');
+        if (!img) return;
+
+        var handle = card.getAttribute('data-ss-handle') || '';
+        var mapped = window.SS && window.SS.dashboardLogoMap ? window.SS.dashboardLogoMap[handle] : '';
         var current = img.currentSrc || img.getAttribute('src') || '';
-        var upgraded = upgradeShopifyImageUrl(current);
-        if (upgraded && upgraded !== current) {
+        var upgraded = mapped || upgradeShopifyImageUrl(current);
+
+        if (upgraded && upgraded !== current && img.dataset.ssDashboardMapped !== upgraded) {
           img.setAttribute('src', upgraded);
+          img.dataset.ssDashboardMapped = upgraded;
         }
+
         img.setAttribute('decoding', 'async');
         img.setAttribute('loading', index < 4 ? 'eager' : 'lazy');
         if (index < 4) img.setAttribute('fetchpriority', 'high');
