@@ -1,0 +1,29 @@
+{% assign is_logged_in = false %}
+{% if customer %}{% assign is_logged_in = true %}{% endif %}
+<section class="ss-demo-entry{% if is_logged_in %} ss-demo-entry--subtle{% endif %}">
+  <div class="ss-demo-entry__shell">
+    <span class="ss-demo-entry__kicker">Live Demo</span>
+    {% if is_logged_in %}
+      <h2>Want to preview the demo experience?</h2>
+      <p>Open a locked sample dashboard and storefront without changing anything in your real stores.</p>
+    {% else %}
+      <h2>See the store and dashboard before creating yours.</h2>
+      <p>Explore a real demo storefront, product pages, and admin-style dashboard. Checkout and admin actions are disabled so it is safe to click around.</p>
+    {% endif %}
+    <div class="ss-demo-entry__actions">
+      <a class="ss-demo-btn ss-demo-btn--dark" href="/pages/demo">View Demo</a>
+      <a class="ss-demo-btn ss-demo-btn--light" href="/collections/raptors-3978?demo=true">Open Demo Store</a>
+      <a class="ss-demo-btn ss-demo-btn--gold" href="/pages/request-storefront-form">Create My Store</a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "SS Demo Entry",
+  "settings": [],
+  "presets": [
+    { "name": "SS Demo Entry" }
+  ]
+}
+{% endschema %}
