@@ -1,7 +1,7 @@
 /*
   Stella & Sage — Product Page Light Polish
   Keep the native product page mostly intact. Remove duplicate navigation,
-  keep desktop product media fully visible on load, and add clear gallery affordance.
+  keep desktop product media visible, and add clear gallery affordance.
 */
 
 body:has([data-template*="product"]),
@@ -72,7 +72,7 @@ body.template-product button[name="add"] {
   border: 1px solid rgba(183, 163, 106, 0.30) !important;
 }
 
-/* Desktop: keep full product + thumbs visible immediately. */
+/* Desktop: bigger image, no cropping, thumbnails still close. */
 @media (min-width: 990px) {
   body:has([data-template*="product"]) media-gallery,
   body:has([data-template*="product"]) .product-media-gallery,
@@ -82,12 +82,7 @@ body.template-product button[name="add"] {
   body.template-product .product__media-wrapper {
     position: relative !important;
     overflow: visible !important;
-    max-height: none !important;
     min-height: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
   }
 
   body:has([data-template*="product"]) .product__media,
@@ -98,11 +93,8 @@ body.template-product button[name="add"] {
   body.template-product .product-media-container,
   body.template-product .media,
   body.template-product .slider__slide {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
     overflow: visible !important;
+    text-align: center !important;
   }
 
   body:has([data-template*="product"]) media-gallery img,
@@ -113,9 +105,9 @@ body.template-product button[name="add"] {
   body.template-product .product-media-container img {
     display: block !important;
     margin-inline: auto !important;
-    max-height: min(520px, 54vh) !important;
+    max-height: min(720px, 70vh) !important;
     width: auto !important;
-    max-width: 90% !important;
+    max-width: 100% !important;
     object-fit: contain !important;
     object-position: center center !important;
   }
@@ -130,15 +122,14 @@ body.template-product button[name="add"] {
     justify-content: center !important;
     align-items: center !important;
     gap: 10px !important;
-    margin-top: 12px !important;
+    margin-top: 10px !important;
     opacity: 1 !important;
     visibility: visible !important;
   }
 
-  /* Our safe gallery arrows, injected by ss-product-front-image-guard.js. */
   .ss-gallery-arrow {
     position: absolute !important;
-    top: 45% !important;
+    top: 42% !important;
     transform: translateY(-50%) !important;
     z-index: 30 !important;
     width: 42px !important;
@@ -163,8 +154,8 @@ body.template-product button[name="add"] {
     opacity: 1 !important;
   }
 
-  .ss-gallery-arrow--prev { left: 26px !important; }
-  .ss-gallery-arrow--next { right: 26px !important; }
+  .ss-gallery-arrow--prev { left: 14px !important; }
+  .ss-gallery-arrow--next { right: 14px !important; }
 }
 
 @media (max-width: 749px) {
