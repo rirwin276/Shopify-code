@@ -113,6 +113,11 @@
     {%- comment -%} STELLA & SAGE CUSTOM ASSETS {%- endcomment -%}
     {% render 'ss-data-layer' %}
     {{ 'ss-premium.css' | asset_url | stylesheet_tag }}
+
+    {%- if template.name == 'product' -%}
+      {{ 'ss-product-page-polish.css' | asset_url | stylesheet_tag }}
+      <script src="{{ 'ss-product-front-image-guard.js' | asset_url }}" defer></script>
+    {%- endif -%}
     
     {% # theme-check-disable ParserBlockingScript %}
     <script src="{{ 'storefront-context.js' | asset_url }}"></script>
