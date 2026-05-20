@@ -1,8 +1,7 @@
 /*
   Stella & Sage — Product Page Light Polish
-  Keep the native product page mostly intact. Only remove duplicate navigation,
-  lightly constrain oversized desktop media, center product media, and make
-  carousel controls easier to see.
+  Keep the native product page mostly intact. Remove duplicate navigation,
+  keep desktop product media fully visible on load, and add clear gallery affordance.
 */
 
 body:has([data-template*="product"]),
@@ -51,7 +50,6 @@ body.template-product .product-title {
   line-height: 1.08 !important;
 }
 
-/* Keep the selected option simple and readable. */
 body:has([data-template*="product"]) .product-form__input input[type="radio"]:checked + label,
 body:has([data-template*="product"]) variant-picker input[type="radio"]:checked + label,
 body:has([data-template*="product"]) .swatch-input__input:checked + .swatch-input__label,
@@ -74,7 +72,7 @@ body.template-product button[name="add"] {
   border: 1px solid rgba(183, 163, 106, 0.30) !important;
 }
 
-/* Desktop: keep media reasonable, centered, and make it clear there are more photos. */
+/* Desktop: keep full product + thumbs visible immediately. */
 @media (min-width: 990px) {
   body:has([data-template*="product"]) media-gallery,
   body:has([data-template*="product"]) .product-media-gallery,
@@ -82,10 +80,14 @@ body.template-product button[name="add"] {
   body.template-product media-gallery,
   body.template-product .product-media-gallery,
   body.template-product .product__media-wrapper {
-    max-height: calc(100vh - 230px) !important;
-    min-height: 520px;
-    overflow: visible !important;
     position: relative !important;
+    overflow: visible !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
   }
 
   body:has([data-template*="product"]) .product__media,
@@ -100,6 +102,7 @@ body.template-product button[name="add"] {
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
+    overflow: visible !important;
   }
 
   body:has([data-template*="product"]) media-gallery img,
@@ -110,49 +113,11 @@ body.template-product button[name="add"] {
   body.template-product .product-media-container img {
     display: block !important;
     margin-inline: auto !important;
-    max-height: calc(100vh - 250px) !important;
+    max-height: min(520px, 54vh) !important;
     width: auto !important;
-    max-width: 92% !important;
+    max-width: 90% !important;
     object-fit: contain !important;
-  }
-
-  /* Force carousel arrows to stay visible over the media instead of falling off-screen. */
-  body:has([data-template*="product"]) media-gallery .slider-button,
-  body:has([data-template*="product"]) .product-media-gallery .slider-button,
-  body:has([data-template*="product"]) .product__media-wrapper .slider-button,
-  body.template-product media-gallery .slider-button,
-  body.template-product .product-media-gallery .slider-button,
-  body.template-product .product__media-wrapper .slider-button {
-    position: absolute !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    z-index: 8 !important;
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: 999px !important;
-    background: rgba(255, 255, 255, 0.90) !important;
-    border: 1px solid rgba(17, 16, 14, 0.12) !important;
-    box-shadow: 0 12px 32px rgba(17, 16, 14, 0.12) !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-
-  body:has([data-template*="product"]) media-gallery .slider-button--prev,
-  body:has([data-template*="product"]) .product-media-gallery .slider-button--prev,
-  body:has([data-template*="product"]) .product__media-wrapper .slider-button--prev,
-  body.template-product media-gallery .slider-button--prev,
-  body.template-product .product-media-gallery .slider-button--prev,
-  body.template-product .product__media-wrapper .slider-button--prev {
-    left: 22px !important;
-  }
-
-  body:has([data-template*="product"]) media-gallery .slider-button--next,
-  body:has([data-template*="product"]) .product-media-gallery .slider-button--next,
-  body:has([data-template*="product"]) .product__media-wrapper .slider-button--next,
-  body.template-product media-gallery .slider-button--next,
-  body.template-product .product-media-gallery .slider-button--next,
-  body.template-product .product__media-wrapper .slider-button--next {
-    right: 22px !important;
+    object-position: center center !important;
   }
 
   body:has([data-template*="product"]) media-gallery .thumbnail-list,
@@ -163,11 +128,43 @@ body.template-product button[name="add"] {
   body.template-product .product__media-wrapper .thumbnail-list {
     display: flex !important;
     justify-content: center !important;
+    align-items: center !important;
     gap: 10px !important;
-    margin-top: 14px !important;
+    margin-top: 12px !important;
     opacity: 1 !important;
     visibility: visible !important;
   }
+
+  /* Our safe gallery arrows, injected by ss-product-front-image-guard.js. */
+  .ss-gallery-arrow {
+    position: absolute !important;
+    top: 45% !important;
+    transform: translateY(-50%) !important;
+    z-index: 30 !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(17,16,14,.12) !important;
+    background: rgba(255,255,255,.92) !important;
+    color: #111 !important;
+    box-shadow: 0 14px 34px rgba(17,16,14,.16) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 28px !important;
+    line-height: 1 !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    opacity: .96 !important;
+  }
+
+  .ss-gallery-arrow:hover {
+    background: #fff !important;
+    opacity: 1 !important;
+  }
+
+  .ss-gallery-arrow--prev { left: 26px !important; }
+  .ss-gallery-arrow--next { right: 26px !important; }
 }
 
 @media (max-width: 749px) {
