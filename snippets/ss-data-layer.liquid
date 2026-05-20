@@ -75,9 +75,8 @@
       document.querySelectorAll('.ss-store-card[data-ss-products]').forEach(function (card) {
         if (card.dataset.ssProductCountInjected === '1') return;
         var count = parseInt(card.getAttribute('data-ss-products') || '0', 10);
-        var identity = card.querySelector('.ss-identity-text');
         var title = card.querySelector('.ss-card-title');
-        if (!identity || !title || !count || count < 1) return;
+        if (!title || !count || count < 1) return;
         var line = document.createElement('span');
         line.className = 'ss-card-product-count';
         line.textContent = count + ' live product' + (count === 1 ? '' : 's');
@@ -125,19 +124,21 @@
 
     .ss-portal .ss-col-identity {
       padding: 12px 14px 8px !important;
-      gap: 12px !important;
+      gap: 14px !important;
     }
 
     .ss-portal .ss-logo-frame {
-      width: 86px !important;
-      height: 86px !important;
+      width: 104px !important;
+      height: 104px !important;
       border-radius: 18px !important;
       box-shadow: 0 10px 24px rgba(15,23,42,.06) !important;
     }
 
     .ss-portal .ss-logo-frame img {
-      padding: 3px !important;
+      padding: 2px !important;
       image-rendering: auto !important;
+      object-fit: contain !important;
+      transform: translateZ(0) !important;
     }
 
     .ss-portal .ss-card-title {
@@ -217,8 +218,8 @@
 
   @media (max-width: 400px) {
     .ss-portal .ss-logo-frame {
-      width: 76px !important;
-      height: 76px !important;
+      width: 96px !important;
+      height: 96px !important;
     }
 
     .ss-portal .ss-card-title {
