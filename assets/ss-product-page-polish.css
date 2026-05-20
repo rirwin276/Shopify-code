@@ -35,11 +35,21 @@ body.template-product .product__info-container,
 body.template-product [data-product-information] {
   border-radius: 34px !important;
   background:
-    radial-gradient(circle at 18% 0%, rgba(183, 163, 106, 0.18), transparent 34%),
-    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,246,235,0.78)) !important;
-  border: 1px solid rgba(183, 163, 106, 0.18) !important;
+    radial-gradient(circle at 18% 0%, rgba(183, 163, 106, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,246,235,0.66)) !important;
+  border: 1px solid rgba(183, 163, 106, 0.16) !important;
   box-shadow: 0 24px 80px rgba(17, 16, 14, 0.08) !important;
   overflow: hidden !important;
+}
+
+/* Keep only the clean top back bar. Hide the duplicate in-card storefront back button. */
+body:has([data-template*="product"]) .product-information .product-details a[href*="/collections/"]:not(.ss-backbtn),
+body:has([data-template*="product"]) .product__info-container a[href*="/collections/"]:not(.ss-backbtn),
+body:has([data-template*="product"]) [data-product-information] a[href*="/collections/"]:not(.ss-backbtn),
+body.template-product .product-information .product-details a[href*="/collections/"]:not(.ss-backbtn),
+body.template-product .product__info-container a[href*="/collections/"]:not(.ss-backbtn),
+body.template-product [data-product-information] a[href*="/collections/"]:not(.ss-backbtn) {
+  display: none !important;
 }
 
 body:has([data-template*="product"]) .product-information h1,
@@ -56,6 +66,37 @@ body.template-product [data-product-title] {
   line-height: 1.05 !important;
 }
 
+/* Remove the big oval/circle containers behind Color and Size groups. */
+body:has([data-template*="product"]) variant-picker,
+body:has([data-template*="product"]) .variant-picker,
+body:has([data-template*="product"]) .product-form__input,
+body:has([data-template*="product"]) .product-form__input fieldset,
+body:has([data-template*="product"]) fieldset.product-form__input,
+body:has([data-template*="product"]) .variant-picker__option,
+body:has([data-template*="product"]) .variant-picker__option-values,
+body:has([data-template*="product"]) .product-options,
+body.template-product variant-picker,
+body.template-product .variant-picker,
+body.template-product .product-form__input,
+body.template-product .product-form__input fieldset,
+body.template-product fieldset.product-form__input,
+body.template-product .variant-picker__option,
+body.template-product .variant-picker__option-values,
+body.template-product .product-options {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body:has([data-template*="product"]) .product-form__input,
+body:has([data-template*="product"]) .variant-picker__option,
+body.template-product .product-form__input,
+body.template-product .variant-picker__option {
+  margin-bottom: 14px !important;
+  padding: 0 !important;
+}
+
 body:has([data-template*="product"]) .product-form__input legend,
 body:has([data-template*="product"]) variant-picker legend,
 body:has([data-template*="product"]) .variant-picker__label,
@@ -67,6 +108,7 @@ body.template-product label[for*="Option"] {
   color: rgba(17, 16, 14, 0.74) !important;
   font-weight: 850 !important;
   letter-spacing: -0.02em !important;
+  margin-bottom: 8px !important;
 }
 
 body:has([data-template*="product"]) .product-form__input input[type="radio"] + label,
@@ -79,7 +121,7 @@ body.template-product .variant-option,
 body.template-product .swatch-input__label {
   border-radius: 999px !important;
   border: 1px solid rgba(17, 16, 14, 0.12) !important;
-  background: rgba(255, 255, 255, 0.74) !important;
+  background: rgba(255, 255, 255, 0.82) !important;
   box-shadow: 0 8px 24px rgba(17, 16, 14, 0.045) !important;
   font-weight: 850 !important;
 }
