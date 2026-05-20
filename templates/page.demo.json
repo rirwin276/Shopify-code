@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "ss-demo-page",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}
