@@ -1,7 +1,8 @@
 /*
   Stella & Sage — Product Page Light Polish
   Keep the native product page mostly intact. Only remove duplicate navigation,
-  lightly constrain oversized desktop media, and make carousel controls more obvious.
+  lightly constrain oversized desktop media, center product media, and make
+  carousel controls easier to see.
 */
 
 body:has([data-template*="product"]),
@@ -73,7 +74,7 @@ body.template-product button[name="add"] {
   border: 1px solid rgba(183, 163, 106, 0.30) !important;
 }
 
-/* Desktop: do not let the main product media become so tall that controls/thumbnails disappear. */
+/* Desktop: keep media reasonable, centered, and make it clear there are more photos. */
 @media (min-width: 990px) {
   body:has([data-template*="product"]) media-gallery,
   body:has([data-template*="product"]) .product-media-gallery,
@@ -83,8 +84,22 @@ body.template-product button[name="add"] {
   body.template-product .product__media-wrapper {
     max-height: calc(100vh - 230px) !important;
     min-height: 520px;
-    overflow: hidden !important;
+    overflow: visible !important;
     position: relative !important;
+  }
+
+  body:has([data-template*="product"]) .product__media,
+  body:has([data-template*="product"]) .product-media-container,
+  body:has([data-template*="product"]) .media,
+  body:has([data-template*="product"]) .slider__slide,
+  body.template-product .product__media,
+  body.template-product .product-media-container,
+  body.template-product .media,
+  body.template-product .slider__slide {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
   }
 
   body:has([data-template*="product"]) media-gallery img,
@@ -93,20 +108,65 @@ body.template-product button[name="add"] {
   body.template-product media-gallery img,
   body.template-product .product__media img,
   body.template-product .product-media-container img {
+    display: block !important;
+    margin-inline: auto !important;
     max-height: calc(100vh - 250px) !important;
     width: auto !important;
-    max-width: 100% !important;
+    max-width: 92% !important;
     object-fit: contain !important;
   }
 
-  /* Make carousel arrows/dots easier to notice when the image is large. */
-  body:has([data-template*="product"]) media-gallery button,
-  body:has([data-template*="product"]) .product-media-gallery button,
-  body:has([data-template*="product"]) .product__media-wrapper button,
-  body.template-product media-gallery button,
-  body.template-product .product-media-gallery button,
-  body.template-product .product__media-wrapper button {
-    z-index: 5 !important;
+  /* Force carousel arrows to stay visible over the media instead of falling off-screen. */
+  body:has([data-template*="product"]) media-gallery .slider-button,
+  body:has([data-template*="product"]) .product-media-gallery .slider-button,
+  body:has([data-template*="product"]) .product__media-wrapper .slider-button,
+  body.template-product media-gallery .slider-button,
+  body.template-product .product-media-gallery .slider-button,
+  body.template-product .product__media-wrapper .slider-button {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 8 !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.90) !important;
+    border: 1px solid rgba(17, 16, 14, 0.12) !important;
+    box-shadow: 0 12px 32px rgba(17, 16, 14, 0.12) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  body:has([data-template*="product"]) media-gallery .slider-button--prev,
+  body:has([data-template*="product"]) .product-media-gallery .slider-button--prev,
+  body:has([data-template*="product"]) .product__media-wrapper .slider-button--prev,
+  body.template-product media-gallery .slider-button--prev,
+  body.template-product .product-media-gallery .slider-button--prev,
+  body.template-product .product__media-wrapper .slider-button--prev {
+    left: 22px !important;
+  }
+
+  body:has([data-template*="product"]) media-gallery .slider-button--next,
+  body:has([data-template*="product"]) .product-media-gallery .slider-button--next,
+  body:has([data-template*="product"]) .product__media-wrapper .slider-button--next,
+  body.template-product media-gallery .slider-button--next,
+  body.template-product .product-media-gallery .slider-button--next,
+  body.template-product .product__media-wrapper .slider-button--next {
+    right: 22px !important;
+  }
+
+  body:has([data-template*="product"]) media-gallery .thumbnail-list,
+  body:has([data-template*="product"]) .product-media-gallery .thumbnail-list,
+  body:has([data-template*="product"]) .product__media-wrapper .thumbnail-list,
+  body.template-product media-gallery .thumbnail-list,
+  body.template-product .product-media-gallery .thumbnail-list,
+  body.template-product .product__media-wrapper .thumbnail-list {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    margin-top: 14px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 }
 
