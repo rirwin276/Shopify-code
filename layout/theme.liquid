@@ -55,7 +55,6 @@
           path.indexOf('/pages/resources') === 0 ||
           path.indexOf('/pages/resource') === 0 ||
           path.indexOf('/pages/how') === 0 ||
-          path.indexOf('/pages/demo') === 0 ||
           path.indexOf('/pages/request') === 0 ||
           path.indexOf('/pages/join-store') === 0;
 
@@ -132,8 +131,6 @@
     {%- comment -%} STELLA & SAGE CUSTOM ASSETS {%- endcomment -%}
     {% render 'ss-data-layer' %}
     {{ 'ss-premium.css' | asset_url | stylesheet_tag }}
-    {{ 'ss-demo-mode.css' | asset_url | stylesheet_tag }}
-    <script src="{{ 'ss-demo-mode.js' | asset_url }}" defer></script>
 
     {%- if template.name == 'product' -%}
       {{ 'ss-product-page-polish.css' | asset_url | stylesheet_tag }}
@@ -145,7 +142,7 @@
     {% # theme-check-enable ParserBlockingScript %}
 
     {%- comment -%}
-      Admin / internal page helpers. These self-guard and only run on matching DOM/routes).
+      Admin / internal page helpers. These self-guard and only run on matching DOM/routes.
     {%- endcomment -%}
     <script src="{{ 'ss-admin-pro-builder-cards.js' | asset_url }}" defer></script>
     <script src="{{ 'ss-admin-pro-builder-thumbnail-overrides.js' | asset_url }}" defer></script>
@@ -166,7 +163,6 @@
           path.indexOf('/pages/resources') === 0 ||
           path.indexOf('/pages/resource') === 0 ||
           path.indexOf('/pages/how') === 0 ||
-          path.indexOf('/pages/demo') === 0 ||
           path.indexOf('/pages/request') === 0 ||
           path.indexOf('/pages/join-store') === 0;
 
@@ -226,7 +222,6 @@
         function persistStoreHandle() {
           const params = new URLSearchParams(window.location.search);
           let handle = params.get('sh');
-          const demo = params.get('demo');
           
           // Fallback: If no handle in URL, check if we are ON a collection page
           if (!handle) {
@@ -237,19 +232,15 @@
             }
           }
 
-          if (handle || demo) {
-            const links = document.querySelectorAll('a[href*="/products/"], a[href*="/collections/"], a[href*="/pages/portal"], a[href*="/pages/admin-powers"]');
+          if (handle) {
+            const links = document.querySelectorAll('a[href*="/products/"]');
             links.forEach(link => {
               const url = new URL(link.href, window.location.origin);
-              // Only apply to this domain
-              if (url.origin !== window.location.origin) return;
-              if (handle && url.pathname.indexOf('/products/') === 0 && !url.searchParams.has('sh')) {
+              // Only add if not already there
+              if (!url.searchParams.has('sh')) {
                 url.searchParams.set('sh', handle);
+                link.href = url.toString();
               }
-              if (demo === 'true' && !url.searchParams.has('demo')) {
-                url.searchParams.set('demo', 'true');
-              }
-              link.href = url.toString();
             });
           }
         }
