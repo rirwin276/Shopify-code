@@ -72,8 +72,13 @@ body.template-product button[name="add"] {
   border: 1px solid rgba(183, 163, 106, 0.30) !important;
 }
 
-/* Desktop: bigger image, no cropping, thumbnails still close. */
+/* Desktop: bigger image, no cropping, thumbnails tight to the image. */
 @media (min-width: 990px) {
+  body:has([data-template*="product"]) .product-information,
+  body.template-product .product-information {
+    gap: 18px !important;
+  }
+
   body:has([data-template*="product"]) media-gallery,
   body:has([data-template*="product"]) .product-media-gallery,
   body:has([data-template*="product"]) .product__media-wrapper,
@@ -83,6 +88,22 @@ body.template-product button[name="add"] {
     position: relative !important;
     overflow: visible !important;
     min-height: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body:has([data-template*="product"]) media-gallery > *,
+  body:has([data-template*="product"]) .product-media-gallery > *,
+  body:has([data-template*="product"]) .product__media-wrapper > *,
+  body.template-product media-gallery > *,
+  body.template-product .product-media-gallery > *,
+  body.template-product .product__media-wrapper > * {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   body:has([data-template*="product"]) .product__media,
@@ -95,6 +116,8 @@ body.template-product button[name="add"] {
   body.template-product .slider__slide {
     overflow: visible !important;
     text-align: center !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   body:has([data-template*="product"]) media-gallery img,
@@ -115,16 +138,31 @@ body.template-product button[name="add"] {
   body:has([data-template*="product"]) media-gallery .thumbnail-list,
   body:has([data-template*="product"]) .product-media-gallery .thumbnail-list,
   body:has([data-template*="product"]) .product__media-wrapper .thumbnail-list,
+  body:has([data-template*="product"]) media-gallery [class*="thumbnail"],
+  body:has([data-template*="product"]) .product-media-gallery [class*="thumbnail"],
+  body:has([data-template*="product"]) .product__media-wrapper [class*="thumbnail"],
+  body.template-product media-gallery .thumbnail-list,
+  body.template-product .product-media-gallery .thumbnail-list,
+  body.template-product .product__media-wrapper .thumbnail-list,
+  body.template-product media-gallery [class*="thumbnail"],
+  body.template-product .product-media-gallery [class*="thumbnail"],
+  body.template-product .product__media-wrapper [class*="thumbnail"] {
+    margin-top: 2px !important;
+    padding-top: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  body:has([data-template*="product"]) media-gallery .thumbnail-list,
+  body:has([data-template*="product"]) .product-media-gallery .thumbnail-list,
+  body:has([data-template*="product"]) .product__media-wrapper .thumbnail-list,
   body.template-product media-gallery .thumbnail-list,
   body.template-product .product-media-gallery .thumbnail-list,
   body.template-product .product__media-wrapper .thumbnail-list {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 10px !important;
-    margin-top: 10px !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+    gap: 8px !important;
   }
 
   .ss-gallery-arrow {
@@ -154,8 +192,8 @@ body.template-product button[name="add"] {
     opacity: 1 !important;
   }
 
-  .ss-gallery-arrow--prev { left: 14px !important; }
-  .ss-gallery-arrow--next { right: 14px !important; }
+  .ss-gallery-arrow--prev { left: 2px !important; }
+  .ss-gallery-arrow--next { right: 2px !important; }
 }
 
 @media (max-width: 749px) {
