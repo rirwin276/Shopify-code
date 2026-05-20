@@ -94,7 +94,7 @@
           pre.onload = function () {
             img.removeAttribute('srcset');
             if (mappedSrcset) img.setAttribute('srcset', mappedSrcset);
-            img.setAttribute('sizes', '(max-width: 850px) 116px, 88px');
+            img.setAttribute('sizes', '(max-width: 850px) 108px, 88px');
             img.setAttribute('src', upgraded);
             img.dataset.ssDashboardMapped = upgraded;
           };
@@ -143,28 +143,28 @@
 
 <style>
   @media (max-width: 850px) {
-    .ss-portal .ss-bg { padding-top: 28px !important; padding-bottom: 34px !important; }
+    .ss-portal .ss-bg { padding-top: 24px !important; padding-bottom: 30px !important; }
     .ss-portal .ss-wrap { padding-left: 14px !important; padding-right: 14px !important; }
-    .ss-portal .ss-store-grid { gap: 12px !important; }
+    .ss-portal .ss-store-grid { gap: 10px !important; }
     .ss-portal .ss-store-card {
-      border-radius: 24px !important;
+      border-radius: 22px !important;
       overflow: hidden !important;
       border-color: rgba(15,23,42,.055) !important;
-      box-shadow: 0 18px 44px rgba(15,23,42,.055), inset 0 1px 0 rgba(255,255,255,.85) !important;
+      box-shadow: 0 14px 34px rgba(15,23,42,.05), inset 0 1px 0 rgba(255,255,255,.85) !important;
     }
     .ss-portal .ss-col-identity {
-      padding: 16px 16px 9px !important;
-      gap: 14px !important;
+      padding: 12px 14px 6px !important;
+      gap: 12px !important;
       align-items: center !important;
     }
     .ss-portal .ss-logo-frame {
-      width: 116px !important;
-      height: 116px !important;
-      min-width: 116px !important;
-      border-radius: 22px !important;
+      width: 108px !important;
+      height: 108px !important;
+      min-width: 108px !important;
+      border-radius: 20px !important;
       background: rgba(255,255,255,.82) !important;
       border: 1px solid rgba(15,23,42,.07) !important;
-      box-shadow: 0 12px 28px rgba(15,23,42,.075) !important;
+      box-shadow: 0 10px 24px rgba(15,23,42,.065) !important;
     }
     .ss-portal .ss-logo-frame img {
       padding: 0 !important;
@@ -173,41 +173,38 @@
       transform: translateZ(0) !important;
       filter: contrast(1.055) saturate(1.055) !important;
     }
-    .ss-portal .ss-identity-text {
-      min-width: 0 !important;
-      padding-top: 2px !important;
-    }
+    .ss-portal .ss-identity-text { min-width: 0 !important; padding-top: 0 !important; }
     .ss-portal .ss-card-title {
       font-size: 18px !important;
-      line-height: 1.06 !important;
-      margin-bottom: 5px !important;
+      line-height: 1.04 !important;
+      margin-bottom: 4px !important;
       letter-spacing: -.04em !important;
     }
     .ss-portal .ss-card-subtitle {
       display: inline-flex !important;
       width: fit-content !important;
       font-size: 10px !important;
-      padding: 4px 9px !important;
+      padding: 3px 8px !important;
       border-radius: 999px !important;
       letter-spacing: .12em !important;
       text-transform: uppercase !important;
     }
     .ss-portal .ss-card-product-count {
       display: block !important;
-      margin: 0 0 7px !important;
+      margin: 0 0 6px !important;
       font-size: 12px !important;
       font-weight: 850 !important;
       color: rgba(15,23,42,.46) !important;
       letter-spacing: .01em !important;
     }
-    .ss-portal .ss-col-engine { padding: 7px 16px 8px !important; }
-    .ss-portal .ss-status-finished, .ss-portal .ss-status-building { padding: 7px 12px !important; border-radius: 999px !important; }
+    .ss-portal .ss-col-engine { padding: 5px 14px 6px !important; }
+    .ss-portal .ss-status-finished, .ss-portal .ss-status-building { padding: 6px 11px !important; border-radius: 999px !important; }
     .ss-portal .ss-status-text, .ss-portal .ss-status-text-building { font-size: 10px !important; letter-spacing: .10em !important; }
-    .ss-portal .ss-col-controls { padding: 10px 14px 14px !important; gap: 8px !important; }
+    .ss-portal .ss-col-controls { padding: 7px 12px 12px !important; gap: 7px !important; }
     .ss-portal .ss-admin-btn {
-      min-height: 42px !important;
-      padding: 9px 14px !important;
-      font-size: 12px !important;
+      min-height: 38px !important;
+      padding: 7px 12px !important;
+      font-size: 11px !important;
       border-radius: 999px !important;
       letter-spacing: .14em !important;
       background: rgba(255,255,255,.76) !important;
@@ -216,22 +213,23 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.78) !important;
     }
     .ss-portal .ss-open-btn {
-      min-height: 54px !important;
-      padding: 12px 16px !important;
-      font-size: 16px !important;
+      min-height: 48px !important;
+      padding: 10px 15px !important;
+      font-size: 15px !important;
       border-radius: 999px !important;
-      box-shadow: 0 17px 36px rgba(15,23,42,.17) !important;
+      box-shadow: 0 14px 30px rgba(15,23,42,.155) !important;
     }
-    .ss-portal .ss-leave-btn { min-height: 38px !important; padding: 8px 14px !important; font-size: 11px !important; border-radius: 999px !important; }
+    .ss-portal .ss-leave-btn { min-height: 34px !important; padding: 7px 12px !important; font-size: 10px !important; border-radius: 999px !important; }
   }
 
   @media (max-width: 400px) {
     .ss-portal .ss-logo-frame {
-      width: 104px !important;
-      height: 104px !important;
-      min-width: 104px !important;
+      width: 100px !important;
+      height: 100px !important;
+      min-width: 100px !important;
     }
     .ss-portal .ss-card-title { font-size: 17px !important; }
+    .ss-portal .ss-open-btn { min-height: 46px !important; }
   }
 
   @media (min-width: 851px) {
