@@ -36,26 +36,44 @@
 
     {%- comment -%}
       STELLA & SAGE ANTI-FLASH GUARD
-      Prevents internal dashboard/admin pages from briefly showing unstyled Liquid
-      content before the custom CSS/JS finishes applying. It only activates on
-      known internal pages and has a hard timeout fallback.
+      Prevents custom/internal pages from briefly showing old/default theme
+      content before the route-specific CSS/JS finishes applying. It activates
+      only on known custom routes and has a hard timeout fallback.
     {%- endcomment -%}
     <script>
       (function () {
         var path = window.location.pathname || '';
-        var isInternal = path.indexOf('/pages/portal') === 0 ||
+        var templateName = {{ template.name | json }};
+        var isGuardedRoute =
+          templateName === 'collection' ||
+          templateName === 'product' ||
+          path.indexOf('/collections/') === 0 ||
+          path.indexOf('/products/') === 0 ||
+          path.indexOf('/pages/portal') === 0 ||
           path.indexOf('/pages/admin-powers') === 0 ||
-          path.indexOf('/pages/price-editor') === 0;
-        if (!isInternal) return;
-        document.documentElement.className += ' ss-internal-booting';
+          path.indexOf('/pages/price-editor') === 0 ||
+          path.indexOf('/pages/resources') === 0 ||
+          path.indexOf('/pages/resource') === 0 ||
+          path.indexOf('/pages/how') === 0 ||
+          path.indexOf('/pages/request') === 0 ||
+          path.indexOf('/pages/join-store') === 0;
+
+        if (!isGuardedRoute) return;
+
+        document.documentElement.className += ' ss-internal-booting ss-route-booting';
         window.setTimeout(function () {
-          document.documentElement.className = document.documentElement.className.replace(/\bss-internal-booting\b/g, '');
-          document.documentElement.className += ' ss-internal-ready';
-        }, 1400);
+          document.documentElement.className = document.documentElement.className
+            .replace(/\bss-internal-booting\b/g, '')
+            .replace(/\bss-route-booting\b/g, '');
+          if (document.documentElement.className.indexOf('ss-internal-ready') === -1) {
+            document.documentElement.className += ' ss-internal-ready';
+          }
+        }, 1600);
       })();
     </script>
     <style>
-      html.ss-internal-booting main.content-for-layout {
+      html.ss-internal-booting main.content-for-layout,
+      html.ss-route-booting main.content-for-layout {
         opacity: 0 !important;
       }
       html.ss-internal-ready main.content-for-layout {
@@ -133,20 +151,35 @@
     <script>
       (function () {
         var path = window.location.pathname || '';
-        var isInternal = path.indexOf('/pages/portal') === 0 ||
+        var templateName = {{ template.name | json }};
+        var isGuardedRoute =
+          templateName === 'collection' ||
+          templateName === 'product' ||
+          path.indexOf('/collections/') === 0 ||
+          path.indexOf('/products/') === 0 ||
+          path.indexOf('/pages/portal') === 0 ||
           path.indexOf('/pages/admin-powers') === 0 ||
-          path.indexOf('/pages/price-editor') === 0;
-        if (!isInternal) return;
+          path.indexOf('/pages/price-editor') === 0 ||
+          path.indexOf('/pages/resources') === 0 ||
+          path.indexOf('/pages/resource') === 0 ||
+          path.indexOf('/pages/how') === 0 ||
+          path.indexOf('/pages/request') === 0 ||
+          path.indexOf('/pages/join-store') === 0;
+
+        if (!isGuardedRoute) return;
+
         function ready() {
-          document.documentElement.className = document.documentElement.className.replace(/\bss-internal-booting\b/g, '');
+          document.documentElement.className = document.documentElement.className
+            .replace(/\bss-internal-booting\b/g, '')
+            .replace(/\bss-route-booting\b/g, '');
           if (document.documentElement.className.indexOf('ss-internal-ready') === -1) {
             document.documentElement.className += ' ss-internal-ready';
           }
         }
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', function () { window.setTimeout(ready, 60); }, { once: true });
+          document.addEventListener('DOMContentLoaded', function () { window.setTimeout(ready, 80); }, { once: true });
         } else {
-          window.setTimeout(ready, 60);
+          window.setTimeout(ready, 80);
         }
       })();
     </script>
