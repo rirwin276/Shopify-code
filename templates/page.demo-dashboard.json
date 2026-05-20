@@ -1,9 +1,0 @@
-{
-  "sections": {
-    "main": {
-      "type": "seller-dashboard",
-      "settings": {}
-    }
-  },
-  "order": ["main"]
-}
