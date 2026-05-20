@@ -1,6 +1,7 @@
 {% comment %}
   STELLA & SAGE - DATA LAYER
   Passes the "Grandma-Proofed" Pixelcut URL to JavaScript.
+  Also gently upgrades dashboard store-logo thumbnail URLs for sharper retina/mobile display.
 {% endcomment %}
 
 <script>
@@ -28,10 +29,55 @@
         
       {%- comment -%} PRIORITY 2: Fallback to raw upload if Pixelcut failed {%- endcomment -%}
       {%- elsif store_meta.logo != blank -%}
-        window.SS.config.logoUrl = "{{ store_meta.logo | image_url: width: 600 }}";
+        window.SS.config.logoUrl = "{{ store_meta.logo | image_url: width: 900 }}";
         
       {%- endif -%}
       
     {%- endif -%}
   {%- endif -%}
+
+  (function () {
+    var path = window.location.pathname || '';
+    if (path.indexOf('/pages/portal') !== 0) return;
+
+    function upgradeShopifyImageUrl(src) {
+      if (!src || src.indexOf('cdn.shopify.com') === -1) return src;
+      try {
+        var url = new URL(src, window.location.origin);
+        url.searchParams.set('width', '900');
+        return url.toString();
+      } catch (e) {
+        if (src.indexOf('width=') !== -1) return src.replace(/width=\d+/g, 'width=900');
+        return src + (src.indexOf('?') === -1 ? '?' : '&') + 'width=900';
+      }
+    }
+
+    function sharpenDashboardLogos() {
+      var imgs = document.querySelectorAll('.ss-logo-frame img');
+      imgs.forEach(function (img, index) {
+        if (!img || img.dataset.ssQualityUpgraded === '1') return;
+        var current = img.currentSrc || img.getAttribute('src') || '';
+        var upgraded = upgradeShopifyImageUrl(current);
+        if (upgraded && upgraded !== current) {
+          img.setAttribute('src', upgraded);
+        }
+        img.setAttribute('decoding', 'async');
+        img.setAttribute('loading', index < 4 ? 'eager' : 'lazy');
+        if (index < 4) img.setAttribute('fetchpriority', 'high');
+        img.style.imageRendering = 'auto';
+        img.style.transform = 'translateZ(0)';
+        img.style.webkitBackfaceVisibility = 'hidden';
+        img.dataset.ssQualityUpgraded = '1';
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', sharpenDashboardLogos, { once: true });
+    } else {
+      sharpenDashboardLogos();
+    }
+
+    var observer = new MutationObserver(sharpenDashboardLogos);
+    if (document.body) observer.observe(document.body, { childList: true, subtree: true });
+  })();
 </script>
