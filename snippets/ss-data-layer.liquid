@@ -22,11 +22,6 @@
     {%- endif -%}
   {%- endif -%}
 
-  {%- comment -%}
-    Dashboard logo map.
-    The dashboard card HTML may use logo_clean_url, which can be a compressed/low-res processed URL.
-    For the dashboard thumbnail, prefer the original Shopify MediaImage at a large size, then fall back to clean URL.
-  {%- endcomment -%}
   {%- if customer -%}
     {%- assign ss_dash_handles_blob = '||' -%}
     {%- for tag in customer.tags -%}
@@ -48,9 +43,12 @@
             {%- assign ss_dash_logo_clean = ss_dash_entry.logo_clean_url.value | default: ss_dash_entry.logo_clean_url -%}
             {%- if ss_dash_logo_clean == blank -%}{%- assign ss_dash_logo_clean = ss_dash_entry.logo_clean.value | default: ss_dash_entry.logo_clean -%}{%- endif -%}
             {%- if ss_dash_logo_file != blank -%}
-              window.SS.dashboardLogoMap[{{ ss_dash_handle | json }}] = {{ ss_dash_logo_file | image_url: width: 1200 | json }};
+              window.SS.dashboardLogoMap[{{ ss_dash_handle | json }}] = {
+                src: {{ ss_dash_logo_file | image_url: width: 1200 | json }},
+                srcset: {{ ss_dash_logo_file | image_url: width: 600 | append: ' 600w, ' | append: ss_dash_logo_file | image_url: width: 900 | append: ' 900w, ' | append: ss_dash_logo_file | image_url: width: 1200 | append: ' 1200w' | json }}
+              };
             {%- elsif ss_dash_logo_clean != blank -%}
-              window.SS.dashboardLogoMap[{{ ss_dash_handle | json }}] = {{ ss_dash_logo_clean | json }};
+              window.SS.dashboardLogoMap[{{ ss_dash_handle | json }}] = { src: {{ ss_dash_logo_clean | json }}, srcset: '' };
             {%- endif -%}
           {%- endif -%}
         {%- endunless -%}
@@ -81,13 +79,22 @@
         if (!img) return;
 
         var handle = card.getAttribute('data-ss-handle') || '';
-        var mapped = window.SS && window.SS.dashboardLogoMap ? window.SS.dashboardLogoMap[handle] : '';
-        var current = img.currentSrc || img.getAttribute('src') || '';
-        var upgraded = mapped || upgradeShopifyImageUrl(current);
+        var mapped = window.SS && window.SS.dashboardLogoMap ? window.SS.dashboardLogoMap[handle] : null;
+        var mappedSrc = mapped && typeof mapped === 'object' ? mapped.src : mapped;
+        var mappedSrcset = mapped && typeof mapped === 'object' ? mapped.srcset : '';
+        var current = img.getAttribute('src') || '';
+        var upgraded = mappedSrc || upgradeShopifyImageUrl(current);
 
-        if (upgraded && upgraded !== current && img.dataset.ssDashboardMapped !== upgraded) {
-          img.setAttribute('src', upgraded);
-          img.dataset.ssDashboardMapped = upgraded;
+        if (upgraded && img.dataset.ssDashboardMapped !== upgraded) {
+          var pre = new Image();
+          pre.onload = function () {
+            img.removeAttribute('srcset');
+            if (mappedSrcset) img.setAttribute('srcset', mappedSrcset);
+            img.setAttribute('sizes', '(max-width: 850px) 104px, 72px');
+            img.setAttribute('src', upgraded);
+            img.dataset.ssDashboardMapped = upgraded;
+          };
+          pre.src = upgraded;
         }
 
         img.setAttribute('decoding', 'async');
@@ -132,143 +139,33 @@
 
 <style>
   @media (max-width: 850px) {
-    .ss-portal .ss-bg {
-      padding-top: 30px !important;
-      padding-bottom: 34px !important;
-    }
-
-    .ss-portal .ss-wrap {
-      padding-left: 14px !important;
-      padding-right: 14px !important;
-    }
-
-    .ss-portal .ss-store-grid {
-      gap: 10px !important;
-    }
-
-    .ss-portal .ss-store-card {
-      border-radius: 20px !important;
-      overflow: hidden !important;
-    }
-
-    .ss-portal .ss-col-identity {
-      padding: 12px 14px 8px !important;
-      gap: 14px !important;
-    }
-
-    .ss-portal .ss-logo-frame {
-      width: 104px !important;
-      height: 104px !important;
-      border-radius: 18px !important;
-      box-shadow: 0 10px 24px rgba(15,23,42,.06) !important;
-    }
-
-    .ss-portal .ss-logo-frame img {
-      padding: 2px !important;
-      image-rendering: auto !important;
-      object-fit: contain !important;
-      transform: translateZ(0) !important;
-    }
-
-    .ss-portal .ss-card-title {
-      font-size: 17px !important;
-      line-height: 1.08 !important;
-      margin-bottom: 5px !important;
-      letter-spacing: -.035em !important;
-    }
-
-    .ss-portal .ss-card-subtitle {
-      display: inline-flex !important;
-      width: fit-content !important;
-      font-size: 10px !important;
-      padding: 3px 8px !important;
-      border-radius: 999px !important;
-      letter-spacing: .12em !important;
-      text-transform: uppercase !important;
-    }
-
-    .ss-portal .ss-card-product-count {
-      display: block !important;
-      margin: -1px 0 6px !important;
-      font-size: 11px !important;
-      font-weight: 800 !important;
-      color: rgba(15,23,42,.48) !important;
-      letter-spacing: .02em !important;
-    }
-
-    .ss-portal .ss-col-engine {
-      padding: 7px 14px 8px !important;
-    }
-
-    .ss-portal .ss-status-finished,
-    .ss-portal .ss-status-building {
-      padding: 7px 12px !important;
-      border-radius: 999px !important;
-    }
-
-    .ss-portal .ss-status-text,
-    .ss-portal .ss-status-text-building {
-      font-size: 10px !important;
-      letter-spacing: .10em !important;
-    }
-
-    .ss-portal .ss-col-controls {
-      padding: 9px 12px 12px !important;
-      gap: 8px !important;
-    }
-
-    .ss-portal .ss-admin-btn {
-      min-height: 42px !important;
-      padding: 9px 14px !important;
-      font-size: 12px !important;
-      border-radius: 999px !important;
-      letter-spacing: .14em !important;
-      background: rgba(255,255,255,.74) !important;
-      color: rgba(87,73,36,.96) !important;
-      border-color: rgba(87,73,36,.16) !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.75) !important;
-    }
-
-    .ss-portal .ss-open-btn {
-      min-height: 52px !important;
-      padding: 12px 16px !important;
-      font-size: 16px !important;
-      border-radius: 999px !important;
-      box-shadow: 0 16px 34px rgba(15,23,42,.16) !important;
-    }
-
-    .ss-portal .ss-leave-btn {
-      min-height: 38px !important;
-      padding: 8px 14px !important;
-      font-size: 11px !important;
-      border-radius: 999px !important;
-    }
+    .ss-portal .ss-bg { padding-top: 30px !important; padding-bottom: 34px !important; }
+    .ss-portal .ss-wrap { padding-left: 14px !important; padding-right: 14px !important; }
+    .ss-portal .ss-store-grid { gap: 10px !important; }
+    .ss-portal .ss-store-card { border-radius: 20px !important; overflow: hidden !important; }
+    .ss-portal .ss-col-identity { padding: 12px 14px 8px !important; gap: 14px !important; }
+    .ss-portal .ss-logo-frame { width: 104px !important; height: 104px !important; border-radius: 18px !important; box-shadow: 0 10px 24px rgba(15,23,42,.06) !important; }
+    .ss-portal .ss-logo-frame img { padding: 2px !important; image-rendering: auto !important; object-fit: contain !important; transform: translateZ(0) !important; filter: contrast(1.04) saturate(1.04) !important; }
+    .ss-portal .ss-card-title { font-size: 17px !important; line-height: 1.08 !important; margin-bottom: 5px !important; letter-spacing: -.035em !important; }
+    .ss-portal .ss-card-subtitle { display: inline-flex !important; width: fit-content !important; font-size: 10px !important; padding: 3px 8px !important; border-radius: 999px !important; letter-spacing: .12em !important; text-transform: uppercase !important; }
+    .ss-portal .ss-card-product-count { display: block !important; margin: -1px 0 6px !important; font-size: 11px !important; font-weight: 800 !important; color: rgba(15,23,42,.48) !important; letter-spacing: .02em !important; }
+    .ss-portal .ss-col-engine { padding: 7px 14px 8px !important; }
+    .ss-portal .ss-status-finished, .ss-portal .ss-status-building { padding: 7px 12px !important; border-radius: 999px !important; }
+    .ss-portal .ss-status-text, .ss-portal .ss-status-text-building { font-size: 10px !important; letter-spacing: .10em !important; }
+    .ss-portal .ss-col-controls { padding: 9px 12px 12px !important; gap: 8px !important; }
+    .ss-portal .ss-admin-btn { min-height: 42px !important; padding: 9px 14px !important; font-size: 12px !important; border-radius: 999px !important; letter-spacing: .14em !important; background: rgba(255,255,255,.74) !important; color: rgba(87,73,36,.96) !important; border-color: rgba(87,73,36,.16) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.75) !important; }
+    .ss-portal .ss-open-btn { min-height: 52px !important; padding: 12px 16px !important; font-size: 16px !important; border-radius: 999px !important; box-shadow: 0 16px 34px rgba(15,23,42,.16) !important; }
+    .ss-portal .ss-leave-btn { min-height: 38px !important; padding: 8px 14px !important; font-size: 11px !important; border-radius: 999px !important; }
   }
 
   @media (max-width: 400px) {
-    .ss-portal .ss-logo-frame {
-      width: 96px !important;
-      height: 96px !important;
-    }
-
-    .ss-portal .ss-card-title {
-      font-size: 16px !important;
-    }
+    .ss-portal .ss-logo-frame { width: 96px !important; height: 96px !important; }
+    .ss-portal .ss-card-title { font-size: 16px !important; }
   }
 
   @media (min-width: 851px) {
-    .ss-portal .ss-card-product-count {
-      display: block;
-      margin: 3px 0 5px;
-      font-size: 11px;
-      font-weight: 780;
-      color: rgba(91,107,130,.72);
-    }
-
-    .ss-portal .ss-admin-btn {
-      padding: 8px 12px !important;
-      font-size: 11px !important;
-      letter-spacing: .09em !important;
-    }
+    .ss-portal .ss-card-product-count { display: block; margin: 3px 0 5px; font-size: 11px; font-weight: 780; color: rgba(91,107,130,.72); }
+    .ss-portal .ss-admin-btn { padding: 8px 12px !important; font-size: 11px !important; letter-spacing: .09em !important; }
+    .ss-portal .ss-logo-frame img { filter: contrast(1.035) saturate(1.035) !important; }
   }
 </style>
