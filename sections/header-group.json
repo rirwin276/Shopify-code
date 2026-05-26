@@ -14,13 +14,7 @@
     "platform_bar_H77NL3": {
       "type": "platform-bar",
       "name": "Platform Bar",
-      "settings": {
-        "title": "Studio Access",
-        "dashboard_label": "Dashboard",
-        "dashboard_url": "/pages/portal",
-        "explainer_label": "How it works",
-        "login_label": "Member Login"
-      }
+      "settings": {}
     },
     "header_section": {
       "type": "header",
@@ -71,19 +65,19 @@
         "country_selector_style": true,
         "show_language": true,
         "localization_font": "heading",
-        "localization_font_size": "0.875rem",
+        "localization_font_size": "0.75rem",
         "localization_position": "right",
         "localization_row": "bottom",
         "section_width": "full-width",
         "section_height": "standard",
-        "enable_sticky_header": "always",
+        "enable_sticky_header": "scroll-up",
         "divider_width": 0,
         "divider_size": "page-width",
         "border_width": 0,
         "color_scheme_top": "scheme-1",
         "color_scheme_bottom": "",
         "color_scheme_transparent": "scheme-6",
-        "enable_transparent_header_home": false,
+        "enable_transparent_header_home": true,
         "home_color_scheme": "inverse",
         "enable_transparent_header_product": false,
         "product_color_scheme": "default",
