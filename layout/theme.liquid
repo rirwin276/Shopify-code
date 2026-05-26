@@ -131,6 +131,8 @@
     {%- comment -%} STELLA & SAGE CUSTOM ASSETS {%- endcomment -%}
     {% render 'ss-data-layer' %}
     {{ 'ss-premium.css' | asset_url | stylesheet_tag }}
+    {{ 'ss-request-form-v2.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'ss-request-form-v2.js' | asset_url }}" defer></script>
 
     {%- if template.name == 'product' -%}
       {{ 'ss-product-page-polish.css' | asset_url | stylesheet_tag }}
