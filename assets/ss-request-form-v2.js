@@ -5,6 +5,15 @@
   function qs(sel, root){ return (root || document).querySelector(sel); }
   function qsa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
 
+  function getUploaderBase(){
+    var fallback = 'https://studio-uploader-production.up.railway.app';
+    if (window.SF_UPLOADER_BASE) return String(window.SF_UPLOADER_BASE).replace(/\/+$/,'');
+    try {
+      if (typeof SF_UPLOADER_BASE !== 'undefined' && SF_UPLOADER_BASE) return String(SF_UPLOADER_BASE).replace(/\/+$/,'');
+    } catch(e) {}
+    return fallback;
+  }
+
   function waitForForm(){
     var form = qs('#sf-request-form');
     if (!form) return setTimeout(waitForForm, 80);
@@ -81,12 +90,13 @@
         var modal = qs('#sf-uploader-modal');
         var iframe = qs('#sf-uploader-iframe');
         if (!modal || !iframe) return false;
-        if (!window.SF_UPLOADER_BASE) {
+        var base = getUploaderBase();
+        if (!base) {
           alert('Studio Uploader URL not configured in section settings.');
           return false;
         }
         if (modal.parentNode !== document.body) document.body.appendChild(modal);
-        iframe.src = window.SF_UPLOADER_BASE.replace(/\/+$/,'') + '/ui?embed=1&return=postmessage&slot=main&mode=request&autopick=1';
+        iframe.src = base + '/ui?embed=1&return=postmessage&slot=main&mode=request&autopick=1';
         modal.classList.remove('sf-hidden');
         modal.setAttribute('aria-hidden','false');
         document.body.style.overflow = 'hidden';
