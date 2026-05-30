@@ -9,7 +9,26 @@
 
 {% assign handle = page.handle | downcase | strip %}
 {% assign collection = collections[handle] %}
+{% assign member_tag = 'storefront-member--' | append: handle %}
+{% assign admin_tag  = 'storefront-admin--'  | append: handle %}
+{% assign access_tag = 'custom_storefront_access' %}
+{% assign shop_admin_tag = 'custom_shop_admin' %}
+{% assign has_access = false %}
 
+{% if customer %}
+  {% for tag in customer.tags %}
+    {% assign normalized_tag = tag | downcase | strip %}
+    {% if normalized_tag == shop_admin_tag or normalized_tag == admin_tag %}
+      {% assign has_access = true %}
+      {% break %}
+    {% endif %}
+    {% if normalized_tag == access_tag or normalized_tag == member_tag %}
+      {% assign has_access = true %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% if has_access %}
 <section class="ps-catalog">
   <div class="ps-wrap">
 
@@ -41,6 +60,7 @@
 
   </div>
 </section>
+{% endif %}
 
 <style>
 .ps-wrap {

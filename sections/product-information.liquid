@@ -1,4 +1,57 @@
 {% liquid
+  assign private_store_handle = request.params.sh | default: request.params.shop | default: '' | downcase | strip
+  assign private_store_collection_url = ''
+  assign is_private_store_product = false
+  assign has_private_store_access = false
+
+  if private_store_handle == blank
+    assign _cfh = content_for_header
+    assign _pageurl = _cfh | split: '"pageurl":"' | last | split: '"' | first | replace: '\u0026', '&'
+
+    if _pageurl contains '?'
+      assign _query_string = _pageurl | split: '?' | last | split: '&'
+
+      for _param in _query_string
+        assign _pair = _param | split: '='
+        if _pair[0] == 'shop' or _pair[0] == 'sh'
+          assign private_store_handle = _pair[1] | downcase | strip
+        endif
+      endfor
+    endif
+  endif
+
+  if private_store_handle != blank
+    assign is_private_store_product = true
+    assign private_store_collection_url = '/collections/' | append: private_store_handle
+  endif
+
+  if is_private_store_product == false
+    for product_collection in product.collections
+      if product_collection and product_collection.template_suffix == 'private-store'
+        assign is_private_store_product = true
+        assign private_store_handle = product_collection.handle | downcase | strip
+        assign private_store_collection_url = product_collection.url
+        break
+      endif
+    endfor
+  endif
+
+  if is_private_store_product and customer
+    assign private_member_tag = 'storefront-member--' | append: private_store_handle
+    assign private_admin_tag = 'storefront-admin--' | append: private_store_handle
+
+    for tag in customer.tags
+      assign normalized_tag = tag | downcase | strip
+      if normalized_tag == 'custom_shop_admin' or normalized_tag == private_admin_tag
+        assign has_private_store_access = true
+        break
+      endif
+      if normalized_tag == 'custom_storefront_access' or normalized_tag == private_member_tag
+        assign has_private_store_access = true
+      endif
+    endfor
+  endif
+
   if section.settings.desktop_media_position == 'left'
     assign render_order = 'media,product-details'
   else
@@ -36,6 +89,26 @@
   endcase
 %}
 
+{% if is_private_store_product and has_private_store_access == false %}
+  {% assign private_store_return_url = private_store_collection_url | default: '/pages/portal' %}
+  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+  <div
+    class="product-information section section--{{ content_width }} spacing-style color-{{ section.settings.color_scheme }} relative"
+    style="{% render 'spacing-style', settings: section.settings %} --gap: {{ section.settings.gap }}px;"
+  >
+    <div class="product-information__private-gate">
+      {% if customer %}
+        <h1>Access required</h1>
+        <p>You do not currently have access to this private store product.</p>
+        <a class="button" href="{{ private_store_return_url }}">Back to private store</a>
+      {% else %}
+        <h1>Sign in to access your private store</h1>
+        <p>You must be signed in with an approved account to view this product.</p>
+        <a class="button" href="{{ routes.account_login_url }}?return_url={{ private_store_return_url | url_encode }}">Sign in</a>
+      {% endif %}
+    </div>
+  </div>
+{% else %}
 <script type="application/ld+json">
   {{ closest.product | structured_data }}
 </script>
@@ -86,8 +159,21 @@
 
   {% content_for 'blocks' %}
 </div>
+{% endif %}
 
 {% stylesheet %}
+  .product-information__private-gate {
+    grid-column: 1 / -1;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+
+  .product-information__private-gate > * + * {
+    margin-top: 1rem;
+  }
+
   .product-information {
     gap: var(--gap) 0;
   }

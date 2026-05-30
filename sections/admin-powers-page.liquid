@@ -2299,7 +2299,7 @@
         <div>
           <span class="ap-panel-kicker">Store identity</span>
           <h2>Settings</h2>
-          <p>Update the storefront name, primary color, or main logo. Logo/color changes rebuild the store.</p>
+          <p>Update the storefront name or main logo. Logo changes rebuild the store.</p>
         </div>
       </div>
 
@@ -2308,19 +2308,6 @@
         <label class="ap-label" for="apSettingsName">Store Display Name</label>
         <input id="apSettingsName" class="ap-input" type="text" value="{{ store_name | escape }}" placeholder="Store name" />
         <p class="ap-helper">Renames the store on the dashboard and storefront. No rebuild needed.</p>
-      </div>
-
-      <!-- Primary color -->
-      <div class="ap-form-group">
-        <label class="ap-label" for="apSettingsColor">Primary Color</label>
-        <select id="apSettingsColor" class="ap-select">
-          {%- assign _ap_color = shop_meta.primary_color.value | default: shop_meta.primary_color | default: 'No preference' -%}
-          {%- assign _ap_colors = 'No preference,Black,White,Navy,Red,Royal Blue,Forest Green,Maroon,Purple,Orange,Grey,Vegas Gold,Pink,Light Blue,Brown,Tan' | split: ',' -%}
-          {%- for _c in _ap_colors -%}
-            <option value="{{ _c }}"{% if _c == _ap_color %} selected{% endif %}>{{ _c }}</option>
-          {%- endfor -%}
-        </select>
-        <p class="ap-helper">Changing this rebuilds all products with the new color direction (~5–10 min).</p>
       </div>
 
       <!-- Logo section -->
@@ -2340,7 +2327,7 @@
 
       <!-- Rebuild warning -->
       <div id="apSettingsRebuildWarning" style="display:none;margin-bottom:16px;padding:12px 14px;background:#fef9c3;border:1px solid #fde047;border-radius:10px;font-size:13px;color:#713f12;font-weight:600;">
-        ⚠️ Logo or color changed. Saving will rebuild the current products with the new settings. This usually takes 5–10 minutes.
+        ⚠️ Logo changed. Saving will rebuild the current products with the new settings. This usually takes 5–10 minutes.
       </div>
 
       <button id="apBtnSaveSettings" class="ap-btn ap-btn--primary ap-btn-full">Save & Apply Settings</button>
@@ -2959,15 +2946,46 @@
     btnAdd.disabled = true; btnRemove.disabled = true;
 
     try {
-      var res = await apPost(action === 'add' ? 'add_members_bulk' : 'remove_members_bulk', { emails: emails, role: role });
-      if(res.ok){
+      var failures = [];
+
+      for (var i = 0; i < emails.length; i++) {
+        var email = emails[i];
+        var endpoint = '/admin/members/remove';
+        var body = { email: email, secret: SSAP.editorSecret || '' };
+
+        if (action === 'add') {
+          if (role === 'admin') {
+            endpoint = '/admin/members/promote';
+            body.role = 'admin';
+          } else {
+            endpoint = '/admin/members/add';
+          }
+        }
+
+        var res = await fetch(
+          SSAP.railwayUrl + endpoint + '?secret=' + encodeURIComponent(SSAP.editorSecret || ''),
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+            cache: 'no-store'
+          }
+        );
+
+        if (!res.ok) {
+          var errorPayload = await res.json().catch(function(){ return {}; });
+          failures.push(email + (errorPayload.error ? ' (' + errorPayload.error + ')' : ''));
+        }
+      }
+
+      if (failures.length === 0) {
         setStatus(statusEl, '✅ Roster updated successfully!', 'ok');
         document.getElementById('apInputEmails').value = '';
       } else {
-        throw new Error();
+        throw new Error(failures.join(', '));
       }
     } catch(e) {
-      setStatus(statusEl, '❌ Could not process request.', 'err');
+      setStatus(statusEl, '❌ Could not process request. ' + (e.message || ''), 'err');
     } finally {
       btnAdd.disabled = false; btnRemove.disabled = false;
     }
@@ -4290,7 +4308,7 @@
 
   var apSettingsNewSessionId = null;
   var apSettingsLogoChanged  = false;
-  var apSettingsColorOriginal = {{ shop_meta.primary_color.value | default: shop_meta.primary_color | default: 'No preference' | json }};
+  var apSettingsNameOriginal = {{ store_name | json }};
 
   // Expose logo-done handler so the shared postMessage listener can call it
   window.apSettingsHandleLogoDone = function(data) {
@@ -4314,16 +4332,9 @@
   };
 
   function apSettingsUpdateRebuildWarning() {
-    var colorEl = document.getElementById('apSettingsColor');
-    var colorChanged = colorEl && (colorEl.value !== apSettingsColorOriginal);
-    var needsRebuild = apSettingsLogoChanged || colorChanged;
     var warningEl = document.getElementById('apSettingsRebuildWarning');
-    if (warningEl) warningEl.style.display = needsRebuild ? 'block' : 'none';
+    if (warningEl) warningEl.style.display = apSettingsLogoChanged ? 'block' : 'none';
   }
-
-  // Attach rebuild warning to color change
-  var apSettingsColorEl = document.getElementById('apSettingsColor');
-  if (apSettingsColorEl) apSettingsColorEl.addEventListener('change', apSettingsUpdateRebuildWarning);
 
   // Change Logo button — open studio-uploader in existing editor modal
   var apBtnChangeLogo = document.getElementById('apBtnChangeLogo');
@@ -4344,11 +4355,10 @@
       var btn = this;
       var statusEl = document.getElementById('apStatusSettings');
       var storeName = document.getElementById('apSettingsName').value.trim();
-      var primaryColor = document.getElementById('apSettingsColor').value;
-      var colorChanged = (primaryColor !== apSettingsColorOriginal);
-      var needsRebuild = apSettingsLogoChanged || colorChanged;
+      var nameChanged = (storeName !== apSettingsNameOriginal);
+      var needsRebuild = apSettingsLogoChanged;
 
-      if (!storeName && !colorChanged && !apSettingsLogoChanged) {
+      if (!nameChanged && !apSettingsLogoChanged) {
         statusEl.className = 'ap-status err';
         statusEl.textContent = 'No changes to save.';
         return;
@@ -4361,8 +4371,7 @@
 
       try {
         var fd = new FormData();
-        if (storeName) fd.append('store_name', storeName);
-        if (colorChanged) fd.append('primary_color', primaryColor);
+        if (nameChanged) fd.append('store_name', storeName);
         if (apSettingsNewSessionId) fd.append('main_session_id', apSettingsNewSessionId);
 
         var r = await fetch(
@@ -4390,6 +4399,7 @@
           // Name-only change — no rebuild
           statusEl.className = 'ap-status ok';
           statusEl.textContent = '✅ Store name updated!';
+          apSettingsNameOriginal = storeName;
           btn.textContent = 'Save & Apply Settings';
           btn.disabled = false;
         }
