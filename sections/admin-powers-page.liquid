@@ -2969,7 +2969,7 @@
     var btnAdd = document.getElementById('apBtnAdd');
     var btnRemove = document.getElementById('apBtnRemove');
     var btnRemoveAdmin = document.getElementById('apBtnRemoveAdmin');
-    var handle = String(apShopHandle || SSAP.shopHandle || '').trim();
+    var handle = String(SSAP.shopHandle || '').trim();
     var actionConfig = apGetMemberActionConfig(action, role);
 
     if(emails.length === 0){
