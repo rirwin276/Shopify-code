@@ -149,6 +149,17 @@
       {% endif %}
     {% endfor %}
   ];
+  window.SS_ALL_PLATFORM_STORES = [
+    {% for store in shop.metaobjects.custom_shop.values %}
+      {% unless store.tags contains 'status:closed' %}
+        {
+          handle: {{ store.system.handle | json }},
+          name: {{ store.name | json }},
+          collection_handle: {{ store.collection_handle | json }}
+        },
+      {% endunless %}
+    {% endfor %}
+  ];
 </script>
 {% endif %}
 
@@ -1176,7 +1187,7 @@
     // --- God Mode: new store notifications ---
     if (document.querySelector('.ss-god-card')) {
       var seen = (localStorage.getItem('ss-god-seen-stores') || '').split(',').filter(Boolean);
-      var allStores = window.SS_GOD_STORES || [];
+      var allStores = window.SS_ALL_PLATFORM_STORES || [];
       var newStores = allStores.filter(function(s){ return seen.indexOf(s.handle) === -1; });
 
       function ssGodEscape(str) {
@@ -1189,7 +1200,7 @@
       }
 
       function ssGodMarkAllSeen() {
-        var allHandles = (window.SS_GOD_STORES || []).map(function(s){ return s.handle; });
+        var allHandles = (window.SS_ALL_PLATFORM_STORES || []).map(function(s){ return s.handle; });
         localStorage.setItem('ss-god-seen-stores', allHandles.join(','));
         var panel = document.querySelector('.ss-new-stores-panel');
         if (panel) panel.remove();
@@ -1202,18 +1213,19 @@
         var godCard = document.querySelector('.ss-god-card');
         var badge = document.createElement('span');
         badge.className = 'ss-god-new-badge';
-        badge.textContent = newStores.length;
+        badge.textContent = newStores.length + ' new stores built';
         godCard.style.position = 'relative';
         godCard.appendChild(badge);
 
         // Add new stores panel after the god card
         var panel = document.createElement('div');
         panel.className = 'ss-new-stores-panel';
-        panel.innerHTML = '<div class="ss-nsp-title">🆕 New Stores (' + newStores.length + ')</div>' +
+        panel.innerHTML = '<div class="ss-nsp-title">🆕 ' + newStores.length + ' new stores built</div>' +
           newStores.map(function(s){
+            var collectionHandle = s.collection_handle || s.handle;
             return '<div class="ss-nsp-row">' +
               '<div class="ss-nsp-info"><span class="ss-nsp-name">' + ssGodEscape(s.name) + '</span><span class="ss-nsp-handle">@' + ssGodEscape(s.handle) + '</span></div>' +
-              '<a href="/collections/' + encodeURIComponent(s.handle) + '" class="ss-nsp-visit" target="_blank">Visit Store →</a>' +
+              '<a href="/collections/' + encodeURIComponent(collectionHandle) + '" class="ss-nsp-visit" target="_blank">Visit Store →</a>' +
               '</div>';
           }).join('') +
           '<button class="ss-nsp-dismiss">Mark all seen ✓</button>';

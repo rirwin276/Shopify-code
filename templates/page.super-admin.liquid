@@ -1,251 +1,494 @@
 {% layout none %}
-{% comment %}ADMIN_SECRET is hardcoded below{% endcomment %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Stella & Sage — God Mode</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
-  :root { 
-    --bg: #0f172a; 
-    --card-bg: #1e293b; 
-    --header-bg: #1e293b;
-    --text: #f8fafc; 
-    --gray: #94a3b8;
-    --border: #334155; 
-    --accent: #3b82f6; 
-    --danger: #ef4444; 
-    --danger-hover: #dc2626;
-    --success: #10b981;
-    --warning: #f59e0b;
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --border: #d1d1d6;
+    --text: #1c1c1e;
+    --gray: #6e6e73;
+    --accent: #0071e3;
+    --danger: #ff3b30;
+    --warning: #ff9f0a;
+    --success: #34c759;
+    --radius: 14px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
-  
+
   * { box-sizing: border-box; }
-  
-  body { 
-    background: var(--bg); 
-    color: var(--text); 
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-    padding: 0; margin: 0; 
-    min-height: 100vh;
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    padding: 0 0 100px;
   }
 
-  /* --- LAYOUT --- */
-  .sa-wrapper { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
-
-  /* --- SIDEBAR --- */
-  .sa-sidebar {
-    background: var(--card-bg); border-right: 1px solid var(--border);
-    padding: 30px 20px; display: flex; flex-direction: column; gap: 30px;
-    position: sticky; top: 0; height: 100vh; overflow-y: auto;
-  }
-  .sa-profile { text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-  .sa-avatar {
-    width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
-    border: 3px solid var(--accent); margin-bottom: 15px; background: #000;
-  }
-  .sa-sidebar h1 { font-size: 18px; margin: 0; font-weight: 800; letter-spacing: -0.5px; }
-  .sa-sidebar p { color: var(--gray); font-size: 13px; margin: 5px 0 0; }
-  .sa-badge-god { 
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6); 
-    color: white; padding: 4px 10px; border-radius: 20px; 
-    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
-    display: inline-block; margin-top: 10px;
+  .gm-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 14px 70px;
   }
 
-  /* --- TOOLS WIDGETS --- */
-  .sa-widget { margin-bottom: 20px; }
-  .sa-widget h3 { font-size: 11px; text-transform: uppercase; color: var(--gray); margin-bottom: 15px; letter-spacing: 1px; font-weight: 700; }
-  .sa-input-group { margin-bottom: 15px; }
-  .sa-label { display: block; font-size: 11px; color: var(--gray); margin-bottom: 5px; font-weight: 600; }
-  .sa-input { 
-    width: 100%; background: #0f172a; border: 1px solid var(--border); 
-    color: white; padding: 10px; border-radius: 6px; font-size: 13px; 
-    transition: 0.2s;
+  .gm-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(245, 245, 247, 0.96);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
   }
-  .sa-input:focus { border-color: var(--accent); outline: none; }
 
-  /* --- BUTTONS --- */
-  .btn { 
-    border: none; cursor: pointer; padding: 10px 16px; border-radius: 6px; 
-    font-size: 12px; font-weight: 600; text-decoration: none; 
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    transition: 0.2s;
+  .gm-header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
   }
-  .btn-primary { background: var(--accent); color: white; width: 100%; }
-  .btn-primary:hover { background: #2563eb; }
-  .btn-glass { background: rgba(255,255,255,0.05); color: var(--text); border: 1px solid var(--border); }
-  .btn-glass:hover { background: rgba(255,255,255,0.1); border-color: var(--text); }
-  .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.2); }
-  .btn-danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
-  .btn-sm { padding: 6px 12px; font-size: 11px; }
-  .btn-warning { background: rgba(245, 158, 11, 0.1); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.2); }
-  .btn-warning:hover { background: var(--warning); color: white; border-color: var(--warning); }
 
-  /* --- STORE TAB BUTTONS --- */
-  .tab-btn {
-    background: rgba(255,255,255,0.05);
+  .gm-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .gm-count-badge {
+    background: var(--card);
     border: 1px solid var(--border);
     color: var(--gray);
-    padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 99px;
+    padding: 4px 10px;
     font-size: 12px;
     font-weight: 700;
+  }
+
+  .gm-search-icon {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 10px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0;
+    font-size: 18px;
     cursor: pointer;
-    transition: 0.2s;
-  }
-  .tab-btn.active, .tab-btn:hover {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
   }
 
-  /* --- MAIN CONTENT --- */
-  .sa-main { padding: 40px 50px; overflow-y: auto; }
-  .sa-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-  .sa-search { 
-    background: var(--card-bg); border: 1px solid var(--border); 
-    color: white; padding: 12px 20px; border-radius: 100px; 
-    width: 300px; font-size: 14px;
-  }
-  .sa-search:focus { border-color: var(--accent); outline: none; }
-
-  /* --- STORE CARDS --- */
-  .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-  .store-card {
-    background: var(--card-bg); border: 1px solid var(--border); 
-    border-radius: 12px; padding: 20px; position: relative;
-    transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;
-  }
-  .store-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-  .store-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-  .store-icon { 
-    width: 40px; height: 40px; background: #334155; 
-    border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-    font-size: 18px; color: var(--gray);
-  }
-  .store-status { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; letter-spacing: 0.5px; }
-  .status-active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-  .status-closed { background: rgba(148, 163, 184, 0.1); color: var(--gray); }
-  .status-private { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-  .status-sleeping { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
-
-  @keyframes sa-wake-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.35); }
-    50%       { box-shadow: 0 0 0 6px rgba(59,130,246,0); }
+  .gm-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 12px;
   }
 
-  .store-name { font-size: 16px; font-weight: 700; margin: 0 0 5px; color: white; }
-  .store-handle { font-size: 12px; color: var(--gray); font-family: monospace; }
-  .store-actions { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border); display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 6px; }
-
-  /* GRAVEYARD SECTION */
-  .graveyard-section { margin-top: 80px; opacity: 0.7; }
-  .graveyard-section:hover { opacity: 1; transition: 0.3s; }
-  .graveyard-title { font-size: 14px; text-transform: uppercase; color: var(--gray); letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
-
-  /* MODAL */
-  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; }
-  .modal { 
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-    width: 90%; max-width: 600px; background: var(--card-bg); 
-    border: 1px solid var(--border); border-radius: 16px; padding: 0; 
-    max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+  .gm-banner-title {
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 800;
   }
-  
-  .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.5); }
-  .modal-tabs { display: flex; border-bottom: 1px solid var(--border); background: #0f172a; }
-  .modal-tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; color: var(--gray); font-size: 13px; font-weight: 600; transition: 0.2s; }
-  .modal-tab:hover { color: white; background: rgba(255,255,255,0.05); }
-  .modal-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
-  
-  .modal-content { padding: 20px; overflow-y: auto; flex: 1; }
-  .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
 
-  .modal-row { display: flex; align-items: center; gap: 15px; padding: 12px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; }
-  .modal-img { width: 40px; height: 40px; background: #334155; border-radius: 6px; object-fit: cover; }
-  
-  /* SETTINGS TOGGLE */
-  .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #0f172a; border-radius: 8px; border: 1px solid var(--border); }
+  .gm-banner-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
 
-  /* --- MOBILE TOP BAR (hidden on desktop) --- */
-  .sa-mobile-bar { display: none; }
+  .gm-banner-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+  }
 
-  /* --- DRAWER OVERLAY (always in DOM, hidden by default) --- */
-  #drawer-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 499;
+  .gm-banner-name {
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .gm-pill-row,
+  .gm-filter-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .gm-pill,
+  .gm-filter-tab {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 999px;
+    min-height: 44px;
+    padding: 0 14px;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .is-active-filter {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+
+  .gm-search-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 12px;
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .gm-store-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .gm-store-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+
+  .gm-store-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .gm-store-name {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  .gm-store-handle {
+    margin-top: 4px;
+    color: var(--gray);
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+
+  .gm-badge {
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .gm-badge.active { color: var(--success); border-color: rgba(52,199,89,0.35); background: rgba(52,199,89,0.08); }
+  .gm-badge.sleeping { color: #5856d6; border-color: rgba(88,86,214,0.35); background: rgba(88,86,214,0.08); }
+  .gm-badge.waking { color: var(--accent); border-color: rgba(0,113,227,0.35); background: rgba(0,113,227,0.08); }
+  .gm-badge.private { color: var(--warning); border-color: rgba(255,159,10,0.35); background: rgba(255,159,10,0.08); }
+  .gm-badge.closed { color: var(--gray); }
+
+  .gm-card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .gm-btn {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--text);
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .gm-btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .gm-btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .gm-btn-warning { background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
+
+  .gm-section-title {
+    margin: 0 0 10px;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .gm-graveyard-toggle {
+    width: 100%;
+  }
+
+  .gm-graveyard-content[hidden] { display: none; }
+
+  .gm-closed-card {
+    opacity: 0.7;
+    border-style: dashed;
+  }
+
+  .gm-sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28,28,30,0.35);
+    z-index: 90;
     display: none;
   }
 
-  /* --- DRAWERS (always in DOM, slide up from bottom) --- */
-  .sa-drawer {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--card-bg);
+  .gm-sheet-overlay.show { display: block; }
+
+  .gm-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--card);
+    border-top: 1px solid var(--border);
     border-radius: 16px 16px 0 0;
-    padding: 24px 20px;
-    z-index: 500;
-    max-height: 65vh;
-    overflow-y: auto;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    display: block;
-  }
-  .sa-drawer.open { transform: translateY(0); }
-  .sa-drawer-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px;
-  }
-  .sa-drawer-header h3 {
-    margin: 0; font-size: 11px; text-transform: uppercase;
-    color: var(--gray); letter-spacing: 1px; font-weight: 700;
-  }
-  .sa-drawer-close {
-    background: none; border: none; color: var(--gray);
-    font-size: 22px; cursor: pointer; line-height: 1; padding: 0;
+    z-index: 100;
+    transform: translateY(102%);
+    transition: transform .22s ease;
+    max-height: 88vh;
+    overflow: auto;
+    padding: 14px;
   }
 
-  /* --- MOBILE BREAKPOINT --- */
-  @media (max-width: 768px) {
-    /* Layout */
-    .sa-wrapper { display: block; }
-    .sa-sidebar { display: none; }
-    .sa-main { padding: 16px; }
+  .gm-sheet.show { transform: translateY(0); }
 
-    /* Store grid — single column */
-    .store-grid { grid-template-columns: 1fr; }
+  .gm-sheet-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
 
-    /* Search bar — full width */
-    .sa-search { width: 100%; }
-    .sa-section-header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .gm-sheet-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.15;
+  }
 
-    /* Filter tabs — horizontally scrollable */
-    #storeTabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
-    .tab-btn { flex-shrink: 0; }
+  .gm-sheet-sub {
+    margin: 4px 0 0;
+    color: var(--gray);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+  }
 
-    /* Store card action buttons — stack full width */
-    .store-actions { flex-direction: column; }
-    .store-actions .btn { width: 100%; justify-content: center; }
+  .gm-close {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 10px;
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 20px;
+    cursor: pointer;
+  }
 
-    /* Modal — don't overflow on small screens */
-    .modal { width: min(95vw, 600px); }
+  .gm-sheet-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
 
-    /* Mobile top bar */
-    .sa-mobile-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--card-bg); border-bottom: 1px solid var(--border);
-      padding: 12px 16px; position: sticky; top: 0; z-index: 100;
+  .gm-sheet-tab {
+    flex: 1;
+    min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .gm-sheet-tab.active {
+    background: var(--text);
+    border-color: var(--text);
+    color: #fff;
+  }
+
+  .gm-tab-pane { display: none; }
+  .gm-tab-pane.active { display: block; }
+
+  .gm-field { margin-bottom: 10px; }
+  .gm-label { display: block; margin-bottom: 6px; font-size: 12px; color: var(--gray); font-weight: 700; }
+
+  .gm-input,
+  .gm-select {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--text);
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
+  .gm-member-grid,
+  .gm-setting-grid,
+  .gm-tools-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .gm-status-text {
+    margin-top: 8px;
+    min-height: 18px;
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .gm-member-list {
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .gm-member-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .gm-member-row:last-child { border-bottom: none; }
+
+  .gm-copy-row {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+
+  .gm-copy-label {
+    font-size: 11px;
+    color: var(--gray);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .gm-copy-value {
+    word-break: break-all;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .gm-fab {
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 50;
+    min-width: 52px;
+    min-height: 52px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--text);
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+  .gm-tools-desktop { display: none; }
+
+  .gm-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 76px;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    z-index: 120;
+    display: none;
+  }
+
+  @media (min-width: 901px) {
+    .gm-page {
+      max-width: 1200px;
+      padding-right: 320px;
     }
-    .sa-mobile-bar-title { font-size: 14px; font-weight: 800; letter-spacing: -0.3px; }
-    .sa-mobile-bar-tools { display: flex; gap: 8px; }
-    .sa-drawer-btn {
-      background: rgba(255,255,255,0.07); border: 1px solid var(--border);
-      color: var(--text); padding: 8px 12px; border-radius: 8px;
-      font-size: 18px; cursor: pointer; line-height: 1;
+
+    .gm-header-inner {
+      max-width: 1200px;
+      padding-right: 334px;
+    }
+
+    .gm-store-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+    .gm-sheet {
+      left: 50%;
+      right: auto;
+      width: min(680px, calc(100vw - 40px));
+      transform: translate(-50%, 102%);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      bottom: 20px;
+      box-shadow: 0 16px 44px rgba(0,0,0,0.16);
+    }
+
+    .gm-sheet.show { transform: translate(-50%, 0); }
+
+    .gm-member-grid { grid-template-columns: 1fr 180px; }
+
+    .gm-fab,
+    #toolsSheet { display: none; }
+
+    .gm-tools-desktop {
+      display: block;
+      position: fixed;
+      top: 82px;
+      right: 14px;
+      width: 280px;
+      z-index: 20;
     }
   }
 </style>
@@ -259,757 +502,815 @@
     {% if t contains 'super-admin' %}{% assign is_super = true %}{% endif %}
   {% endfor %}
 {% endif %}
+{% unless is_super %}
+  <script>window.location.replace('/pages/portal');</script>
+{% endunless %}
 
 {% if is_super %}
+  {% assign total_stores = 0 %}
+  {% assign active_count = 0 %}
+  {% assign sleeping_count = 0 %}
+  {% assign waking_count = 0 %}
+  {% assign closed_count = 0 %}
 
-  <!-- Mobile sticky top bar (hidden on desktop via CSS) -->
-  <div class="sa-mobile-bar">
-    <div class="sa-mobile-bar-title">⚡ God Mode</div>
-    <div class="sa-mobile-bar-tools">
-      <button class="sa-drawer-btn" onclick="openDrawer('drawer-stats')" title="Stats">📊</button>
-      <button class="sa-drawer-btn" onclick="openDrawer('drawer-price')" title="Price">💰</button>
-      <button class="sa-drawer-btn" onclick="openDrawer('drawer-links')" title="Links">🔗</button>
-      <button class="sa-drawer-btn" onclick="openDrawer('drawer-printful')" title="Printful">🖨️</button>
+  {% for store in shop.metaobjects.custom_shop.values %}
+    {% assign total_stores = total_stores | plus: 1 %}
+    {% assign _status = '' %}
+    {% for f in store.fields %}
+      {% if f.key == 'status' %}{% assign _status = f.value %}{% endif %}
+    {% endfor %}
+    {% if _status == blank %}{% assign _status = store.status.value | default: store.status | default: '' %}{% endif %}
+    {% assign _status = _status | strip | downcase %}
+    {% if store.tags contains 'status:closed' %}
+      {% assign closed_count = closed_count | plus: 1 %}
+    {% elsif _status == 'sleeping' %}
+      {% assign sleeping_count = sleeping_count | plus: 1 %}
+    {% elsif _status == 'waking' %}
+      {% assign waking_count = waking_count | plus: 1 %}
+    {% else %}
+      {% assign active_count = active_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+
+  <header class="gm-header">
+    <div class="gm-header-inner">
+      <h1 class="gm-title">⚡ God Mode <span class="gm-count-badge">{{ total_stores }} stores</span></h1>
+      <button class="gm-search-icon" type="button" id="focusSearch" aria-label="Focus search">⌕</button>
     </div>
-  </div>
+  </header>
 
-  <div class="sa-wrapper">
-    
-    <aside class="sa-sidebar">
-      <div class="sa-profile">
-        <img src="https://cdn.shopify.com/s/files/1/0798/2055/4490/files/freeddy_the_frog.jpg?v=1770183074" class="sa-avatar" width="80" height="80" alt="Super Admin Avatar" loading="lazy">
-        <h1>Super Admin</h1>
-        <div class="sa-badge-god">God Mode Active</div>
-        <p>Logged in as {{ customer.first_name }}</p>
-      </div>
+  <div class="gm-page">
+    <div class="gm-card" id="newStoreBanner" style="display:none;">
+      <h2 class="gm-banner-title" id="newStoreTitle"></h2>
+      <div class="gm-banner-list" id="newStoreList"></div>
+      <button type="button" class="gm-btn gm-btn-primary" id="markAllSeenBtn">Mark all seen ✓</button>
+    </div>
 
-      <div class="sa-widget">
-        <h3><i class="fas fa-chart-bar"></i> System Stats</h3>
-        {% assign total_stores = 0 %}
-        {% assign active_count = 0 %}
-        {% assign sleeping_count = 0 %}
-        {% assign waking_count = 0 %}
-        {% assign closed_count = 0 %}
-        {% for store in shop.metaobjects.custom_shop.values %}
-          {% assign total_stores = total_stores | plus: 1 %}
-          {% if store.tags contains 'status:closed' %}
-            {% assign closed_count = closed_count | plus: 1 %}
-          {% else %}
-            {%- assign _sv = '' -%}
-            {%- for _f in store.fields -%}
-              {%- if _f.key == 'status' -%}{%- assign _sv = _f.value -%}{%- endif -%}
-            {%- endfor -%}
-            {%- if _sv == blank -%}{%- assign _sv = store.status.value | default: store.status | default: '' -%}{%- endif -%}
-            {% if _sv == 'sleeping' %}
-              {% assign sleeping_count = sleeping_count | plus: 1 %}
-            {% elsif _sv == 'waking' %}
-              {% assign waking_count = waking_count | plus: 1 %}
-            {% else %}
-              {% assign active_count = active_count | plus: 1 %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-        <div style="font-size:12px; color:var(--gray); line-height:2;">
-          <div>Total: <strong style="color:white;">{{ total_stores }}</strong></div>
-          <div>Active: <strong style="color:var(--success);">{{ active_count }}</strong></div>
-          <div>Sleeping: <strong style="color:#a5b4fc;">{{ sleeping_count }}</strong></div>
-          <div>Waking: <strong style="color:#93c5fd;">{{ waking_count }}</strong></div>
-          <div>Closed: <strong style="color:var(--gray);">{{ closed_count }}</strong></div>
-        </div>
+    <section class="gm-card">
+      <h2 class="gm-section-title">Stats</h2>
+      <div class="gm-pill-row" id="statsPills">
+        <button type="button" class="gm-pill is-active-filter" data-stat-filter="all">Total <span>{{ total_stores }}</span></button>
+        <button type="button" class="gm-pill" data-stat-filter="active">Active <span>{{ active_count }}</span></button>
+        <button type="button" class="gm-pill" data-stat-filter="sleeping">Sleeping <span>{{ sleeping_count }}</span></button>
+        <button type="button" class="gm-pill" data-stat-filter="waking">Waking <span>{{ waking_count }}</span></button>
+        <button type="button" class="gm-pill" data-stat-filter="closed">Closed <span>{{ closed_count }}</span></button>
       </div>
+    </section>
 
-      <div class="sa-widget">
-        <h3><i class="fas fa-tag"></i> Global Price Override</h3>
-        <div class="sa-input-group">
-          <label class="sa-label">Target Tag (Model)</label>
-          <input type="text" id="targetTag" class="sa-input" placeholder="e.g. bella-3006-blk">
-        </div>
-        <div class="sa-input-group">
-          <label class="sa-label">New Price ($)</label>
-          <input type="number" id="newPrice" class="sa-input" placeholder="0.00">
-        </div>
-        <button id="btnUpdatePrice" class="btn btn-primary">Update Prices</button>
-        <div id="priceStatus" style="font-size:11px; margin-top:10px; min-height:15px; text-align:center;"></div>
+    <section class="gm-card">
+      <input class="gm-search-input" id="storeSearch" type="text" placeholder="Search stores...">
+      <div class="gm-filter-tabs" id="storeFilterTabs">
+        <button type="button" class="gm-filter-tab is-active-filter" data-grid-filter="all">All</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="active">Active</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="sleeping">Sleeping</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="waking">Waking</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="closed">Closed</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="no-sales">No Sales</button>
       </div>
+    </section>
 
-      <div class="sa-widget">
-        <h3><i class="fas fa-link"></i> Quick Links</h3>
-        <a href="/admin/products" target="_blank" class="btn btn-glass" style="width:100%; margin-bottom:10px;">Shopify Admin</a>
-        <a href="/pages/portal" class="btn btn-glass" style="width:100%; margin-bottom:10px;">Back to Portal</a>
-        <button class="btn btn-warning" style="width:100%;" onclick="sleepAllInactive()">
-          <i class="fas fa-moon"></i> Sleep All Inactive
-        </button>
-        <div id="sleepAllStatus" style="font-size:11px; margin-top:8px; min-height:14px; text-align:center;"></div>
-      </div>
-
-      <div class="sa-widget">
-        <h3><i class="fas fa-print"></i> Run Printful by Handle</h3>
-        <div class="sa-input-group">
-          <label class="sa-label">Store Handle</label>
-          <input type="text" id="printfulHandle" class="sa-input" placeholder="e.g. my-store-handle">
-        </div>
-        <button class="btn btn-primary" onclick="runPrintful()">Run Printful</button>
-        <div id="printfulStatus" style="font-size:11px; margin-top:8px; min-height:14px; text-align:center;"></div>
-      </div>
-    </aside>
-
-    <main class="sa-main">
-      <div class="sa-section-header">
-        <div>
-          <h2 style="margin:0;">Store Operations</h2>
-          <p style="color:var(--gray); margin:5px 0 0; font-size:14px;">Manage active storefronts, members, and inventory.</p>
-        </div>
-        <input type="text" id="storeSearch" class="sa-search" placeholder="Search stores..." onkeyup="filterStores()">
-      </div>
-
-      <h3 style="color:var(--text); margin-bottom:20px;">Active Storefronts</h3>
-      <div id="storeTabs" style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-        <button class="tab-btn active" onclick="setTab('all', event)">All Stores</button>
-        <button class="tab-btn" onclick="setTab('most_sales', event)">Most Sales</button>
-        <button class="tab-btn" onclick="setTab('least_sales', event)">Least Sales</button>
-        <button class="tab-btn" onclick="setTab('sleeping', event)">Sleeping</button>
-        <button class="tab-btn" onclick="setTab('waking', event)">Waking</button>
-        <button class="tab-btn" onclick="setTab('awake_no_sales', event)">Awake / No Sales</button>
-      </div>
-      <div class="store-grid" id="activeStoreGrid">
+    <section>
+      <div class="gm-store-grid" id="activeStoreGrid">
         {% for store in shop.metaobjects.custom_shop.values %}
           {% unless store.tags contains 'status:closed' %}
-            {%- assign store_status_val = '' -%}
-            {%- for f in store.fields -%}
-              {%- if f.key == 'status' -%}{%- assign store_status_val = f.value -%}{%- endif -%}
-            {%- endfor -%}
-            {%- if store_status_val == blank -%}
-              {%- assign store_status_val = store.status.value | default: store.status | default: '' -%}
-            {%- endif -%}
-            {%- assign is_store_sleeping = false -%}
-            {%- assign is_store_waking = false -%}
-            {%- if store_status_val == 'sleeping' -%}{%- assign is_store_sleeping = true -%}{%- endif -%}
-            {%- if store_status_val == 'waking' -%}{%- assign is_store_waking = true -%}{%- endif -%}
+            {% assign _status = '' %}
+            {% for f in store.fields %}
+              {% if f.key == 'status' %}{% assign _status = f.value %}{% endif %}
+            {% endfor %}
+            {% if _status == blank %}{% assign _status = store.status.value | default: store.status | default: '' %}{% endif %}
+            {% assign _status = _status | strip | downcase %}
+            {% assign _is_sleeping = false %}
+            {% assign _is_waking = false %}
+            {% assign _is_private = false %}
+            {% if _status == 'sleeping' %}{% assign _is_sleeping = true %}{% endif %}
+            {% if _status == 'waking' %}{% assign _is_waking = true %}{% endif %}
+            {% if store.tags contains 'status:private' %}{% assign _is_private = true %}{% endif %}
+            {% assign _collection_handle = store.collection_handle | default: store.system.handle %}
+            {% assign _collection = collections[_collection_handle] %}
+            {% assign _products_count = 0 %}
+            {% if _collection %}{% assign _products_count = _collection.products_count | default: 0 %}{% endif %}
 
-            <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" data-sleep-status="{% if is_store_sleeping %}sleeping{% elsif is_store_waking %}waking{% else %}active{% endif %}" data-sales="0" {% if is_store_sleeping %}style="opacity:0.5; border-color:rgba(99,102,241,0.4);"{% elsif is_store_waking %}style="border-color:rgba(59,130,246,0.5); animation:sa-wake-pulse 2s ease-in-out infinite;"{% endif %}>
-              <div>
-                <div class="store-header">
-                  <div class="store-icon"><i class="fas fa-store"></i></div>
-                  {% if is_store_sleeping %}
-                    <span class="store-status status-sleeping">💤 Sleeping</span>
-                  {% elsif is_store_waking %}
-                    <span class="store-status" style="background:rgba(59,130,246,0.15); color:#93c5fd;">⏳ Waking</span>
-                  {% elsif store.tags contains 'status:private' %}
-                    <span class="store-status status-private">Private</span>
-                  {% else %}
-                    <span class="store-status status-active">Public</span>
-                  {% endif %}
+            <article
+              class="gm-store-card"
+              data-name="{{ store.name | default: store.system.handle | escape | downcase }}"
+              data-handle="{{ store.system.handle | escape }}"
+              data-collection="{{ _collection_handle | escape }}"
+              data-status="{% if _is_sleeping %}sleeping{% elsif _is_waking %}waking{% else %}active{% endif %}"
+              data-private="{% if _is_private %}true{% else %}false{% endif %}"
+              data-products="{{ _products_count }}"
+              data-store-name="{{ store.name | default: store.system.handle | escape }}">
+              <div class="gm-store-top">
+                <div>
+                  <h3 class="gm-store-name">{{ store.name | default: store.system.handle }}</h3>
+                  <div class="gm-store-handle">{{ store.system.handle }}</div>
                 </div>
-                <h3 class="store-name">{{ store.name }}</h3>
-                <div class="store-handle">{{ store.system.handle }}</div>
-              </div>
-
-              <div class="store-actions">
-                {% if is_store_sleeping %}
-                  <button class="btn btn-primary btn-sm" onclick="wakeStore('{{ store.system.handle | escape }}')">
-                    <i class="fas fa-sun"></i> Wake Up
-                  </button>
-                {% elsif is_store_waking %}
-                  <button class="btn btn-sm" disabled style="opacity:0.5; cursor:not-allowed; background:rgba(59,130,246,0.15); color:#93c5fd; border:1px solid rgba(59,130,246,0.2);">
-                    <i class="fas fa-spinner fa-spin"></i> Waking…
-                  </button>
+                {% if _is_sleeping %}
+                  <span class="gm-badge sleeping">Sleeping</span>
+                {% elsif _is_waking %}
+                  <span class="gm-badge waking">Waking</span>
+                {% elsif _is_private %}
+                  <span class="gm-badge private">Private</span>
                 {% else %}
-                  <button class="btn btn-primary btn-sm" onclick="openManage('{{ store.name | escape }}', '{{ store.collection_handle }}', '{{ store.system.handle }}')">
-                    <i class="fas fa-cog"></i> Manage Store
-                  </button>
-                  {% if store.collection_handle != blank %}
-                  <a href="/collections/{{ store.collection_handle }}" class="btn btn-glass btn-sm" target="_blank" rel="noopener noreferrer">
-                    <i class="fas fa-external-link-alt"></i> Visit Store ↗
-                  </a>
-                  {% endif %}
-                  <button class="btn btn-warning btn-sm" onclick="sleepStore('{{ store.system.handle }}')">
-                    <i class="fas fa-moon"></i> Sleep
-                  </button>
-                  <button class="btn btn-danger btn-sm" onclick="nukeStore('{{ store.system.handle }}')">
-                    <i class="fas fa-radiation"></i> NUKE
-                  </button>
+                  <span class="gm-badge active">Active</span>
                 {% endif %}
               </div>
-            </div>
-
+              <div class="gm-card-actions">
+                <a class="gm-btn gm-btn-primary" href="/pages/admin-powers?shop={{ store.system.handle | url_encode }}" target="_blank" rel="noopener">Admin →</a>
+                <a class="gm-btn" href="/collections/{{ _collection_handle | url_encode }}" target="_blank" rel="noopener">Visit ↗</a>
+                <button type="button" class="gm-btn" data-open-manage="true">Manage ▾</button>
+              </div>
+            </article>
           {% endunless %}
         {% endfor %}
       </div>
+    </section>
 
-      <div class="graveyard-section">
-        <h3 class="graveyard-title"><i class="fas fa-archive"></i> Closed Stores (Graveyard)</h3>
-        <div class="store-grid" id="closedStoreGrid">
+    <section class="gm-card">
+      <button type="button" class="gm-btn gm-graveyard-toggle" id="toggleGraveyard">Show Closed Stores ({{ closed_count }})</button>
+      <div class="gm-graveyard-content" id="graveyardContent" hidden>
+        <div class="gm-store-grid" id="closedStoreGrid" style="margin-top:10px;">
           {% for store in shop.metaobjects.custom_shop.values %}
             {% if store.tags contains 'status:closed' %}
-              <div class="store-card" data-name="{{ store.name | downcase }}" data-handle="{{ store.system.handle }}" style="border-style:dashed;">
-                <div>
-                  <div class="store-header">
-                    <div class="store-icon"><i class="fas fa-ban"></i></div>
-                    <span class="store-status status-closed">Closed</span>
+              {% assign _collection_handle = store.collection_handle | default: store.system.handle %}
+              <article class="gm-store-card gm-closed-card" data-name="{{ store.name | default: store.system.handle | escape | downcase }}" data-status="closed" data-handle="{{ store.system.handle | escape }}" data-products="0">
+                <div class="gm-store-top">
+                  <div>
+                    <h3 class="gm-store-name">{{ store.name | default: store.system.handle }}</h3>
+                    <div class="gm-store-handle">{{ store.system.handle }}</div>
                   </div>
-                  <h3 class="store-name" style="color:var(--gray); text-decoration: line-through;">{{ store.name }}</h3>
-                  <div class="store-handle">{{ store.system.handle }}</div>
+                  <span class="gm-badge closed">Closed</span>
                 </div>
-                <div class="store-actions">
-                  <button class="btn btn-primary btn-sm" onclick="wakeStore('{{ store.system.handle | escape }}')">
-                    <i class="fas fa-sun"></i> Wake
-                  </button>
+                <div class="gm-card-actions" style="grid-template-columns:1fr;">
+                  <button type="button" class="gm-btn gm-btn-primary" onclick="wakeStore('{{ store.system.handle | escape }}')">Wake Up ☀️</button>
                 </div>
-              </div>
+              </article>
             {% endif %}
           {% endfor %}
         </div>
       </div>
-    </main>
+    </section>
   </div>
 
-  <div id="manageModal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="manageTitle" style="margin:0;">Manage Store</h3>
-        <button onclick="closeManage()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">&times;</button>
-      </div>
-      
-      <div class="modal-tabs">
-        <div class="modal-tab active" onclick="switchTab('inventory')">Inventory</div>
-        <div class="modal-tab" onclick="switchTab('members')">Members</div>
-        <div class="modal-tab" onclick="switchTab('settings')">Settings</div>
-      </div>
+  <aside class="gm-tools-desktop">
+    <div class="gm-card">
+      <h2 class="gm-section-title">Tools</h2>
+      <div class="gm-tools-grid">
+        <label class="gm-label">Target Tag</label>
+        <input id="targetTag" class="gm-input" type="text" placeholder="e.g. bella-3006-blk">
+        <label class="gm-label">New Price ($)</label>
+        <input id="newPrice" class="gm-input" type="number" step="0.01" placeholder="0.00">
+        <button id="btnUpdatePrice" class="gm-btn gm-btn-primary" type="button">Price Override</button>
+        <div id="priceStatus" class="gm-status-text"></div>
 
-      <div class="modal-content">
-        <div id="tab-inventory" class="tab-pane active">
-          <div id="inventoryList">Loading...</div>
-        </div>
+        <label class="gm-label">Run Printful (handle)</label>
+        <input id="printfulHandle" class="gm-input" type="text" placeholder="store-handle">
+        <button class="gm-btn" type="button" onclick="runPrintful('printfulHandle','printfulStatus')">Run Printful</button>
+        <div id="printfulStatus" class="gm-status-text"></div>
 
-        <div id="tab-members" class="tab-pane">
-          <div style="background:#0f172a; padding:15px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
-            <label class="sa-label">Manage Access</label>
-            <div style="display:flex; gap:10px;">
-              <input type="email" id="memberEmail" class="sa-input" placeholder="user@example.com">
-              <button onclick="handleMember('add')" class="btn btn-primary">Add</button>
-              <button onclick="handleMember('remove')" class="btn btn-danger">Remove</button>
-            </div>
-            <div style="font-size:11px; color:var(--gray); margin-top:5px;">This will tag/untag the customer for this specific store.</div>
-            <div id="memberStatus" style="margin-top:10px; font-weight:bold;"></div>
-          </div>
-        </div>
+        <button class="gm-btn gm-btn-warning" type="button" onclick="sleepAllInactive()">Sleep All Inactive</button>
+        <div id="sleepAllStatus" class="gm-status-text"></div>
 
-        <div id="tab-settings" class="tab-pane">
-          <div class="setting-row">
-            <div>
-              <div style="font-weight:700; font-size:14px; color:white;">Store Visibility</div>
-              <div style="font-size:11px; color:var(--gray);">Toggle between Public and Private.</div>
-            </div>
-            <div>
-              <button class="btn btn-glass" onclick="toggleVisibility('public')">Make Public</button>
-              <button class="btn btn-glass" onclick="toggleVisibility('private')">Make Private</button>
-            </div>
-          </div>
-          <div class="setting-row" style="margin-top:15px;">
-            <div>
-              <div style="font-weight:700; font-size:14px; color:white;">Sleep Mode</div>
-              <div style="font-size:11px; color:var(--gray);">Delete all products. Metaobject and member tags are preserved. Store can be woken up to rebuild.</div>
-            </div>
-            <div>
-              <button class="btn btn-danger" onclick="sleepStore(currentStoreHandle); closeManage();">
-                <i class="fas fa-moon"></i> Put to Sleep
-              </button>
-            </div>
-          </div>
-        </div>
-
+        <a class="gm-btn" href="/admin/products" target="_blank" rel="noopener">Shopify Admin</a>
+        <a class="gm-btn" href="/pages/portal">Back to Portal</a>
       </div>
     </div>
-  </div>
+  </aside>
 
-  <!-- Shared drawer overlay -->
-  <div id="drawer-overlay" onclick="closeAllDrawers()"></div>
+  <button class="gm-fab" id="openToolsFab" type="button" aria-label="Open tools">⚙️</button>
 
-  <!-- Stats Drawer -->
-  <div id="drawer-stats" class="sa-drawer">
-    <div class="sa-drawer-header">
-      <h3><i class="fas fa-chart-bar"></i> System Stats</h3>
-      <button class="sa-drawer-close" onclick="closeDrawer('drawer-stats')">&times;</button>
-    </div>
-    <div style="font-size:14px; color:var(--gray); line-height:2.2;">
-      <div>Total: <strong style="color:white;">{{ total_stores }}</strong></div>
-      <div>Active: <strong style="color:var(--success);">{{ active_count }}</strong></div>
-      <div>Sleeping: <strong style="color:#a5b4fc;">{{ sleeping_count }}</strong></div>
-      <div>Waking: <strong style="color:#93c5fd;">{{ waking_count }}</strong></div>
-      <div>Closed: <strong style="color:var(--gray);">{{ closed_count }}</strong></div>
-    </div>
-  </div>
+  <div class="gm-sheet-overlay" id="sheetOverlay"></div>
 
-  <!-- Price Override Drawer -->
-  <div id="drawer-price" class="sa-drawer">
-    <div class="sa-drawer-header">
-      <h3><i class="fas fa-tag"></i> Global Price Override</h3>
-      <button class="sa-drawer-close" onclick="closeDrawer('drawer-price')">&times;</button>
+  <section class="gm-sheet" id="manageSheet" aria-hidden="true">
+    <div class="gm-sheet-head">
+      <div>
+        <h3 class="gm-sheet-title" id="manageTitle">Manage Store</h3>
+        <p class="gm-sheet-sub" id="manageHandle"></p>
+      </div>
+      <button class="gm-close" type="button" id="closeManage">×</button>
     </div>
-    <div class="sa-input-group">
-      <label class="sa-label">Target Tag (Model)</label>
-      <input type="text" id="targetTag_m" class="sa-input" placeholder="e.g. bella-3006-blk">
-    </div>
-    <div class="sa-input-group">
-      <label class="sa-label">New Price ($)</label>
-      <input type="number" id="newPrice_m" class="sa-input" placeholder="0.00">
-    </div>
-    <button id="btnUpdatePrice_m" class="btn btn-primary">Update Prices</button>
-    <div id="priceStatus_m" style="font-size:11px; margin-top:10px; min-height:15px; text-align:center;"></div>
-  </div>
 
-  <!-- Quick Links Drawer -->
-  <div id="drawer-links" class="sa-drawer">
-    <div class="sa-drawer-header">
-      <h3><i class="fas fa-link"></i> Quick Links</h3>
-      <button class="sa-drawer-close" onclick="closeDrawer('drawer-links')">&times;</button>
+    <div class="gm-sheet-tabs">
+      <button type="button" class="gm-sheet-tab active" data-manage-tab="members">Members</button>
+      <button type="button" class="gm-sheet-tab" data-manage-tab="settings">Settings</button>
+      <button type="button" class="gm-sheet-tab" data-manage-tab="info">Info</button>
     </div>
-    <a href="/admin/products" target="_blank" class="btn btn-glass" style="width:100%; margin-bottom:10px;">Shopify Admin</a>
-    <a href="/pages/portal" class="btn btn-glass" style="width:100%; margin-bottom:10px;">Back to Portal</a>
-    <button class="btn btn-warning" style="width:100%;" onclick="sleepAllInactive()">
-      <i class="fas fa-moon"></i> Sleep All Inactive
-    </button>
-    <div id="sleepAllStatus_m" style="font-size:11px; margin-top:8px; min-height:14px; text-align:center;"></div>
-  </div>
 
-  <!-- Printful Drawer -->
-  <div id="drawer-printful" class="sa-drawer">
-    <div class="sa-drawer-header">
-      <h3><i class="fas fa-print"></i> Run Printful by Handle</h3>
-      <button class="sa-drawer-close" onclick="closeDrawer('drawer-printful')">&times;</button>
+    <div class="gm-tab-pane active" data-pane="members">
+      <div class="gm-member-grid">
+        <div class="gm-field" style="margin-bottom:0;">
+          <label class="gm-label">Email address</label>
+          <input id="memberEmail" type="email" class="gm-input" placeholder="user@example.com">
+        </div>
+        <div class="gm-field" style="margin-bottom:0;">
+          <label class="gm-label">Role</label>
+          <select id="memberRole" class="gm-select">
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="gm-setting-grid" style="margin-top:8px;">
+        <button type="button" class="gm-btn gm-btn-primary" id="addMemberBtn">Add</button>
+        <button type="button" class="gm-btn" id="removeMemberBtn">Remove Member</button>
+        <button type="button" class="gm-btn" id="removeAdminBtn">Remove Admin</button>
+      </div>
+      <div class="gm-status-text" id="memberStatus"></div>
+      <div class="gm-member-list" id="memberList"></div>
     </div>
-    <div class="sa-input-group">
-      <label class="sa-label">Store Handle</label>
-      <input type="text" id="printfulHandle_m" class="sa-input" placeholder="e.g. my-store-handle">
+
+    <div class="gm-tab-pane" data-pane="settings">
+      <div class="gm-setting-grid">
+        <button type="button" class="gm-btn" id="makePublicBtn">Make Public</button>
+        <button type="button" class="gm-btn" id="makePrivateBtn">Make Private</button>
+        <button type="button" class="gm-btn gm-btn-warning" id="sleepStoreBtn">Put to Sleep 💤</button>
+        <button type="button" class="gm-btn gm-btn-primary" id="wakeStoreBtn">Wake Up ☀️</button>
+        <a class="gm-btn gm-btn-primary" id="openFullAdminBtn" target="_blank" rel="noopener">Open Full Admin →</a>
+        <button type="button" class="gm-btn gm-btn-danger" id="nukeStoreBtn">NUKE</button>
+      </div>
+      <div class="gm-status-text" id="settingsStatus"></div>
     </div>
-    <button class="btn btn-primary" onclick="runPrintfulMobile()">Run Printful</button>
-    <div id="printfulStatus_m" style="font-size:11px; margin-top:8px; min-height:14px; text-align:center;"></div>
-  </div>
+
+    <div class="gm-tab-pane" data-pane="info">
+      <div class="gm-copy-row">
+        <div class="gm-copy-label">Store Handle</div>
+        <div class="gm-copy-value" id="infoHandle"></div>
+        <button type="button" class="gm-btn" id="copyHandleBtn">Copy handle</button>
+      </div>
+      <div class="gm-copy-row">
+        <div class="gm-copy-label">Join Link</div>
+        <div class="gm-copy-value" id="infoJoinLink"></div>
+        <button type="button" class="gm-btn" id="copyJoinBtn">Copy join link</button>
+      </div>
+      <div class="gm-copy-row">
+        <div class="gm-copy-label">Product Count</div>
+        <div class="gm-copy-value" id="infoProductCount"></div>
+      </div>
+      <a class="gm-btn" id="infoVisitBtn" target="_blank" rel="noopener">Visit storefront ↗</a>
+    </div>
+  </section>
+
+  <section class="gm-sheet" id="toolsSheet" aria-hidden="true">
+    <div class="gm-sheet-head">
+      <h3 class="gm-sheet-title">Tools</h3>
+      <button class="gm-close" type="button" id="closeTools">×</button>
+    </div>
+    <div class="gm-tools-grid">
+      <label class="gm-label">Target Tag</label>
+      <input id="targetTag_m" class="gm-input" type="text" placeholder="e.g. bella-3006-blk">
+      <label class="gm-label">New Price ($)</label>
+      <input id="newPrice_m" class="gm-input" type="number" step="0.01" placeholder="0.00">
+      <button id="btnUpdatePrice_m" class="gm-btn gm-btn-primary" type="button">Price Override</button>
+      <div id="priceStatus_m" class="gm-status-text"></div>
+
+      <label class="gm-label">Run Printful (handle)</label>
+      <input id="printfulHandle_m" class="gm-input" type="text" placeholder="store-handle">
+      <button class="gm-btn" type="button" onclick="runPrintful('printfulHandle_m','printfulStatus_m')">Run Printful</button>
+      <div id="printfulStatus_m" class="gm-status-text"></div>
+
+      <button class="gm-btn gm-btn-warning" type="button" onclick="sleepAllInactive()">Sleep All Inactive</button>
+      <div id="sleepAllStatus_m" class="gm-status-text"></div>
+
+      <a class="gm-btn" href="/admin/products" target="_blank" rel="noopener">Shopify Admin</a>
+      <a class="gm-btn" href="/pages/portal">Back to Portal</a>
+    </div>
+  </section>
+
+  <div class="gm-toast" id="gmToast"></div>
 
   <script>
-    // --- CONFIGURATION ---
     const RAILWAY_URL = "https://studio-uploader-production.up.railway.app";
     const ADMIN_SECRET = "stellasage-god-mode-2026-xK9mP";
 
-    // STATE
-    let currentStoreTag = "";
-    let currentStoreHandle = "";
-    let currentCollection = "";
+    window.GM_ALL_STORES = [
+      {% for store in shop.metaobjects.custom_shop.values %}
+        {
+          handle: {{ store.system.handle | json }},
+          name: {{ store.name | default: store.system.handle | json }},
+          collection_handle: {{ store.collection_handle | default: store.system.handle | json }}
+        },
+      {% endfor %}
+    ];
 
-    // --- HELPERS ---
+    const GM_STATE = {
+      activeGridFilter: 'all',
+      activeStatFilter: 'all',
+      currentStore: null
+    };
+
     function railwayHeaders() {
       return {
-        "Content-Type": "application/json",
-        "X-Admin-Secret": ADMIN_SECRET
+        'Content-Type': 'application/json',
+        'X-Admin-Secret': ADMIN_SECRET
       };
     }
 
-    function showToast(msg, isError = false) {
-      let t = document.getElementById('toast');
-      if (!t) {
-        t = document.createElement('div');
-        t.id = 'toast';
-        t.style.cssText = 'position:fixed;bottom:30px;right:30px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:700;z-index:9999;transition:opacity 0.4s;';
-        document.body.appendChild(t);
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function setStatus(id, text, color) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      if (color) el.style.color = color;
+    }
+
+    function showToast(msg, isError) {
+      var el = document.getElementById('gmToast');
+      if (!el) return;
+      el.textContent = msg;
+      el.style.background = isError ? 'var(--danger)' : 'var(--text)';
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(function(){ el.style.display = 'none'; }, 3200);
+    }
+
+    function getSeenStores() {
+      return (localStorage.getItem('gm-seen-stores') || '').split(',').map(function(v){ return v.trim(); }).filter(Boolean);
+    }
+
+    function saveSeenStores(handles) {
+      localStorage.setItem('gm-seen-stores', handles.join(','));
+    }
+
+    function markStoreSeen(handle) {
+      var seen = getSeenStores();
+      if (seen.indexOf(handle) === -1) {
+        seen.push(handle);
+        saveSeenStores(seen);
       }
-      t.textContent = msg;
-      t.style.background = isError ? '#ef4444' : '#10b981';
-      t.style.color = 'white';
-      t.style.opacity = '1';
-      clearTimeout(t._timeout);
-      t._timeout = setTimeout(() => { t.style.opacity = '0'; }, 3500);
+      renderNewStoreBanner();
     }
 
-    // --- SEARCH FILTER ---
-    function filterStores() {
-      const filter = document.getElementById('storeSearch').value.toLowerCase();
-      document.querySelectorAll('.store-card').forEach(card => {
-        card.style.display = card.getAttribute('data-name').includes(filter) ? '' : 'none';
+    function markAllStoresSeen() {
+      var allHandles = (window.GM_ALL_STORES || []).map(function(s){ return String(s.handle || '').trim(); }).filter(Boolean);
+      saveSeenStores(allHandles);
+      renderNewStoreBanner();
+    }
+
+    function renderNewStoreBanner() {
+      var banner = document.getElementById('newStoreBanner');
+      var list = document.getElementById('newStoreList');
+      var title = document.getElementById('newStoreTitle');
+      if (!banner || !list || !title) return;
+
+      var seen = getSeenStores();
+      var newStores = (window.GM_ALL_STORES || []).filter(function(store){
+        var h = String(store.handle || '').trim();
+        return h && seen.indexOf(h) === -1;
+      });
+
+      if (!newStores.length) {
+        banner.style.display = 'none';
+        list.innerHTML = '';
+        return;
+      }
+
+      title.textContent = '🆕  ' + newStores.length + ' New Stores Built';
+      list.innerHTML = newStores.map(function(store){
+        var collectionHandle = store.collection_handle || store.handle;
+        return '<div class="gm-banner-row">'
+          + '<div class="gm-banner-name">' + escapeHtml(store.name || store.handle) + '</div>'
+          + '<button type="button" class="gm-btn gm-btn-primary" data-peek-store="' + escapeHtml(store.handle) + '" data-peek-collection="' + escapeHtml(collectionHandle) + '">Peek →</button>'
+          + '</div>';
+      }).join('');
+
+      banner.style.display = '';
+    }
+
+    function applyStoreFilters() {
+      var search = String((document.getElementById('storeSearch') || {}).value || '').toLowerCase().trim();
+      var allCards = Array.prototype.slice.call(document.querySelectorAll('.gm-store-card'));
+      allCards.forEach(function(card){
+        var name = String(card.getAttribute('data-name') || '').toLowerCase();
+        var status = String(card.getAttribute('data-status') || 'active');
+        var isPrivate = card.getAttribute('data-private') === 'true';
+        var products = parseInt(card.getAttribute('data-products') || '0', 10);
+        var inClosedGrid = card.closest('#closedStoreGrid') !== null;
+
+        var statusMatches = true;
+        if (GM_STATE.activeGridFilter === 'closed' || GM_STATE.activeStatFilter === 'closed') {
+          statusMatches = inClosedGrid;
+        } else if (GM_STATE.activeGridFilter === 'sleeping' || GM_STATE.activeStatFilter === 'sleeping') {
+          statusMatches = !inClosedGrid && status === 'sleeping';
+        } else if (GM_STATE.activeGridFilter === 'waking' || GM_STATE.activeStatFilter === 'waking') {
+          statusMatches = !inClosedGrid && status === 'waking';
+        } else if (GM_STATE.activeGridFilter === 'active' || GM_STATE.activeStatFilter === 'active') {
+          statusMatches = !inClosedGrid && status !== 'sleeping' && status !== 'waking';
+        } else if (GM_STATE.activeGridFilter === 'no-sales') {
+          statusMatches = !inClosedGrid && status !== 'sleeping' && status !== 'waking' && !isPrivate && products === 0;
+        }
+
+        var matchesSearch = !search || name.indexOf(search) !== -1;
+        card.style.display = statusMatches && matchesSearch ? '' : 'none';
       });
     }
 
-    // --- TAB SORTING ---
-    let currentTab = 'all';
-    function setTab(tab, evt) {
-      currentTab = tab;
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      if (evt && evt.target) evt.target.classList.add('active');
-      applyTabFilter();
+    function setActiveClass(selector, targetAttr, value) {
+      document.querySelectorAll(selector).forEach(function(btn){
+        if (btn.getAttribute(targetAttr) === value) btn.classList.add('is-active-filter');
+        else btn.classList.remove('is-active-filter');
+      });
     }
 
-    function applyTabFilter() {
-      const cards = document.querySelectorAll('#activeStoreGrid .store-card');
-      cards.forEach(card => {
-        const status = card.getAttribute('data-sleep-status') || 'active';
-        const sales = parseInt(card.getAttribute('data-sales') || '0', 10);
-        let show = true;
-        if (currentTab === 'sleeping') show = status === 'sleeping';
-        else if (currentTab === 'waking') show = status === 'waking';
-        else if (currentTab === 'awake_no_sales') show = status !== 'sleeping' && status !== 'waking' && sales === 0;
-        card.style.display = show ? '' : 'none';
-      });
-      if (currentTab === 'most_sales' || currentTab === 'least_sales') {
-        sortCards(currentTab);
+    function syncGraveyardVisibilityForFilters() {
+      var wantsClosed = GM_STATE.activeGridFilter === 'closed' || GM_STATE.activeStatFilter === 'closed';
+      var content = document.getElementById('graveyardContent');
+      var toggle = document.getElementById('toggleGraveyard');
+      if (!content || !toggle) return;
+      if (wantsClosed && content.hasAttribute('hidden')) {
+        content.removeAttribute('hidden');
+        toggle.textContent = 'Hide Closed Stores ({{ closed_count }})';
       }
     }
 
-    function sortCards(tab) {
-      const grid = document.getElementById('activeStoreGrid');
-      const cards = Array.from(grid.querySelectorAll('.store-card'));
-      cards.sort((a, b) => {
-        const sa = parseInt(a.getAttribute('data-sales') || '0', 10);
-        const sb = parseInt(b.getAttribute('data-sales') || '0', 10);
-        return tab === 'most_sales' ? sb - sa : sa - sb;
+    function openSheet(id) {
+      var overlay = document.getElementById('sheetOverlay');
+      if (overlay) overlay.classList.add('show');
+      document.querySelectorAll('.gm-sheet').forEach(function(s){ s.classList.remove('show'); });
+      var sheet = document.getElementById(id);
+      if (sheet) sheet.classList.add('show');
+    }
+
+    function closeSheets() {
+      var overlay = document.getElementById('sheetOverlay');
+      if (overlay) overlay.classList.remove('show');
+      document.querySelectorAll('.gm-sheet').forEach(function(s){ s.classList.remove('show'); });
+    }
+
+    function switchManageTab(tab) {
+      document.querySelectorAll('.gm-sheet-tab[data-manage-tab]').forEach(function(btn){
+        btn.classList.toggle('active', btn.getAttribute('data-manage-tab') === tab);
       });
-      cards.forEach(c => { c.style.display = ''; grid.appendChild(c); });
+      document.querySelectorAll('.gm-tab-pane[data-pane]').forEach(function(pane){
+        pane.classList.toggle('active', pane.getAttribute('data-pane') === tab);
+      });
+      if (tab === 'members') loadMembers();
     }
 
-    // --- MODAL LOGIC ---
-    function openManage(name, collection, handle) {
-      currentStoreTag = name;
-      currentStoreHandle = handle;
-      currentCollection = collection;
-      document.getElementById('manageTitle').textContent = "Manage: " + name;
-      document.getElementById('manageModal').style.display = 'block';
-      loadInventory(collection);
+    function openManageFromCard(card) {
+      if (!card) return;
+      var handle = card.getAttribute('data-handle') || '';
+      var collection = card.getAttribute('data-collection') || handle;
+      var name = card.getAttribute('data-store-name') || handle;
+      var products = parseInt(card.getAttribute('data-products') || '0', 10);
+
+      GM_STATE.currentStore = {
+        handle: handle,
+        collection_handle: collection,
+        name: name,
+        products: products
+      };
+
+      document.getElementById('manageTitle').textContent = name;
+      document.getElementById('manageHandle').textContent = '@' + handle;
+      document.getElementById('openFullAdminBtn').href = '/pages/admin-powers?shop=' + encodeURIComponent(handle);
+      document.getElementById('infoHandle').textContent = handle;
+      document.getElementById('infoJoinLink').textContent = 'https://stellasageco.com/pages/join-store?shop=' + handle;
+      document.getElementById('infoProductCount').textContent = String(products);
+      document.getElementById('infoVisitBtn').href = '/collections/' + encodeURIComponent(collection || handle);
+      switchManageTab('members');
+      openSheet('manageSheet');
     }
 
-    function closeManage() {
-      document.getElementById('manageModal').style.display = 'none';
+    function copyText(text, successMsg) {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        showToast('Clipboard not available', true);
+        return;
+      }
+      navigator.clipboard.writeText(String(text || '')).then(function(){
+        showToast(successMsg || 'Copied');
+      }).catch(function(){
+        showToast('Copy failed', true);
+      });
     }
 
-    function switchTab(tabName) {
-      document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-      document.querySelector(`.modal-tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-    }
+    function handleMemberAction(mode) {
+      var store = GM_STATE.currentStore;
+      if (!store || !store.handle) return;
+      var email = String((document.getElementById('memberEmail') || {}).value || '').trim();
+      if (!email) {
+        setStatus('memberStatus', 'Please enter an email.', 'var(--danger)');
+        return;
+      }
 
-    // --- TAB 1: INVENTORY ---
-    function loadInventory(collectionHandle) {
-      const el = document.getElementById('inventoryList');
-      if (!collectionHandle) { el.innerHTML = '<p style="color:var(--gray)">No collection linked.</p>'; return; }
-      el.innerHTML = '<p style="color:var(--gray)">Loading inventory...</p>';
-      fetch(`/collections/${collectionHandle}/products.json?limit=50`)
-        .then(r => r.json())
-        .then(data => {
-          if (!data.products || !data.products.length) {
-            el.innerHTML = '<p style="color:var(--gray)">No products found.</p>';
-            return;
-          }
-          el.innerHTML = data.products.map(p => `
-            <div class="modal-row">
-              <img src="${p.image ? p.image.src : ''}" class="modal-img" alt="${p.title}" onerror="this.style.display='none'">
-              <div style="flex:1">
-                <div style="font-weight:700; font-size:13px;">${p.title}</div>
-                <div style="font-size:11px; color:var(--gray);">${p.variants.length} variant(s)</div>
-              </div>
-            </div>`).join('');
-        })
-        .catch(() => { el.innerHTML = '<p style="color:var(--gray)">Could not load inventory.</p>'; });
-    }
+      var role = String((document.getElementById('memberRole') || {}).value || 'member');
+      var endpoint = '';
+      if (mode === 'add') endpoint = role === 'admin' ? '/admin/store/' + encodeURIComponent(store.handle) + '/add-admin' : '/admin/store/' + encodeURIComponent(store.handle) + '/add-member';
+      if (mode === 'remove-member') endpoint = '/admin/store/' + encodeURIComponent(store.handle) + '/remove-member';
+      if (mode === 'remove-admin') endpoint = '/admin/store/' + encodeURIComponent(store.handle) + '/remove-admin';
 
-    // --- TAB 2: MEMBERS (Add User) ---
-    function handleMember(action) {
-      const email = document.getElementById('memberEmail').value.trim();
-      const statusEl = document.getElementById('memberStatus');
-      if (!email) { statusEl.textContent = 'Please enter an email.'; statusEl.style.color = '#ef4444'; return; }
-      if (!currentStoreHandle) { statusEl.textContent = 'No store selected.'; statusEl.style.color = '#ef4444'; return; }
-
-      statusEl.textContent = action === 'add' ? 'Adding user...' : 'Removing user...';
-      statusEl.style.color = 'var(--gray)';
-
-      fetch(`${RAILWAY_URL}/api/storefront/${currentStoreHandle}/member`, {
+      setStatus('memberStatus', 'Saving member changes...', 'var(--gray)');
+      fetch(RAILWAY_URL + endpoint, {
         method: 'POST',
         headers: railwayHeaders(),
-        body: JSON.stringify({ email: email, action: action })
+        body: JSON.stringify({ email: email })
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.ok || data.status === 'ok') {
-            statusEl.textContent = action === 'add' ? `✅ ${email} added to store.` : `✅ ${email} removed from store.`;
-            statusEl.style.color = '#10b981';
-            document.getElementById('memberEmail').value = '';
-          } else {
-            statusEl.textContent = '❌ ' + (data.error || 'Unknown error');
-            statusEl.style.color = '#ef4444';
-          }
-        })
-        .catch(e => {
-          statusEl.textContent = '❌ Request failed: ' + e.message;
-          statusEl.style.color = '#ef4444';
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.ok || data.status === 'ok') {
+          setStatus('memberStatus', '✅ Member update complete.', 'var(--success)');
+          document.getElementById('memberEmail').value = '';
+          loadMembers();
+        } else {
+          setStatus('memberStatus', '❌ ' + (data.error || 'Request failed'), 'var(--danger)');
+        }
+      })
+      .catch(function(err){
+        setStatus('memberStatus', '❌ ' + err.message, 'var(--danger)');
+      });
+    }
+
+    function loadMembers() {
+      var list = document.getElementById('memberList');
+      var store = GM_STATE.currentStore;
+      if (!list || !store || !store.handle) return;
+      list.innerHTML = '<div class="gm-member-row"><span>Loading members...</span></div>';
+      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(store.handle) + '/members', {
+        method: 'GET',
+        headers: railwayHeaders()
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var rows = [];
+        var members = [];
+        if (Array.isArray(data.members)) members = data.members;
+        else if (Array.isArray(data.items)) members = data.items;
+        else if (Array.isArray(data.data)) members = data.data;
+
+        members.forEach(function(item){
+          var email = item.email || item.customer_email || item.value || '';
+          if (!email) return;
+          var role = 'Member';
+          if (item.role) role = item.role;
+          else if (item.is_admin) role = 'Admin';
+          rows.push('<div class="gm-member-row"><span>' + escapeHtml(email) + '</span><strong>' + escapeHtml(role) + '</strong></div>');
         });
+
+        if (!rows.length) rows.push('<div class="gm-member-row"><span>No members found.</span></div>');
+        list.innerHTML = rows.join('');
+      })
+      .catch(function(){
+        list.innerHTML = '<div class="gm-member-row"><span>Could not load members.</span></div>';
+      });
     }
 
-    // --- SLEEP STORE ---
+    function updateVisibility(visibility) {
+      var store = GM_STATE.currentStore;
+      if (!store || !store.handle) return;
+      setStatus('settingsStatus', 'Updating visibility...', 'var(--gray)');
+      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(store.handle) + '/visibility', {
+        method: 'POST',
+        headers: railwayHeaders(),
+        body: JSON.stringify({ visibility: visibility })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.ok || data.status === 'ok') setStatus('settingsStatus', '✅ Visibility updated.', 'var(--success)');
+        else setStatus('settingsStatus', '❌ ' + (data.error || 'Failed'), 'var(--danger)');
+      })
+      .catch(function(err){ setStatus('settingsStatus', '❌ ' + err.message, 'var(--danger)'); });
+    }
+
     function sleepStore(handle) {
-      if (!confirm(`Put store "${handle}" to sleep? It will be hidden until woken up.`)) return;
-      showToast('Putting store to sleep...');
-
-      fetch(`${RAILWAY_URL}/admin/store/${handle}/sleep`, {
+      if (!handle || !confirm('Put store "' + handle + '" to sleep?')) return;
+      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(handle) + '/sleep', {
         method: 'POST',
         headers: railwayHeaders()
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.job_id || data.status === 'ok') {
-            showToast(`✅ Store "${handle}" is going to sleep.`);
-            const card = document.querySelector(`.store-card[data-handle="${handle}"]`);
-            if (card) {
-              card.setAttribute('data-sleep-status', 'sleeping');
-              card.style.opacity = '0.5';
-              const statusBadge = card.querySelector('.store-status');
-              if (statusBadge) { statusBadge.textContent = '💤 Sleeping'; statusBadge.className = 'store-status status-closed'; }
-            }
-          } else {
-            showToast('❌ ' + (data.error || 'Sleep failed'), true);
-          }
-        })
-        .catch(e => showToast('❌ Request failed: ' + e.message, true));
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.job_id || data.status === 'ok') {
+          showToast('✅ Store put to sleep.');
+          window.location.reload();
+        } else {
+          showToast('❌ ' + (data.error || 'Sleep failed'), true);
+        }
+      })
+      .catch(function(err){ showToast('❌ ' + err.message, true); });
     }
 
-    // --- WAKE STORE ---
     function wakeStore(handle) {
-      if (!confirm(`Wake store "${handle}"? This will re-run Printful Automation to rebuild products.`)) return;
-      showToast('Waking store up...');
-      fetch(`${RAILWAY_URL}/admin/store/${handle}/wakeup`, {
+      if (!handle || !confirm('Wake store "' + handle + '" now?')) return;
+      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
         method: 'POST',
         headers: railwayHeaders()
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.job_id || data.status === 'ok') {
-            showToast(`✅ Store "${handle}" is waking up. Products will be rebuilt.`);
-            const card = document.querySelector(`.store-card[data-handle="${handle}"]`);
-            if (card) card.style.opacity = '0.7';
-          } else {
-            showToast('❌ ' + (data.error || 'Wake failed'), true);
-          }
-        })
-        .catch(e => showToast('❌ Request failed: ' + e.message, true));
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.job_id || data.status === 'ok') {
+          showToast('✅ Store waking up.');
+          window.location.reload();
+        } else {
+          showToast('❌ ' + (data.error || 'Wake failed'), true);
+        }
+      })
+      .catch(function(err){ showToast('❌ ' + err.message, true); });
     }
 
-    // --- NUKE STORE ---
     function nukeStore(handle) {
-      if (!confirm(`☢️ NUKE store "${handle}"?\n\nThis will permanently delete ALL data for this store. This cannot be undone.`)) return;
-      if (!confirm(`Are you absolutely sure? Type OK to confirm nuke of "${handle}".`)) return;
-
-      showToast('☢️ Nuking store...');
-
-      fetch(`${RAILWAY_URL}/api/storefront/${handle}/nuke`, {
+      if (!handle) return;
+      if (!confirm('☢️ NUKE store "' + handle + '"? This cannot be undone.')) return;
+      fetch(RAILWAY_URL + '/api/storefront/' + encodeURIComponent(handle) + '/nuke', {
         method: 'POST',
         headers: railwayHeaders(),
         body: JSON.stringify({})
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.job_id) {
-            showToast(`☢️ Nuke job started for "${handle}". Job: ${data.job_id}`);
-            pollNukeJob(data.job_id, handle);
-          } else {
-            showToast('❌ ' + (data.error || 'Nuke failed'), true);
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!data.job_id) {
+          showToast('❌ ' + (data.error || 'Nuke failed'), true);
+          return;
+        }
+        showToast('☢️ Nuke started.');
+        var tries = 0;
+        var timer = setInterval(function(){
+          tries += 1;
+          fetch(RAILWAY_URL + '/api/job/' + encodeURIComponent(data.job_id), { headers: railwayHeaders() })
+            .then(function(r){ return r.json(); })
+            .then(function(job){
+              if (job.status === 'done') {
+                clearInterval(timer);
+                showToast('✅ Store nuked.');
+                window.location.reload();
+              } else if (job.status === 'error') {
+                clearInterval(timer);
+                showToast('❌ ' + (job.error || 'Nuke failed'), true);
+              }
+            })
+            .catch(function(){});
+          if (tries > 35) {
+            clearInterval(timer);
+            showToast('⚠️ Nuke status timed out.', true);
           }
-        })
-        .catch(e => showToast('❌ Request failed: ' + e.message, true));
-    }
-
-    function pollNukeJob(jobId, handle) {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        fetch(`${RAILWAY_URL}/api/job/${jobId}`, { headers: railwayHeaders() })
-          .then(r => r.json())
-          .then(data => {
-            if (data.status === 'done') {
-              clearInterval(interval);
-              showToast(`✅ Store "${handle}" has been nuked.`);
-              const card = document.querySelector(`.store-card[data-handle="${handle}"]`);
-              if (card) card.remove();
-            } else if (data.status === 'error') {
-              clearInterval(interval);
-              showToast('❌ Nuke failed: ' + (data.error || 'unknown'), true);
-            }
-          })
-          .catch(() => {});
-        if (attempts > 30) { clearInterval(interval); showToast('⚠️ Nuke job status check timed out.', true); }
-      }, 3000);
-    }
-
-    // --- GLOBAL PRICE OVERRIDE ---
-    document.getElementById('btnUpdatePrice').addEventListener('click', function () {
-      const tag = document.getElementById('targetTag').value.trim();
-      const price = document.getElementById('newPrice').value.trim();
-      const statusEl = document.getElementById('priceStatus');
-      if (!tag || !price) { statusEl.textContent = 'Please fill in both fields.'; statusEl.style.color = '#ef4444'; return; }
-
-      statusEl.textContent = 'Updating prices...';
-      statusEl.style.color = 'var(--gray)';
-
-      fetch(`${RAILWAY_URL}/admin/price-override`, {
-        method: 'POST',
-        headers: railwayHeaders(),
-        body: JSON.stringify({ tag: tag, price: parseFloat(price) })
+        }, 3000);
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.ok || data.status === 'ok') {
-            statusEl.textContent = '✅ Prices updated!';
-            statusEl.style.color = '#10b981';
-          } else {
-            statusEl.textContent = '❌ ' + (data.error || 'Failed');
-            statusEl.style.color = '#ef4444';
-          }
-        })
-        .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
-    });
+      .catch(function(err){ showToast('❌ ' + err.message, true); });
+    }
 
-    // --- SLEEP ALL INACTIVE ---
+    function runPrintful(inputId, statusId) {
+      var handle = String((document.getElementById(inputId) || {}).value || '').trim();
+      if (!handle) {
+        setStatus(statusId, 'Enter a store handle.', 'var(--danger)');
+        return;
+      }
+      setStatus(statusId, 'Running Printful wake...', 'var(--gray)');
+      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
+        method: 'POST',
+        headers: railwayHeaders()
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.job_id || data.status === 'ok') setStatus(statusId, '✅ Printful started for ' + handle, 'var(--success)');
+        else setStatus(statusId, '❌ ' + (data.error || 'Failed'), 'var(--danger)');
+      })
+      .catch(function(err){ setStatus(statusId, '❌ ' + err.message, 'var(--danger)'); });
+    }
+
     function sleepAllInactive() {
-      if (!confirm('Put ALL inactive stores to sleep? This will call /admin/sleep-check on the backend.')) return;
-      function setSleepAllStatus(text, color) {
-        ['sleepAllStatus', 'sleepAllStatus_m'].forEach(function(id) {
-          var el = document.getElementById(id);
-          if (el) { el.textContent = text; el.style.color = color; }
-        });
-      }
-      setSleepAllStatus('Running sleep check...', 'var(--gray)');
-      fetch(`${RAILWAY_URL}/admin/sleep-check`, {
+      if (!confirm('Run sleep-check for inactive stores?')) return;
+      setStatus('sleepAllStatus', 'Running...', 'var(--gray)');
+      setStatus('sleepAllStatus_m', 'Running...', 'var(--gray)');
+      fetch(RAILWAY_URL + '/admin/sleep-check', {
         method: 'POST',
         headers: railwayHeaders()
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.ok || data.status === 'ok' || data.slept !== undefined) {
-            setSleepAllStatus(`✅ Done. ${data.slept !== undefined ? data.slept + ' store(s) slept.' : ''}`, '#10b981');
-          } else {
-            setSleepAllStatus('❌ ' + (data.error || 'Failed'), '#ef4444');
-          }
-        })
-        .catch(e => { setSleepAllStatus('❌ ' + e.message, '#ef4444'); });
-    }
-
-    // --- RUN PRINTFUL BY HANDLE ---
-    function runPrintful() {
-      const handle = document.getElementById('printfulHandle').value.trim();
-      const statusEl = document.getElementById('printfulStatus');
-      if (!handle) { statusEl.textContent = 'Enter a store handle.'; statusEl.style.color = '#ef4444'; return; }
-      statusEl.textContent = 'Waking/rebuilding...';
-      statusEl.style.color = 'var(--gray)';
-      fetch(`${RAILWAY_URL}/admin/store/${encodeURIComponent(handle)}/wakeup`, {
-        method: 'POST',
-        headers: railwayHeaders()
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var msg = (data.ok || data.status === 'ok' || data.slept !== undefined)
+          ? ('✅ Done' + (data.slept !== undefined ? '. ' + data.slept + ' slept.' : '.'))
+          : ('❌ ' + (data.error || 'Failed'));
+        var color = (data.ok || data.status === 'ok' || data.slept !== undefined) ? 'var(--success)' : 'var(--danger)';
+        setStatus('sleepAllStatus', msg, color);
+        setStatus('sleepAllStatus_m', msg, color);
       })
-        .then(r => r.json())
-        .then(data => {
-          if (data.job_id || data.status === 'ok') {
-            statusEl.textContent = `✅ Printful run started for "${handle}".`;
-            statusEl.style.color = '#10b981';
-          } else {
-            statusEl.textContent = '❌ ' + (data.error || 'Failed');
-            statusEl.style.color = '#ef4444';
-          }
+      .catch(function(err){
+        setStatus('sleepAllStatus', '❌ ' + err.message, 'var(--danger)');
+        setStatus('sleepAllStatus_m', '❌ ' + err.message, 'var(--danger)');
+      });
+    }
+
+    function bindPriceOverride(buttonId, tagId, priceId, statusId) {
+      var button = document.getElementById(buttonId);
+      if (!button) return;
+      button.addEventListener('click', function(){
+        var tag = String((document.getElementById(tagId) || {}).value || '').trim();
+        var price = String((document.getElementById(priceId) || {}).value || '').trim();
+        if (!tag || !price) {
+          setStatus(statusId, 'Please fill in tag and price.', 'var(--danger)');
+          return;
+        }
+        setStatus(statusId, 'Updating prices...', 'var(--gray)');
+        fetch(RAILWAY_URL + '/admin/price-override', {
+          method: 'POST',
+          headers: railwayHeaders(),
+          body: JSON.stringify({ tag: tag, price: parseFloat(price) })
         })
-        .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
-    }
-
-    // --- SETTINGS TAB ---
-    function toggleVisibility(vis) {
-      if (!currentStoreHandle) return;
-      fetch(`${RAILWAY_URL}/admin/store/${currentStoreHandle}/visibility`, {
-        method: 'POST',
-        headers: railwayHeaders(),
-        body: JSON.stringify({ visibility: vis })
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.ok || data.status === 'ok') showToast(`✅ Store set to ${vis}`);
-          else showToast('❌ ' + (data.error || 'Failed'), true);
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if (data.ok || data.status === 'ok') setStatus(statusId, '✅ Prices updated.', 'var(--success)');
+          else setStatus(statusId, '❌ ' + (data.error || 'Failed'), 'var(--danger)');
         })
-        .catch(e => showToast('❌ ' + e.message, true));
+        .catch(function(err){ setStatus(statusId, '❌ ' + err.message, 'var(--danger)'); });
+      });
     }
 
-    // --- DRAWER FUNCTIONS (mobile) ---
-    function openDrawer(id) {
-      closeAllDrawers();
-      var drawer = document.getElementById(id);
-      var overlay = document.getElementById('drawer-overlay');
-      if (drawer) drawer.classList.add('open');
-      if (overlay) overlay.style.display = 'block';
-    }
-
-    function closeDrawer(id) {
-      var drawer = document.getElementById(id);
-      if (drawer) drawer.classList.remove('open');
-      var anyOpen = document.querySelector('.sa-drawer.open');
-      if (!anyOpen) {
-        var overlay = document.getElementById('drawer-overlay');
-        if (overlay) overlay.style.display = 'none';
-      }
-    }
-
-    function closeAllDrawers() {
-      document.querySelectorAll('.sa-drawer').forEach(function(d) { d.classList.remove('open'); });
-      var overlay = document.getElementById('drawer-overlay');
-      if (overlay) overlay.style.display = 'none';
-    }
-
-    // --- MOBILE PRICE OVERRIDE ---
-    document.getElementById('btnUpdatePrice_m').addEventListener('click', function () {
-      const tag = document.getElementById('targetTag_m').value.trim();
-      const price = document.getElementById('newPrice_m').value.trim();
-      const statusEl = document.getElementById('priceStatus_m');
-      if (!tag || !price) { statusEl.textContent = 'Please fill in both fields.'; statusEl.style.color = '#ef4444'; return; }
-      statusEl.textContent = 'Updating prices...';
-      statusEl.style.color = 'var(--gray)';
-      fetch(`${RAILWAY_URL}/admin/price-override`, {
-        method: 'POST',
-        headers: railwayHeaders(),
-        body: JSON.stringify({ tag: tag, price: parseFloat(price) })
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.ok || data.status === 'ok') {
-            statusEl.textContent = '✅ Prices updated!';
-            statusEl.style.color = '#10b981';
-          } else {
-            statusEl.textContent = '❌ ' + (data.error || 'Failed');
-            statusEl.style.color = '#ef4444';
-          }
-        })
-        .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
+    document.getElementById('focusSearch').addEventListener('click', function(){
+      var input = document.getElementById('storeSearch');
+      if (input) input.focus();
     });
 
-    // --- MOBILE RUN PRINTFUL ---
-    function runPrintfulMobile() {
-      const handle = document.getElementById('printfulHandle_m').value.trim();
-      const statusEl = document.getElementById('printfulStatus_m');
-      if (!handle) { statusEl.textContent = 'Enter a store handle.'; statusEl.style.color = '#ef4444'; return; }
-      statusEl.textContent = 'Waking/rebuilding...';
-      statusEl.style.color = 'var(--gray)';
-      fetch(`${RAILWAY_URL}/admin/store/${encodeURIComponent(handle)}/wakeup`, {
-        method: 'POST',
-        headers: railwayHeaders()
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.job_id || data.status === 'ok') {
-            statusEl.textContent = `✅ Printful run started for "${handle}".`;
-            statusEl.style.color = '#10b981';
-          } else {
-            statusEl.textContent = '❌ ' + (data.error || 'Failed');
-            statusEl.style.color = '#ef4444';
-          }
-        })
-        .catch(e => { statusEl.textContent = '❌ ' + e.message; statusEl.style.color = '#ef4444'; });
-    }
-  </script>
+    document.getElementById('storeSearch').addEventListener('input', applyStoreFilters);
 
-{% else %}
-  <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-    <div style="font-size:40px; margin-bottom:20px;">🔒</div>
-    <h1 style="color:white; margin:0;">Restricted</h1>
-    <a href="{{ routes.root_url }}" style="color:var(--accent); text-decoration:none; font-weight:700; margin-top:20px;">Return Home</a>
-  </div>
+    document.querySelectorAll('[data-grid-filter]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        GM_STATE.activeGridFilter = btn.getAttribute('data-grid-filter') || 'all';
+        setActiveClass('[data-grid-filter]', 'data-grid-filter', GM_STATE.activeGridFilter);
+        syncGraveyardVisibilityForFilters();
+        applyStoreFilters();
+      });
+    });
+
+    document.querySelectorAll('[data-stat-filter]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        GM_STATE.activeStatFilter = btn.getAttribute('data-stat-filter') || 'all';
+        setActiveClass('[data-stat-filter]', 'data-stat-filter', GM_STATE.activeStatFilter);
+        syncGraveyardVisibilityForFilters();
+        applyStoreFilters();
+      });
+    });
+
+    document.getElementById('toggleGraveyard').addEventListener('click', function(){
+      var content = document.getElementById('graveyardContent');
+      var isHidden = content.hasAttribute('hidden');
+      if (isHidden) {
+        content.removeAttribute('hidden');
+        this.textContent = 'Hide Closed Stores ({{ closed_count }})';
+      } else {
+        content.setAttribute('hidden', 'hidden');
+        this.textContent = 'Show Closed Stores ({{ closed_count }})';
+      }
+      applyStoreFilters();
+    });
+
+    document.getElementById('activeStoreGrid').addEventListener('click', function(event){
+      var target = event.target.closest('[data-open-manage]');
+      if (!target) return;
+      var card = target.closest('.gm-store-card');
+      openManageFromCard(card);
+    });
+
+    document.getElementById('sheetOverlay').addEventListener('click', closeSheets);
+    document.getElementById('closeManage').addEventListener('click', closeSheets);
+    document.getElementById('openToolsFab').addEventListener('click', function(){ openSheet('toolsSheet'); });
+    document.getElementById('closeTools').addEventListener('click', closeSheets);
+
+    document.querySelectorAll('.gm-sheet-tab[data-manage-tab]').forEach(function(tabBtn){
+      tabBtn.addEventListener('click', function(){ switchManageTab(tabBtn.getAttribute('data-manage-tab')); });
+    });
+
+    document.getElementById('addMemberBtn').addEventListener('click', function(){ handleMemberAction('add'); });
+    document.getElementById('removeMemberBtn').addEventListener('click', function(){ handleMemberAction('remove-member'); });
+    document.getElementById('removeAdminBtn').addEventListener('click', function(){ handleMemberAction('remove-admin'); });
+
+    document.getElementById('makePublicBtn').addEventListener('click', function(){ updateVisibility('public'); });
+    document.getElementById('makePrivateBtn').addEventListener('click', function(){ updateVisibility('private'); });
+    document.getElementById('sleepStoreBtn').addEventListener('click', function(){ if (GM_STATE.currentStore) sleepStore(GM_STATE.currentStore.handle); });
+    document.getElementById('wakeStoreBtn').addEventListener('click', function(){ if (GM_STATE.currentStore) wakeStore(GM_STATE.currentStore.handle); });
+    document.getElementById('nukeStoreBtn').addEventListener('click', function(){ if (GM_STATE.currentStore) nukeStore(GM_STATE.currentStore.handle); });
+
+    document.getElementById('copyHandleBtn').addEventListener('click', function(){
+      if (!GM_STATE.currentStore) return;
+      copyText(GM_STATE.currentStore.handle, 'Handle copied');
+    });
+
+    document.getElementById('copyJoinBtn').addEventListener('click', function(){
+      if (!GM_STATE.currentStore) return;
+      copyText('https://stellasageco.com/pages/join-store?shop=' + GM_STATE.currentStore.handle, 'Join link copied');
+    });
+
+    document.getElementById('newStoreBanner').addEventListener('click', function(event){
+      var peekBtn = event.target.closest('[data-peek-store]');
+      if (!peekBtn) return;
+      var storeHandle = peekBtn.getAttribute('data-peek-store') || '';
+      var collection = peekBtn.getAttribute('data-peek-collection') || storeHandle;
+      if (collection) window.open('/collections/' + encodeURIComponent(collection), '_blank', 'noopener');
+      if (storeHandle) markStoreSeen(storeHandle);
+    });
+
+    document.getElementById('markAllSeenBtn').addEventListener('click', markAllStoresSeen);
+
+    bindPriceOverride('btnUpdatePrice', 'targetTag', 'newPrice', 'priceStatus');
+    bindPriceOverride('btnUpdatePrice_m', 'targetTag_m', 'newPrice_m', 'priceStatus_m');
+
+    renderNewStoreBanner();
+    applyStoreFilters();
+  </script>
 {% endif %}
 
 </body>
