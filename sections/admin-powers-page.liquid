@@ -2004,7 +2004,7 @@
   </div>
 </div>
 
-{%- elsif is_admin_for_shop == false -%}
+{%- elsif is_admin_for_shop == false and is_super_admin == false -%}
 
 <div class="ap-auth-wrap">
   <div class="ap-auth-card">
@@ -2082,6 +2082,7 @@
     window.SSAP = window.SSAP || {};
     SSAP.collectionHandle = {{ collection_handle | json }};
     SSAP.shopHandle = {{ shop_handle | json }};
+    SSAP.isSuperAdmin = {{ is_super_admin | json }};
     SSAP.railwayUrl = "https://studio-uploader-production.up.railway.app";
     SSAP.editorBaseUrl = {{ editor_base_url | json }};
     SSAP.editorBc3001yBaseUrl = {{ editor_bc3001y_base_url | json }};
