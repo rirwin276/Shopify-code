@@ -11,6 +11,8 @@
 {% assign handle = collection.handle | downcase | strip %}
 {% assign member_tag = 'storefront-member--' | append: handle %}
 {% assign admin_tag  = 'storefront-admin--'  | append: handle %}
+{% assign access_tag = 'custom_storefront_access' %}
+{% assign shop_admin_tag = 'custom_shop_admin' %}
 
 {% assign is_admin = false %}
 {% assign allowed = false %}
@@ -18,12 +20,12 @@
 {% if customer %}
   {% for t in customer.tags %}
     {% assign td = t | downcase | strip %}
-    {% if td == admin_tag %}
+    {% if td == shop_admin_tag or td == admin_tag %}
       {% assign is_admin = true %}
       {% assign allowed = true %}
       {% break %}
     {% endif %}
-    {% if td == member_tag %}
+    {% if td == access_tag or td == member_tag %}
       {% assign allowed = true %}
     {% endif %}
   {% endfor %}

@@ -4,6 +4,34 @@
   fetchpriority="low"
 ></script>
 
+{% liquid
+  assign hide_private_store_collection = false
+
+  if collection and collection.template_suffix == 'private-store'
+    assign private_handle = collection.handle | downcase | strip
+    assign private_member_tag = 'storefront-member--' | append: private_handle
+    assign private_admin_tag = 'storefront-admin--' | append: private_handle
+    assign has_private_access = false
+
+    if customer
+      for tag in customer.tags
+        assign normalized_tag = tag | downcase | strip
+        if normalized_tag == 'custom_shop_admin' or normalized_tag == private_admin_tag
+          assign has_private_access = true
+          break
+        endif
+        if normalized_tag == 'custom_storefront_access' or normalized_tag == private_member_tag
+          assign has_private_access = true
+        endif
+      endfor
+    endif
+
+    unless has_private_access
+      assign hide_private_store_collection = true
+    endunless
+  endif
+%}
+
 {% javascript %}
   const url = new URL(window.location.href);
   if (url.hash) {
@@ -21,6 +49,7 @@
 {% endjavascript %}
 
 {% comment %} We always render this full-width, as the child blocks have width: page/full settings {% endcomment %}
+{% unless hide_private_store_collection %}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
   class="section product-grid-container color-{{ section.settings.color_scheme }}"
@@ -73,6 +102,7 @@
     {% endpaginate %}
   </div>
 </results-list>
+{% endunless %}
 
 {% stylesheet %}
   .main-collection-grid {
