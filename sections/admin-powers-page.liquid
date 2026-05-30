@@ -2211,12 +2211,14 @@
         <select id="apInputRole" class="ap-select">
           <option value="member" selected>Member (Can Shop)</option>
           <option value="admin">Admin (Can Edit Settings)</option>
+          <option value="remove-admin">Remove Admin Role (Keep as Member)</option>
         </select>
       </div>
 
       <div class="ap-btn-row">
         <button id="apBtnAdd" class="ap-btn ap-btn--primary">+ Add Members</button>
         <button id="apBtnRemove" class="ap-btn ap-btn--danger">Remove</button>
+        <button id="apBtnRemoveAdmin" class="ap-btn">Remove Admin Role</button>
       </div>
       <div id="apStatusMembers" class="ap-status"></div>
     </div><!-- /apPanelMembers -->
@@ -2884,6 +2886,17 @@
     el.className = 'ap-status ' + (type || '');
   }
 
+  function setStatusLines(el, lines, type){
+    if(!el) return;
+    el.innerHTML = '';
+    el.className = 'ap-status ' + (type || '');
+    (lines || []).forEach(function(lineText){
+      var line = document.createElement('div');
+      line.textContent = lineText;
+      el.appendChild(line);
+    });
+  }
+
   // SAVE MODE (legacy join-mode UI is hidden in V13; guard in case it is re-enabled later)
   var apBtnSaveMode = document.getElementById('apBtnSaveMode');
   if(apBtnSaveMode){
@@ -2928,71 +2941,107 @@
   });
 
   // ADD / REMOVE MEMBERS
+  function apGetMemberActionConfig(action, role){
+    if(action === 'add'){
+      if(role === 'remove-admin') return null;
+      return {
+        route: role === 'admin' ? 'add-admin' : 'add-member',
+        successText: '✅ Added '
+      };
+    }
+    if(action === 'remove-admin'){
+      return {
+        route: 'remove-admin',
+        successText: '✅ Removed admin role for '
+      };
+    }
+    return {
+      route: 'remove-member',
+      successText: '✅ Removed '
+    };
+  }
+
   async function handleMemberAction(action){
-    var rawText = document.getElementById('apInputEmails').value;
+    var rawText = document.getElementById('apInputEmails').value || '';
     var emails = rawText.split(/[\s,;]+/).map(function(e){ return e.trim().toLowerCase(); }).filter(function(e){ return e.length > 0; });
     var role = document.getElementById('apInputRole').value;
     var statusEl = document.getElementById('apStatusMembers');
     var btnAdd = document.getElementById('apBtnAdd');
     var btnRemove = document.getElementById('apBtnRemove');
+    var btnRemoveAdmin = document.getElementById('apBtnRemoveAdmin');
+    var handle = String(apShopHandle || SSAP.shopHandle || '').trim();
+    var actionConfig = apGetMemberActionConfig(action, role);
 
     if(emails.length === 0){
       setStatus(statusEl, '⚠️ Please enter at least one email.', 'err');
       return;
     }
-    if(action === 'remove' && !confirm('Remove ' + emails.length + ' member(s)?')) return;
+    if(!handle){
+      setStatus(statusEl, '⚠️ Select a store first.', 'err');
+      return;
+    }
+    if(!actionConfig){
+      setStatus(statusEl, '⚠️ Choose Member or Admin when adding access.', 'err');
+      return;
+    }
+    if((action === 'remove' || action === 'remove-admin') && !confirm((actionConfig.route === 'remove-admin' ? 'Remove admin role for ' : 'Remove access for ') + emails.length + ' email(s)?')) return;
 
     setStatus(statusEl, 'Processing…', '');
     btnAdd.disabled = true; btnRemove.disabled = true;
+    if(btnRemoveAdmin) btnRemoveAdmin.disabled = true;
 
     try {
-      var failures = [];
+      var lines = [];
+      var hasFailure = false;
 
       for (var i = 0; i < emails.length; i++) {
         var email = emails[i];
-        var endpoint = '/admin/members/remove';
-        var body = { email: email, secret: SSAP.editorSecret || '' };
-
-        if (action === 'add') {
-          if (role === 'admin') {
-            endpoint = '/admin/members/promote';
-            body.role = 'admin';
-          } else {
-            endpoint = '/admin/members/add';
-          }
-        }
-
         var res = await fetch(
-          SSAP.railwayUrl + endpoint + '?secret=' + encodeURIComponent(SSAP.editorSecret || ''),
+          (SSAP.railwayUrl || '') + '/admin/store/' + encodeURIComponent(handle) + '/' + actionConfig.route,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Admin-Secret': SSAP.editorSecret || ''
+            },
+            body: JSON.stringify({ email: email }),
             cache: 'no-store'
           }
         );
 
-        if (!res.ok) {
-          var errorPayload = await res.json().catch(function(){ return {}; });
-          failures.push(email + (errorPayload.error ? ' (' + errorPayload.error + ')' : ''));
+        var errorPayload = await res.json().catch(function(){ return {}; });
+        if (!res.ok || errorPayload.ok === false) {
+          hasFailure = true;
+          var errorMessage = errorPayload.error || errorPayload.message || ('HTTP ' + res.status);
+          if (actionConfig.route === 'remove-admin' && /last admin/i.test(errorMessage || '')) {
+            lines.push('❌ Cannot remove the last admin of this store');
+          } else {
+            lines.push('❌ ' + email + ': ' + errorMessage);
+          }
+          continue;
         }
+        lines.push(actionConfig.successText + email);
       }
 
-      if (failures.length === 0) {
-        setStatus(statusEl, '✅ Roster updated successfully!', 'ok');
+      if (!hasFailure) {
         document.getElementById('apInputEmails').value = '';
-      } else {
-        throw new Error(failures.join(', '));
       }
+      setStatusLines(statusEl, lines, hasFailure ? 'err' : 'ok');
     } catch(e) {
       setStatus(statusEl, '❌ Could not process request. ' + (e.message || ''), 'err');
     } finally {
       btnAdd.disabled = false; btnRemove.disabled = false;
+      if(btnRemoveAdmin) btnRemoveAdmin.disabled = false;
     }
   }
 
   document.getElementById('apBtnAdd').addEventListener('click', function(){ handleMemberAction('add'); });
   document.getElementById('apBtnRemove').addEventListener('click', function(){ handleMemberAction('remove'); });
+  document.getElementById('apBtnRemoveAdmin').addEventListener('click', function(){
+    var roleSelect = document.getElementById('apInputRole');
+    if(roleSelect) roleSelect.value = 'remove-admin';
+    handleMemberAction('remove-admin');
+  });
 
   // ── SLEEP / WAKE STORE ────────────────────────────────────
   var AP_RAILWAY_URL = SSAP.railwayUrl;
