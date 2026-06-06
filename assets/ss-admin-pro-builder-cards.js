@@ -2,9 +2,8 @@
 (function () {
   'use strict';
 
-  var VERSION = 'pro-builder-registry-v7';
+  var VERSION = 'pro-builder-registry-v8';
   var RAILWAY_BASE = 'https://printfulautomation-production.up.railway.app';
-  var TANK_THUMB = "data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1000'%20height='1000'%20viewBox='0%200%201000%201000'%3E%3Crect%20width='1000'%20height='1000'%20fill='%23f5f1e8'/%3E%3Cpath%20d='M360%20118h280l52%20154%2095%2074-84%20512H297l-84-512%2095-74z'%20fill='%23262420'%20stroke='%23b7a36a'%20stroke-width='13'/%3E%3Cpath%20d='M414%20118c22%2077%20150%2077%20172%200'%20fill='none'%20stroke='%23b7a36a'%20stroke-width='13'/%3E%3Crect%20x='335'%20y='268'%20width='330'%20height='358'%20rx='16'%20fill='none'%20stroke='%23ffffff'%20stroke-width='8'%20stroke-dasharray='24%2018'%20opacity='.65'/%3E%3Ctext%20x='500'%20y='905'%20text-anchor='middle'%20fill='%2311100e'%20font-family='Arial'%20font-size='58'%20font-weight='800'%3ETANK%3C/text%3E%3C/svg%3E";
 
   var IMAGE_URLS = {
     bc3413: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/bc3413-front-clay-triblend.png?v=1777937830',
@@ -12,8 +11,8 @@
     m2580: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/m2580-front-latte.png?v=1778444002',
     ls14003: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ls14003_front_editor_background_style28668.png?v=1779070307',
     cc1717: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/cc1717-front-pepper.png?v=1780468020',
-    nl6733: TANK_THUMB,
-    mc1790: TANK_THUMB
+    nl6733: RAILWAY_BASE + '/editor/pro-shirt/nl6733/card-image',
+    mc1790: RAILWAY_BASE + '/editor/pro-shirt/mc1790/card-image'
   };
 
   var BUILDERS = [
