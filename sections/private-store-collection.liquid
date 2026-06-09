@@ -193,7 +193,7 @@
         <h1 class="ps-title">Sign in to access your private store</h1>
         <p class="ps-sub">This storefront is private. Sign in to view approved products and reorders.</p>
         <div class="ps-actions">
-          <a class="ps-btn ps-btn-solid" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">Sign in</a>
+          <a class="ps-btn ps-btn-solid" href="{{ routes.account_login_url }}?return_url={{ '/pages/portal' | url_encode }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/portal',_saved_at:Date.now()}))}catch(e){}">Sign in</a>
           <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
         </div>
       </div>

@@ -1,4 +1,6 @@
 {% assign block_settings = block.settings %}
+{% assign dashboard_url = '/pages/portal' %}
+{% capture dashboard_login_url %}{{ routes.account_login_url }}?return_url={{ dashboard_url | url_encode }}{% endcapture %}
 
 <script
   src="{{ 'component-cart-items.js' | asset_url }}"
@@ -21,7 +23,7 @@
   {% if cart.empty? %}
     {%- if shop.customer_accounts_enabled and customer == null -%}
       <p>
-        {{ 'actions.log_in_html' | t: link: routes.account_login_url }}
+        {{ 'actions.log_in_html' | t: link: dashboard_login_url }}
       </p>
     {%- endif -%}
 

@@ -17,7 +17,11 @@
     1. Pending storefront form -> return to saved form path.
     2. Normal login/account access -> dashboard.
   {%- endcomment -%}
-  {%- if template.name == 'account' or template.name == 'order' or request.path contains '/account' -%}
+  {%- assign ss_is_auth_page = false -%}
+  {%- if request.path contains '/account/login' or request.path contains '/account/register' or request.path contains '/account/reset' or request.path contains '/account/activate' -%}
+    {%- assign ss_is_auth_page = true -%}
+  {%- endif -%}
+  {%- if (template.name == 'account' or template.name == 'order' or request.path contains '/account') and ss_is_auth_page == false -%}
     <script>
       (function () {
         var portal = "{{ pages['portal'].url | default: '/pages/portal' }}";
@@ -152,8 +156,24 @@
     {%- if customer -%}
       <script>
         (function () {
+          var portalUrl = "{{ pages['portal'].url | default: '/pages/portal' }}";
           var fallbackForm = '/pages/private-storefronts';
           var path = window.location.pathname || '';
+
+          try {
+            var signinRaw = localStorage.getItem('sf_pending_signin_v1');
+            if (signinRaw) {
+              localStorage.removeItem('sf_pending_signin_v1');
+              var signinData = JSON.parse(signinRaw);
+              var signinAt = Number(signinData._saved_at || 0);
+              var signinFresh = !signinAt || ((Date.now() - signinAt) < (1000 * 60 * 60 * 4));
+              if (signinFresh && signinData.return_path && path !== signinData.return_path) {
+                window.location.replace(signinData.return_path);
+                return;
+              }
+            }
+          } catch(e) {}
+
           if (path === fallbackForm || path === '/pages/storefront') return;
 
           try {

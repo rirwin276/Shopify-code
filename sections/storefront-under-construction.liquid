@@ -13,12 +13,16 @@
 {% assign handle = page.handle | downcase | strip %}
 {% assign member_tag = 'b2b-' | append: handle %}
 {% assign admin_tag = 'b2b-admin-' | append: handle %}
+{% assign portal_url = '/pages/portal' %}
+{% assign encoded_portal_url = portal_url | url_encode %}
+{% assign portal_login_url = routes.account_login_url | append: '?return_url=' | append: encoded_portal_url %}
 
 {% unless customer %}
   <div style="max-width:760px;margin:60px auto;text-align:center;padding:0 16px;">
     <h1 style="margin:0 0 10px;">Please sign in</h1>
     <p style="margin:0 0 18px;color:rgba(0,0,0,.65);">You must be signed in to access this private store.</p>
-    <a href="{{ routes.account_login_url | append: '?return_url=' | append: request.path | url_encode }}"
+    <a href="{{ portal_login_url }}"
+       onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ portal_url | escape }}',_saved_at:Date.now()}))}catch(e){}"
        style="display:inline-block;padding:12px 18px;border-radius:999px;background:#0b0b0b;color:#fff;font-weight:900;text-decoration:none;">
       Sign in
     </a>
