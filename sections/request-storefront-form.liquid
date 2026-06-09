@@ -45,6 +45,11 @@
 {% assign studio_uploader_base_url = section.settings.studio_uploader_base_url | default: "https://studio-uploader-production.up.railway.app" %}
 {% assign admin_email = section.settings.admin_email | default: "ryan.irwin@stellaandsagecompany.com" %}
 
+{%- comment -%} Build login/register URLs using same pattern as portal-router.liquid (confirmed working) {%- endcomment -%}
+{%- capture sf_encoded_return %}{{ request.path | url_encode }}{% endcapture -%}
+{%- assign sf_login_url = routes.account_login_url | append: '?return_url=' | append: sf_encoded_return -%}
+{%- assign sf_register_url = routes.account_register_url | append: '?return_url=' | append: sf_encoded_return -%}
+
 {{ 'ss-wow.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
 
@@ -327,8 +332,8 @@
           <p class="sf-auth-desc">We will <strong>never spam you</strong>. No daily emails. Ever. You might get an occasional heads-up like "new products are in" or "get ready for softball season" — that's it.</p>
           <p class="sf-auth-desc sf-auth-desc--small">Your form answers are saved and will be waiting for you when you get back.</p>
           <div class="sf-gate-btns">
-            <a href="{{ routes.account_register_url }}?return_url=%2Fpages%2Fstorefront" class="sf-btn sf-btn--solid">Create Free Account</a>
-            <a href="{{ routes.account_login_url }}?return_url=%2Fpages%2Fstorefront" class="sf-btn sf-btn--outline">Log In</a>
+            <a href="{{ sf_register_url }}" class="sf-btn sf-btn--solid">Create Free Account</a>
+            <a href="{{ sf_login_url }}" class="sf-btn sf-btn--outline">Log In</a>
           </div>
           <button type="button" class="sf-auth-cancel" onclick="sfCloseAuthModal()">Back to form</button>
         </div>
@@ -343,8 +348,8 @@
   const SF_USER_EMAIL = ("{{ customer.email | escape }}").toLowerCase();
   const SF_IS_ADMIN = (SF_USER_EMAIL === SF_ADMIN_EMAIL);
   const SF_IS_LOGGED_IN = {% if customer %}true{% else %}false{% endif %};
-  const SF_REGISTER_URL = "{{ routes.account_register_url }}?return_url=%2Fpages%2Fstorefront";
-  const SF_LOGIN_URL = "{{ routes.account_login_url }}?return_url=%2Fpages%2Fstorefront";
+  const SF_REGISTER_URL = "{{ sf_register_url }}";
+  const SF_LOGIN_URL = "{{ sf_login_url }}";
   const SF_SESSION_KEY = 'sf_pending_form_v1';
 
   const sfQualityState = {
