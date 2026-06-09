@@ -1,9 +1,47 @@
 (function(){
   var path = window.location.pathname || '';
-  if (path.indexOf('/pages/request') !== 0) return;
+  var DASHBOARD_URL = '/pages/portal';
+  var STOREFRONT_FORM_URL = '/pages/private-storefronts';
+  var LOGIN_BASE = '/account/login';
 
   function qs(sel, root){ return (root || document).querySelector(sel); }
   function qsa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function loginReturnUrl(returnPath){ return LOGIN_BASE + '?return_url=' + encodeURIComponent(returnPath); }
+
+  function fixHomepageAndFormAuthLinks(){
+    var loginToDashboard = loginReturnUrl(DASHBOARD_URL);
+    var loginToStorefrontForm = loginReturnUrl(STOREFRONT_FORM_URL);
+
+    // Homepage logged-out hero: Create Store -> login -> storefront request form.
+    qsa('.ss-hero-actions a, a').forEach(function(link){
+      var text = (link.textContent || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      var href = link.getAttribute('href') || '';
+
+      var isCreateStoreText =
+        text.indexOf('create') !== -1 &&
+        (text.indexOf('store') !== -1 || text.indexOf('storefront') !== -1 || text.indexOf('shop') !== -1);
+
+      var isRequestStoreHref =
+        href === STOREFRONT_FORM_URL ||
+        href.indexOf('/pages/private-storefronts') === 0 ||
+        href.indexOf('/pages/storefront') === 0;
+
+      if (isCreateStoreText && isRequestStoreHref) {
+        link.setAttribute('href', loginToStorefrontForm);
+      }
+
+      // Homepage Sign In -> login -> dashboard.
+      var isSignInText = text === 'sign in' || text.indexOf('sign in') !== -1 || text.indexOf('log in') !== -1;
+      if (isSignInText && href.indexOf('/account/login') !== -1) {
+        link.setAttribute('href', loginToDashboard);
+      }
+    });
+
+    // Request form logged-out gate: always sign in to the storefront form, never Orders.
+    qsa('.sf-auth-actions a.sf-btn--solid').forEach(function(link){
+      link.setAttribute('href', loginToStorefrontForm);
+    });
+  }
 
   function getUploaderBase(){
     var fallback = 'https://studio-uploader-production.up.railway.app';
@@ -110,6 +148,16 @@
     });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', waitForForm, {once:true});
-  else waitForForm();
+  function init(){
+    fixHomepageAndFormAuthLinks();
+    setTimeout(fixHomepageAndFormAuthLinks, 250);
+    setTimeout(fixHomepageAndFormAuthLinks, 1000);
+
+    if (path.indexOf('/pages/request') === 0 || path.indexOf('/pages/private-storefronts') === 0 || path.indexOf('/pages/storefront') === 0) {
+      waitForForm();
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+  else init();
 })();
