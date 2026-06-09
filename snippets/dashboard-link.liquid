@@ -12,7 +12,7 @@
   </a>
 {% else %}
   {% capture encoded %}{{ dashboard_url | url_encode }}{% endcapture %}
-  <a href="{{ routes.account_login_url }}?return_url={{ encoded }}" class="nav-dashboard">
+  <a href="{{ routes.account_login_url }}?return_url={{ encoded }}" class="nav-dashboard" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ dashboard_url | escape }}',_saved_at:Date.now()}))}catch(e){}">
     Dashboard
   </a>
 {% endif %}

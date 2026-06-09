@@ -12,13 +12,16 @@
 {% endcomment %}
 
 {% assign handle = request.params.shop | downcase | strip %}
+{% assign portal_url = '/pages/portal' %}
+{% assign encoded_portal_url = portal_url | url_encode %}
+{% assign portal_login_url = routes.account_login_url | append: '?return_url=' | append: encoded_portal_url %}
 
 <section class="ps-wrap">
   {% if customer == nil %}
     <div class="ps-card">
       <h1 class="ps-h1">Sign in to access your private store</h1>
       <p class="ps-sub">You must be logged in to view your private storefront.</p>
-      <a class="ps-btn ps-btn--solid" href="{{ routes.account_login_url | append: '?return_url=' | append: request.path | append: '?shop=' | append: handle | url_encode }}">
+      <a class="ps-btn ps-btn--solid" href="{{ portal_login_url }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ portal_url | escape }}',_saved_at:Date.now()}))}catch(e){}">
         Sign in
       </a>
     </div>

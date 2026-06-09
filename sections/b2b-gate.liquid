@@ -16,6 +16,8 @@
 {%- endcomment -%}
 
 {%- assign portal_path = section.settings.portal_path | default: '/pages/portal' -%}
+{%- assign encoded_portal_path = portal_path | url_encode -%}
+{%- assign login_url = routes.account_login_url | append: '?return_url=' | append: encoded_portal_path -%}
 
 {%- assign parts = request.path | split: '/' -%}
 {%- assign page_handle = parts | last -%}
@@ -51,10 +53,13 @@
     {%- endif -%}
   {%- else -%}
     <script>
-      window.location.replace("/account/login");
+      try {
+        localStorage.setItem('sf_pending_signin_v1', JSON.stringify({ return_path: '{{ portal_path | escape }}', _saved_at: Date.now() }));
+      } catch (e) {}
+      window.location.replace("{{ login_url }}");
     </script>
     <noscript>
-      <meta http-equiv="refresh" content="0; url=/account/login">
+      <meta http-equiv="refresh" content="0; url={{ login_url }}">
     </noscript>
   {%- endif -%}
 {%- endif -%}

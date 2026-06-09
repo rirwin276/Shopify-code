@@ -141,7 +141,7 @@
 
           <div class="ss-hero-actions">
             <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.hero_cta_label | escape }}</a>
-            <a class="ss-btn ss-btn--light" href="{{ login_url }}?return_url={{ dashboard_url | url_encode }}">{{ section.settings.hero_signin_label | escape }}</a>
+            <a class="ss-btn ss-btn--light" href="{{ login_url }}?return_url={{ dashboard_url | url_encode }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ dashboard_url | escape }}',_saved_at:Date.now()}))}catch(e){}">{{ section.settings.hero_signin_label | escape }}</a>
           </div>
 
           <div class="ss-hero-proofline">

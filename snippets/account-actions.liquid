@@ -34,6 +34,7 @@
         <a
           href="{{ dashboard_login_url }}"
           class="account-actions__link button"
+          onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ dashboard_url | escape }}',_saved_at:Date.now()}))}catch(e){}"
         >
           <span class="account-actions__sign-in-text">
             {{ 'actions.sign_in_options' | t }}

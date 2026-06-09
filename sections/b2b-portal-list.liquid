@@ -16,10 +16,22 @@
 {%- endcomment -%}
 
 {%- assign login_path = section.settings.login_path | default: '/account/login' -%}
+{%- assign encoded_portal_path = '/pages/portal' | url_encode -%}
+{%- assign login_redirect = login_path -%}
+{%- if login_path contains '/account/login' -%}
+  {%- unless login_path contains 'return_url=' -%}
+    {%- assign login_redirect = login_path | append: '?return_url=' | append: encoded_portal_path -%}
+  {%- endunless -%}
+{%- endif -%}
 
 {%- if customer == nil -%}
-  <script>window.location.replace("{{ login_path }}");</script>
-  <noscript><meta http-equiv="refresh" content="0; url={{ login_path }}"></noscript>
+  <script>
+    try {
+      localStorage.setItem('sf_pending_signin_v1', JSON.stringify({ return_path: '/pages/portal', _saved_at: Date.now() }));
+    } catch (e) {}
+    window.location.replace("{{ login_redirect }}");
+  </script>
+  <noscript><meta http-equiv="refresh" content="0; url={{ login_redirect }}"></noscript>
 {%- endif -%}
 
 <section style="max-width:1100px;margin:0 auto;padding:36px 16px;">

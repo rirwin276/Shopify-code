@@ -283,7 +283,7 @@
 
           {% unless customer %}
             <div class="ss-actions__btnRow">
-              <a class="ss-actions__btn" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">
+              <a class="ss-actions__btn" href="{{ routes.account_login_url }}?return_url={{ '/pages/portal' | url_encode }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/portal',_saved_at:Date.now()}))}catch(e){}">
                 Log in
               </a>
             </div>
@@ -315,7 +315,7 @@
 
           {% unless customer %}
             <div class="ss-actions__btnRow">
-              <a class="ss-actions__btn" href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}">
+              <a class="ss-actions__btn" href="{{ routes.account_login_url }}?return_url={{ '/pages/portal' | url_encode }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/portal',_saved_at:Date.now()}))}catch(e){}">
                 Log in
               </a>
             </div>
