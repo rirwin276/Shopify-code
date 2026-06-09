@@ -141,7 +141,7 @@
 
           <div class="ss-hero-actions">
             <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.hero_cta_label | escape }}</a>
-            <a class="ss-btn ss-btn--light" href="{{ login_url }}?return_to={{ dashboard_url | url_encode }}">{{ section.settings.hero_signin_label | escape }}</a>
+            <a class="ss-btn ss-btn--light" href="{{ login_url }}?return_url={{ dashboard_url | url_encode }}">{{ section.settings.hero_signin_label | escape }}</a>
           </div>
 
           <div class="ss-hero-proofline">
@@ -268,7 +268,7 @@
 
           <div class="ss-compare-card ss-compare-card--new">
             <div class="ss-card-label">THE STELLA & SAGE WAY</div>
-            <h3>Create the store. Share the link. You’re done.</h3>
+            <h3>Create the store. Share the link. You're done.</h3>
             <ul>
               <li>Everyone orders directly</li>
               <li>No minimums or upfront inventory</li>
@@ -475,7 +475,7 @@
 
         <div class="ss-faq-list">
           <details>
-            <summary>Do I have to collect everyone’s sizes?</summary>
+            <summary>Do I have to collect everyone's sizes?</summary>
             <p>No. Everyone orders their own size directly from the private storefront.</p>
           </details>
 
