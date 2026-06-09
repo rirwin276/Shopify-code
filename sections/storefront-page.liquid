@@ -34,7 +34,7 @@
     <div class="sf-card">
       <h1 class="sf-h1">Sign in to access your private store</h1>
       <p class="sf-sub">You must be logged in to view this storefront.</p>
-      <a class="sf-btn sf-btn--solid" href="{{ routes.account_login_url }}?return_url={{ portal_url | url_encode }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ portal_url | escape }}',_saved_at:Date.now()}))}catch(e){}">Sign in</a>
+      <a class="sf-btn sf-btn--solid" href="{{ routes.storefront_login_url }}?return_to={{ portal_url | url_encode }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ portal_url | escape }}',_saved_at:Date.now()}))}catch(e){}">Sign in</a>
       <div style="margin-top:12px;">
         <a class="sf-btn sf-btn--ghost" href="/pages/portal">Back to Dashboard</a>
       </div>

@@ -36,7 +36,7 @@
   (New customer accounts safe)
 {%- endcomment -%}
 {% capture encoded_return %}{{ explainer_url | url_encode }}{% endcapture %}
-{% assign login_url = routes.account_login_url | append: '?return_url=' | append: encoded_return %}
+{% assign login_url = routes.storefront_login_url | append: '?return_to=' | append: encoded_return %}
 
 {% assign has_storefront = false %}
 {% assign requested_badge = false %}
