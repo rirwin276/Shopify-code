@@ -327,8 +327,8 @@
           <p class="sf-auth-desc">We will <strong>never spam you</strong>. No daily emails. Ever. You might get an occasional heads-up like "new products are in" or "get ready for softball season" — that's it.</p>
           <p class="sf-auth-desc sf-auth-desc--small">Your form answers are saved and will be waiting for you when you get back.</p>
           <div class="sf-gate-btns">
-            <a href="{{ routes.account_register_url }}?return_url={{ request.path | url_encode }}" class="sf-btn sf-btn--solid">Create Free Account</a>
-            <a href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}" class="sf-btn sf-btn--outline">Log In</a>
+            <a href="{{ routes.account_register_url }}?return_url=%2Fpages%2Fstorefront" class="sf-btn sf-btn--solid">Create Free Account</a>
+            <a href="{{ routes.account_login_url }}?return_url=%2Fpages%2Fstorefront" class="sf-btn sf-btn--outline">Log In</a>
           </div>
           <button type="button" class="sf-auth-cancel" onclick="sfCloseAuthModal()">Back to form</button>
         </div>
@@ -343,8 +343,8 @@
   const SF_USER_EMAIL = ("{{ customer.email | escape }}").toLowerCase();
   const SF_IS_ADMIN = (SF_USER_EMAIL === SF_ADMIN_EMAIL);
   const SF_IS_LOGGED_IN = {% if customer %}true{% else %}false{% endif %};
-  const SF_REGISTER_URL = "{{ routes.account_register_url }}?return_url={{ request.path | url_encode }}";
-  const SF_LOGIN_URL = "{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}";
+  const SF_REGISTER_URL = "{{ routes.account_register_url }}?return_url=%2Fpages%2Fstorefront";
+  const SF_LOGIN_URL = "{{ routes.account_login_url }}?return_url=%2Fpages%2Fstorefront";
   const SF_SESSION_KEY = 'sf_pending_form_v1';
 
   const sfQualityState = {
@@ -1051,15 +1051,15 @@
         storefront_name: document.getElementById('StoreName')?.value || '',
         main_session_id: document.getElementById('SF_MAIN_SESSION')?.value || ''
       };
-      sessionStorage.setItem(SF_SESSION_KEY, JSON.stringify(data));
+      localStorage.setItem(SF_SESSION_KEY, JSON.stringify(data));
     } catch(e) {}
   }
 
   function sfRestoreFromSession() {
     try {
-      const raw = sessionStorage.getItem(SF_SESSION_KEY);
+      const raw = localStorage.getItem(SF_SESSION_KEY);
       if (!raw) return;
-      sessionStorage.removeItem(SF_SESSION_KEY);
+      localStorage.removeItem(SF_SESSION_KEY);
       const data = JSON.parse(raw);
 
       if (data.org_type) {
@@ -1099,6 +1099,9 @@
   function sfShowAuthModal() {
     const modal = document.getElementById('sf-auth-modal');
     if (!modal) return;
+    if (modal.parentNode !== document.body) {
+      document.body.appendChild(modal);
+    }
     modal.classList.remove('sf-hidden');
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -1219,7 +1222,7 @@
   .sf-btn { width: 100%; background: #111; color: #fff; border: none; padding: 14px 16px; border-radius: 999px; font-size: 16px; font-weight: 900; cursor: pointer; transition: transform 0.1s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
   .sf-btn:hover { transform: translateY(-1px); background: #000; color: #fff; }
   .sf-btn--solid { background:#0f172a; }
-  .sf-btn--outline { background: transparent; border: 1px solid #ddd; color: #111; }
+  .sf-btn--outline { background: transparent; border: 2px solid #111; color: #111; }
 
   .sf-fineprint { margin: 14px 0 0; font-size: 12px; color: #94a3b8; text-align: center; line-height: 1.35; }
 
