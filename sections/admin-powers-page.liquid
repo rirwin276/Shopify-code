@@ -2000,7 +2000,7 @@
     <span class="ap-auth-icon">🔒</span>
     <h2>Please Sign In</h2>
     <p>You must be signed in to access Admin Powers.</p>
-    <a href="{{ routes.account_login_url }}?return_url={{ '/pages/portal' | url_encode }}" class="ap-btn ap-btn--primary" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/portal',_saved_at:Date.now()}))}catch(e){}">Sign In →</a>
+    <a href="{{ routes.storefront_login_url }}?return_to={{ '/pages/portal' | url_encode }}" class="ap-btn ap-btn--primary" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/portal',_saved_at:Date.now()}))}catch(e){}">Sign In →</a>
   </div>
 </div>
 

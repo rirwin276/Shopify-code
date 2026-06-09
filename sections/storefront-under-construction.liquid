@@ -15,7 +15,7 @@
 {% assign admin_tag = 'b2b-admin-' | append: handle %}
 {% assign portal_url = '/pages/portal' %}
 {% assign encoded_portal_url = portal_url | url_encode %}
-{% assign portal_login_url = routes.account_login_url | append: '?return_url=' | append: encoded_portal_url %}
+{% assign portal_login_url = routes.storefront_login_url | append: '?return_to=' | append: encoded_portal_url %}
 
 {% unless customer %}
   <div style="max-width:760px;margin:60px auto;text-align:center;padding:0 16px;">

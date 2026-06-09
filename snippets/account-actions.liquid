@@ -1,6 +1,5 @@
 {% assign dashboard_url = '/pages/portal' %}
-{% capture encoded_dashboard_return %}{{ dashboard_url | url_encode }}{% endcapture %}
-{% assign dashboard_login_url = routes.account_login_url | append: '?return_url=' | append: encoded_dashboard_return %}
+{% capture dashboard_login_url %}{{ routes.storefront_login_url }}?return_to={{ '/pages/portal' | url_encode }}{% endcapture %}
 
 <div class="account-actions">
   <div class="account-actions__main-menu">
@@ -64,7 +63,7 @@
         </li>
         <li class="account-actions__list-item">
           <a
-            href="{{ dashboard_url }}"
+            href="{{ routes.account_url }}"
             class="account-actions__link button-secondary"
           >
             <span

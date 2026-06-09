@@ -8,7 +8,7 @@
 {% assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' %}
 {% assign explainer_url = section.settings.explainer_url | default: '/pages/private-storefronts' %}
 {% assign login_return = section.settings.login_return_url | default: dashboard_url %}
-{% capture login_url %}{{ routes.account_login_url }}?return_url={{ login_return | url_encode }}{% endcapture %}
+{% capture login_url %}{{ routes.storefront_login_url }}?return_to={{ login_return | url_encode }}{% endcapture %}
 
 <section class="ss-command-bar">
   <div class="ss-bar-inner">

@@ -102,7 +102,7 @@
       <div class="ss-invite__right">
         {% unless customer %}
           <a class="ss-invite__btn ss-invite__btn--solid"
-             href="{{ routes.account_login_url }}?return_url={{ '/pages/portal' | url_encode }}"
+           href="{{ routes.storefront_login_url }}?return_to={{ '/pages/portal' | url_encode }}"
              onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/portal',_saved_at:Date.now()}))}catch(e){}">
             Log in to manage access
           </a>

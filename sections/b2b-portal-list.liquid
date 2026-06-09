@@ -19,8 +19,8 @@
 {%- assign encoded_portal_path = '/pages/portal' | url_encode -%}
 {%- assign login_redirect = login_path -%}
 {%- if login_path contains '/account/login' -%}
-  {%- unless login_path contains 'return_url=' -%}
-    {%- assign login_redirect = login_path | append: '?return_url=' | append: encoded_portal_path -%}
+  {%- unless login_path contains 'return_to=' -%}
+    {%- assign login_redirect = login_path | append: '?return_to=' | append: encoded_portal_path -%}
   {%- endunless -%}
 {%- endif -%}
 

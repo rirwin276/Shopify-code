@@ -14,7 +14,7 @@
 {% assign handle = request.params.shop | downcase | strip %}
 {% assign portal_url = '/pages/portal' %}
 {% assign encoded_portal_url = portal_url | url_encode %}
-{% assign portal_login_url = routes.account_login_url | append: '?return_url=' | append: encoded_portal_url %}
+{% assign portal_login_url = routes.storefront_login_url | append: '?return_to=' | append: encoded_portal_url %}
 
 <section class="ps-wrap">
   {% if customer == nil %}

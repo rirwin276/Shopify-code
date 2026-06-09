@@ -15,7 +15,7 @@
         <h1>Restricted Access</h1>
         <p>This terminal is for authorized Hamaker Partners only.</p>
         <div class="mh-gate-actions">
-           <a href="{{ routes.account_login_url }}?return_url={{ '/pages/portal' | url_encode }}" class="mh-btn-primary" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/portal',_saved_at:Date.now()}))}catch(e){}">Log In</a>
+           <a href="{{ routes.storefront_login_url }}?return_to={{ '/pages/portal' | url_encode }}" class="mh-btn-primary" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/portal',_saved_at:Date.now()}))}catch(e){}">Log In</a>
         </div>
       </div>
     </div>

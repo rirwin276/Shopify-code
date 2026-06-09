@@ -12,7 +12,7 @@
 {%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
 {%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
 {%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
-{%- assign login_url = routes.account_login_url | default: routes.storefront_login_url -%}
+{%- capture login_url -%}{{ routes.storefront_login_url }}?return_to={{ dashboard_url | url_encode }}{%- endcapture -%}
 
 {%- comment -%}Logged-in: parse storefront tags & metaobjects, same core logic as previous homepage.{%- endcomment -%}
 {%- assign has_storefront = false -%}
@@ -141,7 +141,7 @@
 
           <div class="ss-hero-actions">
             <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.hero_cta_label | escape }}</a>
-            <a class="ss-btn ss-btn--light" href="{{ login_url }}?return_url={{ dashboard_url | url_encode }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ dashboard_url | escape }}',_saved_at:Date.now()}))}catch(e){}">{{ section.settings.hero_signin_label | escape }}</a>
+            <a class="ss-btn ss-btn--light" href="{{ login_url }}" onclick="try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'{{ dashboard_url | escape }}',_saved_at:Date.now()}))}catch(e){}">{{ section.settings.hero_signin_label | escape }}</a>
           </div>
 
           <div class="ss-hero-proofline">
