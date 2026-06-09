@@ -45,11 +45,6 @@
 {% assign studio_uploader_base_url = section.settings.studio_uploader_base_url | default: "https://studio-uploader-production.up.railway.app" %}
 {% assign admin_email = section.settings.admin_email | default: "ryan.irwin@stellaandsagecompany.com" %}
 
-{%- comment -%} Build login/register URLs using same pattern as portal-router.liquid (confirmed working) {%- endcomment -%}
-{%- capture sf_encoded_return %}{{ request.path | url_encode }}{% endcapture -%}
-{%- assign sf_login_url = routes.account_login_url | append: '?return_url=' | append: sf_encoded_return -%}
-{%- assign sf_register_url = routes.account_register_url | append: '?return_url=' | append: sf_encoded_return -%}
-
 {{ 'ss-wow.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
 
@@ -128,27 +123,6 @@
                 <option value="golf">Golf</option>
                 <option value="tennis">Tennis</option>
                 <option value="cheer">Cheer / Cheerleading</option>
-              </select>
-            </div>
-
-            <div class="sf-field">
-              <label class="sf-label">Est. Users *</label>
-              <select name="user_count" class="sf-select" required>
-                <option value="" disabled selected>Select...</option>
-                <option value="1-10">1-10 people</option>
-                <option value="11-50">11-50 people</option>
-                <option value="51-200">51-200 people</option>
-                <option value="200+">200+ people</option>
-              </select>
-            </div>
-
-            <div class="sf-field">
-              <label class="sf-label">Duration *</label>
-              <select name="duration" class="sf-select" required>
-                <option value="" disabled selected>Select...</option>
-                <option value="Ongoing">Ongoing (Permanent)</option>
-                <option value="One-time Event">One-time Event / Drop</option>
-                <option value="Seasonal">Seasonal</option>
               </select>
             </div>
 
@@ -332,8 +306,8 @@
           <p class="sf-auth-desc">We will <strong>never spam you</strong>. No daily emails. Ever. You might get an occasional heads-up like "new products are in" or "get ready for softball season" — that's it.</p>
           <p class="sf-auth-desc sf-auth-desc--small">Your form answers are saved and will be waiting for you when you get back.</p>
           <div class="sf-gate-btns">
-            <a href="{{ sf_register_url }}" class="sf-btn sf-btn--solid">Create Free Account</a>
-            <a href="{{ sf_login_url }}" class="sf-btn sf-btn--outline">Log In</a>
+            <a href="{{ routes.account_login_url }}?return_url=%2Fpages%2Fstorefront" class="sf-btn sf-btn--solid">Create Free Account</a>
+            <a href="{{ routes.account_login_url }}?return_url=%2Fpages%2Fstorefront" class="sf-btn sf-btn--outline">Log In</a>
           </div>
           <button type="button" class="sf-auth-cancel" onclick="sfCloseAuthModal()">Back to form</button>
         </div>
@@ -348,8 +322,8 @@
   const SF_USER_EMAIL = ("{{ customer.email | escape }}").toLowerCase();
   const SF_IS_ADMIN = (SF_USER_EMAIL === SF_ADMIN_EMAIL);
   const SF_IS_LOGGED_IN = {% if customer %}true{% else %}false{% endif %};
-  const SF_REGISTER_URL = "{{ sf_register_url }}";
-  const SF_LOGIN_URL = "{{ sf_login_url }}";
+  const SF_REGISTER_URL = "{{ routes.account_login_url }}?return_url=%2Fpages%2Fstorefront";
+  const SF_LOGIN_URL = "{{ routes.account_login_url }}?return_url=%2Fpages%2Fstorefront";
   const SF_SESSION_KEY = 'sf_pending_form_v1';
 
   const sfQualityState = {
@@ -1050,8 +1024,6 @@
         org_type: document.getElementById('OrgType')?.value || '',
         military_branch: document.getElementById('BranchInput')?.value || '',
         sport_type: document.getElementById('SportInput')?.value || '',
-        user_count: document.querySelector('[name="user_count"]')?.value || '',
-        duration: document.querySelector('[name="duration"]')?.value || '',
         primary_color: document.getElementById('PrimaryColor')?.value || '',
         storefront_name: document.getElementById('StoreName')?.value || '',
         main_session_id: document.getElementById('SF_MAIN_SESSION')?.value || ''
@@ -1078,14 +1050,6 @@
       if (data.sport_type) {
         const el = document.getElementById('SportInput');
         if (el) el.value = data.sport_type;
-      }
-      if (data.user_count) {
-        const el = document.querySelector('[name="user_count"]');
-        if (el) el.value = data.user_count;
-      }
-      if (data.duration) {
-        const el = document.querySelector('[name="duration"]');
-        if (el) el.value = data.duration;
       }
       if (data.primary_color) {
         const el = document.getElementById('PrimaryColor');
