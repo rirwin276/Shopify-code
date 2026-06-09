@@ -106,7 +106,7 @@
 
     <title>
       {{ page_title }}
-      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', '}}"{% endif -%}
       {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
       {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
     </title>
@@ -127,6 +127,10 @@
     {% endif %}
 
     {{ content_for_header }}
+
+    {%- if customer -%}
+      <script>(function(){var k='sf_pending_form_v1',t='/pages/storefront';if(window.location.pathname===t)return;try{var r=localStorage.getItem(k);if(!r)return;var d=JSON.parse(r),a=Date.now()-(d._saved_at||0);if(a<1800000){window.location.replace(t);}else{localStorage.removeItem(k);}}catch(e){}})();</script>
+    {%- endif -%}
 
     {%- comment -%} STELLA & SAGE CUSTOM ASSETS {%- endcomment -%}
     {% render 'ss-data-layer' %}

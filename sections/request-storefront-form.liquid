@@ -1026,7 +1026,8 @@
         sport_type: document.getElementById('SportInput')?.value || '',
         primary_color: document.getElementById('PrimaryColor')?.value || '',
         storefront_name: document.getElementById('StoreName')?.value || '',
-        main_session_id: document.getElementById('SF_MAIN_SESSION')?.value || ''
+        main_session_id: document.getElementById('SF_MAIN_SESSION')?.value || '',
+        _saved_at: Date.now()
       };
       localStorage.setItem(SF_SESSION_KEY, JSON.stringify(data));
     } catch(e) {}
