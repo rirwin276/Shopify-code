@@ -56,17 +56,7 @@
 
   <div class="sf-form-wrap ss-reveal">
 
-    {% unless customer %}
-      <div class="sf-gate">
-        <div style="font-size: 40px; margin-bottom: 16px;">🔒</div>
-        <h3 class="sf-gate-title">Member Access Only</h3>
-        <p class="sf-gate-text">You must be logged in to request a new storefront.</p>
-        <div class="sf-gate-btns">
-          <a href="{{ routes.account_login_url }}?return_url={{ request.path }}" class="sf-btn sf-btn--solid">Log In</a>
-          <a href="{{ routes.account_register_url }}?return_url={{ request.path }}" class="sf-btn sf-btn--outline">Create Account</a>
-        </div>
-      </div>
-    {% else %}
+
 
       <div id="sf-toast" class="sf-toast sf-hidden" role="status" aria-live="polite">
         <div class="sf-toast-inner">
@@ -191,7 +181,7 @@
                 <option value="Maroon">Maroon</option>
                 <option value="Burgundy">Burgundy</option>
               </select>
-              <p class="sf-help">This helps us pick your default thumbnail color. You’ll still be able to offer multiple colors later.</p>
+              <p class="sf-help">This helps us pick your default thumbnail color. You'll still be able to offer multiple colors later.</p>
             </div>
           </div>
         </div>
@@ -227,7 +217,7 @@
             <label class="sf-label">Main Logo / Store Image *</label>
 
             <div class="sf-file-drop" id="MainLogoDrop" onclick="openUploaderModal()">
-              <span id="MainLogoText">🪄 Add & edit logo</span>
+              <span id="MainLogoText">🪄 Add &amp; edit logo</span>
               <input
                 type="file"
                 id="MainLogo"
@@ -326,7 +316,24 @@
         </div>
       </div>
 
-    {% endunless %}
+
+      <!-- Auth modal: shown when a non-logged-in user tries to submit -->
+      <div id="sf-auth-modal" class="sf-modal sf-hidden" aria-hidden="true">
+        <div class="sf-modal-backdrop" onclick="sfCloseAuthModal()"></div>
+        <div class="sf-modal-card sf-auth-card" role="dialog" aria-modal="true" aria-label="Sign in to continue">
+          <div class="sf-auth-icon">👋</div>
+          <h2 class="sf-auth-title">One quick step!</h2>
+          <p class="sf-auth-desc">We need to link your store to a real person — that's you. Creating an account is completely free and takes about 30 seconds.</p>
+          <p class="sf-auth-desc">We will <strong>never spam you</strong>. No daily emails. Ever. You might get an occasional heads-up like "new products are in" or "get ready for softball season" — that's it.</p>
+          <p class="sf-auth-desc sf-auth-desc--small">Your form answers are saved and will be waiting for you when you get back.</p>
+          <div class="sf-gate-btns">
+            <a href="{{ routes.account_register_url }}?return_url={{ request.path | url_encode }}" class="sf-btn sf-btn--solid">Create Free Account</a>
+            <a href="{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}" class="sf-btn sf-btn--outline">Log In</a>
+          </div>
+          <button type="button" class="sf-auth-cancel" onclick="sfCloseAuthModal()">Back to form</button>
+        </div>
+      </div>
+
   </div>
 </div>
 
@@ -335,6 +342,10 @@
   const SF_ADMIN_EMAIL = "{{ admin_email | escape }}".toLowerCase();
   const SF_USER_EMAIL = ("{{ customer.email | escape }}").toLowerCase();
   const SF_IS_ADMIN = (SF_USER_EMAIL === SF_ADMIN_EMAIL);
+  const SF_IS_LOGGED_IN = {% if customer %}true{% else %}false{% endif %};
+  const SF_REGISTER_URL = "{{ routes.account_register_url }}?return_url={{ request.path | url_encode }}";
+  const SF_LOGIN_URL = "{{ routes.account_login_url }}?return_url={{ request.path | url_encode }}";
+  const SF_SESSION_KEY = 'sf_pending_form_v1';
 
   const sfQualityState = {
     main: { tier: null, okToSubmit: false, hasFile: false, pending: false }
@@ -372,6 +383,7 @@
     generateHandle();
     toggleConditionals();
     updateSubmitEnabled();
+    sfRestoreFromSession();
   });
 
   function checkRateLimit() {
@@ -902,6 +914,12 @@
       return;
     }
 
+    if (!SF_IS_LOGGED_IN) {
+      sfSaveToSession();
+      sfShowAuthModal();
+      return;
+    }
+
     if (!SF_UPLOADER_BASE) {
       alert("Studio Uploader URL not configured in section settings.");
       return;
@@ -982,7 +1000,7 @@
       }
 
       showInlineError(
-        "We couldn’t submit your request. " +
+        "We couldn't submit your request. " +
         "Please double-check your details and try again. " +
         "<br><span style='font-weight:700;'>Reason:</span> " +
         escapeHtml(err.message || "Unknown error")
@@ -1019,6 +1037,79 @@
     return (str || "").replace(/[&<>"']/g, (m) => ({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
     }[m]));
+  }
+
+  function sfSaveToSession() {
+    try {
+      const data = {
+        org_type: document.getElementById('OrgType')?.value || '',
+        military_branch: document.getElementById('BranchInput')?.value || '',
+        sport_type: document.getElementById('SportInput')?.value || '',
+        user_count: document.querySelector('[name="user_count"]')?.value || '',
+        duration: document.querySelector('[name="duration"]')?.value || '',
+        primary_color: document.getElementById('PrimaryColor')?.value || '',
+        storefront_name: document.getElementById('StoreName')?.value || '',
+        main_session_id: document.getElementById('SF_MAIN_SESSION')?.value || ''
+      };
+      sessionStorage.setItem(SF_SESSION_KEY, JSON.stringify(data));
+    } catch(e) {}
+  }
+
+  function sfRestoreFromSession() {
+    try {
+      const raw = sessionStorage.getItem(SF_SESSION_KEY);
+      if (!raw) return;
+      sessionStorage.removeItem(SF_SESSION_KEY);
+      const data = JSON.parse(raw);
+
+      if (data.org_type) {
+        const el = document.getElementById('OrgType');
+        if (el) { el.value = data.org_type; toggleConditionals(); }
+      }
+      if (data.military_branch) {
+        const el = document.getElementById('BranchInput');
+        if (el) el.value = data.military_branch;
+      }
+      if (data.sport_type) {
+        const el = document.getElementById('SportInput');
+        if (el) el.value = data.sport_type;
+      }
+      if (data.user_count) {
+        const el = document.querySelector('[name="user_count"]');
+        if (el) el.value = data.user_count;
+      }
+      if (data.duration) {
+        const el = document.querySelector('[name="duration"]');
+        if (el) el.value = data.duration;
+      }
+      if (data.primary_color) {
+        const el = document.getElementById('PrimaryColor');
+        if (el) el.value = data.primary_color;
+      }
+      if (data.storefront_name) {
+        const el = document.getElementById('StoreName');
+        if (el) { el.value = data.storefront_name; generateHandle(); }
+      }
+      if (data.storefront_name || data.org_type) {
+        sfToastShow("Your answers have been restored. Just re-upload your logo and you're ready to go.");
+      }
+    } catch(e) {}
+  }
+
+  function sfShowAuthModal() {
+    const modal = document.getElementById('sf-auth-modal');
+    if (!modal) return;
+    modal.classList.remove('sf-hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function sfCloseAuthModal() {
+    const modal = document.getElementById('sf-auth-modal');
+    if (!modal) return;
+    modal.classList.add('sf-hidden');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
   }
 
   function hideEl(id, hide) {
@@ -1180,6 +1271,31 @@
   .sf-modal-x:hover { background: rgba(255,255,255,0.16); }
   .sf-modal-iframe { flex: 1; width: 100%; border: 0; background: #0b1220; }
   .sf-modal-help { padding: 10px 14px; color: rgba(255,255,255,0.72); font-size: 12px; border-top: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.03); }
+
+  .sf-auth-card {
+    width: min(480px, calc(100% - 32px));
+    height: auto;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 24px;
+    padding: 32px 28px 28px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0;
+    color: #111;
+  }
+  .sf-auth-icon { font-size: 40px; margin-bottom: 12px; }
+  .sf-auth-title { font-size: 22px; font-weight: 900; margin: 0 0 14px; letter-spacing: -0.02em; }
+  .sf-auth-desc { font-size: 15px; color: #444; margin: 0 0 12px; line-height: 1.55; }
+  .sf-auth-desc--small { font-size: 13px; color: #888; }
+  .sf-auth-desc strong { color: #111; }
+  .sf-auth-card .sf-gate-btns { width: 100%; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .sf-auth-card .sf-btn { min-height: 52px; font-size: 16px; }
+  .sf-auth-cancel { appearance: none; border: none; background: none; color: #888; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 14px; text-decoration: underline; }
+  .sf-auth-cancel:hover { color: #444; }
 
   @media(max-width: 600px) {
     .sf-form-wrap { padding: 18px; }
