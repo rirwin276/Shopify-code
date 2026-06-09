@@ -136,6 +136,39 @@
     {{ 'ss-request-form-v2-compact.css' | asset_url | stylesheet_tag }}
     <script src="{{ 'ss-request-form-v2.js' | asset_url }}" defer></script>
 
+    {%- comment -%} SS mobile dashboard onboarding scroll hotfix {%- endcomment -%}
+    <style>
+      @media (max-width: 760px) {
+        .ss-onboardingOverlay.is-open {
+          align-items: flex-start !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          -webkit-overflow-scrolling: touch !important;
+          overscroll-behavior: contain !important;
+          touch-action: pan-y !important;
+          padding: 10px 10px calc(10px + env(safe-area-inset-bottom)) !important;
+        }
+
+        .ss-onboardingOverlay.is-open .ss-onboardingCard {
+          width: 100% !important;
+          max-height: none !important;
+          min-height: auto !important;
+          height: auto !important;
+          overflow: visible !important;
+          margin: 0 auto !important;
+        }
+
+        .ss-onboardingOverlay.is-open .ss-onboardingContent {
+          min-height: auto !important;
+        }
+
+        .ss-onboardingOverlay.is-open .ss-onboardingFooter {
+          position: sticky !important;
+          bottom: 0 !important;
+        }
+      }
+    </style>
+
     {%- if template.name == 'product' -%}
       {{ 'ss-product-page-polish.css' | asset_url | stylesheet_tag }}
       <script src="{{ 'ss-product-front-image-guard.js' | asset_url }}" defer></script>
