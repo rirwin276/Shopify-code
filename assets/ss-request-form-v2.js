@@ -29,29 +29,20 @@
     return href.indexOf('/pages/request-storefront-form') !== -1 || href.indexOf('/pages/private-storefronts') !== -1 || href.indexOf('/pages/storefront') !== -1;
   }
 
-  function findWorkingDashboardLoginHref(){
+  function getExactFormLoginHref(){
+    if (window.SS && window.SS.auth && window.SS.auth.loginToStorefrontForm) {
+      return window.SS.auth.loginToStorefrontForm;
+    }
     var best = null;
     qsa('a[href]').some(function(link){
       var href = link.getAttribute('href') || '';
       if (href.indexOf('return_to=') !== -1 && href.indexOf('/pages/portal') !== -1) {
-        best = href;
+        best = href.replace(encodeURIComponent(DASHBOARD_URL), encodeURIComponent(STOREFRONT_FORM_URL)).replace(DASHBOARD_URL, STOREFRONT_FORM_URL);
         return true;
       }
       return false;
     });
-    return best;
-  }
-
-  function buildFormLoginHref(){
-    var working = findWorkingDashboardLoginHref();
-    if (working) {
-      try {
-        return working
-          .replace(encodeURIComponent(DASHBOARD_URL), encodeURIComponent(STOREFRONT_FORM_URL))
-          .replace(DASHBOARD_URL, STOREFRONT_FORM_URL);
-      } catch(e) {}
-    }
-    return '/account/login?return_to=' + encodeURIComponent(STOREFRONT_FORM_URL);
+    return best || ('/account/login?return_to=' + encodeURIComponent(STOREFRONT_FORM_URL));
   }
 
   function markPendingSignin(returnPath){
@@ -83,8 +74,11 @@
     });
 
     qsa('[data-storefront-request-form] .sf-auth-actions a.sf-btn--solid').forEach(function(link){
-      link.setAttribute('href', buildFormLoginHref());
+      link.setAttribute('href', getExactFormLoginHref());
+      link.setAttribute('data-ss-auth-form-gate', '1');
       link.setAttribute('onclick', "try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/request-storefront-form',_saved_at:Date.now()}))}catch(e){}");
+      if (link.dataset.ssAuthFormWired === '1') return;
+      link.dataset.ssAuthFormWired = '1';
       link.addEventListener('click', function(){ markPendingSignin(STOREFRONT_FORM_URL); }, { capture: true });
     });
   }
