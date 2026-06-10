@@ -1,5 +1,16 @@
 {% assign dashboard_url = '/pages/portal' %}
+{% assign storefront_form_url = '/pages/request-storefront-form' %}
 {% capture dashboard_login_url %}{{ routes.storefront_login_url }}?return_to={{ '/pages/portal' | url_encode }}{% endcapture %}
+{% capture storefront_form_login_url %}{{ routes.storefront_login_url }}?return_to={{ storefront_form_url | url_encode }}{% endcapture %}
+
+<script>
+  window.SS = window.SS || {};
+  window.SS.auth = window.SS.auth || {};
+  window.SS.auth.dashboardUrl = {{ dashboard_url | json }};
+  window.SS.auth.storefrontFormUrl = {{ storefront_form_url | json }};
+  window.SS.auth.loginToDashboard = {{ dashboard_login_url | strip | json }};
+  window.SS.auth.loginToStorefrontForm = {{ storefront_form_login_url | strip | json }};
+</script>
 
 <div class="account-actions">
   <div class="account-actions__main-menu">
