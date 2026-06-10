@@ -34,15 +34,12 @@
       var text = normalizeText(link.textContent || link.getAttribute('aria-label') || link.title || '');
       var href = link.getAttribute('href') || '';
 
-      // Every create/start/request/build storefront/store CTA should go to the form first.
-      // The form page handles logged-out customers with the sign-in gate.
       if (isStorefrontCreateText(text) || hrefLooksLikeStorefrontIntent(href)) {
         link.setAttribute('href', STOREFRONT_FORM_URL);
         link.removeAttribute('onclick');
         return;
       }
 
-      // General sign-in goes to dashboard. Do not rewrite Orders/Profile/Account links.
       if (isPlainSignInText(text) && href.indexOf('/account') !== -1) {
         if (text.indexOf('order') === -1 && text.indexOf('profile') === -1 && text !== 'account') {
           link.setAttribute('href', DASHBOARD_URL);
@@ -51,10 +48,10 @@
       }
     });
 
-    // Storefront form gate button should not send people to Orders.
-    // It stays on the form flow and lets Shopify/customer auth complete from there.
+    // IMPORTANT: Shopify new customer accounts use return_to, not return_url.
+    // return_url is what was dumping this flow back to Orders.
     qsa('[data-storefront-request-form] .sf-auth-actions a.sf-btn--solid').forEach(function(link){
-      link.setAttribute('href', '/account/login?return_url=' + encodeURIComponent(STOREFRONT_FORM_URL));
+      link.setAttribute('href', '/account/login?return_to=' + encodeURIComponent(STOREFRONT_FORM_URL));
       link.removeAttribute('onclick');
     });
   }
