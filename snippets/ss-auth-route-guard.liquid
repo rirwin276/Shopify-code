@@ -1,0 +1,121 @@
+{%- comment -%}
+  Stella & Sage auth route guard
+
+  Site-wide rules:
+  - Plain sign in / log in -> dashboard after login.
+  - Create/start/request/build storefront/store CTAs -> storefront request form first.
+  - The request form sign-in gate -> storefront request form after login.
+  - Real Orders/Profile/Account links remain untouched unless they are plain sign-in links.
+{%- endcomment -%}
+
+{%- assign ss_dashboard_url = '/pages/portal' -%}
+{%- assign ss_storefront_form_url = '/pages/request-storefront-form' -%}
+{%- capture ss_dashboard_return -%}{{ ss_dashboard_url | url_encode }}{%- endcapture -%}
+{%- capture ss_form_return -%}{{ ss_storefront_form_url | url_encode }}{%- endcapture -%}
+{%- assign ss_login_to_dashboard = routes.storefront_login_url | default: routes.account_login_url | append: '?return_to=' | append: ss_dashboard_return -%}
+{%- assign ss_login_to_form = routes.storefront_login_url | default: routes.account_login_url | append: '?return_to=' | append: ss_form_return -%}
+
+<script>
+  (function () {
+    var IS_LOGGED_IN = {% if customer %}true{% else %}false{% endif %};
+    var DASHBOARD_URL = {{ ss_dashboard_url | json }};
+    var STOREFRONT_FORM_URL = {{ ss_storefront_form_url | json }};
+    var LOGIN_TO_DASHBOARD = {{ ss_login_to_dashboard | json }};
+    var LOGIN_TO_FORM = {{ ss_login_to_form | json }};
+
+    function normalizeText(value) {
+      return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function isPlainSignInText(text) {
+      if (!text) return false;
+      if (text === 'sign in' || text === 'log in' || text === 'login') return true;
+      if (text.indexOf('sign in') !== -1 && text.indexOf('store') === -1 && text.indexOf('storefront') === -1) return true;
+      if (text.indexOf('log in') !== -1 && text.indexOf('store') === -1 && text.indexOf('storefront') === -1) return true;
+      return false;
+    }
+
+    function isStorefrontCreateText(text) {
+      if (!text) return false;
+      var hasAction =
+        text.indexOf('create') !== -1 ||
+        text.indexOf('start') !== -1 ||
+        text.indexOf('request') !== -1 ||
+        text.indexOf('build') !== -1 ||
+        text.indexOf('launch') !== -1 ||
+        text.indexOf('open') !== -1;
+
+      var hasStore =
+        text.indexOf('storefront') !== -1 ||
+        text.indexOf('store front') !== -1 ||
+        text.indexOf('store') !== -1 ||
+        text.indexOf('shop') !== -1;
+
+      return hasAction && hasStore;
+    }
+
+    function hrefLooksLikeStorefrontIntent(href) {
+      href = String(href || '');
+      return href.indexOf('/pages/request-storefront-form') !== -1 ||
+             href.indexOf('/pages/private-storefronts') !== -1 ||
+             href.indexOf('/pages/storefront') !== -1;
+    }
+
+    function hrefLooksLikeLogin(href) {
+      href = String(href || '');
+      return href.indexOf('/account/login') !== -1 || href.indexOf('/account') !== -1 || href.indexOf('shopify.com') !== -1;
+    }
+
+    function shouldNotRewriteAsSignIn(link, text) {
+      var href = String(link.getAttribute('href') || '');
+      if (text.indexOf('order') !== -1 || text.indexOf('profile') !== -1 || text === 'account') return true;
+      if (link.closest('[data-ss-do-not-rewrite-auth]')) return true;
+      if (href.indexOf('/account/orders') !== -1 || href.indexOf('/account/addresses') !== -1) return true;
+      return false;
+    }
+
+    function rewriteLinks() {
+      var links = document.querySelectorAll('a[href]');
+      links.forEach(function (link) {
+        var text = normalizeText(link.textContent || link.getAttribute('aria-label') || link.title || '');
+        var href = link.getAttribute('href') || '';
+
+        if (isStorefrontCreateText(text) || hrefLooksLikeStorefrontIntent(href)) {
+          link.setAttribute('href', STOREFRONT_FORM_URL);
+          link.removeAttribute('onclick');
+          return;
+        }
+
+        if (isPlainSignInText(text) && hrefLooksLikeLogin(href) && !shouldNotRewriteAsSignIn(link, text)) {
+          link.setAttribute('href', LOGIN_TO_DASHBOARD);
+          link.removeAttribute('onclick');
+          return;
+        }
+      });
+
+      var formGate = document.querySelectorAll('[data-storefront-request-form] .sf-auth-actions a.sf-btn--solid, [data-storefront-request-form] a[href*="/account"]');
+      formGate.forEach(function (link) {
+        link.setAttribute('href', LOGIN_TO_FORM);
+        link.removeAttribute('onclick');
+      });
+    }
+
+    function init() {
+      rewriteLinks();
+      setTimeout(rewriteLinks, 150);
+      setTimeout(rewriteLinks, 600);
+      setTimeout(rewriteLinks, 1500);
+
+      try {
+        var observer = new MutationObserver(function () { rewriteLinks(); });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+      } catch (e) {}
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+      init();
+    }
+  })();
+</script>
