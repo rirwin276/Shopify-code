@@ -1,45 +1,61 @@
 (function(){
   var path = window.location.pathname || '';
   var DASHBOARD_URL = '/pages/portal';
-  var STOREFRONT_FORM_URL = '/pages/private-storefronts';
-  var LOGIN_BASE = '/account/login';
+  var STOREFRONT_FORM_URL = '/pages/request-storefront-form';
 
   function qs(sel, root){ return (root || document).querySelector(sel); }
   function qsa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
-  function loginReturnUrl(returnPath){ return LOGIN_BASE + '?return_url=' + encodeURIComponent(returnPath); }
 
-  function fixHomepageAndFormAuthLinks(){
-    var loginToDashboard = loginReturnUrl(DASHBOARD_URL);
-    var loginToStorefrontForm = loginReturnUrl(STOREFRONT_FORM_URL);
+  function normalizeText(value){
+    return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  }
 
-    // Homepage logged-out hero: Create Store -> login -> storefront request form.
-    qsa('.ss-hero-actions a, a').forEach(function(link){
-      var text = (link.textContent || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  function isPlainSignInText(text){
+    if (!text) return false;
+    if (text === 'sign in' || text === 'log in' || text === 'login') return true;
+    if ((text.indexOf('sign in') !== -1 || text.indexOf('log in') !== -1) && text.indexOf('store') === -1 && text.indexOf('storefront') === -1) return true;
+    return false;
+  }
+
+  function isStorefrontCreateText(text){
+    if (!text) return false;
+    var hasAction = text.indexOf('create') !== -1 || text.indexOf('start') !== -1 || text.indexOf('request') !== -1 || text.indexOf('build') !== -1 || text.indexOf('launch') !== -1 || text.indexOf('open') !== -1;
+    var hasStore = text.indexOf('storefront') !== -1 || text.indexOf('store front') !== -1 || text.indexOf('store') !== -1 || text.indexOf('shop') !== -1;
+    return hasAction && hasStore;
+  }
+
+  function hrefLooksLikeStorefrontIntent(href){
+    href = String(href || '');
+    return href.indexOf('/pages/request-storefront-form') !== -1 || href.indexOf('/pages/private-storefronts') !== -1 || href.indexOf('/pages/storefront') !== -1;
+  }
+
+  function rewriteAuthAndStorefrontLinks(){
+    qsa('a[href]').forEach(function(link){
+      var text = normalizeText(link.textContent || link.getAttribute('aria-label') || link.title || '');
       var href = link.getAttribute('href') || '';
 
-      var isCreateStoreText =
-        text.indexOf('create') !== -1 &&
-        (text.indexOf('store') !== -1 || text.indexOf('storefront') !== -1 || text.indexOf('shop') !== -1);
-
-      var isRequestStoreHref =
-        href === STOREFRONT_FORM_URL ||
-        href.indexOf('/pages/private-storefronts') === 0 ||
-        href.indexOf('/pages/storefront') === 0;
-
-      if (isCreateStoreText && isRequestStoreHref) {
-        link.setAttribute('href', loginToStorefrontForm);
+      // Every create/start/request/build storefront/store CTA should go to the form first.
+      // The form page handles logged-out customers with the sign-in gate.
+      if (isStorefrontCreateText(text) || hrefLooksLikeStorefrontIntent(href)) {
+        link.setAttribute('href', STOREFRONT_FORM_URL);
+        link.removeAttribute('onclick');
+        return;
       }
 
-      // Homepage Sign In -> login -> dashboard.
-      var isSignInText = text === 'sign in' || text.indexOf('sign in') !== -1 || text.indexOf('log in') !== -1;
-      if (isSignInText && href.indexOf('/account/login') !== -1) {
-        link.setAttribute('href', loginToDashboard);
+      // General sign-in goes to dashboard. Do not rewrite Orders/Profile/Account links.
+      if (isPlainSignInText(text) && href.indexOf('/account') !== -1) {
+        if (text.indexOf('order') === -1 && text.indexOf('profile') === -1 && text !== 'account') {
+          link.setAttribute('href', DASHBOARD_URL);
+          link.removeAttribute('onclick');
+        }
       }
     });
 
-    // Request form logged-out gate: always sign in to the storefront form, never Orders.
-    qsa('.sf-auth-actions a.sf-btn--solid').forEach(function(link){
-      link.setAttribute('href', loginToStorefrontForm);
+    // Storefront form gate button should not send people to Orders.
+    // It stays on the form flow and lets Shopify/customer auth complete from there.
+    qsa('[data-storefront-request-form] .sf-auth-actions a.sf-btn--solid').forEach(function(link){
+      link.setAttribute('href', '/account/login?return_url=' + encodeURIComponent(STOREFRONT_FORM_URL));
+      link.removeAttribute('onclick');
     });
   }
 
@@ -149,9 +165,15 @@
   }
 
   function init(){
-    fixHomepageAndFormAuthLinks();
-    setTimeout(fixHomepageAndFormAuthLinks, 250);
-    setTimeout(fixHomepageAndFormAuthLinks, 1000);
+    rewriteAuthAndStorefrontLinks();
+    setTimeout(rewriteAuthAndStorefrontLinks, 150);
+    setTimeout(rewriteAuthAndStorefrontLinks, 600);
+    setTimeout(rewriteAuthAndStorefrontLinks, 1500);
+
+    try {
+      var observer = new MutationObserver(function(){ rewriteAuthAndStorefrontLinks(); });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    } catch(e) {}
 
     if (path.indexOf('/pages/request') === 0 || path.indexOf('/pages/private-storefronts') === 0 || path.indexOf('/pages/storefront') === 0) {
       waitForForm();
