@@ -29,6 +29,40 @@
     return href.indexOf('/pages/request-storefront-form') !== -1 || href.indexOf('/pages/private-storefronts') !== -1 || href.indexOf('/pages/storefront') !== -1;
   }
 
+  function findWorkingDashboardLoginHref(){
+    var best = null;
+    qsa('a[href]').some(function(link){
+      var href = link.getAttribute('href') || '';
+      if (href.indexOf('return_to=') !== -1 && href.indexOf('/pages/portal') !== -1) {
+        best = href;
+        return true;
+      }
+      return false;
+    });
+    return best;
+  }
+
+  function buildFormLoginHref(){
+    var working = findWorkingDashboardLoginHref();
+    if (working) {
+      try {
+        return working
+          .replace(encodeURIComponent(DASHBOARD_URL), encodeURIComponent(STOREFRONT_FORM_URL))
+          .replace(DASHBOARD_URL, STOREFRONT_FORM_URL);
+      } catch(e) {}
+    }
+    return '/account/login?return_to=' + encodeURIComponent(STOREFRONT_FORM_URL);
+  }
+
+  function markPendingSignin(returnPath){
+    try {
+      localStorage.setItem('sf_pending_signin_v1', JSON.stringify({
+        return_path: returnPath,
+        _saved_at: Date.now()
+      }));
+    } catch(e) {}
+  }
+
   function rewriteAuthAndStorefrontLinks(){
     qsa('a[href]').forEach(function(link){
       var text = normalizeText(link.textContent || link.getAttribute('aria-label') || link.title || '');
@@ -48,11 +82,10 @@
       }
     });
 
-    // IMPORTANT: Shopify new customer accounts use return_to, not return_url.
-    // return_url is what was dumping this flow back to Orders.
     qsa('[data-storefront-request-form] .sf-auth-actions a.sf-btn--solid').forEach(function(link){
-      link.setAttribute('href', '/account/login?return_to=' + encodeURIComponent(STOREFRONT_FORM_URL));
-      link.removeAttribute('onclick');
+      link.setAttribute('href', buildFormLoginHref());
+      link.setAttribute('onclick', "try{localStorage.setItem('sf_pending_signin_v1',JSON.stringify({return_path:'/pages/request-storefront-form',_saved_at:Date.now()}))}catch(e){}");
+      link.addEventListener('click', function(){ markPendingSignin(STOREFRONT_FORM_URL); }, { capture: true });
     });
   }
 
