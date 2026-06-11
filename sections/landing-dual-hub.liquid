@@ -1,17 +1,22 @@
 {% comment %}
-  LANDING — Stella & Sage Premium Front Page (V13 toned gold)
-  - Built from existing V11 homepage file.
+  LANDING — Stella & Sage Premium Front Page (V14 editorial gold)
+  - Built from V13 toned gold.
   - Keeps existing logged-in customer/store tag logic.
   - Logged-out: Premium hero → proof bar → pain/solution → process → example stores → dashboard preview → roles → trust/FAQ → final CTA → marquee.
   - Logged-in: Premium welcome → store links → second store CTA → marquee.
   - No backend required.
   - Existing schema IDs preserved so current theme settings keep working.
-  - V13 tones down gold intensity for a cleaner Apple-grade look.
+  - V14: serif display headlines (toggleable), editable accent color, all previously
+    hardcoded copy (pain/examples/dashboard/roles/trust/FAQ/marquee/mockup) exposed
+    as theme-editor settings with the original copy as defaults. Multi-item settings
+    use one item per line, fields separated by " | ".
 {% endcomment %}
 
 {%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
 {%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
 {%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
+{%- assign ss_accent = section.settings.accent_color | default: '#b7a36a' -%}
+{%- if section.settings.use_serif -%}{%- render 'ss-brand-font' -%}{%- endif -%}
 {%- capture login_url -%}{{ routes.storefront_login_url }}?return_to={{ dashboard_url | url_encode }}{%- endcapture -%}
 
 {%- comment -%}Logged-in: parse storefront tags & metaobjects, same core logic as previous homepage.{%- endcomment -%}
@@ -62,7 +67,7 @@
         <div class="ss-member-shell">
           <div class="ss-eyebrow">
             <span class="ss-eyebrow-dot"></span>
-            STELLA & SAGE DASHBOARD
+            {{ section.settings.member_eyebrow | default: 'STELLA & SAGE DASHBOARD' }}
           </div>
 
           <h1 class="ss-member-title">{{ section.settings.welcome_prefix | escape }}{{ welcome_name | escape }}.</h1>
@@ -112,7 +117,7 @@
 
     <section class="ss-section ss-reveal">
       <div class="ss-wrap ss-wrap--narrow ss-center">
-        <div class="ss-mini-kicker">CREATE ANOTHER STORE</div>
+        <div class="ss-mini-kicker">{{ section.settings.second_store_kicker | default: 'CREATE ANOTHER STORE' }}</div>
         <h2 class="ss-h2">{{ section.settings.second_store_headline | escape }}</h2>
         <p class="ss-body">{{ section.settings.second_store_body | escape }}</p>
         <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.second_store_cta | escape }} →</a>
@@ -133,10 +138,18 @@
         <div class="ss-hero-copy">
           <div class="ss-eyebrow">
             <span class="ss-eyebrow-dot"></span>
-            VETERAN OWNED · PRIVATE GROUP STORES
+            {{ section.settings.eyebrow_text | default: 'VETERAN OWNED · PRIVATE GROUP STORES' }}
           </div>
 
-          <h1 class="ss-hero-title">{{ section.settings.hero_headline | newline_to_br }}</h1>
+          {%- comment -%}Wrap *words* in the headline with a gold serif accent.{%- endcomment -%}
+          {%- assign hero_raw = section.settings.hero_headline | escape | newline_to_br -%}
+          {%- assign hero_parts = hero_raw | split: '*' -%}
+          <h1 class="ss-hero-title">
+            {%- for part in hero_parts -%}
+              {%- assign part_idx = forloop.index0 | modulo: 2 -%}
+              {%- if part_idx == 1 -%}<em class="ss-accent-word">{{ part }}</em>{%- else -%}{{ part }}{%- endif -%}
+            {%- endfor -%}
+          </h1>
           <p class="ss-hero-sub">{{ section.settings.hero_sub | escape }}</p>
 
           <div class="ss-hero-actions">
@@ -155,33 +168,35 @@
               <span></span><span></span><span></span>
             </div>
 
+            {%- assign mock_name = section.settings.mock_store_name | default: 'Vista Raptors' -%}
+            {%- assign mock_logo = section.settings.mock_logo_initials | default: 'VR' -%}
             <div class="ss-dashboard-preview">
               <div class="ss-preview-head">
                 <div>
                   <p>PRIVATE STORE</p>
-                  <h3>Vista Raptors</h3>
+                  <h3>{{ mock_name | escape }}</h3>
                 </div>
-                <div class="ss-live-badge">Live</div>
+                <div class="ss-live-badge"><span class="ss-live-dot"></span>Live</div>
               </div>
 
               <div class="ss-product-strip">
                 <div class="ss-product-card">
                   <div class="ss-shirt ss-shirt--black">
-                    <div class="ss-shirt-logo">VR</div>
+                    <div class="ss-shirt-logo">{{ mock_logo | escape }}</div>
                   </div>
                   <p>Team Tee</p>
                 </div>
 
                 <div class="ss-product-card">
                   <div class="ss-shirt ss-shirt--sand">
-                    <div class="ss-shirt-logo">VR</div>
+                    <div class="ss-shirt-logo">{{ mock_logo | escape }}</div>
                   </div>
                   <p>Hoodie</p>
                 </div>
 
                 <div class="ss-product-card">
                   <div class="ss-hat">
-                    <div class="ss-hat-logo">VR</div>
+                    <div class="ss-hat-logo">{{ mock_logo | escape }}</div>
                   </div>
                   <p>Hat</p>
                 </div>
@@ -213,14 +228,16 @@
             </div>
           </div>
 
+          {%- assign float1 = section.settings.float1_text | default: '2 min | form' | split: '|' -%}
+          {%- assign float2 = section.settings.float2_text | default: '~15 min | store build' | split: '|' -%}
           <div class="ss-floating-card ss-floating-card--top">
-            <strong>2 min</strong>
-            <span>form</span>
+            <strong>{{ float1[0] | strip | escape }}</strong>
+            <span>{{ float1[1] | strip | escape }}</span>
           </div>
 
           <div class="ss-floating-card ss-floating-card--bottom">
-            <strong>~15 min</strong>
-            <span>store build</span>
+            <strong>{{ float2[0] | strip | escape }}</strong>
+            <span>{{ float2[1] | strip | escape }}</span>
           </div>
         </div>
       </div>
@@ -230,15 +247,15 @@
       <div class="ss-wrap">
         <div class="ss-proof-grid">
           <div class="ss-proof-item">
-            <strong>{{ section.settings.stat1_num | escape }}</strong>
+            <strong data-ss-count>{{ section.settings.stat1_num | escape }}</strong>
             <span>{{ section.settings.stat1_label | escape }}</span>
           </div>
           <div class="ss-proof-item">
-            <strong>{{ section.settings.stat2_num | escape }}</strong>
+            <strong data-ss-count>{{ section.settings.stat2_num | escape }}</strong>
             <span>{{ section.settings.stat2_label | escape }}</span>
           </div>
           <div class="ss-proof-item">
-            <strong>{{ section.settings.stat3_num | escape }}</strong>
+            <strong data-ss-count>{{ section.settings.stat3_num | escape }}</strong>
             <span>{{ section.settings.stat3_label | escape }}</span>
           </div>
         </div>
@@ -248,33 +265,33 @@
     <section class="ss-section ss-pain-section ss-reveal">
       <div class="ss-wrap">
         <div class="ss-section-head">
-          <div class="ss-mini-kicker">THE REAL PROBLEM</div>
-          <h2 class="ss-h2">Stop being the unpaid shirt manager.</h2>
-          <p class="ss-body">Group merch should not mean chasing sizes, collecting Venmo payments, tracking spreadsheets, and answering the same text over and over.</p>
+          <div class="ss-mini-kicker">{{ section.settings.pain_kicker | default: 'THE REAL PROBLEM' }}</div>
+          <h2 class="ss-h2">{{ section.settings.pain_headline | default: 'Stop being the unpaid shirt manager.' }}</h2>
+          <p class="ss-body">{{ section.settings.pain_body | default: 'Group merch should not mean chasing sizes, collecting Venmo payments, tracking spreadsheets, and answering the same text over and over.' }}</p>
         </div>
 
         <div class="ss-compare-grid">
           <div class="ss-compare-card ss-compare-card--old">
-            <div class="ss-card-label">THE OLD WAY</div>
-            <h3>One person gets stuck with everything.</h3>
+            <div class="ss-card-label">{{ section.settings.pain_old_label | default: 'THE OLD WAY' }}</div>
+            <h3>{{ section.settings.pain_old_title | default: 'One person gets stuck with everything.' }}</h3>
             <ul>
-              <li>Collect every size manually</li>
-              <li>Chase payments in Venmo</li>
-              <li>Deal with late orders</li>
-              <li>Track everything in a spreadsheet</li>
-              <li>Handle mistakes yourself</li>
+              {%- assign old_items = section.settings.pain_old_items | escape | newline_to_br | split: '<br />' -%}
+              {%- for item in old_items -%}
+                {%- assign item_clean = item | strip -%}
+                {%- if item_clean != blank -%}<li>{{ item_clean }}</li>{%- endif -%}
+              {%- endfor -%}
             </ul>
           </div>
 
           <div class="ss-compare-card ss-compare-card--new">
-            <div class="ss-card-label">THE STELLA & SAGE WAY</div>
-            <h3>Create the store. Share the link. You're done.</h3>
+            <div class="ss-card-label">{{ section.settings.pain_new_label | default: 'THE STELLA & SAGE WAY' }}</div>
+            <h3>{{ section.settings.pain_new_title | default: "Create the store. Share the link. You're done." }}</h3>
             <ul>
-              <li>Everyone orders directly</li>
-              <li>No minimums or upfront inventory</li>
-              <li>No size collection</li>
-              <li>No payment chasing</li>
-              <li>Reorder anytime</li>
+              {%- assign new_items = section.settings.pain_new_items | escape | newline_to_br | split: '<br />' -%}
+              {%- for item in new_items -%}
+                {%- assign item_clean = item | strip -%}
+                {%- if item_clean != blank -%}<li>{{ item_clean }}</li>{%- endif -%}
+              {%- endfor -%}
             </ul>
           </div>
         </div>
@@ -314,43 +331,29 @@
     <section class="ss-section ss-examples-section ss-reveal">
       <div class="ss-wrap">
         <div class="ss-section-head">
-          <div class="ss-mini-kicker">BUILT FOR REAL GROUPS</div>
-          <h2 class="ss-h2">One system. Almost any group.</h2>
-          <p class="ss-body">Teams, units, trips, businesses, fundraisers, families — if people need to order gear without one person managing chaos, it fits.</p>
+          <div class="ss-mini-kicker">{{ section.settings.examples_kicker | default: 'BUILT FOR REAL GROUPS' }}</div>
+          <h2 class="ss-h2">{{ section.settings.examples_headline | default: 'One system. Almost any group.' }}</h2>
+          <p class="ss-body">{{ section.settings.examples_body | default: 'Teams, units, trips, businesses, fundraisers, families — if people need to order gear without one person managing chaos, it fits.' }}</p>
         </div>
 
         <div class="ss-example-grid">
-          <div class="ss-example-card">
-            <div class="ss-example-art ss-example-art--team">
-              <span>RAPTORS</span>
+          {%- assign example_art = 'team,unit,trip,business' | split: ',' -%}
+          {%- assign example_lines = section.settings.example_cards | escape | newline_to_br | split: '<br />' -%}
+          {%- assign example_i = 0 -%}
+          {%- for line in example_lines -%}
+            {%- assign line_clean = line | strip -%}
+            {%- if line_clean == blank -%}{%- continue -%}{%- endif -%}
+            {%- assign fields = line_clean | split: '|' -%}
+            {%- assign art_idx = example_i | modulo: 4 -%}
+            <div class="ss-example-card ss-reveal" data-delay="{{ art_idx | times: 70 }}">
+              <div class="ss-example-art ss-example-art--{{ example_art[art_idx] }}">
+                <span>{{ fields[0] | strip }}</span>
+              </div>
+              <h3>{{ fields[1] | strip }}</h3>
+              <p>{{ fields[2] | strip }}</p>
             </div>
-            <h3>Youth sports teams</h3>
-            <p>Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey.</p>
-          </div>
-
-          <div class="ss-example-card">
-            <div class="ss-example-art ss-example-art--unit">
-              <span>UNIT</span>
-            </div>
-            <h3>Military & first responders</h3>
-            <p>Private storefronts for units, stations, departments, classes, teams, and special events.</p>
-          </div>
-
-          <div class="ss-example-card">
-            <div class="ss-example-art ss-example-art--trip">
-              <span>TRIP</span>
-            </div>
-            <h3>Trips, parties & reunions</h3>
-            <p>Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events.</p>
-          </div>
-
-          <div class="ss-example-card">
-            <div class="ss-example-art ss-example-art--business">
-              <span>CO.</span>
-            </div>
-            <h3>Small businesses & fundraisers</h3>
-            <p>Simple merch stores without buying boxes of shirts or managing orders by hand.</p>
-          </div>
+            {%- assign example_i = example_i | plus: 1 -%}
+          {%- endfor -%}
         </div>
       </div>
     </section>
@@ -358,23 +361,21 @@
     <section class="ss-section ss-dashboard-section ss-reveal">
       <div class="ss-wrap ss-dashboard-grid">
         <div>
-          <div class="ss-mini-kicker">YOUR HOME BASE</div>
-          <h2 class="ss-h2">Every store lives in one clean dashboard.</h2>
-          <p class="ss-body">Admins can manage products, edit placement, choose colors, hide items, delete products, build new merch, and share the storefront link. Members just shop.</p>
+          <div class="ss-mini-kicker">{{ section.settings.dash_kicker | default: 'YOUR HOME BASE' }}</div>
+          <h2 class="ss-h2">{{ section.settings.dash_headline | default: 'Every store lives in one clean dashboard.' }}</h2>
+          <p class="ss-body">{{ section.settings.dash_body | default: 'Admins can manage products, edit placement, choose colors, hide items, delete products, build new merch, and share the storefront link. Members just shop.' }}</p>
 
           <div class="ss-feature-list">
-            <div>
-              <strong>Admin tools</strong>
-              <span>Edit, hide, delete, rebuild, and share.</span>
-            </div>
-            <div>
-              <strong>Member shopping</strong>
-              <span>No confusing admin controls for normal buyers.</span>
-            </div>
-            <div>
-              <strong>Reorder forever</strong>
-              <span>Your group can come back later without starting over.</span>
-            </div>
+            {%- assign dash_lines = section.settings.dash_features | escape | newline_to_br | split: '<br />' -%}
+            {%- for line in dash_lines -%}
+              {%- assign line_clean = line | strip -%}
+              {%- if line_clean == blank -%}{%- continue -%}{%- endif -%}
+              {%- assign fields = line_clean | split: '|' -%}
+              <div>
+                <strong>{{ fields[0] | strip }}</strong>
+                <span>{{ fields[1] | strip }}</span>
+              </div>
+            {%- endfor -%}
           </div>
         </div>
 
@@ -418,23 +419,23 @@
     <section class="ss-section ss-roles-section ss-reveal">
       <div class="ss-wrap">
         <div class="ss-section-head ss-center">
-          <div class="ss-mini-kicker">SIMPLE ACCESS</div>
-          <h2 class="ss-h2">Admins manage. Members order.</h2>
-          <p class="ss-body">The store feels simple because each person only sees what they need.</p>
+          <div class="ss-mini-kicker">{{ section.settings.roles_kicker | default: 'SIMPLE ACCESS' }}</div>
+          <h2 class="ss-h2">{{ section.settings.roles_headline | default: 'Admins manage. Members order.' }}</h2>
+          <p class="ss-body">{{ section.settings.roles_body | default: 'The store feels simple because each person only sees what they need.' }}</p>
         </div>
 
         <div class="ss-role-grid">
-          <div class="ss-role-card">
-            <span>ADMIN</span>
-            <h3>For the person running the store</h3>
-            <p>Create the store, manage products, edit placement, choose colors, and share the link.</p>
-          </div>
-
-          <div class="ss-role-card">
-            <span>MEMBER</span>
-            <h3>For everyone ordering</h3>
-            <p>Open the link, pick a product, choose size and color, checkout, and reorder later.</p>
-          </div>
+          {%- assign role_lines = section.settings.role_cards | escape | newline_to_br | split: '<br />' -%}
+          {%- for line in role_lines -%}
+            {%- assign line_clean = line | strip -%}
+            {%- if line_clean == blank -%}{%- continue -%}{%- endif -%}
+            {%- assign fields = line_clean | split: '|' -%}
+            <div class="ss-role-card">
+              <span>{{ fields[0] | strip }}</span>
+              <h3>{{ fields[1] | strip }}</h3>
+              <p>{{ fields[2] | strip }}</p>
+            </div>
+          {%- endfor -%}
         </div>
       </div>
     </section>
@@ -443,24 +444,22 @@
       <div class="ss-wrap">
         <div class="ss-trust-shell">
           <div>
-            <div class="ss-mini-kicker">WHY IT WORKS</div>
-            <h2 class="ss-h2">Built for people who do not have time to manage merch.</h2>
-            <p class="ss-body">Stella & Sage removes the annoying parts of group apparel: collecting sizes, handling payments, placing bulk orders, and being the person everyone texts when they need another shirt.</p>
+            <div class="ss-mini-kicker">{{ section.settings.trust_kicker | default: 'WHY IT WORKS' }}</div>
+            <h2 class="ss-h2">{{ section.settings.trust_headline | default: 'Built for people who do not have time to manage merch.' }}</h2>
+            <p class="ss-body">{{ section.settings.trust_body | default: 'Stella & Sage removes the annoying parts of group apparel: collecting sizes, handling payments, placing bulk orders, and being the person everyone texts when they need another shirt.' }}</p>
           </div>
 
           <div class="ss-trust-points">
-            <div>
-              <strong>Veteran owned</strong>
-              <span>Built by someone who understands teams, units, and group chaos.</span>
-            </div>
-            <div>
-              <strong>No minimums</strong>
-              <span>People order what they need, when they need it.</span>
-            </div>
-            <div>
-              <strong>No inventory</strong>
-              <span>No boxes of extra shirts sitting in your garage.</span>
-            </div>
+            {%- assign trust_lines = section.settings.trust_points | escape | newline_to_br | split: '<br />' -%}
+            {%- for line in trust_lines -%}
+              {%- assign line_clean = line | strip -%}
+              {%- if line_clean == blank -%}{%- continue -%}{%- endif -%}
+              {%- assign fields = line_clean | split: '|' -%}
+              <div>
+                <strong>{{ fields[0] | strip }}</strong>
+                <span>{{ fields[1] | strip }}</span>
+              </div>
+            {%- endfor -%}
           </div>
         </div>
       </div>
@@ -469,42 +468,28 @@
     <section class="ss-section ss-faq-section ss-reveal">
       <div class="ss-wrap ss-wrap--medium">
         <div class="ss-section-head ss-center">
-          <div class="ss-mini-kicker">FAQ</div>
-          <h2 class="ss-h2">The questions people ask first.</h2>
+          <div class="ss-mini-kicker">{{ section.settings.faq_kicker | default: 'FAQ' }}</div>
+          <h2 class="ss-h2">{{ section.settings.faq_headline | default: 'The questions people ask first.' }}</h2>
         </div>
 
         <div class="ss-faq-list">
-          <details>
-            <summary>Do I have to collect everyone's sizes?</summary>
-            <p>No. Everyone orders their own size directly from the private storefront.</p>
-          </details>
-
-          <details>
-            <summary>Is there a minimum order?</summary>
-            <p>No. The whole point is to avoid minimums, bulk order pressure, and upfront inventory.</p>
-          </details>
-
-          <details>
-            <summary>How long does setup take?</summary>
-            <p>The form takes about 2 minutes. The automated store build usually takes about 15 minutes.</p>
-          </details>
-
-          <details>
-            <summary>Can I edit products after the store is built?</summary>
-            <p>Yes. Store admins can manage products, adjust placement, choose colors, hide items, delete products, and build more.</p>
-          </details>
-
-          <details>
-            <summary>Who can use this?</summary>
-            <p>Sports teams, military units, first responders, families, bachelor trips, fundraisers, small businesses, school groups, and almost any group that needs merch.</p>
-          </details>
+          {%- assign faq_lines = section.settings.faq_items | escape | newline_to_br | split: '<br />' -%}
+          {%- for line in faq_lines -%}
+            {%- assign line_clean = line | strip -%}
+            {%- if line_clean == blank -%}{%- continue -%}{%- endif -%}
+            {%- assign fields = line_clean | split: '|' -%}
+            <details>
+              <summary>{{ fields[0] | strip }}<span class="ss-faq-icon" aria-hidden="true"></span></summary>
+              <div class="ss-faq-body"><p>{{ fields[1] | strip }}</p></div>
+            </details>
+          {%- endfor -%}
         </div>
       </div>
     </section>
 
     <section class="ss-final-cta ss-reveal">
       <div class="ss-wrap ss-wrap--narrow ss-center">
-        <div class="ss-mini-kicker">READY WHEN YOU ARE</div>
+        <div class="ss-mini-kicker">{{ section.settings.final_kicker | default: 'READY WHEN YOU ARE' }}</div>
         <h2 class="ss-final-title">{{ section.settings.final_headline | escape }}</h2>
         <p class="ss-final-sub">{{ section.settings.final_sub | escape }}</p>
         <a class="ss-btn ss-btn--dark" href="{{ request_url }}">{{ section.settings.final_cta_label | escape }} →</a>
@@ -515,35 +500,15 @@
 
   <div class="ss-marquee-wrap">
     <div class="ss-marquee-track">
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Fire Departments</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Football</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Law Enforcement</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Softball</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Corporate Teams</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Hockey</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Cheer Squads</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Wrestling Teams</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
-
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Baseball</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Soccer</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Military Units</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Fire Departments</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Football</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Law Enforcement</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Travel Softball</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Corporate Teams</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Youth Hockey</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Cheer Squads</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Wrestling Teams</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Bachelor Trips</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>Family Reunions</span>
-      <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>First Responders</span>
+      {%- assign marquee_items = section.settings.marquee_items | escape | newline_to_br | split: '<br />' -%}
+      {%- for repeat in (1..2) -%}
+        {%- for item in marquee_items -%}
+          {%- assign item_clean = item | strip -%}
+          {%- if item_clean != blank -%}
+            <span class="ss-marquee-item"><span class="ss-marquee-dot"></span>{{ item_clean }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
     </div>
   </div>
 
@@ -560,9 +525,53 @@
      STELLA & SAGE PREMIUM HOME
   ========================== */
 
+  #ss-home-{{ section.id }} {
+    --ss-accent: {{ ss_accent }};
+    --ss-accent-deep: {{ ss_accent | color_darken: 12 }};
+    --ss-accent-bright: {{ ss_accent | color_lighten: 22 }};
+    --ss-accent-pale: {{ ss_accent | color_lighten: 32 }};
+  }
+
   .ss-home,
   .ss-home * {
     box-sizing: border-box;
+  }
+
+  {%- if section.settings.use_serif %}
+  /* Editorial serif display layer (toggle in section settings) */
+  .ss-home .ss-hero-title,
+  .ss-home .ss-h2,
+  .ss-home .ss-final-title,
+  .ss-home .ss-member-title {
+    font-family: var(--ss-font-display, Georgia, serif);
+    font-weight: 580;
+    letter-spacing: -.025em;
+    font-variation-settings: "opsz" 110;
+  }
+
+  .ss-home .ss-hero-title {
+    line-height: .98;
+    letter-spacing: -.03em;
+  }
+
+  .ss-home .ss-h2 {
+    line-height: 1.04;
+  }
+
+  .ss-home .ss-member-title,
+  .ss-home .ss-final-title {
+    line-height: 1;
+  }
+  {%- endif %}
+
+  /* Gold accent word inside the hero headline (*wrapped* in settings) */
+  .ss-accent-word {
+    font-style: italic;
+    background: linear-gradient(105deg, var(--ss-accent-deep), var(--ss-accent) 55%, var(--ss-accent-bright));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding-right: .04em;
   }
 
   .ss-home {
@@ -571,7 +580,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
     color: #11100e;
     background:
-      radial-gradient(circle at 18% 5%, rgba(183, 163, 106, 0.10), transparent 30%),
+      radial-gradient(circle at 18% 5%, color-mix(in srgb, var(--ss-accent) 10%, transparent), transparent 30%),
       radial-gradient(circle at 80% 8%, rgba(255, 255, 255, 0.85), transparent 22%),
       linear-gradient(180deg, #fbf8f1 0%, #fffdf9 22%, #ffffff 50%, #fbfaf7 100%);
     -webkit-font-smoothing: antialiased;
@@ -608,7 +617,7 @@
     height: 420px;
     top: -160px;
     left: -120px;
-    background: rgba(183, 163, 106, 0.10);
+    background: color-mix(in srgb, var(--ss-accent) 10%, transparent);
   }
 
   .ss-bg-orb--two {
@@ -649,8 +658,8 @@
     width: 8px;
     height: 8px;
     border-radius: 999px;
-    background: #a9955d;
-    box-shadow: 0 0 0 7px rgba(183, 163, 106, .08);
+    background: var(--ss-accent-deep);
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--ss-accent) 8%, transparent);
   }
 
   .ss-h2 {
@@ -713,7 +722,7 @@
   .ss-btn--dark {
     color: #fff;
     background: #11100e;
-    border: 1px solid rgba(183, 163, 106, .28);
+    border: 1px solid color-mix(in srgb, var(--ss-accent) 28%, transparent);
     box-shadow: 0 18px 44px rgba(17, 16, 14, .18);
   }
 
@@ -734,6 +743,33 @@
   .ss-btn--light:hover {
     transform: translateY(-2px);
     border-color: rgba(17, 16, 14, .22);
+  }
+
+  /* Gold shimmer sweep across primary buttons on hover */
+  .ss-btn--dark,
+  .ss-pill--primary {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ss-btn--dark::after,
+  .ss-pill--primary::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -110%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--ss-accent-bright) 35%, transparent), transparent);
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ss-btn--dark:hover::after,
+    .ss-pill--primary:hover::after {
+      left: 170%;
+      transition: left .55s ease;
+    }
   }
 
   /* HERO */
@@ -791,22 +827,26 @@
     content: "";
     width: 24px;
     height: 1px;
-    background: rgba(183, 163, 106, .45);
+    background: color-mix(in srgb, var(--ss-accent) 45%, transparent);
   }
 
   .ss-hero-visual {
     position: relative;
     min-height: 570px;
+    perspective: 1400px;
   }
 
   .ss-device-card {
     position: relative;
     width: 100%;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform .18s ease-out;
     border-radius: 34px;
     padding: 13px;
     background:
       linear-gradient(145deg, rgba(255,255,255,.85), rgba(255,255,255,.42)),
-      linear-gradient(145deg, rgba(183,163,106,.12), rgba(17,16,14,.045));
+      linear-gradient(145deg, color-mix(in srgb, var(--ss-accent) 12%, transparent), rgba(17,16,14,.045));
     border: 1px solid rgba(255,255,255,.8);
     box-shadow:
       0 45px 120px rgba(17, 16, 14, .20),
@@ -834,7 +874,7 @@
     border-radius: 25px;
     padding: 24px;
     background:
-      radial-gradient(circle at 15% 0%, rgba(183,163,106,.10), transparent 32%),
+      radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--ss-accent) 10%, transparent), transparent 32%),
       linear-gradient(180deg, #141311, #070706);
     color: #fff;
     min-height: 470px;
@@ -867,13 +907,34 @@
   }
 
   .ss-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     padding: 9px 13px;
     border-radius: 999px;
-    background: rgba(183, 163, 106, .10);
-    border: 1px solid rgba(183, 163, 106, .22);
-    color: #ead892;
+    background: color-mix(in srgb, var(--ss-accent) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ss-accent) 22%, transparent);
+    color: var(--ss-accent-bright);
     font-size: 12px;
     font-weight: 850;
+  }
+
+  .ss-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--ss-accent-bright);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ss-live-dot {
+      animation: ssLivePulse 2.2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes ssLivePulse {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ss-accent-bright) 55%, transparent); }
+    50% { box-shadow: 0 0 0 6px transparent; }
   }
 
   .ss-product-strip {
@@ -926,7 +987,7 @@
     display: grid;
     place-items: center;
     color: #11100e;
-    background: #efe4bf;
+    background: var(--ss-accent-pale);
     font-size: 11px;
     font-weight: 950;
     letter-spacing: -.04em;
@@ -981,7 +1042,7 @@
     height: 34px;
     border-radius: 12px;
     background:
-      linear-gradient(145deg, rgba(183,163,106,.68), rgba(243,222,154,.42));
+      linear-gradient(145deg, color-mix(in srgb, var(--ss-accent) 68%, transparent), color-mix(in srgb, var(--ss-accent-bright) 42%, transparent));
     flex: 0 0 auto;
   }
 
@@ -1039,6 +1100,21 @@
     bottom: 62px;
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .ss-floating-card--top {
+      animation: ssFloat 6s ease-in-out infinite;
+    }
+
+    .ss-floating-card--bottom {
+      animation: ssFloat 7s ease-in-out 1.2s infinite reverse;
+    }
+  }
+
+  @keyframes ssFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-9px); }
+  }
+
   /* PROOF BAR */
 
   .ss-proof-bar {
@@ -1069,11 +1145,12 @@
 
   .ss-proof-item strong {
     display: block;
-    color: #9f8d5a;
+    color: var(--ss-accent-deep);
     font-size: clamp(34px, 4.4vw, 58px);
     line-height: .92;
     letter-spacing: -.06em;
     font-weight: 950;
+    font-variant-numeric: tabular-nums;
   }
 
   .ss-proof-item span {
@@ -1113,13 +1190,13 @@
   .ss-compare-card--new {
     color: #fff;
     background:
-      radial-gradient(circle at 15% 0%, rgba(183,163,106,.15), transparent 36%),
+      radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--ss-accent) 15%, transparent), transparent 36%),
       linear-gradient(180deg, #171613, #080807);
   }
 
   .ss-card-label {
     margin-bottom: 22px;
-    color: #9f8d5a;
+    color: var(--ss-accent-deep);
     font-size: 12px;
     font-weight: 950;
     letter-spacing: .14em;
@@ -1171,8 +1248,8 @@
   }
 
   .ss-compare-card--new li::before {
-    background: #a9955d;
-    box-shadow: 0 0 0 5px rgba(183,163,106,.08);
+    background: var(--ss-accent-deep);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--ss-accent) 8%, transparent);
   }
 
   /* PROCESS */
@@ -1196,6 +1273,13 @@
     background: rgba(255,255,255,.70);
     border: 1px solid rgba(17,16,14,.08);
     box-shadow: 0 20px 70px rgba(17,16,14,.055);
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+
+  .ss-step-card:hover {
+    transform: translateY(-5px);
+    border-color: color-mix(in srgb, var(--ss-accent) 38%, transparent);
+    box-shadow: 0 28px 84px rgba(17,16,14,.10);
   }
 
   .ss-step-num {
@@ -1206,7 +1290,7 @@
     margin-bottom: 42px;
     border-radius: 18px;
     color: #11100e;
-    background: rgba(183,163,106,.12);
+    background: color-mix(in srgb, var(--ss-accent) 12%, transparent);
     font-size: 14px;
     font-weight: 950;
     letter-spacing: -.02em;
@@ -1247,6 +1331,13 @@
     background: #fff;
     border: 1px solid rgba(17,16,14,.08);
     box-shadow: 0 22px 70px rgba(17,16,14,.06);
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+
+  .ss-example-card:hover {
+    transform: translateY(-5px);
+    border-color: color-mix(in srgb, var(--ss-accent) 38%, transparent);
+    box-shadow: 0 30px 86px rgba(17,16,14,.11);
   }
 
   .ss-example-art {
@@ -1257,7 +1348,12 @@
     overflow: hidden;
   }
 
+  .ss-example-card:hover .ss-example-art span {
+    transform: skewX(-7deg) scale(1.06);
+  }
+
   .ss-example-art span {
+    transition: transform .35s ease;
     color: #fff;
     font-size: 31px;
     font-weight: 950;
@@ -1274,7 +1370,7 @@
 
   .ss-example-art--unit {
     background:
-      radial-gradient(circle at 50% 40%, rgba(183,163,106,.14), transparent 35%),
+      radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--ss-accent) 14%, transparent), transparent 35%),
       linear-gradient(145deg, #293224, #090a08);
   }
 
@@ -1286,7 +1382,7 @@
 
   .ss-example-art--business {
     background:
-      radial-gradient(circle at 50% 40%, rgba(183,163,106,.12), transparent 35%),
+      radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--ss-accent) 12%, transparent), transparent 35%),
       linear-gradient(145deg, #242424, #090909);
   }
 
@@ -1311,7 +1407,7 @@
 
   .ss-dashboard-section {
     background:
-      radial-gradient(circle at 80% 20%, rgba(183,163,106,.09), transparent 27%),
+      radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--ss-accent) 9%, transparent), transparent 27%),
       linear-gradient(180deg, #11100e, #070706);
     color: #fff;
   }
@@ -1380,7 +1476,7 @@
     border-radius: 999px;
     padding: 11px 15px;
     color: #11100e;
-    background: #efe4bf;
+    background: var(--ss-accent-pale);
     font-size: 12px;
     font-weight: 900;
   }
@@ -1412,7 +1508,7 @@
 
   .ss-store-row em {
     margin-left: auto;
-    color: #f4e2a6;
+    color: var(--ss-accent-bright);
     font-size: 12px;
     font-style: normal;
     font-weight: 850;
@@ -1426,7 +1522,7 @@
   }
 
   .ss-store-dot--gold {
-    background: #a9955d;
+    background: var(--ss-accent-deep);
   }
 
   .ss-admin-actions {
@@ -1465,10 +1561,17 @@
     background: rgba(255,255,255,.72);
     border: 1px solid rgba(17,16,14,.08);
     box-shadow: 0 24px 80px rgba(17,16,14,.055);
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+
+  .ss-role-card:hover {
+    transform: translateY(-5px);
+    border-color: color-mix(in srgb, var(--ss-accent) 38%, transparent);
+    box-shadow: 0 30px 90px rgba(17,16,14,.10);
   }
 
   .ss-role-card span {
-    color: #9f8d5a;
+    color: var(--ss-accent-deep);
     font-size: 12px;
     font-weight: 950;
     letter-spacing: .14em;
@@ -1505,7 +1608,7 @@
     padding: clamp(28px, 5vw, 54px);
     border-radius: 40px;
     background:
-      radial-gradient(circle at 0% 0%, rgba(183,163,106,.10), transparent 35%),
+      radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--ss-accent) 10%, transparent), transparent 35%),
       linear-gradient(180deg, #fbf8ef, #fff);
     border: 1px solid rgba(17,16,14,.08);
     box-shadow: 0 30px 110px rgba(17,16,14,.075);
@@ -1557,10 +1660,21 @@
     background: rgba(255,255,255,.72);
     border: 1px solid rgba(17,16,14,.08);
     overflow: hidden;
+    transition: border-color .25s ease, box-shadow .25s ease;
+  }
+
+  .ss-faq-list details:hover,
+  .ss-faq-list details[open] {
+    border-color: color-mix(in srgb, var(--ss-accent) 36%, transparent);
+    box-shadow: 0 16px 50px rgba(17,16,14,.07);
   }
 
   .ss-faq-list summary {
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     padding: 20px 22px;
     color: #11100e;
     font-size: 16px;
@@ -1572,16 +1686,49 @@
     display: none;
   }
 
-  .ss-faq-list summary::after {
-    content: "+";
-    float: right;
-    color: #9f8d5a;
-    font-size: 20px;
-    line-height: 1;
+  .ss-faq-icon {
+    position: relative;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ss-accent) 12%, transparent);
+    transition: transform .3s ease, background .3s ease;
   }
 
-  .ss-faq-list details[open] summary::after {
-    content: "–";
+  .ss-faq-icon::before,
+  .ss-faq-icon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    background: var(--ss-accent-deep);
+    border-radius: 2px;
+  }
+
+  .ss-faq-icon::before {
+    width: 12px;
+    height: 2px;
+  }
+
+  .ss-faq-icon::after {
+    width: 2px;
+    height: 12px;
+    transition: transform .3s ease, opacity .3s ease;
+  }
+
+  .ss-faq-list details[open] .ss-faq-icon {
+    transform: rotate(180deg);
+    background: color-mix(in srgb, var(--ss-accent) 22%, transparent);
+  }
+
+  .ss-faq-list details[open] .ss-faq-icon::after {
+    transform: rotate(90deg);
+    opacity: 0;
+  }
+
+  .ss-faq-body {
+    overflow: hidden;
   }
 
   .ss-faq-list p {
@@ -1598,7 +1745,7 @@
     position: relative;
     padding: 118px 0;
     background:
-      radial-gradient(circle at 50% 0%, rgba(183,163,106,.11), transparent 34%),
+      radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ss-accent) 11%, transparent), transparent 34%),
       linear-gradient(180deg, #fff, #f8f3e8);
   }
 
@@ -1631,7 +1778,7 @@
     padding: clamp(28px, 6vw, 66px);
     border-radius: 40px;
     background:
-      radial-gradient(circle at 10% 0%, rgba(183,163,106,.10), transparent 30%),
+      radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--ss-accent) 10%, transparent), transparent 30%),
       linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,255,255,.56));
     border: 1px solid rgba(255,255,255,.8);
     box-shadow: 0 34px 120px rgba(17,16,14,.10);
@@ -1674,7 +1821,7 @@
   .ss-pill--primary {
     color: #fff;
     background: #11100e;
-    border: 1px solid rgba(183,163,106,.28);
+    border: 1px solid color-mix(in srgb, var(--ss-accent) 28%, transparent);
     box-shadow: 0 16px 44px rgba(17,16,14,.16);
   }
 
@@ -1706,6 +1853,10 @@
     animation: ssMarquee 30s linear infinite;
     white-space: nowrap;
     will-change: transform;
+  }
+
+  .ss-marquee-wrap:hover .ss-marquee-track {
+    animation-play-state: paused;
   }
 
   .ss-marquee-item {
@@ -1938,12 +2089,95 @@
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var revealEls = root.querySelectorAll('.ss-reveal');
 
+  /* --- Animated count-up on the proof bar numbers --- */
+  function animateCount(el) {
+    var text = el.textContent;
+    var match = text.match(/(\d[\d,.]*)/);
+    if (!match) return;
+    var target = parseFloat(match[1].replace(/,/g, ''));
+    if (!isFinite(target) || target <= 0) return;
+    var prefix = text.slice(0, match.index);
+    var suffix = text.slice(match.index + match[1].length);
+    var hasDecimal = match[1].indexOf('.') !== -1;
+    var start = null;
+    var duration = 1100;
+
+    function frame(ts) {
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / duration);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var val = target * eased;
+      el.textContent = prefix + (hasDecimal ? val.toFixed(1) : Math.round(val).toLocaleString()) + suffix;
+      if (p < 1) requestAnimationFrame(frame);
+      else el.textContent = text;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* --- Gentle 3D tilt on the hero device mockup (desktop pointers only) --- */
+  function wireTilt() {
+    var visual = root.querySelector('.ss-hero-visual');
+    var card = root.querySelector('.ss-device-card');
+    if (!visual || !card) return;
+    if (!window.matchMedia('(pointer: fine)').matches) return;
+
+    visual.addEventListener('mousemove', function(e) {
+      var rect = visual.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width - 0.5;
+      var y = (e.clientY - rect.top) / rect.height - 0.5;
+      card.style.transform = 'rotateY(' + (x * 7).toFixed(2) + 'deg) rotateX(' + (y * -7).toFixed(2) + 'deg)';
+    });
+
+    visual.addEventListener('mouseleave', function() {
+      card.style.transform = '';
+    });
+  }
+
+  /* --- Smooth FAQ open/close --- */
+  function wireFaq() {
+    root.querySelectorAll('.ss-faq-list details').forEach(function(details) {
+      var summary = details.querySelector('summary');
+      var body = details.querySelector('.ss-faq-body');
+      if (!summary || !body || typeof body.animate !== 'function') return;
+      var animating = false;
+
+      summary.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (animating) return;
+        animating = true;
+
+        if (details.open) {
+          var h = body.offsetHeight;
+          body.animate(
+            [{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }],
+            { duration: 280, easing: 'ease' }
+          ).onfinish = function() {
+            details.open = false;
+            animating = false;
+          };
+        } else {
+          details.open = true;
+          var h2 = body.offsetHeight;
+          body.animate(
+            [{ height: '0px', opacity: 0 }, { height: h2 + 'px', opacity: 1 }],
+            { duration: 320, easing: 'ease' }
+          ).onfinish = function() {
+            animating = false;
+          };
+        }
+      });
+    });
+  }
+
   if (prefersReducedMotion) {
     revealEls.forEach(function(el) {
       el.classList.add('is-visible');
     });
     return;
   }
+
+  wireTilt();
+  wireFaq();
 
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function(entries) {
@@ -1954,6 +2188,10 @@
         window.setTimeout(function() {
           entry.target.classList.add('is-visible');
         }, delay);
+
+        if (entry.target.classList.contains('ss-proof-bar')) {
+          entry.target.querySelectorAll('[data-ss-count]').forEach(animateCount);
+        }
 
         io.unobserve(entry.target);
       });
@@ -2067,8 +2305,8 @@
     {
       "type": "textarea",
       "id": "hero_headline",
-      "label": "Headline (use line breaks for multi-line)",
-      "default": "Your team store.\nDone before your coffee."
+      "label": "Headline (line breaks for multi-line; wrap a phrase in *asterisks* for the gold accent)",
+      "default": "Your team store.\nDone before *your coffee*."
     },
     {
       "type": "textarea",
@@ -2263,6 +2501,276 @@
       "id": "second_store_cta",
       "label": "CTA label",
       "default": "Create another store"
+    },
+    {
+      "type": "header",
+      "content": "✦ Brand style"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Gold accent color",
+      "default": "#b7a36a"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_serif",
+      "label": "Serif display headlines (Fraunces)",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow_text",
+      "label": "Hero eyebrow (logged-out)",
+      "default": "VETERAN OWNED · PRIVATE GROUP STORES"
+    },
+    {
+      "type": "text",
+      "id": "member_eyebrow",
+      "label": "Eyebrow (logged-in)",
+      "default": "STELLA & SAGE DASHBOARD"
+    },
+    {
+      "type": "text",
+      "id": "second_store_kicker",
+      "label": "Second-store kicker (logged-in)",
+      "default": "CREATE ANOTHER STORE"
+    },
+    {
+      "type": "header",
+      "content": "✦ Hero mockup"
+    },
+    {
+      "type": "text",
+      "id": "mock_store_name",
+      "label": "Mockup store name",
+      "default": "Vista Raptors"
+    },
+    {
+      "type": "text",
+      "id": "mock_logo_initials",
+      "label": "Mockup logo initials",
+      "default": "VR"
+    },
+    {
+      "type": "text",
+      "id": "float1_text",
+      "label": "Floating card 1 (Number | Label)",
+      "default": "2 min | form"
+    },
+    {
+      "type": "text",
+      "id": "float2_text",
+      "label": "Floating card 2 (Number | Label)",
+      "default": "~15 min | store build"
+    },
+    {
+      "type": "header",
+      "content": "✦ Problem / comparison"
+    },
+    {
+      "type": "text",
+      "id": "pain_kicker",
+      "label": "Kicker",
+      "default": "THE REAL PROBLEM"
+    },
+    {
+      "type": "text",
+      "id": "pain_headline",
+      "label": "Headline",
+      "default": "Stop being the unpaid shirt manager."
+    },
+    {
+      "type": "textarea",
+      "id": "pain_body",
+      "label": "Body",
+      "default": "Group merch should not mean chasing sizes, collecting Venmo payments, tracking spreadsheets, and answering the same text over and over."
+    },
+    {
+      "type": "text",
+      "id": "pain_old_label",
+      "label": "Old-way card label",
+      "default": "THE OLD WAY"
+    },
+    {
+      "type": "text",
+      "id": "pain_old_title",
+      "label": "Old-way card title",
+      "default": "One person gets stuck with everything."
+    },
+    {
+      "type": "textarea",
+      "id": "pain_old_items",
+      "label": "Old-way list (one item per line)",
+      "default": "Collect every size manually\nChase payments in Venmo\nDeal with late orders\nTrack everything in a spreadsheet\nHandle mistakes yourself"
+    },
+    {
+      "type": "text",
+      "id": "pain_new_label",
+      "label": "New-way card label",
+      "default": "THE STELLA & SAGE WAY"
+    },
+    {
+      "type": "text",
+      "id": "pain_new_title",
+      "label": "New-way card title",
+      "default": "Create the store. Share the link. You're done."
+    },
+    {
+      "type": "textarea",
+      "id": "pain_new_items",
+      "label": "New-way list (one item per line)",
+      "default": "Everyone orders directly\nNo minimums or upfront inventory\nNo size collection\nNo payment chasing\nReorder anytime"
+    },
+    {
+      "type": "header",
+      "content": "✦ Example groups"
+    },
+    {
+      "type": "text",
+      "id": "examples_kicker",
+      "label": "Kicker",
+      "default": "BUILT FOR REAL GROUPS"
+    },
+    {
+      "type": "text",
+      "id": "examples_headline",
+      "label": "Headline",
+      "default": "One system. Almost any group."
+    },
+    {
+      "type": "textarea",
+      "id": "examples_body",
+      "label": "Body",
+      "default": "Teams, units, trips, businesses, fundraisers, families — if people need to order gear without one person managing chaos, it fits."
+    },
+    {
+      "type": "textarea",
+      "id": "example_cards",
+      "label": "Cards (one per line: TAG | Title | Description)",
+      "default": "RAPTORS | Youth sports teams | Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey.\nUNIT | Military & first responders | Private storefronts for units, stations, departments, classes, teams, and special events.\nTRIP | Trips, parties & reunions | Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events.\nCO. | Small businesses & fundraisers | Simple merch stores without buying boxes of shirts or managing orders by hand."
+    },
+    {
+      "type": "header",
+      "content": "✦ Dashboard section"
+    },
+    {
+      "type": "text",
+      "id": "dash_kicker",
+      "label": "Kicker",
+      "default": "YOUR HOME BASE"
+    },
+    {
+      "type": "text",
+      "id": "dash_headline",
+      "label": "Headline",
+      "default": "Every store lives in one clean dashboard."
+    },
+    {
+      "type": "textarea",
+      "id": "dash_body",
+      "label": "Body",
+      "default": "Admins can manage products, edit placement, choose colors, hide items, delete products, build new merch, and share the storefront link. Members just shop."
+    },
+    {
+      "type": "textarea",
+      "id": "dash_features",
+      "label": "Feature list (one per line: Title | Description)",
+      "default": "Admin tools | Edit, hide, delete, rebuild, and share.\nMember shopping | No confusing admin controls for normal buyers.\nReorder forever | Your group can come back later without starting over."
+    },
+    {
+      "type": "header",
+      "content": "✦ Roles section"
+    },
+    {
+      "type": "text",
+      "id": "roles_kicker",
+      "label": "Kicker",
+      "default": "SIMPLE ACCESS"
+    },
+    {
+      "type": "text",
+      "id": "roles_headline",
+      "label": "Headline",
+      "default": "Admins manage. Members order."
+    },
+    {
+      "type": "textarea",
+      "id": "roles_body",
+      "label": "Body",
+      "default": "The store feels simple because each person only sees what they need."
+    },
+    {
+      "type": "textarea",
+      "id": "role_cards",
+      "label": "Role cards (one per line: TAG | Title | Description)",
+      "default": "ADMIN | For the person running the store | Create the store, manage products, edit placement, choose colors, and share the link.\nMEMBER | For everyone ordering | Open the link, pick a product, choose size and color, checkout, and reorder later."
+    },
+    {
+      "type": "header",
+      "content": "✦ Trust section"
+    },
+    {
+      "type": "text",
+      "id": "trust_kicker",
+      "label": "Kicker",
+      "default": "WHY IT WORKS"
+    },
+    {
+      "type": "text",
+      "id": "trust_headline",
+      "label": "Headline",
+      "default": "Built for people who do not have time to manage merch."
+    },
+    {
+      "type": "textarea",
+      "id": "trust_body",
+      "label": "Body",
+      "default": "Stella & Sage removes the annoying parts of group apparel: collecting sizes, handling payments, placing bulk orders, and being the person everyone texts when they need another shirt."
+    },
+    {
+      "type": "textarea",
+      "id": "trust_points",
+      "label": "Trust points (one per line: Title | Description)",
+      "default": "Veteran owned | Built by someone who understands teams, units, and group chaos.\nNo minimums | People order what they need, when they need it.\nNo inventory | No boxes of extra shirts sitting in your garage."
+    },
+    {
+      "type": "header",
+      "content": "✦ FAQ"
+    },
+    {
+      "type": "text",
+      "id": "faq_kicker",
+      "label": "Kicker",
+      "default": "FAQ"
+    },
+    {
+      "type": "text",
+      "id": "faq_headline",
+      "label": "Headline",
+      "default": "The questions people ask first."
+    },
+    {
+      "type": "textarea",
+      "id": "faq_items",
+      "label": "FAQ items (one per line: Question | Answer)",
+      "default": "Do I have to collect everyone's sizes? | No. Everyone orders their own size directly from the private storefront.\nIs there a minimum order? | No. The whole point is to avoid minimums, bulk order pressure, and upfront inventory.\nHow long does setup take? | The form takes about 2 minutes. The automated store build usually takes about 15 minutes.\nCan I edit products after the store is built? | Yes. Store admins can manage products, adjust placement, choose colors, hide items, delete products, and build more.\nWho can use this? | Sports teams, military units, first responders, families, bachelor trips, fundraisers, small businesses, school groups, and almost any group that needs merch."
+    },
+    {
+      "type": "header",
+      "content": "✦ Final CTA & marquee"
+    },
+    {
+      "type": "text",
+      "id": "final_kicker",
+      "label": "Final CTA kicker",
+      "default": "READY WHEN YOU ARE"
+    },
+    {
+      "type": "textarea",
+      "id": "marquee_items",
+      "label": "Marquee items (one per line)",
+      "default": "Youth Baseball\nTravel Soccer\nMilitary Units\nFire Departments\nYouth Football\nLaw Enforcement\nTravel Softball\nCorporate Teams\nYouth Hockey\nCheer Squads\nWrestling Teams\nBachelor Trips\nFamily Reunions\nFirst Responders"
     }
   ],
   "presets": [

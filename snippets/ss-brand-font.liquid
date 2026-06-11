@@ -1,0 +1,13 @@
+{% comment %}
+  Stella & Sage — brand display font loader.
+  Renders the Fraunces variable font + a CSS variable other sections can use.
+  Safe to render from multiple sections: browsers dedupe identical <link> hrefs.
+{% endcomment %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&display=swap">
+<style>
+  :root {
+    --ss-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  }
+</style>
