@@ -334,7 +334,7 @@
         </div>
 
         <div class="ss-example-grid">
-          <div class="ss-example-card">
+          <div class="ss-example-card ss-reveal" data-delay="0">
             <div class="ss-example-art ss-example-art--team">
               {%- if section.settings.example1_image != blank -%}
                 <img class="ss-example-photo" src="{{ section.settings.example1_image | image_url: width: 600 }}" alt="{{ section.settings.example1_title | escape }}" loading="lazy" width="600" height="{{ 600 | divided_by: section.settings.example1_image.aspect_ratio | round }}">
@@ -346,7 +346,7 @@
             <p>{{ section.settings.example1_desc | default: 'Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey.' | escape }}</p>
           </div>
 
-          <div class="ss-example-card">
+          <div class="ss-example-card ss-reveal" data-delay="110">
             <div class="ss-example-art ss-example-art--unit">
               {%- if section.settings.example2_image != blank -%}
                 <img class="ss-example-photo" src="{{ section.settings.example2_image | image_url: width: 600 }}" alt="{{ section.settings.example2_title | escape }}" loading="lazy" width="600" height="{{ 600 | divided_by: section.settings.example2_image.aspect_ratio | round }}">
@@ -358,7 +358,7 @@
             <p>{{ section.settings.example2_desc | default: 'Private storefronts for units, stations, departments, classes, teams, and special events.' | escape }}</p>
           </div>
 
-          <div class="ss-example-card">
+          <div class="ss-example-card ss-reveal" data-delay="220">
             <div class="ss-example-art ss-example-art--trip">
               {%- if section.settings.example3_image != blank -%}
                 <img class="ss-example-photo" src="{{ section.settings.example3_image | image_url: width: 600 }}" alt="{{ section.settings.example3_title | escape }}" loading="lazy" width="600" height="{{ 600 | divided_by: section.settings.example3_image.aspect_ratio | round }}">
@@ -370,7 +370,7 @@
             <p>{{ section.settings.example3_desc | default: 'Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events.' | escape }}</p>
           </div>
 
-          <div class="ss-example-card">
+          <div class="ss-example-card ss-reveal" data-delay="330">
             <div class="ss-example-art ss-example-art--business">
               {%- if section.settings.example4_image != blank -%}
                 <img class="ss-example-photo" src="{{ section.settings.example4_image | image_url: width: 600 }}" alt="{{ section.settings.example4_title | escape }}" loading="lazy" width="600" height="{{ 600 | divided_by: section.settings.example4_image.aspect_ratio | round }}">
@@ -393,15 +393,15 @@
           <p class="ss-body">Admins can manage products, edit placement, choose colors, hide items, delete products, build new merch, and share the storefront link. Members just shop.</p>
 
           <div class="ss-feature-list">
-            <div>
+            <div class="ss-reveal" data-delay="0">
               <strong>Admin tools</strong>
               <span>Edit, hide, delete, rebuild, and share.</span>
             </div>
-            <div>
+            <div class="ss-reveal" data-delay="120">
               <strong>Member shopping</strong>
               <span>No confusing admin controls for normal buyers.</span>
             </div>
-            <div>
+            <div class="ss-reveal" data-delay="240">
               <strong>Reorder forever</strong>
               <span>Your group can come back later without starting over.</span>
             </div>
@@ -409,11 +409,11 @@
         </div>
 
         {%- if section.settings.panel_image != blank -%}
-        <div class="ss-admin-panel ss-admin-panel--photo" aria-label="Dashboard preview">
+        <div class="ss-admin-panel ss-admin-panel--photo ss-reveal" data-delay="160" aria-label="Dashboard preview">
           <img class="ss-panel-photo" src="{{ section.settings.panel_image | image_url: width: 1000 }}" alt="{{ section.settings.panel_image.alt | default: 'Dashboard preview' | escape }}" loading="lazy" width="{{ section.settings.panel_image.width }}" height="{{ section.settings.panel_image.height }}">
         </div>
         {%- else -%}
-        <div class="ss-admin-panel" aria-label="Dashboard tools preview">
+        <div class="ss-admin-panel ss-reveal" data-delay="160" aria-label="Dashboard tools preview">
           <div class="ss-admin-top">
             <div>
               <p>DASHBOARD</p>
@@ -1327,7 +1327,8 @@
   }
 
   .ss-example-art {
-    height: 178px;
+    height: auto;
+    aspect-ratio: 1 / 1;
     border-radius: 22px;
     display: grid;
     place-items: center;
@@ -1340,6 +1341,22 @@
     object-fit: cover;
     display: block;
     transition: transform 700ms cubic-bezier(.22, .8, .26, 1);
+  }
+
+  /* Photos start zoomed-in and settle into place as the card scrolls into view */
+  @media (prefers-reduced-motion: no-preference) {
+    .ss-example-card.ss-reveal .ss-example-photo {
+      transform: scale(1.18);
+      transition: transform 1100ms cubic-bezier(.22, .8, .26, 1);
+    }
+
+    .ss-example-card.ss-reveal.is-visible .ss-example-photo {
+      transform: scale(1);
+    }
+
+    .ss-example-card.ss-reveal.is-visible:hover .ss-example-photo {
+      transform: scale(1.06);
+    }
   }
 
   .ss-example-card {
@@ -1390,6 +1407,89 @@
     height: auto;
     display: block;
     border-radius: 24px;
+  }
+
+  /* Dashboard section life */
+  .ss-store-row {
+    transition: background 240ms ease, border-color 240ms ease, transform 240ms ease;
+  }
+
+  .ss-store-row:hover {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(183,163,106,.34);
+    transform: translateX(4px);
+  }
+
+  .ss-store-dot {
+    position: relative;
+  }
+
+  .ss-store-dot::after {
+    content: "";
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #5dd97c;
+    box-shadow: 0 0 0 0 rgba(93,217,124,.55);
+  }
+
+  .ss-store-dot--gold::after {
+    background: #ead892;
+    box-shadow: 0 0 0 0 rgba(234,216,146,.55);
+  }
+
+  .ss-admin-actions span {
+    transition: background 240ms ease, border-color 240ms ease, color 240ms ease;
+  }
+
+  .ss-admin-actions span:hover {
+    background: rgba(183,163,106,.16);
+    border-color: rgba(183,163,106,.36);
+    color: #f4e2a6;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ss-store-dot::after {
+      animation: ssDotPulse 2.4s ease-out infinite;
+    }
+
+    .ss-store-dot--gold::after {
+      animation: ssDotPulseGold 2.4s ease-out infinite;
+      animation-delay: -1.2s;
+    }
+
+    .ss-admin-panel {
+      animation: ssPanelFloat 7s ease-in-out infinite alternate;
+    }
+
+    .ss-panel-photo {
+      transform: scale(1.12);
+      transition: transform 1200ms cubic-bezier(.22, .8, .26, 1);
+    }
+
+    .ss-admin-panel.is-visible .ss-panel-photo {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes ssDotPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(93,217,124,.55); }
+    70%  { box-shadow: 0 0 0 9px rgba(93,217,124,0); }
+    100% { box-shadow: 0 0 0 0 rgba(93,217,124,0); }
+  }
+
+  @keyframes ssDotPulseGold {
+    0%   { box-shadow: 0 0 0 0 rgba(234,216,146,.55); }
+    70%  { box-shadow: 0 0 0 9px rgba(234,216,146,0); }
+    100% { box-shadow: 0 0 0 0 rgba(234,216,146,0); }
+  }
+
+  @keyframes ssPanelFloat {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-10px); }
   }
 
   .ss-example-art span {
@@ -2048,9 +2148,6 @@
       font-size: 42px;
     }
 
-    .ss-example-art {
-      height: 150px;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
