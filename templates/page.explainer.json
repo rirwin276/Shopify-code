@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "explainer_main": {
+      "type": "ss-explainer-page",
+      "settings": {}
+    }
+  },
+  "order": [
+    "explainer_main"
+  ]
+}
