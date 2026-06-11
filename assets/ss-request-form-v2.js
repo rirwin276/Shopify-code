@@ -26,7 +26,7 @@
 
   function hrefLooksLikeStorefrontIntent(href){
     href = String(href || '');
-    return href.indexOf('/pages/request-storefront-form') !== -1 || href.indexOf('/pages/private-storefronts') !== -1 || href.indexOf('/pages/storefront') !== -1;
+    return href.indexOf('/pages/request-storefront-form') !== -1 || href.indexOf('/pages/storefront') !== -1;
   }
 
   function getExactFormLoginHref(){
