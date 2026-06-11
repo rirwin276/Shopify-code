@@ -9,6 +9,7 @@
   - Premium Apple-style layout with restrained gold accents.
 {% endcomment %}
 
+{%- if section.settings.use_serif -%}{%- render 'ss-brand-font' -%}{%- endif -%}
 <section class="ss-about-page" id="ss-about-{{ section.id }}">
   <div class="ss-about-wrap">
 
@@ -268,6 +269,26 @@
   #ss-about-{{ section.id }} * {
     box-sizing: border-box;
   }
+
+  {%- if section.settings.use_serif %}
+  /* Editorial serif display layer (toggle in section settings) */
+  #ss-about-{{ section.id }} .ss-about-h1,
+  #ss-about-{{ section.id }} .ss-about-h2 {
+    font-family: var(--ss-font-display, Georgia, serif);
+    font-weight: 580;
+    letter-spacing: -.025em;
+    font-variation-settings: "opsz" 110;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-h1 {
+    line-height: .98;
+    letter-spacing: -.03em;
+  }
+
+  #ss-about-{{ section.id }} .ss-about-h2 {
+    line-height: 1.04;
+  }
+  {%- endif %}
 
   #ss-about-{{ section.id }} {
     position: relative;
@@ -862,6 +883,16 @@
       "id": "secondary_cta_url",
       "label": "Secondary CTA URL",
       "default": "/pages/portal"
+    },
+    {
+      "type": "header",
+      "content": "✦ Brand style"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_serif",
+      "label": "Serif display headlines (Fraunces)",
+      "default": true
     }
   ],
   "presets": [
