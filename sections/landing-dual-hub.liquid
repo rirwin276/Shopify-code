@@ -155,6 +155,19 @@
               <span></span><span></span><span></span>
             </div>
 
+            {%- if section.settings.hero_image != blank -%}
+            <div class="ss-hero-photo-frame">
+              <img
+                class="ss-hero-photo"
+                src="{{ section.settings.hero_image | image_url: width: 1200 }}"
+                srcset="{{ section.settings.hero_image | image_url: width: 600 }} 600w, {{ section.settings.hero_image | image_url: width: 900 }} 900w, {{ section.settings.hero_image | image_url: width: 1200 }} 1200w"
+                sizes="(max-width: 980px) 90vw, 560px"
+                alt="{{ section.settings.hero_image.alt | default: 'Store preview' | escape }}"
+                width="{{ section.settings.hero_image.width }}"
+                height="{{ section.settings.hero_image.height }}"
+                loading="eager">
+            </div>
+            {%- else -%}
             <div class="ss-dashboard-preview">
               <div class="ss-preview-head">
                 <div>
@@ -211,6 +224,7 @@
                 </div>
               </div>
             </div>
+            {%- endif -%}
           </div>
 
           <div class="ss-floating-card ss-floating-card--top">
@@ -322,34 +336,50 @@
         <div class="ss-example-grid">
           <div class="ss-example-card">
             <div class="ss-example-art ss-example-art--team">
-              <span>RAPTORS</span>
+              {%- if section.settings.example1_image != blank -%}
+                <img class="ss-example-photo" src="{{ section.settings.example1_image | image_url: width: 600 }}" alt="{{ section.settings.example1_title | escape }}" loading="lazy" width="600" height="{{ 600 | divided_by: section.settings.example1_image.aspect_ratio | round }}">
+              {%- else -%}
+                <span>RAPTORS</span>
+              {%- endif -%}
             </div>
-            <h3>Youth sports teams</h3>
-            <p>Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey.</p>
+            <h3>{{ section.settings.example1_title | default: 'Youth sports teams' | escape }}</h3>
+            <p>{{ section.settings.example1_desc | default: 'Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey.' | escape }}</p>
           </div>
 
           <div class="ss-example-card">
             <div class="ss-example-art ss-example-art--unit">
-              <span>UNIT</span>
+              {%- if section.settings.example2_image != blank -%}
+                <img class="ss-example-photo" src="{{ section.settings.example2_image | image_url: width: 600 }}" alt="{{ section.settings.example2_title | escape }}" loading="lazy" width="600" height="{{ 600 | divided_by: section.settings.example2_image.aspect_ratio | round }}">
+              {%- else -%}
+                <span>UNIT</span>
+              {%- endif -%}
             </div>
-            <h3>Military & first responders</h3>
-            <p>Private storefronts for units, stations, departments, classes, teams, and special events.</p>
+            <h3>{{ section.settings.example2_title | default: 'Military & first responders' | escape }}</h3>
+            <p>{{ section.settings.example2_desc | default: 'Private storefronts for units, stations, departments, classes, teams, and special events.' | escape }}</p>
           </div>
 
           <div class="ss-example-card">
             <div class="ss-example-art ss-example-art--trip">
-              <span>TRIP</span>
+              {%- if section.settings.example3_image != blank -%}
+                <img class="ss-example-photo" src="{{ section.settings.example3_image | image_url: width: 600 }}" alt="{{ section.settings.example3_title | escape }}" loading="lazy" width="600" height="{{ 600 | divided_by: section.settings.example3_image.aspect_ratio | round }}">
+              {%- else -%}
+                <span>TRIP</span>
+              {%- endif -%}
             </div>
-            <h3>Trips, parties & reunions</h3>
-            <p>Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events.</p>
+            <h3>{{ section.settings.example3_title | default: 'Trips, parties & reunions' | escape }}</h3>
+            <p>{{ section.settings.example3_desc | default: 'Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events.' | escape }}</p>
           </div>
 
           <div class="ss-example-card">
             <div class="ss-example-art ss-example-art--business">
-              <span>CO.</span>
+              {%- if section.settings.example4_image != blank -%}
+                <img class="ss-example-photo" src="{{ section.settings.example4_image | image_url: width: 600 }}" alt="{{ section.settings.example4_title | escape }}" loading="lazy" width="600" height="{{ 600 | divided_by: section.settings.example4_image.aspect_ratio | round }}">
+              {%- else -%}
+                <span>CO.</span>
+              {%- endif -%}
             </div>
-            <h3>Small businesses & fundraisers</h3>
-            <p>Simple merch stores without buying boxes of shirts or managing orders by hand.</p>
+            <h3>{{ section.settings.example4_title | default: 'Small businesses & fundraisers' | escape }}</h3>
+            <p>{{ section.settings.example4_desc | default: 'Simple merch stores without buying boxes of shirts or managing orders by hand.' | escape }}</p>
           </div>
         </div>
       </div>
@@ -378,6 +408,11 @@
           </div>
         </div>
 
+        {%- if section.settings.panel_image != blank -%}
+        <div class="ss-admin-panel ss-admin-panel--photo" aria-label="Dashboard preview">
+          <img class="ss-panel-photo" src="{{ section.settings.panel_image | image_url: width: 1000 }}" alt="{{ section.settings.panel_image.alt | default: 'Dashboard preview' | escape }}" loading="lazy" width="{{ section.settings.panel_image.width }}" height="{{ section.settings.panel_image.height }}">
+        </div>
+        {%- else -%}
         <div class="ss-admin-panel" aria-label="Dashboard tools preview">
           <div class="ss-admin-top">
             <div>
@@ -412,6 +447,7 @@
             <span>Delete product</span>
           </div>
         </div>
+        {%- endif -%}
       </div>
     </section>
 
@@ -622,14 +658,55 @@
   @media (prefers-reduced-motion: no-preference) {
     .ss-reveal {
       opacity: 0;
-      transform: translateY(18px);
-      transition: opacity 560ms ease, transform 560ms ease;
+      transform: translateY(26px) scale(.985);
+      filter: blur(5px);
+      transition:
+        opacity 720ms cubic-bezier(.22, .8, .26, 1),
+        transform 720ms cubic-bezier(.22, .8, .26, 1),
+        filter 720ms cubic-bezier(.22, .8, .26, 1);
     }
 
     .ss-reveal.is-visible {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
+      filter: blur(0);
     }
+
+    .ss-bg-orb {
+      animation: ssOrbFloat 14s ease-in-out infinite alternate;
+    }
+
+    .ss-bg-orb--two {
+      animation-duration: 18s;
+      animation-delay: -6s;
+    }
+
+    .ss-floating-card {
+      animation: ssCardFloat 6s ease-in-out infinite alternate;
+    }
+
+    .ss-floating-card--bottom {
+      animation-delay: -3s;
+    }
+
+    .ss-hero-photo {
+      animation: ssKenBurns 22s ease-in-out infinite alternate;
+    }
+  }
+
+  @keyframes ssOrbFloat {
+    from { transform: translate(0, 0); }
+    to { transform: translate(34px, 26px); }
+  }
+
+  @keyframes ssCardFloat {
+    from { transform: translateY(0); }
+    to { transform: translateY(-12px); }
+  }
+
+  @keyframes ssKenBurns {
+    from { transform: scale(1); }
+    to { transform: scale(1.07); }
   }
 
   .ss-eyebrow,
@@ -1257,6 +1334,64 @@
     overflow: hidden;
   }
 
+  .ss-example-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 700ms cubic-bezier(.22, .8, .26, 1);
+  }
+
+  .ss-example-card {
+    transition: transform 320ms ease, box-shadow 320ms ease;
+  }
+
+  .ss-example-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 32px 90px rgba(17,16,14,.12);
+  }
+
+  .ss-example-card:hover .ss-example-photo {
+    transform: scale(1.06);
+  }
+
+  .ss-step-card {
+    transition: transform 320ms ease, box-shadow 320ms ease;
+  }
+
+  .ss-step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 28px 90px rgba(17,16,14,.10);
+  }
+
+  .ss-hero-photo-frame {
+    border-radius: 25px;
+    overflow: hidden;
+    min-height: 470px;
+    display: grid;
+    background: #11100e;
+  }
+
+  .ss-hero-photo {
+    width: 100%;
+    height: 100%;
+    min-height: 470px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ss-admin-panel--photo {
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .ss-panel-photo {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 24px;
+  }
+
   .ss-example-art span {
     color: #fff;
     font-size: 31px;
@@ -1838,6 +1973,12 @@
       border-radius: 22px;
     }
 
+    .ss-hero-photo-frame,
+    .ss-hero-photo {
+      min-height: 300px;
+      border-radius: 22px;
+    }
+
     .ss-preview-head h3,
     .ss-admin-top h3 {
       font-size: 24px;
@@ -1916,10 +2057,14 @@
     .ss-reveal {
       opacity: 1;
       transform: none;
+      filter: none;
       transition: none;
     }
 
-    .ss-marquee-track {
+    .ss-marquee-track,
+    .ss-bg-orb,
+    .ss-floating-card,
+    .ss-hero-photo {
       animation: none;
     }
 
@@ -2031,7 +2176,93 @@
     },
     {
       "type": "header",
-      "content": "Media (dashboard image)"
+      "content": "Images — Hero & Dashboard"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image (replaces the mock dashboard in the device frame)"
+    },
+    {
+      "type": "image_picker",
+      "id": "panel_image",
+      "label": "Dashboard section image (replaces the mock admin panel)"
+    },
+    {
+      "type": "header",
+      "content": "Images & text — Example cards"
+    },
+    {
+      "type": "image_picker",
+      "id": "example1_image",
+      "label": "Card 1 image"
+    },
+    {
+      "type": "text",
+      "id": "example1_title",
+      "label": "Card 1 title",
+      "default": "Youth sports teams"
+    },
+    {
+      "type": "textarea",
+      "id": "example1_desc",
+      "label": "Card 1 description",
+      "default": "Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey."
+    },
+    {
+      "type": "image_picker",
+      "id": "example2_image",
+      "label": "Card 2 image"
+    },
+    {
+      "type": "text",
+      "id": "example2_title",
+      "label": "Card 2 title",
+      "default": "Military & first responders"
+    },
+    {
+      "type": "textarea",
+      "id": "example2_desc",
+      "label": "Card 2 description",
+      "default": "Private storefronts for units, stations, departments, classes, teams, and special events."
+    },
+    {
+      "type": "image_picker",
+      "id": "example3_image",
+      "label": "Card 3 image"
+    },
+    {
+      "type": "text",
+      "id": "example3_title",
+      "label": "Card 3 title",
+      "default": "Trips, parties & reunions"
+    },
+    {
+      "type": "textarea",
+      "id": "example3_desc",
+      "label": "Card 3 description",
+      "default": "Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events."
+    },
+    {
+      "type": "image_picker",
+      "id": "example4_image",
+      "label": "Card 4 image"
+    },
+    {
+      "type": "text",
+      "id": "example4_title",
+      "label": "Card 4 title",
+      "default": "Small businesses & fundraisers"
+    },
+    {
+      "type": "textarea",
+      "id": "example4_desc",
+      "label": "Card 4 description",
+      "default": "Simple merch stores without buying boxes of shirts or managing orders by hand."
+    },
+    {
+      "type": "header",
+      "content": "Media (legacy dashboard image)"
     },
     {
       "type": "image_picker",
