@@ -3747,8 +3747,13 @@
       apPolishEditorButtons(actionsEl);
       } // end if(!isProEditorBuild)
 
-      // Pro Builder re-edit button — shown only for pro-built products
-      if(isProEditorBuild && SSAP.editorSecret && SSAP.railwayUrl){
+      // Pro Builder re-edit button — shown only for pro-built products.
+      // The pro-builder routes live on the Printful Automation app, not the
+      // uploader app (SSAP.railwayUrl), so derive that origin from an existing
+      // editor base URL (e.g. https://printfulautomation-production.up.railway.app/editor/bc3413).
+      var _proBuilderOrigin = '';
+      try { _proBuilderOrigin = new URL(SSAP.editorBaseUrl || SSAP.editorProShirtBc3413BaseUrl || '').origin; } catch(_e){ _proBuilderOrigin = ''; }
+      if(isProEditorBuild && SSAP.editorSecret && _proBuilderOrigin){
         var _proTags = _tagListForProCheck;
         var _isCc1717Pro  = _proTags.some(function(t){ return t === 'pro-shirt-cc1717'  || t === 'pro-builder-cc1717'; });
         var _isM2580Pro   = _proTags.some(function(t){ return t === 'pro-shirt-m2580'   || t === 'pro-builder-m2580'; });
@@ -3759,7 +3764,7 @@
         else if(_isLs14003Pro) _proEditPath = '/editor/pro-shirt/ls14003/edit';
         if(_proEditPath){
           var _returnUrl = (window.location.origin + window.location.pathname);
-          var _proEditUrl = SSAP.railwayUrl + _proEditPath
+          var _proEditUrl = _proBuilderOrigin + _proEditPath
             + '?product_handle=' + encodeURIComponent(product.handle || '')
             + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
