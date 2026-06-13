@@ -3745,6 +3745,34 @@
         }
       }
       apPolishEditorButtons(actionsEl);
+      } // end if(!isProEditorBuild)
+
+      // Pro Builder re-edit button — shown only for pro-built products
+      if(isProEditorBuild && SSAP.editorSecret && SSAP.railwayUrl){
+        var _proTags = _tagListForProCheck;
+        var _isCc1717Pro  = _proTags.some(function(t){ return t === 'pro-shirt-cc1717'  || t === 'pro-builder-cc1717'; });
+        var _isM2580Pro   = _proTags.some(function(t){ return t === 'pro-shirt-m2580'   || t === 'pro-builder-m2580'; });
+        var _isLs14003Pro = _proTags.some(function(t){ return t === 'pro-shirt-ls14003' || t === 'pro-builder-ls14003'; });
+        var _proEditPath  = null;
+        if(_isCc1717Pro)       _proEditPath = '/editor/pro-shirt/cc1717/edit';
+        else if(_isM2580Pro)   _proEditPath = '/editor/pro-shirt/m2580/edit';
+        else if(_isLs14003Pro) _proEditPath = '/editor/pro-shirt/ls14003/edit';
+        if(_proEditPath){
+          var _returnUrl = (window.location.origin + window.location.pathname);
+          var _proEditUrl = SSAP.railwayUrl + _proEditPath
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_returnUrl)
+            + '&mode=embedded';
+          var _proEditBtn = document.createElement('button');
+          _proEditBtn.type = 'button';
+          _proEditBtn.className = 'ap-edit-placement-btn';
+          _proEditBtn.innerHTML = '✏️ Edit in Pro Builder';
+          _proEditBtn.title = 'Re-open this product in the Pro Builder to adjust image, placement, or colors';
+          _proEditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_proEditUrl));
+          actionsEl.appendChild(_proEditBtn);
+        }
       }
 
       row.appendChild(imgEl);
