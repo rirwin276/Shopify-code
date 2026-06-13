@@ -2446,12 +2446,16 @@
     var toast = document.createElement('div');
     toast.className = 'ap-rebuilding-toast';
     toast.innerHTML =
-      '<strong>✅ Placement saved — rebuilding product.</strong><br>' +
-      'Allow 2–4 minutes, then refresh this page to see the updated mockups. ' +
+      '<strong>✅ Thank you — your placement and colors are saved.</strong><br>' +
+      'We’re rebuilding this auto-build product now. Allow 2–4 minutes, then refresh ' +
+      'this page to see the updated mockups. If it still looks off, you can edit the ' +
+      'placement again or build a fresh one. ' +
       '<button type="button" class="ap-rebuilding-toast__close" aria-label="Dismiss">✕</button>';
     document.body.appendChild(toast);
     toast.querySelector('.ap-rebuilding-toast__close')
       .addEventListener('click', function(){ toast.remove(); });
+    // Auto-dismiss after 15s so the admin view returns to a clean state.
+    setTimeout(function(){ if (toast && toast.parentNode) toast.remove(); }, 15000);
   }
 
   (function apMaybeShowRebuildingToast(){
@@ -3415,7 +3419,7 @@
         isBc3413Back = productTags.split(',').some(_isBc3413BackTag);
       }
 
-      if(isBc3413Back && SSAP.editorSecret){
+      if(!isProEditorBuild && isBc3413Back && SSAP.editorSecret){
         var bc3413BackLogoSrc = SSAP.shopLogoSrc || '';
         var bc3413BackEditorBtn;
         if(bc3413BackLogoSrc){
@@ -3468,7 +3472,7 @@
         isBc3001y = productTags.split(',').some(_isBc3001yTag);
       }
 
-      if(isBc3001y && SSAP.editorSecret){
+      if(!isProEditorBuild && isBc3001y && SSAP.editorSecret){
         var bc3001yLogoSrc = SSAP.shopLogoSrc || '';
         var bc3001yEditorBtn;
         if(bc3001yLogoSrc){
@@ -3521,7 +3525,7 @@
         isNl6733 = productTags.split(',').some(_isNl6733Tag);
       }
 
-      if(isNl6733 && SSAP.editorSecret){
+      if(!isProEditorBuild && isNl6733 && SSAP.editorSecret){
         var nl6733LogoSrc = SSAP.shopLogoSrc || '';
         var nl6733EditorBtn;
         if(nl6733LogoSrc){
@@ -3574,7 +3578,7 @@
         isMc1790 = productTags.split(',').some(_isMc1790Tag);
       }
 
-      if(isMc1790 && SSAP.editorSecret){
+      if(!isProEditorBuild && isMc1790 && SSAP.editorSecret){
         var mc1790LogoSrc = SSAP.shopLogoSrc || '';
         var mc1790EditorBtn;
         if(mc1790LogoSrc){
@@ -3648,7 +3652,7 @@
       if(isM2580CustomBuild){
         // Intentionally append nothing for new M2580 Pro Builder custom products.
         // Existing-product rebuild/edit will be added later as a separate real workflow.
-      } else if(isM2580 && SSAP.editorSecret){
+      } else if(!isProEditorBuild && isM2580 && SSAP.editorSecret){
         var m2580LogoSrc = SSAP.shopLogoSrc || '';
         var m2580EditorBtn;
         if(m2580LogoSrc){
@@ -3701,7 +3705,7 @@
         isCc1467y = productTags.split(',').some(_isCc1467yTag);
       }
 
-      if(isCc1467y && SSAP.editorSecret){
+      if(!isProEditorBuild && isCc1467y && SSAP.editorSecret){
         var cc1467yLogoSrc = SSAP.shopLogoSrc || '';
         var cc1467yEditorBtn;
         if(cc1467yLogoSrc){
