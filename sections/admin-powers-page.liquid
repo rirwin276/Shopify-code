@@ -3801,7 +3801,7 @@
         else if(_isM2580Pro)   _proEditPath = '/editor/pro-shirt/m2580/edit';
         else if(_isLs14003Pro) _proEditPath = '/editor/pro-shirt/ls14003/edit';
         if(_proEditPath){
-          var _returnUrl = (window.location.origin + window.location.pathname);
+          var _returnUrl = (window.location.origin + window.location.pathname + window.location.search);
           var _proEditUrl = _proBuilderOrigin + _proEditPath
             + '?product_handle=' + encodeURIComponent(product.handle || '')
             + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
