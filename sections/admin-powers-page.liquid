@@ -2336,6 +2336,35 @@
       <button id="apBtnSaveSettings" class="ap-btn ap-btn--primary ap-btn-full">Save & Apply Settings</button>
       <div id="apStatusSettings" class="ap-status"></div>
 
+      <!-- FUNDRAISING CARD -->
+      <div style="margin-top:32px;padding:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+          <span style="font-size:22px;">💚</span>
+          <h3 style="margin:0;font-size:16px;font-weight:800;">Fundraising</h3>
+        </div>
+        <p style="margin:0 0 16px;font-size:13px;color:var(--ap-gray);">Add a fundraising donation to every product in this store. A $1 processing fee is disclosed to customers on top of the fundraising amount.</p>
+
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:700;font-size:14px;">
+            <span id="apFrToggleLabel">Fundraising Off</span>
+            <div id="apFrToggleTrack" style="position:relative;width:44px;height:24px;border-radius:12px;background:#cbd5e1;transition:background 0.2s;cursor:pointer;" onclick="apFrToggle()">
+              <div id="apFrToggleThumb" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:9px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:left 0.2s;"></div>
+            </div>
+          </label>
+        </div>
+
+        <div id="apFrAmountRow" style="display:none;margin-bottom:16px;">
+          <label class="ap-label" for="apFrAmount" style="margin-bottom:6px;display:block;">Fundraising Amount ($ per item)</label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input id="apFrAmount" class="ap-input" type="number" min="1" max="100" step="1" value="4" style="width:90px;" />
+            <span style="font-size:13px;color:var(--ap-gray);">+ $1 fee = <strong id="apFrTotal">$5</strong> added per item</span>
+          </div>
+        </div>
+
+        <button id="apBtnSaveFundraising" class="ap-btn ap-btn--primary" type="button" onclick="apFrSave()">Save Fundraising Settings</button>
+        <div id="apStatusFundraising" class="ap-status" style="margin-top:8px;"></div>
+      </div>
+
     </div><!-- /apPanelSettings -->
 
     <!-- DANGER PANEL -->
@@ -4498,6 +4527,104 @@
       }
     });
   }
+})();
+
+// --- Fundraising UI ---
+(function() {
+  var _frEnabled = false;
+
+  // Load current fundraising state
+  async function apFrLoad() {
+    try {
+      var r = await fetch(
+        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/fundraising',
+        { headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }, cache: 'no-store' }
+      );
+      var j = await r.json().catch(function(){ return {}; });
+      if (j.enabled) {
+        _frEnabled = true;
+        document.getElementById('apFrAmount').value = j.amount || 4;
+      }
+      _apFrRender();
+    } catch(e) { /* silent — store may not have fundraising fields yet */ }
+  }
+
+  function _apFrRender() {
+    var track = document.getElementById('apFrToggleTrack');
+    var thumb = document.getElementById('apFrToggleThumb');
+    var label = document.getElementById('apFrToggleLabel');
+    var amtRow = document.getElementById('apFrAmountRow');
+    if (!track) return;
+    if (_frEnabled) {
+      track.style.background = '#22c55e';
+      thumb.style.left = '23px';
+      label.textContent = 'Fundraising On';
+      amtRow.style.display = 'block';
+    } else {
+      track.style.background = '#cbd5e1';
+      thumb.style.left = '3px';
+      label.textContent = 'Fundraising Off';
+      amtRow.style.display = 'none';
+    }
+    var amt = parseInt(document.getElementById('apFrAmount').value) || 4;
+    document.getElementById('apFrTotal').textContent = '$' + (amt + 1);
+  }
+
+  window.apFrToggle = function() {
+    _frEnabled = !_frEnabled;
+    _apFrRender();
+  };
+
+  document.getElementById('apFrAmount').addEventListener('input', function() {
+    var amt = parseInt(this.value) || 0;
+    document.getElementById('apFrTotal').textContent = '$' + (amt + 1);
+  });
+
+  window.apFrSave = async function() {
+    var btn = document.getElementById('apBtnSaveFundraising');
+    var statusEl = document.getElementById('apStatusFundraising');
+    var amount = parseInt(document.getElementById('apFrAmount').value) || 0;
+
+    if (_frEnabled && (amount < 1 || amount > 100)) {
+      statusEl.className = 'ap-status err';
+      statusEl.textContent = 'Amount must be $1–$100.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    statusEl.className = 'ap-status';
+    statusEl.textContent = '';
+
+    try {
+      var r = await fetch(
+        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/fundraising',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET },
+          body: JSON.stringify({ enabled: _frEnabled, amount: _frEnabled ? amount : 0 }),
+          cache: 'no-store'
+        }
+      );
+      var j = await r.json().catch(function(){ return {}; });
+      if (!r.ok) throw new Error(j.error || 'Save failed');
+      statusEl.className = 'ap-status ok';
+      if (_frEnabled) {
+        statusEl.textContent = '✅ Fundraising enabled — $' + amount + ' + $1 fee per item. Products are being repriced in the background.';
+      } else {
+        statusEl.textContent = '✅ Fundraising disabled. Products are being repriced to base prices.';
+      }
+    } catch(e) {
+      statusEl.className = 'ap-status err';
+      statusEl.textContent = '❌ ' + (e.message || 'Save failed');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Fundraising Settings';
+    }
+  };
+
+  // Initialize on load
+  apFrLoad();
 })();
 </script>
 
