@@ -48,3 +48,7 @@ After changing the admin page, test:
 - Share/join links
 - Dashboard return link
 - Product loading
+
+## Current status
+
+README notes are on main. Large section edits are being handled carefully because the admin page is a very large Liquid file.
