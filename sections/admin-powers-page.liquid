@@ -33,23 +33,42 @@
 {%- endif -%}
 {%- assign shop_handle = shop_handle | replace: '%2D', '-' | replace: '%5F', '_' | strip | downcase -%}
 
-{%- comment %} 2. PERMISSIONS CHECK {% endcomment -%}
+{%- comment %}
+  2. ADMIN ACCESS CHECK
+
+  Access rules:
+  - Founder access: customer tag `super-admin` can manage every storefront.
+  - Store admin access: customer tag `storefront-admin--<shop_handle>` can manage only that storefront.
+  - Temporary safety fallback: Ryan's owner email still gets founder access until the `super-admin`
+    tag is confirmed on the live Shopify customer account.
+
+  Do not remove the email fallback until owner access has been tested through the `super-admin` tag.
+{%- endcomment -%}
 {%- assign required_admin_tag = 'storefront-admin--' | append: shop_handle -%}
+{%- assign founder_access_tag = 'super-admin' -%}
+{%- assign owner_email_fallback = 'ryan.irwin@stellaandsagecompany.com' -%}
 {%- assign is_admin_for_shop = false -%}
 {%- assign is_super_admin = false -%}
 
 {%- if customer and shop_handle != blank -%}
-  {%- if customer.email == 'ryan.irwin@stellaandsagecompany.com' -%}
+  {%- assign customer_email_down = customer.email | default: '' | downcase | strip -%}
+
+  {%- if customer_email_down == owner_email_fallback -%}
     {%- assign is_super_admin = true -%}
     {%- assign is_admin_for_shop = true -%}
   {%- endif -%}
+
   {%- for t in customer.tags -%}
     {%- assign tag_down = t | downcase | strip -%}
-    {%- if tag_down == 'super-admin' -%}
+
+    {%- if tag_down == founder_access_tag -%}
       {%- assign is_super_admin = true -%}
       {%- assign is_admin_for_shop = true -%}
     {%- endif -%}
-    {%- if tag_down == required_admin_tag -%}{%- assign is_admin_for_shop = true -%}{%- endif -%}
+
+    {%- if tag_down == required_admin_tag -%}
+      {%- assign is_admin_for_shop = true -%}
+    {%- endif -%}
   {%- endfor -%}
 {%- endif -%}
 
@@ -2038,17 +2057,27 @@
   {%- endif -%}
 {%- endif -%}
 
-{%- comment %} BC3413 placement editor — hardcoded config (no schema settings — see PR #59 RCA) {% endcomment -%}
-{%- assign editor_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413' -%}
-{%- assign editor_bc3001y_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3001y' -%}
-{%- assign editor_nl6733_base_url = 'https://printfulautomation-production.up.railway.app/editor/nl6733' -%}
-{%- assign editor_mc1790_base_url = 'https://printfulautomation-production.up.railway.app/editor/mc1790' -%}
-{%- assign editor_m2580_base_url = 'https://printfulautomation-production.up.railway.app/editor/m2580' -%}
-{%- assign editor_cc1467y_base_url = 'https://printfulautomation-production.up.railway.app/editor/cc1467y' -%}
-{%- assign editor_bc3413_back_base_url = 'https://printfulautomation-production.up.railway.app/editor/bc3413_back' -%}
-{%- assign editor_pro_shirt_bc3413_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3413' -%}
-{%- assign editor_pro_shirt_bc3001y_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3001y' -%}
-{%- assign editor_pro_shirt_m2580_base_url = 'https://printfulautomation-production.up.railway.app/editor/pro-shirt/m2580' -%}
+{%- comment %}
+  BACKEND + EDITOR CONFIG
+
+  Studio Uploader handles member/admin actions, store settings, sleep/wake, and store maintenance actions.
+  Printful Automation handles placement editors, custom product builders, rebuild jobs, and apply-status polling.
+
+  Editor URLs are built from a single base URL so backend changes are easier to make safely.
+{%- endcomment -%}
+{%- assign studio_uploader_base_url = 'https://studio-uploader-production.up.railway.app' -%}
+{%- assign printful_automation_base_url = 'https://printfulautomation-production.up.railway.app' -%}
+
+{%- assign editor_base_url = printful_automation_base_url | append: '/editor/bc3413' -%}
+{%- assign editor_bc3001y_base_url = printful_automation_base_url | append: '/editor/bc3001y' -%}
+{%- assign editor_nl6733_base_url = printful_automation_base_url | append: '/editor/nl6733' -%}
+{%- assign editor_mc1790_base_url = printful_automation_base_url | append: '/editor/mc1790' -%}
+{%- assign editor_m2580_base_url = printful_automation_base_url | append: '/editor/m2580' -%}
+{%- assign editor_cc1467y_base_url = printful_automation_base_url | append: '/editor/cc1467y' -%}
+{%- assign editor_bc3413_back_base_url = printful_automation_base_url | append: '/editor/bc3413_back' -%}
+{%- assign editor_pro_shirt_bc3413_base_url = printful_automation_base_url | append: '/editor/pro-shirt/bc3413' -%}
+{%- assign editor_pro_shirt_bc3001y_base_url = printful_automation_base_url | append: '/editor/pro-shirt/bc3001y' -%}
+{%- assign editor_pro_shirt_m2580_base_url = printful_automation_base_url | append: '/editor/pro-shirt/m2580' -%}
 {%- assign editor_pro_shirt_zip_hoodie_base_url = section.settings.editor_pro_shirt_zip_hoodie_base_url | default: '' -%}
 {%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
    Not actually secret — it's already in the public repo, only gates the editor page,
@@ -2083,7 +2112,7 @@
     SSAP.collectionHandle = {{ collection_handle | json }};
     SSAP.shopHandle = {{ shop_handle | json }};
     SSAP.isSuperAdmin = {{ is_super_admin | json }};
-    SSAP.railwayUrl = "https://studio-uploader-production.up.railway.app";
+    SSAP.railwayUrl = {{ studio_uploader_base_url | json }};
     SSAP.editorBaseUrl = {{ editor_base_url | json }};
     SSAP.editorBc3001yBaseUrl = {{ editor_bc3001y_base_url | json }};
     SSAP.editorNl6733BaseUrl = {{ editor_nl6733_base_url | json }};
