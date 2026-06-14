@@ -2237,6 +2237,165 @@
     font-size: 13px; font-weight: 700; color: #14532d;
   }
 
+  /* ── Fundraising Zone (between hero and tabs) ── */
+  .ap-fr-zone {
+    margin: 0 0 20px;
+  }
+  /* Empty state — no fundraiser */
+  .ap-fr-zone-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 24px;
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 16px;
+    gap: 14px;
+  }
+  .ap-fr-zone-empty-icon { font-size: 24px; flex-shrink: 0; }
+  .ap-fr-zone-empty-copy { flex: 1; }
+  .ap-fr-zone-empty-copy p {
+    margin: 0; font-size: 13px; color: #64748b;
+  }
+  .ap-fr-zone-empty-copy strong {
+    display: block; font-size: 15px; color: #1e293b; font-weight: 700; margin-bottom: 2px;
+  }
+  .ap-btn--fr-start {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 10px 18px; font-size: 13px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: opacity 0.15s;
+  }
+  .ap-btn--fr-start:hover { opacity: 0.88; }
+  /* Active state — fundraiser running */
+  .ap-fr-zone-active {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1.5px solid #86efac; border-radius: 16px;
+  }
+  .ap-fr-zone-pulse {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #22c55e; flex-shrink: 0;
+    box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
+    animation: apFrPulse 2s infinite;
+  }
+  @keyframes apFrPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+    70%  { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+  .ap-fr-zone-info { flex: 1; min-width: 0; }
+  .ap-fr-zone-title {
+    font-size: 14px; font-weight: 700; color: #14532d; margin: 0 0 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ap-fr-zone-sub {
+    font-size: 12px; color: #166534; margin: 0;
+  }
+  .ap-fr-zone-stats {
+    display: flex; gap: 16px; flex-shrink: 0;
+  }
+  .ap-fr-zone-stat { text-align: center; }
+  .ap-fr-zone-stat-val { font-size: 16px; font-weight: 800; color: #14532d; }
+  .ap-fr-zone-stat-lbl { font-size: 10px; color: #16a34a; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ap-btn--fr-details {
+    background: #fff; color: #16a34a;
+    border: 1.5px solid #86efac; border-radius: 10px;
+    padding: 8px 14px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .ap-btn--fr-details:hover { background: #f0fdf4; }
+  /* Details modal */
+  .ap-frd-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .ap-frd-overlay.open { opacity: 1; pointer-events: all; }
+  .ap-frd-modal {
+    background: #fff; border-radius: 20px;
+    max-width: 520px; width: calc(100% - 32px);
+    max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+    transform: translateY(24px) scale(0.97);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s;
+    padding: 0;
+  }
+  .ap-frd-overlay.open .ap-frd-modal { transform: translateY(0) scale(1); }
+  .ap-frd-header {
+    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+    padding: 24px 24px 20px;
+    border-radius: 20px 20px 0 0;
+    position: relative;
+  }
+  .ap-frd-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.15); border: none; border-radius: 50%;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px; cursor: pointer; line-height: 1;
+  }
+  .ap-frd-close:hover { background: rgba(255,255,255,0.25); }
+  .ap-frd-header-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.15); border-radius: 20px;
+    padding: 4px 10px; font-size: 11px; font-weight: 700; color: #bbf7d0;
+    margin-bottom: 10px;
+  }
+  .ap-frd-header-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+  .ap-frd-header h3 { color: #fff; font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+  .ap-frd-header p  { color: #bbf7d0; font-size: 13px; margin: 0; }
+  .ap-frd-stats-row {
+    display: flex; gap: 0; border-bottom: 1px solid #e2e8f0;
+  }
+  .ap-frd-stat-cell {
+    flex: 1; padding: 16px; text-align: center;
+    border-right: 1px solid #e2e8f0;
+  }
+  .ap-frd-stat-cell:last-child { border-right: none; }
+  .ap-frd-stat-cell-val { font-size: 22px; font-weight: 800; color: #14532d; }
+  .ap-frd-stat-cell-lbl { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .ap-frd-body { padding: 20px 24px; }
+  .ap-frd-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 0; border-bottom: 1px solid #f1f5f9;
+  }
+  .ap-frd-row:last-child { border-bottom: none; }
+  .ap-frd-row-icon { font-size: 18px; flex-shrink: 0; width: 24px; }
+  .ap-frd-row-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .ap-frd-row-val { font-size: 14px; color: #1e293b; font-weight: 600; }
+  .ap-frd-footer { padding: 16px 24px 20px; display: flex; gap: 10px; }
+  .ap-btn--fr-edit-wizard {
+    flex: 1; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 11px; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .ap-btn--fr-edit-wizard:hover { opacity: 0.88; }
+  .ap-btn--fr-stop {
+    background: #fff; color: #dc2626; border: 1.5px solid #fca5a5;
+    border-radius: 10px; padding: 11px 16px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .ap-btn--fr-stop:hover { background: #fff1f2; }
+  /* Progress bar */
+  .ap-frd-progress-wrap { margin: 0 24px 16px; }
+  .ap-frd-progress-bar { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+  .ap-frd-progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 99px; transition: width 0.6s; }
+  .ap-frd-progress-label { font-size: 11px; color: #64748b; margin-top: 5px; text-align: right; }
+  @media (max-width: 600px) {
+    .ap-fr-zone-stats { display: none; }
+    .ap-fr-zone-active { flex-wrap: wrap; }
+    .ap-fr-zone-empty { flex-direction: column; text-align: center; }
+    .ap-frd-stats-row { flex-wrap: wrap; }
+    .ap-frd-stat-cell { flex: 0 0 50%; }
+  }
+
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -2389,7 +2548,6 @@
           <span class="ap-smart-tooltip-arrow" aria-hidden="true"></span>
         </span>
       </span>
-      <button id="apFrLaunchBtn" type="button" class="ap-btn ap-btn--fundraise">💚 Fundraise</button>
       <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">Shop Store ↗</a>
       <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
     </div>
@@ -2657,6 +2815,119 @@
     </div>
   </div>
 
+  <!-- FUNDRAISING ZONE — between hero and tabs -->
+  <div class="ap-fr-zone" id="apFrZone">
+    <!-- Empty state (default, no fundraiser active) -->
+    <div class="ap-fr-zone-empty" id="apFrZoneEmpty">
+      <div class="ap-fr-zone-empty-icon">💚</div>
+      <div class="ap-fr-zone-empty-copy">
+        <strong>Fundraise for your team</strong>
+        <p>Add a per-item donation to every purchase. Payments go straight to your cause — no middleman.</p>
+      </div>
+      <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">Start a Fundraiser Campaign →</button>
+    </div>
+    <!-- Active state (shown when fundraiser is running) -->
+    <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:none;">
+      <div class="ap-fr-zone-pulse"></div>
+      <div class="ap-fr-zone-info">
+        <p class="ap-fr-zone-title" id="apFrZoneTitle">Fundraiser Active</p>
+        <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
+      </div>
+      <div class="ap-fr-zone-stats">
+        <div class="ap-fr-zone-stat">
+          <div class="ap-fr-zone-stat-val" id="apFrZoneRaised">$0</div>
+          <div class="ap-fr-zone-stat-lbl">Raised</div>
+        </div>
+        <div class="ap-fr-zone-stat" id="apFrZoneGoalWrap" style="display:none;">
+          <div class="ap-fr-zone-stat-val" id="apFrZoneGoal">—</div>
+          <div class="ap-fr-zone-stat-lbl">Goal</div>
+        </div>
+        <div class="ap-fr-zone-stat" id="apFrZoneDaysWrap" style="display:none;">
+          <div class="ap-fr-zone-stat-val" id="apFrZoneDays">—</div>
+          <div class="ap-fr-zone-stat-lbl">Days Left</div>
+        </div>
+      </div>
+      <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details →</button>
+    </div>
+  </div>
+
+  <!-- FUNDRAISER DETAILS MODAL -->
+  <div class="ap-frd-overlay" id="apFrdOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="apFrdTitle">
+    <div class="ap-frd-modal">
+      <div class="ap-frd-header">
+        <button class="ap-frd-close" id="apFrdClose" aria-label="Close">✕</button>
+        <div class="ap-frd-header-badge"><span class="dot"></span> Active</div>
+        <h3 id="apFrdTitle">Fundraiser Details</h3>
+        <p id="apFrdSubtitle">Your fundraiser is live — raising funds on every sale.</p>
+      </div>
+      <div class="ap-frd-stats-row">
+        <div class="ap-frd-stat-cell">
+          <div class="ap-frd-stat-cell-val" id="apFrdStatRaised">$0</div>
+          <div class="ap-frd-stat-cell-lbl">Total Raised</div>
+        </div>
+        <div class="ap-frd-stat-cell" id="apFrdStatGoalCell" style="display:none;">
+          <div class="ap-frd-stat-cell-val" id="apFrdStatGoal">—</div>
+          <div class="ap-frd-stat-cell-lbl">Goal</div>
+        </div>
+        <div class="ap-frd-stat-cell" id="apFrdStatDaysCell" style="display:none;">
+          <div class="ap-frd-stat-cell-val" id="apFrdStatDays">—</div>
+          <div class="ap-frd-stat-cell-lbl">Days Left</div>
+        </div>
+        <div class="ap-frd-stat-cell">
+          <div class="ap-frd-stat-cell-val" id="apFrdStatAmt">$4</div>
+          <div class="ap-frd-stat-cell-lbl">Per Item</div>
+        </div>
+      </div>
+      <div class="ap-frd-progress-wrap" id="apFrdProgressWrap" style="display:none;">
+        <div class="ap-frd-progress-bar">
+          <div class="ap-frd-progress-fill" id="apFrdProgressFill" style="width:0%"></div>
+        </div>
+        <p class="ap-frd-progress-label" id="apFrdProgressLabel">0% of goal</p>
+      </div>
+      <div class="ap-frd-body">
+        <div class="ap-frd-row">
+          <div class="ap-frd-row-icon">🎯</div>
+          <div>
+            <div class="ap-frd-row-label">Cause</div>
+            <div class="ap-frd-row-val" id="apFrdCauseName">—</div>
+          </div>
+        </div>
+        <div class="ap-frd-row" id="apFrdEndDateRow" style="display:none;">
+          <div class="ap-frd-row-icon">📅</div>
+          <div>
+            <div class="ap-frd-row-label">End Date</div>
+            <div class="ap-frd-row-val" id="apFrdEndDate">—</div>
+          </div>
+        </div>
+        <div class="ap-frd-row">
+          <div class="ap-frd-row-icon">💰</div>
+          <div>
+            <div class="ap-frd-row-label">How it works</div>
+            <div class="ap-frd-row-val" id="apFrdHowItWorks">$4 per item donated → $1 processing fee → $4 goes to your cause</div>
+          </div>
+        </div>
+        <div class="ap-frd-row">
+          <div class="ap-frd-row-icon">👁️</div>
+          <div>
+            <div class="ap-frd-row-label">Public Progress Bar</div>
+            <div class="ap-frd-row-val" id="apFrdVisibility">Visible to shoppers</div>
+          </div>
+        </div>
+        <div class="ap-frd-row">
+          <div class="ap-frd-row-icon">⏱️</div>
+          <div>
+            <div class="ap-frd-row-label">Payout</div>
+            <div class="ap-frd-row-val">7-day hold, then automatic bank transfer via Stripe</div>
+          </div>
+        </div>
+      </div>
+      <div class="ap-frd-footer">
+        <button type="button" class="ap-btn--fr-edit-wizard" id="apFrdEditBtn">✏️ Edit Fundraiser</button>
+        <button type="button" class="ap-btn--fr-stop" id="apFrdStopBtn">Stop</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MAIN DASHBOARD CARD WITH TABS -->
   <div class="ap-main-card">
 
@@ -2714,30 +2985,6 @@
           <p>Review live products, adjust placement/colors, hide items, or delete old products. Custom products appear first.</p>
         </div>
         <a class="ap-panel-mini-link" href="/collections/{{ collection_handle }}">View live store ↗</a>
-      </div>
-
-      <!-- FUNDRAISER ACTIVE STATUS CARD (admin view) -->
-      <div id="apFrActiveCard" class="ap-fr-active-card" style="display:none;">
-        <div class="ap-fr-pulse"></div>
-        <div class="ap-fr-active-info">
-          <p class="ap-fr-active-title" id="apFrActiveTitle">Fundraiser Active</p>
-          <p class="ap-fr-active-sub" id="apFrActiveSub">Loading…</p>
-        </div>
-        <div class="ap-fr-active-stats">
-          <div class="ap-fr-stat">
-            <div class="ap-fr-stat-val" id="apFrStatRaised">$0</div>
-            <div class="ap-fr-stat-lbl">Raised</div>
-          </div>
-          <div class="ap-fr-stat" id="apFrStatGoalWrap" style="display:none;">
-            <div class="ap-fr-stat-val" id="apFrStatGoal">—</div>
-            <div class="ap-fr-stat-lbl">Goal</div>
-          </div>
-          <div class="ap-fr-stat" id="apFrStatDaysWrap" style="display:none;">
-            <div class="ap-fr-stat-val" id="apFrStatDays">—</div>
-            <div class="ap-fr-stat-lbl">Days Left</div>
-          </div>
-        </div>
-        <button class="ap-fr-active-edit" id="apFrEditBtn">Edit Fundraiser</button>
       </div>
 
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
@@ -5035,13 +5282,20 @@
   };
 
   // ── DOM refs ───────────────────────────────────────────────
-  var overlay     = document.getElementById('apFrwOverlay');
-  var launchBtn   = document.getElementById('apFrLaunchBtn');
-  var closeBtn    = document.getElementById('apFrwClose');
-  var activeCard  = document.getElementById('apFrActiveCard');
-  var settingsRow = document.getElementById('apFrSettingsRow');
-  var editBtn     = document.getElementById('apFrEditBtn');
+  var overlay      = document.getElementById('apFrwOverlay');
+  var launchBtn    = document.getElementById('apFrLaunchBtn');
+  var closeBtn     = document.getElementById('apFrwClose');
+  var settingsRow  = document.getElementById('apFrSettingsRow');
   var editFromSettings = document.getElementById('apFrEditFromSettings');
+  // Zone
+  var frZoneEmpty  = document.getElementById('apFrZoneEmpty');
+  var frZoneActive = document.getElementById('apFrZoneActive');
+  var frDetailsBtn = document.getElementById('apFrDetailsBtn');
+  // Details modal
+  var frdOverlay   = document.getElementById('apFrdOverlay');
+  var frdClose     = document.getElementById('apFrdClose');
+  var frdEditBtn   = document.getElementById('apFrdEditBtn');
+  var frdStopBtn   = document.getElementById('apFrdStopBtn');
 
   // Steps
   var steps = [null,
@@ -5089,8 +5343,42 @@
   if (closeBtn) closeBtn.addEventListener('click', closeWizard);
   if (overlay)  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeWizard(); });
   if (launchBtn) launchBtn.addEventListener('click', function(){ openWizard(1); });
-  if (editBtn)   editBtn.addEventListener('click',   function(){ openWizard(3); });
   if (editFromSettings) editFromSettings.addEventListener('click', function(){ openWizard(3); });
+
+  function openDetails() {
+    if (!frdOverlay) return;
+    frdOverlay.classList.add('open');
+    frdOverlay.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDetails() {
+    if (!frdOverlay) return;
+    frdOverlay.classList.remove('open');
+    frdOverlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+  if (frDetailsBtn) frDetailsBtn.addEventListener('click', openDetails);
+  if (frdClose)     frdClose.addEventListener('click', closeDetails);
+  if (frdOverlay)   frdOverlay.addEventListener('click', function(e){ if(e.target===frdOverlay) closeDetails(); });
+  if (frdEditBtn)   frdEditBtn.addEventListener('click', function(){ closeDetails(); openWizard(3); });
+  if (frdStopBtn) {
+    frdStopBtn.addEventListener('click', async function(){
+      if (!confirm('Stop this fundraiser? Products will be repriced back to base prices.')) return;
+      frdStopBtn.disabled = true; frdStopBtn.textContent = 'Stopping…';
+      try {
+        var r = await fetch(
+          AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle||'') + '/fundraising',
+          { method:'POST', headers:{'Content-Type':'application/json','X-Admin-Secret':AP_ADMIN_SECRET},
+            body: JSON.stringify({enabled:false,amount:0,cause_name:'',show_bar:false,goal:0,end_date:''}),
+            cache:'no-store' }
+        );
+        if (!r.ok) throw new Error('Failed');
+        closeDetails();
+        _renderActiveState({enabled:false});
+      } catch(e) { alert('Could not stop fundraiser: ' + (e.message||'Server error')); }
+      finally { frdStopBtn.disabled=false; frdStopBtn.textContent='Stop'; }
+    });
+  }
 
   // ── Render step ────────────────────────────────────────────
   function renderStep() {
@@ -5269,11 +5557,11 @@
   // ── Active state rendering ─────────────────────────────────
   function _renderActiveState(data) {
     var enabled = data && data.enabled;
-    if (activeCard)  activeCard.style.display  = enabled ? '' : 'none';
-    if (settingsRow) settingsRow.style.display = enabled ? '' : 'none';
-    if (launchBtn) {
-      launchBtn.textContent = enabled ? '💚 Edit Fundraiser' : '💚 Fundraise';
-    }
+
+    // Zone toggle
+    if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : '';
+    if (frZoneActive) frZoneActive.style.display = enabled ? '' : 'none';
+    if (settingsRow)  settingsRow.style.display  = enabled ? '' : 'none';
     if (!enabled) return;
 
     var cause  = (data.cause_name || '').trim() || 'Your Fundraiser';
@@ -5281,33 +5569,81 @@
     var raised = parseFloat(data.total_raised || 0);
     var goal   = parseFloat(data.goal || 0);
     var endDate= data.end_date || '';
+    var showBar = !!data.show_bar;
 
-    var titleEl = document.getElementById('apFrActiveTitle');
-    var subEl   = document.getElementById('apFrActiveSub');
-    var raisedEl= document.getElementById('apFrStatRaised');
-    var goalWrap= document.getElementById('apFrStatGoalWrap');
-    var goalEl  = document.getElementById('apFrStatGoal');
-    var daysWrap= document.getElementById('apFrStatDaysWrap');
-    var daysEl  = document.getElementById('apFrStatDays');
+    // ── Zone active band ──
+    var zoneTitleEl = document.getElementById('apFrZoneTitle');
+    var zoneSubEl   = document.getElementById('apFrZoneSub');
+    var zoneRaisedEl= document.getElementById('apFrZoneRaised');
+    var zoneGoalWrap= document.getElementById('apFrZoneGoalWrap');
+    var zoneGoalEl  = document.getElementById('apFrZoneGoal');
+    var zoneDaysWrap= document.getElementById('apFrZoneDaysWrap');
+    var zoneDaysEl  = document.getElementById('apFrZoneDays');
+
+    if (zoneTitleEl) zoneTitleEl.textContent = '💚 ' + cause + ' Fundraiser — Active';
+    if (zoneSubEl)   zoneSubEl.textContent   = '$' + amt + ' per item · +$1 fee · auto-repriced';
+    if (zoneRaisedEl) zoneRaisedEl.textContent = '$' + raised.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+    if (goal > 0 && zoneGoalWrap && zoneGoalEl) {
+      zoneGoalWrap.style.display = '';
+      zoneGoalEl.textContent = '$' + goal.toLocaleString('en-US',{maximumFractionDigits:0});
+    } else if (zoneGoalWrap) { zoneGoalWrap.style.display = 'none'; }
+
+    var msLeft = endDate ? (new Date(endDate) - new Date()) : 0;
+    if (endDate && msLeft > 0 && zoneDaysWrap && zoneDaysEl) {
+      zoneDaysWrap.style.display = '';
+      zoneDaysEl.textContent = Math.ceil(msLeft/864e5);
+    } else if (zoneDaysWrap) { zoneDaysWrap.style.display = 'none'; }
+
+    // ── Details modal ──
+    var frdTitle  = document.getElementById('apFrdTitle');
+    var frdCause  = document.getElementById('apFrdCauseName');
+    var frdRaised = document.getElementById('apFrdStatRaised');
+    var frdGoalCell = document.getElementById('apFrdStatGoalCell');
+    var frdGoal   = document.getElementById('apFrdStatGoal');
+    var frdDaysCell = document.getElementById('apFrdStatDaysCell');
+    var frdDays   = document.getElementById('apFrdStatDays');
+    var frdAmt    = document.getElementById('apFrdStatAmt');
+    var frdHoW    = document.getElementById('apFrdHowItWorks');
+    var frdVis    = document.getElementById('apFrdVisibility');
+    var frdEndRow = document.getElementById('apFrdEndDateRow');
+    var frdEndEl  = document.getElementById('apFrdEndDate');
+    var frdProgWrap = document.getElementById('apFrdProgressWrap');
+    var frdProgFill = document.getElementById('apFrdProgressFill');
+    var frdProgLbl  = document.getElementById('apFrdProgressLabel');
     var srTitle = document.getElementById('apFrSettingsRowTitle');
     var srSub   = document.getElementById('apFrSettingsRowSub');
 
-    if (titleEl) titleEl.textContent = '💚 ' + cause + ' Fundraiser';
-    if (subEl)   subEl.textContent   = '$' + amt + ' per item · +$1 fee · products repriced automatically';
-    if (raisedEl) raisedEl.textContent = '$' + raised.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    if (frdTitle) frdTitle.textContent = cause + ' Fundraiser';
+    if (frdCause) frdCause.textContent = cause;
+    if (frdRaised) frdRaised.textContent = '$' + raised.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    if (frdAmt) frdAmt.textContent = '$' + amt;
+    if (frdHoW) frdHoW.textContent = '$' + amt + ' per item donated · +$1 processing fee · cause receives $' + amt + ' per sale';
+    if (frdVis) frdVis.textContent = showBar ? 'Progress bar visible to shoppers' : 'Hidden from public storefront';
 
-    if (goal > 0 && goalWrap && goalEl) {
-      goalWrap.style.display = '';
-      goalEl.textContent = '$' + goal.toLocaleString('en-US',{maximumFractionDigits:0});
-    } else if (goalWrap) { goalWrap.style.display = 'none'; }
+    if (goal > 0) {
+      if (frdGoalCell) frdGoalCell.style.display = '';
+      if (frdGoal) frdGoal.textContent = '$' + goal.toLocaleString('en-US',{maximumFractionDigits:0});
+      if (frdProgWrap) frdProgWrap.style.display = '';
+      var pct = Math.min(100, (raised/goal)*100);
+      if (frdProgFill) frdProgFill.style.width = pct.toFixed(1) + '%';
+      if (frdProgLbl)  frdProgLbl.textContent  = pct.toFixed(0) + '% of $' + goal.toLocaleString('en-US',{maximumFractionDigits:0}) + ' goal';
+    } else {
+      if (frdGoalCell) frdGoalCell.style.display = 'none';
+      if (frdProgWrap) frdProgWrap.style.display = 'none';
+    }
 
-    if (endDate && daysWrap && daysEl) {
-      var msLeft = new Date(endDate) - new Date();
+    if (endDate) {
+      if (frdEndRow) frdEndRow.style.display = '';
+      if (frdEndEl) frdEndEl.textContent = new Date(endDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
       if (msLeft > 0) {
-        daysWrap.style.display = '';
-        daysEl.textContent = Math.ceil(msLeft/864e5);
-      } else { daysWrap.style.display = 'none'; }
-    } else if (daysWrap) { daysWrap.style.display = 'none'; }
+        if (frdDaysCell) frdDaysCell.style.display = '';
+        if (frdDays) frdDays.textContent = Math.ceil(msLeft/864e5);
+      } else if (frdDaysCell) { frdDaysCell.style.display = 'none'; }
+    } else {
+      if (frdEndRow) frdEndRow.style.display = 'none';
+      if (frdDaysCell) frdDaysCell.style.display = 'none';
+    }
 
     if (srTitle) srTitle.textContent = '💚 ' + cause + ' Fundraiser — Active';
     if (srSub)   srSub.textContent   = '$' + amt + ' per item · $' + raised.toFixed(2) + ' raised' + (goal>0?' of $'+goal+' goal':'') + (endDate?' · ends '+endDate:'');
