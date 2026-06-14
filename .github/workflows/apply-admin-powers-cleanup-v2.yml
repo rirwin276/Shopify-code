@@ -81,6 +81,6 @@ jobs:
           fi
           git config user.name "Stella Sage Cleanup Bot"
           git config user.email "actions@github.com"
-          git add sections/admin-powers-page.liquid .github/workflows/apply-admin-powers-cleanup-v2.yml
+          git add -A
           git commit -m "Clean Admin Powers access and config blocks"
           git push
