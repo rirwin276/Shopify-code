@@ -2901,20 +2901,28 @@
     });
   }
 
-  async function apPost(action, payload){
-    var body = Object.assign({
+  var ADMIN_ACTION_URL = (SSAP.railwayUrl || '') + '/api/admin-action';
+
+  function buildAdminActionPayload(action, payload){
+    return Object.assign({
       action: action,
       shop_handle: String(SSAP.collectionHandle || ''),
       requested_by_customer_id: {{ customer.id | json }},
       requested_by_email: {{ customer.email | json }}
     }, payload || {});
-    return fetch(SSAP.railwayUrl + '/api/admin-action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
   }
 
+  async function apPost(action, payload){
+    if(!SSAP.railwayUrl){
+      throw new Error('Admin backend URL is missing.');
+    }
+
+    return fetch(ADMIN_ACTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildAdminActionPayload(action, payload))
+    });
+  }
   function setStatus(el, msg, type){
     el.textContent = msg;
     el.className = 'ap-status ' + (type || '');
