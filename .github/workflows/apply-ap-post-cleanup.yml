@@ -1,6 +1,11 @@
 name: Apply apPost Cleanup
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apply-ap-post-cleanup.yml
   workflow_dispatch:
 
 permissions:
