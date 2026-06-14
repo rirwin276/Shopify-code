@@ -1,8 +1,8 @@
-/* Stella & Sage — Admin Pro Builder Cards */
+/* Stella & Sage — Admin Pro Builder Cards + lightweight Admin Fundraiser mount */
 (function () {
   'use strict';
 
-  var VERSION = 'pro-builder-registry-v8';
+  var VERSION = 'pro-builder-registry-v8-fr-mount-v1';
   var RAILWAY_BASE = 'https://printfulautomation-production.up.railway.app';
 
   var IMAGE_URLS = {
@@ -96,6 +96,69 @@
     document.head.appendChild(style);
   }
 
+  function injectFundraiserMountStyles() {
+    if ($('#ss-admin-fundraiser-mount-styles')) return;
+
+    var style = document.createElement('style');
+    style.id = 'ss-admin-fundraiser-mount-styles';
+    style.textContent = [
+      '.ss-fr-hero-mount{width:100%;display:block}',
+      '.ss-fr-hero-mount .ap-fr-zone{margin:0!important;width:100%!important}',
+      '.ss-fr-hero-mount .ap-fr-zone-empty{display:block!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}',
+      '.ss-fr-hero-mount .ap-fr-zone-empty-icon,.ss-fr-hero-mount .ap-fr-zone-empty-copy{display:none!important}',
+      '.ss-fr-hero-mount #apFrLaunchBtn{width:100%!important;min-height:54px!important;border-radius:999px!important;padding:0 18px!important;background:linear-gradient(135deg,#16a34a,#0f766e)!important;color:#fff!important;border:1px solid rgba(134,239,172,.42)!important;font-size:13px!important;font-weight:950!important;box-shadow:0 14px 34px rgba(16,185,129,.24)!important}',
+      '.ss-fr-hero-mount #apFrLaunchBtn:hover{opacity:1!important;transform:translateY(-1px)!important;background:linear-gradient(135deg,#22c55e,#0d9488)!important}',
+      '.ss-fr-hero-mount .ap-fr-zone-active{width:100%!important;box-sizing:border-box!important;padding:12px 14px!important;border-radius:22px!important;background:linear-gradient(135deg,#0f3d2e,#14532d)!important;border:1px solid rgba(187,247,208,.36)!important;color:#fff!important;box-shadow:0 14px 34px rgba(16,185,129,.18)!important;cursor:pointer!important}',
+      '.ss-fr-hero-mount .ap-fr-zone-title{color:#fff!important;font-size:12px!important;font-weight:950!important;white-space:normal!important;line-height:1.2!important}',
+      '.ss-fr-hero-mount .ap-fr-zone-sub{color:rgba(236,253,245,.82)!important;font-size:11px!important;line-height:1.25!important}',
+      '.ss-fr-hero-mount .ap-fr-zone-stats{display:none!important}',
+      '.ss-fr-hero-mount #apFrDetailsBtn{width:100%!important;margin-top:10px!important;border-radius:999px!important;background:#fff!important;color:#14532d!important;border:0!important;min-height:40px!important;font-weight:950!important}',
+      '@media(max-width:760px){.ap-hero-actions{width:100%!important}.ss-fr-hero-mount{width:100%!important}}'
+    ].join('');
+
+    document.head.appendChild(style);
+  }
+
+  function mountFundraiserCard() {
+    if (window.location.pathname.indexOf('/pages/admin-powers') === -1) return false;
+
+    var zone = $('#apFrZone');
+    var actions = $('.ap-hero-actions');
+    if (!zone || !actions) return false;
+
+    injectFundraiserMountStyles();
+
+    var mount = $('#ssFrHeroMount');
+    if (!mount) {
+      mount = document.createElement('div');
+      mount.id = 'ssFrHeroMount';
+      mount.className = 'ss-fr-hero-mount';
+    }
+
+    var dashboard = actions.querySelector('a[href*="/pages/portal"]') || actions.lastElementChild;
+    if (dashboard && dashboard.parentNode === actions && dashboard.nextElementSibling !== mount) {
+      dashboard.insertAdjacentElement('afterend', mount);
+    } else if (!mount.parentNode) {
+      actions.appendChild(mount);
+    }
+
+    if (zone.parentNode !== mount) {
+      mount.appendChild(zone);
+    }
+
+    var active = $('#apFrZoneActive');
+    if (active && active.getAttribute('data-ss-fr-click') !== '1') {
+      active.setAttribute('data-ss-fr-click', '1');
+      active.addEventListener('click', function (event) {
+        if (event.target && event.target.closest && event.target.closest('button')) return;
+        var btn = $('#apFrDetailsBtn');
+        if (btn) btn.click();
+      });
+    }
+
+    return true;
+  }
+
   function findContainer() { return $('#apCustomBuildersContainer'); }
 
   function renderCards(force) {
@@ -124,16 +187,21 @@
 
   function boot() {
     var attempts = 0;
-    var maxAttempts = 240; // 30 seconds at 125ms
+    var maxAttempts = 120; // 15 seconds at 125ms
 
     var timer = window.setInterval(function () {
       attempts += 1;
-      if (shouldTryAdminPatch()) renderCards(false);
+      if (shouldTryAdminPatch()) {
+        renderCards(false);
+        mountFundraiserCard();
+      }
       if (attempts >= maxAttempts) window.clearInterval(timer);
     }, 125);
 
     var observer = new MutationObserver(function () {
       if (!shouldTryAdminPatch()) return;
+      mountFundraiserCard();
+
       var container = findContainer();
       if (!container) return;
       if (container.getAttribute('data-ss-pro-builder-version') !== VERSION || container.children.length !== BUILDERS.length) {
