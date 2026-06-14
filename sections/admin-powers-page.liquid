@@ -1992,17 +1992,252 @@
       grid-template-columns: 1fr !important;
     }
 
-  /* ── FUNDRAISING CARD (SETTINGS) ───────────────────────── */
-  .ap-fr-card {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f2d1a 100%);
-    border: 1px solid rgba(34,197,94,0.25);
-    border-radius: 16px;
-    padding: 28px 28px 24px;
-    margin-bottom: 28px;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
+  /* ══════════════════════════════════════════════════════════
+     FUNDRAISING WIZARD — complete style system
+     ══════════════════════════════════════════════════════════ */
+
+  /* Hero fundraise button */
+  .ap-btn--fundraise {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+    color: #fff; border: none; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: opacity 0.18s, transform 0.15s;
   }
+  .ap-btn--fundraise:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+
+  /* Active fundraiser status card (compact, shown on Products panel) */
+  .ap-fr-active-card {
+    display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(135deg, rgba(20,83,45,0.06), rgba(34,197,94,0.04));
+    border: 1px solid rgba(34,197,94,0.22); border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .ap-fr-pulse {
+    width: 10px; height: 10px; border-radius: 50%; background: #22c55e; flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+    animation: frPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes frPulse {
+    0%,100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.18); }
+    50%      { box-shadow: 0 0 0 7px rgba(34,197,94,0.06); }
+  }
+  .ap-fr-active-info { flex: 1; min-width: 140px; }
+  .ap-fr-active-title { margin: 0 0 2px; font-size: 13px; font-weight: 800; color: #14532d; }
+  .ap-fr-active-sub   { margin: 0; font-size: 12px; color: #4b7a5c; }
+  .ap-fr-active-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+  .ap-fr-stat { text-align: center; }
+  .ap-fr-stat-val { font-size: 20px; font-weight: 900; color: #15803d; letter-spacing: -0.03em; line-height: 1.1; }
+  .ap-fr-stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #4b7a5c; margin-top: 1px; }
+  .ap-fr-active-edit { font-size: 12px; font-weight: 700; color: #16a34a; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 7px; padding: 5px 12px; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+  .ap-fr-active-edit:hover { background: rgba(34,197,94,0.08); }
+
+  /* Settings panel minimal edit row (shown when fundraiser already active) */
+  .ap-fr-settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: 12px; margin-bottom: 20px;
+  }
+  .ap-fr-settings-row-left h4 { margin: 0 0 2px; font-size: 14px; font-weight: 800; color: #14532d; }
+  .ap-fr-settings-row-left p  { margin: 0; font-size: 12px; color: #4b7a5c; }
+
+  /* ── WIZARD MODAL OVERLAY ─────────────────────────── */
+  .ap-frw-overlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(0,0,0,0.72); backdrop-filter: blur(6px) saturate(0.8);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; pointer-events: none; transition: opacity 0.22s;
+  }
+  .ap-frw-overlay.open { opacity: 1; pointer-events: all; }
+
+  .ap-frw-modal {
+    background: #fff; border-radius: 24px; width: 100%; max-width: 580px;
+    max-height: 92vh; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.06);
+    transform: translateY(24px) scale(0.97); transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .ap-frw-overlay.open .ap-frw-modal { transform: translateY(0) scale(1); }
+
+  /* Modal hero */
+  .ap-frw-hero {
+    background: linear-gradient(135deg, #0a1628 0%, #0d2d1a 60%, #0a1628 100%);
+    padding: 28px 32px 24px; position: relative; flex-shrink: 0;
+  }
+  .ap-frw-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 30px; height: 30px; border-radius: 15px;
+    background: rgba(255,255,255,0.1); border: none; color: rgba(255,255,255,0.7);
+    font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .ap-frw-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .ap-frw-step-pills {
+    display: flex; gap: 5px; margin-bottom: 16px;
+  }
+  .ap-frw-pill {
+    height: 4px; border-radius: 2px; flex: 1;
+    background: rgba(255,255,255,0.15); transition: background 0.3s;
+  }
+  .ap-frw-pill.done    { background: #22c55e; }
+  .ap-frw-pill.active  { background: rgba(255,255,255,0.6); }
+  .ap-frw-hero-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: rgba(134,239,172,0.8); margin: 0 0 6px;
+  }
+  .ap-frw-hero h2 {
+    margin: 0 0 4px; font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -0.02em;
+  }
+  .ap-frw-hero p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.5); }
+
+  /* Tab nav (for Learn More / Legal) */
+  .ap-frw-tabs { display: flex; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; background: #fff; }
+  .ap-frw-tab {
+    padding: 13px 20px; font-size: 13px; font-weight: 700; color: #94a3b8;
+    background: none; border: none; border-bottom: 2px solid transparent;
+    cursor: pointer; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s;
+  }
+  .ap-frw-tab.active { color: #0f172a; border-bottom-color: #16a34a; }
+  .ap-frw-tab-panel { display: none; }
+  .ap-frw-tab-panel.active { display: block; }
+
+  /* Scrollable content area */
+  .ap-frw-body { padding: 24px 32px; overflow-y: auto; flex: 1; }
+  @media (max-width: 600px) { .ap-frw-body { padding: 20px 20px; } .ap-frw-hero { padding: 24px 20px 20px; } }
+
+  /* Feature rows in learn more */
+  .ap-frw-feature {
+    display: flex; gap: 16px; padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .ap-frw-feature:last-child { border-bottom: none; }
+  .ap-frw-feature-icon {
+    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .ap-frw-fi--green  { background: #dcfce7; }
+  .ap-frw-fi--blue   { background: #dbeafe; }
+  .ap-frw-fi--amber  { background: #fef9c3; }
+  .ap-frw-fi--purple { background: #ede9fe; }
+  .ap-frw-fi--slate  { background: #f1f5f9; }
+  .ap-frw-feature-copy h4 { margin: 0 0 4px; font-size: 14px; font-weight: 800; color: #0f172a; }
+  .ap-frw-feature-copy p  { margin: 0; font-size: 13px; color: #64748b; line-height: 1.6; }
+  .ap-frw-feature-copy strong { color: #0f172a; }
+
+  /* Highlight banner inside body */
+  .ap-frw-highlight {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border: 1px solid #86efac; border-radius: 12px;
+    padding: 16px 18px; margin: 16px 0; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .ap-frw-highlight-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
+  .ap-frw-highlight-copy { font-size: 13px; color: #14532d; line-height: 1.6; }
+  .ap-frw-highlight-copy strong { font-weight: 800; }
+
+  /* Legal content */
+  .ap-frw-legal { font-size: 13px; color: #374151; line-height: 1.75; }
+  .ap-frw-legal h4 { font-size: 13px; font-weight: 800; color: #0f172a; margin: 18px 0 4px; }
+  .ap-frw-legal p  { margin: 0 0 10px; }
+  .ap-frw-legal ul { margin: 6px 0 12px 18px; padding: 0; }
+  .ap-frw-legal li { margin-bottom: 5px; }
+
+  /* Wizard form fields */
+  .ap-frw-field { margin-bottom: 20px; }
+  .ap-frw-label {
+    display: block; font-size: 11px; font-weight: 800;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: #64748b; margin-bottom: 7px;
+  }
+  .ap-frw-input {
+    width: 100%; box-sizing: border-box;
+    border: 1.5px solid #e2e8f0; border-radius: 10px;
+    padding: 11px 14px; font-size: 14px; color: #0f172a;
+    background: #fff; outline: none; font-family: inherit;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .ap-frw-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+  .ap-frw-input-row { display: flex; gap: 8px; align-items: center; }
+  .ap-frw-input-prefix { font-size: 18px; font-weight: 700; color: #94a3b8; }
+  .ap-frw-input--amount { width: 80px !important; text-align: center; font-size: 20px; font-weight: 800; }
+  .ap-frw-helper { font-size: 12px; color: #94a3b8; margin-top: 5px; }
+  .ap-frw-calc-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 10px;
+    padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px;
+    font-size: 13px;
+  }
+  .ap-frw-calc-label { color: #4b7a5c; }
+  .ap-frw-calc-val   { font-size: 15px; font-weight: 800; color: #15803d; margin-left: auto; }
+  .ap-frw-goal-row   { display: flex; gap: 12px; }
+  .ap-frw-goal-row .ap-frw-field { flex: 1; }
+
+  /* Toggle row for visibility step */
+  .ap-frw-toggle-row {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 18px; background: #f8fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 12px; margin-bottom: 14px; cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+  }
+  .ap-frw-toggle-row.selected { background: #f0fdf4; border-color: #86efac; }
+  .ap-frw-toggle-icon { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+  .ap-frw-toggle-copy h4 { margin: 0 0 3px; font-size: 14px; font-weight: 800; color: #0f172a; }
+  .ap-frw-toggle-copy p  { margin: 0; font-size: 12px; color: #64748b; line-height: 1.55; }
+  .ap-frw-toggle-check { margin-left: auto; flex-shrink: 0; margin-top: 3px; }
+  .ap-frw-toggle-check input { width: 18px; height: 18px; accent-color: #16a34a; cursor: pointer; }
+
+  /* Terms checkbox */
+  .ap-frw-terms-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 14px 16px; background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 10px; margin-top: 16px; cursor: pointer;
+  }
+  .ap-frw-terms-row input { width: 16px; height: 16px; margin-top: 2px; accent-color: #16a34a; cursor: pointer; flex-shrink: 0; }
+  .ap-frw-terms-copy { font-size: 12px; color: #78350f; line-height: 1.6; }
+  .ap-frw-terms-copy strong { font-weight: 800; }
+
+  /* Footer / nav buttons */
+  .ap-frw-footer {
+    padding: 16px 32px 24px; border-top: 1px solid #f1f5f9;
+    display: flex; gap: 10px; align-items: center; flex-shrink: 0; background: #fff;
+  }
+  @media (max-width: 600px) { .ap-frw-footer { padding: 14px 20px 20px; } }
+  .ap-frw-back-btn {
+    background: none; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    padding: 11px 18px; font-size: 14px; font-weight: 700; color: #64748b;
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+  .ap-frw-back-btn:hover { border-color: #94a3b8; color: #0f172a; }
+  .ap-frw-next-btn {
+    flex: 1; padding: 13px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff; font-size: 15px; font-weight: 800; cursor: pointer;
+    transition: opacity 0.18s, transform 0.14s; letter-spacing: -0.01em;
+  }
+  .ap-frw-next-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .ap-frw-next-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* Stripe connect step */
+  .ap-frw-stripe-card {
+    border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 22px 24px;
+    text-align: center; margin-bottom: 16px;
+  }
+  .ap-frw-stripe-logo { font-size: 32px; margin-bottom: 12px; }
+  .ap-frw-stripe-card h3 { margin: 0 0 8px; font-size: 17px; font-weight: 800; color: #0f172a; }
+  .ap-frw-stripe-card p  { margin: 0 0 18px; font-size: 13px; color: #64748b; line-height: 1.6; }
+  .ap-frw-stripe-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; background: #635bff; color: #fff;
+    border: none; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .ap-frw-stripe-btn:hover { opacity: 0.9; }
+  .ap-frw-stripe-test-note {
+    font-size: 12px; color: #94a3b8; margin-top: 10px; font-style: italic;
+  }
+  .ap-frw-stripe-connected {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
+    font-size: 13px; font-weight: 700; color: #14532d;
+  }
+
+{%- endstyle -%}
   .ap-fr-card::before {
     content: '';
     position: absolute;
@@ -2344,6 +2579,7 @@
           <span class="ap-smart-tooltip-arrow" aria-hidden="true"></span>
         </span>
       </span>
+      <button id="apFrLaunchBtn" type="button" class="ap-btn ap-btn--fundraise">💚 Fundraise</button>
       <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">Shop Store ↗</a>
       <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
     </div>
@@ -2378,49 +2614,236 @@
   </div>
 
 
-  <!-- FUNDRAISING EXPLAINER MODAL -->
-  <div class="ap-fr-modal-overlay" id="apFrModalOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="apFrModalTitle">
-    <div class="ap-fr-modal">
-      <div class="ap-fr-modal-hero">
-        <button class="ap-fr-modal-close" id="apFrModalClose" aria-label="Close">✕</button>
-        <span class="ap-fr-modal-hero-icon">💚</span>
-        <h2 id="apFrModalTitle">How Team Store Fundraising Works</h2>
-        <p>Transparent, automatic, and zero work after setup.</p>
+  <!-- ══════════════════════════════════════════════════════
+       FUNDRAISING WIZARD MODAL — 4-step setup flow
+       ══════════════════════════════════════════════════════ -->
+  <div class="ap-frw-overlay" id="apFrwOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="apFrwTitle">
+    <div class="ap-frw-modal" id="apFrwModal">
+
+      <!-- HERO (step indicator + dynamic title) -->
+      <div class="ap-frw-hero">
+        <button class="ap-frw-close" id="apFrwClose" aria-label="Close">✕</button>
+        <div class="ap-frw-step-pills">
+          <div class="ap-frw-pill active" id="apFrwPill1"></div>
+          <div class="ap-frw-pill" id="apFrwPill2"></div>
+          <div class="ap-frw-pill" id="apFrwPill3"></div>
+          <div class="ap-frw-pill" id="apFrwPill4"></div>
+        </div>
+        <p class="ap-frw-hero-label" id="apFrwStepLabel">Step 1 of 4</p>
+        <h2 id="apFrwTitle">Fundraising for your team store</h2>
+        <p id="apFrwSubtitle">The most seamless way to raise money — set up in under 5 minutes.</p>
       </div>
-      <div class="ap-fr-modal-body">
-        <div class="ap-fr-modal-step">
-          <div class="ap-fr-modal-step-icon ap-fr-modal-step-icon--green">💰</div>
-          <div class="ap-fr-modal-step-content">
-            <h4>You set the amount</h4>
-            <p>Choose any fundraising amount ($1–$20 recommended). Every product in this store automatically gets that price added at checkout. <strong>No repricing products one by one.</strong></p>
+
+      <!-- STEP 1: Learn More + Legal (tabbed) -->
+      <div id="apFrwStep1" class="ap-frw-step-content">
+        <div class="ap-frw-tabs">
+          <button class="ap-frw-tab active" data-frw-tab="apFrwTabLearn">💚 How It Works</button>
+          <button class="ap-frw-tab" data-frw-tab="apFrwTabLegal">📋 Legal & Terms</button>
+        </div>
+        <div class="ap-frw-body">
+          <!-- LEARN MORE tab -->
+          <div id="apFrwTabLearn" class="ap-frw-tab-panel active">
+            <div class="ap-frw-highlight">
+              <span class="ap-frw-highlight-icon">🚀</span>
+              <div class="ap-frw-highlight-copy">
+                <strong>Your store raises money automatically on every sale.</strong> No collection jars, no Venmo requests, no chasing people down. Set it once and watch the donations come in.
+              </div>
+            </div>
+            <div class="ap-frw-feature">
+              <div class="ap-frw-feature-icon ap-frw-fi--green">💰</div>
+              <div class="ap-frw-feature-copy">
+                <h4>You choose the fundraising amount</h4>
+                <p>Pick $1–$8 per item. Every product in the store automatically includes that amount at checkout — <strong>no manual repricing, ever.</strong> Flip it on once and it's live across your entire catalog instantly.</p>
+              </div>
+            </div>
+            <div class="ap-frw-feature">
+              <div class="ap-frw-feature-icon ap-frw-fi--blue">👀</div>
+              <div class="ap-frw-feature-copy">
+                <h4>Full transparency — customers always know</h4>
+                <p>Your store can show a live fundraiser banner so shoppers know exactly what they're contributing to. <strong>Transparency builds trust and actually drives more sales</strong> — people love buying when they know it's for something real.</p>
+              </div>
+            </div>
+            <div class="ap-frw-feature">
+              <div class="ap-frw-feature-icon ap-frw-fi--amber">⏱️</div>
+              <div class="ap-frw-feature-copy">
+                <h4>7-day hold, then automatic bank transfer</h4>
+                <p>Stripe (the same payment processor used by Amazon and Apple) holds funds for 7 days to protect against returns. After that, <strong>the donation goes straight to your cause's bank account</strong> — automatic, zero effort on your end.</p>
+              </div>
+            </div>
+            <div class="ap-frw-feature">
+              <div class="ap-frw-feature-icon ap-frw-fi--purple">🏦</div>
+              <div class="ap-frw-feature-copy">
+                <h4>Powered by Stripe — the world's #1 payment platform</h4>
+                <p>The receiving organization sets up a <strong>free Stripe Express account</strong> (takes ~5 minutes, just like setting up any banking app). After that, every order that comes in automatically splits the fundraising amount directly to their bank. No invoices. No checks. No middleman.</p>
+              </div>
+            </div>
+            <div class="ap-frw-feature">
+              <div class="ap-frw-feature-icon ap-frw-fi--slate">🎯</div>
+              <div class="ap-frw-feature-copy">
+                <h4>Set a goal — and let your community push for it</h4>
+                <p>Set a fundraising goal and end date. Your supporters can watch the total grow in real time. <strong>Think of the team mom who can share "We're at $340 of our $500 goal — 3 weeks left!"</strong> That kind of momentum sells shirts and builds community.</p>
+              </div>
+            </div>
+            <div class="ap-frw-feature">
+              <div class="ap-frw-feature-icon ap-frw-fi--amber">💳</div>
+              <div class="ap-frw-feature-copy">
+                <h4>About the $1 processing fee</h4>
+                <p>Stripe and platform costs come with every transaction. Rather than hide it, we add $1 to your fundraising amount and disclose it to customers. If you raise $4 per item, shoppers pay $5 total — <strong>$4 goes directly to the cause, $1 covers fees.</strong> Your cause always receives exactly the amount you set.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- LEGAL tab -->
+          <div id="apFrwTabLegal" class="ap-frw-tab-panel">
+            <div class="ap-frw-legal">
+              <h4>Platform Role &amp; Limitation of Liability</h4>
+              <p>Stella &amp; Sage Co. ("Platform") provides technology infrastructure that enables team stores to collect fundraising contributions through third-party payment processing. The Platform acts solely as a technology intermediary and does not hold, control, manage, or distribute fundraising funds at any point.</p>
+
+              <h4>Payment Processing</h4>
+              <p>All fundraising payments are processed and transferred directly through Stripe, Inc. The Platform has no access to fundraising funds and cannot initiate, reverse, or redirect transfers. By enabling fundraising, you agree to Stripe's Terms of Service and Connected Account Agreement.</p>
+
+              <h4>Fundraiser Manager Responsibility</h4>
+              <ul>
+                <li>The store administrator ("Fundraiser Manager") is solely responsible for the lawful use of all donated funds received.</li>
+                <li>The Platform accepts no responsibility or liability for how funds are used, distributed, or managed after transfer to the receiving Stripe account.</li>
+                <li>The Fundraiser Manager represents that the fundraiser complies with all applicable federal, state, and local laws, including any charitable solicitation registration requirements.</li>
+                <li>The Platform makes no guarantee that any fundraising goal will be met.</li>
+              </ul>
+
+              <h4>Disclosure to Customers</h4>
+              <p>By enabling fundraising, you agree to clearly communicate to customers that a portion of each purchase includes a fundraising contribution. The Platform's built-in "Fundraiser Active" banner satisfies this requirement, but you remain responsible for any additional disclosure obligations in your jurisdiction.</p>
+
+              <h4>No Charitable Status</h4>
+              <p>Use of this fundraising feature does not constitute a charitable donation and should not be represented as tax-deductible unless the receiving organization is a registered 501(c)(3) and has independently verified that status to donors.</p>
+
+              <h4>Indemnification</h4>
+              <p>By enabling fundraising on your store, you agree to indemnify and hold harmless Stella &amp; Sage Co., its owners, employees, and affiliates from any claims, damages, or liabilities arising from the fundraiser, including but not limited to: misuse of funds, legal disputes, or failure to comply with applicable law.</p>
+            </div>
+
+            <div class="ap-frw-terms-row" id="apFrwTermsRow">
+              <input type="checkbox" id="apFrwTermsCheck" />
+              <div class="ap-frw-terms-copy">
+                <strong>I have read and agree to the Fundraising Terms.</strong> I understand that Stella &amp; Sage Co. is not responsible for the use or management of fundraising funds after they are received by the fundraiser recipient, and that I am solely responsible for compliance with all applicable laws.
+              </div>
+            </div>
           </div>
         </div>
-        <div class="ap-fr-modal-step">
-          <div class="ap-fr-modal-step-icon ap-fr-modal-step-icon--blue">💳</div>
-          <div class="ap-fr-modal-step-content">
-            <h4>Customers see it clearly</h4>
-            <p>Product prices reflect the full amount. The storefront shows a fundraiser banner so shoppers know they're contributing. <strong>Nothing is hidden — full transparency builds trust.</strong></p>
-          </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-next-btn" id="apFrwStep1Next">Continue — Connect the Cause →</button>
         </div>
-        <div class="ap-fr-modal-step">
-          <div class="ap-fr-modal-step-icon ap-fr-modal-step-icon--amber">⏱️</div>
-          <div class="ap-fr-modal-step-content">
-            <h4>7-day hold, then automatic transfer</h4>
-            <p>Stripe holds funds for 7 days to cover any potential returns or disputes. After that, <strong>the fundraising amount transfers directly to your cause's bank account</strong> — we never touch or hold the donation money.</p>
-          </div>
-        </div>
-        <div class="ap-fr-modal-step">
-          <div class="ap-fr-modal-step-icon ap-fr-modal-step-icon--purple">🏦</div>
-          <div class="ap-fr-modal-step-content">
-            <h4>Cause needs a free Stripe account</h4>
-            <p>The organization receiving donations sets up a <strong>Stripe Express account</strong> — takes about 5 minutes. Once connected, every order automatically splits the payment. No invoices, no manual transfers, no waiting on checks.</p>
-          </div>
-        </div>
-        <div class="ap-fr-modal-note">
-          <strong>About the $1 processing fee:</strong> Payment processing (Stripe) and platform costs eat into every transaction. Rather than absorbing it silently, we add $1 on top of your fundraising amount and disclose it to customers. If you raise $4 per item, customers pay $5 extra — $4 to the cause, $1 for fees. Your cause always gets exactly what you set.
-        </div>
-        <button class="ap-fr-modal-done-btn" id="apFrModalDoneBtn">Got it — let's set it up</button>
       </div>
+
+      <!-- STEP 2: Stripe Connect -->
+      <div id="apFrwStep2" class="ap-frw-step-content" style="display:none;">
+        <div class="ap-frw-body">
+          <div class="ap-frw-stripe-card">
+            <div class="ap-frw-stripe-logo">💳</div>
+            <h3>Connect the Cause's Stripe Account</h3>
+            <p>The organization receiving donations sets up a <strong>free Stripe Express account</strong> — takes about 5 minutes, similar to setting up any banking app. Once connected, Stripe automatically routes every fundraising dollar directly to their bank account after each sale.</p>
+            <p style="font-size:13px;color:#64748b;">No invoices. No manual transfers. No middleman. The money moves by itself.</p>
+            <div id="apFrwStripeStatus">
+              <button class="ap-frw-stripe-btn" id="apFrwStripeConnectBtn" type="button">
+                <span>🔗</span> Connect with Stripe
+              </button>
+              <p class="ap-frw-stripe-test-note" id="apFrwStripeTestNote">Test mode active — no real money moves. Switch to live after Stripe platform approval.</p>
+            </div>
+            <div id="apFrwStripeConnected" class="ap-frw-stripe-connected" style="display:none;">
+              ✅ <span>Stripe account connected — <span id="apFrwStripeAcctId"></span></span>
+            </div>
+          </div>
+          <div class="ap-frw-highlight">
+            <span class="ap-frw-highlight-icon">ℹ️</span>
+            <div class="ap-frw-highlight-copy">
+              <strong>This step connects the recipient's bank, not yours.</strong> The coach, booster club treasurer, or team parent sets this up once. After that, they never have to touch it again — Stripe does everything automatically.
+            </div>
+          </div>
+        </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-back-btn" id="apFrwStep2Back">← Back</button>
+          <button class="ap-frw-next-btn" id="apFrwStep2Next">Continue — Set Up Fundraiser →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Fundraiser Details -->
+      <div id="apFrwStep3" class="ap-frw-step-content" style="display:none;">
+        <div class="ap-frw-body">
+          <div class="ap-frw-field">
+            <label class="ap-frw-label" for="apFrwCause">Cause / Organization Name</label>
+            <input class="ap-frw-input" type="text" id="apFrwCause" placeholder="e.g. Westview Youth Baseball" maxlength="80" />
+            <p class="ap-frw-helper">This shows on the storefront so customers know who they're supporting.</p>
+          </div>
+
+          <div class="ap-frw-field">
+            <label class="ap-frw-label" for="apFrwAmount">Fundraising Amount Per Item</label>
+            <div class="ap-frw-input-row">
+              <span class="ap-frw-input-prefix">$</span>
+              <input class="ap-frw-input ap-frw-input--amount" type="number" id="apFrwAmount" min="1" max="8" step="1" value="4" />
+            </div>
+            <div class="ap-frw-calc-row">
+              <span class="ap-frw-calc-label">$<span id="apFrwAmtA">4</span> fundraiser + $1 fee</span>
+              <span class="ap-frw-calc-val">= $<span id="apFrwAmtB">5</span> added per item</span>
+            </div>
+            <p class="ap-frw-helper">$1–$8 range keeps purchases feeling affordable while still raising meaningful money.</p>
+          </div>
+
+          <div class="ap-frw-goal-row">
+            <div class="ap-frw-field">
+              <label class="ap-frw-label" for="apFrwGoal">Fundraising Goal</label>
+              <div class="ap-frw-input-row">
+                <span class="ap-frw-input-prefix">$</span>
+                <input class="ap-frw-input" type="number" id="apFrwGoal" min="1" step="1" placeholder="500" style="flex:1;" />
+              </div>
+              <p class="ap-frw-helper">Visible to customers — drives urgency.</p>
+            </div>
+            <div class="ap-frw-field">
+              <label class="ap-frw-label" for="apFrwEndDate">End Date</label>
+              <input class="ap-frw-input" type="date" id="apFrwEndDate" />
+              <p class="ap-frw-helper">Max 1 year from today.</p>
+            </div>
+          </div>
+        </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-back-btn" id="apFrwStep3Back">← Back</button>
+          <button class="ap-frw-next-btn" id="apFrwStep3Next">Continue — Display Settings →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Display Settings -->
+      <div id="apFrwStep4" class="ap-frw-step-content" style="display:none;">
+        <div class="ap-frw-body">
+          <p style="font-size:14px;color:#64748b;margin:0 0 20px;line-height:1.6;">Choose what your customers see. <strong style="color:#0f172a;">Transparency drives sales</strong> — stores that show their fundraiser progress publicly see significantly more purchases from supporters who want to help hit the goal.</p>
+
+          <div class="ap-frw-toggle-row selected" id="apFrwVisRow1" data-val="public">
+            <div class="ap-frw-toggle-icon">📢</div>
+            <div class="ap-frw-toggle-copy">
+              <h4>Show live fundraiser progress to everyone</h4>
+              <p>A banner on your storefront shows the cause name, goal, amount raised, and days remaining. Team moms share it. Parents show it to neighbors. It builds social proof and creates urgency to buy before the deadline.</p>
+            </div>
+            <div class="ap-frw-toggle-check"><input type="radio" name="apFrwVis" value="public" checked /></div>
+          </div>
+
+          <div class="ap-frw-toggle-row" id="apFrwVisRow2" data-val="admin_only">
+            <div class="ap-frw-toggle-icon">🔒</div>
+            <div class="ap-frw-toggle-copy">
+              <h4>Admin-only — I'll track it myself</h4>
+              <p>Fundraising is active and products are priced accordingly, but customers don't see a progress bar. You still get all the tracking in this admin panel. Good for stores where you want to announce the total at the end.</p>
+            </div>
+            <div class="ap-frw-toggle-check"><input type="radio" name="apFrwVis" value="admin_only" /></div>
+          </div>
+
+          <div class="ap-frw-highlight" style="margin-top:20px;">
+            <span class="ap-frw-highlight-icon">💡</span>
+            <div class="ap-frw-highlight-copy">
+              <strong>Either way, every store shows "Active Fundraiser" to customers.</strong> Shoppers always know a fundraiser is running so they understand why prices include a contribution — even if they don't see the live total.
+            </div>
+          </div>
+        </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-back-btn" id="apFrwStep4Back">← Back</button>
+          <button class="ap-frw-next-btn" id="apFrwStep4Launch">🚀 Launch Fundraiser</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2483,20 +2906,28 @@
         <a class="ap-panel-mini-link" href="/collections/{{ collection_handle }}">View live store ↗</a>
       </div>
 
-      <!-- FUNDRAISING ACTIVE BANNER (shown when fundraising is enabled) -->
-      <div id="apFrActiveBanner" class="ap-fr-banner" style="display:none;" aria-label="Fundraising active">
-        <div class="ap-fr-banner-inner">
-          <div class="ap-fr-banner-dot"></div>
-          <div class="ap-fr-banner-info">
-            <p class="ap-fr-banner-title" id="apFrBannerTitle">Fundraiser Active</p>
-            <p class="ap-fr-banner-sub" id="apFrBannerSub">$4 per item · +$1 fee · $5 total per item added at checkout</p>
-          </div>
-          <div class="ap-fr-banner-stat">
-            <div class="ap-fr-banner-raised" id="apFrBannerRaised">$0</div>
-            <div class="ap-fr-banner-raised-label">Total Raised</div>
-          </div>
-          <button class="ap-fr-banner-edit" onclick="document.getElementById('apTabBtnSettings').click()">Edit →</button>
+      <!-- FUNDRAISER ACTIVE STATUS CARD (admin view) -->
+      <div id="apFrActiveCard" class="ap-fr-active-card" style="display:none;">
+        <div class="ap-fr-pulse"></div>
+        <div class="ap-fr-active-info">
+          <p class="ap-fr-active-title" id="apFrActiveTitle">Fundraiser Active</p>
+          <p class="ap-fr-active-sub" id="apFrActiveSub">Loading…</p>
         </div>
+        <div class="ap-fr-active-stats">
+          <div class="ap-fr-stat">
+            <div class="ap-fr-stat-val" id="apFrStatRaised">$0</div>
+            <div class="ap-fr-stat-lbl">Raised</div>
+          </div>
+          <div class="ap-fr-stat" id="apFrStatGoalWrap" style="display:none;">
+            <div class="ap-fr-stat-val" id="apFrStatGoal">—</div>
+            <div class="ap-fr-stat-lbl">Goal</div>
+          </div>
+          <div class="ap-fr-stat" id="apFrStatDaysWrap" style="display:none;">
+            <div class="ap-fr-stat-val" id="apFrStatDays">—</div>
+            <div class="ap-fr-stat-lbl">Days Left</div>
+          </div>
+        </div>
+        <button class="ap-fr-active-edit" id="apFrEditBtn">Edit Fundraiser</button>
       </div>
 
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
@@ -2561,64 +2992,16 @@
     <!-- SETTINGS PANEL -->
     <div id="apPanelSettings" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnSettings">
 
-      <!-- FUNDRAISING CARD — shown first -->
-      <div class="ap-fr-card" id="apFrCard">
-        <div class="ap-fr-card-head">
-          <div class="ap-fr-card-title">
-            <span style="font-size:22px;line-height:1;">💚</span>
-            <h3>Fundraising</h3>
-            <span class="ap-fr-status-pill ap-fr-status-pill--off" id="apFrStatusPill">
-              <span class="ap-fr-status-dot"></span>Inactive
-            </span>
-          </div>
-          <button class="ap-fr-how-link" id="apFrHowBtn" type="button">How it works →</button>
+      <!-- Fundraising row: shows active state or start prompt, no clutter -->
+      <div id="apFrSettingsRow" class="ap-fr-settings-row" style="display:none;">
+        <div class="ap-fr-settings-row-left">
+          <h4 id="apFrSettingsRowTitle">💚 Fundraiser Active</h4>
+          <p id="apFrSettingsRowSub">Loading fundraiser details…</p>
         </div>
-
-        <div class="ap-fr-toggle-row">
-          <label class="ap-fr-toggle-wrap" for="apFrToggleInput">
-            <input class="ap-fr-toggle-input" type="checkbox" id="apFrToggleInput" />
-            <span class="ap-fr-toggle-track"></span>
-          </label>
-          <span class="ap-fr-toggle-label" id="apFrToggleLabel">Enable fundraising for this store</span>
-        </div>
-
-        <div class="ap-fr-fields" id="apFrFields">
-          <div class="ap-fr-field-group">
-            <label class="ap-fr-field-label" for="apFrCauseName">Cause / Organization Name</label>
-            <input class="ap-fr-input" type="text" id="apFrCauseName" placeholder="e.g. Westview Youth Baseball" maxlength="80" />
-          </div>
-
-          <div class="ap-fr-field-group">
-            <label class="ap-fr-field-label" for="apFrAmount">Fundraising Amount Per Item</label>
-            <div class="ap-fr-input-row">
-              <span class="ap-fr-input-prefix">$</span>
-              <input class="ap-fr-input ap-fr-input--amount" type="number" id="apFrAmount" min="1" max="20" step="1" value="4" />
-            </div>
-            <div class="ap-fr-calc">
-              <span class="ap-fr-calc-label">$<span id="apFrAmtDisplay">4</span> fundraiser &nbsp;+&nbsp; $1 fee</span>
-              <span class="ap-fr-calc-value">= $<span id="apFrTotalDisplay">5</span> added per item</span>
-            </div>
-          </div>
-
-          <hr class="ap-fr-divider" />
-
-          <div class="ap-fr-secondary-toggle-row">
-            <div style="flex:1;">
-              <span class="ap-fr-secondary-label" style="font-weight:700;color:rgba(255,255,255,0.8);">Show fundraising bar to shoppers</span>
-              <span class="ap-fr-secondary-sub">Displays a live progress banner on the storefront so customers can see the fundraiser.</span>
-            </div>
-            <label class="ap-fr-toggle-wrap" for="apFrShowBarInput" style="margin-left:14px;">
-              <input class="ap-fr-toggle-input" type="checkbox" id="apFrShowBarInput" checked />
-              <span class="ap-fr-toggle-track"></span>
-            </label>
-          </div>
-        </div>
-
-        <button class="ap-fr-save-btn" id="apBtnSaveFundraising" type="button">Save Fundraising Settings</button>
-        <div class="ap-fr-status" id="apStatusFundraising"></div>
+        <button class="ap-fr-active-edit" id="apFrEditFromSettings">Edit / End →</button>
       </div>
 
-      <div class="ap-panel-head" style="margin-top:8px;">
+      <div class="ap-panel-head" style="margin-top:0;">
         <div>
           <span class="ap-panel-kicker">Store identity</span>
           <h2>Settings</h2>
@@ -4820,12 +5203,338 @@
   }
 })();
 
-// ── FUNDRAISING UI ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// FUNDRAISING WIZARD
+// ══════════════════════════════════════════════════════════════
 (function() {
-  var _frEnabled = false;
+  'use strict';
 
-  var _toggleInput  = document.getElementById('apFrToggleInput');
-  var _showBarInput = document.getElementById('apFrShowBarInput');
+  // ── State ─────────────────────────────────────────────────
+  var _state = {
+    step: 1,
+    termsAgreed: false,
+    stripeConnected: false,
+    stripeAccountId: '',
+    cause: '',
+    amount: 4,
+    goal: 0,
+    endDate: '',
+    visibility: 'public',
+    enabled: false,
+    totalRaised: 0,
+  };
+
+  // ── DOM refs ───────────────────────────────────────────────
+  var overlay     = document.getElementById('apFrwOverlay');
+  var launchBtn   = document.getElementById('apFrLaunchBtn');
+  var closeBtn    = document.getElementById('apFrwClose');
+  var activeCard  = document.getElementById('apFrActiveCard');
+  var settingsRow = document.getElementById('apFrSettingsRow');
+  var editBtn     = document.getElementById('apFrEditBtn');
+  var editFromSettings = document.getElementById('apFrEditFromSettings');
+
+  // Steps
+  var steps = [null,
+    document.getElementById('apFrwStep1'),
+    document.getElementById('apFrwStep2'),
+    document.getElementById('apFrwStep3'),
+    document.getElementById('apFrwStep4'),
+  ];
+  // Pills
+  var pills = [null,
+    document.getElementById('apFrwPill1'),
+    document.getElementById('apFrwPill2'),
+    document.getElementById('apFrwPill3'),
+    document.getElementById('apFrwPill4'),
+  ];
+
+  var stepTitles = [null,
+    'Fundraising for your team store',
+    'Connect your cause',
+    'Set up your fundraiser',
+    'Choose what customers see',
+  ];
+  var stepSubs = [null,
+    'The most seamless way to raise money — set up in under 5 minutes.',
+    'Link the cause\'s bank via Stripe Express — takes about 5 minutes.',
+    'Name your cause, set your per-item amount, goal, and end date.',
+    'Transparency drives sales. Choose how much to show publicly.',
+  ];
+  var stepLabels = [null,'Step 1 of 4','Step 2 of 4','Step 3 of 4','Step 4 of 4'];
+
+  // ── Open / close ───────────────────────────────────────────
+  function openWizard(startAtStep) {
+    _state.step = startAtStep || 1;
+    renderStep();
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeWizard() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeWizard);
+  if (overlay)  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeWizard(); });
+  if (launchBtn) launchBtn.addEventListener('click', function(){ openWizard(1); });
+  if (editBtn)   editBtn.addEventListener('click',   function(){ openWizard(3); });
+  if (editFromSettings) editFromSettings.addEventListener('click', function(){ openWizard(3); });
+
+  // ── Render step ────────────────────────────────────────────
+  function renderStep() {
+    var s = _state.step;
+    // Show/hide step panels
+    for (var i=1; i<=4; i++) {
+      if (steps[i]) steps[i].style.display = (i===s) ? '' : 'none';
+    }
+    // Pills
+    for (var j=1; j<=4; j++) {
+      if (!pills[j]) continue;
+      pills[j].className = 'ap-frw-pill' + (j<s ? ' done' : j===s ? ' active' : '');
+    }
+    // Hero text
+    var titleEl = document.getElementById('apFrwTitle');
+    var subEl   = document.getElementById('apFrwSubtitle');
+    var lblEl   = document.getElementById('apFrwStepLabel');
+    if (titleEl) titleEl.textContent = stepTitles[s];
+    if (subEl)   subEl.textContent   = stepSubs[s];
+    if (lblEl)   lblEl.textContent   = stepLabels[s];
+  }
+
+  // ── Tab switching (Step 1: Learn More / Legal) ─────────────
+  document.querySelectorAll('.ap-frw-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var panelId = this.getAttribute('data-frw-tab');
+      var container = this.closest('.ap-frw-step-content');
+      if (!container) return;
+      container.querySelectorAll('.ap-frw-tab').forEach(function(t){ t.classList.remove('active'); });
+      container.querySelectorAll('.ap-frw-tab-panel').forEach(function(p){ p.classList.remove('active'); });
+      this.classList.add('active');
+      var panel = document.getElementById(panelId);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  // ── Step 1 nav ─────────────────────────────────────────────
+  var step1Next = document.getElementById('apFrwStep1Next');
+  var termsCheck = document.getElementById('apFrwTermsCheck');
+  if (step1Next) {
+    step1Next.addEventListener('click', function(){
+      if (!termsCheck || !termsCheck.checked) {
+        // Switch to Legal tab and highlight the terms row
+        var legalTabBtn = document.querySelector('[data-frw-tab="apFrwTabLegal"]');
+        if (legalTabBtn) legalTabBtn.click();
+        var row = document.getElementById('apFrwTermsRow');
+        if (row) { row.style.outline = '2px solid #f59e0b'; setTimeout(function(){ row.style.outline=''; }, 1800); }
+        return;
+      }
+      _state.termsAgreed = true;
+      _state.step = 2;
+      renderStep();
+    });
+  }
+  if (termsCheck) {
+    termsCheck.addEventListener('change', function(){
+      _state.termsAgreed = this.checked;
+    });
+  }
+
+  // ── Step 2 nav (Stripe connect) ────────────────────────────
+  var step2Back = document.getElementById('apFrwStep2Back');
+  var step2Next = document.getElementById('apFrwStep2Next');
+  var stripeConnectBtn = document.getElementById('apFrwStripeConnectBtn');
+  var stripeConnectedEl = document.getElementById('apFrwStripeConnected');
+  var stripeStatusEl    = document.getElementById('apFrwStripeStatus');
+  var stripeAcctEl      = document.getElementById('apFrwStripeAcctId');
+
+  if (step2Back) step2Back.addEventListener('click', function(){ _state.step=1; renderStep(); });
+  if (step2Next) step2Next.addEventListener('click', function(){
+    // Allow skipping Stripe connect for now (will be required before live)
+    _state.step=3; renderStep();
+    // Set max date to 1 year
+    var dateEl = document.getElementById('apFrwEndDate');
+    if (dateEl && !dateEl.value) {
+      var d = new Date(); d.setFullYear(d.getFullYear()+1);
+      dateEl.max = d.toISOString().split('T')[0];
+      dateEl.value = new Date(Date.now() + 90*864e5).toISOString().split('T')[0]; // default 90 days
+    }
+  });
+  if (stripeConnectBtn) {
+    stripeConnectBtn.addEventListener('click', function(){
+      // Placeholder — real Stripe Connect onboarding URL goes here
+      alert('Stripe Connect onboarding coming soon. For now, continue to set up your fundraiser details and connect Stripe before going live.');
+    });
+  }
+
+  // ── Step 3 fields + nav ────────────────────────────────────
+  var step3Back = document.getElementById('apFrwStep3Back');
+  var step3Next = document.getElementById('apFrwStep3Next');
+  var amountEl  = document.getElementById('apFrwAmount');
+  var amtA      = document.getElementById('apFrwAmtA');
+  var amtB      = document.getElementById('apFrwAmtB');
+
+  function updateCalc() {
+    var v = parseInt(amountEl ? amountEl.value : '4') || 0;
+    v = Math.max(1, Math.min(8, v));
+    _state.amount = v;
+    if (amtA) amtA.textContent = v;
+    if (amtB) amtB.textContent = v + 1;
+  }
+  if (amountEl) amountEl.addEventListener('input', updateCalc);
+  if (step3Back) step3Back.addEventListener('click', function(){ _state.step=2; renderStep(); });
+  if (step3Next) step3Next.addEventListener('click', function(){
+    var causeEl = document.getElementById('apFrwCause');
+    var goalEl  = document.getElementById('apFrwGoal');
+    var dateEl  = document.getElementById('apFrwEndDate');
+    var cause = (causeEl ? causeEl.value : '').trim();
+    if (!cause) {
+      if (causeEl) { causeEl.focus(); causeEl.style.borderColor='#f59e0b'; setTimeout(function(){ causeEl.style.borderColor=''; },1800); }
+      return;
+    }
+    _state.cause   = cause;
+    _state.goal    = parseInt(goalEl ? goalEl.value : '0') || 0;
+    _state.endDate = dateEl ? dateEl.value : '';
+    updateCalc();
+    _state.step = 4;
+    renderStep();
+  });
+
+  // ── Step 4 visibility toggles + launch ────────────────────
+  var step4Back    = document.getElementById('apFrwStep4Back');
+  var step4Launch  = document.getElementById('apFrwStep4Launch');
+  var visRows      = document.querySelectorAll('[data-frw-vis]') || [];
+
+  document.querySelectorAll('.ap-frw-toggle-row[data-val]').forEach(function(row){
+    row.addEventListener('click', function(){
+      document.querySelectorAll('.ap-frw-toggle-row[data-val]').forEach(function(r){
+        r.classList.remove('selected');
+        var rb = r.querySelector('input[type=radio]');
+        if (rb) rb.checked = false;
+      });
+      this.classList.add('selected');
+      var rb = this.querySelector('input[type=radio]');
+      if (rb) { rb.checked = true; _state.visibility = rb.value; }
+    });
+  });
+
+  if (step4Back) step4Back.addEventListener('click', function(){ _state.step=3; renderStep(); });
+  if (step4Launch) {
+    step4Launch.addEventListener('click', async function(){
+      step4Launch.disabled = true;
+      step4Launch.textContent = 'Launching…';
+      try {
+        var r = await fetch(
+          AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle||'') + '/fundraising',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET },
+            body: JSON.stringify({
+              enabled: true,
+              amount: _state.amount,
+              cause_name: _state.cause,
+              show_bar: _state.visibility === 'public',
+              goal: _state.goal,
+              end_date: _state.endDate,
+            }),
+            cache: 'no-store'
+          }
+        );
+        var j = await r.json().catch(function(){ return {}; });
+        if (!r.ok) throw new Error(j.error || 'Failed to launch');
+        _state.enabled = true;
+        closeWizard();
+        _renderActiveState({ enabled:true, amount:_state.amount, cause_name:_state.cause,
+          goal:_state.goal, end_date:_state.endDate, total_raised:0, show_bar:_state.visibility==='public' });
+      } catch(e) {
+        alert('Could not launch fundraiser: ' + (e.message || 'Server error'));
+      } finally {
+        step4Launch.disabled = false;
+        step4Launch.textContent = '🚀 Launch Fundraiser';
+      }
+    });
+  }
+
+  // ── Active state rendering ─────────────────────────────────
+  function _renderActiveState(data) {
+    var enabled = data && data.enabled;
+    if (activeCard)  activeCard.style.display  = enabled ? '' : 'none';
+    if (settingsRow) settingsRow.style.display = enabled ? '' : 'none';
+    if (launchBtn) {
+      launchBtn.textContent = enabled ? '💚 Edit Fundraiser' : '💚 Fundraise';
+    }
+    if (!enabled) return;
+
+    var cause  = (data.cause_name || '').trim() || 'Your Fundraiser';
+    var amt    = parseInt(data.amount || 0);
+    var raised = parseFloat(data.total_raised || 0);
+    var goal   = parseFloat(data.goal || 0);
+    var endDate= data.end_date || '';
+
+    var titleEl = document.getElementById('apFrActiveTitle');
+    var subEl   = document.getElementById('apFrActiveSub');
+    var raisedEl= document.getElementById('apFrStatRaised');
+    var goalWrap= document.getElementById('apFrStatGoalWrap');
+    var goalEl  = document.getElementById('apFrStatGoal');
+    var daysWrap= document.getElementById('apFrStatDaysWrap');
+    var daysEl  = document.getElementById('apFrStatDays');
+    var srTitle = document.getElementById('apFrSettingsRowTitle');
+    var srSub   = document.getElementById('apFrSettingsRowSub');
+
+    if (titleEl) titleEl.textContent = '💚 ' + cause + ' Fundraiser';
+    if (subEl)   subEl.textContent   = '$' + amt + ' per item · +$1 fee · products repriced automatically';
+    if (raisedEl) raisedEl.textContent = '$' + raised.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+    if (goal > 0 && goalWrap && goalEl) {
+      goalWrap.style.display = '';
+      goalEl.textContent = '$' + goal.toLocaleString('en-US',{maximumFractionDigits:0});
+    } else if (goalWrap) { goalWrap.style.display = 'none'; }
+
+    if (endDate && daysWrap && daysEl) {
+      var msLeft = new Date(endDate) - new Date();
+      if (msLeft > 0) {
+        daysWrap.style.display = '';
+        daysEl.textContent = Math.ceil(msLeft/864e5);
+      } else { daysWrap.style.display = 'none'; }
+    } else if (daysWrap) { daysWrap.style.display = 'none'; }
+
+    if (srTitle) srTitle.textContent = '💚 ' + cause + ' Fundraiser — Active';
+    if (srSub)   srSub.textContent   = '$' + amt + ' per item · $' + raised.toFixed(2) + ' raised' + (goal>0?' of $'+goal+' goal':'') + (endDate?' · ends '+endDate:'');
+  }
+
+  // ── Load existing fundraising state on page load ───────────
+  async function _loadState() {
+    try {
+      var r = await fetch(
+        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle||'') + '/fundraising',
+        { headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }, cache: 'no-store' }
+      );
+      var j = await r.json().catch(function(){ return {}; });
+      if (j.ok !== false) {
+        _state.enabled = !!j.enabled;
+        _state.amount  = parseInt(j.amount||4);
+        _state.cause   = j.cause_name || '';
+        _state.goal    = parseFloat(j.goal||0);
+        _state.endDate = j.end_date || '';
+        _state.totalRaised = parseFloat(j.total_raised||0);
+        // Pre-fill step 3 fields
+        var causeEl  = document.getElementById('apFrwCause');
+        var amountEl2= document.getElementById('apFrwAmount');
+        var goalEl   = document.getElementById('apFrwGoal');
+        var dateEl   = document.getElementById('apFrwEndDate');
+        if (causeEl && j.cause_name)  causeEl.value  = j.cause_name;
+        if (amountEl2 && j.amount)    amountEl2.value= j.amount;
+        if (goalEl && j.goal)         goalEl.value   = j.goal;
+        if (dateEl && j.end_date)     dateEl.value   = j.end_date;
+        updateCalc();
+        _renderActiveState(j);
+      }
+    } catch(e) { /* silent on stores without fundraising fields yet */ }
+  }
+
+  _loadState();
+})();
   var _amountInput  = document.getElementById('apFrAmount');
   var _causeInput   = document.getElementById('apFrCauseName');
   var _fields       = document.getElementById('apFrFields');
