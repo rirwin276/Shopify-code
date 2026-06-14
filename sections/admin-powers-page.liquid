@@ -2924,6 +2924,7 @@
     });
   }
   function setStatus(el, msg, type){
+    if(!el) return;
     el.textContent = msg;
     el.className = 'ap-status ' + (type || '');
   }
