@@ -10,10 +10,10 @@
 {
   "current": {
     "logo": "shopify://shop_images/stella-and-sage-company-3978__cc1467y_front__emblem__265b58cfce.png",
-    "logo_inverse": "shopify://shop_images/Stella_and_Sage_logo_png.png",
+    "logo_inverse": "shopify://shop_images/new-token-test-3978__mc1790_front__emblem__a037680c34.png",
     "logo_height": 100,
     "logo_height_mobile": 70,
-    "favicon": "shopify://shop_images/Stella_and_Sage_logo_png.png",
+    "favicon": "shopify://shop_images/new-token-test-3978__mc1790_front__emblem__a037680c34.png",
     "type_body_font": "inter_n4",
     "type_subheading_font": "inter_n5",
     "type_heading_font": "inter_n7",
@@ -91,18 +91,6 @@
         "type": "shopify://apps/upload-lift/blocks/app-embed/3c98bdcb-7587-4ade-bfe4-7d8af00d05ca",
         "disabled": true,
         "settings": {}
-      },
-      "9776720720251544092": {
-        "type": "shopify://apps/helium-customer-fields/blocks/app-embed/bab58598-3e6a-4377-aaaa-97189b15f131",
-        "disabled": false,
-        "settings": {
-          "registration_form_id": "",
-          "edit_account_form_id": "",
-          "edit_account_link_text": "Edit account",
-          "edit_account_heading": "Edit account",
-          "edit_account_back_link_text": "Back to account",
-          "enable_js_api": false
-        }
       }
     },
     "color_schemes": {
