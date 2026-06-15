@@ -13,7 +13,6 @@
   "sections": {
     "platform_bar_H77NL3": {
       "type": "platform-bar",
-      "disabled": true,
       "name": "Platform Bar",
       "settings": {}
     },
