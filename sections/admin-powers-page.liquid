@@ -3204,7 +3204,7 @@
     try {
       var res = await fetch(NUKE_BACKEND_URL + '/api/storefront/' + encodeURIComponent(NUKE_HANDLE) + '/nuke', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET }
       });
 
       if(!res.ok){
