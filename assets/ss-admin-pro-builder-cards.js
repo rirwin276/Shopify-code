@@ -207,6 +207,18 @@
       '.ap-frw-info-card-note{font-size:12px!important;color:rgba(17,16,14,.50)!important;margin:10px 0 0!important;line-height:1.6!important;display:block!important;}',
       '.ap-frw-info-callout{background:linear-gradient(135deg,rgba(75,111,91,.08),rgba(47,88,68,.04))!important;border:1px solid rgba(75,111,91,.18)!important;border-radius:16px!important;padding:14px 16px!important;font-size:13px!important;color:rgba(17,16,14,.72)!important;line-height:1.6!important;}',
       '.ap-frw-info-callout strong{color:#2f5844!important;font-weight:900!important;}',
+      /* Step 4 — amount stepper */
+      '.ap-frw-amount-row{display:flex!important;align-items:center!important;width:100%!important;max-width:100%!important;border:1.5px solid rgba(17,16,14,.13)!important;border-radius:16px!important;overflow:hidden!important;background:#fff!important;margin-bottom:10px!important;}',
+      '.ap-frw-amt-btn{width:56px!important;height:56px!important;border:0!important;border-right:1px solid rgba(17,16,14,.08)!important;background:#faf9f6!important;color:#11100e!important;font-size:26px!important;font-weight:400!important;cursor:pointer!important;flex-shrink:0!important;display:flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;padding:0!important;}',
+      '.ap-frw-amt-btn:last-of-type{border-right:0!important;border-left:1px solid rgba(17,16,14,.08)!important;}',
+      '.ap-frw-amt-btn:hover{background:#f0eee8!important;}',
+      '.ap-frw-amt-display{flex:1 1 auto!important;text-align:center!important;font-size:30px!important;font-weight:950!important;color:#11100e!important;letter-spacing:-.04em!important;}',
+      /* Step 4 — $ prefix input */
+      '.ap-frw-input-icon-wrap{position:relative!important;display:flex!important;align-items:center!important;}',
+      '.ap-frw-input-pre{position:absolute!important;left:14px!important;font-size:15px!important;font-weight:800!important;color:rgba(17,16,14,.42)!important;pointer-events:none!important;z-index:2!important;}',
+      '.ap-frw-input--icon-pre{padding-left:30px!important;}',
+      '.ap-frw-helper{font-size:12px!important;color:rgba(17,16,14,.50)!important;margin:6px 0 0!important;line-height:1.5!important;}',
+      '.ap-frw-calc-label{color:#2f5844!important;font-weight:800!important;}',
 
       '.ss-fr-hero-mount{width:100%;display:block}',
       '.ss-fr-hero-mount .ap-fr-zone{margin:0!important;width:100%!important}',
