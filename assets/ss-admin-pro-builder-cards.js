@@ -176,6 +176,38 @@
       '.ap-frd-progress-bar{height:8px!important;border-radius:999px!important;background:rgba(17,16,14,.08)!important;overflow:hidden!important;}',
       '.ap-frd-progress-fill{height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#8f7a42,#4b6f5b)!important;}',
 
+      /* Step 1 — benefit cards */
+      '.ap-frw-benefit-list{display:flex!important;flex-direction:column!important;gap:10px!important;margin-bottom:18px!important;}',
+      '.ap-frw-benefit-item{display:grid!important;grid-template-columns:52px 1fr!important;gap:14px!important;align-items:center!important;padding:14px!important;border-radius:18px!important;border:1px solid rgba(17,16,14,.08)!important;background:#fafaf8!important;box-shadow:0 4px 14px rgba(17,16,14,.04)!important;}',
+      '.ap-frw-benefit-icon{width:52px!important;height:52px!important;border-radius:16px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:24px!important;flex-shrink:0!important;line-height:1!important;}',
+      '.ap-frw-benefit-text strong{display:block!important;font-size:14px!important;font-weight:900!important;color:#11100e!important;margin-bottom:4px!important;letter-spacing:-.02em!important;line-height:1.25!important;}',
+      '.ap-frw-benefit-text span{font-size:13px!important;color:rgba(17,16,14,.60)!important;line-height:1.6!important;display:block!important;}',
+      /* Step 1 — legal box */
+      '.ap-frw-legal-box{border-radius:18px!important;border:1px solid rgba(17,16,14,.08)!important;background:#f5f4f0!important;padding:16px!important;margin-top:4px!important;}',
+      '.ap-frw-legal-intro{font-size:10px!important;font-weight:950!important;letter-spacing:.09em!important;text-transform:uppercase!important;color:rgba(17,16,14,.42)!important;margin:0 0 10px!important;display:block!important;}',
+      '.ap-frw-legal-points{display:flex!important;flex-direction:column!important;gap:6px!important;margin-bottom:12px!important;}',
+      '.ap-frw-legal-point{font-size:12px!important;color:rgba(17,16,14,.66)!important;line-height:1.6!important;padding:9px 12px 9px 26px!important;background:#fff!important;border-radius:11px!important;border:1px solid rgba(17,16,14,.06)!important;position:relative!important;}',
+      '.ap-frw-legal-point::before{content:""!important;position:absolute!important;left:11px!important;top:17px!important;width:5px!important;height:5px!important;border-radius:999px!important;background:rgba(183,163,106,.75)!important;}',
+      '.ap-frw-terms-label{display:flex!important;align-items:flex-start!important;gap:12px!important;padding:12px!important;border-radius:13px!important;background:#fff!important;border:1px solid rgba(17,16,14,.10)!important;cursor:pointer!important;}',
+      '.ap-frw-terms-label input{width:17px!important;height:17px!important;flex-shrink:0!important;margin-top:2px!important;accent-color:#2f5844!important;cursor:pointer!important;}',
+      '.ap-frw-terms-label span{font-size:12.5px!important;color:rgba(17,16,14,.68)!important;line-height:1.6!important;}',
+      '.ap-frw-terms-label strong{color:#11100e!important;font-weight:900!important;}',
+      /* Step 2 — About Stripe */
+      '.ap-frw-stripe-intro{background:#fafaf8!important;border:1px solid rgba(17,16,14,.08)!important;border-radius:18px!important;padding:16px!important;margin-bottom:12px!important;}',
+      '.ap-frw-stripe-intro-header{display:flex!important;align-items:center!important;gap:12px!important;margin-bottom:12px!important;}',
+      '.ap-frw-stripe-intro-icon{width:48px!important;height:48px!important;border-radius:14px!important;background:#eff6ff!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:24px!important;flex-shrink:0!important;}',
+      '.ap-frw-stripe-intro-title{font-size:15px!important;font-weight:950!important;color:#11100e!important;letter-spacing:-.02em!important;line-height:1.2!important;margin:0!important;}',
+      '.ap-frw-stripe-intro-sub{font-size:12px!important;color:rgba(17,16,14,.48)!important;line-height:1.4!important;margin-top:3px!important;}',
+      '.ap-frw-stripe-intro-body{font-size:13.5px!important;color:rgba(17,16,14,.70)!important;line-height:1.65!important;}',
+      '.ap-frw-info-card{background:#fff!important;border:1px solid rgba(17,16,14,.08)!important;border-radius:18px!important;padding:16px!important;margin-bottom:12px!important;}',
+      '.ap-frw-info-card-label{font-size:10px!important;font-weight:950!important;letter-spacing:.09em!important;text-transform:uppercase!important;color:rgba(17,16,14,.42)!important;margin:0 0 10px!important;display:block!important;}',
+      '.ap-frw-info-row{display:flex!important;align-items:baseline!important;gap:10px!important;padding:7px 0!important;border-bottom:1px solid rgba(17,16,14,.05)!important;font-size:13px!important;color:rgba(17,16,14,.72)!important;line-height:1.5!important;}',
+      '.ap-frw-info-row:last-of-type{border-bottom:0!important}',
+      '.ap-frw-info-dot{width:6px!important;height:6px!important;border-radius:999px!important;background:rgba(183,163,106,.8)!important;flex-shrink:0!important;margin-top:5px!important;}',
+      '.ap-frw-info-card-note{font-size:12px!important;color:rgba(17,16,14,.50)!important;margin:10px 0 0!important;line-height:1.6!important;display:block!important;}',
+      '.ap-frw-info-callout{background:linear-gradient(135deg,rgba(75,111,91,.08),rgba(47,88,68,.04))!important;border:1px solid rgba(75,111,91,.18)!important;border-radius:16px!important;padding:14px 16px!important;font-size:13px!important;color:rgba(17,16,14,.72)!important;line-height:1.6!important;}',
+      '.ap-frw-info-callout strong{color:#2f5844!important;font-weight:900!important;}',
+
       '.ss-fr-hero-mount{width:100%;display:block}',
       '.ss-fr-hero-mount .ap-fr-zone{margin:0!important;width:100%!important}',
       '.ss-fr-hero-mount .ap-fr-zone-empty{display:block!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}',
@@ -194,22 +226,7 @@
   }
 
   function removeFundraiserEmoji() {
-    var root = document.querySelector('#apFrwOverlay, #apFrdOverlay');
-    if (!root) return;
-    var nodes = [];
-    ['#apFrwOverlay', '#apFrdOverlay'].forEach(function (sel) {
-      var el = document.querySelector(sel);
-      if (!el) return;
-      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
-      var node;
-      while ((node = walker.nextNode())) nodes.push(node);
-    });
-    nodes.forEach(function (node) {
-      node.nodeValue = node.nodeValue
-        .replace(/[💚📋🚀💰👀⏱️💳🔗✅📢🔒💡🎯📅👁️ℹ️]/g, '')
-        .replace(/\s{2,}/g, ' ')
-        .trimStart();
-    });
+    // No-op: redesign uses emoji intentionally for benefit icons; no dot stripping needed.
   }
 
   function openFrModal(overlay) {
