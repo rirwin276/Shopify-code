@@ -2415,6 +2415,81 @@
     .ap-frd-stat-cell { flex: 0 0 50%; }
   }
 
+  /* ── FUNDRAISING WIZARD — Redesign v2 ── */
+
+  /* Step 1: benefit cards */
+  .ap-frw-benefit-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .ap-frw-benefit-item {
+    display: grid; grid-template-columns: 48px 1fr; gap: 14px; align-items: center;
+    padding: 14px; border-radius: 18px; border: 1px solid rgba(17,16,14,.08);
+    background: #fff; box-shadow: 0 8px 22px rgba(17,16,14,.045);
+  }
+  .ap-frw-benefit-icon {
+    width: 48px; height: 48px; border-radius: 15px; display: flex; align-items: center;
+    justify-content: center; font-size: 22px; flex-shrink: 0;
+  }
+  .ap-frw-benefit-text strong {
+    display: block; font-size: 14px; font-weight: 900; color: #11100e;
+    margin-bottom: 3px; letter-spacing: -.02em; line-height: 1.2;
+  }
+  .ap-frw-benefit-text span { font-size: 13px; color: rgba(17,16,14,.62); line-height: 1.55; }
+
+  /* Step 1: legal agreement box */
+  .ap-frw-legal-box {
+    border-radius: 20px; border: 1px solid rgba(17,16,14,.08);
+    background: #fafaf8; padding: 18px;
+  }
+  .ap-frw-legal-intro {
+    font-size: 11px; font-weight: 950; letter-spacing: .07em; text-transform: uppercase;
+    color: rgba(17,16,14,.46); margin: 0 0 12px;
+  }
+  .ap-frw-legal-points { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+  .ap-frw-legal-point {
+    font-size: 12px; color: rgba(17,16,14,.68); line-height: 1.6;
+    padding: 10px 12px 10px 28px; background: #fff; border-radius: 12px;
+    border: 1px solid rgba(17,16,14,.06); position: relative;
+  }
+  .ap-frw-legal-point::before {
+    content: ""; position: absolute; left: 12px; top: 18px;
+    width: 5px; height: 5px; border-radius: 999px; background: rgba(183,163,106,.8);
+  }
+  .ap-frw-terms-label {
+    display: flex; align-items: flex-start; gap: 12px; padding: 13px;
+    border-radius: 14px; background: #fff; border: 1px solid rgba(17,16,14,.10); cursor: pointer;
+  }
+  .ap-frw-terms-label input { width: 17px; height: 17px; flex-shrink: 0; margin-top: 2px; accent-color: #2f5844; cursor: pointer; }
+  .ap-frw-terms-label span { font-size: 13px; color: rgba(17,16,14,.70); line-height: 1.6; }
+  .ap-frw-terms-label strong { color: #11100e; font-weight: 900; }
+
+  /* Step 3: amount stepper */
+  .ap-frw-amount-row {
+    display: flex; align-items: center; width: fit-content;
+    border: 1.5px solid rgba(17,16,14,.13); border-radius: 16px; overflow: hidden;
+    background: #fff; margin-bottom: 10px;
+  }
+  .ap-frw-amt-btn {
+    width: 52px; height: 52px; border: 0; background: rgba(17,16,14,.04);
+    color: #11100e; font-size: 26px; font-weight: 300; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; transition: background .14s;
+    line-height: 1;
+  }
+  .ap-frw-amt-btn:hover { background: rgba(17,16,14,.09); }
+  .ap-frw-amt-btn:active { background: rgba(17,16,14,.15); }
+  .ap-frw-amt-display {
+    min-width: 80px; text-align: center; font-size: 28px; font-weight: 900;
+    color: #11100e; letter-spacing: -.04em;
+  }
+
+  /* Step 3: goal/date with $ prefix */
+  .ap-frw-input-icon-wrap { position: relative; display: flex; align-items: center; }
+  .ap-frw-input-pre {
+    position: absolute; left: 14px; font-size: 16px; font-weight: 700;
+    color: rgba(17,16,14,.45); pointer-events: none; z-index: 1;
+  }
+  .ap-frw-input--icon-pre { padding-left: 28px; }
+
+  .ap-frw-helper { font-size: 12px; color: rgba(17,16,14,.50); margin: 6px 0 0; line-height: 1.45; }
+
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -2631,99 +2706,48 @@
         <p id="apFrwSubtitle">The most seamless way to raise money — set up in under 5 minutes.</p>
       </div>
 
-      <!-- STEP 1: Learn More + Legal (tabbed) -->
+      <!-- STEP 1: How It Works + Agreement -->
       <div id="apFrwStep1" class="ap-frw-step-content">
-        <div class="ap-frw-tabs">
-          <button class="ap-frw-tab active" data-frw-tab="apFrwTabLearn">💚 How It Works</button>
-          <button class="ap-frw-tab" data-frw-tab="apFrwTabLegal">📋 Legal & Terms</button>
-        </div>
         <div class="ap-frw-body">
-          <!-- LEARN MORE tab -->
-          <div id="apFrwTabLearn" class="ap-frw-tab-panel active">
-            <div class="ap-frw-highlight">
-              <span class="ap-frw-highlight-icon">🚀</span>
-              <div class="ap-frw-highlight-copy">
-                <strong>Your store raises money automatically on every sale.</strong> No collection jars, no Venmo requests, no chasing people down. Set it once and watch the donations come in.
+
+          <div class="ap-frw-benefit-list">
+            <div class="ap-frw-benefit-item">
+              <div class="ap-frw-benefit-icon" style="background:#f0fdf4">💰</div>
+              <div class="ap-frw-benefit-text">
+                <strong>Your store raises money on every sale</strong>
+                <span>Add $1–$8 per item. Every product includes that amount at checkout — no manual repricing, ever. Flip it on once and it's live across your entire catalog instantly.</span>
               </div>
             </div>
-            <div class="ap-frw-feature">
-              <div class="ap-frw-feature-icon ap-frw-fi--green">💰</div>
-              <div class="ap-frw-feature-copy">
-                <h4>You choose the fundraising amount</h4>
-                <p>Pick $1–$8 per item. Every product in the store automatically includes that amount at checkout — <strong>no manual repricing, ever.</strong> Flip it on once and it's live across your entire catalog instantly.</p>
+            <div class="ap-frw-benefit-item">
+              <div class="ap-frw-benefit-icon" style="background:#eff6ff">🏦</div>
+              <div class="ap-frw-benefit-text">
+                <strong>Funds go straight to the cause</strong>
+                <span>Stripe routes every fundraising dollar directly to the recipient's bank after a 7-day hold. No invoices, no checks, no middleman — the money moves by itself.</span>
               </div>
             </div>
-            <div class="ap-frw-feature">
-              <div class="ap-frw-feature-icon ap-frw-fi--blue">👀</div>
-              <div class="ap-frw-feature-copy">
-                <h4>Full transparency — customers always know</h4>
-                <p>Your store can show a live fundraiser banner so shoppers know exactly what they're contributing to. <strong>Transparency builds trust and actually drives more sales</strong> — people love buying when they know it's for something real.</p>
-              </div>
-            </div>
-            <div class="ap-frw-feature">
-              <div class="ap-frw-feature-icon ap-frw-fi--amber">⏱️</div>
-              <div class="ap-frw-feature-copy">
-                <h4>7-day hold, then automatic bank transfer</h4>
-                <p>Stripe (the same payment processor used by Amazon and Apple) holds funds for 7 days to protect against returns. After that, <strong>the donation goes straight to your cause's bank account</strong> — automatic, zero effort on your end.</p>
-              </div>
-            </div>
-            <div class="ap-frw-feature">
-              <div class="ap-frw-feature-icon ap-frw-fi--purple">🏦</div>
-              <div class="ap-frw-feature-copy">
-                <h4>Powered by Stripe — the world's #1 payment platform</h4>
-                <p>The receiving organization sets up a <strong>free Stripe Express account</strong> (takes ~5 minutes, just like setting up any banking app). After that, every order that comes in automatically splits the fundraising amount directly to their bank. No invoices. No checks. No middleman.</p>
-              </div>
-            </div>
-            <div class="ap-frw-feature">
-              <div class="ap-frw-feature-icon ap-frw-fi--slate">🎯</div>
-              <div class="ap-frw-feature-copy">
-                <h4>Set a goal — and let your community push for it</h4>
-                <p>Set a fundraising goal and end date. Your supporters can watch the total grow in real time. <strong>Think of the team mom who can share "We're at $340 of our $500 goal — 3 weeks left!"</strong> That kind of momentum sells shirts and builds community.</p>
-              </div>
-            </div>
-            <div class="ap-frw-feature">
-              <div class="ap-frw-feature-icon ap-frw-fi--amber">💳</div>
-              <div class="ap-frw-feature-copy">
-                <h4>About the $1 processing fee</h4>
-                <p>Stripe and platform costs come with every transaction. Rather than hide it, we add $1 to your fundraising amount and disclose it to customers. If you raise $4 per item, shoppers pay $5 total — <strong>$4 goes directly to the cause, $1 covers fees.</strong> Your cause always receives exactly the amount you set.</p>
+            <div class="ap-frw-benefit-item">
+              <div class="ap-frw-benefit-icon" style="background:#fefce8">🎯</div>
+              <div class="ap-frw-benefit-text">
+                <strong>Set a goal, show progress, build momentum</strong>
+                <span>Share a live fundraiser bar publicly. Shoppers buy more when they can see the total climbing toward a goal — "We're at $340 of our $500 goal!" drives urgency.</span>
               </div>
             </div>
           </div>
 
-          <!-- LEGAL tab -->
-          <div id="apFrwTabLegal" class="ap-frw-tab-panel">
-            <div class="ap-frw-legal">
-              <h4>Platform Role &amp; Limitation of Liability</h4>
-              <p>Stella &amp; Sage Co. ("Platform") provides technology infrastructure that enables team stores to collect fundraising contributions through third-party payment processing. The Platform acts solely as a technology intermediary and does not hold, control, manage, or distribute fundraising funds at any point.</p>
-
-              <h4>Payment Processing</h4>
-              <p>All fundraising payments are processed and transferred directly through Stripe, Inc. The Platform has no access to fundraising funds and cannot initiate, reverse, or redirect transfers. By enabling fundraising, you agree to Stripe's Terms of Service and Connected Account Agreement.</p>
-
-              <h4>Fundraiser Manager Responsibility</h4>
-              <ul>
-                <li>The store administrator ("Fundraiser Manager") is solely responsible for the lawful use of all donated funds received.</li>
-                <li>The Platform accepts no responsibility or liability for how funds are used, distributed, or managed after transfer to the receiving Stripe account.</li>
-                <li>The Fundraiser Manager represents that the fundraiser complies with all applicable federal, state, and local laws, including any charitable solicitation registration requirements.</li>
-                <li>The Platform makes no guarantee that any fundraising goal will be met.</li>
-              </ul>
-
-              <h4>Disclosure to Customers</h4>
-              <p>By enabling fundraising, you agree to clearly communicate to customers that a portion of each purchase includes a fundraising contribution. The Platform's built-in "Fundraiser Active" banner satisfies this requirement, but you remain responsible for any additional disclosure obligations in your jurisdiction.</p>
-
-              <h4>No Charitable Status</h4>
-              <p>Use of this fundraising feature does not constitute a charitable donation and should not be represented as tax-deductible unless the receiving organization is a registered 501(c)(3) and has independently verified that status to donors.</p>
-
-              <h4>Indemnification</h4>
-              <p>By enabling fundraising on your store, you agree to indemnify and hold harmless Stella &amp; Sage Co., its owners, employees, and affiliates from any claims, damages, or liabilities arising from the fundraiser, including but not limited to: misuse of funds, legal disputes, or failure to comply with applicable law.</p>
+          <div class="ap-frw-legal-box">
+            <p class="ap-frw-legal-intro">Before continuing, please read and agree:</p>
+            <div class="ap-frw-legal-points">
+              <div class="ap-frw-legal-point">Stella &amp; Sage Co. is a technology intermediary only — we do not hold, control, or distribute fundraising funds. All payments move directly through Stripe, Inc.</div>
+              <div class="ap-frw-legal-point">As the Fundraiser Manager you are solely responsible for the lawful use of funds received and compliance with all applicable laws, including charitable solicitation requirements.</div>
+              <div class="ap-frw-legal-point">A $1 per-item processing fee is added on top of your set amount and disclosed to customers. Your cause always receives exactly the amount you set.</div>
+              <div class="ap-frw-legal-point">This feature does not constitute a charitable donation and should not be represented as tax-deductible unless the receiving organization is a registered 501(c)(3).</div>
             </div>
-
-            <div class="ap-frw-terms-row" id="apFrwTermsRow">
+            <label class="ap-frw-terms-label" for="apFrwTermsCheck">
               <input type="checkbox" id="apFrwTermsCheck" />
-              <div class="ap-frw-terms-copy">
-                <strong>I have read and agree to the Fundraising Terms.</strong> I understand that Stella &amp; Sage Co. is not responsible for the use or management of fundraising funds after they are received by the fundraiser recipient, and that I am solely responsible for compliance with all applicable laws.
-              </div>
-            </div>
+              <span><strong>I have read and agree to these terms.</strong> I understand Stella &amp; Sage Co. is not responsible for how funds are used after transfer, and I am solely responsible for legal compliance.</span>
+            </label>
           </div>
+
         </div>
         <div class="ap-frw-footer">
           <button class="ap-frw-next-btn" id="apFrwStep1Next">Continue — Connect the Cause →</button>
@@ -2764,40 +2788,44 @@
       <!-- STEP 3: Fundraiser Details -->
       <div id="apFrwStep3" class="ap-frw-step-content" style="display:none;">
         <div class="ap-frw-body">
+
           <div class="ap-frw-field">
-            <label class="ap-frw-label" for="apFrwCause">Cause / Organization Name</label>
-            <input class="ap-frw-input" type="text" id="apFrwCause" placeholder="e.g. Westview Youth Baseball" maxlength="80" />
-            <p class="ap-frw-helper">This shows on the storefront so customers know who they're supporting.</p>
+            <label class="ap-frw-label" for="apFrwCause">Cause Name</label>
+            <input class="ap-frw-input" type="text" id="apFrwCause" placeholder="e.g. Westview Youth Baseball" maxlength="80" autocomplete="off" />
+            <p class="ap-frw-helper">Shown on the storefront — customers see exactly who they're supporting.</p>
           </div>
 
           <div class="ap-frw-field">
-            <label class="ap-frw-label" for="apFrwAmount">Fundraising Amount Per Item</label>
-            <div class="ap-frw-input-row">
-              <span class="ap-frw-input-prefix">$</span>
-              <input class="ap-frw-input ap-frw-input--amount" type="number" id="apFrwAmount" min="1" max="8" step="1" value="4" />
+            <label class="ap-frw-label">Fundraising Amount Per Item</label>
+            <div class="ap-frw-amount-row">
+              <button type="button" class="ap-frw-amt-btn" id="apFrwAmtDown" aria-label="Decrease">−</button>
+              <div class="ap-frw-amt-display">$<span id="apFrwAmtDisplay">4</span></div>
+              <button type="button" class="ap-frw-amt-btn" id="apFrwAmtUp" aria-label="Increase">+</button>
+              <input type="hidden" id="apFrwAmount" value="4" />
             </div>
             <div class="ap-frw-calc-row">
-              <span class="ap-frw-calc-label">$<span id="apFrwAmtA">4</span> fundraiser + $1 fee</span>
-              <span class="ap-frw-calc-val">= $<span id="apFrwAmtB">5</span> added per item</span>
+              <span class="ap-frw-calc-label">$<span id="apFrwAmtA">4</span> to cause + $1 fee</span>
+              <span class="ap-frw-calc-val">= $<span id="apFrwAmtB">5</span> per item</span>
             </div>
-            <p class="ap-frw-helper">$1–$8 range keeps purchases feeling affordable while still raising meaningful money.</p>
+            <p class="ap-frw-helper">$1–$8 range. Your cause receives exactly the amount you set — the $1 fee is disclosed to customers.</p>
           </div>
 
           <div class="ap-frw-goal-row">
             <div class="ap-frw-field">
               <label class="ap-frw-label" for="apFrwGoal">Fundraising Goal</label>
-              <div class="ap-frw-input-row">
-                <span class="ap-frw-input-prefix">$</span>
-                <input class="ap-frw-input" type="number" id="apFrwGoal" min="1" step="1" placeholder="500" style="flex:1;" />
+              <div class="ap-frw-input-icon-wrap">
+                <span class="ap-frw-input-pre">$</span>
+                <input class="ap-frw-input ap-frw-input--icon-pre" type="number" id="apFrwGoal" min="1" step="1" placeholder="500" />
               </div>
-              <p class="ap-frw-helper">Visible to customers — drives urgency.</p>
+              <p class="ap-frw-helper">Optional — shown publicly to drive urgency.</p>
             </div>
             <div class="ap-frw-field">
               <label class="ap-frw-label" for="apFrwEndDate">End Date</label>
               <input class="ap-frw-input" type="date" id="apFrwEndDate" />
-              <p class="ap-frw-helper">Max 1 year from today.</p>
+              <p class="ap-frw-helper">Optional. Max 1 year from today.</p>
             </div>
           </div>
+
         </div>
         <div class="ap-frw-footer">
           <button class="ap-frw-back-btn" id="apFrwStep3Back">← Back</button>
@@ -2885,7 +2913,7 @@
     <div class="ap-frd-modal">
       <div class="ap-frd-header">
         <button class="ap-frd-close" id="apFrdClose" aria-label="Close">✕</button>
-        <div class="ap-frd-header-badge"><span class="dot"></span> Active</div>
+        <div class="ap-frd-header-badge">Active</div>
         <h3 id="apFrdTitle">Fundraiser Details</h3>
         <p id="apFrdSubtitle">Your fundraiser is live — raising funds on every sale.</p>
       </div>
@@ -5441,31 +5469,15 @@
     if (lblEl)   lblEl.textContent   = stepLabels[s];
   }
 
-  // ── Tab switching (Step 1: Learn More / Legal) ─────────────
-  document.querySelectorAll('.ap-frw-tab').forEach(function(tab){
-    tab.addEventListener('click', function(){
-      var panelId = this.getAttribute('data-frw-tab');
-      var container = this.closest('.ap-frw-step-content');
-      if (!container) return;
-      container.querySelectorAll('.ap-frw-tab').forEach(function(t){ t.classList.remove('active'); });
-      container.querySelectorAll('.ap-frw-tab-panel').forEach(function(p){ p.classList.remove('active'); });
-      this.classList.add('active');
-      var panel = document.getElementById(panelId);
-      if (panel) panel.classList.add('active');
-    });
-  });
-
   // ── Step 1 nav ─────────────────────────────────────────────
   var step1Next = document.getElementById('apFrwStep1Next');
   var termsCheck = document.getElementById('apFrwTermsCheck');
   if (step1Next) {
     step1Next.addEventListener('click', function(){
       if (!termsCheck || !termsCheck.checked) {
-        // Switch to Legal tab and highlight the terms row
-        var legalTabBtn = document.querySelector('[data-frw-tab="apFrwTabLegal"]');
-        if (legalTabBtn) legalTabBtn.click();
-        var row = document.getElementById('apFrwTermsRow');
-        if (row) { row.style.outline = '2px solid #f59e0b'; setTimeout(function(){ row.style.outline=''; }, 1800); }
+        var label = document.querySelector('label[for="apFrwTermsCheck"]');
+        if (label) { label.style.outline = '2px solid #f59e0b'; setTimeout(function(){ label.style.outline = ''; }, 1800); }
+        if (termsCheck) termsCheck.focus();
         return;
       }
       _state.termsAgreed = true;
@@ -5474,9 +5486,7 @@
     });
   }
   if (termsCheck) {
-    termsCheck.addEventListener('change', function(){
-      _state.termsAgreed = this.checked;
-    });
+    termsCheck.addEventListener('change', function(){ _state.termsAgreed = this.checked; });
   }
 
   // ── Step 2 nav (Stripe connect) ────────────────────────────
@@ -5507,20 +5517,32 @@
   }
 
   // ── Step 3 fields + nav ────────────────────────────────────
-  var step3Back = document.getElementById('apFrwStep3Back');
-  var step3Next = document.getElementById('apFrwStep3Next');
-  var amountEl  = document.getElementById('apFrwAmount');
-  var amtA      = document.getElementById('apFrwAmtA');
-  var amtB      = document.getElementById('apFrwAmtB');
+  var step3Back   = document.getElementById('apFrwStep3Back');
+  var step3Next   = document.getElementById('apFrwStep3Next');
+  var amountEl    = document.getElementById('apFrwAmount');
+  var amtA        = document.getElementById('apFrwAmtA');
+  var amtB        = document.getElementById('apFrwAmtB');
+  var amtDisplay  = document.getElementById('apFrwAmtDisplay');
+  var amtDownBtn  = document.getElementById('apFrwAmtDown');
+  var amtUpBtn    = document.getElementById('apFrwAmtUp');
 
   function updateCalc() {
     var v = parseInt(amountEl ? amountEl.value : '4') || 0;
     v = Math.max(1, Math.min(8, v));
     _state.amount = v;
-    if (amtA) amtA.textContent = v;
-    if (amtB) amtB.textContent = v + 1;
+    if (amountEl)   amountEl.value      = v;
+    if (amtA)       amtA.textContent    = v;
+    if (amtB)       amtB.textContent    = v + 1;
+    if (amtDisplay) amtDisplay.textContent = v;
   }
-  if (amountEl) amountEl.addEventListener('input', updateCalc);
+  if (amtDownBtn) amtDownBtn.addEventListener('click', function(){
+    if (amountEl) amountEl.value = Math.max(1, (parseInt(amountEl.value) || 4) - 1);
+    updateCalc();
+  });
+  if (amtUpBtn) amtUpBtn.addEventListener('click', function(){
+    if (amountEl) amountEl.value = Math.min(8, (parseInt(amountEl.value) || 4) + 1);
+    updateCalc();
+  });
   if (step3Back) step3Back.addEventListener('click', function(){ _state.step=2; renderStep(); });
   if (step3Next) step3Next.addEventListener('click', function(){
     var causeEl = document.getElementById('apFrwCause');
