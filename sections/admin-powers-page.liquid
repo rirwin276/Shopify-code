@@ -3040,12 +3040,11 @@
       for (var i = 0; i < emails.length; i++) {
         var email = emails[i];
         var res = await fetch(
-          (SSAP.railwayUrl || '') + '/admin/store/' + encodeURIComponent(handle) + '/' + actionConfig.route,
+          '/apps/ss/relay/store/' + encodeURIComponent(handle) + '/' + actionConfig.route,
           {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'X-Admin-Secret': SSAP.editorSecret || ''
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({ email: email }),
             cache: 'no-store'
@@ -3087,8 +3086,7 @@
   });
 
   // ── SLEEP / WAKE STORE ────────────────────────────────────
-  var AP_RAILWAY_URL = SSAP.railwayUrl;
-  var AP_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
+  var AP_PROXY_URL = '/apps/ss';
   var apStatusSleep = document.getElementById('apStatusSleep');
 
   function apSleepStatus(msg, type){
@@ -3105,9 +3103,9 @@
       apBtnSleepStore.textContent = 'Putting to sleep\u2026';
       apSleepStatus('', '');
       try {
-        var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/sleep', {
+        var res = await fetch(AP_PROXY_URL + '/relay/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/sleep', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET }
+          headers: { 'Content-Type': 'application/json' }
         });
         var data = await res.json();
         if(data.job_id || data.status === 'ok' || res.ok){
@@ -3134,9 +3132,9 @@
       apBtnWakeStore.textContent = 'Waking up\u2026';
       apSleepStatus('', '');
       try {
-        var res = await fetch(AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/wakeup', {
+        var res = await fetch(AP_PROXY_URL + '/relay/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/wakeup', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET }
+          headers: { 'Content-Type': 'application/json' }
         });
         var data = await res.json();
         if(data.job_id || data.status === 'ok' || res.ok){
@@ -3156,7 +3154,7 @@
   }
 
   // ── NUKE STORE ────────────────────────────────────────────
-  var NUKE_BACKEND_URL = SSAP.railwayUrl;
+  var NUKE_BACKEND_URL = '/apps/ss';
   var NUKE_HANDLE = String(SSAP.shopHandle || '');
   var apNukeBtn = document.getElementById('apNukeBtn');
   var apNukeOverlay = document.getElementById('apNukeOverlay');
@@ -3202,9 +3200,9 @@
     appendNukeLog('Starting nuke for "' + NUKE_HANDLE + '"…');
 
     try {
-      var res = await fetch(NUKE_BACKEND_URL + '/api/storefront/' + encodeURIComponent(NUKE_HANDLE) + '/nuke', {
+      var res = await fetch(NUKE_BACKEND_URL + '/relay/storefront/' + encodeURIComponent(NUKE_HANDLE) + '/nuke', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET }
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if(!res.ok){
@@ -3227,7 +3225,7 @@
       var lastLog = 0;
       var pollInterval = setInterval(async function(){
         try {
-          var pollRes = await fetch(NUKE_BACKEND_URL + '/api/job/' + encodeURIComponent(jobId));
+          var pollRes = await fetch(NUKE_BACKEND_URL + '/relay/job/' + encodeURIComponent(jobId));
           if(!pollRes.ok){ appendNukeLog('Poll error: ' + pollRes.status); return; }
           var job = await pollRes.json();
           var lines = job.log || [];
@@ -4351,8 +4349,8 @@
     }
     try {
       var res = await fetch(
-        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products?ts=' + Date.now(),
-        { headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }, cache: 'no-store' }
+        AP_PROXY_URL + '/relay/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products?ts=' + Date.now(),
+        { cache: 'no-store' }
       );
       if(!res.ok) throw new Error('HTTP ' + res.status);
       var data = await res.json();
@@ -4370,10 +4368,10 @@
     apProductsStatus('Updating…', '');
     try {
       var res = await fetch(
-        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products/' + encodeURIComponent(productId) + '/hide',
+        AP_PROXY_URL + '/relay/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products/' + encodeURIComponent(productId) + '/hide',
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': AP_ADMIN_SECRET },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ hidden: !currentHidden })
         }
       );
@@ -4394,10 +4392,9 @@
     apProductsStatus('Deleting…', '');
     try {
       var res = await fetch(
-        AP_RAILWAY_URL + '/admin/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products/' + encodeURIComponent(productId),
+        AP_PROXY_URL + '/relay/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products/' + encodeURIComponent(productId),
         {
-          method: 'DELETE',
-          headers: { 'X-Admin-Secret': AP_ADMIN_SECRET }
+          method: 'DELETE'
         }
       );
       if(!res.ok) throw new Error('HTTP ' + res.status);
@@ -4429,8 +4426,6 @@
 
 // ── SETTINGS TAB ─────────────────────────────────────────────
 (function(){
-  var AP_SETTINGS_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
-
   var apSettingsNewSessionId = null;
   var apSettingsLogoChanged  = false;
   var apSettingsNameOriginal = {{ store_name | json }};
@@ -4500,10 +4495,9 @@
         if (apSettingsNewSessionId) fd.append('main_session_id', apSettingsNewSessionId);
 
         var r = await fetch(
-          SSAP.railwayUrl + '/admin/store/' + encodeURIComponent(SSAP.shopHandle) + '/update-settings',
+          '/apps/ss/relay/store/' + encodeURIComponent(SSAP.shopHandle) + '/update-settings',
           {
             method: 'POST',
-            headers: { 'X-Admin-Secret': AP_SETTINGS_ADMIN_SECRET },
             body: fd,
             cache: 'no-store'
           }
