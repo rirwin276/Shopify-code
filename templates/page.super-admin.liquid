@@ -778,8 +778,10 @@
   <div class="gm-toast" id="gmToast"></div>
 
   <script>
-    const RAILWAY_URL = "https://studio-uploader-production.up.railway.app";
-    const ADMIN_SECRET = "stellasage-god-mode-2026-xK9mP";
+    // Admin actions are proxied through the Shopify App Proxy relay. The raw
+    // admin secret is never exposed to the browser — auth is the App Proxy
+    // signature + the logged-in customer's admin tag, verified server-side.
+    const RAILWAY_URL = "/apps/ss/relay";
 
     window.GM_ALL_STORES = [
       {% for store in shop.metaobjects.custom_shop.values %}
@@ -799,8 +801,7 @@
 
     function railwayHeaders() {
       return {
-        'Content-Type': 'application/json',
-        'X-Admin-Secret': ADMIN_SECRET
+        'Content-Type': 'application/json'
       };
     }
 
@@ -1001,9 +1002,9 @@
 
       var role = String((document.getElementById('memberRole') || {}).value || 'member');
       var endpoint = '';
-      if (mode === 'add') endpoint = role === 'admin' ? '/admin/store/' + encodeURIComponent(store.handle) + '/add-admin' : '/admin/store/' + encodeURIComponent(store.handle) + '/add-member';
-      if (mode === 'remove-member') endpoint = '/admin/store/' + encodeURIComponent(store.handle) + '/remove-member';
-      if (mode === 'remove-admin') endpoint = '/admin/store/' + encodeURIComponent(store.handle) + '/remove-admin';
+      if (mode === 'add') endpoint = role === 'admin' ? '/store/' + encodeURIComponent(store.handle) + '/add-admin' : '/store/' + encodeURIComponent(store.handle) + '/add-member';
+      if (mode === 'remove-member') endpoint = '/store/' + encodeURIComponent(store.handle) + '/remove-member';
+      if (mode === 'remove-admin') endpoint = '/store/' + encodeURIComponent(store.handle) + '/remove-admin';
 
       setStatus('memberStatus', 'Saving member changes...', 'var(--gray)');
       fetch(RAILWAY_URL + endpoint, {
@@ -1031,7 +1032,7 @@
       var store = GM_STATE.currentStore;
       if (!list || !store || !store.handle) return;
       list.innerHTML = '<div class="gm-member-row"><span>Loading members...</span></div>';
-      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(store.handle) + '/members', {
+      fetch(RAILWAY_URL + '/store/' + encodeURIComponent(store.handle) + '/members', {
         method: 'GET',
         headers: railwayHeaders()
       })
@@ -1064,7 +1065,7 @@
       var store = GM_STATE.currentStore;
       if (!store || !store.handle) return;
       setStatus('settingsStatus', 'Updating visibility...', 'var(--gray)');
-      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(store.handle) + '/visibility', {
+      fetch(RAILWAY_URL + '/store/' + encodeURIComponent(store.handle) + '/visibility', {
         method: 'POST',
         headers: railwayHeaders(),
         body: JSON.stringify({ visibility: visibility })
@@ -1079,7 +1080,7 @@
 
     function sleepStore(handle) {
       if (!handle || !confirm('Put store "' + handle + '" to sleep?')) return;
-      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(handle) + '/sleep', {
+      fetch(RAILWAY_URL + '/store/' + encodeURIComponent(handle) + '/sleep', {
         method: 'POST',
         headers: railwayHeaders()
       })
@@ -1097,7 +1098,7 @@
 
     function wakeStore(handle) {
       if (!handle || !confirm('Wake store "' + handle + '" now?')) return;
-      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
+      fetch(RAILWAY_URL + '/store/' + encodeURIComponent(handle) + '/wakeup', {
         method: 'POST',
         headers: railwayHeaders()
       })
@@ -1116,7 +1117,7 @@
     function nukeStore(handle) {
       if (!handle) return;
       if (!confirm('☢️ NUKE store "' + handle + '"? This cannot be undone.')) return;
-      fetch(RAILWAY_URL + '/api/storefront/' + encodeURIComponent(handle) + '/nuke', {
+      fetch(RAILWAY_URL + '/storefront/' + encodeURIComponent(handle) + '/nuke', {
         method: 'POST',
         headers: railwayHeaders(),
         body: JSON.stringify({})
@@ -1131,7 +1132,7 @@
         var tries = 0;
         var timer = setInterval(function(){
           tries += 1;
-          fetch(RAILWAY_URL + '/api/job/' + encodeURIComponent(data.job_id), { headers: railwayHeaders() })
+          fetch(RAILWAY_URL + '/job/' + encodeURIComponent(data.job_id), { headers: railwayHeaders() })
             .then(function(r){ return r.json(); })
             .then(function(job){
               if (job.status === 'done') {
@@ -1160,7 +1161,7 @@
         return;
       }
       setStatus(statusId, 'Running Printful wake...', 'var(--gray)');
-      fetch(RAILWAY_URL + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
+      fetch(RAILWAY_URL + '/store/' + encodeURIComponent(handle) + '/wakeup', {
         method: 'POST',
         headers: railwayHeaders()
       })
