@@ -5339,6 +5339,7 @@
   // ── State ─────────────────────────────────────────────────
   var _state = {
     step: 1,
+    maxStep: 1,            // furthest step the user has reached (for resume)
     termsAgreed: false,
     stripeConnected: false,
     stripeAccountId: '',
@@ -5350,6 +5351,46 @@
     enabled: false,
     totalRaised: 0,
   };
+
+  // ── Draft persistence (resume where you left off) ──────────
+  // Until the backend metaobject exists, the in-progress setup is saved to
+  // localStorage so an admin can close the wizard and pick up exactly where
+  // they left off — including a connected Stripe account. Once the backend is
+  // live this same shape is mirrored into the `store_fundraising` metaobject.
+  var DRAFT_KEY = 'ss_fr_draft_' + ((window.SSAP && SSAP.shopHandle) || '');
+  function saveDraft() {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        step: _state.step,
+        maxStep: _state.maxStep,
+        termsAgreed: _state.termsAgreed,
+        stripeConnected: _state.stripeConnected,
+        stripeAccountId: _state.stripeAccountId,
+        cause: _state.cause,
+        amount: _state.amount,
+        goal: _state.goal,
+        endDate: _state.endDate,
+        visibility: _state.visibility,
+        _savedAt: Date.now()
+      }));
+    } catch (e) { /* storage disabled — non-fatal */ }
+  }
+  function loadDraft() {
+    try {
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) { return null; }
+  }
+  function clearDraft() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+  }
+  // Advance to a step, remembering the furthest point reached.
+  function goToStep(n) {
+    _state.step = n;
+    if (n > _state.maxStep) _state.maxStep = n;
+    renderStep();
+  }
 
   // ── DOM refs ───────────────────────────────────────────────
   var overlay      = document.getElementById('apFrwOverlay');
@@ -5412,7 +5453,8 @@
 
   if (closeBtn) closeBtn.addEventListener('click', closeWizard);
   if (overlay)  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeWizard(); });
-  if (launchBtn) launchBtn.addEventListener('click', function(){ openWizard(1); });
+  // Resume at the furthest step previously reached (or step 1 for a fresh start).
+  if (launchBtn) launchBtn.addEventListener('click', function(){ openWizard(_state.maxStep || 1); });
   if (editFromSettings) editFromSettings.addEventListener('click', function(){ openWizard(3); });
 
   function openDetails() {
@@ -5442,6 +5484,8 @@
           body: JSON.stringify({enabled:false,amount:0,cause_name:'',show_bar:false,goal:0,end_date:''}),
           cache:'no-store'
         }).catch(function(){});
+        clearDraft();
+        _state.enabled = false; _state.maxStep = 1; _state.step = 1; _state.stripeConnected = false;
         closeDetails();
         _renderActiveState({enabled:false});
       } finally { frdStopBtn.disabled=false; frdStopBtn.textContent='Stop'; }
@@ -5451,9 +5495,11 @@
   // ── Render step ────────────────────────────────────────────
   function renderStep() {
     var s = _state.step;
-    // Show/hide step panels
+    // Show/hide step panels via class (inline display can't beat !important CSS)
     for (var i=1; i<=4; i++) {
-      if (steps[i]) steps[i].style.display = (i===s) ? '' : 'none';
+      if (!steps[i]) continue;
+      steps[i].style.display = '';                 // clear any leftover inline display
+      steps[i].classList.toggle('ap-frw-active', i === s);
     }
     // Pills
     for (var j=1; j<=4; j++) {
@@ -5467,6 +5513,10 @@
     if (titleEl) titleEl.textContent = stepTitles[s];
     if (subEl)   subEl.textContent   = stepSubs[s];
     if (lblEl)   lblEl.textContent   = stepLabels[s];
+    // Scroll the body back to top whenever the step changes
+    var activeBody = steps[s] ? steps[s].querySelector('.ap-frw-body') : null;
+    if (activeBody) activeBody.scrollTop = 0;
+    saveDraft();
   }
 
   // ── Step 1 nav ─────────────────────────────────────────────
@@ -5481,12 +5531,11 @@
         return;
       }
       _state.termsAgreed = true;
-      _state.step = 2;
-      renderStep();
+      goToStep(2);
     });
   }
   if (termsCheck) {
-    termsCheck.addEventListener('change', function(){ _state.termsAgreed = this.checked; });
+    termsCheck.addEventListener('change', function(){ _state.termsAgreed = this.checked; saveDraft(); });
   }
 
   // ── Step 2 nav (Stripe connect) ────────────────────────────
@@ -5497,10 +5546,10 @@
   var stripeStatusEl    = document.getElementById('apFrwStripeStatus');
   var stripeAcctEl      = document.getElementById('apFrwStripeAcctId');
 
-  if (step2Back) step2Back.addEventListener('click', function(){ _state.step=1; renderStep(); });
+  if (step2Back) step2Back.addEventListener('click', function(){ goToStep(1); });
   if (step2Next) step2Next.addEventListener('click', function(){
     // Allow skipping Stripe connect for now (will be required before live)
-    _state.step=3; renderStep();
+    goToStep(3);
     // Set max date to 1 year
     var dateEl = document.getElementById('apFrwEndDate');
     if (dateEl && !dateEl.value) {
@@ -5509,10 +5558,20 @@
       dateEl.value = new Date(Date.now() + 90*864e5).toISOString().split('T')[0]; // default 90 days
     }
   });
+  // Reflect a connected Stripe account in the UI (used on connect + on resume).
+  function _showStripeConnected() {
+    if (stripeStatusEl)    stripeStatusEl.style.display = 'none';
+    if (stripeConnectedEl) stripeConnectedEl.style.display = '';
+    if (stripeAcctEl)      stripeAcctEl.textContent = _state.stripeAccountId || 'connected';
+  }
   if (stripeConnectBtn) {
     stripeConnectBtn.addEventListener('click', function(){
-      // Placeholder — real Stripe Connect onboarding URL goes here
-      alert('Stripe Connect onboarding coming soon. For now, continue to set up your fundraiser details and connect Stripe before going live.');
+      // Placeholder until the Stripe Connect onboarding URL is wired to the backend.
+      // For review/testing, mark connected locally so the resume flow is exercisable.
+      _state.stripeConnected = true;
+      _state.stripeAccountId = 'acct_test_pending';
+      _showStripeConnected();
+      saveDraft();
     });
   }
 
@@ -5534,6 +5593,7 @@
     if (amtA)       amtA.textContent    = v;
     if (amtB)       amtB.textContent    = v + 1;
     if (amtDisplay) amtDisplay.textContent = v;
+    saveDraft();
   }
   if (amtDownBtn) amtDownBtn.addEventListener('click', function(){
     if (amountEl) amountEl.value = Math.max(1, (parseInt(amountEl.value) || 4) - 1);
@@ -5543,7 +5603,20 @@
     if (amountEl) amountEl.value = Math.min(8, (parseInt(amountEl.value) || 4) + 1);
     updateCalc();
   });
-  if (step3Back) step3Back.addEventListener('click', function(){ _state.step=2; renderStep(); });
+  if (step3Back) step3Back.addEventListener('click', function(){ goToStep(2); });
+  // Keep draft in sync as the admin types so nothing is lost on close.
+  ['apFrwCause','apFrwGoal','apFrwEndDate'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function(){
+      var causeEl = document.getElementById('apFrwCause');
+      var goalEl  = document.getElementById('apFrwGoal');
+      var dateEl  = document.getElementById('apFrwEndDate');
+      _state.cause   = causeEl ? causeEl.value.trim() : _state.cause;
+      _state.goal    = parseInt(goalEl ? goalEl.value : '0') || 0;
+      _state.endDate = dateEl ? dateEl.value : '';
+      saveDraft();
+    });
+  });
   if (step3Next) step3Next.addEventListener('click', function(){
     var causeEl = document.getElementById('apFrwCause');
     var goalEl  = document.getElementById('apFrwGoal');
@@ -5557,8 +5630,7 @@
     _state.goal    = parseInt(goalEl ? goalEl.value : '0') || 0;
     _state.endDate = dateEl ? dateEl.value : '';
     updateCalc();
-    _state.step = 4;
-    renderStep();
+    goToStep(4);
   });
 
   // ── Step 4 visibility toggles + launch ────────────────────
@@ -5575,11 +5647,11 @@
       });
       this.classList.add('selected');
       var rb = this.querySelector('input[type=radio]');
-      if (rb) { rb.checked = true; _state.visibility = rb.value; }
+      if (rb) { rb.checked = true; _state.visibility = rb.value; saveDraft(); }
     });
   });
 
-  if (step4Back) step4Back.addEventListener('click', function(){ _state.step=3; renderStep(); });
+  if (step4Back) step4Back.addEventListener('click', function(){ goToStep(3); });
   if (step4Launch) {
     step4Launch.addEventListener('click', async function(){
       step4Launch.disabled = true;
@@ -5603,6 +5675,7 @@
           cache: 'no-store'
         }).catch(function(){});
         _state.enabled = true;
+        clearDraft();   // setup complete — no half-finished draft to resume
         closeWizard();
         _renderActiveState({ enabled:true, amount:_state.amount, cause_name:_state.cause,
           goal:_state.goal, end_date:_state.endDate, total_raised:0, show_bar:_state.visibility==='public' });
@@ -5708,31 +5781,62 @@
     if (srSub)   srSub.textContent   = '$' + amt + ' per item · $' + raised.toFixed(2) + ' raised' + (goal>0?' of $'+goal+' goal':'') + (endDate?' · ends '+endDate:'');
   }
 
+  // Apply a set of fundraiser fields to _state and the form inputs.
+  function _applyToForm(d) {
+    if (!d) return;
+    if (d.cause   != null) _state.cause   = d.cause   || d.cause_name || '';
+    if (d.amount  != null) _state.amount  = parseInt(d.amount) || 4;
+    if (d.goal    != null) _state.goal    = parseFloat(d.goal) || 0;
+    if (d.endDate != null || d.end_date != null) _state.endDate = d.endDate || d.end_date || '';
+    var causeEl  = document.getElementById('apFrwCause');
+    var goalEl   = document.getElementById('apFrwGoal');
+    var dateEl   = document.getElementById('apFrwEndDate');
+    if (causeEl && _state.cause)   causeEl.value = _state.cause;
+    if (amountEl)                  amountEl.value = _state.amount;
+    if (goalEl && _state.goal)     goalEl.value  = _state.goal;
+    if (dateEl && _state.endDate)  dateEl.value  = _state.endDate;
+    updateCalc();
+  }
+
+  // Restore an in-progress (not yet launched) setup so the admin can resume.
+  function _restoreDraft() {
+    var d = loadDraft();
+    if (!d) return;
+    _state.maxStep        = parseInt(d.maxStep) || 1;
+    _state.termsAgreed    = !!d.termsAgreed;
+    _state.stripeConnected= !!d.stripeConnected;
+    _state.stripeAccountId= d.stripeAccountId || '';
+    _state.visibility     = d.visibility || 'public';
+    _applyToForm(d);
+    if (_state.termsAgreed && termsCheck) termsCheck.checked = true;
+    if (_state.stripeConnected) _showStripeConnected();
+    // Reflect saved visibility selection in the toggle rows
+    document.querySelectorAll('.ap-frw-toggle-row[data-val]').forEach(function(r){
+      var on = r.getAttribute('data-val') === _state.visibility;
+      r.classList.toggle('selected', on);
+      var rb = r.querySelector('input[type=radio]');
+      if (rb) rb.checked = on;
+    });
+  }
+
   // ── Load existing fundraising state on page load ───────────
   async function _loadState() {
+    var serverActive = false;
     try {
       var r = await fetch(FR_ENDPOINT, { cache: 'no-store' });
       var j = await r.json().catch(function(){ return {}; });
-      if (j.ok !== false) {
-        _state.enabled = !!j.enabled;
-        _state.amount  = parseInt(j.amount||4);
-        _state.cause   = j.cause_name || '';
-        _state.goal    = parseFloat(j.goal||0);
-        _state.endDate = j.end_date || '';
+      if (j.ok !== false && j.enabled) {
+        serverActive = true;
+        _state.enabled = true;
         _state.totalRaised = parseFloat(j.total_raised||0);
-        // Pre-fill step 3 fields
-        var causeEl  = document.getElementById('apFrwCause');
-        var amountEl2= document.getElementById('apFrwAmount');
-        var goalEl   = document.getElementById('apFrwGoal');
-        var dateEl   = document.getElementById('apFrwEndDate');
-        if (causeEl && j.cause_name)  causeEl.value  = j.cause_name;
-        if (amountEl2 && j.amount)    amountEl2.value= j.amount;
-        if (goalEl && j.goal)         goalEl.value   = j.goal;
-        if (dateEl && j.end_date)     dateEl.value   = j.end_date;
-        updateCalc();
+        _applyToForm(j);
+        if (j.stripe_account_id) { _state.stripeConnected = true; _state.stripeAccountId = j.stripe_account_id; }
         _renderActiveState(j);
+        clearDraft();   // a live fundraiser supersedes any local draft
       }
     } catch(e) { /* silent on stores without fundraising fields yet */ }
+    // No live fundraiser → restore a half-finished setup if one exists.
+    if (!serverActive) _restoreDraft();
   }
 
   _loadState();

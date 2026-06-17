@@ -131,8 +131,9 @@
       '.ap-frw-hero h2,.ap-frd-header h2,.ap-frd-header h3{margin:0!important;color:#fff!important;font-size:clamp(26px,4vw,42px)!important;line-height:.96!important;font-weight:950!important;letter-spacing:-.05em!important;max-width:580px!important;}',
       '.ap-frw-hero p,.ap-frd-header p{margin:10px 0 0!important;color:rgba(255,255,255,.65)!important;font-size:14px!important;line-height:1.5!important;max-width:560px!important;font-weight:500!important;}',
 
-      /* step content — flex column so body grows and scrolls */
-      '.ap-frw-step-content{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;}',
+      /* step content — ONLY the active step is shown (class-toggled, not inline) */
+      '.ap-frw-step-content{display:none!important;}',
+      '.ap-frw-step-content.ap-frw-active{display:flex!important;flex-direction:column!important;flex:1 1 auto!important;min-height:0!important;overflow:hidden!important;}',
 
       /* body — THE scrollable region */
       '.ap-frw-body,.ap-frd-body{display:block!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;flex:1 1 auto!important;min-height:0!important;padding:22px 28px 28px!important;background:#fff!important;color:#11100e!important;}',
