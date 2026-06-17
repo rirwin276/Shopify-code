@@ -1141,11 +1141,12 @@
       leaveConfirm.disabled = true;
       leaveStatus.textContent = 'Removing\u2026';
       try {
-        var res = await fetch(BACKEND_URL + '/api/storefront/' + encodeURIComponent(leaveHandle) + '/leave', {
+        // Routed through the App Proxy relay; the relay injects the verified
+        // logged-in customer id, so we don't send (and the backend won't trust)
+        // a browser-supplied customer_id.
+        var res = await fetch('/apps/ss/relay/storefront/' + encodeURIComponent(leaveHandle) + '/leave', {
           method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ customer_id: String({{ customer.id | json }}) }),
-          credentials: 'omit'
+          headers: {'Content-Type':'application/json'}
         });
         if(!res.ok){ leaveStatus.textContent = 'Error: ' + res.status; leaveConfirm.disabled=false; return; }
         leaveStatus.textContent = 'Done! Refreshing\u2026';
