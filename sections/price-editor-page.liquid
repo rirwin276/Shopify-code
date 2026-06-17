@@ -11,10 +11,6 @@
   {%- endfor -%}
 {%- endif -%}
 
-{%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py. {% endcomment -%}
-{%- assign fallback_editor_secret = 'stellasage-god-mode-2026-xK9mP' -%}
-{%- assign mf_editor_secret = shop.metafields.custom.editor_secret.value | default: shop.metafields.custom.editor_secret -%}
-{%- assign editor_secret = mf_editor_secret | default: fallback_editor_secret -%}
 
 {%- if is_super_admin == false -%}
   <script>window.location.replace('/pages/portal');</script>
@@ -497,14 +493,12 @@
 
 <script>
 (function() {
-  var RAILWAY = 'https://printfulautomation-production.up.railway.app';
-  var SECRET = {{ editor_secret | json }};
+  var APP_PROXY = '/apps/ss';
   var originalPrices = {};
 
   function headers() {
     return {
-      'Content-Type': 'application/json',
-      'X-Editor-Secret': SECRET
+      'Content-Type': 'application/json'
     };
   }
 
@@ -557,7 +551,7 @@
   }
 
   function loadPrices() {
-    fetch(RAILWAY + '/api/pricing', {
+    fetch(APP_PROXY + '/api/pricing', {
       method: 'GET',
       headers: headers(),
       cache: 'no-store'
@@ -582,9 +576,9 @@
 
     function tick() {
       attempts += 1;
-      fetch(RAILWAY + '/job/' + encodeURIComponent(jobId), {
+      fetch(APP_PROXY + '/api/pricing/job/' + encodeURIComponent(jobId), {
         method: 'GET',
-        headers: { 'X-Editor-Secret': SECRET },
+        headers: headers(),
         cache: 'no-store'
       })
       .then(function(r) {
@@ -652,7 +646,7 @@
     }
     setJobStatus('', false);
 
-    fetch(RAILWAY + '/api/pricing', {
+    fetch(APP_PROXY + '/api/pricing', {
       method: 'POST',
       headers: headers(),
       body: JSON.stringify(payload)
