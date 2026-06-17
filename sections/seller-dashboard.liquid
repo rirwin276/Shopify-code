@@ -1157,8 +1157,10 @@
     });
 
     // --- Wake Store (seller dashboard) ---
-    var SD_RAILWAY_URL = 'https://studio-uploader-production.up.railway.app';
-    var SD_ADMIN_SECRET = 'stellasage-god-mode-2026-xK9mP';
+    // Routed through the Shopify App Proxy relay: auth is the proxy signature +
+    // the logged-in customer's storefront-admin--{handle} tag (verified
+    // server-side). No admin secret is exposed to the browser.
+    var SD_RELAY_URL = '/apps/ss/relay';
     document.addEventListener('click', function(e){
       var btn = e.target.closest('[data-wake-store-sd]');
       if(!btn) return;
@@ -1167,9 +1169,9 @@
       if(!confirm('Wake up store "' + handle + '"? This will re-run Printful to rebuild all products.')) return;
       btn.disabled = true;
       btn.textContent = 'Waking up\u2026';
-      fetch(SD_RAILWAY_URL + '/admin/store/' + encodeURIComponent(handle) + '/wakeup', {
+      fetch(SD_RELAY_URL + '/store/' + encodeURIComponent(handle) + '/wakeup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': SD_ADMIN_SECRET }
+        headers: { 'Content-Type': 'application/json' }
       })
       .then(function(r){ return r.json(); })
       .then(function(data){
