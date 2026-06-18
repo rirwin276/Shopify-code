@@ -5381,8 +5381,10 @@
   // built, so these calls are best-effort: the UI renders fully regardless so
   // the experience can be reviewed end-to-end today.
   var AP_PROXY_URL = '/apps/ss';
-  var FR_ENDPOINT  = AP_PROXY_URL + '/relay/store/'
-    + encodeURIComponent((window.SSAP && SSAP.shopHandle) || '') + '/fundraising';
+  var _SS_HANDLE   = encodeURIComponent((window.SSAP && SSAP.shopHandle) || '');
+  var FR_ENDPOINT  = AP_PROXY_URL + '/relay/store/' + _SS_HANDLE + '/fundraising';
+  var FR_STRIPE_CONNECT = FR_ENDPOINT + '/stripe/connect';
+  var FR_STRIPE_STATUS  = FR_ENDPOINT + '/stripe/status';
 
   // ── State ─────────────────────────────────────────────────
   var _state = {
@@ -5623,14 +5625,53 @@
     if (stripeAcctEl)      stripeAcctEl.textContent = _state.stripeAccountId || 'connected';
   }
   if (stripeConnectBtn) {
-    stripeConnectBtn.addEventListener('click', function(){
-      // Placeholder until the Stripe Connect onboarding URL is wired to the backend.
-      // For review/testing, mark connected locally so the resume flow is exercisable.
-      _state.stripeConnected = true;
-      _state.stripeAccountId = 'acct_test_pending';
-      _showStripeConnected();
-      saveDraft();
+    stripeConnectBtn.addEventListener('click', async function(){
+      stripeConnectBtn.disabled = true;
+      var orig = stripeConnectBtn.textContent;
+      stripeConnectBtn.textContent = 'Opening Stripe…';
+      try {
+        // Save the draft so we resume on this step after the Stripe round-trip.
+        _state.maxStep = Math.max(_state.maxStep || 1, 3);
+        saveDraft();
+        var returnUrl = window.location.origin + window.location.pathname + '?fr_stripe=return';
+        var res = await fetch(FR_STRIPE_CONNECT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ return_url: returnUrl, refresh_url: returnUrl }),
+          cache: 'no-store'
+        });
+        var j = await res.json().catch(function(){ return {}; });
+        if (j && j.ok && j.url) {
+          if (j.account_id) { _state.stripeAccountId = j.account_id; saveDraft(); }
+          window.location.href = j.url;   // Stripe-hosted onboarding
+          return;
+        }
+        alert('Could not start Stripe setup. ' + ((j && j.error) || 'Please try again.'));
+      } catch (e) {
+        alert('Could not reach Stripe setup. Please check your connection and try again.');
+      } finally {
+        stripeConnectBtn.disabled = false;
+        stripeConnectBtn.textContent = orig;
+      }
     });
+  }
+
+  // After returning from Stripe-hosted onboarding, confirm the account status.
+  async function _checkStripeReturn() {
+    if (window.location.search.indexOf('fr_stripe=return') === -1) return;
+    try {
+      var res = await fetch(FR_STRIPE_STATUS, { cache: 'no-store' });
+      var j = await res.json().catch(function(){ return {}; });
+      if (j && j.connected) {
+        _state.stripeConnected = true;
+        if (j.account_id) _state.stripeAccountId = j.account_id;
+        _showStripeConnected();
+        saveDraft();
+      }
+    } catch (e) { /* leave UI as-is; they can retry */ }
+    // Clean the URL and reopen the wizard on the Stripe step to show the result.
+    try { window.history.replaceState({}, '', window.location.pathname); } catch (e) {}
+    openWizard(_state.stripeConnected ? 4 : 3);
   }
 
   // ── Step 4 fields + nav ────────────────────────────────────
@@ -5895,6 +5936,8 @@
     } catch(e) { /* silent on stores without fundraising fields yet */ }
     // No live fundraiser → restore a half-finished setup if one exists.
     if (!serverActive) _restoreDraft();
+    // If we just came back from Stripe onboarding, verify + reflect it.
+    _checkStripeReturn();
   }
 
   _loadState();
