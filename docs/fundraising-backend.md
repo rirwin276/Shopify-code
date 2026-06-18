@@ -246,6 +246,22 @@ not coding.
 > Only after the whole flow is clean in **test mode**, switch
 > `STRIPE_SECRET_KEY` to `sk_live_…` and re-test once on a real low-risk store.
 
+## Payout Architecture Warning
+
+The fundraiser payout job uses Stripe Transfers to connected Express accounts.
+
+Stripe Transfers require available balance in the Stella & Sage platform Stripe account. Storefront customer payments currently happen through Shopify checkout / Shopify Payments. Before enabling live payouts, confirm that the payout source is funded correctly.
+
+Do not enable the weekly payout cron in live mode until one of these is confirmed:
+
+1. Stripe platform balance is funded and available for transfers.
+2. A manual/top-up process exists.
+3. The payout architecture is changed to match the actual money flow from Shopify Payments.
+
+If the Stripe balance is insufficient, the payout job will skip the transfer and leave ledger rows unpaid (the balance guard added in the Step 7 hardening commit).
+
+---
+
 ### Still open / nice-to-have
 - One order can contain items from multiple sub-stores; the webhook handles
   that (per-tag attribution). If a product carries more than one
