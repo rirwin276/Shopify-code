@@ -22,21 +22,19 @@ POST {STUDIO_UPLOADER}/api/fundraising/{handle}     (requires X-Admin-Secret)
 
 ---
 
-## Status (what's built)
+## Status
 
-**Phase 1 — persistence — DONE and live in code:**
-- `studio-uploader` serves `GET/POST /api/fundraising/{handle}` (in `app.py`).
-- `Printful_Automation` relays `GET/POST /relay/store/{handle}/fundraising`
-  → studio-uploader, injecting `X-Admin-Secret`.
-- The metaobject definition is **auto-created on first call** — you do not need
-  to create it by hand in the Shopify admin.
-- The wizard's Launch and Stop persist authoritatively to the metaobject;
-  reopening the admin reflects server state.
+**Phase 1 — fundraiser setup and persistence:** complete on `claude/dazzling-turing-76cjur`.
+- `studio-uploader` serves `GET/POST /api/fundraising/{handle}`.
+- `Printful_Automation` relays it, injecting `X-Admin-Secret` server-side.
+- The metaobject definition is auto-created on first call.
+- Launch and Stop persist authoritatively to the metaobject.
 
-**Phase 2 — money movement — NOT built yet:** product reprice on launch /
-revert on stop, the order-paid webhook that grows `total_raised`, the 7-day
-escrow ledger, batched weekly Stripe payouts, and Stripe Connect onboarding.
-See §3 and §5.
+**Phase 2 — Stripe Connect, repricing, webhook tracking, ledger, public bar, payout endpoint:**
+code exists on `claude/dazzling-turing-76cjur`. It has **not been production-tested**.
+Do not enable live fundraisers or the live payout cron until the test checklist passes.
+
+**Current overall status:** feature-complete test-branch code, not live production-ready.
 
 ## 1. Shopify metaobject
 
@@ -250,15 +248,25 @@ not coding.
 
 The fundraiser payout job uses Stripe Transfers to connected Express accounts.
 
-Stripe Transfers require available balance in the Stella & Sage platform Stripe account. Storefront customer payments currently happen through Shopify checkout / Shopify Payments. Before enabling live payouts, confirm that the payout source is funded correctly.
+Stripe Transfers require available balance in the Stella & Sage **platform Stripe account**. Storefront customer payments go through Shopify checkout / Shopify Payments, which pays out to Stella & Sage's **bank account** — not to a Stripe balance. These are two separate money flows. The balance guard in the payout endpoint prevents broken transfers, but the money may never reach the Stripe balance unless it is funded separately.
 
-Do not enable the weekly payout cron in live mode until one of these is confirmed:
+**Do not enable the weekly payout cron in live mode until the payout model is decided.**
 
-1. Stripe platform balance is funded and available for transfers.
-2. A manual/top-up process exists.
-3. The payout architecture is changed to match the actual money flow from Shopify Payments.
+### Recommended payout options (ranked safest → most automated)
 
-If the Stripe balance is insufficient, the payout job will skip the transfer and leave ledger rows unpaid (the balance guard added in the Step 7 hardening commit).
+**Option B — Manual payout from bank (recommended for first live fundraiser):**
+Keep the escrow ledger as an accounting record. When a fundraiser ends, pull the ledger totals and pay the cause directly via bank transfer, Venmo, or check from the Shopify Payments bank payout. No automated Stripe transfer needed. Zero risk of lost or double transfers.
+
+**Option A — Stripe Transfer with manually funded platform balance:**
+Move money from the Shopify Payments bank payout into the Stella & Sage Stripe account before each payout run. Automated transfers then work. Labor-intensive; requires discipline to fund before each cron run.
+
+**Option C — Rebuild checkout around Stripe Connect (long-term):**
+Use Stripe as the payment processor instead of Shopify Payments. Enables destination charges that flow automatically through the platform to connected accounts. The "correct" Stripe Connect model for this use case, but requires switching away from Shopify Payments — a significant change.
+
+**Option D — Ledger-only, no automated payout:**
+Same as Option B. Track everything in the ledger; pay manually on a schedule. Defer automated transfers until the checkout model is clarified.
+
+If the Stripe balance is insufficient, the payout job skips the transfer and leaves ledger rows unpaid for the next run (see balance guard added in hardening commit `9f1c0f7`).
 
 ---
 

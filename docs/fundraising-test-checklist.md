@@ -29,6 +29,15 @@
 - Confirm wizard detects status.
 - Confirm Stripe account ID is saved.
 
+## Manual price backup before repricing test
+
+Before clicking Launch on any test store:
+
+- Export or screenshot all product variant prices in the test store.
+- Confirm the test store has only disposable products.
+- Confirm no real customer orders are expected during the test.
+- Confirm you know how to manually restore prices in Shopify admin if the automatic restore fails.
+
 ## Launch test
 
 - Use a throwaway test store with test products.
