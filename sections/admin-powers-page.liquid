@@ -5781,17 +5781,23 @@
           stripe_connected: _state.stripeConnected,
           setup_step: 5,
         };
-        await fetch(FR_ENDPOINT, {
+        var res = await fetch(FR_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
           cache: 'no-store'
-        }).catch(function(){});
+        });
+        var j = await res.json().catch(function(){ return {}; });
+        if (!res.ok || !j || j.ok === false) {
+          throw new Error((j && j.error) || ('Launch failed with HTTP ' + res.status));
+        }
         _state.enabled = true;
         clearDraft();   // setup complete — no half-finished draft to resume
         closeWizard();
-        _renderActiveState({ enabled:true, amount:_state.amount, cause_name:_state.cause,
-          goal:_state.goal, end_date:_state.endDate, total_raised:0, show_bar:_state.visibility==='public' });
+        _renderActiveState(j);
+      } catch (e) {
+        alert('Fundraiser was not launched. ' + (e.message || 'Please try again.'));
+        return;
       } finally {
         step5Launch.disabled = false;
         step5Launch.textContent = 'Launch Fundraiser';
