@@ -5764,18 +5764,23 @@
     step5Launch.addEventListener('click', async function(){
       step5Launch.disabled = true;
       step5Launch.textContent = 'Launching…';
-      var payload = {
-        enabled: true,
-        amount: _state.amount,
-        cause_name: _state.cause,
-        show_bar: _state.visibility === 'public',
-        goal: _state.goal,
-        end_date: _state.endDate,
-      };
       try {
-        // Best-effort persist through the secure relay. Until the backend route
-        // exists this may fail; we render the active state regardless so the
-        // full launch experience is reviewable today.
+        if (!_state.stripeConnected || !_state.stripeAccountId) {
+          alert('Connect Stripe before launching this fundraiser. This prevents money from being collected without a payout account.');
+          goToStep(3);
+          return;
+        }
+        var payload = {
+          enabled: true,
+          amount: _state.amount,
+          cause_name: _state.cause,
+          show_bar: _state.visibility === 'public',
+          goal: _state.goal,
+          end_date: _state.endDate,
+          stripe_account_id: _state.stripeAccountId,
+          stripe_connected: _state.stripeConnected,
+          setup_step: 5,
+        };
         await fetch(FR_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
