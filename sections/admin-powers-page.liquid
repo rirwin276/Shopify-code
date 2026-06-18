@@ -5633,7 +5633,12 @@
         // Save the draft so we resume on this step after the Stripe round-trip.
         _state.maxStep = Math.max(_state.maxStep || 1, 3);
         saveDraft();
-        var returnUrl = window.location.origin + window.location.pathname + '?fr_stripe=return';
+        // Preserve the existing Admin Powers query string, especially ?shop=<handle>,
+        // then add the Stripe return marker. Dropping ?shop breaks store-specific
+        // admin access after Stripe redirects back.
+        var returnUrlObj = new URL(window.location.href);
+        returnUrlObj.searchParams.set('fr_stripe', 'return');
+        var returnUrl = returnUrlObj.toString();
         var res = await fetch(FR_STRIPE_CONNECT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -5670,7 +5675,11 @@
       }
     } catch (e) { /* leave UI as-is; they can retry */ }
     // Clean the URL and reopen the wizard on the Stripe step to show the result.
-    try { window.history.replaceState({}, '', window.location.pathname); } catch (e) {}
+    try {
+      var cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('fr_stripe');
+      window.history.replaceState({}, '', cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+    } catch (e) {}
     openWizard(_state.stripeConnected ? 4 : 3);
   }
 
