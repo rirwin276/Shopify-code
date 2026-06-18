@@ -182,37 +182,75 @@ a popup. On return, set `stripe_connected = true` and store `stripe_account_id`.
    should come back as "Active." In the Shopify admin, **Content → Metaobjects →
    Store Fundraising** will show one entry per store.
 
-### B. Stripe (phase 2 — not built yet)
+### B. Phase 2 — money mechanics (CODE NOW BUILT)
 
-This feature uses **Stripe Connect** (the platform collects on each sale and
-routes the cause's share to the recipient's connected account). That means:
+All of this is implemented in `studio-uploader/app.py` + relayed through
+`Printful_Automation/app.py`. What remains is **configuration and registration**,
+not coding.
 
-1. **Use the platform _Secret_ key, not a publishable/restricted key.** It looks
-   like `sk_live_…` (or `sk_test_…` while testing). The publishable key (`pk_…`)
-   is client-side only and can't create accounts or transfers. All Stripe calls
-   run server-side in studio-uploader, so the secret key lives there as an env
-   var (e.g. `STRIPE_SECRET_KEY`) — never in the theme or the browser.
-2. **Enable Connect** in the Stripe Dashboard: dashboard.stripe.com → Connect →
-   Get started. Choose **Express** accounts. This is what lets recipients onboard
-   their own bank without you ever seeing their details.
-3. **Set the platform name/branding** under Connect settings (shows on the
-   recipient's onboarding screen).
-4. Add `stripe` to `studio-uploader/requirements.txt` and set
-   `STRIPE_SECRET_KEY` on the studio-uploader Railway service.
-5. Build the four Stripe endpoints (all in studio-uploader, behind the relay):
-   - `POST /api/fundraising/{handle}/stripe/connect` → create/find an Express
-     account, create an account onboarding link, return its URL. The wizard's
-     "Connect with Stripe" button opens it in a popup.
-   - `GET  /api/fundraising/{handle}/stripe/status` → on popup return, read the
-     account; if `details_submitted && charges_enabled`, set
-     `stripe_connected:true` + `stripe_account_id` in the metaobject.
-   - Order-paid webhook → add `amount × qty` to `total_raised`; write an escrow
-     ledger row with a release date 7 days out.
-   - Weekly payout job → sum released (past-hold) contributions per connected
-     account and issue **one** `Transfer` per account (never per order).
-6. Reprice: on Launch, snapshot product prices into `base_prices`, then raise
-   each price by `amount + 1`; on Stop, restore from `base_prices`. Reuse
-   Printful_Automation's `reprice_products` / `variant_rest_update` helpers.
+**What the code does now:**
+- **Repricing** — on Launch, every active variant for `tag:{handle}` is
+  snapshotted into the metaobject's `base_prices` and raised by `amount + $1`;
+  on Stop it's restored exactly. Idempotent, keyed on `markup_add`, runs in a
+  background thread off the launch/stop POST.
+- **Stripe Connect (Express)** —
+  `POST /api/fundraising/{handle}/stripe/connect` creates/reuses the recipient's
+  Express account (transfers capability) and returns a hosted onboarding URL;
+  `GET .../stripe/status` re-checks `details_submitted && payouts_enabled` and
+  persists `stripe_connected`. The wizard's Step 3 button now drives this and
+  redirects to Stripe, returning to `?fr_stripe=return`.
+- **Order-paid webhook** — `POST /webhooks/fundraising/order-paid` (Shopify
+  HMAC, `SHOPIFY_WEBHOOK_SECRET`) attributes `amount × qty` to each
+  fundraiser-active store tag on the order, grows `total_raised`, appends an
+  escrow ledger row (idempotent per order id), and emails on goal-met.
+- **Weekly payouts** — `POST /api/fundraising/payouts/run` (`X-Cron-Secret`)
+  sums unpaid ledger rows past the 7-day hold per store and issues **one**
+  Stripe `Transfer` per connected account, then marks rows paid.
+- **Public progress bar** — `GET /api/fundraising/{handle}/public` (no auth,
+  display-safe fields) feeds the drop-in `sections/fundraiser-bar.liquid`.
 
-> Test mode first: with `sk_test_…` and Stripe's test bank numbers you can run
-> the whole flow end-to-end with fake money before switching to `sk_live_…`.
+**Setup runbook — do these to turn it on:**
+
+1. **Env vars (Railway):**
+   - `studio-uploader`: `STRIPE_SECRET_KEY` (✅ you set this — use `sk_test_…`
+     first), `SHOPIFY_WEBHOOK_SECRET` (for the order webhook), `CRON_SECRET`
+     (for the payout job), and `SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS/
+     NOTIFY_EMAIL` (for goal-met email — may already be set).
+   - `ADMIN_SECRET` identical on both services (already true if nuke works).
+   - Do NOT put `STRIPE_SECRET_KEY` on Printful_Automation or in the theme.
+2. **Stripe Dashboard:** Connect → Get started → enable **Express** accounts;
+   set platform name/branding. Start in **test mode**.
+3. **Register the order webhook:** Shopify admin → Settings → Notifications →
+   Webhooks (or via API): topic **Order payment** (`orders/paid`), format JSON,
+   URL `https://<studio-uploader>/webhooks/fundraising/order-paid`. The webhook
+   signing secret Shopify shows you is the `SHOPIFY_WEBHOOK_SECRET` value.
+4. **Schedule payouts:** add a Railway Cron (weekly) that POSTs to
+   `https://<studio-uploader>/api/fundraising/payouts/run` with header
+   `X-Cron-Secret: <CRON_SECRET>` (same shape as `cron_sleep_check.py`).
+5. **Progress bar:** in the theme editor, add the **Fundraiser Bar** section to
+   the collection template (it auto-detects the collection handle).
+6. **Deploy** all three `claude/dazzling-turing-76cjur` branches.
+
+**Test order (test mode):**
+1. Start a fundraiser on a **test store** handle, connect Stripe with Stripe's
+   test onboarding, Launch.
+2. Confirm products under `tag:{handle}` went up by `amount + $1`; confirm the
+   metaobject has `base_prices` + `markup_add`.
+3. Place a test order on a fundraiser product → the webhook should grow
+   `total_raised` and add a ledger row.
+4. Hit the payout endpoint manually with the cron secret; with the 7-day hold
+   you'll see `transferred: 0` until rows age (or temporarily set
+   `FUNDRAISING_HOLD_DAYS=0` on studio-uploader to test a real transfer).
+5. Stop → confirm prices restore exactly to base.
+
+> Only after the whole flow is clean in **test mode**, switch
+> `STRIPE_SECRET_KEY` to `sk_live_…` and re-test once on a real low-risk store.
+
+### Still open / nice-to-have
+- One order can contain items from multiple sub-stores; the webhook handles
+  that (per-tag attribution). If a product carries more than one
+  fundraiser-active store tag, the contribution is counted for each — keep
+  store tags clean.
+- `base_prices` lives in the metaobject JSON; for very large catalogs consider a
+  per-variant metafield instead.
+- Refund/chargeback reversal of ledger rows is not handled yet.

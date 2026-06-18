@@ -1,0 +1,108 @@
+{%- comment -%}
+  Public fundraiser progress bar.
+
+  Add this section to a store's collection template (or anywhere on the
+  storefront). It reads the public, display-safe fundraiser data through the
+  App Proxy relay:
+      GET /apps/ss/relay/store/{handle}/fundraising/public
+  and renders a live progress bar only when the fundraiser is enabled AND the
+  admin chose "show progress publicly". Nothing renders otherwise.
+
+  Handle resolution: the section setting `fundraiser_handle` wins; otherwise it
+  falls back to the current collection handle (these stores live at
+  /collections/{handle}).
+{%- endcomment -%}
+
+{%- assign fr_handle = section.settings.fundraiser_handle | strip -%}
+{%- if fr_handle == blank -%}{%- assign fr_handle = collection.handle -%}{%- endif -%}
+
+{%- if fr_handle != blank -%}
+<div class="ss-frbar" id="ssFrBar" data-handle="{{ fr_handle }}" hidden>
+  <div class="ss-frbar-inner">
+    <div class="ss-frbar-head">
+      <span class="ss-frbar-badge">Fundraiser</span>
+      <span class="ss-frbar-cause" id="ssFrBarCause"></span>
+    </div>
+    <div class="ss-frbar-track"><div class="ss-frbar-fill" id="ssFrBarFill"></div></div>
+    <div class="ss-frbar-stats">
+      <span id="ssFrBarRaised"></span>
+      <span id="ssFrBarGoal"></span>
+      <span id="ssFrBarDays"></span>
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  .ss-frbar { margin: 14px auto; max-width: 920px; padding: 0 16px; }
+  .ss-frbar-inner {
+    background: linear-gradient(135deg, #17150f, #2f5844);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 18px; padding: 16px 18px; color: #fff;
+    box-shadow: 0 12px 30px rgba(15,23,42,.18);
+  }
+  .ss-frbar-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .ss-frbar-badge {
+    font-size: 10px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase;
+    background: rgba(183,163,106,.85); color: #1a160c; padding: 4px 9px; border-radius: 999px;
+  }
+  .ss-frbar-cause { font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
+  .ss-frbar-track { height: 10px; border-radius: 999px; background: rgba(255,255,255,.16); overflow: hidden; }
+  .ss-frbar-fill { height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, #b7a36a, #e9dcae); transition: width .6s ease; }
+  .ss-frbar-stats { display: flex; gap: 14px; margin-top: 10px; font-size: 12.5px; color: rgba(255,255,255,.82); }
+  .ss-frbar-stats span:nth-child(2) { margin-left: auto; }
+  .ss-frbar-stats strong { color: #fff; font-weight: 900; }
+{%- endstyle -%}
+
+<script>
+(function () {
+  var el = document.getElementById('ssFrBar');
+  if (!el) return;
+  var handle = el.getAttribute('data-handle');
+  if (!handle) return;
+  var url = '/apps/ss/relay/store/' + encodeURIComponent(handle) + '/fundraising/public';
+
+  function money(n) { return '$' + (Math.round(n) || 0).toLocaleString(); }
+
+  fetch(url, { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (!j || !j.enabled) return;
+      var raised = parseFloat(j.total_raised || 0);
+      var goal = parseFloat(j.goal || 0);
+      document.getElementById('ssFrBarCause').textContent = j.cause_name || 'Support our team';
+
+      var pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+      document.getElementById('ssFrBarFill').style.width = (goal > 0 ? pct : 100) + '%';
+
+      document.getElementById('ssFrBarRaised').innerHTML = '<strong>' + money(raised) + '</strong> raised';
+      document.getElementById('ssFrBarGoal').innerHTML = goal > 0 ? ('of <strong>' + money(goal) + '</strong> goal') : '';
+
+      var daysEl = document.getElementById('ssFrBarDays');
+      if (j.end_date) {
+        var end = new Date(j.end_date + 'T23:59:59');
+        var days = Math.ceil((end - new Date()) / 86400000);
+        daysEl.innerHTML = days > 0 ? ('<strong>' + days + '</strong> days left') : 'Final day';
+      } else { daysEl.textContent = ''; }
+
+      el.hidden = false;
+    })
+    .catch(function () { /* no bar on error */ });
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Fundraiser Bar",
+  "settings": [
+    {
+      "type": "text",
+      "id": "fundraiser_handle",
+      "label": "Store handle (optional)",
+      "info": "Leave blank to use the current collection handle."
+    }
+  ],
+  "presets": [{ "name": "Fundraiser Bar" }]
+}
+{% endschema %}
