@@ -5532,16 +5532,22 @@
       if (!confirm('Stop this fundraiser? Products will be repriced back to base prices.')) return;
       frdStopBtn.disabled = true; frdStopBtn.textContent = 'Stopping…';
       try {
-        // Best-effort persist through the secure relay; render regardless (shell).
-        await fetch(FR_ENDPOINT, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({enabled:false,amount:0,cause_name:'',show_bar:false,goal:0,end_date:''}),
-          cache:'no-store'
-        }).catch(function(){});
+        var res = await fetch(FR_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled:false, amount:0, cause_name:'', show_bar:false, goal:0, end_date:'' }),
+          cache: 'no-store'
+        });
+        var j = await res.json().catch(function(){ return {}; });
+        if (!res.ok || !j || j.ok === false) {
+          throw new Error((j && j.error) || ('Stop failed with HTTP ' + res.status));
+        }
         clearDraft();
         _state.enabled = false; _state.maxStep = 1; _state.step = 1; _state.stripeConnected = false;
         closeDetails();
-        _renderActiveState({enabled:false});
+        _renderActiveState(j);
+      } catch (e) {
+        alert('Fundraiser was not stopped. ' + (e.message || 'Please try again.'));
       } finally { frdStopBtn.disabled=false; frdStopBtn.textContent='Stop'; }
     });
   }
