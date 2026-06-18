@@ -2260,6 +2260,18 @@
   .ap-fr-zone {
     margin: 0 0 20px;
   }
+  /* Pricing status banner — lives outside the active zone so it persists after Stop */
+  #apFrPricingBanner {
+    margin: -12px 0 16px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  #apFrPricingBanner.fr-banner--pending  { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
+  #apFrPricingBanner.fr-banner--success  { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
+  #apFrPricingBanner.fr-banner--error    { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; font-weight:700; }
   /* Empty state — no fundraiser */
   .ap-fr-zone-empty {
     display: flex;
@@ -2955,6 +2967,9 @@
       <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details →</button>
     </div>
   </div>
+
+  <!-- FUNDRAISER PRICING STATUS BANNER (persists through Stop; outside active zone) -->
+  <div id="apFrPricingBanner" style="display:none;" aria-live="polite"></div>
 
   <!-- FUNDRAISER DETAILS MODAL -->
   <div class="ap-frd-overlay" id="apFrdOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="apFrdTitle">
@@ -5819,15 +5834,31 @@
   }
 
   // ── Pricing status poller ──────────────────────────────────
-  // After Launch or Stop, pricing runs in a background thread on the backend.
-  // Poll the endpoint every 2 s (up to 60 s) and update the zone subtitle so
-  // the admin knows whether prices actually changed.
+  // After Launch or Stop, repricing runs in a background thread on the backend.
+  // Poll every 2 s (up to 60 s) and update the persistent banner so the admin
+  // knows whether prices actually changed. The banner lives outside frZoneActive
+  // and therefore remains visible even after Stop hides the active zone.
   var _pricingPollTimer = null;
   function _startPricingPoll(context) {
-    // context: 'launch' or 'stop'
+    var banner = document.getElementById('apFrPricingBanner');
+    if (!banner) return;
+
+    function _showBanner(msg, type) {
+      banner.textContent = msg;
+      banner.className = 'fr-banner--' + type;
+      banner.style.display = msg ? '' : 'none';
+      // Mirror into zone subtitle and details modal for the launch case when
+      // those elements are still visible.
+      var subEl = document.getElementById('apFrZoneSub');
+      var dtlEl = document.getElementById('apFrdSubtitle');
+      if (subEl) subEl.textContent = msg;
+      if (dtlEl) dtlEl.textContent = msg;
+    }
+
     if (_pricingPollTimer) clearInterval(_pricingPollTimer);
     var attempts = 0;
     var maxAttempts = 30; // 30 × 2 s = 60 s
+
     _pricingPollTimer = setInterval(async function() {
       attempts++;
       if (attempts > maxAttempts) { clearInterval(_pricingPollTimer); return; }
@@ -5835,29 +5866,29 @@
         var res = await fetch(FR_ENDPOINT, { cache: 'no-store' });
         var j = await res.json().catch(function(){ return {}; });
         var status = j && j.pricing_status;
-        var err    = (j && j.pricing_error) || '';
-        var subEl  = document.getElementById('apFrZoneSub');
-        var dtlEl  = document.getElementById('apFrdSubtitle');
-        var msg = '';
+        var err    = ((j && j.pricing_error) || '').slice(0, 200);
+        var errSuffix = err ? ' (' + err + ')' : '';
+
         if (context === 'launch') {
-          if (status === 'pending')   msg = 'Fundraiser launched. Product pricing is still updating…';
-          if (status === 'succeeded') msg = 'Fundraiser active. Product prices updated.';
-          if (status === 'skipped')   msg = 'Fundraiser active. Product prices were already correct.';
-          if (status === 'failed')    msg = 'Fundraiser setup saved, but product pricing failed. Do not take orders until this is fixed.' + (err ? ' (' + err + ')' : '');
+          if (status === 'pending')   _showBanner('Fundraiser launched. Product pricing is still updating…', 'pending');
+          if (status === 'succeeded') _showBanner('Fundraiser active. Product prices updated.', 'success');
+          if (status === 'skipped')   _showBanner('Fundraiser active. Product prices were already correct.', 'success');
+          if (status === 'failed')    _showBanner('Fundraiser setup saved, but product pricing failed. Do not take orders until this is fixed.' + errSuffix, 'error');
         } else {
-          if (status === 'pending')   msg = 'Stopping fundraiser. Product prices are being restored…';
-          if (status === 'succeeded') msg = 'Fundraiser stopped. Product prices restored.';
-          if (status === 'skipped')   msg = 'Fundraiser stopped. No price restore needed.';
-          if (status === 'failed')    msg = 'Fundraiser stop was saved, but product price restore failed. Check products before taking orders.' + (err ? ' (' + err + ')' : '');
+          if (status === 'pending')   _showBanner('Stopping fundraiser. Product prices are being restored…', 'pending');
+          if (status === 'succeeded') _showBanner('Fundraiser stopped. Product prices restored.', 'success');
+          if (status === 'skipped')   _showBanner('Fundraiser stopped. No price restore needed.', 'success');
+          if (status === 'failed')    _showBanner('Fundraiser stop was saved, but product price restore failed. Check products before taking orders.' + errSuffix, 'error');
         }
-        if (msg) {
-          if (subEl) subEl.textContent = msg;
-          if (dtlEl) dtlEl.textContent = msg;
-        }
+
+        // Keep error banners visible indefinitely; clear success after 8 s.
         if (status && status !== 'pending') {
           clearInterval(_pricingPollTimer);
+          if (status !== 'failed') {
+            setTimeout(function(){ banner.style.display = 'none'; }, 8000);
+          }
         }
-      } catch (e) { /* ignore poll errors */ }
+      } catch (e) { /* ignore transient poll errors */ }
     }, 2000);
   }
 
