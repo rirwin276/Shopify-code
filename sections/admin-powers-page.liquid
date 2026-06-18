@@ -5376,10 +5376,7 @@
 
   // Fundraising state persists through the secure App Proxy relay — no admin
   // secret is ever exposed to the browser (the relay injects it server-side,
-  // matching every other admin action on this page). The backend route
-  // (/relay/store/{handle}/fundraising) and Stripe Connect are still being
-  // built, so these calls are best-effort: the UI renders fully regardless so
-  // the experience can be reviewed end-to-end today.
+  // matching every other admin action on this page).
   var AP_PROXY_URL = '/apps/ss';
   var _SS_HANDLE   = encodeURIComponent((window.SSAP && SSAP.shopHandle) || '');
   var FR_ENDPOINT  = AP_PROXY_URL + '/relay/store/' + _SS_HANDLE + '/fundraising';
@@ -5403,10 +5400,9 @@
   };
 
   // ── Draft persistence (resume where you left off) ──────────
-  // Until the backend metaobject exists, the in-progress setup is saved to
-  // localStorage so an admin can close the wizard and pick up exactly where
-  // they left off — including a connected Stripe account. Once the backend is
-  // live this same shape is mirrored into the `store_fundraising` metaobject.
+  // In-progress setup is saved to localStorage so an admin can close the wizard
+  // and pick up exactly where they left off. A live fundraiser from the server
+  // always supersedes the draft.
   var DRAFT_KEY = 'ss_fr_draft_' + ((window.SSAP && SSAP.shopHandle) || '');
   function saveDraft() {
     try {
@@ -5437,6 +5433,7 @@
   }
   // Advance to a step, remembering the furthest point reached.
   function goToStep(n) {
+    if (n < 1 || n > 5) return;
     _state.step = n;
     if (n > _state.maxStep) _state.maxStep = n;
     renderStep();
@@ -5509,7 +5506,7 @@
   if (overlay)  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeWizard(); });
   // Resume at the furthest step previously reached (or step 1 for a fresh start).
   if (launchBtn) launchBtn.addEventListener('click', function(){ openWizard(_state.maxStep || 1); });
-  if (editFromSettings) editFromSettings.addEventListener('click', function(){ openWizard(3); });
+  if (editFromSettings) editFromSettings.addEventListener('click', function(){ openWizard(4); });
 
   function openDetails() {
     if (!frdOverlay) return;
@@ -5543,7 +5540,11 @@
           throw new Error((j && j.error) || ('Stop failed with HTTP ' + res.status));
         }
         clearDraft();
-        _state.enabled = false; _state.maxStep = 1; _state.step = 1; _state.stripeConnected = false;
+        _state.enabled = false;
+        _state.maxStep = 1;
+        _state.step = 1;
+        _state.stripeConnected = false;
+        _state.totalRaised = 0;
         closeDetails();
         _renderActiveState(j);
         _startPricingPoll('stop');
@@ -5671,6 +5672,12 @@
   // After returning from Stripe-hosted onboarding, confirm the account status.
   async function _checkStripeReturn() {
     if (window.location.search.indexOf('fr_stripe=return') === -1) return;
+    // Clean the marker param first regardless of outcome.
+    try {
+      var cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('fr_stripe');
+      window.history.replaceState({}, '', cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+    } catch (e) {}
     try {
       var res = await fetch(FR_STRIPE_STATUS, { cache: 'no-store' });
       var j = await res.json().catch(function(){ return {}; });
@@ -5680,14 +5687,13 @@
         _showStripeConnected();
         saveDraft();
       }
-    } catch (e) { /* leave UI as-is; they can retry */ }
-    // Clean the URL and reopen the wizard on the Stripe step to show the result.
-    try {
-      var cleanUrl = new URL(window.location.href);
-      cleanUrl.searchParams.delete('fr_stripe');
-      window.history.replaceState({}, '', cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
-    } catch (e) {}
-    openWizard(_state.stripeConnected ? 4 : 3);
+      // Reopen wizard to show the Stripe result. Step 4 if connected, else 3.
+      openWizard(_state.stripeConnected ? 4 : 3);
+    } catch (e) {
+      // Status check failed (network/server error). Open Step 3 so the admin
+      // can see the connect button and retry rather than seeing a blank page.
+      openWizard(3);
+    }
   }
 
   // ── Step 4 fields + nav ────────────────────────────────────
@@ -5751,7 +5757,6 @@
   // ── Step 5 visibility toggles + launch ────────────────────
   var step5Back    = document.getElementById('apFrwStep5Back');
   var step5Launch  = document.getElementById('apFrwStep5Launch');
-  var visRows      = document.querySelectorAll('[data-frw-vis]') || [];
 
   document.querySelectorAll('.ap-frw-toggle-row[data-val]').forEach(function(row){
     row.addEventListener('click', function(){
@@ -5954,7 +5959,7 @@
   // Apply a set of fundraiser fields to _state and the form inputs.
   function _applyToForm(d) {
     if (!d) return;
-    if (d.cause   != null) _state.cause   = d.cause   || d.cause_name || '';
+    if (d.cause != null || d.cause_name != null) _state.cause = d.cause || d.cause_name || '';
     if (d.amount  != null) _state.amount  = parseInt(d.amount) || 4;
     if (d.goal    != null) _state.goal    = parseFloat(d.goal) || 0;
     if (d.endDate != null || d.end_date != null) _state.endDate = d.endDate || d.end_date || '';
@@ -5998,17 +6003,25 @@
       if (j.ok !== false && j.enabled) {
         serverActive = true;
         _state.enabled = true;
-        _state.totalRaised = parseFloat(j.total_raised||0);
+        _state.totalRaised = parseFloat(j.total_raised || 0);
         _applyToForm(j);
-        if (j.stripe_account_id) { _state.stripeConnected = true; _state.stripeAccountId = j.stripe_account_id; }
+        // Require both stripe_connected AND stripe_account_id — having an
+        // account ID alone doesn't mean onboarding is complete.
+        if (j.stripe_connected && j.stripe_account_id) {
+          _state.stripeConnected = true;
+          _state.stripeAccountId = j.stripe_account_id;
+        } else {
+          _state.stripeConnected = false;
+          _state.stripeAccountId = j.stripe_account_id || '';
+        }
         _renderActiveState(j);
-        clearDraft();   // a live fundraiser supersedes any local draft
+        clearDraft();
       }
-    } catch(e) { /* silent on stores without fundraising fields yet */ }
-    // No live fundraiser → restore a half-finished setup if one exists.
+    } catch(e) { /* silent — store may not have a fundraiser yet */ }
     if (!serverActive) _restoreDraft();
-    // If we just came back from Stripe onboarding, verify + reflect it.
-    _checkStripeReturn();
+    // Only check the Stripe return if there's no live fundraiser already active.
+    // Await so the wizard opens after state is fully settled.
+    if (!serverActive) await _checkStripeReturn();
   }
 
   _loadState();
