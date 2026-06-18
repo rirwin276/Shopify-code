@@ -50,3 +50,5 @@ jobs:
           git add sections/admin-powers-page.liquid .github/workflows/ss-fundraiser-step1-return-url.yml
           git commit -m "Fix fundraiser Stripe return URL"
           git push origin HEAD:claude/dazzling-turing-76cjur
+
+# trigger: second push so branch-created workflow can run
