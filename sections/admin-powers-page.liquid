@@ -5546,6 +5546,7 @@
         _state.enabled = false; _state.maxStep = 1; _state.step = 1; _state.stripeConnected = false;
         closeDetails();
         _renderActiveState(j);
+        _startPricingPoll('stop');
       } catch (e) {
         alert('Fundraiser was not stopped. ' + (e.message || 'Please try again.'));
       } finally { frdStopBtn.disabled=false; frdStopBtn.textContent='Stop'; }
@@ -5801,6 +5802,7 @@
         clearDraft();   // setup complete — no half-finished draft to resume
         closeWizard();
         _renderActiveState(j);
+        _startPricingPoll('launch');
       } catch (e) {
         alert('Fundraiser was not launched. ' + (e.message || 'Please try again.'));
         return;
@@ -5809,6 +5811,49 @@
         step5Launch.textContent = 'Launch Fundraiser';
       }
     });
+  }
+
+  // ── Pricing status poller ──────────────────────────────────
+  // After Launch or Stop, pricing runs in a background thread on the backend.
+  // Poll the endpoint every 2 s (up to 60 s) and update the zone subtitle so
+  // the admin knows whether prices actually changed.
+  var _pricingPollTimer = null;
+  function _startPricingPoll(context) {
+    // context: 'launch' or 'stop'
+    if (_pricingPollTimer) clearInterval(_pricingPollTimer);
+    var attempts = 0;
+    var maxAttempts = 30; // 30 × 2 s = 60 s
+    _pricingPollTimer = setInterval(async function() {
+      attempts++;
+      if (attempts > maxAttempts) { clearInterval(_pricingPollTimer); return; }
+      try {
+        var res = await fetch(FR_ENDPOINT, { cache: 'no-store' });
+        var j = await res.json().catch(function(){ return {}; });
+        var status = j && j.pricing_status;
+        var err    = (j && j.pricing_error) || '';
+        var subEl  = document.getElementById('apFrZoneSub');
+        var dtlEl  = document.getElementById('apFrdSubtitle');
+        var msg = '';
+        if (context === 'launch') {
+          if (status === 'pending')   msg = 'Fundraiser launched. Product pricing is still updating…';
+          if (status === 'succeeded') msg = 'Fundraiser active. Product prices updated.';
+          if (status === 'skipped')   msg = 'Fundraiser active. Product prices were already correct.';
+          if (status === 'failed')    msg = 'Fundraiser setup saved, but product pricing failed. Do not take orders until this is fixed.' + (err ? ' (' + err + ')' : '');
+        } else {
+          if (status === 'pending')   msg = 'Stopping fundraiser. Product prices are being restored…';
+          if (status === 'succeeded') msg = 'Fundraiser stopped. Product prices restored.';
+          if (status === 'skipped')   msg = 'Fundraiser stopped. No price restore needed.';
+          if (status === 'failed')    msg = 'Fundraiser stop was saved, but product price restore failed. Check products before taking orders.' + (err ? ' (' + err + ')' : '');
+        }
+        if (msg) {
+          if (subEl) subEl.textContent = msg;
+          if (dtlEl) dtlEl.textContent = msg;
+        }
+        if (status && status !== 'pending') {
+          clearInterval(_pricingPollTimer);
+        }
+      } catch (e) { /* ignore poll errors */ }
+    }, 2000);
   }
 
   // ── Active state rendering ─────────────────────────────────
