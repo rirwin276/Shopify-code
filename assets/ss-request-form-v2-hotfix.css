@@ -7,17 +7,17 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
 @media(max-width:760px){html.ss-request-v2 .sf-modal:not(.sf-hidden){padding:8px!important}html.ss-request-v2 .sf-modal-card{width:calc(100vw - 16px)!important;height:calc(100dvh - 16px)!important;border-radius:18px!important}}
 
 /* Fundraiser UI cleanup — scoped to Admin Powers and Dashboard DOM only. */
-.ap-wrap #apFrZone{margin:14px 0 18px!important}
+.ap-wrap #apFrZone{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;margin:14px 0 18px!important;clear:both!important}
 .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-empty{display:none!important;visibility:hidden!important;pointer-events:none!important}
 .ap-wrap #apFrZone:not(.ap-fr-zone--active) .ap-fr-zone-active{display:none!important}
-.ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:9px 12px!important;padding:14px 16px!important;min-height:0!important;border-radius:20px!important;background:linear-gradient(135deg,rgba(22,61,42,.92),rgba(18,47,34,.86))!important;border:1px solid rgba(134,239,172,.20)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;overflow:hidden!important}
-.ap-wrap #apFrZone .ap-fr-zone-active-top{display:contents!important}
-.ap-wrap #apFrZone .ap-fr-zone-badge{grid-column:1!important;justify-self:start!important;display:inline-flex!important;align-items:center!important;gap:8px!important;max-width:100%!important;padding:7px 11px!important;border-radius:999px!important;background:rgba(240,253,244,.11)!important;border:1px solid rgba(134,239,172,.18)!important;color:#dcfce7!important;font-size:10.5px!important;font-weight:900!important;letter-spacing:.14em!important;line-height:1!important;text-transform:uppercase!important;white-space:nowrap!important}
+.ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{display:flex!important;flex-direction:column!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;align-items:stretch!important;gap:10px!important;padding:14px 16px!important;min-height:0!important;border-radius:20px!important;background:linear-gradient(135deg,rgba(22,61,42,.92),rgba(18,47,34,.86))!important;border:1px solid rgba(134,239,172,.20)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;overflow:hidden!important}
+.ap-wrap #apFrZone .ap-fr-zone-active-top{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;min-width:0!important;gap:12px!important;margin:0!important}
+.ap-wrap #apFrZone .ap-fr-zone-badge{display:inline-flex!important;align-items:center!important;gap:8px!important;min-width:0!important;max-width:100%!important;padding:7px 11px!important;border-radius:999px!important;background:rgba(240,253,244,.11)!important;border:1px solid rgba(134,239,172,.18)!important;color:#dcfce7!important;font-size:10.5px!important;font-weight:900!important;letter-spacing:.14em!important;line-height:1!important;text-transform:uppercase!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
 .ap-wrap #apFrZone .ap-fr-zone-pulse{width:7px!important;height:7px!important;border-radius:999px!important;background:#4ade80!important;box-shadow:0 0 0 4px rgba(74,222,128,.13)!important;flex:0 0 auto!important}
-.ap-wrap #apFrZone .ap-btn--fr-details{grid-column:2!important;justify-self:end!important;position:static!important;transform:none!important;width:auto!important;max-width:none!important;height:36px!important;min-height:36px!important;padding:0 14px!important;border-radius:999px!important;background:#fff!important;border:0!important;box-shadow:0 10px 24px rgba(0,0,0,.14)!important;color:#173b2a!important;font-size:12.5px!important;font-weight:900!important;letter-spacing:-.01em!important;white-space:nowrap!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+.ap-wrap #apFrZone .ap-btn--fr-details{position:static!important;transform:none!important;flex:0 0 auto!important;width:auto!important;max-width:none!important;height:36px!important;min-height:36px!important;padding:0 14px!important;border-radius:999px!important;background:#fff!important;border:0!important;box-shadow:0 10px 24px rgba(0,0,0,.14)!important;color:#173b2a!important;font-size:12.5px!important;font-weight:900!important;letter-spacing:-.01em!important;white-space:nowrap!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
 .ap-wrap #apFrZone .ap-fr-zone-title{display:none!important}
-.ap-wrap #apFrZone .ap-fr-zone-sub{grid-column:1/-1!important;margin:0!important;color:rgba(255,255,255,.70)!important;font-size:11.5px!important;font-weight:700!important;line-height:1.25!important;min-height:0!important}
-.ap-wrap #apFrZone .ap-fr-zone-progress{grid-column:1/-1!important;display:block!important;width:100%!important;margin:0!important;min-height:0!important}
+.ap-wrap #apFrZone .ap-fr-zone-sub{display:block!important;margin:-2px 0 0!important;color:rgba(255,255,255,.70)!important;font-size:11.5px!important;font-weight:700!important;line-height:1.25!important;min-height:0!important;white-space:normal!important}
+.ap-wrap #apFrZone .ap-fr-zone-progress{display:block!important;width:100%!important;margin:0!important;min-height:0!important}
 .ap-wrap #apFrZone .ap-fr-zone-bar{width:100%!important;height:7px!important;border-radius:999px!important;background:rgba(255,255,255,.14)!important;overflow:hidden!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important}
 .ap-wrap #apFrZone .ap-fr-zone-bar-fill{height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#22c55e,#bbf7d0)!important;min-width:3px!important}
 .ap-wrap #apFrZone .ap-fr-zone-progress-meta{display:flex!important;align-items:baseline!important;justify-content:space-between!important;gap:14px!important;margin-top:8px!important;color:rgba(255,255,255,.72)!important;font-size:12.5px!important;line-height:1!important;white-space:nowrap!important}
@@ -41,8 +41,9 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
 
 @media(max-width:700px){
   .ap-wrap #apFrZone{margin:12px 0 16px!important}
-  .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{padding:13px 14px!important;border-radius:18px!important;gap:8px 10px!important}
-  .ap-wrap #apFrZone .ap-fr-zone-badge{font-size:10px!important;padding:7px 9px!important;letter-spacing:.13em!important}
+  .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{padding:13px 14px!important;border-radius:18px!important;gap:9px!important}
+  .ap-wrap #apFrZone .ap-fr-zone-active-top{gap:9px!important}
+  .ap-wrap #apFrZone .ap-fr-zone-badge{font-size:9.5px!important;padding:7px 9px!important;letter-spacing:.12em!important;flex:1 1 auto!important}
   .ap-wrap #apFrZone .ap-btn--fr-details{height:34px!important;min-height:34px!important;padding:0 11px!important;font-size:12px!important}
   .ap-wrap #apFrZone .ap-fr-zone-sub{font-size:11px!important}
   .ap-wrap #apFrZone .ap-fr-zone-progress-meta{font-size:12px!important;gap:10px!important}
