@@ -50,7 +50,7 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
   .ap-wrap .ap-share-help{grid-column:1/-1!important;width:100%!important;max-width:100%!important;min-width:0!important;display:block!important;overflow:hidden!important}
   .ap-wrap .ap-hero-actions .ap-btn{width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
 
-  /* Change how the admin fundraiser works on mobile: one simple status strip, details modal has the numbers. */
+  /* Mobile admin fundraiser: the green strip itself is the details button. */
   .ap-wrap #apFrZone,
   .ap-wrap .ap-fr-zone{
     display:block!important;
@@ -69,33 +69,33 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
     overflow:visible!important;
   }
   .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) auto!important;
+    position:relative!important;
+    display:flex!important;
     align-items:center!important;
+    justify-content:center!important;
     width:100%!important;
     min-width:0!important;
     max-width:100%!important;
-    height:64px!important;
-    min-height:64px!important;
-    max-height:64px!important;
-    gap:10px!important;
-    padding:10px 12px!important;
+    height:58px!important;
+    min-height:58px!important;
+    max-height:58px!important;
+    padding:10px 14px!important;
     border-radius:20px!important;
     background:linear-gradient(135deg,rgba(16,65,42,.96),rgba(10,45,31,.94))!important;
     border:1px solid rgba(134,239,172,.24)!important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.07)!important;
     overflow:hidden!important;
+    cursor:pointer!important;
   }
-  .ap-wrap #apFrZone .ap-fr-zone-active-top{display:contents!important}
+  .ap-wrap #apFrZone .ap-fr-zone-active-top{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;pointer-events:none!important}
   .ap-wrap #apFrZone .ap-fr-zone-badge{
-    grid-column:1!important;
     display:inline-flex!important;
     align-items:center!important;
-    justify-self:start!important;
+    justify-content:center!important;
     width:auto!important;
     max-width:100%!important;
     min-width:0!important;
-    padding:7px 10px!important;
+    padding:7px 12px!important;
     border-radius:999px!important;
     background:rgba(220,252,231,.12)!important;
     border:1px solid rgba(134,239,172,.18)!important;
@@ -106,29 +106,32 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
     line-height:1!important;
     text-transform:uppercase!important;
     white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    pointer-events:none!important;
   }
   .ap-wrap #apFrZone .ap-fr-zone-pulse{width:7px!important;height:7px!important;flex:0 0 auto!important}
   .ap-wrap #apFrZone .ap-btn--fr-details{
-    grid-column:2!important;
-    justify-self:end!important;
-    width:auto!important;
-    min-width:124px!important;
-    max-width:132px!important;
-    height:38px!important;
-    min-height:38px!important;
-    padding:0 12px!important;
-    border-radius:999px!important;
-    background:#fff!important;
-    color:#173b2a!important;
+    position:absolute!important;
+    inset:0!important;
+    z-index:5!important;
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    height:100%!important;
+    min-height:0!important;
+    padding:0!important;
+    margin:0!important;
     border:0!important;
-    font-size:12.5px!important;
-    font-weight:950!important;
-    white-space:nowrap!important;
+    border-radius:20px!important;
+    background:transparent!important;
+    color:transparent!important;
+    box-shadow:none!important;
+    opacity:0!important;
+    cursor:pointer!important;
     overflow:hidden!important;
-    text-overflow:ellipsis!important;
-    box-shadow:0 10px 22px rgba(0,0,0,.18)!important;
+    font-size:0!important;
   }
   .ap-wrap #apFrZone .ap-fr-zone-title,
   .ap-wrap #apFrZone .ap-fr-zone-sub,
@@ -143,6 +146,5 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
 @media(max-width:390px){
   .ap-wrap #apFrZone,
   .ap-wrap .ap-fr-zone{width:calc(100vw - 74px)!important;min-width:calc(100vw - 74px)!important;max-width:calc(100vw - 74px)!important}
-  .ap-wrap #apFrZone .ap-fr-zone-badge{font-size:9px!important;letter-spacing:.08em!important;padding:7px 8px!important}
-  .ap-wrap #apFrZone .ap-btn--fr-details{min-width:116px!important;max-width:124px!important;font-size:12px!important}
+  .ap-wrap #apFrZone .ap-fr-zone-badge{font-size:9px!important;letter-spacing:.08em!important;padding:7px 10px!important}
 }
