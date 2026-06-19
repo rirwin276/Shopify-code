@@ -5,3 +5,50 @@ html.ss-request-v2 .sf-modal-backdrop{background:rgba(15,23,42,.56)!important;ba
 html.ss-request-v2 .sf-modal-iframe{width:100%!important;height:100%!important;display:block!important;border:0!important;background:#050505!important}
 html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important}
 @media(max-width:760px){html.ss-request-v2 .sf-modal:not(.sf-hidden){padding:8px!important}html.ss-request-v2 .sf-modal-card{width:calc(100vw - 16px)!important;height:calc(100dvh - 16px)!important;border-radius:18px!important}}
+
+/* Fundraiser UI cleanup — scoped to Admin Powers and Dashboard DOM only. */
+.ap-wrap #apFrZone{margin:14px 0 18px!important}
+.ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-empty{display:none!important;visibility:hidden!important;pointer-events:none!important}
+.ap-wrap #apFrZone:not(.ap-fr-zone--active) .ap-fr-zone-active{display:none!important}
+.ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:9px 12px!important;padding:14px 16px!important;min-height:0!important;border-radius:20px!important;background:linear-gradient(135deg,rgba(22,61,42,.92),rgba(18,47,34,.86))!important;border:1px solid rgba(134,239,172,.20)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;overflow:hidden!important}
+.ap-wrap #apFrZone .ap-fr-zone-active-top{display:contents!important}
+.ap-wrap #apFrZone .ap-fr-zone-badge{grid-column:1!important;justify-self:start!important;display:inline-flex!important;align-items:center!important;gap:8px!important;max-width:100%!important;padding:7px 11px!important;border-radius:999px!important;background:rgba(240,253,244,.11)!important;border:1px solid rgba(134,239,172,.18)!important;color:#dcfce7!important;font-size:10.5px!important;font-weight:900!important;letter-spacing:.14em!important;line-height:1!important;text-transform:uppercase!important;white-space:nowrap!important}
+.ap-wrap #apFrZone .ap-fr-zone-pulse{width:7px!important;height:7px!important;border-radius:999px!important;background:#4ade80!important;box-shadow:0 0 0 4px rgba(74,222,128,.13)!important;flex:0 0 auto!important}
+.ap-wrap #apFrZone .ap-btn--fr-details{grid-column:2!important;justify-self:end!important;position:static!important;transform:none!important;width:auto!important;max-width:none!important;height:36px!important;min-height:36px!important;padding:0 14px!important;border-radius:999px!important;background:#fff!important;border:0!important;box-shadow:0 10px 24px rgba(0,0,0,.14)!important;color:#173b2a!important;font-size:12.5px!important;font-weight:900!important;letter-spacing:-.01em!important;white-space:nowrap!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+.ap-wrap #apFrZone .ap-fr-zone-title{display:none!important}
+.ap-wrap #apFrZone .ap-fr-zone-sub{grid-column:1/-1!important;margin:0!important;color:rgba(255,255,255,.70)!important;font-size:11.5px!important;font-weight:700!important;line-height:1.25!important;min-height:0!important}
+.ap-wrap #apFrZone .ap-fr-zone-progress{grid-column:1/-1!important;display:block!important;width:100%!important;margin:0!important;min-height:0!important}
+.ap-wrap #apFrZone .ap-fr-zone-bar{width:100%!important;height:7px!important;border-radius:999px!important;background:rgba(255,255,255,.14)!important;overflow:hidden!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important}
+.ap-wrap #apFrZone .ap-fr-zone-bar-fill{height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#22c55e,#bbf7d0)!important;min-width:3px!important}
+.ap-wrap #apFrZone .ap-fr-zone-progress-meta{display:flex!important;align-items:baseline!important;justify-content:space-between!important;gap:14px!important;margin-top:8px!important;color:rgba(255,255,255,.72)!important;font-size:12.5px!important;line-height:1!important;white-space:nowrap!important}
+.ap-wrap #apFrZone .ap-fr-zone-progress-meta span{display:inline-flex!important;align-items:baseline!important;gap:4px!important;min-width:0!important;white-space:nowrap!important}
+.ap-wrap #apFrZone #apFrZoneRaised{font-size:17px!important;font-weight:950!important;letter-spacing:-.04em!important;color:#fff!important;line-height:1!important}
+.ap-wrap #apFrZone #apFrZoneGoal{margin-left:auto!important;text-align:right!important;font-size:12.5px!important;color:rgba(255,255,255,.78)!important;white-space:nowrap!important}
+
+.ss-portal .ss-store-card .ss-fr-strip{width:100%!important;box-sizing:border-box!important;margin:14px 0 0!important;padding:13px 0 0!important;border-top:1px solid rgba(15,23,42,.07)!important;background:transparent!important;border-radius:0!important;box-shadow:none!important;display:block!important;grid-column:1/-1!important;align-self:stretch!important;clear:both!important}
+.ss-portal .ss-store-card .ss-fr-strip-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;width:100%!important;margin:0!important;min-width:0!important;flex-wrap:nowrap!important}
+.ss-portal .ss-store-card .ss-fr-pill{display:inline-flex!important;align-items:center!important;gap:7px!important;min-width:0!important;max-width:calc(100% - 90px)!important;padding:6px 10px!important;border-radius:999px!important;background:rgba(220,252,231,.72)!important;border:1px solid rgba(34,197,94,.18)!important;color:#166534!important;font-size:10.5px!important;font-weight:900!important;letter-spacing:.11em!important;text-transform:uppercase!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.ss-portal .ss-store-card .ss-fr-dot{width:6px!important;height:6px!important;border-radius:999px!important;background:#22c55e!important;box-shadow:0 0 0 4px rgba(34,197,94,.12)!important;flex:0 0 auto!important}
+.ss-portal .ss-store-card .ss-fr-cause{display:none!important}
+.ss-portal .ss-store-card .ss-fr-days{margin-left:auto!important;color:#6b7280!important;font-size:12.5px!important;font-weight:850!important;line-height:1!important;white-space:nowrap!important;flex:0 0 auto!important}
+.ss-portal .ss-store-card .ss-fr-progress{width:100%!important;margin-top:10px!important;min-width:0!important}
+.ss-portal .ss-store-card .ss-fr-bar{width:100%!important;height:6px!important;border-radius:999px!important;background:rgba(15,23,42,.07)!important;overflow:hidden!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)!important}
+.ss-portal .ss-store-card .ss-fr-bar-fill{height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#16a34a,#86efac)!important;min-width:3px!important}
+.ss-portal .ss-store-card .ss-fr-meta{display:flex!important;align-items:baseline!important;justify-content:space-between!important;gap:14px!important;width:100%!important;margin-top:10px!important;color:#6b7280!important;font-size:13px!important;line-height:1.1!important;white-space:nowrap!important}
+.ss-portal .ss-store-card .ss-fr-meta span{display:block!important;min-width:0!important;white-space:nowrap!important}
+.ss-portal .ss-store-card .ss-fr-meta span:first-child{color:#14532d!important;font-weight:850!important}
+.ss-portal .ss-store-card .ss-fr-meta span:last-child{margin-left:auto!important;text-align:right!important;color:#6b7280!important}
+
+@media(max-width:700px){
+  .ap-wrap #apFrZone{margin:12px 0 16px!important}
+  .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{padding:13px 14px!important;border-radius:18px!important;gap:8px 10px!important}
+  .ap-wrap #apFrZone .ap-fr-zone-badge{font-size:10px!important;padding:7px 9px!important;letter-spacing:.13em!important}
+  .ap-wrap #apFrZone .ap-btn--fr-details{height:34px!important;min-height:34px!important;padding:0 11px!important;font-size:12px!important}
+  .ap-wrap #apFrZone .ap-fr-zone-sub{font-size:11px!important}
+  .ap-wrap #apFrZone .ap-fr-zone-progress-meta{font-size:12px!important;gap:10px!important}
+  .ap-wrap #apFrZone #apFrZoneRaised{font-size:16px!important}
+  .ss-portal .ss-store-card .ss-fr-strip{margin-top:13px!important;padding-top:12px!important}
+  .ss-portal .ss-store-card .ss-fr-pill{font-size:10px!important;padding:6px 9px!important;max-width:calc(100% - 84px)!important}
+  .ss-portal .ss-store-card .ss-fr-days{font-size:12px!important}
+  .ss-portal .ss-store-card .ss-fr-meta{font-size:12.5px!important;gap:10px!important}
+}
