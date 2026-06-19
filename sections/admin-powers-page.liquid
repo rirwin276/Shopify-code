@@ -2274,8 +2274,6 @@
   #apFrPricingBanner.fr-banner--error    { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; font-weight:700; }
   /* Hide empty state when active class is on parent (belt-and-suspenders vs JS display toggle) */
   .ap-fr-zone--active .ap-fr-zone-empty { display: none !important; }
-  /* Loading state — hides both children until JS has resolved fundraiser state */
-  .ap-fr-zone--loading > div { display: none !important; }
   /* Empty state — no fundraiser */
   .ap-fr-zone-empty {
     display: flex;
@@ -2965,10 +2963,47 @@
   </div>
 
   <!-- FUNDRAISING ZONE — between hero and tabs -->
-  <div class="ap-fr-zone ap-fr-zone--loading" id="apFrZone">
-    <!-- Empty state — hidden by default; JS reveals it only when we confirm
-         there is no active fundraiser, so it can never show beside the active card. -->
-    <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:none;">
+  {%- comment %}
+    Server-side fundraiser state (authoritative). The store_fundraising
+    metaobject (PUBLIC_READ, keyed by store handle, single JSON `data` field)
+    is read here so the correct zone is rendered in the initial HTML — the
+    "Start a Fundraiser" button is never emitted as visible when a fundraiser
+    is live, regardless of JS timing or relay/Stripe errors. JS still runs to
+    refresh live numbers, but it can only confirm or refine this state.
+  {% endcomment -%}
+  {%- assign fr_meta = shop.metaobjects.store_fundraising[shop_handle] -%}
+  {%- assign fr_data = fr_meta.data.value -%}
+  {%- assign fr_active = false -%}
+  {%- if fr_data and fr_data.enabled -%}{%- assign fr_active = true -%}{%- endif -%}
+  {%- assign fr_cause = 'Your Fundraiser' -%}
+  {%- assign fr_amount = 0 -%}
+  {%- assign fr_goal = 0 -%}
+  {%- assign fr_raised = 0 -%}
+  {%- assign fr_days_left = 0 -%}
+  {%- assign fr_pct = 0 -%}
+  {%- if fr_active -%}
+    {%- assign _c = fr_data.cause_name | default: '' | strip -%}
+    {%- if _c != blank -%}{%- assign fr_cause = _c -%}{%- endif -%}
+    {%- assign fr_amount = fr_data.amount | default: 0 | round -%}
+    {%- assign fr_goal = fr_data.goal | default: 0 | round -%}
+    {%- assign fr_raised = fr_data.total_raised | default: 0 | round -%}
+    {%- assign _end = fr_data.end_date | default: '' | strip -%}
+    {%- if _end != blank -%}
+      {%- assign _end_ts = _end | date: '%s' | plus: 0 -%}
+      {%- assign _now_ts = 'now' | date: '%s' | plus: 0 -%}
+      {%- assign _diff = _end_ts | minus: _now_ts -%}
+      {%- if _diff > 0 -%}
+        {%- assign fr_days_left = _diff | plus: 86399 | divided_by: 86400 -%}
+      {%- endif -%}
+    {%- endif -%}
+    {%- if fr_goal > 0 -%}
+      {%- assign fr_pct = fr_raised | times: 100 | divided_by: fr_goal -%}
+      {%- if fr_pct > 100 -%}{%- assign fr_pct = 100 -%}{%- endif -%}
+    {%- endif -%}
+  {%- endif -%}
+  <div class="ap-fr-zone{% if fr_active %} ap-fr-zone--active{% endif %}" id="apFrZone">
+    <!-- Empty state — only visible when there is NO active fundraiser. -->
+    <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:{% if fr_active %}none{% else %}flex{% endif %};">
       <div class="ap-fr-zone-empty-icon">💚</div>
       <div class="ap-fr-zone-empty-copy">
         <strong>Fundraise for your team</strong>
@@ -2976,21 +3011,21 @@
       </div>
       <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">Start a Fundraiser Campaign →</button>
     </div>
-    <!-- Active state (shown when fundraiser is running) -->
-    <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:none;">
+    <!-- Active state — pre-rendered from the metaobject; JS refreshes live numbers. -->
+    <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:{% if fr_active %}flex{% else %}none{% endif %};">
       <div class="ap-fr-zone-active-top">
         <div class="ap-fr-zone-info">
           <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
-          <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
-          <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
+          <p class="ap-fr-zone-title" id="apFrZoneTitle">{{ fr_cause | escape }}</p>
+          <p class="ap-fr-zone-sub" id="apFrZoneSub">{% if fr_active %}${{ fr_amount }} per item · +$1 fee · auto-repriced{% if fr_days_left > 0 %} · {{ fr_days_left }} day{% unless fr_days_left == 1 %}s{% endunless %} left{% endif %}{% else %}Loading…{% endif %}</p>
         </div>
         <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details</button>
       </div>
-      <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:none;">
-        <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill"></div></div>
+      <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:{% if fr_active and fr_goal > 0 %}flex{% else %}none{% endif %};">
+        <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill" style="width:{{ fr_pct }}%;"></div></div>
         <div class="ap-fr-zone-progress-meta">
-          <span><strong id="apFrZoneRaised">$0</strong> raised</span>
-          <span id="apFrZoneGoal"></span>
+          <span><strong id="apFrZoneRaised">${{ fr_raised }}</strong> raised</span>
+          <span id="apFrZoneGoal">{% if fr_active and fr_goal > 0 %}of ${{ fr_goal }} goal{% endif %}</span>
         </div>
       </div>
     </div>
@@ -5924,12 +5959,10 @@
   function _renderActiveState(data) {
     var enabled = data && data.enabled;
 
-    // Lift the loading veil first, then toggle active/empty as appropriate.
+    // Server-side Liquid already rendered the correct zone from the metaobject;
+    // this keeps the class in sync after client-side launch/stop transitions.
     var frZoneEl = document.getElementById('apFrZone');
-    if (frZoneEl) {
-      frZoneEl.classList.remove('ap-fr-zone--loading');
-      frZoneEl.classList.toggle('ap-fr-zone--active', !!enabled);
-    }
+    if (frZoneEl) frZoneEl.classList.toggle('ap-fr-zone--active', !!enabled);
     if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : 'flex';
     if (frZoneActive) frZoneActive.style.display = enabled ? '' : 'none';
     if (settingsRow)  settingsRow.style.display  = enabled ? '' : 'none';
