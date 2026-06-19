@@ -6111,10 +6111,16 @@
       _renderActiveState(j);
       clearDraft();
     } else if (responseValid) {
-      // Server confirmed: no active fundraiser — reveal Start button.
-      _renderActiveState({ enabled: false });
+      // API says no active fundraiser — but ONLY reveal the Start button if the
+      // server-rendered HTML (Liquid metaobject read) also said no fundraiser.
+      // If the server pre-rendered the active card as visible, a stale or
+      // transiently-failed API response must not override that and show the
+      // Start button incorrectly.
+      var serverPreRenderedActive = frZoneActive && frZoneActive.style.display !== 'none';
+      if (!serverPreRenderedActive) {
+        _renderActiveState({ enabled: false });
+      }
     }
-    // If !responseValid: zone stays hidden (loading state) until next load.
     if (!serverActive) _restoreDraft();
     if (!serverActive) await _checkStripeReturn();
   }
