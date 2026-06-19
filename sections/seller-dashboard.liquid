@@ -547,6 +547,19 @@
 
                       </div>
 
+                      <!-- Active fundraiser strip (revealed by JS when a fundraiser is live) -->
+                      <div class="ss-fr-strip" data-ss-fr-strip hidden>
+                        <div class="ss-fr-strip-head">
+                          <span class="ss-fr-pill"><span class="ss-fr-dot"></span>Active Fundraiser</span>
+                          <span class="ss-fr-cause" data-ss-fr-cause></span>
+                          <span class="ss-fr-days" data-ss-fr-days></span>
+                        </div>
+                        <div class="ss-fr-progress" data-ss-fr-progress hidden>
+                          <div class="ss-fr-bar"><div class="ss-fr-bar-fill" data-ss-fr-fill></div></div>
+                          <div class="ss-fr-meta"><span data-ss-fr-raised></span><span data-ss-fr-goal></span></div>
+                        </div>
+                      </div>
+
                     </div>
 
                   {% endif %}
@@ -1274,6 +1287,59 @@
       }
     }
 
+    // --- Active fundraiser badge + progress bar on store cards ---
+    // For each store card, read the public, display-safe fundraiser status via
+    // the App Proxy relay. The "Active Fundraiser" pill shows whenever a
+    // fundraiser is live; the progress bar (with goal + days left) only shows
+    // when the seller chose to display progress publicly. Degrades silently.
+    (function ssFundraiserStrips(){
+      function frMoney(n){ return '$' + (Math.round(Number(n)) || 0).toLocaleString('en-US'); }
+      var cards = document.querySelectorAll('.ss-store-card[data-ss-handle]');
+      Array.prototype.forEach.call(cards, function(card){
+        var strip = card.querySelector('[data-ss-fr-strip]');
+        if (!strip) return;
+        var handle = card.getAttribute('data-ss-handle');
+        if (!handle) return;
+        fetch('/apps/ss/relay/store/' + encodeURIComponent(handle) + '/fundraising/public', { cache: 'no-store' })
+          .then(function(r){ return r.json().catch(function(){ return {}; }); })
+          .then(function(j){
+            if (!j || !j.enabled) return;
+            card.classList.add('ss-card-has-fr');
+            strip.hidden = false;
+
+            var causeEl = strip.querySelector('[data-ss-fr-cause]');
+            var daysEl  = strip.querySelector('[data-ss-fr-days]');
+            var progEl  = strip.querySelector('[data-ss-fr-progress]');
+
+            // Bar + amounts + cause + days only exist when show_bar is on.
+            if (j.show_bar) {
+              if (causeEl && j.cause_name) causeEl.textContent = j.cause_name;
+
+              var raised = parseFloat(j.total_raised || 0);
+              var goal   = parseFloat(j.goal || 0);
+
+              if (j.end_date && daysEl) {
+                var end = new Date(j.end_date + 'T23:59:59');
+                var days = Math.ceil((end - new Date()) / 86400000);
+                daysEl.textContent = days > 0 ? (days + (days === 1 ? ' day left' : ' days left')) : 'Final day';
+              }
+
+              if (goal > 0 && progEl) {
+                progEl.hidden = false;
+                var pct = Math.min(100, (raised / goal) * 100);
+                var fill = progEl.querySelector('[data-ss-fr-fill]');
+                if (fill) fill.style.width = pct.toFixed(1) + '%';
+                var rEl = progEl.querySelector('[data-ss-fr-raised]');
+                var gEl = progEl.querySelector('[data-ss-fr-goal]');
+                if (rEl) rEl.innerHTML = '<strong>' + frMoney(raised) + '</strong> raised';
+                if (gEl) gEl.textContent = 'of ' + frMoney(goal) + ' goal';
+              }
+            }
+          })
+          .catch(function(){ /* no strip on error */ });
+      });
+    })();
+
   })();
 </script>
 
@@ -1504,6 +1570,42 @@
   .ss-closedtext{ color: #c2410c; }
 
   .ss-col-controls { width: 25%; display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
+
+  /* Active fundraiser strip (full-width row across the bottom of a store card) */
+  .ss-store-card.ss-card-has-fr { flex-wrap: wrap; }
+  .ss-fr-strip {
+    flex-basis: 100%; width: 100%;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid rgba(15,23,42,0.08);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ss-fr-strip-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ss-fr-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10.5px; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase;
+    color: #166534; background: rgba(22,163,74,0.10);
+    border: 1px solid rgba(22,163,74,0.22); padding: 4px 10px; border-radius: 999px;
+  }
+  .ss-fr-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #16a34a;
+    box-shadow: 0 0 0 0 rgba(22,163,74,0.5); animation: ssFrPulse 2s infinite;
+  }
+  @keyframes ssFrPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); }
+    70%  { box-shadow: 0 0 0 6px rgba(22,163,74,0); }
+    100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+  }
+  .ss-fr-cause { font-size: 13px; font-weight: 800; color: #14532d; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ss-fr-days { font-size: 11.5px; font-weight: 700; color: #64748b; margin-left: auto; white-space: nowrap; }
+  .ss-fr-progress { display: flex; flex-direction: column; gap: 6px; }
+  .ss-fr-bar { height: 8px; border-radius: 999px; background: rgba(15,23,42,0.08); overflow: hidden; }
+  .ss-fr-bar-fill {
+    height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, #22c55e, #16a34a); transition: width 0.6s ease;
+  }
+  .ss-fr-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #64748b; }
+  .ss-fr-meta strong { color: #14532d; font-weight: 800; }
+  @media (prefers-reduced-motion: reduce) { .ss-fr-dot { animation: none; } }
 
   .ss-admin-btn {
     text-decoration: none;
@@ -1746,6 +1848,13 @@
       flex-direction: column;
       gap: 8px;
       padding: 12px 14px 14px;
+    }
+
+    /* Fundraiser strip: match the card's sectioned mobile style */
+    .ss-fr-strip {
+      margin-top: 0;
+      padding: 14px 16px 16px;
+      border-top: 1px solid rgba(15,23,42,0.05);
     }
 
     /* Open Storefront button: full width, bold, Apple-style */

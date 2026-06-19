@@ -67,7 +67,9 @@
   fetch(url, { cache: 'no-store' })
     .then(function (r) { return r.json(); })
     .then(function (j) {
-      if (!j || !j.enabled) return;
+      // enabled alone now just means a fundraiser is active; the public bar
+      // only renders when the seller chose to show progress publicly.
+      if (!j || !j.enabled || !j.show_bar) return;
       var raised = parseFloat(j.total_raised || 0);
       var goal = parseFloat(j.goal || 0);
       document.getElementById('ssFrBarCause').textContent = j.cause_name || 'Support our team';
