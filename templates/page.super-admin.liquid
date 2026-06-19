@@ -96,6 +96,24 @@
     margin-bottom: 12px;
   }
 
+  /* Fundraiser Hub */
+  .fh-summary { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .fh-sumrow { display:flex; justify-content:space-between; align-items:center; font-size:13px; }
+  .fh-sumrow > span { color:#6b7280; }
+  .fh-list { display:flex; flex-direction:column; gap:10px; }
+  .fh-store { border:1px solid var(--border); border-radius:10px; padding:10px; }
+  .fh-store-top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px; }
+  .fh-cause { font-weight:700; font-size:13px; line-height:1.2; }
+  .fh-handle { font-size:11px; color:#6b7280; margin-top:2px; }
+  .fh-badge { font-size:10px; font-weight:800; padding:2px 7px; border-radius:999px; text-transform:uppercase; white-space:nowrap; }
+  .fh-badge.ok { background:#dcfce7; color:#166534; }
+  .fh-badge.no { background:#fee2e2; color:#991b1b; }
+  .fh-amts { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; font-size:12px; margin-bottom:8px; }
+  .fh-amts > div { display:flex; justify-content:space-between; gap:6px; }
+  .fh-amts span { color:#6b7280; }
+  .fh-amts strong { font-weight:700; }
+  .fh-empty { font-size:13px; color:#6b7280; }
+
   .gm-banner-title {
     margin: 0 0 10px;
     font-size: 18px;
@@ -673,6 +691,18 @@
         <a class="gm-btn" href="/admin/products" target="_blank" rel="noopener">Shopify Admin</a>
         <a class="gm-btn" href="/pages/portal">Back to Portal</a>
       </div>
+    </div>
+
+    <div class="gm-card" id="fhCard">
+      <h2 class="gm-section-title">💸 Fundraiser Hub</h2>
+      <div class="fh-summary">
+        <div class="fh-sumrow"><span>Next payout</span><strong id="fhPayday">—</strong></div>
+        <div class="fh-sumrow"><span>Stripe balance</span><strong id="fhBalance">—</strong></div>
+        <div class="fh-sumrow"><span>Load needed by Thu</span><strong id="fhLoad">—</strong></div>
+      </div>
+      <div class="fh-list" id="fhList"><div class="gm-status-text">Loading fundraisers…</div></div>
+      <button id="fhRefresh" class="gm-btn" type="button" style="margin-top:10px;">Refresh</button>
+      <div id="fhStatus" class="gm-status-text"></div>
     </div>
   </aside>
 
@@ -1311,6 +1341,73 @@
 
     renderNewStoreBanner();
     applyStoreFilters();
+
+    // ── Fundraiser Hub ───────────────────────────────────────────────────
+    function fhMoney(n){ if(n===null||n===undefined||isNaN(n)) return '—'; return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    function fhDate(iso){ if(!iso) return '—'; try{ var d=new Date(iso+'T00:00:00'); return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }catch(e){ return iso; } }
+
+    function renderFundraiserHub(data){
+      document.getElementById('fhPayday').textContent = fhDate(data.next_payday);
+      var balEl = document.getElementById('fhBalance');
+      balEl.textContent = (data.stripe_available===null||data.stripe_available===undefined) ? (data.stripe_error||'unavailable') : fhMoney(data.stripe_available);
+      var load = data.totals ? data.totals.load_needed : null;
+      var loadEl = document.getElementById('fhLoad');
+      loadEl.textContent = (load===null||load===undefined) ? '—' : fhMoney(load);
+      loadEl.style.color = (load && load>0) ? '#b91c1c' : '';
+
+      var list = document.getElementById('fhList');
+      var stores = (data.stores||[]).filter(function(s){ return s.cause_name || s.total_unpaid>0 || s.eligible_by_friday>0 || s.on_hold>0; });
+      if(!stores.length){ list.innerHTML='<div class="fh-empty">No active fundraisers with unpaid balances.</div>'; return; }
+      list.innerHTML = stores.map(function(s){
+        var badge = s.stripe_connected ? '<span class="fh-badge ok">connected</span>' : '<span class="fh-badge no">no payout acct</span>';
+        return '<div class="fh-store">'+
+          '<div class="fh-store-top"><div><div class="fh-cause">'+escapeHtml(s.cause_name||'(unnamed)')+'</div><div class="fh-handle">'+escapeHtml(s.handle)+'</div></div>'+badge+'</div>'+
+          '<div class="fh-amts">'+
+            '<div><span>Eligible Fri</span><strong>'+fhMoney(s.eligible_by_friday)+'</strong></div>'+
+            '<div><span>On hold</span><strong>'+fhMoney(s.on_hold)+'</strong></div>'+
+            '<div><span>Total unpaid</span><strong>'+fhMoney(s.total_unpaid)+'</strong></div>'+
+            '<div><span>Rows</span><strong>'+(s.eligible_row_count||0)+'</strong></div>'+
+          '</div>'+
+          '<button class="gm-btn gm-btn-warning" type="button" data-fh-end="'+escapeHtml(s.handle)+'">End Fundraiser</button>'+
+        '</div>';
+      }).join('');
+    }
+
+    function loadFundraiserHub(){
+      var status=document.getElementById('fhStatus'); if(status) status.textContent='';
+      fetch(RAILWAY_URL + '/admin/fundraising/payouts/summary', { headers: railwayHeaders(), cache:'no-store' })
+        .then(function(r){ return r.json().catch(function(){return {};}); })
+        .then(function(j){
+          if(!j || j.ok===false){ document.getElementById('fhList').innerHTML='<div class="fh-empty">'+escapeHtml((j&&j.error)||'Could not load Fundraiser Hub.')+'</div>'; return; }
+          renderFundraiserHub(j);
+        })
+        .catch(function(){ document.getElementById('fhList').innerHTML='<div class="fh-empty">Network error loading Fundraiser Hub.</div>'; });
+    }
+
+    function endFundraiser(handle, btn){
+      if(!confirm('End the fundraiser for "'+handle+'"?\n\nThis stops it and restores product prices. Any unpaid balance stays owed and is still payable.')) return;
+      btn.disabled=true; var orig=btn.textContent; btn.textContent='Ending…';
+      fetch(RAILWAY_URL + '/store/' + encodeURIComponent(handle) + '/fundraising', {
+        method:'POST', headers: railwayHeaders(),
+        body: JSON.stringify({ enabled:false, amount:0, cause_name:'', show_bar:false, goal:0, end_date:'' })
+      }).then(function(r){ return r.json().catch(function(){return {};}); })
+        .then(function(j){
+          if(!j || j.ok===false){ btn.disabled=false; btn.textContent=orig; alert('Could not end fundraiser. '+((j&&j.error)||'Try again.')); return; }
+          var status=document.getElementById('fhStatus'); if(status) status.textContent='Ended fundraiser for '+handle+'.';
+          loadFundraiserHub();
+        }).catch(function(){ btn.disabled=false; btn.textContent=orig; alert('Network error ending fundraiser.'); });
+    }
+
+    var fhListEl = document.getElementById('fhList');
+    if(fhListEl){
+      fhListEl.addEventListener('click', function(e){
+        var endBtn = e.target.closest ? e.target.closest('[data-fh-end]') : null;
+        if(endBtn) endFundraiser(endBtn.getAttribute('data-fh-end'), endBtn);
+      });
+    }
+    var fhRefreshBtn=document.getElementById('fhRefresh');
+    if(fhRefreshBtn) fhRefreshBtn.addEventListener('click', loadFundraiserHub);
+    if(fhListEl) loadFundraiserHub();
   </script>
 {% endif %}
 
