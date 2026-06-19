@@ -74,3 +74,84 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
   .ap-wrap #apFrZone .ap-fr-zone-progress-meta{width:100%!important;margin-top:8px!important;gap:10px!important;overflow:hidden!important}
   .ap-wrap #apFrZone .ap-fr-zone-progress-meta span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important}
 }
+
+/* Final admin fundraiser fix: force the card to stop behaving like a tiny flex/grid tile. */
+@media(max-width:700px){
+  .ap-wrap #apFrZone,
+  .ap-wrap .ap-fr-zone{
+    display:block!important;
+    flex:0 0 100%!important;
+    grid-column:1/-1!important;
+    align-self:stretch!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin:12px 0 16px!important;
+    padding:0!important;
+    clear:both!important;
+    overflow:visible!important;
+  }
+  .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    gap:9px 12px!important;
+    padding:13px 14px!important;
+    border-radius:18px!important;
+    overflow:hidden!important;
+  }
+  .ap-wrap #apFrZone .ap-fr-zone-active-top{display:contents!important}
+  .ap-wrap #apFrZone .ap-fr-zone-badge{
+    grid-column:1!important;
+    justify-self:start!important;
+    width:auto!important;
+    max-width:100%!important;
+    min-width:0!important;
+    flex:none!important;
+    font-size:9.75px!important;
+    letter-spacing:.10em!important;
+    padding:7px 9px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .ap-wrap #apFrZone .ap-btn--fr-details{
+    grid-column:2!important;
+    justify-self:end!important;
+    width:auto!important;
+    min-width:128px!important;
+    max-width:136px!important;
+    height:34px!important;
+    min-height:34px!important;
+    padding:0 12px!important;
+    font-size:12px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .ap-wrap #apFrZone .ap-fr-zone-title,
+  .ap-wrap #apFrZone .ap-fr-zone-sub{display:none!important}
+  .ap-wrap #apFrZone .ap-fr-zone-progress{
+    grid-column:1/-1!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    overflow:hidden!important;
+  }
+  .ap-wrap #apFrZone .ap-fr-zone-bar{height:7px!important;width:100%!important;max-width:100%!important}
+  .ap-wrap #apFrZone .ap-fr-zone-progress-meta{
+    display:flex!important;
+    grid-column:1/-1!important;
+    width:100%!important;
+    max-width:100%!important;
+    align-items:baseline!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+    margin-top:8px!important;
+    overflow:hidden!important;
+  }
+  .ap-wrap #apFrZone .ap-fr-zone-progress-meta span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+}
