@@ -188,6 +188,34 @@
     });
   }
 
+  function installAdminNoFlashGuards(){
+    if (path.indexOf('/pages/admin-powers') !== 0) return;
+    if (!document.head || document.getElementById('ss-admin-no-flash-guards')) return;
+    var style = document.createElement('style');
+    style.id = 'ss-admin-no-flash-guards';
+    style.textContent = [
+      '.ap-share-overlay:not(.open),.ap-frw-overlay:not(.open),.ap-frd-overlay:not(.open),.ap-nuke-overlay:not(.open),.ap-rebuild-overlay:not(.open),.ap-editor-overlay:not(.open){display:none!important;visibility:hidden!important;pointer-events:none!important;opacity:0!important}',
+      '.ap-main-panel:not(.active){display:none!important}',
+      '.ap-main-panel.active{display:block!important}',
+      '.ap-frw-overlay:not(.open) .ap-frw-step-content{display:none!important}',
+      '.ap-frw-overlay.open .ap-frw-step-content:not(.ap-frw-active){display:none!important}',
+      '.ap-frw-overlay.open .ap-frw-step-content.ap-frw-active{display:block!important}'
+    ].join('\n');
+    document.head.appendChild(style);
+  }
+
+  function releaseAdminRouteGuard(){
+    if (path.indexOf('/pages/admin-powers') !== 0) return;
+    requestAnimationFrame(function(){
+      document.documentElement.className = document.documentElement.className
+        .replace(/\bss-internal-booting\b/g, '')
+        .replace(/\bss-route-booting\b/g, '');
+      if (document.documentElement.className.indexOf('ss-internal-ready') === -1) {
+        document.documentElement.className += ' ss-internal-ready';
+      }
+    });
+  }
+
   function formatMoney(value){
     var amount = Number(value || 0);
     return '$' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -278,6 +306,9 @@
   }
 
   function init(){
+    installAdminNoFlashGuards();
+    releaseAdminRouteGuard();
+
     rewriteAuthAndStorefrontLinks();
     setTimeout(rewriteAuthAndStorefrontLinks, 150);
     setTimeout(rewriteAuthAndStorefrontLinks, 600);
