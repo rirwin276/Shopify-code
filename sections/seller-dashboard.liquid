@@ -1303,7 +1303,10 @@
         fetch('/apps/ss/relay/store/' + encodeURIComponent(handle) + '/fundraising/public', { cache: 'no-store' })
           .then(function(r){ return r.json().catch(function(){ return {}; }); })
           .then(function(j){
+            // Verify the response belongs to this card — guards against CDN
+            // serving a cached response from a different store's request.
             if (!j || !j.enabled) return;
+            if (j.handle && j.handle !== handle) return;
             card.classList.add('ss-card-has-fr');
             strip.hidden = false;
 
@@ -1319,7 +1322,9 @@
               var goal   = parseFloat(j.goal || 0);
 
               if (j.end_date && daysEl) {
-                var end = new Date(j.end_date + 'T23:59:59');
+                // Match admin-powers: parse as UTC midnight, use ceiling of
+                // remaining ms to avoid adding phantom timezone-offset days.
+                var end = new Date(j.end_date);
                 var days = Math.ceil((end - new Date()) / 86400000);
                 daysEl.textContent = days > 0 ? (days + (days === 1 ? ' day left' : ' days left')) : 'Final day';
               }

@@ -2272,6 +2272,8 @@
   #apFrPricingBanner.fr-banner--pending  { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
   #apFrPricingBanner.fr-banner--success  { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
   #apFrPricingBanner.fr-banner--error    { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; font-weight:700; }
+  /* Hide empty state when active class is on parent (belt-and-suspenders vs JS display toggle) */
+  .ap-fr-zone--active .ap-fr-zone-empty { display: none !important; }
   /* Empty state — no fundraiser */
   .ap-fr-zone-empty {
     display: flex;
@@ -5916,7 +5918,10 @@
   function _renderActiveState(data) {
     var enabled = data && data.enabled;
 
-    // Zone toggle
+    // Zone toggle — class on parent drives CSS visibility as well so the empty
+    // state can't flash in before JS runs on repeat page loads.
+    var frZoneEl = document.getElementById('apFrZone');
+    if (frZoneEl) frZoneEl.classList.toggle('ap-fr-zone--active', !!enabled);
     if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : '';
     if (frZoneActive) frZoneActive.style.display = enabled ? '' : 'none';
     if (settingsRow)  settingsRow.style.display  = enabled ? '' : 'none';
