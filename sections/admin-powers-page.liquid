@@ -2448,11 +2448,13 @@
   .ap-frd-progress-label { font-size: 11px; color: #64748b; margin-top: 5px; text-align: right; }
   @media (max-width: 600px) {
     .ap-fr-zone-empty { flex-direction: column; text-align: center; }
-    /* Active card: compact horizontal row, hide verbose subtitle */
-    .ap-fr-zone-active { padding: 13px 15px; gap: 8px; }
-    .ap-fr-zone-active-top { flex-direction: row; align-items: center; gap: 10px; }
+    /* Active card: full-width, compact single-row layout */
+    .ap-fr-zone-active { padding: 12px 14px; gap: 8px; width: 100%; box-sizing: border-box; }
+    .ap-fr-zone-active-top { flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; }
+    .ap-fr-zone-title { display: none; }
     .ap-fr-zone-sub { display: none; }
-    .ap-btn--fr-details { width: auto; flex-shrink: 0; padding: 8px 12px; font-size: 11px; }
+    .ap-fr-zone-info { flex: 1; min-width: 0; }
+    .ap-btn--fr-details { width: auto; flex-shrink: 0; padding: 7px 11px; font-size: 11px; white-space: nowrap; }
     .ap-frd-stats-row { flex-wrap: wrap; }
     .ap-frd-stat-cell { flex: 0 0 50%; }
   }
