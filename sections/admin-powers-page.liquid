@@ -6110,17 +6110,13 @@
       }
       _renderActiveState(j);
       clearDraft();
-    } else if (responseValid) {
-      // API says no active fundraiser — but ONLY reveal the Start button if the
-      // server-rendered HTML (Liquid metaobject read) also said no fundraiser.
-      // If the server pre-rendered the active card as visible, a stale or
-      // transiently-failed API response must not override that and show the
-      // Start button incorrectly.
-      var serverPreRenderedActive = frZoneActive && frZoneActive.style.display !== 'none';
-      if (!serverPreRenderedActive) {
-        _renderActiveState({ enabled: false });
-      }
     }
+    // No `else` branch — the server (Liquid) already pre-rendered the correct
+    // zone visibility from the metaobject. _loadState must NEVER call
+    // _renderActiveState({enabled:false}) — doing so overrides correct
+    // server HTML with stale/failed API data and shows the Start button
+    // when a fundraiser is live. Stop/launch user actions call
+    // _renderActiveState directly and are the only valid transitions.
     if (!serverActive) _restoreDraft();
     if (!serverActive) await _checkStripeReturn();
   }
