@@ -188,11 +188,73 @@
     });
   }
 
+  function formatMoney(value){
+    var amount = Number(value || 0);
+    return '$' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+
+  function hideDashboardFundraiser(strip){
+    if (!strip) return;
+    strip.classList.remove('ss-fr-strip--active');
+    strip.style.setProperty('display', 'none', 'important');
+  }
+
+  function showDashboardFundraiser(strip, data){
+    if (!strip) return;
+    var raised = Number(data.total_raised || data.raised || 0);
+    var goal = Number(data.goal || 0);
+    var endDate = data.end_date || data.endDate || '';
+    var days = 0;
+    if (endDate) {
+      var diff = new Date(endDate) - new Date();
+      if (diff > 0) days = Math.ceil(diff / 864e5);
+    }
+
+    var daysEl = qs('[data-ss-fr-days]', strip);
+    var raisedEl = qs('[data-ss-fr-raised]', strip);
+    var goalEl = qs('[data-ss-fr-goal]', strip);
+    var fill = qs('[data-ss-fr-fill]', strip);
+    var progress = qs('[data-ss-fr-progress]', strip);
+
+    if (daysEl) daysEl.textContent = days ? (days + ' days left') : '';
+    if (raisedEl) raisedEl.textContent = formatMoney(raised) + ' raised';
+    if (goalEl) goalEl.textContent = goal > 0 ? ('of ' + formatMoney(goal) + ' goal') : '';
+    if (progress) progress.style.display = goal > 0 ? '' : 'none';
+    if (fill) fill.style.width = goal > 0 ? Math.max(0, Math.min(100, (raised / goal) * 100)).toFixed(1) + '%' : '0%';
+
+    strip.classList.add('ss-fr-strip--active');
+    strip.style.setProperty('display', 'block', 'important');
+  }
+
+  function hydrateDashboardFundraisers(){
+    if (path.indexOf('/pages/portal') !== 0) return;
+    qsa('.ss-store-card[data-ss-handle]').forEach(function(card){
+      var handle = String(card.getAttribute('data-ss-handle') || '').trim();
+      var strip = qs('[data-ss-fr-strip]', card);
+      hideDashboardFundraiser(strip);
+      if (!handle || !strip) return;
+
+      fetch('/apps/ss/relay/store/' + encodeURIComponent(handle) + '/fundraising?ts=' + Date.now(), { cache: 'no-store' })
+        .then(function(res){ return res.ok ? res.json() : null; })
+        .then(function(data){
+          if (data && data.ok !== false && (data.enabled === true || data.enabled === 'true')) {
+            showDashboardFundraiser(strip, data);
+          } else {
+            hideDashboardFundraiser(strip);
+          }
+        })
+        .catch(function(){ hideDashboardFundraiser(strip); });
+    });
+  }
+
   function init(){
     rewriteAuthAndStorefrontLinks();
     setTimeout(rewriteAuthAndStorefrontLinks, 150);
     setTimeout(rewriteAuthAndStorefrontLinks, 600);
     setTimeout(rewriteAuthAndStorefrontLinks, 1500);
+
+    hydrateDashboardFundraisers();
+    setTimeout(hydrateDashboardFundraisers, 900);
 
     try {
       var observer = new MutationObserver(function(){ rewriteAuthAndStorefrontLinks(); });
