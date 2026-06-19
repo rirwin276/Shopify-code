@@ -2965,20 +2965,26 @@
   <!-- FUNDRAISING ZONE — between hero and tabs -->
   {%- comment %}
     Determine fundraiser active state server-side from the store_fundraising
-    metaobject (PUBLIC_READ). The `data` field is a raw JSON string — Liquid
-    cannot parse JSON natively, so we use a string-contains check for the
-    enabled flag. This is the authoritative check: the Start button is never
-    rendered visible when a fundraiser is live, regardless of JS timing.
+    metaobject (PUBLIC_READ) so the Start button is never rendered visible
+    when a fundraiser is live. A JSON metaobject field can surface in Liquid
+    either as a parsed object OR a raw string depending on context, so we
+    check every form: parsed boolean access first, then a re-serialized
+    string contains check as a fallback.
   {% endcomment -%}
   {%- assign _fr_obj = shop.metaobjects.store_fundraising[shop_handle] -%}
-  {%- assign _fr_json = '' -%}
-  {%- unless _fr_obj == blank -%}
-    {%- assign _fr_json = _fr_obj.data.value | default: '' -%}
-  {%- endunless -%}
   {%- assign fr_active = false -%}
-  {%- if _fr_json contains '"enabled": true' or _fr_json contains '"enabled":true' -%}
-    {%- assign fr_active = true -%}
-  {%- endif -%}
+  {%- unless _fr_obj == blank -%}
+    {%- assign _fr_data = _fr_obj.data.value | default: _fr_obj.data -%}
+    {%- if _fr_data.enabled -%}
+      {%- assign fr_active = true -%}
+    {%- else -%}
+      {%- assign _fr_raw = _fr_data | json -%}
+      {%- if _fr_raw contains '"enabled":true' or _fr_raw contains '"enabled": true' or _fr_raw contains 'enabled\":true' or _fr_raw contains 'enabled\": true' -%}
+        {%- assign fr_active = true -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endunless -%}
+  <!-- ss-fr-debug: obj_present={% if _fr_obj == blank %}no{% else %}yes{% endif %} fr_active={{ fr_active }} raw_head={{ _fr_data | json | slice: 0, 60 | escape }} -->
   <div class="ap-fr-zone{% if fr_active %} ap-fr-zone--active{% endif %}" id="apFrZone">
     <!-- Empty state — hidden when a fundraiser is active; JS confirms on load. -->
     <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:{% if fr_active %}none{% else %}flex{% endif %};">
