@@ -2964,45 +2964,23 @@
 
   <!-- FUNDRAISING ZONE — between hero and tabs -->
   {%- comment %}
-    Server-side fundraiser state (authoritative). The store_fundraising
-    metaobject (PUBLIC_READ, keyed by store handle, single JSON `data` field)
-    is read here so the correct zone is rendered in the initial HTML — the
-    "Start a Fundraiser" button is never emitted as visible when a fundraiser
-    is live, regardless of JS timing or relay/Stripe errors. JS still runs to
-    refresh live numbers, but it can only confirm or refine this state.
+    Determine fundraiser active state server-side from the store_fundraising
+    metaobject (PUBLIC_READ). The `data` field is a raw JSON string — Liquid
+    cannot parse JSON natively, so we use a string-contains check for the
+    enabled flag. This is the authoritative check: the Start button is never
+    rendered visible when a fundraiser is live, regardless of JS timing.
   {% endcomment -%}
-  {%- assign fr_meta = shop.metaobjects.store_fundraising[shop_handle] -%}
-  {%- assign fr_data = fr_meta.data.value -%}
+  {%- assign _fr_obj = shop.metaobjects.store_fundraising[shop_handle] -%}
+  {%- assign _fr_json = '' -%}
+  {%- unless _fr_obj == blank -%}
+    {%- assign _fr_json = _fr_obj.data.value | default: '' -%}
+  {%- endunless -%}
   {%- assign fr_active = false -%}
-  {%- if fr_data and fr_data.enabled -%}{%- assign fr_active = true -%}{%- endif -%}
-  {%- assign fr_cause = 'Your Fundraiser' -%}
-  {%- assign fr_amount = 0 -%}
-  {%- assign fr_goal = 0 -%}
-  {%- assign fr_raised = 0 -%}
-  {%- assign fr_days_left = 0 -%}
-  {%- assign fr_pct = 0 -%}
-  {%- if fr_active -%}
-    {%- assign _c = fr_data.cause_name | default: '' | strip -%}
-    {%- if _c != blank -%}{%- assign fr_cause = _c -%}{%- endif -%}
-    {%- assign fr_amount = fr_data.amount | default: 0 | round -%}
-    {%- assign fr_goal = fr_data.goal | default: 0 | round -%}
-    {%- assign fr_raised = fr_data.total_raised | default: 0 | round -%}
-    {%- assign _end = fr_data.end_date | default: '' | strip -%}
-    {%- if _end != blank -%}
-      {%- assign _end_ts = _end | date: '%s' | plus: 0 -%}
-      {%- assign _now_ts = 'now' | date: '%s' | plus: 0 -%}
-      {%- assign _diff = _end_ts | minus: _now_ts -%}
-      {%- if _diff > 0 -%}
-        {%- assign fr_days_left = _diff | plus: 86399 | divided_by: 86400 -%}
-      {%- endif -%}
-    {%- endif -%}
-    {%- if fr_goal > 0 -%}
-      {%- assign fr_pct = fr_raised | times: 100 | divided_by: fr_goal -%}
-      {%- if fr_pct > 100 -%}{%- assign fr_pct = 100 -%}{%- endif -%}
-    {%- endif -%}
+  {%- if _fr_json contains '"enabled": true' or _fr_json contains '"enabled":true' -%}
+    {%- assign fr_active = true -%}
   {%- endif -%}
   <div class="ap-fr-zone{% if fr_active %} ap-fr-zone--active{% endif %}" id="apFrZone">
-    <!-- Empty state — only visible when there is NO active fundraiser. -->
+    <!-- Empty state — hidden when a fundraiser is active; JS confirms on load. -->
     <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:{% if fr_active %}none{% else %}flex{% endif %};">
       <div class="ap-fr-zone-empty-icon">💚</div>
       <div class="ap-fr-zone-empty-copy">
@@ -3011,21 +2989,21 @@
       </div>
       <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">Start a Fundraiser Campaign →</button>
     </div>
-    <!-- Active state — pre-rendered from the metaobject; JS refreshes live numbers. -->
+    <!-- Active state — shown immediately when metaobject confirms active; JS fills in live numbers. -->
     <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:{% if fr_active %}flex{% else %}none{% endif %};">
       <div class="ap-fr-zone-active-top">
         <div class="ap-fr-zone-info">
           <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
-          <p class="ap-fr-zone-title" id="apFrZoneTitle">{{ fr_cause | escape }}</p>
-          <p class="ap-fr-zone-sub" id="apFrZoneSub">{% if fr_active %}${{ fr_amount }} per item · +$1 fee · auto-repriced{% if fr_days_left > 0 %} · {{ fr_days_left }} day{% unless fr_days_left == 1 %}s{% endunless %} left{% endif %}{% else %}Loading…{% endif %}</p>
+          <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
+          <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
         </div>
         <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details</button>
       </div>
-      <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:{% if fr_active and fr_goal > 0 %}flex{% else %}none{% endif %};">
-        <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill" style="width:{{ fr_pct }}%;"></div></div>
+      <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:none;">
+        <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill"></div></div>
         <div class="ap-fr-zone-progress-meta">
-          <span><strong id="apFrZoneRaised">${{ fr_raised }}</strong> raised</span>
-          <span id="apFrZoneGoal">{% if fr_active and fr_goal > 0 %}of ${{ fr_goal }} goal{% endif %}</span>
+          <span><strong id="apFrZoneRaised">$0</strong> raised</span>
+          <span id="apFrZoneGoal"></span>
         </div>
       </div>
     </div>
