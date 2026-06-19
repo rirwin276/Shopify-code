@@ -2961,8 +2961,9 @@
 
   <!-- FUNDRAISING ZONE — between hero and tabs -->
   <div class="ap-fr-zone" id="apFrZone">
-    <!-- Empty state (default, no fundraiser active) -->
-    <div class="ap-fr-zone-empty" id="apFrZoneEmpty">
+    <!-- Empty state — hidden by default; JS reveals it only when we confirm
+         there is no active fundraiser, so it can never show beside the active card. -->
+    <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:none;">
       <div class="ap-fr-zone-empty-icon">💚</div>
       <div class="ap-fr-zone-empty-copy">
         <strong>Fundraise for your team</strong>
@@ -5922,7 +5923,7 @@
     // state can't flash in before JS runs on repeat page loads.
     var frZoneEl = document.getElementById('apFrZone');
     if (frZoneEl) frZoneEl.classList.toggle('ap-fr-zone--active', !!enabled);
-    if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : '';
+    if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : 'flex';
     if (frZoneActive) frZoneActive.style.display = enabled ? '' : 'none';
     if (settingsRow)  settingsRow.style.display  = enabled ? '' : 'none';
     if (!enabled) return;
@@ -6058,27 +6059,33 @@
   // ── Load existing fundraising state on page load ───────────
   async function _loadState() {
     var serverActive = false;
+    var j = {};
     try {
       var r = await fetch(FR_ENDPOINT, { cache: 'no-store' });
-      var j = await r.json().catch(function(){ return {}; });
-      if (j.ok !== false && j.enabled) {
-        serverActive = true;
-        _state.enabled = true;
-        _state.totalRaised = parseFloat(j.total_raised || 0);
-        _applyToForm(j);
-        // Require both stripe_connected AND stripe_account_id — having an
-        // account ID alone doesn't mean onboarding is complete.
-        if (j.stripe_connected && j.stripe_account_id) {
-          _state.stripeConnected = true;
-          _state.stripeAccountId = j.stripe_account_id;
-        } else {
-          _state.stripeConnected = false;
-          _state.stripeAccountId = j.stripe_account_id || '';
-        }
-        _renderActiveState(j);
-        clearDraft();
+      j = await r.json().catch(function(){ return {}; });
+    } catch(e) { j = {}; /* store may not have a fundraiser yet */ }
+
+    if (j && j.ok !== false && j.enabled) {
+      serverActive = true;
+      _state.enabled = true;
+      _state.totalRaised = parseFloat(j.total_raised || 0);
+      _applyToForm(j);
+      // Require both stripe_connected AND stripe_account_id — having an
+      // account ID alone doesn't mean onboarding is complete.
+      if (j.stripe_connected && j.stripe_account_id) {
+        _state.stripeConnected = true;
+        _state.stripeAccountId = j.stripe_account_id;
+      } else {
+        _state.stripeConnected = false;
+        _state.stripeAccountId = j.stripe_account_id || '';
       }
-    } catch(e) { /* silent — store may not have a fundraiser yet */ }
+      _renderActiveState(j);
+      clearDraft();
+    } else {
+      // No active fundraiser — explicitly render the empty state so the
+      // "Start a Fundraiser" button is revealed only in this case.
+      _renderActiveState({ enabled: false });
+    }
     if (!serverActive) _restoreDraft();
     // Only check the Stripe return if there's no live fundraiser already active.
     // Await so the wizard opens after state is fully settled.

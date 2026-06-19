@@ -1809,97 +1809,93 @@
     }
     .ss-mobile-insights { display: block; }
 
-    /* Card: stacked layout, clean sections */
+    /* ── Card: compact, single-padding layout with tidy stacked sections ── */
     .ss-store-card {
       flex-direction: column;
       align-items: stretch;
-      gap: 0;
-      padding: 0;
-      border-radius: 22px;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 20px;
       overflow: hidden;
     }
 
-    /* Identity row: logo + name side by side, full width */
+    /* Header: logo + name aligned together */
     .ss-col-identity {
       width: 100%;
-      gap: 14px;
-      padding: 16px 16px 12px;
-      border-bottom: 1px solid rgba(15,23,42,0.05);
+      gap: 12px;
+      padding: 0;
+      align-items: center;
     }
-
-    /* Logo: bigger and more prominent on mobile */
     .ss-logo-frame {
-      width: 104px;
-      height: 104px;
-      border-radius: 18px;
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
       flex-shrink: 0;
     }
-
+    .ss-identity-text { min-width: 0; }
     .ss-card-title { font-size: 16px; font-weight: 820; letter-spacing: -0.02em; }
-    .ss-card-subtitle { font-size: 11px; }
+    .ss-card-subtitle { font-size: 11px; margin-top: 3px; }
 
-    /* Engine: status badge row */
+    /* Status badge: own line, left aligned, compact */
     .ss-col-engine {
       width: 100%;
-      padding: 10px 16px;
+      padding: 0;
       justify-content: flex-start;
-      border-bottom: 1px solid rgba(15,23,42,0.05);
     }
 
-    /* Controls: buttons full width, stacked cleanly */
+    /* Controls: aligned button row that shares space evenly */
     .ss-col-controls {
       width: 100%;
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 12px 14px 14px;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0 0;
+      border-top: 1px solid rgba(15,23,42,0.07);
     }
-
-    /* Fundraiser strip: match the card's sectioned mobile style */
-    .ss-fr-strip {
-      margin-top: 0;
-      padding: 14px 16px 16px;
-      border-top: 1px solid rgba(15,23,42,0.05);
-    }
-
-    /* Open Storefront button: full width, bold, Apple-style */
-    .ss-open-btn {
-      width: 100%;
+    /* Primary action buttons share the row equally and stay aligned */
+    .ss-col-controls > .ss-admin-btn,
+    .ss-col-controls > .ss-open-btn,
+    .ss-col-controls > .ss-wake-btn {
+      flex: 1 1 130px;
+      width: auto;
       justify-content: center;
-      padding: 13px 16px;
+      text-align: center;
+      padding: 12px 16px;
       font-size: 14px;
       font-weight: 750;
-      border-radius: 14px;
+      border-radius: 13px;
     }
-
-    /* Admin button: outlined, full width */
-    .ss-admin-btn {
+    .ss-col-controls > .ss-admin-btn { font-size: 13px; }
+    /* Disabled / preparing buttons span full width */
+    .ss-col-controls > .ss-open-btn.ss-disabled,
+    .ss-col-controls > .ss-open-dyn {
+      flex: 1 1 100%;
+      width: 100%;
+      justify-content: center;
+      padding: 12px 16px;
+      border-radius: 13px;
+    }
+    /* Leave Store + helper note drop to their own full-width line */
+    .ss-col-controls > .ss-leave-btn {
+      flex: 1 1 100%;
       width: 100%;
       text-align: center;
       padding: 11px 16px;
-      font-size: 13px;
-      border-radius: 14px;
-    }
-
-    /* Leave Store: subtle, full width */
-    .ss-leave-btn {
-      width: 100%;
-      text-align: center;
-      padding: 10px 16px;
       font-size: 12px;
-      border-radius: 14px;
+      border-radius: 13px;
+    }
+    .ss-col-controls > p { flex: 1 1 100%; margin: 0; }
+
+    /* Fundraiser strip: slim divider section, no extra side padding */
+    .ss-fr-strip {
+      margin-top: 0;
+      padding: 12px 0 0;
+      border-top: 1px solid rgba(15,23,42,0.07);
     }
 
-    /* Wake button: full width */
-    .ss-wake-btn {
-      width: 100%;
-      justify-content: center;
-      padding: 13px 16px;
-      font-size: 14px;
-      border-radius: 14px;
-    }
-
-    .ss-buildwrap { align-items: flex-start; max-width: 100%; }
+    .ss-buildwrap { align-items: flex-start; max-width: 100%; width: 100%; }
     .ss-founderline { text-align: left; }
   }
 
