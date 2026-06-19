@@ -548,13 +548,13 @@
                       </div>
 
                       <!-- Active fundraiser strip (revealed by JS when a fundraiser is live) -->
-                      <div class="ss-fr-strip" data-ss-fr-strip hidden>
+                      <div class="ss-fr-strip" data-ss-fr-strip style="display:none;">
                         <div class="ss-fr-strip-head">
                           <span class="ss-fr-pill"><span class="ss-fr-dot"></span>Active Fundraiser</span>
                           <span class="ss-fr-cause" data-ss-fr-cause></span>
                           <span class="ss-fr-days" data-ss-fr-days></span>
                         </div>
-                        <div class="ss-fr-progress" data-ss-fr-progress hidden>
+                        <div class="ss-fr-progress" data-ss-fr-progress style="display:none;">
                           <div class="ss-fr-bar"><div class="ss-fr-bar-fill" data-ss-fr-fill></div></div>
                           <div class="ss-fr-meta"><span data-ss-fr-raised></span><span data-ss-fr-goal></span></div>
                         </div>
@@ -1308,7 +1308,7 @@
             if (!j || !j.enabled) return;
             if (j.handle && j.handle !== handle) return;
             card.classList.add('ss-card-has-fr');
-            strip.hidden = false;
+            strip.style.display = '';
 
             var causeEl = strip.querySelector('[data-ss-fr-cause]');
             var daysEl  = strip.querySelector('[data-ss-fr-days]');
@@ -1330,7 +1330,7 @@
               }
 
               if (goal > 0 && progEl) {
-                progEl.hidden = false;
+                progEl.style.display = '';
                 var pct = Math.min(100, (raised / goal) * 100);
                 var fill = progEl.querySelector('[data-ss-fr-fill]');
                 if (fill) fill.style.width = pct.toFixed(1) + '%';
