@@ -1888,12 +1888,39 @@
     }
     .ss-col-controls > p { flex: 1 1 100%; margin: 0; }
 
-    /* Fundraiser strip: slim divider section, no extra side padding */
+    /* Fundraiser strip: aggressive single-line compact layout on mobile */
     .ss-fr-strip {
       margin-top: 0;
-      padding: 12px 0 0;
+      padding: 8px 0 0;
       border-top: 1px solid rgba(15,23,42,0.07);
+      gap: 5px;
     }
+    .ss-fr-strip-head {
+      flex-wrap: nowrap;
+      gap: 7px;
+    }
+    .ss-fr-pill {
+      font-size: 9px;
+      padding: 3px 7px;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .ss-fr-dot {
+      width: 5px;
+      height: 5px;
+    }
+    .ss-fr-cause {
+      font-size: 11.5px;
+      flex: 1;
+      min-width: 0;
+    }
+    .ss-fr-days {
+      font-size: 10.5px;
+      flex-shrink: 0;
+      margin-left: 0;
+    }
+    .ss-fr-bar { height: 5px; }
+    .ss-fr-meta { font-size: 10.5px; }
 
     .ss-buildwrap { align-items: flex-start; max-width: 100%; width: 100%; }
     .ss-founderline { text-align: left; }

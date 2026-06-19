@@ -2274,6 +2274,8 @@
   #apFrPricingBanner.fr-banner--error    { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; font-weight:700; }
   /* Hide empty state when active class is on parent (belt-and-suspenders vs JS display toggle) */
   .ap-fr-zone--active .ap-fr-zone-empty { display: none !important; }
+  /* Loading state — hides both children until JS has resolved fundraiser state */
+  .ap-fr-zone--loading > div { display: none !important; }
   /* Empty state — no fundraiser */
   .ap-fr-zone-empty {
     display: flex;
@@ -2448,8 +2450,11 @@
   .ap-frd-progress-label { font-size: 11px; color: #64748b; margin-top: 5px; text-align: right; }
   @media (max-width: 600px) {
     .ap-fr-zone-empty { flex-direction: column; text-align: center; }
-    .ap-fr-zone-active-top { flex-direction: column; }
-    .ap-btn--fr-details { width: 100%; }
+    /* Active card: compact horizontal row, hide verbose subtitle */
+    .ap-fr-zone-active { padding: 13px 15px; gap: 8px; }
+    .ap-fr-zone-active-top { flex-direction: row; align-items: center; gap: 10px; }
+    .ap-fr-zone-sub { display: none; }
+    .ap-btn--fr-details { width: auto; flex-shrink: 0; padding: 8px 12px; font-size: 11px; }
     .ap-frd-stats-row { flex-wrap: wrap; }
     .ap-frd-stat-cell { flex: 0 0 50%; }
   }
@@ -2960,7 +2965,7 @@
   </div>
 
   <!-- FUNDRAISING ZONE — between hero and tabs -->
-  <div class="ap-fr-zone" id="apFrZone">
+  <div class="ap-fr-zone ap-fr-zone--loading" id="apFrZone">
     <!-- Empty state — hidden by default; JS reveals it only when we confirm
          there is no active fundraiser, so it can never show beside the active card. -->
     <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:none;">
@@ -5919,10 +5924,12 @@
   function _renderActiveState(data) {
     var enabled = data && data.enabled;
 
-    // Zone toggle — class on parent drives CSS visibility as well so the empty
-    // state can't flash in before JS runs on repeat page loads.
+    // Lift the loading veil first, then toggle active/empty as appropriate.
     var frZoneEl = document.getElementById('apFrZone');
-    if (frZoneEl) frZoneEl.classList.toggle('ap-fr-zone--active', !!enabled);
+    if (frZoneEl) {
+      frZoneEl.classList.remove('ap-fr-zone--loading');
+      frZoneEl.classList.toggle('ap-fr-zone--active', !!enabled);
+    }
     if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : 'flex';
     if (frZoneActive) frZoneActive.style.display = enabled ? '' : 'none';
     if (settingsRow)  settingsRow.style.display  = enabled ? '' : 'none';
@@ -6059,19 +6066,24 @@
   // ── Load existing fundraising state on page load ───────────
   async function _loadState() {
     var serverActive = false;
+    var responseValid = false;
     var j = {};
     try {
       var r = await fetch(FR_ENDPOINT, { cache: 'no-store' });
-      j = await r.json().catch(function(){ return {}; });
-    } catch(e) { j = {}; /* store may not have a fundraiser yet */ }
+      if (r.ok) {
+        j = await r.json().catch(function(){ return null; }) || {};
+        // Only trust the response if it contains the expected `enabled` field —
+        // a 502 from Railway or a proxy error can return {} which must not be
+        // mistaken for "no active fundraiser".
+        responseValid = (j && typeof j.enabled !== 'undefined');
+      }
+    } catch(e) { /* network error — zone stays in loading state */ }
 
-    if (j && j.ok !== false && j.enabled) {
+    if (responseValid && j.ok !== false && j.enabled) {
       serverActive = true;
       _state.enabled = true;
       _state.totalRaised = parseFloat(j.total_raised || 0);
       _applyToForm(j);
-      // Require both stripe_connected AND stripe_account_id — having an
-      // account ID alone doesn't mean onboarding is complete.
       if (j.stripe_connected && j.stripe_account_id) {
         _state.stripeConnected = true;
         _state.stripeAccountId = j.stripe_account_id;
@@ -6081,14 +6093,12 @@
       }
       _renderActiveState(j);
       clearDraft();
-    } else {
-      // No active fundraiser — explicitly render the empty state so the
-      // "Start a Fundraiser" button is revealed only in this case.
+    } else if (responseValid) {
+      // Server confirmed: no active fundraiser — reveal Start button.
       _renderActiveState({ enabled: false });
     }
+    // If !responseValid: zone stays hidden (loading state) until next load.
     if (!serverActive) _restoreDraft();
-    // Only check the Stripe return if there's no live fundraiser already active.
-    // Await so the wizard opens after state is fully settled.
     if (!serverActive) await _checkStripeReturn();
   }
 
