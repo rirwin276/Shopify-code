@@ -6,7 +6,7 @@ html.ss-request-v2 .sf-modal-iframe{width:100%!important;height:100%!important;d
 html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important}
 @media(max-width:760px){html.ss-request-v2 .sf-modal:not(.sf-hidden){padding:8px!important}html.ss-request-v2 .sf-modal-card{width:calc(100vw - 16px)!important;height:calc(100dvh - 16px)!important;border-radius:18px!important}}
 
-/* Fundraiser UI cleanup — scoped to Admin Powers and Dashboard DOM only. */
+/* Admin fundraiser default/desktop state. Keep this boring and predictable. */
 .ap-wrap #apFrZone{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;margin:14px 0 18px!important;clear:both!important}
 .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-empty{display:none!important;visibility:hidden!important;pointer-events:none!important}
 .ap-wrap #apFrZone:not(.ap-fr-zone--active) .ap-fr-zone-active{display:none!important}
@@ -25,6 +25,7 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
 .ap-wrap #apFrZone #apFrZoneRaised{font-size:17px!important;font-weight:950!important;letter-spacing:-.04em!important;color:#fff!important;line-height:1!important}
 .ap-wrap #apFrZone #apFrZoneGoal{margin-left:auto!important;text-align:right!important;font-size:12.5px!important;color:rgba(255,255,255,.78)!important;white-space:nowrap!important}
 
+/* Dashboard/store-card fundraiser strip — preserved from the layout Ryan liked. */
 .ss-portal .ss-store-card .ss-fr-strip{width:100%!important;box-sizing:border-box!important;margin:14px 0 0!important;padding:13px 0 0!important;border-top:1px solid rgba(15,23,42,.07)!important;background:transparent!important;border-radius:0!important;box-shadow:none!important;display:block!important;grid-column:1/-1!important;align-self:stretch!important;clear:both!important}
 .ss-portal .ss-store-card .ss-fr-strip-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;width:100%!important;margin:0!important;min-width:0!important;flex-wrap:nowrap!important}
 .ss-portal .ss-store-card .ss-fr-pill{display:inline-flex!important;align-items:center!important;gap:7px!important;min-width:0!important;max-width:calc(100% - 90px)!important;padding:6px 10px!important;border-radius:999px!important;background:rgba(220,252,231,.72)!important;border:1px solid rgba(34,197,94,.18)!important;color:#166534!important;font-size:10.5px!important;font-weight:900!important;letter-spacing:.11em!important;text-transform:uppercase!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
@@ -40,22 +41,6 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
 .ss-portal .ss-store-card .ss-fr-meta span:last-child{margin-left:auto!important;text-align:right!important;color:#6b7280!important}
 
 @media(max-width:700px){
-  .ap-wrap #apFrZone{margin:12px 0 16px!important}
-  .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{padding:13px 14px!important;border-radius:18px!important;gap:9px!important}
-  .ap-wrap #apFrZone .ap-fr-zone-active-top{gap:9px!important}
-  .ap-wrap #apFrZone .ap-fr-zone-badge{font-size:9.5px!important;padding:7px 9px!important;letter-spacing:.12em!important;flex:1 1 auto!important}
-  .ap-wrap #apFrZone .ap-btn--fr-details{height:34px!important;min-height:34px!important;padding:0 11px!important;font-size:12px!important}
-  .ap-wrap #apFrZone .ap-fr-zone-sub{font-size:11px!important}
-  .ap-wrap #apFrZone .ap-fr-zone-progress-meta{font-size:12px!important;gap:10px!important}
-  .ap-wrap #apFrZone #apFrZoneRaised{font-size:16px!important}
-  .ss-portal .ss-store-card .ss-fr-strip{margin-top:13px!important;padding-top:12px!important}
-  .ss-portal .ss-store-card .ss-fr-pill{font-size:10px!important;padding:6px 9px!important;max-width:calc(100% - 84px)!important}
-  .ss-portal .ss-store-card .ss-fr-days{font-size:12px!important}
-  .ss-portal .ss-store-card .ss-fr-meta{font-size:12.5px!important;gap:10px!important}
-}
-
-/* Admin mobile overflow patch — do not touch dashboard/store-card fundraiser strip. */
-@media(max-width:700px){
   html:has(.ap-wrap),body:has(.ap-wrap){overflow-x:hidden!important;max-width:100%!important}
   .ap-wrap,.ap-wrap *{box-sizing:border-box!important}
   .ap-wrap{width:100%!important;max-width:100%!important;overflow-x:hidden!important;padding-left:10px!important;padding-right:10px!important}
@@ -64,29 +49,21 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
   .ap-wrap .ap-hero-actions{width:100%!important;max-width:100%!important;min-width:0!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;overflow:hidden!important}
   .ap-wrap .ap-share-help{grid-column:1/-1!important;width:100%!important;max-width:100%!important;min-width:0!important;display:block!important;overflow:hidden!important}
   .ap-wrap .ap-hero-actions .ap-btn{width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
-  .ap-wrap #apFrZone{width:auto!important;max-width:none!important;margin:12px 14px 16px!important;overflow:hidden!important;clear:both!important}
-  .ap-wrap #apFrZone.ap-fr-zone--active .ap-fr-zone-active{width:100%!important;max-width:100%!important;min-width:0!important;padding:13px 14px!important;gap:9px!important;overflow:hidden!important}
-  .ap-wrap #apFrZone .ap-fr-zone-active-top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;width:100%!important;gap:10px!important;overflow:hidden!important}
-  .ap-wrap #apFrZone .ap-fr-zone-badge{min-width:0!important;width:auto!important;max-width:100%!important;font-size:9.5px!important;letter-spacing:.10em!important;padding:7px 9px!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  .ap-wrap #apFrZone .ap-btn--fr-details{width:auto!important;max-width:148px!important;height:34px!important;min-height:34px!important;padding:0 13px!important;font-size:12px!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  .ap-wrap #apFrZone .ap-fr-zone-sub{display:none!important}
-  .ap-wrap #apFrZone .ap-fr-zone-progress{width:100%!important;margin:0!important;overflow:hidden!important}
-  .ap-wrap #apFrZone .ap-fr-zone-progress-meta{width:100%!important;margin-top:8px!important;gap:10px!important;overflow:hidden!important}
-  .ap-wrap #apFrZone .ap-fr-zone-progress-meta span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important}
-}
 
-/* Final admin fundraiser fix: force the card to stop behaving like a tiny flex/grid tile. */
-@media(max-width:700px){
+  /* Change how the admin fundraiser works on mobile: one simple status strip, details modal has the numbers. */
   .ap-wrap #apFrZone,
   .ap-wrap .ap-fr-zone{
     display:block!important;
-    flex:0 0 100%!important;
+    position:relative!important;
+    left:auto!important;
+    right:auto!important;
+    flex:none!important;
     grid-column:1/-1!important;
     align-self:stretch!important;
-    width:100%!important;
-    max-width:100%!important;
-    min-width:0!important;
-    margin:12px 0 16px!important;
+    width:calc(100vw - 100px)!important;
+    min-width:calc(100vw - 100px)!important;
+    max-width:calc(100vw - 100px)!important;
+    margin:18px auto 0!important;
     padding:0!important;
     clear:both!important;
     overflow:visible!important;
@@ -96,62 +73,76 @@ html.ss-request-v2 body:has(.sf-modal:not(.sf-hidden)){overflow:hidden!important
     grid-template-columns:minmax(0,1fr) auto!important;
     align-items:center!important;
     width:100%!important;
-    max-width:100%!important;
     min-width:0!important;
-    gap:9px 12px!important;
-    padding:13px 14px!important;
-    border-radius:18px!important;
+    max-width:100%!important;
+    height:64px!important;
+    min-height:64px!important;
+    max-height:64px!important;
+    gap:10px!important;
+    padding:10px 12px!important;
+    border-radius:20px!important;
+    background:linear-gradient(135deg,rgba(16,65,42,.96),rgba(10,45,31,.94))!important;
+    border:1px solid rgba(134,239,172,.24)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07)!important;
     overflow:hidden!important;
   }
   .ap-wrap #apFrZone .ap-fr-zone-active-top{display:contents!important}
   .ap-wrap #apFrZone .ap-fr-zone-badge{
     grid-column:1!important;
+    display:inline-flex!important;
+    align-items:center!important;
     justify-self:start!important;
     width:auto!important;
     max-width:100%!important;
     min-width:0!important;
-    flex:none!important;
-    font-size:9.75px!important;
+    padding:7px 10px!important;
+    border-radius:999px!important;
+    background:rgba(220,252,231,.12)!important;
+    border:1px solid rgba(134,239,172,.18)!important;
+    color:#dcfce7!important;
+    font-size:10px!important;
+    font-weight:950!important;
     letter-spacing:.10em!important;
-    padding:7px 9px!important;
+    line-height:1!important;
+    text-transform:uppercase!important;
     white-space:nowrap!important;
     overflow:hidden!important;
     text-overflow:ellipsis!important;
   }
+  .ap-wrap #apFrZone .ap-fr-zone-pulse{width:7px!important;height:7px!important;flex:0 0 auto!important}
   .ap-wrap #apFrZone .ap-btn--fr-details{
     grid-column:2!important;
     justify-self:end!important;
     width:auto!important;
-    min-width:128px!important;
-    max-width:136px!important;
-    height:34px!important;
-    min-height:34px!important;
+    min-width:124px!important;
+    max-width:132px!important;
+    height:38px!important;
+    min-height:38px!important;
     padding:0 12px!important;
-    font-size:12px!important;
+    border-radius:999px!important;
+    background:#fff!important;
+    color:#173b2a!important;
+    border:0!important;
+    font-size:12.5px!important;
+    font-weight:950!important;
     white-space:nowrap!important;
     overflow:hidden!important;
     text-overflow:ellipsis!important;
+    box-shadow:0 10px 22px rgba(0,0,0,.18)!important;
   }
   .ap-wrap #apFrZone .ap-fr-zone-title,
-  .ap-wrap #apFrZone .ap-fr-zone-sub{display:none!important}
-  .ap-wrap #apFrZone .ap-fr-zone-progress{
-    grid-column:1/-1!important;
-    width:100%!important;
-    max-width:100%!important;
-    margin:0!important;
-    overflow:hidden!important;
-  }
-  .ap-wrap #apFrZone .ap-fr-zone-bar{height:7px!important;width:100%!important;max-width:100%!important}
-  .ap-wrap #apFrZone .ap-fr-zone-progress-meta{
-    display:flex!important;
-    grid-column:1/-1!important;
-    width:100%!important;
-    max-width:100%!important;
-    align-items:baseline!important;
-    justify-content:space-between!important;
-    gap:12px!important;
-    margin-top:8px!important;
-    overflow:hidden!important;
-  }
-  .ap-wrap #apFrZone .ap-fr-zone-progress-meta span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .ap-wrap #apFrZone .ap-fr-zone-sub,
+  .ap-wrap #apFrZone .ap-fr-zone-progress{display:none!important}
+
+  .ss-portal .ss-store-card .ss-fr-strip{margin-top:13px!important;padding-top:12px!important}
+  .ss-portal .ss-store-card .ss-fr-pill{font-size:10px!important;padding:6px 9px!important;max-width:calc(100% - 84px)!important}
+  .ss-portal .ss-store-card .ss-fr-days{font-size:12px!important}
+  .ss-portal .ss-store-card .ss-fr-meta{font-size:12.5px!important;gap:10px!important}
+}
+
+@media(max-width:390px){
+  .ap-wrap #apFrZone,
+  .ap-wrap .ap-fr-zone{width:calc(100vw - 74px)!important;min-width:calc(100vw - 74px)!important;max-width:calc(100vw - 74px)!important}
+  .ap-wrap #apFrZone .ap-fr-zone-badge{font-size:9px!important;letter-spacing:.08em!important;padding:7px 8px!important}
+  .ap-wrap #apFrZone .ap-btn--fr-details{min-width:116px!important;max-width:124px!important;font-size:12px!important}
 }
