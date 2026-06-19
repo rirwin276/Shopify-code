@@ -329,6 +329,33 @@
                   </div>
                 {% endif %}
 
+                {% if is_god %}
+                  <!-- FUNDRAISER HUB CARD -->
+                  <div class="ss-store-card ss-clickrow ss-fundraiser-card" role="link" tabindex="0" data-href="/pages/fundraiser-hub" style="border-color: #16a34a; box-shadow: 0 0 0 1px rgba(22,163,74,0.15), 0 10px 24px rgba(22,163,74,0.08);">
+                    <div class="ss-col-identity">
+                      <div class="ss-logo-frame" style="background:#f0fdf4; border-color:#bbf7d0;">
+                        <span style="font-size:24px;">💸</span>
+                      </div>
+                      <div class="ss-identity-text">
+                        <h3 class="ss-card-title" style="color:#166534;">Fundraiser Hub</h3>
+                        <span class="ss-card-subtitle" style="background:#dcfce7; color:#166534; border-color:#bbf7d0;">Super Admin</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-engine">
+                      <div class="ss-status-finished" style="background:#f0fdf4; border-color:#bbf7d0;">
+                        <span class="ss-dot-live" style="background:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,0.2);"></span>
+                        <span class="ss-status-text" style="color:#166534;">PAYOUTS &amp; FUNDRAISERS</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-controls">
+                      <a href="/pages/fundraiser-hub" class="ss-open-btn" style="background:#16a34a;">
+                        <span>Open Hub</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </a>
+                    </div>
+                  </div>
+                {% endif %}
+
                 {% for raw_handle in handles_array %}
                   {% assign handle = raw_handle | strip %}
                   {% if handle != blank %}
