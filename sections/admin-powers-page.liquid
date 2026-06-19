@@ -2272,89 +2272,76 @@
   #apFrPricingBanner.fr-banner--pending  { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
   #apFrPricingBanner.fr-banner--success  { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
   #apFrPricingBanner.fr-banner--error    { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; font-weight:700; }
-  /* Hide empty state when active class is on parent (belt-and-suspenders vs JS display toggle) */
-  .ap-fr-zone--active .ap-fr-zone-empty { display: none !important; }
-  /* Empty state — no fundraiser */
+  /* Empty state — visible by default; class hides it */
   .ap-fr-zone-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center;
     padding: 18px 24px;
-    background: #f8fafc;
-    border: 1.5px dashed #cbd5e1;
-    border-radius: 16px;
-    gap: 14px;
+    background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 16px; gap: 14px;
   }
   .ap-fr-zone-empty-icon { font-size: 24px; flex-shrink: 0; }
   .ap-fr-zone-empty-copy { flex: 1; }
-  .ap-fr-zone-empty-copy p {
-    margin: 0; font-size: 13px; color: #64748b;
-  }
-  .ap-fr-zone-empty-copy strong {
-    display: block; font-size: 15px; color: #1e293b; font-weight: 700; margin-bottom: 2px;
-  }
+  .ap-fr-zone-empty-copy p { margin: 0; font-size: 13px; color: #64748b; }
+  .ap-fr-zone-empty-copy strong { display: block; font-size: 15px; color: #1e293b; font-weight: 700; margin-bottom: 2px; }
   .ap-btn--fr-start {
     background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     color: #fff; border: none; border-radius: 10px;
     padding: 10px 18px; font-size: 13px; font-weight: 700;
-    cursor: pointer; white-space: nowrap; flex-shrink: 0;
-    transition: opacity 0.15s;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: opacity 0.15s;
   }
   .ap-btn--fr-start:hover { opacity: 0.88; }
-  /* Active state — fundraiser running (premium dark card) */
+  /* Active state — hidden by default; class reveals it (no inline-style race condition) */
   .ap-fr-zone-active {
-    display: flex; flex-direction: column; gap: 14px;
+    display: none; flex-direction: column; gap: 12px;
     padding: 18px 20px;
     background: linear-gradient(135deg, #14532d 0%, #166534 55%, #15803d 100%);
     border: 1px solid rgba(255,255,255,0.10); border-radius: 18px;
     box-shadow: 0 14px 34px rgba(20,83,45,0.22);
   }
+  /* CSS class is the single source of truth — server pre-renders it, JS toggles it */
+  .ap-fr-zone--active .ap-fr-zone-empty  { display: none !important; }
+  .ap-fr-zone--active .ap-fr-zone-active { display: flex !important; }
+  /* Top row: badge hard-left, button hard-right */
   .ap-fr-zone-active-top {
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
   }
-  .ap-fr-zone-info { flex: 1; min-width: 0; }
   .ap-fr-zone-badge {
-    display: inline-flex; align-items: center; gap: 7px;
+    display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
     font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-    color: #bbf7d0; margin-bottom: 7px;
+    color: #bbf7d0;
   }
   .ap-fr-zone-pulse {
     width: 8px; height: 8px; border-radius: 50%;
     background: #4ade80; flex-shrink: 0;
-    box-shadow: 0 0 0 0 rgba(74,222,128,0.5);
-    animation: apFrPulse 2s infinite;
+    box-shadow: 0 0 0 0 rgba(74,222,128,0.5); animation: apFrPulse 2s infinite;
   }
   @keyframes apFrPulse {
     0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
     70%  { box-shadow: 0 0 0 7px rgba(74,222,128,0); }
     100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
   }
+  /* Title + sub sit below the top row (desktop only; hidden on mobile) */
   .ap-fr-zone-title {
-    font-size: 17px; font-weight: 800; color: #fff; margin: 0 0 3px; letter-spacing: -0.01em;
+    font-size: 16px; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.01em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .ap-fr-zone-sub {
-    font-size: 12.5px; color: rgba(255,255,255,0.72); margin: 0;
-  }
+  .ap-fr-zone-sub { font-size: 12px; color: rgba(255,255,255,0.72); margin: 0; }
+  /* Progress bar */
   .ap-fr-zone-progress { display: flex; flex-direction: column; gap: 7px; }
-  .ap-fr-zone-bar {
-    height: 9px; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden;
-  }
+  .ap-fr-zone-bar { height: 9px; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
   .ap-fr-zone-bar-fill {
     height: 100%; width: 0%; border-radius: 999px;
-    background: linear-gradient(90deg, #86efac, #4ade80);
-    transition: width 0.6s ease;
+    background: linear-gradient(90deg, #86efac, #4ade80); transition: width 0.6s ease;
   }
   .ap-fr-zone-progress-meta {
     display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.78);
   }
   .ap-fr-zone-progress-meta strong { color: #fff; font-weight: 800; }
+  /* View Details button */
   .ap-btn--fr-details {
     background: rgba(255,255,255,0.14); color: #fff;
-    border: 1px solid rgba(255,255,255,0.22); border-radius: 11px;
-    padding: 9px 15px; font-size: 12.5px; font-weight: 700;
-    cursor: pointer; white-space: nowrap; flex-shrink: 0;
-    transition: background 0.15s;
+    border: 1px solid rgba(255,255,255,0.22); border-radius: 10px;
+    padding: 8px 14px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s;
   }
   .ap-btn--fr-details:hover { background: rgba(255,255,255,0.24); }
   /* Details modal */
@@ -2448,13 +2435,11 @@
   .ap-frd-progress-label { font-size: 11px; color: #64748b; margin-top: 5px; text-align: right; }
   @media (max-width: 600px) {
     .ap-fr-zone-empty { flex-direction: column; text-align: center; }
-    /* Active card: full-width, compact single-row layout */
-    .ap-fr-zone-active { padding: 12px 14px; gap: 8px; width: 100%; box-sizing: border-box; }
-    .ap-fr-zone-active-top { flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; }
+    /* Active card: compact on mobile — badge+button row, no title/sub */
+    .ap-fr-zone-active { padding: 13px 14px; gap: 9px; }
     .ap-fr-zone-title { display: none; }
     .ap-fr-zone-sub { display: none; }
-    .ap-fr-zone-info { flex: 1 1 auto; min-width: 0; }
-    .ap-btn--fr-details { width: auto; flex-shrink: 0; margin-left: auto; padding: 7px 11px; font-size: 11px; white-space: nowrap; }
+    .ap-btn--fr-details { padding: 7px 11px; font-size: 11px; }
     .ap-frd-stats-row { flex-wrap: wrap; }
     .ap-frd-stat-cell { flex: 0 0 50%; }
   }
@@ -2986,10 +2971,9 @@
       {%- endif -%}
     {%- endif -%}
   {%- endunless -%}
-  <!-- ss-fr-debug: obj_present={% if _fr_obj == blank %}no{% else %}yes{% endif %} fr_active={{ fr_active }} raw_head={{ _fr_data | json | slice: 0, 60 | escape }} -->
   <div class="ap-fr-zone{% if fr_active %} ap-fr-zone--active{% endif %}" id="apFrZone">
-    <!-- Empty state — hidden when a fundraiser is active; JS confirms on load. -->
-    <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:{% if fr_active %}none{% else %}flex{% endif %};">
+    <!-- Empty state: CSS class hides this when active -->
+    <div class="ap-fr-zone-empty" id="apFrZoneEmpty">
       <div class="ap-fr-zone-empty-icon">💚</div>
       <div class="ap-fr-zone-empty-copy">
         <strong>Fundraise for your team</strong>
@@ -2997,16 +2981,14 @@
       </div>
       <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">Start a Fundraiser Campaign →</button>
     </div>
-    <!-- Active state — shown immediately when metaobject confirms active; JS fills in live numbers. -->
-    <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:{% if fr_active %}flex{% else %}none{% endif %};">
+    <!-- Active card: CSS class reveals this when active; JS fills live numbers -->
+    <div class="ap-fr-zone-active" id="apFrZoneActive">
       <div class="ap-fr-zone-active-top">
-        <div class="ap-fr-zone-info">
-          <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
-          <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
-          <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
-        </div>
-        <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details</button>
+        <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
+        <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details →</button>
       </div>
+      <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
+      <p class="ap-fr-zone-sub" id="apFrZoneSub"></p>
       <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:none;">
         <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill"></div></div>
         <div class="ap-fr-zone-progress-meta">
@@ -5510,8 +5492,6 @@
   var settingsRow  = document.getElementById('apFrSettingsRow');
   var editFromSettings = document.getElementById('apFrEditFromSettings');
   // Zone
-  var frZoneEmpty  = document.getElementById('apFrZoneEmpty');
-  var frZoneActive = document.getElementById('apFrZoneActive');
   var frDetailsBtn = document.getElementById('apFrDetailsBtn');
   // Details modal
   var frdOverlay   = document.getElementById('apFrdOverlay');
@@ -5944,14 +5924,11 @@
   // ── Active state rendering ─────────────────────────────────
   function _renderActiveState(data) {
     var enabled = data && data.enabled;
-
-    // Server-side Liquid already rendered the correct zone from the metaobject;
-    // this keeps the class in sync after client-side launch/stop transitions.
+    // CSS class is the single source of truth for zone visibility.
+    // Server pre-renders the class; JS only toggles it on launch/stop transitions.
     var frZoneEl = document.getElementById('apFrZone');
     if (frZoneEl) frZoneEl.classList.toggle('ap-fr-zone--active', !!enabled);
-    if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : 'flex';
-    if (frZoneActive) frZoneActive.style.display = enabled ? '' : 'none';
-    if (settingsRow)  settingsRow.style.display  = enabled ? '' : 'none';
+    if (settingsRow) settingsRow.style.display = enabled ? '' : 'none';
     if (!enabled) return;
 
     var cause  = (data.cause_name || '').trim() || 'Your Fundraiser';
