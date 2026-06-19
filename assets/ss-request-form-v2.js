@@ -193,6 +193,36 @@
     return '$' + amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
   }
 
+  function parseMoneyText(value){
+    var cleaned = String(value || '').replace(/[^0-9.\-]/g, '');
+    var parsed = parseFloat(cleaned);
+    return isFinite(parsed) ? parsed : 0;
+  }
+
+  function setProgressFill(fill, raised, goal){
+    if (!fill) return;
+    var pct = goal > 0 ? Math.max(0, Math.min(100, (Number(raised || 0) / Number(goal || 0)) * 100)) : 0;
+    fill.style.setProperty('width', pct.toFixed(1) + '%', 'important');
+    fill.style.setProperty('flex', '0 0 auto', 'important');
+    fill.style.setProperty('max-width', pct.toFixed(1) + '%', 'important');
+    fill.style.setProperty('min-width', Number(raised || 0) > 0 ? '3px' : '0', 'important');
+  }
+
+  function correctAdminFundraiserProgress(){
+    if (path.indexOf('/pages/admin-powers') !== 0) return;
+    var raisedEl = qs('#apFrZoneRaised');
+    var goalEl = qs('#apFrZoneGoal');
+    var fill = qs('#apFrZoneBarFill');
+    if (!raisedEl || !goalEl || !fill) return;
+
+    var raised = parseMoneyText(raisedEl.textContent);
+    var goal = parseMoneyText(goalEl.textContent);
+    setProgressFill(fill, raised, goal);
+
+    var modalFill = qs('#apFrdProgressFill');
+    if (modalFill) setProgressFill(modalFill, raised, goal);
+  }
+
   function hideDashboardFundraiser(strip){
     if (!strip) return;
     strip.classList.remove('ss-fr-strip--active');
@@ -220,7 +250,7 @@
     if (raisedEl) raisedEl.textContent = formatMoney(raised) + ' raised';
     if (goalEl) goalEl.textContent = goal > 0 ? ('of ' + formatMoney(goal) + ' goal') : '';
     if (progress) progress.style.display = goal > 0 ? '' : 'none';
-    if (fill) fill.style.width = goal > 0 ? Math.max(0, Math.min(100, (raised / goal) * 100)).toFixed(1) + '%' : '0%';
+    if (fill) setProgressFill(fill, raised, goal);
 
     strip.classList.add('ss-fr-strip--active');
     strip.style.setProperty('display', 'block', 'important');
@@ -255,10 +285,17 @@
 
     hydrateDashboardFundraisers();
     setTimeout(hydrateDashboardFundraisers, 900);
+    correctAdminFundraiserProgress();
+    setTimeout(correctAdminFundraiserProgress, 250);
+    setTimeout(correctAdminFundraiserProgress, 900);
+    setTimeout(correctAdminFundraiserProgress, 1800);
 
     try {
-      var observer = new MutationObserver(function(){ rewriteAuthAndStorefrontLinks(); });
-      observer.observe(document.documentElement, { childList: true, subtree: true });
+      var observer = new MutationObserver(function(){
+        rewriteAuthAndStorefrontLinks();
+        correctAdminFundraiserProgress();
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
     } catch(e) {}
 
     if (path.indexOf('/pages/request') === 0 || path.indexOf('/pages/private-storefronts') === 0 || path.indexOf('/pages/storefront') === 0) {
