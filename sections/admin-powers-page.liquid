@@ -2010,6 +2010,525 @@
     .ap-add-product-row .ap-product-row__actions {
       grid-template-columns: 1fr !important;
     }
+
+  /* ══════════════════════════════════════════════════════════
+     FUNDRAISING WIZARD — complete style system
+     ══════════════════════════════════════════════════════════ */
+
+  /* Hero fundraise button */
+  .ap-btn--fundraise {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+    color: #fff; border: none; font-weight: 700;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: opacity 0.18s, transform 0.15s;
+  }
+  .ap-btn--fundraise:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+
+  /* Active fundraiser status card (compact, shown on Products panel) */
+  .ap-fr-active-card {
+    display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(135deg, rgba(20,83,45,0.06), rgba(34,197,94,0.04));
+    border: 1px solid rgba(34,197,94,0.22); border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .ap-fr-pulse {
+    width: 10px; height: 10px; border-radius: 50%; background: #22c55e; flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+    animation: frPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes frPulse {
+    0%,100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.18); }
+    50%      { box-shadow: 0 0 0 7px rgba(34,197,94,0.06); }
+  }
+  .ap-fr-active-info { flex: 1; min-width: 140px; }
+  .ap-fr-active-title { margin: 0 0 2px; font-size: 13px; font-weight: 800; color: #14532d; }
+  .ap-fr-active-sub   { margin: 0; font-size: 12px; color: #4b7a5c; }
+  .ap-fr-active-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+  .ap-fr-stat { text-align: center; }
+  .ap-fr-stat-val { font-size: 20px; font-weight: 900; color: #15803d; letter-spacing: -0.03em; line-height: 1.1; }
+  .ap-fr-stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #4b7a5c; margin-top: 1px; }
+  .ap-fr-active-edit { font-size: 12px; font-weight: 700; color: #16a34a; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 7px; padding: 5px 12px; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+  .ap-fr-active-edit:hover { background: rgba(34,197,94,0.08); }
+
+  /* Settings panel minimal edit row (shown when fundraiser already active) */
+  .ap-fr-settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: 12px; margin-bottom: 20px;
+  }
+  .ap-fr-settings-row-left h4 { margin: 0 0 2px; font-size: 14px; font-weight: 800; color: #14532d; }
+  .ap-fr-settings-row-left p  { margin: 0; font-size: 12px; color: #4b7a5c; }
+
+  /* ── WIZARD MODAL OVERLAY ─────────────────────────── */
+  .ap-frw-overlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(0,0,0,0.72); backdrop-filter: blur(6px) saturate(0.8);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; pointer-events: none; transition: opacity 0.22s;
+  }
+  .ap-frw-overlay.open { opacity: 1; pointer-events: all; }
+
+  .ap-frw-modal {
+    background: #fff; border-radius: 24px; width: 100%; max-width: 580px;
+    max-height: 92vh; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.06);
+    transform: translateY(24px) scale(0.97); transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .ap-frw-overlay.open .ap-frw-modal { transform: translateY(0) scale(1); }
+
+  /* Modal hero */
+  .ap-frw-hero {
+    background: linear-gradient(135deg, #0a1628 0%, #0d2d1a 60%, #0a1628 100%);
+    padding: 28px 32px 24px; position: relative; flex-shrink: 0;
+  }
+  .ap-frw-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 30px; height: 30px; border-radius: 15px;
+    background: rgba(255,255,255,0.1); border: none; color: rgba(255,255,255,0.7);
+    font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .ap-frw-close:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .ap-frw-step-pills {
+    display: flex; gap: 5px; margin-bottom: 16px;
+  }
+  .ap-frw-pill {
+    height: 4px; border-radius: 2px; flex: 1;
+    background: rgba(255,255,255,0.15); transition: background 0.3s;
+  }
+  .ap-frw-pill.done    { background: #22c55e; }
+  .ap-frw-pill.active  { background: rgba(255,255,255,0.6); }
+  .ap-frw-hero-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: rgba(134,239,172,0.8); margin: 0 0 6px;
+  }
+  .ap-frw-hero h2 {
+    margin: 0 0 4px; font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -0.02em;
+  }
+  .ap-frw-hero p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.5); }
+
+  /* Tab nav (for Learn More / Legal) */
+  .ap-frw-tabs { display: flex; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; background: #fff; }
+  .ap-frw-tab {
+    padding: 13px 20px; font-size: 13px; font-weight: 700; color: #94a3b8;
+    background: none; border: none; border-bottom: 2px solid transparent;
+    cursor: pointer; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s;
+  }
+  .ap-frw-tab.active { color: #0f172a; border-bottom-color: #16a34a; }
+  .ap-frw-tab-panel { display: none; }
+  .ap-frw-tab-panel.active { display: block; }
+
+  /* Scrollable content area */
+  .ap-frw-body { padding: 24px 32px; overflow-y: auto; flex: 1; }
+  @media (max-width: 600px) { .ap-frw-body { padding: 20px 20px; } .ap-frw-hero { padding: 24px 20px 20px; } }
+
+  /* Feature rows in learn more */
+  .ap-frw-feature {
+    display: flex; gap: 16px; padding: 16px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .ap-frw-feature:last-child { border-bottom: none; }
+  .ap-frw-feature-icon {
+    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .ap-frw-fi--green  { background: #dcfce7; }
+  .ap-frw-fi--blue   { background: #dbeafe; }
+  .ap-frw-fi--amber  { background: #fef9c3; }
+  .ap-frw-fi--purple { background: #ede9fe; }
+  .ap-frw-fi--slate  { background: #f1f5f9; }
+  .ap-frw-feature-copy h4 { margin: 0 0 4px; font-size: 14px; font-weight: 800; color: #0f172a; }
+  .ap-frw-feature-copy p  { margin: 0; font-size: 13px; color: #64748b; line-height: 1.6; }
+  .ap-frw-feature-copy strong { color: #0f172a; }
+
+  /* Highlight banner inside body */
+  .ap-frw-highlight {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border: 1px solid #86efac; border-radius: 12px;
+    padding: 16px 18px; margin: 16px 0; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .ap-frw-highlight-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
+  .ap-frw-highlight-copy { font-size: 13px; color: #14532d; line-height: 1.6; }
+  .ap-frw-highlight-copy strong { font-weight: 800; }
+
+  /* Legal content */
+  .ap-frw-legal { font-size: 13px; color: #374151; line-height: 1.75; }
+  .ap-frw-legal h4 { font-size: 13px; font-weight: 800; color: #0f172a; margin: 18px 0 4px; }
+  .ap-frw-legal p  { margin: 0 0 10px; }
+  .ap-frw-legal ul { margin: 6px 0 12px 18px; padding: 0; }
+  .ap-frw-legal li { margin-bottom: 5px; }
+
+  /* Wizard form fields */
+  .ap-frw-field { margin-bottom: 20px; }
+  .ap-frw-label {
+    display: block; font-size: 11px; font-weight: 800;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: #64748b; margin-bottom: 7px;
+  }
+  .ap-frw-input {
+    width: 100%; box-sizing: border-box;
+    border: 1.5px solid #e2e8f0; border-radius: 10px;
+    padding: 11px 14px; font-size: 14px; color: #0f172a;
+    background: #fff; outline: none; font-family: inherit;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .ap-frw-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+  .ap-frw-input-row { display: flex; gap: 8px; align-items: center; }
+  .ap-frw-input-prefix { font-size: 18px; font-weight: 700; color: #94a3b8; }
+  .ap-frw-input--amount { width: 80px !important; text-align: center; font-size: 20px; font-weight: 800; }
+  .ap-frw-helper { font-size: 12px; color: #94a3b8; margin-top: 5px; }
+  .ap-frw-calc-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 10px;
+    padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 9px;
+    font-size: 13px;
+  }
+  .ap-frw-calc-label { color: #4b7a5c; }
+  .ap-frw-calc-val   { font-size: 15px; font-weight: 800; color: #15803d; margin-left: auto; }
+  .ap-frw-goal-row   { display: flex; gap: 12px; }
+  .ap-frw-goal-row .ap-frw-field { flex: 1; }
+
+  /* Toggle row for visibility step */
+  .ap-frw-toggle-row {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 18px; background: #f8fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 12px; margin-bottom: 14px; cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+  }
+  .ap-frw-toggle-row.selected { background: #f0fdf4; border-color: #86efac; }
+  .ap-frw-toggle-icon { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+  .ap-frw-toggle-copy h4 { margin: 0 0 3px; font-size: 14px; font-weight: 800; color: #0f172a; }
+  .ap-frw-toggle-copy p  { margin: 0; font-size: 12px; color: #64748b; line-height: 1.55; }
+  .ap-frw-toggle-check { margin-left: auto; flex-shrink: 0; margin-top: 3px; }
+  .ap-frw-toggle-check input { width: 18px; height: 18px; accent-color: #16a34a; cursor: pointer; }
+
+  /* Terms checkbox */
+  .ap-frw-terms-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 14px 16px; background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 10px; margin-top: 16px; cursor: pointer;
+  }
+  .ap-frw-terms-row input { width: 16px; height: 16px; margin-top: 2px; accent-color: #16a34a; cursor: pointer; flex-shrink: 0; }
+  .ap-frw-terms-copy { font-size: 12px; color: #78350f; line-height: 1.6; }
+  .ap-frw-terms-copy strong { font-weight: 800; }
+
+  /* Footer / nav buttons */
+  .ap-frw-footer {
+    padding: 16px 32px 24px; border-top: 1px solid #f1f5f9;
+    display: flex; gap: 10px; align-items: center; flex-shrink: 0; background: #fff;
+  }
+  @media (max-width: 600px) { .ap-frw-footer { padding: 14px 20px 20px; } }
+  .ap-frw-back-btn {
+    background: none; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    padding: 11px 18px; font-size: 14px; font-weight: 700; color: #64748b;
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+  .ap-frw-back-btn:hover { border-color: #94a3b8; color: #0f172a; }
+  .ap-frw-next-btn {
+    flex: 1; padding: 13px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff; font-size: 15px; font-weight: 800; cursor: pointer;
+    transition: opacity 0.18s, transform 0.14s; letter-spacing: -0.01em;
+  }
+  .ap-frw-next-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .ap-frw-next-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* Stripe connect step */
+  .ap-frw-stripe-card {
+    border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 22px 24px;
+    text-align: center; margin-bottom: 16px;
+  }
+  .ap-frw-stripe-logo { font-size: 32px; margin-bottom: 12px; }
+  .ap-frw-stripe-card h3 { margin: 0 0 8px; font-size: 17px; font-weight: 800; color: #0f172a; }
+  .ap-frw-stripe-card p  { margin: 0 0 18px; font-size: 13px; color: #64748b; line-height: 1.6; }
+  .ap-frw-stripe-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; background: #635bff; color: #fff;
+    border: none; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .ap-frw-stripe-btn:hover { opacity: 0.9; }
+  .ap-frw-stripe-test-note {
+    font-size: 12px; color: #94a3b8; margin-top: 10px; font-style: italic;
+  }
+  .ap-frw-stripe-connected {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
+    font-size: 13px; font-weight: 700; color: #14532d;
+  }
+
+  /* ── Fundraising Zone (between hero and tabs) ── */
+  .ap-fr-zone {
+    margin: 0 0 20px;
+  }
+  /* Pricing status banner — lives outside the active zone so it persists after Stop */
+  #apFrPricingBanner {
+    margin: -12px 0 16px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  #apFrPricingBanner.fr-banner--pending  { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
+  #apFrPricingBanner.fr-banner--success  { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
+  #apFrPricingBanner.fr-banner--error    { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; font-weight:700; }
+  /* Hide empty state when active class is on parent (belt-and-suspenders vs JS display toggle) */
+  .ap-fr-zone--active .ap-fr-zone-empty { display: none !important; }
+  /* Empty state — no fundraiser */
+  .ap-fr-zone-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px 24px;
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 16px;
+    gap: 14px;
+  }
+  .ap-fr-zone-empty-icon { font-size: 24px; flex-shrink: 0; }
+  .ap-fr-zone-empty-copy { flex: 1; }
+  .ap-fr-zone-empty-copy p {
+    margin: 0; font-size: 13px; color: #64748b;
+  }
+  .ap-fr-zone-empty-copy strong {
+    display: block; font-size: 15px; color: #1e293b; font-weight: 700; margin-bottom: 2px;
+  }
+  .ap-btn--fr-start {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 10px 18px; font-size: 13px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: opacity 0.15s;
+  }
+  .ap-btn--fr-start:hover { opacity: 0.88; }
+  /* Active state — fundraiser running (premium dark card) */
+  .ap-fr-zone-active {
+    display: flex; flex-direction: column; gap: 14px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, #14532d 0%, #166534 55%, #15803d 100%);
+    border: 1px solid rgba(255,255,255,0.10); border-radius: 18px;
+    box-shadow: 0 14px 34px rgba(20,83,45,0.22);
+  }
+  .ap-fr-zone-active-top {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+  }
+  .ap-fr-zone-info { flex: 1; min-width: 0; }
+  .ap-fr-zone-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #bbf7d0; margin-bottom: 7px;
+  }
+  .ap-fr-zone-pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #4ade80; flex-shrink: 0;
+    box-shadow: 0 0 0 0 rgba(74,222,128,0.5);
+    animation: apFrPulse 2s infinite;
+  }
+  @keyframes apFrPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
+    70%  { box-shadow: 0 0 0 7px rgba(74,222,128,0); }
+    100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+  }
+  .ap-fr-zone-title {
+    font-size: 17px; font-weight: 800; color: #fff; margin: 0 0 3px; letter-spacing: -0.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ap-fr-zone-sub {
+    font-size: 12.5px; color: rgba(255,255,255,0.72); margin: 0;
+  }
+  .ap-fr-zone-progress { display: flex; flex-direction: column; gap: 7px; }
+  .ap-fr-zone-bar {
+    height: 9px; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden;
+  }
+  .ap-fr-zone-bar-fill {
+    height: 100%; width: 0%; border-radius: 999px;
+    background: linear-gradient(90deg, #86efac, #4ade80);
+    transition: width 0.6s ease;
+  }
+  .ap-fr-zone-progress-meta {
+    display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.78);
+  }
+  .ap-fr-zone-progress-meta strong { color: #fff; font-weight: 800; }
+  .ap-btn--fr-details {
+    background: rgba(255,255,255,0.14); color: #fff;
+    border: 1px solid rgba(255,255,255,0.22); border-radius: 11px;
+    padding: 9px 15px; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .ap-btn--fr-details:hover { background: rgba(255,255,255,0.24); }
+  /* Details modal */
+  .ap-frd-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .ap-frd-overlay.open { opacity: 1; pointer-events: all; }
+  .ap-frd-modal {
+    background: #fff; border-radius: 20px;
+    max-width: 520px; width: calc(100% - 32px);
+    max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+    transform: translateY(24px) scale(0.97);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s;
+    padding: 0;
+  }
+  .ap-frd-overlay.open .ap-frd-modal { transform: translateY(0) scale(1); }
+  .ap-frd-header {
+    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+    padding: 24px 24px 20px;
+    border-radius: 20px 20px 0 0;
+    position: relative;
+  }
+  .ap-frd-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255,255,255,0.15); border: none; border-radius: 50%;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 16px; cursor: pointer; line-height: 1;
+  }
+  .ap-frd-close:hover { background: rgba(255,255,255,0.25); }
+  .ap-frd-header-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.15); border-radius: 20px;
+    padding: 4px 10px; font-size: 11px; font-weight: 700; color: #bbf7d0;
+    margin-bottom: 10px;
+  }
+  .ap-frd-header-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+  .ap-frd-header h3 { color: #fff; font-size: 20px; font-weight: 800; margin: 0 0 4px; }
+  .ap-frd-header p  { color: #bbf7d0; font-size: 13px; margin: 0; }
+  .ap-frd-stats-row {
+    display: flex; gap: 0; border-bottom: 1px solid #e2e8f0;
+  }
+  .ap-frd-stat-cell {
+    flex: 1; padding: 16px; text-align: center;
+    border-right: 1px solid #e2e8f0;
+  }
+  .ap-frd-stat-cell:last-child { border-right: none; }
+  .ap-frd-stat-cell-val { font-size: 22px; font-weight: 800; color: #14532d; }
+  .ap-frd-stat-cell-lbl { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .ap-frd-body { padding: 20px 24px; }
+  .ap-frd-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 0; border-bottom: 1px solid #f1f5f9;
+  }
+  .ap-frd-row:last-child { border-bottom: none; }
+  .ap-frd-row-icon { font-size: 18px; flex-shrink: 0; width: 24px; }
+  .ap-frd-row-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .ap-frd-row-val { font-size: 14px; color: #1e293b; font-weight: 600; }
+  .ap-frd-footer {
+    padding: 16px 24px 22px; display: flex; gap: 10px; align-items: center;
+    border-top: 1px solid #f1f5f9; background: #fafbfc;
+    border-radius: 0 0 20px 20px;
+  }
+  .ap-btn--fr-edit-wizard {
+    flex: 1; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #fff; border: none; border-radius: 12px;
+    padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 6px 16px rgba(22,163,74,0.22);
+    transition: transform 0.12s, box-shadow 0.15s;
+  }
+  .ap-btn--fr-edit-wizard:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(22,163,74,0.28); }
+  .ap-btn--fr-stop {
+    flex-shrink: 0; background: #fff; color: #b91c1c; border: 1.5px solid #fecaca;
+    border-radius: 12px; padding: 13px 16px; font-size: 13.5px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  }
+  .ap-btn--fr-stop:hover { background: #fef2f2; border-color: #fca5a5; }
+  @media (max-width: 460px) {
+    .ap-frd-footer { flex-direction: column-reverse; }
+    .ap-btn--fr-edit-wizard, .ap-btn--fr-stop { width: 100%; }
+  }
+  /* Progress bar */
+  .ap-frd-progress-wrap { margin: 0 24px 16px; }
+  .ap-frd-progress-bar { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+  .ap-frd-progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 99px; transition: width 0.6s; }
+  .ap-frd-progress-label { font-size: 11px; color: #64748b; margin-top: 5px; text-align: right; }
+  @media (max-width: 600px) {
+    .ap-fr-zone-empty { flex-direction: column; text-align: center; }
+    .ap-fr-zone-active-top { flex-direction: column; }
+    .ap-btn--fr-details { width: 100%; }
+    .ap-frd-stats-row { flex-wrap: wrap; }
+    .ap-frd-stat-cell { flex: 0 0 50%; }
+  }
+
+  /* ── FUNDRAISING WIZARD — Redesign v2 ── */
+
+  /* Step 1: benefit cards */
+  .ap-frw-benefit-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .ap-frw-benefit-item {
+    display: grid; grid-template-columns: 48px 1fr; gap: 14px; align-items: center;
+    padding: 14px; border-radius: 18px; border: 1px solid rgba(17,16,14,.08);
+    background: #fff; box-shadow: 0 8px 22px rgba(17,16,14,.045);
+  }
+  .ap-frw-benefit-icon {
+    width: 48px; height: 48px; border-radius: 15px; display: flex; align-items: center;
+    justify-content: center; font-size: 22px; flex-shrink: 0;
+  }
+  .ap-frw-benefit-text strong {
+    display: block; font-size: 14px; font-weight: 900; color: #11100e;
+    margin-bottom: 3px; letter-spacing: -.02em; line-height: 1.2;
+  }
+  .ap-frw-benefit-text span { font-size: 13px; color: rgba(17,16,14,.62); line-height: 1.55; }
+
+  /* Step 1: legal agreement box */
+  .ap-frw-legal-box {
+    border-radius: 20px; border: 1px solid rgba(17,16,14,.08);
+    background: #fafaf8; padding: 18px;
+  }
+  .ap-frw-legal-intro {
+    font-size: 11px; font-weight: 950; letter-spacing: .07em; text-transform: uppercase;
+    color: rgba(17,16,14,.46); margin: 0 0 12px;
+  }
+  .ap-frw-legal-points { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+  .ap-frw-legal-point {
+    font-size: 12px; color: rgba(17,16,14,.68); line-height: 1.6;
+    padding: 10px 12px 10px 28px; background: #fff; border-radius: 12px;
+    border: 1px solid rgba(17,16,14,.06); position: relative;
+  }
+  .ap-frw-legal-point::before {
+    content: ""; position: absolute; left: 12px; top: 18px;
+    width: 5px; height: 5px; border-radius: 999px; background: rgba(183,163,106,.8);
+  }
+  .ap-frw-terms-label {
+    display: flex; align-items: flex-start; gap: 12px; padding: 13px;
+    border-radius: 14px; background: #fff; border: 1px solid rgba(17,16,14,.10); cursor: pointer;
+  }
+  .ap-frw-terms-label input { width: 17px; height: 17px; flex-shrink: 0; margin-top: 2px; accent-color: #2f5844; cursor: pointer; }
+  .ap-frw-terms-label span { font-size: 13px; color: rgba(17,16,14,.70); line-height: 1.6; }
+  .ap-frw-terms-label strong { color: #11100e; font-weight: 900; }
+
+  /* Step 3: amount stepper */
+  .ap-frw-amount-row {
+    display: flex; align-items: center; width: fit-content;
+    border: 1.5px solid rgba(17,16,14,.13); border-radius: 16px; overflow: hidden;
+    background: #fff; margin-bottom: 10px;
+  }
+  .ap-frw-amt-btn {
+    width: 52px; height: 52px; border: 0; background: rgba(17,16,14,.04);
+    color: #11100e; font-size: 26px; font-weight: 300; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; transition: background .14s;
+    line-height: 1;
+  }
+  .ap-frw-amt-btn:hover { background: rgba(17,16,14,.09); }
+  .ap-frw-amt-btn:active { background: rgba(17,16,14,.15); }
+  .ap-frw-amt-display {
+    min-width: 80px; text-align: center; font-size: 28px; font-weight: 900;
+    color: #11100e; letter-spacing: -.04em;
+  }
+
+  /* Step 3: goal/date with $ prefix */
+  .ap-frw-input-icon-wrap { position: relative; display: flex; align-items: center; }
+  .ap-frw-input-pre {
+    position: absolute; left: 14px; font-size: 16px; font-weight: 700;
+    color: rgba(17,16,14,.45); pointer-events: none; z-index: 1;
+  }
+  .ap-frw-input--icon-pre { padding-left: 28px; }
+
+  .ap-frw-helper { font-size: 12px; color: rgba(17,16,14,.50); margin: 6px 0 0; line-height: 1.45; }
+
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -2206,6 +2725,351 @@
   </div>
 
 
+  <!-- ══════════════════════════════════════════════════════
+       FUNDRAISING WIZARD MODAL — 4-step setup flow
+       ══════════════════════════════════════════════════════ -->
+  <div class="ap-frw-overlay" id="apFrwOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="apFrwTitle">
+    <div class="ap-frw-modal" id="apFrwModal">
+
+      <!-- HERO (step indicator + dynamic title) -->
+      <div class="ap-frw-hero">
+        <button class="ap-frw-close" id="apFrwClose" aria-label="Close">✕</button>
+        <div class="ap-frw-step-pills">
+          <div class="ap-frw-pill active" id="apFrwPill1"></div>
+          <div class="ap-frw-pill" id="apFrwPill2"></div>
+          <div class="ap-frw-pill" id="apFrwPill3"></div>
+          <div class="ap-frw-pill" id="apFrwPill4"></div>
+          <div class="ap-frw-pill" id="apFrwPill5"></div>
+        </div>
+        <p class="ap-frw-hero-label" id="apFrwStepLabel">Step 1 of 5</p>
+        <h2 id="apFrwTitle">Fundraising for your team store</h2>
+        <p id="apFrwSubtitle">The most seamless way to raise money — set up in under 5 minutes.</p>
+      </div>
+
+      <!-- STEP 1: How It Works + Agreement -->
+      <div id="apFrwStep1" class="ap-frw-step-content">
+        <div class="ap-frw-body">
+
+          <div class="ap-frw-benefit-list">
+            <div class="ap-frw-benefit-item">
+              <div class="ap-frw-benefit-icon" style="background:#f0fdf4">🏆</div>
+              <div class="ap-frw-benefit-text">
+                <strong>Every sale raises money — automatically</strong>
+                <span>Add $1–$8 per item. The donation is built into your prices when you launch. Flip it on once and every product in your catalog raises money without any ongoing effort.</span>
+              </div>
+            </div>
+            <div class="ap-frw-benefit-item">
+              <div class="ap-frw-benefit-icon" style="background:#eff6ff">🏦</div>
+              <div class="ap-frw-benefit-text">
+                <strong>Funds go straight to the cause's bank</strong>
+                <span>Stripe deposits fundraising dollars directly to the recipient's account after a 7-day hold. No invoices. No checks. No middleman — the money moves itself.</span>
+              </div>
+            </div>
+            <div class="ap-frw-benefit-item">
+              <div class="ap-frw-benefit-icon" style="background:#fefce8">📈</div>
+              <div class="ap-frw-benefit-text">
+                <strong>A live goal bar turns browsers into buyers</strong>
+                <span>Show shoppers how close you are in real time. "We're at $340 of our $500 goal" creates urgency — people who were on the fence buy because they want to help push it over the line.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ap-frw-legal-box">
+            <span class="ap-frw-legal-intro">Read before you continue</span>
+            <div class="ap-frw-legal-points">
+              <div class="ap-frw-legal-point">Stella &amp; Sage Co. is a technology intermediary only — we do not hold, control, or distribute fundraising funds. All payments move directly through Stripe, Inc.</div>
+              <div class="ap-frw-legal-point">As the Fundraiser Manager you are solely responsible for the lawful use of funds and compliance with all applicable laws, including charitable solicitation requirements.</div>
+              <div class="ap-frw-legal-point">A $1 per-item processing fee is added on top of your set amount and disclosed to customers. Your cause always receives exactly the amount you set.</div>
+              <div class="ap-frw-legal-point">This feature does not constitute a charitable donation and should not be represented as tax-deductible unless the receiving organization is a registered 501(c)(3).</div>
+            </div>
+            <label class="ap-frw-terms-label" for="apFrwTermsCheck">
+              <input type="checkbox" id="apFrwTermsCheck" />
+              <span><strong>I've read and agree to these terms.</strong> I understand Stella &amp; Sage Co. is not responsible for how funds are used after transfer, and I'm solely responsible for legal compliance.</span>
+            </label>
+          </div>
+
+        </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-next-btn" id="apFrwStep1Next">Got it — How does payment work? →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: About Stripe -->
+      <div id="apFrwStep2" class="ap-frw-step-content" style="display:none;">
+        <div class="ap-frw-body">
+
+          <div class="ap-frw-stripe-intro">
+            <div class="ap-frw-stripe-intro-header">
+              <div class="ap-frw-stripe-intro-icon">🏦</div>
+              <div>
+                <div class="ap-frw-stripe-intro-title">What is Stripe?</div>
+                <div class="ap-frw-stripe-intro-sub">The payment infrastructure behind millions of businesses</div>
+              </div>
+            </div>
+            <div class="ap-frw-stripe-intro-body">Stripe is the payment platform behind Apple Pay, Shopify, Lyft, and hundreds of thousands of small businesses. When you run a fundraiser here, Stripe handles every transfer from your store to the cause's bank — automatically, on a weekly schedule. You set it up once and walk away.</div>
+          </div>
+
+          <div class="ap-frw-info-card">
+            <span class="ap-frw-info-card-label">What the recipient needs to open their account</span>
+            <div class="ap-frw-info-row">
+              <div class="ap-frw-info-dot"></div>
+              <span><strong>Legal name</strong> — the individual or organization name as it appears on their bank account</span>
+            </div>
+            <div class="ap-frw-info-row">
+              <div class="ap-frw-info-dot"></div>
+              <span><strong>Date of birth</strong> — for identity verification</span>
+            </div>
+            <div class="ap-frw-info-row">
+              <div class="ap-frw-info-dot"></div>
+              <span><strong>Last 4 of SSN or full EIN</strong> — depends on payout volume</span>
+            </div>
+            <div class="ap-frw-info-row">
+              <div class="ap-frw-info-dot"></div>
+              <span><strong>Bank account + routing number</strong> — where their deposits land</span>
+            </div>
+            <span class="ap-frw-info-card-note">Setup takes about 5 minutes — similar to any banking app. They only do it once. After that, Stripe handles every deposit automatically.</span>
+          </div>
+
+          <div class="ap-frw-info-callout">
+            <strong>Who does this?</strong> Not you — the coach, booster club treasurer, or team parent who will receive the funds. They'll click "Connect with Stripe" on the next screen and walk through Stripe's guided setup. You never see or touch their banking information.
+          </div>
+
+        </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-back-btn" id="apFrwStep2Back">← Back</button>
+          <button class="ap-frw-next-btn" id="apFrwStep2Next">Connect the Cause →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Stripe Connect -->
+      <div id="apFrwStep3" class="ap-frw-step-content" style="display:none;">
+        <div class="ap-frw-body">
+          <div class="ap-frw-stripe-card">
+            <div class="ap-frw-stripe-logo">🏦</div>
+            <h3>Connect the Cause's Stripe Account</h3>
+            <p>Have the recipient — the coach, booster club treasurer, or team parent — click below to set up their free Stripe Express account. It takes about 5 minutes. They enter their banking information directly with Stripe. You never see it.</p>
+            <p style="font-size:13px;color:#64748b;">Once connected, Stripe automatically deposits every fundraising dollar to their bank on a weekly basis. No action needed from either of you after setup.</p>
+            <div id="apFrwStripeStatus">
+              <button class="ap-frw-stripe-btn" id="apFrwStripeConnectBtn" type="button">
+                Connect with Stripe
+              </button>
+              <p class="ap-frw-stripe-test-note" id="apFrwStripeTestNote">Test mode active — no real money moves. Switch to live after Stripe platform approval.</p>
+            </div>
+            <div id="apFrwStripeConnected" class="ap-frw-stripe-connected" style="display:none;">
+              Connected — <span id="apFrwStripeAcctId"></span>
+            </div>
+          </div>
+          <div class="ap-frw-highlight">
+            <span class="ap-frw-highlight-icon">🔑</span>
+            <div class="ap-frw-highlight-copy">
+              <strong>This connects the recipient's bank, not yours.</strong> Once they complete setup, Stripe handles every deposit automatically — they never have to touch it again.
+            </div>
+          </div>
+        </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-back-btn" id="apFrwStep3Back">← Back</button>
+          <button class="ap-frw-next-btn" id="apFrwStep3Next">Continue — Set Up Fundraiser →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Fundraiser Details -->
+      <div id="apFrwStep4" class="ap-frw-step-content" style="display:none;">
+        <div class="ap-frw-body">
+
+          <div class="ap-frw-field">
+            <label class="ap-frw-label" for="apFrwCause">Cause Name</label>
+            <input class="ap-frw-input" type="text" id="apFrwCause" placeholder="e.g. Westview Youth Baseball" maxlength="80" autocomplete="off" />
+            <p class="ap-frw-helper">Shown on the storefront — customers see exactly who they're supporting.</p>
+          </div>
+
+          <div class="ap-frw-field">
+            <label class="ap-frw-label">Fundraising Amount Per Item</label>
+            <div class="ap-frw-amount-row">
+              <button type="button" class="ap-frw-amt-btn" id="apFrwAmtDown" aria-label="Decrease">−</button>
+              <div class="ap-frw-amt-display">$<span id="apFrwAmtDisplay">4</span></div>
+              <button type="button" class="ap-frw-amt-btn" id="apFrwAmtUp" aria-label="Increase">+</button>
+              <input type="hidden" id="apFrwAmount" value="4" />
+            </div>
+            <div class="ap-frw-calc-row">
+              <span class="ap-frw-calc-label">$<span id="apFrwAmtA">4</span> to cause + $1 fee</span>
+              <span class="ap-frw-calc-val">= $<span id="apFrwAmtB">5</span> per item</span>
+            </div>
+            <p class="ap-frw-helper">$1–$8 range. Your cause receives exactly the amount you set — the $1 fee is disclosed to customers.</p>
+          </div>
+
+          <div class="ap-frw-goal-row">
+            <div class="ap-frw-field">
+              <label class="ap-frw-label" for="apFrwGoal">Fundraising Goal</label>
+              <div class="ap-frw-input-icon-wrap">
+                <span class="ap-frw-input-pre">$</span>
+                <input class="ap-frw-input ap-frw-input--icon-pre" type="number" id="apFrwGoal" min="1" step="1" placeholder="500" />
+              </div>
+              <p class="ap-frw-helper">Optional — shown publicly to drive urgency.</p>
+            </div>
+            <div class="ap-frw-field">
+              <label class="ap-frw-label" for="apFrwEndDate">End Date</label>
+              <input class="ap-frw-input" type="date" id="apFrwEndDate" />
+              <p class="ap-frw-helper">Optional. Max 1 year from today.</p>
+            </div>
+          </div>
+
+        </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-back-btn" id="apFrwStep4Back">← Back</button>
+          <button class="ap-frw-next-btn" id="apFrwStep4Next">Continue — Display Settings →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Display Settings -->
+      <div id="apFrwStep5" class="ap-frw-step-content" style="display:none;">
+        <div class="ap-frw-body">
+          <p style="font-size:14px;color:rgba(17,16,14,.62);margin:0 0 18px;line-height:1.65;"><strong style="color:#11100e;">Transparency drives sales.</strong> Stores that show their fundraiser progress publicly see significantly more purchases — supporters want to see the goal hit.</p>
+
+          <div class="ap-frw-toggle-row selected" id="apFrwVisRow1" data-val="public">
+            <div class="ap-frw-toggle-icon">🌐</div>
+            <div class="ap-frw-toggle-copy">
+              <h4>Show live progress to everyone</h4>
+              <p>A banner on your storefront shows the cause name, goal, amount raised, and days left. People share it. Parents show it to neighbors. Social proof turns browsers into buyers.</p>
+            </div>
+            <div class="ap-frw-toggle-check"><input type="radio" name="apFrwVis" value="public" checked /></div>
+          </div>
+
+          <div class="ap-frw-toggle-row" id="apFrwVisRow2" data-val="admin_only">
+            <div class="ap-frw-toggle-icon">🛡️</div>
+            <div class="ap-frw-toggle-copy">
+              <h4>Admin-only — I'll announce it myself</h4>
+              <p>Fundraising is active and products are priced accordingly, but customers don't see a progress bar. You track it here in admin. Good for stores that prefer to reveal the total at the end.</p>
+            </div>
+            <div class="ap-frw-toggle-check"><input type="radio" name="apFrwVis" value="admin_only" /></div>
+          </div>
+
+          <div class="ap-frw-highlight" style="margin-top:16px;">
+            <span class="ap-frw-highlight-icon">⭐</span>
+            <div class="ap-frw-highlight-copy">
+              <strong>Either way, shoppers always see "Active Fundraiser."</strong> Customers know a fundraiser is running and understand why prices include a contribution — even if they don't see the live total.
+            </div>
+          </div>
+        </div>
+        <div class="ap-frw-footer">
+          <button class="ap-frw-back-btn" id="apFrwStep5Back">← Back</button>
+          <button class="ap-frw-next-btn" id="apFrwStep5Launch">Launch Fundraiser</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FUNDRAISING ZONE — between hero and tabs -->
+  <div class="ap-fr-zone" id="apFrZone">
+    <!-- Empty state (default, no fundraiser active) -->
+    <div class="ap-fr-zone-empty" id="apFrZoneEmpty">
+      <div class="ap-fr-zone-empty-icon">💚</div>
+      <div class="ap-fr-zone-empty-copy">
+        <strong>Fundraise for your team</strong>
+        <p>Add a per-item donation to every purchase. Payments go straight to your cause — no middleman.</p>
+      </div>
+      <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">Start a Fundraiser Campaign →</button>
+    </div>
+    <!-- Active state (shown when fundraiser is running) -->
+    <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:none;">
+      <div class="ap-fr-zone-active-top">
+        <div class="ap-fr-zone-info">
+          <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
+          <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
+          <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
+        </div>
+        <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details</button>
+      </div>
+      <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:none;">
+        <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill"></div></div>
+        <div class="ap-fr-zone-progress-meta">
+          <span><strong id="apFrZoneRaised">$0</strong> raised</span>
+          <span id="apFrZoneGoal"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUNDRAISER PRICING STATUS BANNER (persists through Stop; outside active zone) -->
+  <div id="apFrPricingBanner" style="display:none;" aria-live="polite"></div>
+
+  <!-- FUNDRAISER DETAILS MODAL -->
+  <div class="ap-frd-overlay" id="apFrdOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="apFrdTitle">
+    <div class="ap-frd-modal">
+      <div class="ap-frd-header">
+        <button class="ap-frd-close" id="apFrdClose" aria-label="Close">✕</button>
+        <div class="ap-frd-header-badge">Active</div>
+        <h3 id="apFrdTitle">Fundraiser Details</h3>
+        <p id="apFrdSubtitle">Your fundraiser is live — raising funds on every sale.</p>
+      </div>
+      <div class="ap-frd-stats-row">
+        <div class="ap-frd-stat-cell">
+          <div class="ap-frd-stat-cell-val" id="apFrdStatRaised">$0</div>
+          <div class="ap-frd-stat-cell-lbl">Total Raised</div>
+        </div>
+        <div class="ap-frd-stat-cell" id="apFrdStatGoalCell" style="display:none;">
+          <div class="ap-frd-stat-cell-val" id="apFrdStatGoal">—</div>
+          <div class="ap-frd-stat-cell-lbl">Goal</div>
+        </div>
+        <div class="ap-frd-stat-cell" id="apFrdStatDaysCell" style="display:none;">
+          <div class="ap-frd-stat-cell-val" id="apFrdStatDays">—</div>
+          <div class="ap-frd-stat-cell-lbl">Days Left</div>
+        </div>
+        <div class="ap-frd-stat-cell">
+          <div class="ap-frd-stat-cell-val" id="apFrdStatAmt">$4</div>
+          <div class="ap-frd-stat-cell-lbl">Per Item</div>
+        </div>
+      </div>
+      <div class="ap-frd-progress-wrap" id="apFrdProgressWrap" style="display:none;">
+        <div class="ap-frd-progress-bar">
+          <div class="ap-frd-progress-fill" id="apFrdProgressFill" style="width:0%"></div>
+        </div>
+        <p class="ap-frd-progress-label" id="apFrdProgressLabel">0% of goal</p>
+      </div>
+      <div class="ap-frd-body">
+        <div class="ap-frd-row">
+          <div class="ap-frd-row-icon">🎯</div>
+          <div>
+            <div class="ap-frd-row-label">Cause</div>
+            <div class="ap-frd-row-val" id="apFrdCauseName">—</div>
+          </div>
+        </div>
+        <div class="ap-frd-row" id="apFrdEndDateRow" style="display:none;">
+          <div class="ap-frd-row-icon">📅</div>
+          <div>
+            <div class="ap-frd-row-label">End Date</div>
+            <div class="ap-frd-row-val" id="apFrdEndDate">—</div>
+          </div>
+        </div>
+        <div class="ap-frd-row">
+          <div class="ap-frd-row-icon">💰</div>
+          <div>
+            <div class="ap-frd-row-label">How it works</div>
+            <div class="ap-frd-row-val" id="apFrdHowItWorks">$4 per item donated → $1 processing fee → $4 goes to your cause</div>
+          </div>
+        </div>
+        <div class="ap-frd-row">
+          <div class="ap-frd-row-icon">👁️</div>
+          <div>
+            <div class="ap-frd-row-label">Public Progress Bar</div>
+            <div class="ap-frd-row-val" id="apFrdVisibility">Visible to shoppers</div>
+          </div>
+        </div>
+        <div class="ap-frd-row">
+          <div class="ap-frd-row-icon">⏱️</div>
+          <div>
+            <div class="ap-frd-row-label">Payout</div>
+            <div class="ap-frd-row-val">7-day hold, then automatic bank transfer via Stripe</div>
+          </div>
+        </div>
+      </div>
+      <div class="ap-frd-footer">
+        <button type="button" class="ap-btn--fr-edit-wizard" id="apFrdEditBtn">Edit Fundraiser</button>
+        <button type="button" class="ap-btn--fr-stop" id="apFrdStopBtn">End Fundraiser</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MAIN DASHBOARD CARD WITH TABS -->
   <div class="ap-main-card">
 
@@ -2327,7 +3191,16 @@
     <!-- SETTINGS PANEL -->
     <div id="apPanelSettings" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnSettings">
 
-      <div class="ap-panel-head">
+      <!-- Fundraising row: shows active state or start prompt, no clutter -->
+      <div id="apFrSettingsRow" class="ap-fr-settings-row" style="display:none;">
+        <div class="ap-fr-settings-row-left">
+          <h4 id="apFrSettingsRowTitle">💚 Fundraiser Active</h4>
+          <p id="apFrSettingsRowSub">Loading fundraiser details…</p>
+        </div>
+        <button class="ap-fr-active-edit" id="apFrEditFromSettings">Edit / End →</button>
+      </div>
+
+      <div class="ap-panel-head" style="margin-top:0;">
         <div>
           <span class="ap-panel-kicker">Store identity</span>
           <h2>Settings</h2>
@@ -4530,6 +5403,689 @@
       }
     });
   }
+})();
+
+// ══════════════════════════════════════════════════════════════
+// FUNDRAISING WIZARD
+// ══════════════════════════════════════════════════════════════
+(function() {
+  'use strict';
+
+  // Fundraising state persists through the secure App Proxy relay — no admin
+  // secret is ever exposed to the browser (the relay injects it server-side,
+  // matching every other admin action on this page).
+  var AP_PROXY_URL = '/apps/ss';
+  var _SS_HANDLE   = encodeURIComponent((window.SSAP && SSAP.shopHandle) || '');
+  var FR_ENDPOINT  = AP_PROXY_URL + '/relay/store/' + _SS_HANDLE + '/fundraising';
+  var FR_STRIPE_CONNECT = FR_ENDPOINT + '/stripe/connect';
+  var FR_STRIPE_STATUS  = FR_ENDPOINT + '/stripe/status';
+
+  // ── State ─────────────────────────────────────────────────
+  var _state = {
+    step: 1,
+    maxStep: 1,            // furthest step the user has reached (for resume)
+    termsAgreed: false,
+    stripeConnected: false,
+    stripeAccountId: '',
+    cause: '',
+    amount: 4,
+    goal: 0,
+    endDate: '',
+    visibility: 'public',
+    enabled: false,
+    totalRaised: 0,
+  };
+
+  // ── Draft persistence (resume where you left off) ──────────
+  // In-progress setup is saved to localStorage so an admin can close the wizard
+  // and pick up exactly where they left off. A live fundraiser from the server
+  // always supersedes the draft.
+  var DRAFT_KEY = 'ss_fr_draft_' + ((window.SSAP && SSAP.shopHandle) || '');
+  function saveDraft() {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        step: _state.step,
+        maxStep: _state.maxStep,
+        termsAgreed: _state.termsAgreed,
+        stripeConnected: _state.stripeConnected,
+        stripeAccountId: _state.stripeAccountId,
+        cause: _state.cause,
+        amount: _state.amount,
+        goal: _state.goal,
+        endDate: _state.endDate,
+        visibility: _state.visibility,
+        _savedAt: Date.now()
+      }));
+    } catch (e) { /* storage disabled — non-fatal */ }
+  }
+  function loadDraft() {
+    try {
+      var raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) { return null; }
+  }
+  function clearDraft() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+  }
+  // Advance to a step, remembering the furthest point reached.
+  function goToStep(n) {
+    if (n < 1 || n > 5) return;
+    _state.step = n;
+    if (n > _state.maxStep) _state.maxStep = n;
+    renderStep();
+  }
+
+  // ── DOM refs ───────────────────────────────────────────────
+  var overlay      = document.getElementById('apFrwOverlay');
+  var launchBtn    = document.getElementById('apFrLaunchBtn');
+  var closeBtn     = document.getElementById('apFrwClose');
+  var settingsRow  = document.getElementById('apFrSettingsRow');
+  var editFromSettings = document.getElementById('apFrEditFromSettings');
+  // Zone
+  var frZoneEmpty  = document.getElementById('apFrZoneEmpty');
+  var frZoneActive = document.getElementById('apFrZoneActive');
+  var frDetailsBtn = document.getElementById('apFrDetailsBtn');
+  // Details modal
+  var frdOverlay   = document.getElementById('apFrdOverlay');
+  var frdClose     = document.getElementById('apFrdClose');
+  var frdEditBtn   = document.getElementById('apFrdEditBtn');
+  var frdStopBtn   = document.getElementById('apFrdStopBtn');
+
+  // Steps
+  var steps = [null,
+    document.getElementById('apFrwStep1'),
+    document.getElementById('apFrwStep2'),
+    document.getElementById('apFrwStep3'),
+    document.getElementById('apFrwStep4'),
+    document.getElementById('apFrwStep5'),
+  ];
+  // Pills
+  var pills = [null,
+    document.getElementById('apFrwPill1'),
+    document.getElementById('apFrwPill2'),
+    document.getElementById('apFrwPill3'),
+    document.getElementById('apFrwPill4'),
+    document.getElementById('apFrwPill5'),
+  ];
+
+  var stepTitles = [null,
+    'Fundraising for your team store',
+    'How the money gets there',
+    'Connect the cause',
+    'Set up your fundraiser',
+    'Choose what customers see',
+  ];
+  var stepSubs = [null,
+    'The most seamless way to raise money — set up in under 5 minutes.',
+    'Stripe handles every transfer automatically — here\'s what the recipient needs.',
+    'Link the cause\'s bank via Stripe Express — takes about 5 minutes.',
+    'Name your cause, set your per-item amount, goal, and end date.',
+    'Transparency drives sales. Choose how much to show publicly.',
+  ];
+  var stepLabels = [null,'Step 1 of 5','Step 2 of 5','Step 3 of 5','Step 4 of 5','Step 5 of 5'];
+
+  // ── Open / close ───────────────────────────────────────────
+  function openWizard(startAtStep) {
+    _state.step = startAtStep || 1;
+    renderStep();
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeWizard() {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeWizard);
+  if (overlay)  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeWizard(); });
+  // Resume at the furthest step previously reached (or step 1 for a fresh start).
+  if (launchBtn) launchBtn.addEventListener('click', function(){ openWizard(_state.maxStep || 1); });
+  if (editFromSettings) editFromSettings.addEventListener('click', function(){ openWizard(4); });
+
+  function openDetails() {
+    if (!frdOverlay) return;
+    frdOverlay.classList.add('open');
+    frdOverlay.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDetails() {
+    if (!frdOverlay) return;
+    frdOverlay.classList.remove('open');
+    frdOverlay.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+  }
+  if (frDetailsBtn) frDetailsBtn.addEventListener('click', openDetails);
+  if (frdClose)     frdClose.addEventListener('click', closeDetails);
+  if (frdOverlay)   frdOverlay.addEventListener('click', function(e){ if(e.target===frdOverlay) closeDetails(); });
+  if (frdEditBtn)   frdEditBtn.addEventListener('click', function(){ closeDetails(); openWizard(4); });
+  if (frdStopBtn) {
+    frdStopBtn.addEventListener('click', async function(){
+      if (!confirm('End this fundraiser? Products will be repriced back to their base prices. Any unpaid balance stays owed and is still payable.')) return;
+      frdStopBtn.disabled = true; frdStopBtn.textContent = 'Stopping…';
+      try {
+        var res = await fetch(FR_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled:false, amount:0, cause_name:'', show_bar:false, goal:0, end_date:'' }),
+          cache: 'no-store'
+        });
+        var j = await res.json().catch(function(){ return {}; });
+        if (!res.ok || !j || j.ok === false) {
+          throw new Error((j && j.error) || ('Stop failed with HTTP ' + res.status));
+        }
+        clearDraft();
+        _state.enabled = false;
+        _state.maxStep = 1;
+        _state.step = 1;
+        _state.stripeConnected = false;
+        _state.totalRaised = 0;
+        closeDetails();
+        _renderActiveState(j);
+        _startPricingPoll('stop');
+      } catch (e) {
+        alert('Fundraiser was not stopped. ' + (e.message || 'Please try again.'));
+      } finally { frdStopBtn.disabled=false; frdStopBtn.textContent='Stop'; }
+    });
+  }
+
+  // ── Render step ────────────────────────────────────────────
+  function renderStep() {
+    var s = _state.step;
+    // Show/hide step panels via class (inline display can't beat !important CSS)
+    for (var i=1; i<=5; i++) {
+      if (!steps[i]) continue;
+      steps[i].style.display = '';                 // clear any leftover inline display
+      steps[i].classList.toggle('ap-frw-active', i === s);
+    }
+    // Pills
+    for (var j=1; j<=5; j++) {
+      if (!pills[j]) continue;
+      pills[j].className = 'ap-frw-pill' + (j<s ? ' done' : j===s ? ' active' : '');
+    }
+    // Hero text
+    var titleEl = document.getElementById('apFrwTitle');
+    var subEl   = document.getElementById('apFrwSubtitle');
+    var lblEl   = document.getElementById('apFrwStepLabel');
+    if (titleEl) titleEl.textContent = stepTitles[s];
+    if (subEl)   subEl.textContent   = stepSubs[s];
+    if (lblEl)   lblEl.textContent   = stepLabels[s];
+    // Scroll the body back to top whenever the step changes
+    var activeBody = steps[s] ? steps[s].querySelector('.ap-frw-body') : null;
+    if (activeBody) activeBody.scrollTop = 0;
+    saveDraft();
+  }
+
+  // ── Step 1 nav ─────────────────────────────────────────────
+  var step1Next = document.getElementById('apFrwStep1Next');
+  var termsCheck = document.getElementById('apFrwTermsCheck');
+  if (step1Next) {
+    step1Next.addEventListener('click', function(){
+      if (!termsCheck || !termsCheck.checked) {
+        var label = document.querySelector('label[for="apFrwTermsCheck"]');
+        if (label) { label.style.outline = '2px solid #f59e0b'; setTimeout(function(){ label.style.outline = ''; }, 1800); }
+        if (termsCheck) termsCheck.focus();
+        return;
+      }
+      _state.termsAgreed = true;
+      goToStep(2);
+    });
+  }
+  if (termsCheck) {
+    termsCheck.addEventListener('change', function(){ _state.termsAgreed = this.checked; saveDraft(); });
+  }
+
+  // ── Step 2 nav (About Stripe) ──────────────────────────────
+  var step2Back = document.getElementById('apFrwStep2Back');
+  var step2Next = document.getElementById('apFrwStep2Next');
+  if (step2Back) step2Back.addEventListener('click', function(){ goToStep(1); });
+  if (step2Next) step2Next.addEventListener('click', function(){ goToStep(3); });
+
+  // ── Step 3 nav (Stripe Connect) ────────────────────────────
+  var step3Back = document.getElementById('apFrwStep3Back');
+  var step3Next = document.getElementById('apFrwStep3Next');
+  var stripeConnectBtn = document.getElementById('apFrwStripeConnectBtn');
+  var stripeConnectedEl = document.getElementById('apFrwStripeConnected');
+  var stripeStatusEl    = document.getElementById('apFrwStripeStatus');
+  var stripeAcctEl      = document.getElementById('apFrwStripeAcctId');
+
+  if (step3Back) step3Back.addEventListener('click', function(){ goToStep(2); });
+  if (step3Next) step3Next.addEventListener('click', function(){
+    // Allow skipping Stripe connect for now (will be required before live)
+    goToStep(4);
+    // Set max date to 1 year and default to 90 days out
+    var dateEl = document.getElementById('apFrwEndDate');
+    if (dateEl && !dateEl.value) {
+      var d = new Date(); d.setFullYear(d.getFullYear()+1);
+      dateEl.max = d.toISOString().split('T')[0];
+      dateEl.value = new Date(Date.now() + 90*864e5).toISOString().split('T')[0];
+    }
+  });
+  // Reflect a connected Stripe account in the UI (used on connect + on resume).
+  function _showStripeConnected() {
+    if (stripeStatusEl)    stripeStatusEl.style.display = 'none';
+    if (stripeConnectedEl) stripeConnectedEl.style.display = '';
+    if (stripeAcctEl)      stripeAcctEl.textContent = _state.stripeAccountId || 'connected';
+  }
+  if (stripeConnectBtn) {
+    stripeConnectBtn.addEventListener('click', async function(){
+      stripeConnectBtn.disabled = true;
+      var orig = stripeConnectBtn.textContent;
+      stripeConnectBtn.textContent = 'Opening Stripe…';
+      try {
+        // Save the draft so we resume on this step after the Stripe round-trip.
+        _state.maxStep = Math.max(_state.maxStep || 1, 3);
+        saveDraft();
+        // Preserve the existing Admin Powers query string, especially ?shop=<handle>,
+        // then add the Stripe return marker. Dropping ?shop breaks store-specific
+        // admin access after Stripe redirects back.
+        var returnUrlObj = new URL(window.location.href);
+        returnUrlObj.searchParams.set('fr_stripe', 'return');
+        var returnUrl = returnUrlObj.toString();
+        var res = await fetch(FR_STRIPE_CONNECT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ return_url: returnUrl, refresh_url: returnUrl }),
+          cache: 'no-store'
+        });
+        var j = await res.json().catch(function(){ return {}; });
+        if (j && j.ok && j.url) {
+          if (j.account_id) { _state.stripeAccountId = j.account_id; saveDraft(); }
+          window.location.href = j.url;   // Stripe-hosted onboarding
+          return;
+        }
+        alert('Could not start Stripe setup. ' + ((j && j.error) || 'Please try again.'));
+      } catch (e) {
+        alert('Could not reach Stripe setup. Please check your connection and try again.');
+      } finally {
+        stripeConnectBtn.disabled = false;
+        stripeConnectBtn.textContent = orig;
+      }
+    });
+  }
+
+  // After returning from Stripe-hosted onboarding, confirm the account status.
+  async function _checkStripeReturn() {
+    if (window.location.search.indexOf('fr_stripe=return') === -1) return;
+    // Clean the marker param first regardless of outcome.
+    try {
+      var cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('fr_stripe');
+      window.history.replaceState({}, '', cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+    } catch (e) {}
+    try {
+      var res = await fetch(FR_STRIPE_STATUS, { cache: 'no-store' });
+      var j = await res.json().catch(function(){ return {}; });
+      if (j && j.connected) {
+        _state.stripeConnected = true;
+        if (j.account_id) _state.stripeAccountId = j.account_id;
+        _showStripeConnected();
+        saveDraft();
+      }
+      // Reopen wizard to show the Stripe result. Step 4 if connected, else 3.
+      openWizard(_state.stripeConnected ? 4 : 3);
+    } catch (e) {
+      // Status check failed (network/server error). Open Step 3 so the admin
+      // can see the connect button and retry rather than seeing a blank page.
+      openWizard(3);
+    }
+  }
+
+  // ── Step 4 fields + nav ────────────────────────────────────
+  var step4Back   = document.getElementById('apFrwStep4Back');
+  var step4Next   = document.getElementById('apFrwStep4Next');
+  var amountEl    = document.getElementById('apFrwAmount');
+  var amtA        = document.getElementById('apFrwAmtA');
+  var amtB        = document.getElementById('apFrwAmtB');
+  var amtDisplay  = document.getElementById('apFrwAmtDisplay');
+  var amtDownBtn  = document.getElementById('apFrwAmtDown');
+  var amtUpBtn    = document.getElementById('apFrwAmtUp');
+
+  function updateCalc() {
+    var v = parseInt(amountEl ? amountEl.value : '4') || 0;
+    v = Math.max(1, Math.min(8, v));
+    _state.amount = v;
+    if (amountEl)   amountEl.value      = v;
+    if (amtA)       amtA.textContent    = v;
+    if (amtB)       amtB.textContent    = v + 1;
+    if (amtDisplay) amtDisplay.textContent = v;
+    saveDraft();
+  }
+  if (amtDownBtn) amtDownBtn.addEventListener('click', function(){
+    if (amountEl) amountEl.value = Math.max(1, (parseInt(amountEl.value) || 4) - 1);
+    updateCalc();
+  });
+  if (amtUpBtn) amtUpBtn.addEventListener('click', function(){
+    if (amountEl) amountEl.value = Math.min(8, (parseInt(amountEl.value) || 4) + 1);
+    updateCalc();
+  });
+  if (step4Back) step4Back.addEventListener('click', function(){ goToStep(3); });
+  // Keep draft in sync as the admin types so nothing is lost on close.
+  ['apFrwCause','apFrwGoal','apFrwEndDate'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function(){
+      var causeEl = document.getElementById('apFrwCause');
+      var goalEl  = document.getElementById('apFrwGoal');
+      var dateEl  = document.getElementById('apFrwEndDate');
+      _state.cause   = causeEl ? causeEl.value.trim() : _state.cause;
+      _state.goal    = parseInt(goalEl ? goalEl.value : '0') || 0;
+      _state.endDate = dateEl ? dateEl.value : '';
+      saveDraft();
+    });
+  });
+  if (step4Next) step4Next.addEventListener('click', function(){
+    var causeEl = document.getElementById('apFrwCause');
+    var goalEl  = document.getElementById('apFrwGoal');
+    var dateEl  = document.getElementById('apFrwEndDate');
+    var cause = (causeEl ? causeEl.value : '').trim();
+    if (!cause) {
+      if (causeEl) { causeEl.focus(); causeEl.style.borderColor='#f59e0b'; setTimeout(function(){ causeEl.style.borderColor=''; },1800); }
+      return;
+    }
+    _state.cause   = cause;
+    _state.goal    = parseInt(goalEl ? goalEl.value : '0') || 0;
+    _state.endDate = dateEl ? dateEl.value : '';
+    updateCalc();
+    goToStep(5);
+  });
+
+  // ── Step 5 visibility toggles + launch ────────────────────
+  var step5Back    = document.getElementById('apFrwStep5Back');
+  var step5Launch  = document.getElementById('apFrwStep5Launch');
+
+  document.querySelectorAll('.ap-frw-toggle-row[data-val]').forEach(function(row){
+    row.addEventListener('click', function(){
+      document.querySelectorAll('.ap-frw-toggle-row[data-val]').forEach(function(r){
+        r.classList.remove('selected');
+        var rb = r.querySelector('input[type=radio]');
+        if (rb) rb.checked = false;
+      });
+      this.classList.add('selected');
+      var rb = this.querySelector('input[type=radio]');
+      if (rb) { rb.checked = true; _state.visibility = rb.value; saveDraft(); }
+    });
+  });
+
+  if (step5Back) step5Back.addEventListener('click', function(){ goToStep(4); });
+  if (step5Launch) {
+    step5Launch.addEventListener('click', async function(){
+      step5Launch.disabled = true;
+      step5Launch.textContent = 'Launching…';
+      try {
+        if (!_state.stripeConnected || !_state.stripeAccountId) {
+          alert('Connect Stripe before launching this fundraiser. This prevents money from being collected without a payout account.');
+          goToStep(3);
+          return;
+        }
+        var payload = {
+          enabled: true,
+          amount: _state.amount,
+          cause_name: _state.cause,
+          show_bar: _state.visibility === 'public',
+          goal: _state.goal,
+          end_date: _state.endDate,
+          stripe_account_id: _state.stripeAccountId,
+          stripe_connected: _state.stripeConnected,
+          setup_step: 5,
+        };
+        var res = await fetch(FR_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          cache: 'no-store'
+        });
+        var j = await res.json().catch(function(){ return {}; });
+        if (!res.ok || !j || j.ok === false) {
+          throw new Error((j && j.error) || ('Launch failed with HTTP ' + res.status));
+        }
+        _state.enabled = true;
+        clearDraft();   // setup complete — no half-finished draft to resume
+        closeWizard();
+        _renderActiveState(j);
+        _startPricingPoll('launch');
+      } catch (e) {
+        alert('Fundraiser was not launched. ' + (e.message || 'Please try again.'));
+        return;
+      } finally {
+        step5Launch.disabled = false;
+        step5Launch.textContent = 'Launch Fundraiser';
+      }
+    });
+  }
+
+  // ── Pricing status poller ──────────────────────────────────
+  // After Launch or Stop, repricing runs in a background thread on the backend.
+  // Poll every 2 s (up to 60 s) and update the persistent banner so the admin
+  // knows whether prices actually changed. The banner lives outside frZoneActive
+  // and therefore remains visible even after Stop hides the active zone.
+  var _pricingPollTimer = null;
+  function _startPricingPoll(context) {
+    var banner = document.getElementById('apFrPricingBanner');
+    if (!banner) return;
+
+    function _showBanner(msg, type) {
+      banner.textContent = msg;
+      banner.className = 'fr-banner--' + type;
+      banner.style.display = msg ? '' : 'none';
+      // Mirror into zone subtitle and details modal for the launch case when
+      // those elements are still visible.
+      var subEl = document.getElementById('apFrZoneSub');
+      var dtlEl = document.getElementById('apFrdSubtitle');
+      if (subEl) subEl.textContent = msg;
+      if (dtlEl) dtlEl.textContent = msg;
+    }
+
+    if (_pricingPollTimer) clearInterval(_pricingPollTimer);
+    var attempts = 0;
+    var maxAttempts = 30; // 30 × 2 s = 60 s
+
+    _pricingPollTimer = setInterval(async function() {
+      attempts++;
+      if (attempts > maxAttempts) { clearInterval(_pricingPollTimer); return; }
+      try {
+        var res = await fetch(FR_ENDPOINT, { cache: 'no-store' });
+        var j = await res.json().catch(function(){ return {}; });
+        var status = j && j.pricing_status;
+        var err    = ((j && j.pricing_error) || '').slice(0, 200);
+        var errSuffix = err ? ' (' + err + ')' : '';
+
+        if (context === 'launch') {
+          if (status === 'pending')   _showBanner('Fundraiser launched. Product pricing is still updating…', 'pending');
+          if (status === 'succeeded') _showBanner('Fundraiser active. Product prices updated.', 'success');
+          if (status === 'skipped')   _showBanner('Fundraiser active. Product prices were already correct.', 'success');
+          if (status === 'failed')    _showBanner('Fundraiser setup saved, but product pricing failed. Do not take orders until this is fixed.' + errSuffix, 'error');
+        } else {
+          if (status === 'pending')   _showBanner('Stopping fundraiser. Product prices are being restored…', 'pending');
+          if (status === 'succeeded') _showBanner('Fundraiser stopped. Product prices restored.', 'success');
+          if (status === 'skipped')   _showBanner('Fundraiser stopped. No price restore needed.', 'success');
+          if (status === 'failed')    _showBanner('Fundraiser stop was saved, but product price restore failed. Check products before taking orders.' + errSuffix, 'error');
+        }
+
+        // Keep error banners visible indefinitely; clear success after 8 s.
+        if (status && status !== 'pending') {
+          clearInterval(_pricingPollTimer);
+          if (status !== 'failed') {
+            setTimeout(function(){ banner.style.display = 'none'; }, 8000);
+          }
+        }
+      } catch (e) { /* ignore transient poll errors */ }
+    }, 2000);
+  }
+
+  // ── Active state rendering ─────────────────────────────────
+  function _renderActiveState(data) {
+    var enabled = data && data.enabled;
+
+    // Zone toggle — class on parent drives CSS visibility as well so the empty
+    // state can't flash in before JS runs on repeat page loads.
+    var frZoneEl = document.getElementById('apFrZone');
+    if (frZoneEl) frZoneEl.classList.toggle('ap-fr-zone--active', !!enabled);
+    if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : '';
+    if (frZoneActive) frZoneActive.style.display = enabled ? '' : 'none';
+    if (settingsRow)  settingsRow.style.display  = enabled ? '' : 'none';
+    if (!enabled) return;
+
+    var cause  = (data.cause_name || '').trim() || 'Your Fundraiser';
+    var amt    = parseInt(data.amount || 0);
+    var raised = parseFloat(data.total_raised || 0);
+    var goal   = parseFloat(data.goal || 0);
+    var endDate= data.end_date || '';
+    var showBar = !!data.show_bar;
+
+    // ── Zone active band ──
+    var zoneTitleEl   = document.getElementById('apFrZoneTitle');
+    var zoneSubEl     = document.getElementById('apFrZoneSub');
+    var zoneRaisedEl  = document.getElementById('apFrZoneRaised');
+    var zoneGoalEl    = document.getElementById('apFrZoneGoal');
+    var zoneProgWrap  = document.getElementById('apFrZoneProgressWrap');
+    var zoneBarFill   = document.getElementById('apFrZoneBarFill');
+
+    var msLeft = endDate ? (new Date(endDate) - new Date()) : 0;
+    var daysLeft = (endDate && msLeft > 0) ? Math.ceil(msLeft/864e5) : 0;
+
+    if (zoneTitleEl) zoneTitleEl.textContent = cause;
+    if (zoneSubEl) {
+      var sub = '$' + amt + ' per item · +$1 fee · auto-repriced';
+      if (daysLeft > 0) sub += ' · ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + ' left';
+      zoneSubEl.textContent = sub;
+    }
+    if (zoneRaisedEl) zoneRaisedEl.textContent = '$' + raised.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+    // Progress bar only shows when there's a goal to track.
+    if (goal > 0 && zoneProgWrap) {
+      zoneProgWrap.style.display = '';
+      var zpct = Math.min(100, (raised/goal)*100);
+      if (zoneBarFill) zoneBarFill.style.width = zpct.toFixed(1) + '%';
+      if (zoneGoalEl) zoneGoalEl.textContent = 'of $' + goal.toLocaleString('en-US',{maximumFractionDigits:0}) + ' goal';
+    } else if (zoneProgWrap) {
+      zoneProgWrap.style.display = 'none';
+    }
+
+    // ── Details modal ──
+    var frdTitle  = document.getElementById('apFrdTitle');
+    var frdCause  = document.getElementById('apFrdCauseName');
+    var frdRaised = document.getElementById('apFrdStatRaised');
+    var frdGoalCell = document.getElementById('apFrdStatGoalCell');
+    var frdGoal   = document.getElementById('apFrdStatGoal');
+    var frdDaysCell = document.getElementById('apFrdStatDaysCell');
+    var frdDays   = document.getElementById('apFrdStatDays');
+    var frdAmt    = document.getElementById('apFrdStatAmt');
+    var frdHoW    = document.getElementById('apFrdHowItWorks');
+    var frdVis    = document.getElementById('apFrdVisibility');
+    var frdEndRow = document.getElementById('apFrdEndDateRow');
+    var frdEndEl  = document.getElementById('apFrdEndDate');
+    var frdProgWrap = document.getElementById('apFrdProgressWrap');
+    var frdProgFill = document.getElementById('apFrdProgressFill');
+    var frdProgLbl  = document.getElementById('apFrdProgressLabel');
+    var srTitle = document.getElementById('apFrSettingsRowTitle');
+    var srSub   = document.getElementById('apFrSettingsRowSub');
+
+    if (frdTitle) frdTitle.textContent = cause + ' Fundraiser';
+    if (frdCause) frdCause.textContent = cause;
+    if (frdRaised) frdRaised.textContent = '$' + raised.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    if (frdAmt) frdAmt.textContent = '$' + amt;
+    if (frdHoW) frdHoW.textContent = '$' + amt + ' per item donated · +$1 processing fee · cause receives $' + amt + ' per sale';
+    if (frdVis) frdVis.textContent = showBar ? 'Progress bar visible to shoppers' : 'Hidden from public storefront';
+
+    if (goal > 0) {
+      if (frdGoalCell) frdGoalCell.style.display = '';
+      if (frdGoal) frdGoal.textContent = '$' + goal.toLocaleString('en-US',{maximumFractionDigits:0});
+      if (frdProgWrap) frdProgWrap.style.display = '';
+      var pct = Math.min(100, (raised/goal)*100);
+      if (frdProgFill) frdProgFill.style.width = pct.toFixed(1) + '%';
+      if (frdProgLbl)  frdProgLbl.textContent  = pct.toFixed(0) + '% of $' + goal.toLocaleString('en-US',{maximumFractionDigits:0}) + ' goal';
+    } else {
+      if (frdGoalCell) frdGoalCell.style.display = 'none';
+      if (frdProgWrap) frdProgWrap.style.display = 'none';
+    }
+
+    if (endDate) {
+      if (frdEndRow) frdEndRow.style.display = '';
+      if (frdEndEl) frdEndEl.textContent = new Date(endDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+      if (msLeft > 0) {
+        if (frdDaysCell) frdDaysCell.style.display = '';
+        if (frdDays) frdDays.textContent = Math.ceil(msLeft/864e5);
+      } else if (frdDaysCell) { frdDaysCell.style.display = 'none'; }
+    } else {
+      if (frdEndRow) frdEndRow.style.display = 'none';
+      if (frdDaysCell) frdDaysCell.style.display = 'none';
+    }
+
+    if (srTitle) srTitle.textContent = '💚 ' + cause + ' Fundraiser — Active';
+    if (srSub)   srSub.textContent   = '$' + amt + ' per item · $' + raised.toFixed(2) + ' raised' + (goal>0?' of $'+goal+' goal':'') + (endDate?' · ends '+endDate:'');
+  }
+
+  // Apply a set of fundraiser fields to _state and the form inputs.
+  function _applyToForm(d) {
+    if (!d) return;
+    if (d.cause != null || d.cause_name != null) _state.cause = d.cause || d.cause_name || '';
+    if (d.amount  != null) _state.amount  = parseInt(d.amount) || 4;
+    if (d.goal    != null) _state.goal    = parseFloat(d.goal) || 0;
+    if (d.endDate != null || d.end_date != null) _state.endDate = d.endDate || d.end_date || '';
+    var causeEl  = document.getElementById('apFrwCause');
+    var goalEl   = document.getElementById('apFrwGoal');
+    var dateEl   = document.getElementById('apFrwEndDate');
+    if (causeEl && _state.cause)   causeEl.value = _state.cause;
+    if (amountEl)                  amountEl.value = _state.amount;
+    if (goalEl && _state.goal)     goalEl.value  = _state.goal;
+    if (dateEl && _state.endDate)  dateEl.value  = _state.endDate;
+    updateCalc();
+  }
+
+  // Restore an in-progress (not yet launched) setup so the admin can resume.
+  function _restoreDraft() {
+    var d = loadDraft();
+    if (!d) return;
+    _state.maxStep        = parseInt(d.maxStep) || 1;
+    _state.termsAgreed    = !!d.termsAgreed;
+    _state.stripeConnected= !!d.stripeConnected;
+    _state.stripeAccountId= d.stripeAccountId || '';
+    _state.visibility     = d.visibility || 'public';
+    _applyToForm(d);
+    if (_state.termsAgreed && termsCheck) termsCheck.checked = true;
+    if (_state.stripeConnected) _showStripeConnected();
+    // Reflect saved visibility selection in the toggle rows
+    document.querySelectorAll('.ap-frw-toggle-row[data-val]').forEach(function(r){
+      var on = r.getAttribute('data-val') === _state.visibility;
+      r.classList.toggle('selected', on);
+      var rb = r.querySelector('input[type=radio]');
+      if (rb) rb.checked = on;
+    });
+  }
+
+  // ── Load existing fundraising state on page load ───────────
+  async function _loadState() {
+    var serverActive = false;
+    try {
+      var r = await fetch(FR_ENDPOINT, { cache: 'no-store' });
+      var j = await r.json().catch(function(){ return {}; });
+      if (j.ok !== false && j.enabled) {
+        serverActive = true;
+        _state.enabled = true;
+        _state.totalRaised = parseFloat(j.total_raised || 0);
+        _applyToForm(j);
+        // Require both stripe_connected AND stripe_account_id — having an
+        // account ID alone doesn't mean onboarding is complete.
+        if (j.stripe_connected && j.stripe_account_id) {
+          _state.stripeConnected = true;
+          _state.stripeAccountId = j.stripe_account_id;
+        } else {
+          _state.stripeConnected = false;
+          _state.stripeAccountId = j.stripe_account_id || '';
+        }
+        _renderActiveState(j);
+        clearDraft();
+      }
+    } catch(e) { /* silent — store may not have a fundraiser yet */ }
+    if (!serverActive) _restoreDraft();
+    // Only check the Stripe return if there's no live fundraiser already active.
+    // Await so the wizard opens after state is fully settled.
+    if (!serverActive) await _checkStripeReturn();
+  }
+
+  _loadState();
 })();
 </script>
 
