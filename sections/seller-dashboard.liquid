@@ -27,6 +27,7 @@
 {% assign requested_badge = false %}
 {% assign member_handles_blob = '||' %}
 {% assign admin_handles_blob  = '||' %}
+{% assign ack_member_handles_blob = '||' %}
 {% assign store_count = 0 %}
 {% assign admin_count = 0 %}
 {% assign form_access_url = section.settings.form_access_url | default: '' %}
@@ -77,6 +78,17 @@
         {% endunless %}
       {% endif %}
     {% endif %}
+
+    {% comment %} Track which member-store ack tags the customer already has {% endcomment %}
+    {% if tag_down contains 'ss-ack-member-store--' %}
+      {% assign ackh = tag_stripped | remove: 'ss-ack-member-store--' | remove: 'SS-ACK-MEMBER-STORE--' | strip | downcase %}
+      {% if ackh != blank %}
+        {% capture ack_needle %}||{{ ackh }}||{% endcapture %}
+        {% unless ack_member_handles_blob contains ack_needle %}
+          {% assign ack_member_handles_blob = ack_member_handles_blob | append: ackh | append: '||' %}
+        {% endunless %}
+      {% endif %}
+    {% endif %}
   {% endfor %}
 {% endif %}
 
@@ -94,6 +106,28 @@
 {% assign bucket_building = '' %}
 
 {% assign raw_handles = member_handles_blob | split: '||' %}
+
+{% comment %}
+  Find the first store where the customer is a member-only (not admin) and has
+  not yet acked the member-store notice. The modal shows for that store.
+  Members who are also admin for a store never see the member notice for it.
+{% endcomment %}
+{% assign first_unacked_member_handle = '' %}
+{% if customer %}
+  {% for rh in raw_handles %}
+    {% assign rh_clean = rh | strip | downcase %}
+    {% if rh_clean == blank %}{% continue %}{% endif %}
+    {% capture rh_admin_needle %}||{{ rh_clean }}||{% endcapture %}
+    {% unless admin_handles_blob contains rh_admin_needle %}
+      {% capture rh_ack_needle %}||{{ rh_clean }}||{% endcapture %}
+      {% unless ack_member_handles_blob contains rh_ack_needle %}
+        {% if first_unacked_member_handle == blank %}
+          {% assign first_unacked_member_handle = rh_clean %}
+        {% endif %}
+      {% endunless %}
+    {% endunless %}
+  {% endfor %}
+{% endif %}
 
 {% for h in raw_handles %}
   {% assign handle = h | strip %}
@@ -3681,7 +3715,133 @@
   }
 }
 
+/* ── MEMBER STORE NOTICE MODAL ────────────────────────────────────────── */
+.ss-mnot-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(15,23,42,0.72); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.ss-mnot-overlay.open { opacity: 1; pointer-events: all; }
+.ss-mnot-dialog {
+  background: #fff; border-radius: 20px; width: 100%; max-width: 500px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.06);
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.26s cubic-bezier(0.34,1.56,0.64,1);
+  overflow: hidden;
+}
+.ss-mnot-overlay.open .ss-mnot-dialog { transform: translateY(0) scale(1); }
+.ss-mnot-header {
+  background: linear-gradient(135deg, #14532d 0%, #15803d 100%);
+  padding: 26px 26px 20px; display: flex; align-items: center; gap: 14px;
+}
+.ss-mnot-icon {
+  width: 46px; height: 46px; border-radius: 13px;
+  background: rgba(255,255,255,0.15); display: flex;
+  align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+}
+.ss-mnot-title {
+  margin: 0; font-size: 19px; font-weight: 900; color: #fff; letter-spacing: -0.02em;
+}
+.ss-mnot-body {
+  padding: 22px 26px 8px; font-size: 14px; line-height: 1.65; color: #374151;
+}
+.ss-mnot-body p { margin: 0 0 12px; }
+.ss-mnot-contact {
+  margin: 12px 0 0; padding: 13px 15px;
+  background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
+  font-size: 13px; color: #166534;
+}
+.ss-mnot-warn {
+  margin: 0 26px 0; min-height: 0; font-size: 12px;
+  color: #b45309; font-weight: 600;
+}
+.ss-mnot-warn:not(:empty) { margin-bottom: 8px; }
+.ss-mnot-actions {
+  padding: 14px 26px 22px; display: flex; justify-content: flex-end;
+}
+.ss-mnot-ack-btn {
+  background: linear-gradient(135deg, #15803d, #16a34a);
+  color: #fff; border: none; border-radius: 10px;
+  padding: 11px 22px; font-size: 14px; font-weight: 800;
+  cursor: pointer; transition: opacity 0.15s, transform 0.12s;
+}
+.ss-mnot-ack-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.ss-mnot-ack-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+@media (max-width: 560px) {
+  .ss-mnot-dialog { border-radius: 16px; }
+  .ss-mnot-header { padding: 20px 18px 16px; }
+  .ss-mnot-body { padding: 16px 18px 6px; font-size: 13px; }
+  .ss-mnot-actions { padding: 10px 18px 18px; }
+  .ss-mnot-warn { margin: 0 18px 0; }
+}
+
 </style>
+
+{% if customer and first_unacked_member_handle != blank %}
+<!-- MEMBER STORE NOTICE — one-time, cross-device, ack'd via tag ss-ack-member-store--{handle} -->
+<div class="ss-mnot-overlay" id="ssMnotOverlay" role="dialog" aria-modal="true" aria-labelledby="ssMnotTitle">
+  <div class="ss-mnot-dialog">
+    <div class="ss-mnot-header">
+      <div class="ss-mnot-icon">🏪</div>
+      <h2 class="ss-mnot-title" id="ssMnotTitle">Welcome to Your Store</h2>
+    </div>
+    <div class="ss-mnot-body">
+      <p>This store was created and customized by your store admin.</p>
+      <p>If you would like product changes, different shirt colors, logo placement adjustments, or have questions about the designs shown on this store, please reach out to your store admin before ordering.</p>
+      <p>The product mockups show how each item is expected to print, so please review the item, color, size, and design placement before checking out.</p>
+      <div class="ss-mnot-contact">
+        For order, checkout, or Stella &amp; Sage support questions, contact:<br>
+        <strong>ryan.irwin@stellaandsagecompany.com</strong>
+      </div>
+    </div>
+    <div class="ss-mnot-warn" id="ssMnotWarn" aria-live="polite"></div>
+    <div class="ss-mnot-actions">
+      <button type="button" class="ss-mnot-ack-btn" id="ssMnotAckBtn">Got it</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var overlay = document.getElementById('ssMnotOverlay');
+  var ackBtn  = document.getElementById('ssMnotAckBtn');
+  var warn    = document.getElementById('ssMnotWarn');
+  if (!overlay) return;
+
+  var HANDLE = {{ first_unacked_member_handle | json }};
+  var RELAY_BASE = '/apps/ss/relay/store/' + HANDLE;
+
+  requestAnimationFrame(function(){ overlay.classList.add('open'); });
+
+  function closeNotice() { overlay.classList.remove('open'); }
+
+  ackBtn.addEventListener('click', function() {
+    ackBtn.disabled = true;
+    warn.textContent = '';
+    fetch(RELAY_BASE + '/notice-ack', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notice: 'member-store' }),
+      cache: 'no-store',
+    })
+    .then(function(r){ return r.json().catch(function(){ return {}; }); })
+    .then(function(j){
+      if (j && j.ok) {
+        closeNotice();
+      } else {
+        warn.textContent = 'We could not save this acknowledgement. You may see this again later.';
+        ackBtn.disabled = false;
+      }
+    })
+    .catch(function(){
+      warn.textContent = 'We could not save this acknowledgement. You may see this again later.';
+      ackBtn.disabled = false;
+    });
+  });
+})();
+</script>
+{% endif %}
 
 
 {% schema %}
