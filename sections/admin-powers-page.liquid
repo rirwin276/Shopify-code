@@ -24,8 +24,6 @@
 {%- assign owner_email_fallback = 'ryan.irwin@stellaandsagecompany.com' -%}
 {%- assign is_admin_for_shop = false -%}
 {%- assign is_super_admin = false -%}
-{%- assign ack_admin_review_tag = 'ss-ack-admin-review--' | append: shop_handle | downcase -%}
-{%- assign has_ack_admin_review = false -%}
 
 {%- if customer and shop_handle != blank -%}
   {%- assign customer_email_down = customer.email | default: '' | downcase | strip -%}
@@ -46,14 +44,8 @@
     {%- if tag_down == required_admin_tag -%}
       {%- assign is_admin_for_shop = true -%}
     {%- endif -%}
-
-    {%- if tag_down == ack_admin_review_tag -%}
-      {%- assign has_ack_admin_review = true -%}
-    {%- endif -%}
   {%- endfor -%}
 {%- endif -%}
-
-{%- assign show_admin_review_notice = false -%}{%- if customer and is_admin_for_shop and has_ack_admin_review == false -%}{%- assign show_admin_review_notice = true -%}{%- endif -%}
 
 {%- style -%}
   :root {
@@ -2443,22 +2435,6 @@
 
   .ap-frw-helper { font-size: 12px; color: rgba(17,16,14,.50); margin: 6px 0 0; line-height: 1.45; }
 
-.ap-rnot-overlay{position:fixed;inset:0;z-index:9000;background:rgba(15,23,42,.72);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .22s ease}
-.ap-rnot-overlay.open{opacity:1;pointer-events:all}
-.ap-rnot-dialog{background:#fff;border-radius:20px;width:100%;max-width:520px;box-shadow:0 32px 80px rgba(0,0,0,.28),0 0 0 1px rgba(0,0,0,.06);transform:translateY(20px) scale(.97);transition:transform .26s cubic-bezier(.34,1.56,.64,1);overflow:hidden}
-.ap-rnot-overlay.open .ap-rnot-dialog{transform:translateY(0) scale(1)}
-.ap-rnot-header{background:linear-gradient(135deg,#1e3a5f,#1d4ed8);padding:28px 28px 22px;display:flex;align-items:center;gap:16px}
-.ap-rnot-icon{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
-.ap-rnot-title{margin:0;font-size:20px;font-weight:900;color:#fff;letter-spacing:-.02em}
-.ap-rnot-body{padding:24px 28px 8px;font-size:14px;line-height:1.65;color:#374151}
-.ap-rnot-body p{margin:0 0 12px}.ap-rnot-body ul{margin:0 0 12px;padding-left:20px}.ap-rnot-body li{margin-bottom:5px}.ap-rnot-body strong{color:#111827}
-.ap-rnot-contact{margin:14px 0 0;padding:14px 16px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;font-size:13px;color:#0369a1}
-.ap-rnot-warn{margin:0 28px;min-height:0;font-size:12px;color:#b45309;font-weight:600}.ap-rnot-warn:not(:empty){margin-bottom:8px}
-.ap-rnot-actions{padding:16px 28px 24px;display:flex;justify-content:flex-end}
-.ap-rnot-ack-btn{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:800;cursor:pointer;transition:opacity .15s,transform .12s}
-.ap-rnot-ack-btn:hover{opacity:.9;transform:translateY(-1px)}.ap-rnot-ack-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-@media(max-width:560px){.ap-rnot-dialog{border-radius:16px}.ap-rnot-header{padding:22px 20px 18px}.ap-rnot-body{padding:18px 20px 6px;font-size:13px}.ap-rnot-actions{padding:12px 20px 20px}.ap-rnot-warn{margin:0 20px}}
-
 {%- endstyle -%}
 
 {%- if customer == nil -%}
@@ -3239,10 +3215,6 @@
   </div>
 
 </div>
-
-{%- if show_admin_review_notice -%}
-<div class="ap-rnot-overlay" id="apRnotOverlay" role="dialog" aria-modal="true" aria-labelledby="apRnotTitle"><div class="ap-rnot-dialog"><div class="ap-rnot-header"><div class="ap-rnot-icon">🔍</div><h2 class="ap-rnot-title" id="apRnotTitle">Quick Store Review</h2></div><div class="ap-rnot-body"><p>Before sharing your store, please take a minute to review your products.</p><p>Your product mockups show how your items are expected to print. If a logo looks too high, too low, too small, too large, off-center, or the shirt color does not look right, please adjust it before sharing your store.</p><p><strong>You can make changes from your Admin Page:</strong></p><ul><li>Go to the <strong>Products</strong> tab.</li><li>Use the <strong>Color / Placement Editor</strong> to adjust logo size, logo position, and available shirt colors.</li><li>Use <strong>Change Main Image</strong> in Settings if your uploaded image looks blurry, cropped wrong, or needs to be replaced.</li></ul><p>Because these are custom-made products, the store admin is responsible for reviewing and approving products before the store is shared or opened for orders.</p><div class="ap-rnot-contact">Need help? Reach out anytime and we'll help you get it right before orders come in.<br><strong>Contact:</strong> ryan.irwin@stellaandsagecompany.com</div></div><div class="ap-rnot-warn" id="apRnotWarn" aria-live="polite"></div><div class="ap-rnot-actions"><button type="button" class="ap-rnot-ack-btn" id="apRnotAckBtn">Got it — I'll review my store</button></div></div></div>
-{%- endif -%}
 
 <script>
 (function(){
@@ -6000,10 +5972,6 @@
   _loadState();
 })();
 </script>
-
-{%- if show_admin_review_notice -%}
-<script>(function(){var o=document.getElementById('apRnotOverlay'),b=document.getElementById('apRnotAckBtn'),w=document.getElementById('apRnotWarn');if(!o)return;var H={{ shop_handle | json }},U='/apps/ss/relay/store/'+H+'/notice-ack';requestAnimationFrame(function(){o.classList.add('open')});b.addEventListener('click',function(){b.disabled=true;w.textContent='';fetch(U,{method:'POST',headers:{'Content-Type':'application/json'},body:'{"notice":"admin-review"}',cache:'no-store'}).then(function(r){return r.json().catch(function(){return{}})}).then(function(j){if(j&&j.ok){o.classList.remove('open')}else{w.textContent='We could not save this acknowledgement. You may see this again later.';b.disabled=false}}).catch(function(){w.textContent='We could not save this acknowledgement. You may see this again later.';b.disabled=false})})})();</script>
-{%- endif -%}
 
 {%- endif -%}
 

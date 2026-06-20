@@ -50,6 +50,24 @@
         </div>
       {% else %}
 
+        {%- assign ack_admin_tag  = 'ss-ack-admin-review--' | append: handle -%}
+        {%- assign ack_member_tag = 'ss-ack-member-store--' | append: handle -%}
+        {%- assign is_admin       = false -%}
+        {%- assign is_member      = false -%}
+        {%- assign has_ack_admin  = false -%}
+        {%- assign has_ack_member = false -%}
+        {%- for t in customer.tags -%}
+          {%- assign td = t | downcase | strip -%}
+          {%- if td == admin_tag -%}{%- assign is_admin = true -%}{%- endif -%}
+          {%- if td == member_tag -%}{%- assign is_member = true -%}{%- endif -%}
+          {%- if td == ack_admin_tag -%}{%- assign has_ack_admin = true -%}{%- endif -%}
+          {%- if td == ack_member_tag -%}{%- assign has_ack_member = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- assign show_admin_notice  = false -%}
+        {%- assign show_member_notice = false -%}
+        {%- if is_admin and has_ack_admin == false -%}{%- assign show_admin_notice = true -%}{%- endif -%}
+        {%- if is_admin == false and is_member and has_ack_member == false -%}{%- assign show_member_notice = true -%}{%- endif -%}
+
         {% assign entry = shop.metaobjects.custom_shop[handle] %}
 
         {% assign store_name = handle | replace: '-', ' ' | capitalize %}
@@ -151,6 +169,100 @@
     {% endif %}
   {% endif %}
 </section>
+
+{%- if show_admin_notice or show_member_notice -%}
+<div class="ss-not-overlay" id="ssNotOverlay" role="dialog" aria-modal="true">
+  <div class="ss-not-modal">
+    <div class="ss-not-hero">
+      <button class="ss-not-close" id="ssNotClose" type="button" aria-label="Close">✕</button>
+      <div class="ss-not-logo-wrap">
+        {%- if logo_obj != blank -%}
+          {{ logo_obj | image_url: width: 160 | image_tag: loading: 'eager', alt: store_name, class: 'ss-not-logo-img' }}
+        {%- else -%}
+          <span class="ss-not-logo-fb">S&amp;S</span>
+        {%- endif -%}
+      </div>
+      {%- if show_admin_notice -%}
+        <h2 class="ss-not-title">Quick Store Review</h2>
+        <p class="ss-not-sub">{{ store_name }}</p>
+      {%- else -%}
+        <h2 class="ss-not-title">Welcome to Your Store</h2>
+        <p class="ss-not-sub">{{ store_name }}</p>
+      {%- endif -%}
+    </div>
+    <div class="ss-not-body">
+      {%- if show_admin_notice -%}
+        <p>Before sharing your store, take a minute to review your products. Your mockups show how items are expected to print.</p>
+        <p>If a logo looks off — too high, too low, too small, too large, or off-center — or if a shirt color looks wrong, please adjust it before sharing your store with customers.</p>
+        <p><strong>You can make changes from your Admin Page:</strong></p>
+        <ul>
+          <li>Go to the <strong>Products</strong> tab.</li>
+          <li>Use the <strong>Color / Placement Editor</strong> to adjust logo size, position, and available shirt colors.</li>
+          <li>Use <strong>Change Main Image</strong> in Settings if your logo looks blurry or needs to be replaced.</li>
+        </ul>
+        <p>Because these are custom-made products, you are responsible for reviewing and approving your products before sharing the store or opening it for orders.</p>
+        <div class="ss-not-contact">Need help? Reach out anytime — we'll help you get it right before orders come in.<br><strong>Contact:</strong> ryan.irwin@stellaandsagecompany.com</div>
+      {%- else -%}
+        <p>This store was created and customized by your store admin.</p>
+        <p>If you'd like product changes, different shirt colors, or logo placement adjustments, please reach out to your store admin before ordering.</p>
+        <p>The product mockups show how each item is expected to print — please review the item, color, size, and placement before checking out.</p>
+        <div class="ss-not-contact">For order, checkout, or Stella &amp; Sage support questions, contact:<br><strong>ryan.irwin@stellaandsagecompany.com</strong></div>
+      {%- endif -%}
+    </div>
+    <div class="ss-not-warn" id="ssNotWarn" aria-live="polite"></div>
+    <div class="ss-not-footer">
+      {%- if show_admin_notice -%}
+        <button type="button" class="ss-not-ack-btn" id="ssNotAckBtn" data-notice="admin-review">Got it — I'll review my store</button>
+      {%- else -%}
+        <button type="button" class="ss-not-ack-btn" id="ssNotAckBtn" data-notice="member-store">Got it, let's shop!</button>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+<style>
+.ss-not-overlay{position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .22s}
+.ss-not-overlay.open{opacity:1;pointer-events:all}
+.ss-not-modal{background:#fff;border-radius:24px;width:100%;max-width:540px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 40px 100px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.06);transform:translateY(20px) scale(.97);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+.ss-not-overlay.open .ss-not-modal{transform:translateY(0) scale(1)}
+.ss-not-hero{background:linear-gradient(135deg,#0a1628 0%,#1e293b 55%,#111827 100%);padding:28px 28px 22px;position:relative;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.ss-not-close{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.7);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.ss-not-close:hover{background:rgba(255,255,255,.22);color:#fff}
+.ss-not-logo-wrap{width:80px;height:80px;border-radius:20px;overflow:hidden;border:2px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ss-not-logo-img{width:100%;height:100%;object-fit:cover;display:block}
+.ss-not-logo-fb{font-size:22px;font-weight:900;color:rgba(255,255,255,.7)}
+.ss-not-title{margin:0;font-size:21px;font-weight:900;color:#fff;letter-spacing:-.02em}
+.ss-not-sub{margin:0;font-size:13px;color:rgba(255,255,255,.55)}
+.ss-not-body{padding:22px 26px 10px;overflow-y:auto;flex:1;font-size:14px;line-height:1.65;color:#374151}
+.ss-not-body p{margin:0 0 12px}
+.ss-not-body ul{margin:0 0 12px;padding-left:20px}
+.ss-not-body li{margin-bottom:5px}
+.ss-not-body strong{color:#111827}
+.ss-not-contact{margin:12px 0 0;padding:13px 15px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;font-size:13px;color:#0369a1}
+.ss-not-warn{min-height:0;font-size:12px;color:#b45309;font-weight:600;padding:0 26px}
+.ss-not-warn:not(:empty){padding-bottom:8px}
+.ss-not-footer{padding:14px 26px 22px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;flex-shrink:0}
+.ss-not-ack-btn{background:linear-gradient(135deg,#11100e,#2d2820);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:800;cursor:pointer;transition:opacity .15s,transform .12s;letter-spacing:-.01em}
+.ss-not-ack-btn:hover{opacity:.9;transform:translateY(-1px)}
+.ss-not-ack-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+@media(max-width:540px){.ss-not-modal{border-radius:18px}.ss-not-hero{padding:22px 20px 18px}.ss-not-body{padding:18px 20px 8px;font-size:13px}.ss-not-footer{padding:12px 20px 20px}}
+</style>
+<script>
+(function(){
+  var o=document.getElementById('ssNotOverlay'),b=document.getElementById('ssNotAckBtn'),w=document.getElementById('ssNotWarn');
+  if(!o||!b)return;
+  var H={{ handle | json }},notice=b.dataset.notice,U='/apps/ss/relay/store/'+H+'/notice-ack';
+  requestAnimationFrame(function(){o.classList.add('open')});
+  document.getElementById('ssNotClose').addEventListener('click',function(){o.classList.remove('open')});
+  b.addEventListener('click',function(){
+    b.disabled=true;w.textContent='';
+    fetch(U,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({notice:notice}),cache:'no-store'})
+    .then(function(r){return r.json().catch(function(){return{}})})
+    .then(function(j){if(j&&j.ok){o.classList.remove('open')}else{w.textContent='Could not save. You may see this again later.';b.disabled=false}})
+    .catch(function(){w.textContent='Could not save. You may see this again later.';b.disabled=false});
+  });
+})();
+</script>
+{%- endif -%}
 
 <style>
   .ps-wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
