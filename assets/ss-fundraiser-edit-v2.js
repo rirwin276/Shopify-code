@@ -1,6 +1,7 @@
-/* Stella & Sage — active fundraiser edit modal v3
-   Uses a real end-date picker, shows a days-left ticker, and sends edit-only updates
-   without re-launching the active fundraiser. */
+/* Stella & Sage — active fundraiser edit modal v4
+   Safety patch: editing an active fundraiser must never look like Stop/New Launch.
+   It preserves enabled:true, blocks unsafe saves when current data cannot be loaded,
+   and keeps a browser-side audit trace for debugging. */
 (function(){
   'use strict';
 
@@ -99,6 +100,17 @@
     if (!el || !el.textContent.trim()) return '';
     return toISODate(el.textContent.trim());
   }
+  function handleKey(){ return (window.SSAP && SSAP.shopHandle) || 'unknown-store'; }
+  function audit(event, details){
+    var entry = { at: new Date().toISOString(), event: event, details: details || {}, handle: handleKey() };
+    try {
+      var key = 'ss_fr_edit_audit_' + handleKey();
+      var list = JSON.parse(localStorage.getItem(key) || '[]');
+      list.push(entry);
+      localStorage.setItem(key, JSON.stringify(list.slice(-25)));
+    } catch(e) {}
+    try { console.info('[SS fundraiser edit]', entry); } catch(e) {}
+  }
   function fallbackData(){
     var endDate = parseVisibleEndDate();
     var daysEl = qs('#apFrdStatDays');
@@ -114,6 +126,9 @@
       endDate = d.toISOString().slice(0, 10);
     }
     return {
+      enabled: true,
+      _loadedFromServer: false,
+      _source: 'dom-fallback',
       amount: moneyTextToNumber(amtEl && amtEl.textContent ? amtEl.textContent : '4') || 4,
       cause_name: causeEl && causeEl.textContent ? causeEl.textContent.trim() : 'Fundraiser',
       goal: moneyTextToNumber(goalEl && goalEl.textContent ? goalEl.textContent : '0'),
@@ -122,7 +137,7 @@
       show_bar: !(visEl && /hidden|admin|private/i.test(visEl.textContent || ''))
     };
   }
-  function normalizeFundraiserData(data){
+  function normalizeFundraiserData(data, opts){
     var f = fallbackData();
     var flat = flattenFundraiserPayload(data || {});
     var endDate = toISODate(firstValue(flat, ['end_date','endDate','fundraising_end_date','fundraiser_end_date','ends_at','end_at','deadline','expires_at'])) || f.end_date;
@@ -131,10 +146,14 @@
     var amount = firstValue(flat, ['amount','per_item_amount','fundraising_amount','fundraiser_amount','donation_amount','upcharge']);
     var cause = firstValue(flat, ['cause_name','cause','fundraiser_name','fundraising_name','name','title']);
     var rawDays = firstValue(flat, ['days_left','daysLeft','duration_days','duration','campaign_days']);
+    var enabledRaw = firstValue(flat, ['enabled','active','is_active','isActive']);
     var days = daysFromEndDate(endDate) || numFrom(rawDays, f.days_left || 30);
     var goal = numFrom(rawGoal, f.goal || 0);
     if (goal > 999999) goal = Math.round(goal / 100);
     return Object.assign({}, f, flat, {
+      enabled: boolish(enabledRaw, true),
+      _loadedFromServer: !!(opts && opts.loadedFromServer),
+      _source: opts && opts.source ? opts.source : (flat._source || f._source),
       amount: numFrom(amount, f.amount || 4) || 4,
       cause_name: String(cause || f.cause_name || 'Fundraiser').trim(),
       goal: Math.max(0, Math.round(goal || 0)),
@@ -335,14 +354,14 @@
     return overlay;
   }
 
-  function openEditorWithData(data){
+  function openEditorWithData(data, opts){
     var overlay = ensureModal();
-    currentData = normalizeFundraiserData(data);
+    currentData = normalizeFundraiserData(data, opts || {});
     qs('#ssFrEdit2Goal', overlay).value = String(currentData.goal || 0);
     qs('#ssFrEdit2EndDate', overlay).value = toISODate(currentData.end_date) || defaultEndDate();
     setShowPublic(currentData.show_bar !== false);
     updateTicker();
-    setStatus('', '');
+    setStatus(currentData._loadedFromServer ? '' : 'Loading saved fundraiser settings…', '');
     closeNativeModals();
     lockPage();
     overlay.classList.add('open');
@@ -359,30 +378,52 @@
   }
   async function fetchCurrent(){
     var url = endpointUrl();
-    if (!url) return fallbackData();
+    if (!url) return { ok:false, data:fallbackData(), error:'missing endpoint' };
     try {
       var res = await fetch(url + '?ts=' + Date.now(), { cache: 'no-store' });
       var data = await res.json().catch(function(){ return {}; });
-      if (!res.ok || !data || data.ok === false) return fallbackData();
-      return data;
+      audit('fundraiser_get', { ok: res.ok, status: res.status, enabled: data && data.enabled, goal: data && data.goal, end_date: data && data.end_date });
+      if (!res.ok || !data || data.ok === false) return { ok:false, data:fallbackData(), error:(data && data.error) || ('GET failed ' + res.status) };
+      return { ok:true, data:data };
     } catch(e) {
-      return fallbackData();
+      audit('fundraiser_get_error', { error: e && e.message });
+      return { ok:false, data:fallbackData(), error:e && e.message };
     }
   }
   async function openEditor(){
-    openEditorWithData(fallbackData());
-    setStatus('Loading saved fundraiser settings…', '');
-    var data = await fetchCurrent();
-    openEditorWithData(data);
+    openEditorWithData(fallbackData(), { source: 'dom-fallback', loadedFromServer:false });
+    var result = await fetchCurrent();
+    openEditorWithData(result.data, { source: result.ok ? 'server' : 'dom-fallback-after-get-failed', loadedFromServer: result.ok });
+    if (!result.ok) setStatus('Could not confirm saved settings from the server. Saving is blocked to avoid wiping the active fundraiser. Refresh and try again.', 'err');
   }
   async function saveEditor(){
     var overlay = ensureModal();
     var saveBtn = qs('#ssFrEdit2Save', overlay);
+    var data = normalizeFundraiserData(currentData || fallbackData(), { loadedFromServer: currentData && currentData._loadedFromServer, source: currentData && currentData._source });
+
+    if (!data._loadedFromServer) {
+      audit('save_blocked_no_server_data', { data: data });
+      setStatus('Save blocked: I could not confirm the active fundraiser from the server, so I will not overwrite it.', 'err');
+      return;
+    }
+    if (data.enabled === false) {
+      audit('save_blocked_inactive_server_data', { data: data });
+      setStatus('Save blocked: the server says this fundraiser is not active. Refresh before editing.', 'err');
+      return;
+    }
+
     var goal = Math.max(0, parseInt(qs('#ssFrEdit2Goal', overlay).value || '0', 10) || 0);
-    var endDate = toISODate(qs('#ssFrEdit2EndDate', overlay).value) || defaultEndDate();
+    var endDate = toISODate(qs('#ssFrEdit2EndDate', overlay).value);
+    if (!endDate) {
+      setStatus('Pick a valid fundraiser end date first.', 'err');
+      return;
+    }
     var showPublic = getShowPublic();
-    var data = normalizeFundraiserData(currentData || fallbackData());
     var payload = {
+      enabled: true,
+      active: true,
+      mode: 'edit',
+      action: 'update',
       edit_existing: true,
       edit_only: true,
       update_existing: true,
@@ -403,6 +444,7 @@
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving…';
     setStatus('Saving fundraiser settings…', '');
+    audit('fundraiser_edit_save_attempt', { payload: payload });
     try {
       var res = await fetch(endpointUrl(), {
         method: 'POST',
@@ -411,11 +453,13 @@
         cache: 'no-store'
       });
       var json = await res.json().catch(function(){ return {}; });
+      audit('fundraiser_edit_save_response', { ok: res.ok, status: res.status, response: json });
       if (!res.ok || !json || json.ok === false) throw new Error((json && (json.error || json.detail || json.message)) || ('Save failed with HTTP ' + res.status));
       setStatus('Saved. Refreshing the admin view…', 'ok');
       setTimeout(function(){ window.location.reload(); }, 650);
     } catch(e) {
-      setStatus('Could not save yet: ' + (e.message || 'Please try again.'), 'err');
+      audit('fundraiser_edit_save_error', { error: e && e.message });
+      setStatus('Could not save yet: ' + (e.message || 'Please try again.') + ' Debug trace saved in this browser.', 'err');
       saveBtn.disabled = false;
       saveBtn.textContent = 'Save changes';
     }
