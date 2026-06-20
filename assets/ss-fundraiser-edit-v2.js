@@ -1,6 +1,6 @@
-/* Stella & Sage — active fundraiser edit modal v2
-   Fixes mobile keyboard jump, pulls current fundraiser values more robustly,
-   and mirrors the original public/admin progress visibility choice. */
+/* Stella & Sage — active fundraiser edit modal v3
+   Uses a real end-date picker, shows a days-left ticker, and sends edit-only updates
+   without re-launching the active fundraiser. */
 (function(){
   'use strict';
 
@@ -62,23 +62,42 @@
     merge(data);
     return out;
   }
+  function toISODate(value){
+    if (!value) return '';
+    var s = String(value).trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+    var d = new Date(s);
+    return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+  }
+  function todayISO(){
+    var d = new Date();
+    d.setHours(12, 0, 0, 0);
+    return d.toISOString().slice(0, 10);
+  }
+  function defaultEndDate(){
+    var d = new Date();
+    d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() + 30);
+    return d.toISOString().slice(0, 10);
+  }
   function daysFromEndDate(endDate){
-    if (!endDate) return 0;
-    var end = new Date(String(endDate).slice(0, 10) + 'T23:59:59');
+    var iso = toISODate(endDate);
+    if (!iso) return 0;
+    var end = new Date(iso + 'T23:59:59');
     if (isNaN(end.getTime())) return 0;
     return Math.max(0, Math.ceil((end - new Date()) / 864e5));
   }
-  function endDateFromDays(days){
-    var d = new Date();
-    d.setHours(12, 0, 0, 0);
-    d.setDate(d.getDate() + Math.max(1, parseInt(days || '1', 10)));
-    return d.toISOString().slice(0, 10);
+  function formatDateLong(endDate){
+    var iso = toISODate(endDate);
+    if (!iso) return '';
+    var d = new Date(iso + 'T12:00:00');
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   }
   function parseVisibleEndDate(){
     var el = qs('#apFrdEndDate');
     if (!el || !el.textContent.trim()) return '';
-    var d = new Date(el.textContent.trim());
-    return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+    return toISODate(el.textContent.trim());
   }
   function fallbackData(){
     var endDate = parseVisibleEndDate();
@@ -87,36 +106,40 @@
     var amtEl = qs('#apFrdStatAmt');
     var causeEl = qs('#apFrdCauseName');
     var visEl = qs('#apFrdVisibility');
+    var visibleDays = parseInt(daysEl && daysEl.textContent ? daysEl.textContent : '', 10) || daysFromEndDate(endDate) || 30;
+    if (!endDate && visibleDays > 0) {
+      var d = new Date();
+      d.setHours(12, 0, 0, 0);
+      d.setDate(d.getDate() + visibleDays);
+      endDate = d.toISOString().slice(0, 10);
+    }
     return {
-      enabled: true,
       amount: moneyTextToNumber(amtEl && amtEl.textContent ? amtEl.textContent : '4') || 4,
       cause_name: causeEl && causeEl.textContent ? causeEl.textContent.trim() : 'Fundraiser',
       goal: moneyTextToNumber(goalEl && goalEl.textContent ? goalEl.textContent : '0'),
-      end_date: endDate,
-      days_left: parseInt(daysEl && daysEl.textContent ? daysEl.textContent : String(daysFromEndDate(endDate)), 10) || daysFromEndDate(endDate) || 30,
+      end_date: endDate || defaultEndDate(),
+      days_left: visibleDays,
       show_bar: !(visEl && /hidden|admin|private/i.test(visEl.textContent || ''))
     };
   }
   function normalizeFundraiserData(data){
     var f = fallbackData();
     var flat = flattenFundraiserPayload(data || {});
-    var endDate = firstValue(flat, ['end_date','endDate','fundraising_end_date','fundraiser_end_date','ends_at','end_at','deadline','expires_at']) || f.end_date;
+    var endDate = toISODate(firstValue(flat, ['end_date','endDate','fundraising_end_date','fundraiser_end_date','ends_at','end_at','deadline','expires_at'])) || f.end_date;
     var rawGoal = firstValue(flat, ['goal','fundraising_goal','fundraiser_goal','goal_amount','target','target_amount','public_goal','goal_dollars']);
-    var rawDays = firstValue(flat, ['days_left','daysLeft','duration_days','duration','campaign_days']);
     var rawShow = firstValue(flat, ['show_bar','showBar','show_progress_bar','showProgressBar','show_progress','showProgress','display_progress','displayProgress','progress_public','public_progress','visibility']);
     var amount = firstValue(flat, ['amount','per_item_amount','fundraising_amount','fundraiser_amount','donation_amount','upcharge']);
     var cause = firstValue(flat, ['cause_name','cause','fundraiser_name','fundraising_name','name','title']);
-
-    var days = numFrom(rawDays, 0) || daysFromEndDate(endDate) || f.days_left || 30;
+    var rawDays = firstValue(flat, ['days_left','daysLeft','duration_days','duration','campaign_days']);
+    var days = daysFromEndDate(endDate) || numFrom(rawDays, f.days_left || 30);
     var goal = numFrom(rawGoal, f.goal || 0);
-    if (goal > 999999) goal = Math.round(goal / 100); // tolerate cents if backend sends cents
-
+    if (goal > 999999) goal = Math.round(goal / 100);
     return Object.assign({}, f, flat, {
       amount: numFrom(amount, f.amount || 4) || 4,
       cause_name: String(cause || f.cause_name || 'Fundraiser').trim(),
       goal: Math.max(0, Math.round(goal || 0)),
-      end_date: endDate || endDateFromDays(days),
-      days_left: Math.max(1, Math.round(days || 30)),
+      end_date: endDate || defaultEndDate(),
+      days_left: Math.max(0, Math.round(days || 0)),
       show_bar: boolish(rawShow, f.show_bar !== false)
     });
   }
@@ -124,11 +147,7 @@
     var zone = qs('#apFrZone');
     var activeVisible = qs('#apFrZoneActive');
     var settings = qs('#apFrSettingsRow');
-    return !!(
-      (zone && zone.classList.contains('ap-fr-zone--active')) ||
-      (activeVisible && activeVisible.offsetParent !== null) ||
-      (settings && settings.offsetParent !== null)
-    );
+    return !!((zone && zone.classList.contains('ap-fr-zone--active')) || (activeVisible && activeVisible.offsetParent !== null) || (settings && settings.offsetParent !== null));
   }
 
   var endpoint = '';
@@ -161,6 +180,7 @@
       '.ss-fr-edit2-input{width:100%;box-sizing:border-box;border:1.5px solid rgba(17,16,14,.14);border-radius:16px;background:#fff;color:#11100e;padding:14px 15px;font-size:18px;font-weight:850;outline:0}',
       '.ss-fr-edit2-input:focus{border-color:#2f5844;box-shadow:0 0 0 4px rgba(47,88,68,.12)}',
       '.ss-fr-edit2-help{margin:8px 0 0;font-size:12px;line-height:1.45;color:rgba(17,16,14,.56);font-weight:650}',
+      '.ss-fr-edit2-ticker{margin-top:10px;padding:12px 14px;border-radius:16px;background:#eefbf3;border:1px solid rgba(22,163,74,.18);color:#14532d;font-size:13px;font-weight:850;line-height:1.45}',
       '.ss-fr-edit2-choice{position:relative;display:grid;grid-template-columns:54px 1fr 28px;gap:14px;align-items:center;padding:16px;border:1.5px solid rgba(17,16,14,.10);border-radius:20px;background:#fff;cursor:pointer}',
       '.ss-fr-edit2-choice+.ss-fr-edit2-choice{margin-top:12px}',
       '.ss-fr-edit2-choice.is-selected{border-color:rgba(183,163,106,.55);background:linear-gradient(145deg,#fffdf6,#f7f4e8)}',
@@ -223,6 +243,16 @@
     var overlay = qs('#ssFrEdit2Overlay');
     return !overlay || overlay.dataset.showPublic !== 'false';
   }
+  function updateTicker(){
+    var dateEl = qs('#ssFrEdit2EndDate');
+    var ticker = qs('#ssFrEdit2Ticker');
+    if (!dateEl || !ticker) return;
+    var iso = toISODate(dateEl.value);
+    if (!iso) { ticker.textContent = 'Pick a fundraiser end date.'; return; }
+    var days = daysFromEndDate(iso);
+    if (days <= 0) ticker.textContent = 'Ends today — this is the final day.';
+    else ticker.textContent = days + ' day' + (days === 1 ? '' : 's') + ' left · ends ' + formatDateLong(iso);
+  }
   function closeNativeModals(){
     ['#apFrdOverlay','#apFrwOverlay'].forEach(function(sel){
       var el = qs(sel);
@@ -246,18 +276,19 @@
           '<button type="button" class="ss-fr-edit2-close" id="ssFrEdit2Close" aria-label="Close">×</button>',
           '<span class="ss-fr-edit2-kicker">Active fundraiser</span>',
           '<h2 class="ss-fr-edit2-title" id="ssFrEdit2Title">Edit fundraiser</h2>',
-          '<p class="ss-fr-edit2-sub">Update the goal, days left, and whether customers see the live progress bar. This will not change the donation amount.</p>',
+          '<p class="ss-fr-edit2-sub">Update the saved goal, choose the fundraiser end date, and decide whether customers see the progress bar.</p>',
         '</div>',
         '<div class="ss-fr-edit2-body" id="ssFrEdit2Body">',
           '<div class="ss-fr-edit2-card">',
             '<label class="ss-fr-edit2-label" for="ssFrEdit2Goal">Fundraising goal</label>',
             '<input id="ssFrEdit2Goal" class="ss-fr-edit2-input" type="number" inputmode="numeric" min="0" step="1" placeholder="500" enterkeyhint="done">',
-            '<p class="ss-fr-edit2-help">Pulled from the saved fundraiser settings. Set 0 if you do not want a public goal.</p>',
+            '<p class="ss-fr-edit2-help">Loaded from the saved fundraiser goal.</p>',
           '</div>',
           '<div class="ss-fr-edit2-card">',
-            '<label class="ss-fr-edit2-label" for="ssFrEdit2Days">Days left</label>',
-            '<input id="ssFrEdit2Days" class="ss-fr-edit2-input" type="number" inputmode="numeric" min="1" max="365" step="1" placeholder="30" enterkeyhint="done">',
-            '<p class="ss-fr-edit2-help">This updates the fundraiser end date from today.</p>',
+            '<label class="ss-fr-edit2-label" for="ssFrEdit2EndDate">Fundraiser end date</label>',
+            '<input id="ssFrEdit2EndDate" class="ss-fr-edit2-input" type="date" min="' + todayISO() + '">',
+            '<div class="ss-fr-edit2-ticker" id="ssFrEdit2Ticker"></div>',
+            '<p class="ss-fr-edit2-help">Pick the calendar date the countdown should use.</p>',
           '</div>',
           '<div class="ss-fr-edit2-card">',
             '<div class="ss-fr-edit2-label">Customer visibility</div>',
@@ -278,27 +309,25 @@
     ].join('');
     document.body.appendChild(overlay);
 
-    function close(){ closeEditor(); }
-    overlay.addEventListener('click', function(e){ if (e.target === overlay) close(); });
-    qs('#ssFrEdit2Close', overlay).addEventListener('click', close);
-    qs('#ssFrEdit2Cancel', overlay).addEventListener('click', close);
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) closeEditor(); });
+    qs('#ssFrEdit2Close', overlay).addEventListener('click', closeEditor);
+    qs('#ssFrEdit2Cancel', overlay).addEventListener('click', closeEditor);
     qs('#ssFrEdit2Save', overlay).addEventListener('click', saveEditor);
+    qs('#ssFrEdit2EndDate', overlay).addEventListener('change', updateTicker);
+    qs('#ssFrEdit2EndDate', overlay).addEventListener('input', updateTicker);
     qsa('.ss-fr-edit2-choice', overlay).forEach(function(card){
       card.addEventListener('click', function(){ setShowPublic(card.getAttribute('data-show-public') === 'true'); });
       card.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowPublic(card.getAttribute('data-show-public') === 'true'); } });
     });
     qsa('.ss-fr-edit2-input', overlay).forEach(function(input){
       input.addEventListener('focus', function(){
+        if (input.type === 'date') return;
         overlay.classList.add('ss-fr-edit2-keyboard');
-        setTimeout(function(){
-          try { input.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch(e) { input.scrollIntoView(false); }
-        }, 120);
+        setTimeout(function(){ try { input.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch(e) { input.scrollIntoView(false); } }, 120);
       });
       input.addEventListener('blur', function(){
         setTimeout(function(){
-          if (!overlay.contains(document.activeElement) || !document.activeElement.classList.contains('ss-fr-edit2-input')) {
-            overlay.classList.remove('ss-fr-edit2-keyboard');
-          }
+          if (!overlay.contains(document.activeElement) || !document.activeElement.classList.contains('ss-fr-edit2-input')) overlay.classList.remove('ss-fr-edit2-keyboard');
         }, 180);
       });
       input.addEventListener('keydown', function(e){ if (e.key === 'Enter') input.blur(); });
@@ -310,8 +339,9 @@
     var overlay = ensureModal();
     currentData = normalizeFundraiserData(data);
     qs('#ssFrEdit2Goal', overlay).value = String(currentData.goal || 0);
-    qs('#ssFrEdit2Days', overlay).value = String(currentData.days_left || 30);
+    qs('#ssFrEdit2EndDate', overlay).value = toISODate(currentData.end_date) || defaultEndDate();
     setShowPublic(currentData.show_bar !== false);
+    updateTicker();
     setStatus('', '');
     closeNativeModals();
     lockPage();
@@ -349,18 +379,17 @@
     var overlay = ensureModal();
     var saveBtn = qs('#ssFrEdit2Save', overlay);
     var goal = Math.max(0, parseInt(qs('#ssFrEdit2Goal', overlay).value || '0', 10) || 0);
-    var days = Math.max(1, Math.min(365, parseInt(qs('#ssFrEdit2Days', overlay).value || '1', 10) || 1));
+    var endDate = toISODate(qs('#ssFrEdit2EndDate', overlay).value) || defaultEndDate();
     var showPublic = getShowPublic();
     var data = normalizeFundraiserData(currentData || fallbackData());
     var payload = {
-      enabled: true,
       edit_existing: true,
       edit_only: true,
       update_existing: true,
       amount: data.amount || 4,
       cause_name: data.cause_name || 'Fundraiser',
       goal: goal,
-      end_date: endDateFromDays(days),
+      end_date: endDate,
       show_bar: showPublic,
       show_progress_bar: showPublic,
       display_progress: showPublic,
@@ -382,9 +411,7 @@
         cache: 'no-store'
       });
       var json = await res.json().catch(function(){ return {}; });
-      if (!res.ok || !json || json.ok === false) {
-        throw new Error((json && (json.error || json.detail || json.message)) || ('Save failed with HTTP ' + res.status));
-      }
+      if (!res.ok || !json || json.ok === false) throw new Error((json && (json.error || json.detail || json.message)) || ('Save failed with HTTP ' + res.status));
       setStatus('Saved. Refreshing the admin view…', 'ok');
       setTimeout(function(){ window.location.reload(); }, 650);
     } catch(e) {
