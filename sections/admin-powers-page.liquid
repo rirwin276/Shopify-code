@@ -1,9 +1,8 @@
-{% comment %}ADMIN POWERS — V14{% endcomment %}
+
 
 {%- assign dashboard_url = '/pages/portal' -%}
 {%- assign join_path = '/pages/join-store' -%}
 
-{%- comment %} 1. GET SHOP HANDLE {% endcomment -%}
 {%- assign shop_handle = request.params.shop | default: '' | strip -%}
 {%- if shop_handle == blank -%}
   {%- assign _cfh = content_for_header -%}
@@ -20,17 +19,6 @@
 {%- endif -%}
 {%- assign shop_handle = shop_handle | replace: '%2D', '-' | replace: '%5F', '_' | strip | downcase -%}
 
-{%- comment %}
-  2. ADMIN ACCESS CHECK
-
-  Access rules:
-  - Founder access: customer tag `super-admin` can manage every storefront.
-  - Store admin access: customer tag `storefront-admin--<shop_handle>` can manage only that storefront.
-  - Temporary safety fallback: Ryan's owner email still gets founder access until the `super-admin`
-    tag is confirmed on the live Shopify customer account.
-
-  Do not remove the email fallback until owner access has been tested through the `super-admin` tag.
-{%- endcomment -%}
 {%- assign required_admin_tag = 'storefront-admin--' | append: shop_handle -%}
 {%- assign founder_access_tag = 'super-admin' -%}
 {%- assign owner_email_fallback = 'ryan.irwin@stellaandsagecompany.com' -%}
@@ -85,7 +73,6 @@
     --ap-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
   }
 
-  /* ── AUTH SCREENS ──────────────────────────────────────── */
   .ap-auth-wrap {
     max-width: 420px; margin: 80px auto; padding: 20px;
     text-align: center; font-family: var(--ap-font);
@@ -102,13 +89,11 @@
   .ap-auth-card h2 { margin: 0 0 10px; font-size: 22px; font-weight: 800; }
   .ap-auth-card p { margin: 0 0 24px; color: var(--ap-gray); font-size: 15px; }
 
-  /* ── MAIN LAYOUT ───────────────────────────────────────── */
   .ap-wrap {
     max-width: 1180px; margin: 0 auto; padding: 40px 24px 80px;
     font-family: var(--ap-font); color: var(--ap-text);
   }
 
-  /* ── HERO HEADER ───────────────────────────────────────── */
   .ap-hero {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
     border-radius: var(--ap-radius); padding: 36px 40px; margin-bottom: 32px;
@@ -148,7 +133,6 @@
   .ap-hero-sub { color: rgba(255,255,255,0.6); font-size: 14px; margin: 0; }
   .ap-hero-actions { display: flex; gap: 10px; position: relative; z-index: 1; flex-wrap: wrap; }
 
-  /* ── BUTTONS ───────────────────────────────────────────── */
   .ap-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px;
@@ -225,11 +209,9 @@
   .ap-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
   .ap-btn-full { width: 100%; }
 
-  /* ── GRID ──────────────────────────────────────────────── */
   .ap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   @media(max-width: 800px) { .ap-grid { grid-template-columns: 1fr; } }
 
-  /* ── CARDS ─────────────────────────────────────────────── */
   .ap-card {
     background: var(--ap-card); border: 1px solid var(--ap-border);
     border-radius: var(--ap-radius); padding: 28px;
@@ -246,7 +228,6 @@
   .ap-card-icon--indigo { background: #eef2ff; }
   .ap-card-icon--emerald { background: #ecfdf5; }
 
-  /* ── FORM ELEMENTS ─────────────────────────────────────── */
   .ap-form-group { margin-bottom: 20px; }
   .ap-label {
     display: block; font-size: 11px; font-weight: 800; margin-bottom: 8px;
@@ -266,7 +247,6 @@
   .ap-input-mono { font-family: monospace; background: #f8fafc; color: #475569; }
   .ap-helper { font-size: 12px; color: var(--ap-gray); margin: 6px 0 0; }
 
-  /* ── RADIO GROUP ───────────────────────────────────────── */
   .ap-radio-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
   .ap-radio {
     display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
@@ -279,10 +259,8 @@
   .ap-radio-title { display: block; font-weight: 700; font-size: 14px; margin-bottom: 2px; }
   .ap-radio-desc { display: block; font-size: 12px; color: var(--ap-gray); }
 
-  /* ── DIVIDER ───────────────────────────────────────────── */
   .ap-divider { height: 1px; background: var(--ap-border); margin: 22px 0; }
 
-  /* ── TABS ──────────────────────────────────────────────── */
   .ap-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
   .ap-tab-btn {
     background: none; border: none; font-size: 13px; font-weight: 700;
@@ -291,7 +269,6 @@
   }
   .ap-tab-btn.active { background: #e2e8f0; color: var(--ap-text); }
 
-  /* ── PRODUCT ROWS ──────────────────────────────────────────── */
   .ap-product-list { display: flex; flex-direction: column; gap: 10px; }
   .ap-product-row {
     display: flex; align-items: center; justify-content: space-between;
@@ -320,7 +297,7 @@
   .ap-products-spinner { text-align: center; padding: 32px; color: var(--ap-gray); font-size: 14px; }
   .ap-products-empty { text-align: center; padding: 48px 20px; color: var(--ap-gray); font-size: 15px; }
   @media (max-width: 600px) {
-    /* Bigger product thumbnails */
+    
     .ap-product-thumb,
     .ap-product-thumb-empty {
       width: 72px;
@@ -328,7 +305,6 @@
       border-radius: 10px;
     }
 
-    /* Stack product rows as cards */
     .ap-product-row {
       flex-direction: row;
       flex-wrap: wrap;
@@ -341,7 +317,6 @@
       box-shadow: var(--ap-shadow-sm);
     }
 
-    /* Title takes remaining width on top row next to thumbnail */
     .ap-product-title {
       flex: 1 1 auto;
       min-width: 0;
@@ -353,7 +328,6 @@
       overflow: hidden;
     }
 
-    /* Action bar below thumbnail+title */
     .ap-product-row__actions,
     .ap-product-actions {
       width: 100%;
@@ -365,7 +339,6 @@
       flex-wrap: nowrap;
     }
 
-    /* Larger touch targets */
     .ap-btn--outline-sm,
     .ap-btn--danger-sm {
       flex: 1 1 0;
@@ -374,7 +347,6 @@
       padding: 10px 12px;
     }
 
-    /* Edit Placement is the primary action — make it prominent */
     .ap-edit-placement-btn,
     .ap-edit-placement-btn--disabled {
       flex: 2 1 0;
@@ -385,11 +357,9 @@
     }
   }
 
-  /* ── COPY ROW ──────────────────────────────────────────── */
   .ap-copy-row { display: flex; gap: 10px; }
   .ap-copy-row .ap-input { flex: 1; }
 
-  /* ── QR ────────────────────────────────────────────────── */
   .ap-qr-box {
     display: flex; flex-direction: column; align-items: center;
     padding: 20px; background: #fff; border-radius: 14px;
@@ -398,11 +368,9 @@
   #ap-qrcode { margin: 0 auto 12px; }
   #ap-qrcode img, #ap-qrcode canvas { display: block; margin: 0 auto; }
 
-  /* ── BTN ROW ───────────────────────────────────────────── */
   .ap-btn-row { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
   .ap-btn-row .ap-btn { flex: 1; min-width: 100px; }
 
-  /* ── STATUS ────────────────────────────────────────────── */
   .ap-status {
     margin-top: 14px; font-size: 13px; font-weight: 600;
     min-height: 20px; border-radius: 8px; padding: 0;
@@ -412,11 +380,9 @@
   .ap-status.ok { background: #ecfdf5; color: #065f46; }
   .ap-status.err { background: #fef2f2; color: #991b1b; }
 
-  /* ── PUBLIC BLOCK ──────────────────────────────────────── */
   .ap-public-block { animation: ap-fadeIn 0.2s ease-out; }
   @keyframes ap-fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ── DANGER ZONE CARD ──────────────────────────────────── */
   .ap-danger-card {
     background: #fff5f5;
     border: 1.5px solid rgba(239,68,68,0.3);
@@ -431,7 +397,6 @@
   }
   .ap-btn--nuke:hover { background: #dc2626; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.4); }
 
-  /* ── NUKE MODAL ────────────────────────────────────────── */
   .ap-nuke-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.55); z-index: 9999;
@@ -471,7 +436,6 @@
     line-height: 1.6;
   }
 
-  /* ── REBUILD MODAL ─────────────────────────────────────── */
   .ap-rebuild-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(15,23,42,0.75); z-index: 10000;
@@ -515,7 +479,6 @@
     .ap-rebuild-title { font-size: 18px; }
   }
 
-  /* ── MAIN TABS ─────────────────────────────────────────── */
   .ap-main-card {
     background: var(--ap-card); border: 1px solid var(--ap-border);
     border-radius: var(--ap-radius); box-shadow: var(--ap-shadow);
@@ -547,44 +510,43 @@
   .ap-tab-icon { display: block; font-size: 16px; line-height: 1; }
   .ap-tab-label { display: block; font-size: 10px; font-weight: 700; margin-top: 2px; }
   @media(max-width:600px) {
-    /* Outer wrap */
+    
     .ap-wrap { padding: 16px 14px 60px; }
-    /* Hero */
+    
     .ap-hero { padding: 22px 18px; margin-bottom: 18px; }
     .ap-hero h1 { font-size: 22px; }
     .ap-hero-sub { font-size: 12px; }
     .ap-hero-actions { width: 100%; flex-direction: column; }
     .ap-hero-actions .ap-btn { width: 100%; justify-content: center; }
-    /* Tabs — all 5 fit on screen, no scroll */
+    
     .ap-main-tabs { overflow-x: hidden; -webkit-overflow-scrolling: auto; }
     .ap-main-tab-btn { flex: 1 1 0; min-width: 0; padding: 10px 4px; font-size: 11px; white-space: normal; line-height: 1.2; overflow: visible; text-overflow: clip; }
-    /* Remove the scroll-hint fade gradient */
+    
     .ap-main-tabs-wrap::after { display: none; }
     .ap-tab-icon { font-size: 18px; }
     .ap-tab-label { font-size: 9px; }
-    /* Panel content */
+    
     .ap-main-panel { padding: 16px; }
     .ap-danger-zone-body { padding: 4px 0 0; }
-    /* Danger rows — stack vertically */
+    
     .ap-danger-row { flex-direction: column; gap: 10px; }
     .ap-danger-row .ap-btn { width: 100%; justify-content: center; }
-    /* Forms */
+    
     .ap-radio { padding: 12px; }
     .ap-form-group { margin-bottom: 14px; }
     .ap-input, .ap-textarea, .ap-select { font-size: 16px; }
-    /* Member rows */
+    
     .ap-member-row { flex-wrap: wrap; gap: 8px; }
     .ap-member-row .ap-btn { font-size: 12px; padding: 7px 12px; }
-    /* Product row action buttons */
+    
     .ap-product-row__actions { flex-wrap: wrap; gap: 6px; }
   }
   @media(max-width:480px) {
-    /* Auth card on tiny phones */
+    
     .ap-auth-card { padding: 28px 18px; }
     .ap-auth-wrap { margin: 32px auto; }
   }
 
-  /* ── DANGER ROW ──────────────────────────────────────────── */
   .ap-danger-zone-body { padding: 4px 28px 24px; }
   .ap-danger-row {
     display: flex; align-items: flex-start; justify-content: space-between;
@@ -600,7 +562,6 @@
     align-self: center; white-space: nowrap;
   }
 
-  /* ── PRODUCT THUMB ───────────────────────────────────────── */
   .ap-product-thumb {
     width: 52px; height: 52px; border-radius: 8px; object-fit: cover;
     background: #f1f5f9; flex-shrink: 0; display: block;
@@ -801,15 +762,13 @@
   }
   body.ap-editor-open { overflow: hidden; }
 
-  /* ── SETTINGS LOGO PREVIEW ─────────────────────────────── */
   .ap-settings-logo-new {
     max-width: 120px; max-height: 80px; border-radius: 8px;
     border: 2px solid var(--ap-success); padding: 4px; background: #fff;
     display: block; object-fit: contain; margin-bottom: 8px;
   }
 
-
-  /* ── V13 DESKTOP ADMIN UPGRADES ───────────────────────── */
+  
   .ap-share-overlay {
     display: none; position: fixed; inset: 0; z-index: 9997;
     background: rgba(15,23,42,0.58); backdrop-filter: blur(5px);
@@ -904,12 +863,7 @@
     .ap-copy-row { flex-direction: column; }
   }
 
-
-
-  /* ─────────────────────────────────────────────────────────────
-     V14 — STELLA & SAGE PREMIUM ADMIN CONTROL CENTER
-     Theme-only upgrade. Existing IDs, buttons, modals, and API hooks remain intact.
-  ───────────────────────────────────────────────────────────── */
+  
   :root {
     --ap-bg: #fbf8f1;
     --ap-card: rgba(255,255,255,0.82);
@@ -1821,8 +1775,7 @@
     }
   }
 
-
-  /* ── V15 USER REQUEST UPGRADES: COMPACT HERO + ADD PRODUCTS TAB + MOBILE ACTIONS ── */
+  
   .ap-hero {
     min-height: 218px !important;
     padding: clamp(22px, 3vw, 36px) !important;
@@ -2006,11 +1959,7 @@
       grid-template-columns: 1fr !important;
     }
 
-  /* ══════════════════════════════════════════════════════════
-     FUNDRAISING WIZARD — complete style system
-     ══════════════════════════════════════════════════════════ */
-
-  /* Hero fundraise button */
+  
   .ap-btn--fundraise {
     background: linear-gradient(135deg, #14532d, #16a34a);
     color: #fff; border: none; font-weight: 700;
@@ -2019,7 +1968,6 @@
   }
   .ap-btn--fundraise:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
 
-  /* Active fundraiser status card (compact, shown on Products panel) */
   .ap-fr-active-card {
     display: flex; align-items: center; gap: 16px;
     background: linear-gradient(135deg, rgba(20,83,45,0.06), rgba(34,197,94,0.04));
@@ -2045,7 +1993,6 @@
   .ap-fr-active-edit { font-size: 12px; font-weight: 700; color: #16a34a; background: none; border: 1px solid rgba(34,197,94,0.3); border-radius: 7px; padding: 5px 12px; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
   .ap-fr-active-edit:hover { background: rgba(34,197,94,0.08); }
 
-  /* Settings panel minimal edit row (shown when fundraiser already active) */
   .ap-fr-settings-row {
     display: flex; align-items: center; justify-content: space-between;
     padding: 16px 20px; background: #f0fdf4; border: 1px solid #bbf7d0;
@@ -2054,7 +2001,6 @@
   .ap-fr-settings-row-left h4 { margin: 0 0 2px; font-size: 14px; font-weight: 800; color: #14532d; }
   .ap-fr-settings-row-left p  { margin: 0; font-size: 12px; color: #4b7a5c; }
 
-  /* ── WIZARD MODAL OVERLAY ─────────────────────────── */
   .ap-frw-overlay {
     position: fixed; inset: 0; z-index: 10000;
     background: rgba(0,0,0,0.72); backdrop-filter: blur(6px) saturate(0.8);
@@ -2071,7 +2017,6 @@
   }
   .ap-frw-overlay.open .ap-frw-modal { transform: translateY(0) scale(1); }
 
-  /* Modal hero */
   .ap-frw-hero {
     background: linear-gradient(135deg, #0a1628 0%, #0d2d1a 60%, #0a1628 100%);
     padding: 28px 32px 24px; position: relative; flex-shrink: 0;
@@ -2102,7 +2047,6 @@
   }
   .ap-frw-hero p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.5); }
 
-  /* Tab nav (for Learn More / Legal) */
   .ap-frw-tabs { display: flex; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; background: #fff; }
   .ap-frw-tab {
     padding: 13px 20px; font-size: 13px; font-weight: 700; color: #94a3b8;
@@ -2113,11 +2057,9 @@
   .ap-frw-tab-panel { display: none; }
   .ap-frw-tab-panel.active { display: block; }
 
-  /* Scrollable content area */
   .ap-frw-body { padding: 24px 32px; overflow-y: auto; flex: 1; }
   @media (max-width: 600px) { .ap-frw-body { padding: 20px 20px; } .ap-frw-hero { padding: 24px 20px 20px; } }
 
-  /* Feature rows in learn more */
   .ap-frw-feature {
     display: flex; gap: 16px; padding: 16px 0;
     border-bottom: 1px solid #f1f5f9;
@@ -2136,7 +2078,6 @@
   .ap-frw-feature-copy p  { margin: 0; font-size: 13px; color: #64748b; line-height: 1.6; }
   .ap-frw-feature-copy strong { color: #0f172a; }
 
-  /* Highlight banner inside body */
   .ap-frw-highlight {
     background: linear-gradient(135deg, #f0fdf4, #dcfce7);
     border: 1px solid #86efac; border-radius: 12px;
@@ -2146,14 +2087,12 @@
   .ap-frw-highlight-copy { font-size: 13px; color: #14532d; line-height: 1.6; }
   .ap-frw-highlight-copy strong { font-weight: 800; }
 
-  /* Legal content */
   .ap-frw-legal { font-size: 13px; color: #374151; line-height: 1.75; }
   .ap-frw-legal h4 { font-size: 13px; font-weight: 800; color: #0f172a; margin: 18px 0 4px; }
   .ap-frw-legal p  { margin: 0 0 10px; }
   .ap-frw-legal ul { margin: 6px 0 12px 18px; padding: 0; }
   .ap-frw-legal li { margin-bottom: 5px; }
 
-  /* Wizard form fields */
   .ap-frw-field { margin-bottom: 20px; }
   .ap-frw-label {
     display: block; font-size: 11px; font-weight: 800;
@@ -2182,7 +2121,6 @@
   .ap-frw-goal-row   { display: flex; gap: 12px; }
   .ap-frw-goal-row .ap-frw-field { flex: 1; }
 
-  /* Toggle row for visibility step */
   .ap-frw-toggle-row {
     display: flex; align-items: flex-start; gap: 16px;
     padding: 18px; background: #f8fafc; border: 1.5px solid #e2e8f0;
@@ -2196,7 +2134,6 @@
   .ap-frw-toggle-check { margin-left: auto; flex-shrink: 0; margin-top: 3px; }
   .ap-frw-toggle-check input { width: 18px; height: 18px; accent-color: #16a34a; cursor: pointer; }
 
-  /* Terms checkbox */
   .ap-frw-terms-row {
     display: flex; align-items: flex-start; gap: 10px;
     padding: 14px 16px; background: #fffbeb; border: 1px solid #fde68a;
@@ -2206,7 +2143,6 @@
   .ap-frw-terms-copy { font-size: 12px; color: #78350f; line-height: 1.6; }
   .ap-frw-terms-copy strong { font-weight: 800; }
 
-  /* Footer / nav buttons */
   .ap-frw-footer {
     padding: 16px 32px 24px; border-top: 1px solid #f1f5f9;
     display: flex; gap: 10px; align-items: center; flex-shrink: 0; background: #fff;
@@ -2227,7 +2163,6 @@
   .ap-frw-next-btn:hover { opacity: 0.92; transform: translateY(-1px); }
   .ap-frw-next-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-  /* Stripe connect step */
   .ap-frw-stripe-card {
     border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 22px 24px;
     text-align: center; margin-bottom: 16px;
@@ -2251,11 +2186,10 @@
     font-size: 13px; font-weight: 700; color: #14532d;
   }
 
-  /* ── Fundraising Zone (between hero and tabs) ── */
   .ap-fr-zone {
     margin: 0 0 20px;
   }
-  /* Pricing status banner — lives outside the active zone so it persists after Stop */
+  
   #apFrPricingBanner {
     margin: -12px 0 16px;
     padding: 10px 14px;
@@ -2267,7 +2201,7 @@
   #apFrPricingBanner.fr-banner--pending  { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
   #apFrPricingBanner.fr-banner--success  { background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
   #apFrPricingBanner.fr-banner--error    { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; font-weight:700; }
-  /* Empty state — visible by default; class hides it */
+  
   .ap-fr-zone-empty {
     display: flex; align-items: center;
     padding: 18px 24px;
@@ -2284,7 +2218,7 @@
     cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: opacity 0.15s;
   }
   .ap-btn--fr-start:hover { opacity: 0.88; }
-  /* Active state — hidden by default; class reveals it (no inline-style race condition) */
+  
   .ap-fr-zone-active {
     display: none; flex-direction: column; gap: 12px;
     padding: 18px 20px;
@@ -2292,10 +2226,10 @@
     border: 1px solid rgba(255,255,255,0.10); border-radius: 18px;
     box-shadow: 0 14px 34px rgba(20,83,45,0.22);
   }
-  /* CSS class is the single source of truth — server pre-renders it, JS toggles it */
+  
   .ap-fr-zone--active .ap-fr-zone-empty  { display: none !important; }
   .ap-fr-zone--active .ap-fr-zone-active { display: flex !important; }
-  /* Top row: badge hard-left, button hard-right */
+  
   .ap-fr-zone-active-top {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
   }
@@ -2314,13 +2248,13 @@
     70%  { box-shadow: 0 0 0 7px rgba(74,222,128,0); }
     100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
   }
-  /* Title + sub sit below the top row (desktop only; hidden on mobile) */
+  
   .ap-fr-zone-title {
     font-size: 16px; font-weight: 800; color: #fff; margin: 0; letter-spacing: -0.01em;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .ap-fr-zone-sub { font-size: 12px; color: rgba(255,255,255,0.72); margin: 0; }
-  /* Progress bar */
+  
   .ap-fr-zone-progress { display: flex; flex-direction: column; gap: 7px; }
   .ap-fr-zone-bar { height: 9px; border-radius: 999px; background: rgba(255,255,255,0.16); overflow: hidden; }
   .ap-fr-zone-bar-fill {
@@ -2331,7 +2265,7 @@
     display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.78);
   }
   .ap-fr-zone-progress-meta strong { color: #fff; font-weight: 800; }
-  /* View Details button */
+  
   .ap-btn--fr-details {
     background: rgba(255,255,255,0.14); color: #fff;
     border: 1px solid rgba(255,255,255,0.22); border-radius: 10px;
@@ -2339,7 +2273,7 @@
     cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s;
   }
   .ap-btn--fr-details:hover { background: rgba(255,255,255,0.24); }
-  /* Details modal */
+  
   .ap-frd-overlay {
     position: fixed; inset: 0; z-index: 9999;
     background: rgba(15,23,42,0.55);
@@ -2423,14 +2357,14 @@
     .ap-frd-footer { flex-direction: column-reverse; }
     .ap-btn--fr-edit-wizard, .ap-btn--fr-stop { width: 100%; }
   }
-  /* Progress bar */
+  
   .ap-frd-progress-wrap { margin: 0 24px 16px; }
   .ap-frd-progress-bar { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
   .ap-frd-progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 99px; transition: width 0.6s; }
   .ap-frd-progress-label { font-size: 11px; color: #64748b; margin-top: 5px; text-align: right; }
   @media (max-width: 600px) {
     .ap-fr-zone-empty { flex-direction: column; text-align: center; }
-    /* Active card: compact on mobile — badge+button row, no title/sub */
+    
     .ap-fr-zone-active { padding: 13px 14px; gap: 9px; }
     .ap-fr-zone-title { display: none; }
     .ap-fr-zone-sub { display: none; }
@@ -2439,9 +2373,7 @@
     .ap-frd-stat-cell { flex: 0 0 50%; }
   }
 
-  /* ── FUNDRAISING WIZARD — Redesign v2 ── */
-
-  /* Step 1: benefit cards */
+  
   .ap-frw-benefit-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
   .ap-frw-benefit-item {
     display: grid; grid-template-columns: 48px 1fr; gap: 14px; align-items: center;
@@ -2458,7 +2390,6 @@
   }
   .ap-frw-benefit-text span { font-size: 13px; color: rgba(17,16,14,.62); line-height: 1.55; }
 
-  /* Step 1: legal agreement box */
   .ap-frw-legal-box {
     border-radius: 20px; border: 1px solid rgba(17,16,14,.08);
     background: #fafaf8; padding: 18px;
@@ -2485,7 +2416,6 @@
   .ap-frw-terms-label span { font-size: 13px; color: rgba(17,16,14,.70); line-height: 1.6; }
   .ap-frw-terms-label strong { color: #11100e; font-weight: 900; }
 
-  /* Step 3: amount stepper */
   .ap-frw-amount-row {
     display: flex; align-items: center; width: fit-content;
     border: 1.5px solid rgba(17,16,14,.13); border-radius: 16px; overflow: hidden;
@@ -2504,7 +2434,6 @@
     color: #11100e; letter-spacing: -.04em;
   }
 
-  /* Step 3: goal/date with $ prefix */
   .ap-frw-input-icon-wrap { position: relative; display: flex; align-items: center; }
   .ap-frw-input-pre {
     position: absolute; left: 14px; font-size: 16px; font-weight: 700;
@@ -2577,14 +2506,6 @@
   {%- endif -%}
 {%- endif -%}
 
-{%- comment %}
-  BACKEND + EDITOR CONFIG
-
-  Studio Uploader handles member/admin actions, store settings, sleep/wake, and store maintenance actions.
-  Printful Automation handles placement editors, custom product builders, rebuild jobs, and apply-status polling.
-
-  Editor URLs are built from a single base URL so backend changes are easier to make safely.
-{%- endcomment -%}
 {%- assign studio_uploader_base_url = 'https://studio-uploader-production.up.railway.app' -%}
 {%- assign printful_automation_base_url = 'https://printfulautomation-production.up.railway.app' -%}
 
@@ -2599,9 +2520,7 @@
 {%- assign editor_pro_shirt_bc3001y_base_url = printful_automation_base_url | append: '/editor/pro-shirt/bc3001y' -%}
 {%- assign editor_pro_shirt_m2580_base_url = printful_automation_base_url | append: '/editor/pro-shirt/m2580' -%}
 {%- assign editor_pro_shirt_zip_hoodie_base_url = section.settings.editor_pro_shirt_zip_hoodie_base_url | default: '' -%}
-{%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
-   Not actually secret — it's already in the public repo, only gates the editor page,
-   and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
+
 {%- assign editor_secret = 'stellasage-god-mode-2026-xK9mP' -%}
 
 {%- assign ap_shop_logo_src = '' -%}
@@ -2609,7 +2528,7 @@
   {%- assign _logo_field = shop_meta.logo -%}
   {%- if _logo_field != blank -%}
     {%- assign _logo_obj = _logo_field.value | default: _logo_field -%}
-    {%- comment %} Only call image_url if it looks like a real image object (has src or is a media object) {% endcomment -%}
+    
     {%- if _logo_obj.src or _logo_obj.preview_image -%}
       {%- assign ap_shop_logo_src = _logo_obj | image_url: width: 3000 -%}
     {%- elsif _logo_obj != blank and _logo_obj.url -%}
@@ -2648,7 +2567,6 @@
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
   </script>
 
-  <!-- HERO HEADER -->
   <div class="ap-hero">
     <div class="ap-hero-left">
       <div class="ap-hero-badge">
@@ -2697,7 +2615,6 @@
     </div>
   </div>
 
-  <!-- SHARE STORE MODAL -->
   <div class="ap-share-overlay" id="apShareOverlay" aria-hidden="true">
     <div class="ap-share-dialog" role="dialog" aria-modal="true" aria-labelledby="apShareTitle">
       <button id="apShareClose" type="button" class="ap-share-close" aria-label="Close share options">✕</button>
@@ -2725,14 +2642,10 @@
     </div>
   </div>
 
-
-  <!-- ══════════════════════════════════════════════════════
-       FUNDRAISING WIZARD MODAL — 4-step setup flow
-       ══════════════════════════════════════════════════════ -->
+  
   <div class="ap-frw-overlay" id="apFrwOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="apFrwTitle">
     <div class="ap-frw-modal" id="apFrwModal">
 
-      <!-- HERO (step indicator + dynamic title) -->
       <div class="ap-frw-hero">
         <button class="ap-frw-close" id="apFrwClose" aria-label="Close">✕</button>
         <div class="ap-frw-step-pills">
@@ -2747,7 +2660,6 @@
         <p id="apFrwSubtitle">The most seamless way to raise money — set up in under 5 minutes.</p>
       </div>
 
-      <!-- STEP 1: How It Works + Agreement -->
       <div id="apFrwStep1" class="ap-frw-step-content">
         <div class="ap-frw-body">
 
@@ -2795,7 +2707,6 @@
         </div>
       </div>
 
-      <!-- STEP 2: About Stripe -->
       <div id="apFrwStep2" class="ap-frw-step-content" style="display:none;">
         <div class="ap-frw-body">
 
@@ -2842,7 +2753,6 @@
         </div>
       </div>
 
-      <!-- STEP 3: Stripe Connect -->
       <div id="apFrwStep3" class="ap-frw-step-content" style="display:none;">
         <div class="ap-frw-body">
           <div class="ap-frw-stripe-card">
@@ -2873,7 +2783,6 @@
         </div>
       </div>
 
-      <!-- STEP 4: Fundraiser Details -->
       <div id="apFrwStep4" class="ap-frw-step-content" style="display:none;">
         <div class="ap-frw-body">
 
@@ -2921,7 +2830,6 @@
         </div>
       </div>
 
-      <!-- STEP 5: Display Settings -->
       <div id="apFrwStep5" class="ap-frw-step-content" style="display:none;">
         <div class="ap-frw-body">
           <p style="font-size:14px;color:rgba(17,16,14,.62);margin:0 0 18px;line-height:1.65;"><strong style="color:#11100e;">Transparency drives sales.</strong> Stores that show their fundraiser progress publicly see significantly more purchases — supporters want to see the goal hit.</p>
@@ -2960,15 +2868,7 @@
     </div>
   </div>
 
-  <!-- FUNDRAISING ZONE — between hero and tabs -->
-  {%- comment %}
-    Determine fundraiser active state server-side from the store_fundraising
-    metaobject (PUBLIC_READ) so the Start button is never rendered visible
-    when a fundraiser is live. A JSON metaobject field can surface in Liquid
-    either as a parsed object OR a raw string depending on context, so we
-    check every form: parsed boolean access first, then a re-serialized
-    string contains check as a fallback.
-  {% endcomment -%}
+  
   {%- assign _fr_obj = shop.metaobjects.store_fundraising[shop_handle] -%}
   {%- assign fr_active = false -%}
   {%- unless _fr_obj == blank -%}
@@ -2983,7 +2883,7 @@
     {%- endif -%}
   {%- endunless -%}
   <div class="ap-fr-zone{% if fr_active %} ap-fr-zone--active{% endif %}" id="apFrZone">
-    <!-- Empty state: CSS class hides this when active -->
+    
     <div class="ap-fr-zone-empty" id="apFrZoneEmpty">
       <div class="ap-fr-zone-empty-icon">💚</div>
       <div class="ap-fr-zone-empty-copy">
@@ -2992,7 +2892,7 @@
       </div>
       <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">Start a Fundraiser Campaign →</button>
     </div>
-    <!-- Active card: CSS class reveals this when active; JS fills live numbers -->
+    
     <div class="ap-fr-zone-active" id="apFrZoneActive">
       <div class="ap-fr-zone-active-top">
         <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
@@ -3010,10 +2910,8 @@
     </div>
   </div>
 
-  <!-- FUNDRAISER PRICING STATUS BANNER (persists through Stop; outside active zone) -->
   <div id="apFrPricingBanner" style="display:none;" aria-live="polite"></div>
 
-  <!-- FUNDRAISER DETAILS MODAL -->
   <div class="ap-frd-overlay" id="apFrdOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="apFrdTitle">
     <div class="ap-frd-modal">
       <div class="ap-frd-header">
@@ -3090,10 +2988,8 @@
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD CARD WITH TABS -->
   <div class="ap-main-card">
 
-    <!-- MAIN PANEL TABS -->
     <div class="ap-main-tabs-wrap">
       <div class="ap-main-tabs" role="tablist">
         <button class="ap-main-tab-btn active" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="true" aria-controls="apPanelProducts"><span class="ap-tab-icon">📦</span><span class="ap-tab-label">Products</span></button>
@@ -3104,7 +3000,6 @@
       </div>
     </div>
 
-    <!-- MEMBERS PANEL -->
     <div id="apPanelMembers" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnMembers">
       <div class="ap-panel-head">
         <div>
@@ -3135,9 +3030,8 @@
         <button id="apBtnRemoveAdmin" class="ap-btn">Remove Admin Role</button>
       </div>
       <div id="apStatusMembers" class="ap-status"></div>
-    </div><!-- /apPanelMembers -->
+    </div>
 
-    <!-- PRODUCTS PANEL -->
     <div id="apPanelProducts" class="ap-main-panel active" role="tabpanel" aria-labelledby="apTabBtnProducts">
 
       <div class="ap-panel-head ap-panel-head--products">
@@ -3179,9 +3073,8 @@
       </div>
 
       <div id="apStatusProducts" class="ap-status"></div>
-    </div><!-- /apPanelProducts -->
+    </div>
 
-    <!-- ADD PRODUCTS PANEL -->
     <div id="apPanelAddProducts" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnAddProducts">
       <div class="ap-panel-head">
         <div>
@@ -3206,12 +3099,10 @@
       </section>
 
       <div id="apStatusAddProducts" class="ap-status"></div>
-    </div><!-- /apPanelAddProducts -->
+    </div>
 
-    <!-- SETTINGS PANEL -->
     <div id="apPanelSettings" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnSettings">
 
-      <!-- Fundraising row: shows active state or start prompt, no clutter -->
       <div id="apFrSettingsRow" class="ap-fr-settings-row" style="display:none;">
         <div class="ap-fr-settings-row-left">
           <h4 id="apFrSettingsRowTitle">💚 Fundraiser Active</h4>
@@ -3228,14 +3119,12 @@
         </div>
       </div>
 
-      <!-- Store display name -->
       <div class="ap-form-group">
         <label class="ap-label" for="apSettingsName">Store Display Name</label>
         <input id="apSettingsName" class="ap-input" type="text" value="{{ store_name | escape }}" placeholder="Store name" />
         <p class="ap-helper">Renames the store on the dashboard and storefront. No rebuild needed.</p>
       </div>
 
-      <!-- Logo section -->
       <div class="ap-form-group">
         <label class="ap-label">Main Logo / Primary Image</label>
         <div id="apSettingsLogoPreview" style="margin-bottom:12px;">
@@ -3250,7 +3139,6 @@
         <p class="ap-helper">Changing the logo rebuilds the full product set with the new artwork (~5–10 min).</p>
       </div>
 
-      <!-- Rebuild warning -->
       <div id="apSettingsRebuildWarning" style="display:none;margin-bottom:16px;padding:12px 14px;background:#fef9c3;border:1px solid #fde047;border-radius:10px;font-size:13px;color:#713f12;font-weight:600;">
         ⚠️ Logo changed. Saving will rebuild the current products with the new settings. This usually takes 5–10 minutes.
       </div>
@@ -3258,9 +3146,8 @@
       <button id="apBtnSaveSettings" class="ap-btn ap-btn--primary ap-btn-full">Save & Apply Settings</button>
       <div id="apStatusSettings" class="ap-status"></div>
 
-    </div><!-- /apPanelSettings -->
+    </div>
 
-    <!-- DANGER PANEL -->
     <div id="apPanelDanger" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnDanger">
 
       <div class="ap-panel-head ap-panel-head--danger">
@@ -3271,7 +3158,6 @@
         </div>
       </div>
 
-      <!-- Sleep Mode Card -->
       <div class="ap-card" style="margin-bottom:20px;border-color:rgba(239,68,68,0.2);background:#fff5f5;">
         <div class="ap-card-head">
           <div class="ap-card-icon ap-card-icon--red">💤</div>
@@ -3288,7 +3174,6 @@
         <div id="apStatusSleep" class="ap-status"></div>
       </div>
 
-      <!-- Danger Zone (Nuke) Card -->
       <div class="ap-danger-card">
         <div class="ap-card-head">
           <div class="ap-card-icon ap-card-icon--red">💣</div>
@@ -3298,11 +3183,10 @@
         <button id="apNukeBtn" class="ap-btn ap-btn--nuke">Permanently Delete Store</button>
       </div>
 
-    </div><!-- /apPanelDanger -->
+    </div>
 
-  </div><!-- /.ap-main-card -->
+  </div>
 
-  <!-- NUKE CONFIRMATION MODAL (position: fixed — outside sections) -->
   <div class="ap-nuke-overlay" id="apNukeOverlay">
     <div class="ap-nuke-dialog" role="dialog" aria-modal="true" aria-labelledby="apNukeTitle">
       <div class="ap-nuke-dialog__icon">☢️</div>
@@ -3326,7 +3210,6 @@
     </div>
   </div>
 
-  <!-- BC3413 EDITOR MODAL -->
   <div class="ap-editor-overlay" id="apEditorOverlay" aria-hidden="true">
     <div class="ap-editor-dialog" role="dialog" aria-modal="true" aria-labelledby="apEditorTitle">
       <div class="ap-editor-header">
@@ -3340,7 +3223,6 @@
     </div>
   </div>
 
-  <!-- REBUILD IN PROGRESS MODAL -->
   <div class="ap-rebuild-overlay" id="apRebuildOverlay" aria-hidden="true">
     <div class="ap-rebuild-dialog" role="dialog" aria-modal="true" aria-labelledby="apRebuildTitle">
       <div class="ap-rebuild-icon">🔨</div>
@@ -3356,7 +3238,7 @@
     </div>
   </div>
 
-</div><!-- /.ap-wrap -->
+</div>
 
 {%- if show_admin_review_notice -%}
 <div class="ap-rnot-overlay" id="apRnotOverlay" role="dialog" aria-modal="true" aria-labelledby="apRnotTitle"><div class="ap-rnot-dialog"><div class="ap-rnot-header"><div class="ap-rnot-icon">🔍</div><h2 class="ap-rnot-title" id="apRnotTitle">Quick Store Review</h2></div><div class="ap-rnot-body"><p>Before sharing your store, please take a minute to review your products.</p><p>Your product mockups show how your items are expected to print. If a logo looks too high, too low, too small, too large, off-center, or the shirt color does not look right, please adjust it before sharing your store.</p><p><strong>You can make changes from your Admin Page:</strong></p><ul><li>Go to the <strong>Products</strong> tab.</li><li>Use the <strong>Color / Placement Editor</strong> to adjust logo size, logo position, and available shirt colors.</li><li>Use <strong>Change Main Image</strong> in Settings if your uploaded image looks blurry, cropped wrong, or needs to be replaced.</li></ul><p>Because these are custom-made products, the store admin is responsible for reviewing and approving products before the store is shared or opened for orders.</p><div class="ap-rnot-contact">Need help? Reach out anytime and we'll help you get it right before orders come in.<br><strong>Contact:</strong> ryan.irwin@stellaandsagecompany.com</div></div><div class="ap-rnot-warn" id="apRnotWarn" aria-live="polite"></div><div class="ap-rnot-actions"><button type="button" class="ap-rnot-ack-btn" id="apRnotAckBtn">Got it — I'll review my store</button></div></div></div>
