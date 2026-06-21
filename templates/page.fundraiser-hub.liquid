@@ -208,13 +208,28 @@
 
     function loadFundraiserHub(){
       var status=document.getElementById('fhStatus'); if(status) status.textContent='';
-      fetch(RAILWAY_URL + '/admin/fundraising/payouts/summary', { headers: railwayHeaders(), cache:'no-store' })
+      var listEl=document.getElementById('fhList');
+      listEl.innerHTML='<div class="gm-status-text">Loading fundraisers…</div>';
+      // Abort after 20s so a cold/slow backend shows a retry button instead of
+      // spinning on "Loading fundraisers…" forever.
+      var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+      var timer = setTimeout(function(){ if(ctrl) ctrl.abort(); }, 20000);
+      fetch(RAILWAY_URL + '/admin/fundraising/payouts/summary', {
+        headers: railwayHeaders(), cache:'no-store', signal: ctrl ? ctrl.signal : undefined
+      })
         .then(function(r){ return r.json().catch(function(){return {};}); })
         .then(function(j){
-          if(!j || j.ok===false){ document.getElementById('fhList').innerHTML='<div class="fh-empty">'+escapeHtml((j&&j.error)||'Could not load Fundraiser Hub.')+'</div>'; return; }
+          clearTimeout(timer);
+          if(!j || j.ok===false){ listEl.innerHTML='<div class="fh-empty">'+escapeHtml((j&&j.error)||'Could not load Fundraiser Hub.')+'</div>'; return; }
           renderFundraiserHub(j);
         })
-        .catch(function(){ document.getElementById('fhList').innerHTML='<div class="fh-empty">Network error loading Fundraiser Hub.</div>'; });
+        .catch(function(err){
+          clearTimeout(timer);
+          var msg = (err && err.name==='AbortError')
+            ? 'Timed out loading the Fundraiser Hub. The server may be waking up — tap Refresh to try again.'
+            : 'Network error loading Fundraiser Hub. Tap Refresh to try again.';
+          listEl.innerHTML='<div class="fh-empty">'+escapeHtml(msg)+'</div>';
+        });
     }
 
     function endFundraiser(handle, btn){
@@ -222,7 +237,10 @@
       btn.disabled=true; var orig=btn.textContent; btn.textContent='Ending…';
       fetch(RAILWAY_URL + '/store/' + encodeURIComponent(handle) + '/fundraising', {
         method:'POST', headers: railwayHeaders(),
-        body: JSON.stringify({ enabled:false, amount:0, cause_name:'', show_bar:false, goal:0, end_date:'' })
+        // Stop only flips enabled:false. The backend reprices products back to
+        // base from that flag alone — we deliberately do NOT blank amount/cause/
+        // goal so the unpaid balance and history stay intact for payouts.
+        body: JSON.stringify({ enabled:false })
       }).then(function(r){ return r.json().catch(function(){return {};}); })
         .then(function(j){
           if(!j || j.ok===false){ btn.disabled=false; btn.textContent=orig; alert('Could not end fundraiser. '+((j&&j.error)||'Try again.')); return; }

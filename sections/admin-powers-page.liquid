@@ -2352,6 +2352,7 @@
   .ap-frd-progress-bar { height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
   .ap-frd-progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 99px; transition: width 0.6s; }
   .ap-frd-progress-label { font-size: 11px; color: #64748b; margin-top: 5px; text-align: right; }
+
   @media (max-width: 600px) {
     .ap-fr-zone-empty { flex-direction: column; text-align: center; }
     
@@ -5417,6 +5418,8 @@
   if (overlay)  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeWizard(); });
   // Resume at the furthest step previously reached (or step 1 for a fresh start).
   if (launchBtn) launchBtn.addEventListener('click', function(){ openWizard(_state.maxStep || 1); });
+  // "Edit / End" is also intercepted by ss-fundraiser-edit-v2.js (see above);
+  // openWizard(4) is only the fallback if that asset fails to load.
   if (editFromSettings) editFromSettings.addEventListener('click', function(){ openWizard(4); });
 
   function openDetails() {
@@ -5434,6 +5437,12 @@
   if (frDetailsBtn) frDetailsBtn.addEventListener('click', openDetails);
   if (frdClose)     frdClose.addEventListener('click', closeDetails);
   if (frdOverlay)   frdOverlay.addEventListener('click', function(e){ if(e.target===frdOverlay) closeDetails(); });
+  // Active-fundraiser editing is owned by the site-wide ss-fundraiser-edit-v2.js
+  // asset (loaded in theme.liquid). It intercepts #apFrdEditBtn / #apFrEditFromSettings
+  // in the capture phase and opens its own polished edit modal, sending an explicit
+  // edit payload (action:update / mode:edit) that the backend merges in place —
+  // goal / end date / visibility only, never disabling or repricing. openWizard(4)
+  // below is just a fallback for the rare case that asset fails to load.
   if (frdEditBtn)   frdEditBtn.addEventListener('click', function(){ closeDetails(); openWizard(4); });
   if (frdStopBtn) {
     frdStopBtn.addEventListener('click', async function(){
@@ -5443,7 +5452,10 @@
         var res = await fetch(FR_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ enabled:false, amount:0, cause_name:'', show_bar:false, goal:0, end_date:'' }),
+          // Stop only flips enabled:false. The backend reprices products back to
+          // base from that flag alone — we deliberately keep amount/cause/goal so
+          // the unpaid balance and history survive for payouts.
+          body: JSON.stringify({ enabled:false }),
           cache: 'no-store'
         });
         var j = await res.json().catch(function(){ return {}; });
@@ -5956,8 +5968,19 @@
       }
       _renderActiveState(j);
       clearDraft();
+    } else if (responseValid && j.ok !== false && (j.cause_name || j.stripe_account_id)) {
+      // A stopped-but-existing record. Do NOT render active state (the Start
+      // button stays correct), but DO prefill the wizard so a relaunch keeps the
+      // prior cause / amount / Stripe connection instead of starting from blank.
+      _applyToForm(j);
+      if (j.stripe_connected && j.stripe_account_id) {
+        _state.stripeConnected = true;
+        _state.stripeAccountId = j.stripe_account_id;
+        _showStripeConnected();
+      }
+      if (typeof j.show_bar !== 'undefined') _state.visibility = j.show_bar ? 'public' : 'admin_only';
     }
-    // No `else` branch — the server (Liquid) already pre-rendered the correct
+    // No `else` branch that renders — the server (Liquid) already pre-rendered the correct
     // zone visibility from the metaobject. _loadState must NEVER call
     // _renderActiveState({enabled:false}) — doing so overrides correct
     // server HTML with stale/failed API data and shows the Start button
