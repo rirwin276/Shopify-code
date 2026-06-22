@@ -2175,6 +2175,21 @@
     padding: 12px 16px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
     font-size: 13px; font-weight: 700; color: #14532d;
   }
+  .ap-frw-stripe-gate {
+    display: flex; align-items: flex-start; gap: 10px; margin-top: 16px;
+    padding: 12px 16px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+  }
+  .ap-frw-stripe-gate.is-ready { background: #f0fdf4; border-color: #86efac; }
+  .ap-frw-stripe-gate-icon { font-size: 16px; line-height: 1.4; flex-shrink: 0; }
+  .ap-frw-stripe-gate-copy { font-size: 12.5px; color: #92400e; line-height: 1.6; }
+  .ap-frw-stripe-gate.is-ready .ap-frw-stripe-gate-copy { color: #14532d; }
+  .ap-frw-stripe-recheck {
+    display: inline-block; margin-top: 8px; background: #fff; border: 1.5px solid #cbd5e1;
+    border-radius: 8px; padding: 7px 14px; font-size: 12.5px; font-weight: 700;
+    color: #0f172a; cursor: pointer; transition: border-color 0.15s;
+  }
+  .ap-frw-stripe-recheck:hover { border-color: #94a3b8; }
+  .ap-frw-stripe-recheck:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .ap-fr-zone {
     margin: 0 0 20px;
@@ -2751,10 +2766,18 @@
               <strong>This connects the recipient's bank, not yours.</strong> Once they complete setup, Stripe handles every deposit automatically — they never have to touch it again.
             </div>
           </div>
+          <div class="ap-frw-stripe-gate" id="apFrwStripeGate">
+            <span class="ap-frw-stripe-gate-icon">🔒</span>
+            <div class="ap-frw-stripe-gate-copy">
+              <strong>A connected, payout-ready Stripe account is required to continue.</strong>
+              You can't set fundraiser goals until the cause can actually be paid. Once setup is finished, tap <em>Re-check status</em>.
+              <button type="button" class="ap-frw-stripe-recheck" id="apFrwStripeRecheck">Re-check status</button>
+            </div>
+          </div>
         </div>
         <div class="ap-frw-footer">
           <button class="ap-frw-back-btn" id="apFrwStep3Back">← Back</button>
-          <button class="ap-frw-next-btn" id="apFrwStep3Next">Continue — Set Up Fundraiser →</button>
+          <button class="ap-frw-next-btn" id="apFrwStep3Next" disabled>Connect Stripe to continue</button>
         </div>
       </div>
 
@@ -5402,7 +5425,15 @@
 
   // ── Open / close ───────────────────────────────────────────
   function openWizard(startAtStep) {
-    _state.step = startAtStep || 1;
+    var target = startAtStep || 1;
+    // Hard gate: a not-yet-active fundraiser can never resume past the Stripe
+    // step without a connected payout account. This also corrects stale drafts
+    // saved by older builds that allowed skipping Stripe. Active fundraisers
+    // (already launched, so already Stripe-connected) edit at step 4 normally.
+    if (target >= 4 && !_state.enabled && !_state.stripeConnected) {
+      target = 3;
+    }
+    _state.step = target;
     renderStep();
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
@@ -5501,6 +5532,15 @@
     // Scroll the body back to top whenever the step changes
     var activeBody = steps[s] ? steps[s].querySelector('.ap-frw-body') : null;
     if (activeBody) activeBody.scrollTop = 0;
+    // On the Stripe step, reflect the gate from current state and silently
+    // re-verify with the server so a stale "connected" flag can never unlock
+    // the Continue button.
+    if (s === 3 && typeof _setStripeGate === 'function') {
+      _setStripeGate(_state.stripeConnected);
+      if (typeof _verifyStripeConnected === 'function' && _state.stripeAccountId) {
+        _verifyStripeConnected();
+      }
+    }
     saveDraft();
   }
 
@@ -5537,9 +5577,10 @@
   var stripeStatusEl    = document.getElementById('apFrwStripeStatus');
   var stripeAcctEl      = document.getElementById('apFrwStripeAcctId');
 
-  if (step3Back) step3Back.addEventListener('click', function(){ goToStep(2); });
-  if (step3Next) step3Next.addEventListener('click', function(){
-    // Allow skipping Stripe connect for now (will be required before live)
+  var stripeGateEl    = document.getElementById('apFrwStripeGate');
+  var stripeRecheckBtn= document.getElementById('apFrwStripeRecheck');
+
+  function _advanceToGoals() {
     goToStep(4);
     // Set max date to 1 year and default to 90 days out
     var dateEl = document.getElementById('apFrwEndDate');
@@ -5548,12 +5589,76 @@
       dateEl.max = d.toISOString().split('T')[0];
       dateEl.value = new Date(Date.now() + 90*864e5).toISOString().split('T')[0];
     }
+  }
+
+  // Gate Step 3 → Step 4: a payout-ready Stripe account is MANDATORY. Without it
+  // a fundraiser could collect money we cannot pay out, so we hard-block here.
+  function _setStripeGate(connected) {
+    _state.stripeConnected = !!connected;
+    if (step3Next) {
+      step3Next.disabled = !connected;
+      step3Next.textContent = connected
+        ? 'Continue — Set Up Fundraiser →'
+        : 'Connect Stripe to continue';
+    }
+    if (stripeGateEl) {
+      stripeGateEl.classList.toggle('is-ready', !!connected);
+      var copy = stripeGateEl.querySelector('.ap-frw-stripe-gate-copy');
+      var icon = stripeGateEl.querySelector('.ap-frw-stripe-gate-icon');
+      if (connected && copy) {
+        copy.innerHTML = '<strong>Stripe is connected and payout-ready.</strong> You\'re cleared to set up the fundraiser.';
+        if (icon) icon.textContent = '✅';
+      }
+    }
+  }
+
+  // Live verification against the server — never trust local state alone before
+  // letting an admin build a fundraiser. Returns true if payout-ready.
+  async function _verifyStripeConnected() {
+    try {
+      var res = await fetch(FR_STRIPE_STATUS, { cache: 'no-store' });
+      var j = await res.json().catch(function(){ return {}; });
+      var ok = !!(j && j.connected);
+      if (ok && j.account_id) _state.stripeAccountId = j.account_id;
+      _setStripeGate(ok);            // also resets button + gate text
+      if (ok) { _showStripeConnected(); saveDraft(); }
+      return ok;
+    } catch (e) {
+      _setStripeGate(false);         // never leave the button stuck enabled
+      return false;
+    }
+  }
+
+  if (step3Back) step3Back.addEventListener('click', function(){ goToStep(2); });
+  if (step3Next) step3Next.addEventListener('click', async function(){
+    // Defensive double-check: re-verify against the server even if local state
+    // says connected, so we never advance on a stale flag. _verifyStripeConnected
+    // owns the button/gate state via _setStripeGate on every outcome.
+    step3Next.textContent = 'Verifying Stripe…';
+    step3Next.disabled = true;
+    var ok = await _verifyStripeConnected();
+    if (ok) { _advanceToGoals(); return; }
+    alert('Stripe isn\'t payout-ready yet. Finish the recipient\'s Stripe setup (bank + identity), then tap "Re-check status" before continuing. This protects you — a fundraiser can\'t run until the cause can actually be paid.');
   });
+  if (stripeRecheckBtn) {
+    stripeRecheckBtn.addEventListener('click', async function(){
+      stripeRecheckBtn.disabled = true;
+      var orig = stripeRecheckBtn.textContent;
+      stripeRecheckBtn.textContent = 'Checking…';
+      var ok = await _verifyStripeConnected();
+      stripeRecheckBtn.textContent = orig;
+      stripeRecheckBtn.disabled = false;
+      if (!ok) {
+        alert('Not connected yet. Make sure the recipient finished Stripe setup — bank details and identity verification must both be complete.');
+      }
+    });
+  }
   // Reflect a connected Stripe account in the UI (used on connect + on resume).
   function _showStripeConnected() {
     if (stripeStatusEl)    stripeStatusEl.style.display = 'none';
     if (stripeConnectedEl) stripeConnectedEl.style.display = '';
     if (stripeAcctEl)      stripeAcctEl.textContent = _state.stripeAccountId || 'connected';
+    _setStripeGate(true);
   }
   if (stripeConnectBtn) {
     stripeConnectBtn.addEventListener('click', async function(){
