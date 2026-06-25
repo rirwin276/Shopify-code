@@ -2293,14 +2293,17 @@
   .ap-fr-zone-empty-copy strong {
     display: block; font-size: 15px; color: #1e293b; font-weight: 700; margin-bottom: 2px;
   }
-  .ap-btn--fr-start {
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-    color: #fff; border: none; border-radius: 10px;
-    padding: 10px 18px; font-size: 13px; font-weight: 700;
+  .ap-btn--fr-start,
+  #apFrLaunchBtn {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+    color: #fff !important; border: none !important; border-radius: 10px !important;
+    padding: 10px 18px !important; font-size: 13px; font-weight: 700;
     cursor: pointer; white-space: nowrap; flex-shrink: 0;
     transition: opacity 0.15s;
+    box-shadow: none !important; outline: none;
   }
-  .ap-btn--fr-start:hover { opacity: 0.88; }
+  .ap-btn--fr-start:hover,
+  #apFrLaunchBtn:hover { opacity: 0.88; }
   /* Active state — fundraiser running (premium dark card) */
   .ap-fr-zone-active {
     display: flex; flex-direction: column; gap: 14px;
@@ -5448,7 +5451,26 @@
     if (frZoneEmpty)  frZoneEmpty.style.display  = enabled ? 'none' : 'flex';
     if (frZoneActive) frZoneActive.style.display = enabled ? '' : 'none';
     if (settingsRow)  settingsRow.style.display  = enabled ? '' : 'none';
-    if (!enabled) return;
+    if (!enabled) {
+      // Ensure the launch button has correct green styling regardless of CSS cascade
+      var btn = document.getElementById('apFrLaunchBtn');
+      if (btn) {
+        btn.style.cssText = [
+          'background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%)',
+          'color:#fff',
+          'border:none',
+          'border-radius:10px',
+          'padding:10px 18px',
+          'font-size:13px',
+          'font-weight:700',
+          'cursor:pointer',
+          'white-space:nowrap',
+          'flex-shrink:0',
+          'transition:opacity 0.15s',
+        ].join(';');
+      }
+      return;
+    }
 
     var cause  = (data.cause_name || '').trim() || 'Your Fundraiser';
     var amt    = parseInt(data.amount || 0);
