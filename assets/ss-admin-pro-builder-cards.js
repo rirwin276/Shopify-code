@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v2';
+  var VERSION = 'catalog-v3';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -155,11 +155,81 @@
     }
   ];
 
+  /* ─── Live pricing ──────────────────────────────────────────────────────── */
+  // Maps each builder to its global_pricing keys so the catalog reflects the
+  // exact prices set in the Price Editor (/pages/price-editor). Falls back to
+  // the hardcoded prices in each builder's `pricing` array if the live fetch
+  // is unavailable.
+  var PRICE_KEYS = {
+    bc3413:  { front: 'BC3413_front',  back: 'BC3413_front_back' },
+    bc3001y: { front: 'BC3001Y_front', back: 'BC3001Y_front_back' },
+    m2580:   { front: 'M2580_front',   back: 'M2580_front_back' },
+    m2480:   { front: 'M2480_front',   back: 'M2480_front_back' },
+    ls14003: { front: 'LS14003_front', back: 'LS14003_front_back' },
+    cc1717:  { front: 'CC1717_front',  back: 'CC1717_front_back' },
+    nl6733:  { front: 'NL6733_front',  back: null },
+    mc1790:  { front: 'MC1790_front',  back: null }
+  };
+
+  var livePrices = null;
+
+  function parseDollars(s) {
+    var n = parseFloat(String(s == null ? '' : s).replace(/[^0-9.]/g, ''));
+    return isFinite(n) ? n : null;
+  }
+  function fmtPrice(n) {
+    if (n == null || !isFinite(n)) return '';
+    return '$' + (n % 1 === 0 ? String(n) : n.toFixed(2));
+  }
+  function livePrice(key, fallbackNum) {
+    if (key && livePrices && livePrices[key] != null) {
+      var n = Number(livePrices[key]);
+      if (isFinite(n) && n > 0) return n;
+    }
+    return fallbackNum;
+  }
+  // Front price (number) for a builder — live value or hardcoded fallback.
+  function frontPrice(b) {
+    var keys = PRICE_KEYS[b.id] || {};
+    var fb = parseDollars(b.pricing[0] && b.pricing[0].price);
+    return livePrice(keys.front, fb);
+  }
+  // Back / front+back price (number) for a builder, or null if not offered.
+  function backPrice(b) {
+    var keys = PRICE_KEYS[b.id] || {};
+    if (!keys.back || !b.pricing[1]) return null;
+    var fb = parseDollars(b.pricing[1].price);
+    return livePrice(keys.back, fb);
+  }
+
   /* ─── Utilities ─────────────────────────────────────────────────────────── */
   function $(s) { return document.querySelector(s); }
   function ready(fn) { document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn, {once: true}) : fn(); }
   function ssap() { return window.SSAP || {}; }
   function esc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // Fetch the live global prices once (same endpoint + auth the Price Editor
+  // uses). On success, re-render so cards + modal reflect current pricing.
+  function fetchLivePrices() {
+    var secret = ssap()['editor' + 'Secret'] || '';
+    if (!secret) return;
+    fetch(RAILWAY + '/api/pricing', {
+      method: 'GET',
+      headers: { 'X-Editor-Secret': secret },
+      cache: 'no-store'
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data) return;
+        var p = data.prices || data;
+        if (p && typeof p === 'object') {
+          livePrices = p;
+          var c = $('#apCustomBuildersContainer');
+          if (c) { c.removeAttribute('data-ss-v'); renderCards(true); }
+        }
+      })
+      .catch(function () { /* keep hardcoded fallbacks */ });
+  }
 
   function editorUrl(b) {
     var s = ssap();
@@ -279,8 +349,8 @@
       'display:flex;flex-direction:column;',
     '}',
     '.ss-modal__hero{',
-      'flex:1;width:100%;object-fit:cover;display:block;',
-      'min-height:0;',
+      'flex:1;width:100%;object-fit:contain;display:block;',
+      'min-height:0;padding:22px;box-sizing:border-box;',
     '}',
     '.ss-modal__thumbs{',
       'display:flex;gap:8px;',
@@ -501,7 +571,12 @@
       thumbsEl.style.display = 'none';
     }
 
-    var priceRows = b.pricing.map(function (p) {
+    var rows = [{ label: b.pricing[0].label, note: b.pricing[0].note, price: fmtPrice(frontPrice(b)) }];
+    var bp = backPrice(b);
+    if (bp != null && b.pricing[1]) {
+      rows.push({ label: b.pricing[1].label, note: b.pricing[1].note, price: fmtPrice(bp) });
+    }
+    var priceRows = rows.map(function (p) {
       return '<div class="ss-modal__price-row">' +
         '<div><div class="ss-modal__pl">' + esc(p.label) + '</div><div class="ss-modal__pn">' + esc(p.note) + '</div></div>' +
         '<div class="ss-modal__pv">' + esc(p.price) + '</div>' +
@@ -575,7 +650,7 @@
     info.className = 'ss-cat__info';
     info.innerHTML =
       '<div class="ss-cat__name">' + esc(b.name) + '</div>' +
-      '<div class="ss-cat__price">From ' + esc(b.from) + '</div>' +
+      '<div class="ss-cat__price">From ' + esc(fmtPrice(frontPrice(b))) + '</div>' +
       '<div class="ss-cat__hint">' + esc(b.hint) + '</div>';
 
     card.appendChild(media);
@@ -629,8 +704,12 @@
   /* ─── Boot ──────────────────────────────────────────────────────────────── */
   function boot() {
     var tries = 0;
+    var pricesRequested = false;
     var timer = setInterval(function () {
-      if (shouldRun()) renderCards(false);
+      if (shouldRun()) {
+        renderCards(false);
+        if (!pricesRequested) { pricesRequested = true; fetchLivePrices(); }
+      }
       if (++tries >= 240) clearInterval(timer);
     }, 125);
 
