@@ -1,29 +1,206 @@
-/* Stella & Sage — Admin Pro Builder Cards */
+/* Stella & Sage — Admin Pro Builder Cards (catalog grid) */
 (function () {
   'use strict';
 
-  var VERSION = 'pro-builder-registry-v8';
+  var VERSION = 'catalog-v1';
   var RAILWAY_BASE = 'https://printfulautomation-production.up.railway.app';
 
   var IMAGE_URLS = {
-    bc3413: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/bc3413-front-clay-triblend.png?v=1777937830',
+    bc3413:  'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/bc3413-front-clay-triblend.png?v=1777937830',
     bc3001y: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/bc3001y-front-natural_dd41b37c-8fb7-4aec-bb0d-9191145a77ca.png?v=1778476357',
-    m2580: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/m2580-front-latte.png?v=1778444002',
+    m2580:   'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/m2580-front-latte.png?v=1778444002',
+    m2480:   'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/m2480_front_editor_background_style3433.png?v=1782189743',
     ls14003: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ls14003_front_editor_background_style28668.png?v=1779070307',
-    cc1717: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/cc1717-front-pepper.png?v=1780468020',
-    nl6733: RAILWAY_BASE + '/editor/pro-shirt/nl6733/card-image',
-    mc1790: RAILWAY_BASE + '/editor/pro-shirt/mc1790/card-image'
+    cc1717:  'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/cc1717-front-pepper.png?v=1780468020',
+    nl6733:  RAILWAY_BASE + '/editor/pro-shirt/nl6733/card-image',
+    mc1790:  RAILWAY_BASE + '/editor/pro-shirt/mc1790/card-image'
   };
 
   var BUILDERS = [
-    { id: 'bc3413', title: 'Bella + Canvas BC3413', subtitle: 'Custom unisex tri-blend tee · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/bc3413', fixedImage: IMAGE_URLS.bc3413, tipTitle: 'Bella + Canvas BC3413', tipBody: 'Premium unisex tri-blend tee with custom front or front + back artwork and up to 2 garment colors.' },
-    { id: 'bc3001y', title: 'Bella + Canvas BC3001Y', subtitle: 'Custom youth staple tee · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/bc3001y', fixedImage: IMAGE_URLS.bc3001y, tipTitle: 'Bella + Canvas BC3001Y', tipBody: 'Youth staple tee with custom front or front + back artwork, color selection, and a separate store listing.' },
-    { id: 'm2580', title: 'Independent Trading Co. M2580', subtitle: 'Custom premium hoodie · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/m2580', fixedImage: IMAGE_URLS.m2580, tipTitle: 'Independent Trading Co. M2580', tipBody: 'Premium pullover hoodie with custom front or front + back artwork and up to 2 hoodie colors.' },
-    { id: 'ls14003', title: 'Lane Seven LS14003', subtitle: 'Custom full zip hoodie · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/ls14003', fixedImage: IMAGE_URLS.ls14003, tipTitle: 'Lane Seven LS14003', tipBody: 'Full zip hoodie with custom front or front + back artwork, up to 2 garment colors, and a separate store listing.' },
-    { id: 'cc1717', title: 'Comfort Colors CC1717', subtitle: 'Custom heavyweight garment-dyed tee · Front or front + back artwork · Up to 2 colors', route: '/editor/pro-shirt/cc1717', fixedImage: IMAGE_URLS.cc1717, tipTitle: 'Comfort Colors CC1717', tipBody: 'Premium heavyweight garment-dyed tee with custom front or front + back artwork and up to 2 garment colors.' },
-    { id: 'nl6733', title: 'Next Level NL6733', subtitle: "Custom women's racerback tank · Front artwork only · Up to 2 colors", route: '/editor/pro-shirt/nl6733', fixedImage: IMAGE_URLS.nl6733, tipTitle: 'Next Level NL6733', tipBody: "Women's racerback tank with custom front artwork, color selection, and a separate store listing. Back artwork is disabled for now." },
-    { id: 'mc1790', title: 'Cotton Heritage MC1790', subtitle: "Custom men's premium tank · Front artwork only · Up to 2 colors", route: '/editor/pro-shirt/mc1790', fixedImage: IMAGE_URLS.mc1790, tipTitle: 'Cotton Heritage MC1790', tipBody: "Men's premium tank top with custom front artwork, color selection, and a separate store listing. Back artwork is disabled for now." }
+    {
+      id: 'bc3413',
+      badge: 'Unisex Tee',
+      title: 'Bella + Canvas BC3413',
+      subtitle: 'Tri-blend · Front or front + back · Up to 2 colors',
+      route: '/editor/pro-shirt/bc3413',
+      image: IMAGE_URLS.bc3413,
+      tip: 'Premium unisex tri-blend tee with custom artwork and up to 2 garment colors.'
+    },
+    {
+      id: 'bc3001y',
+      badge: 'Youth Tee',
+      title: 'Bella + Canvas BC3001Y',
+      subtitle: 'Youth staple · Front or front + back · Up to 2 colors',
+      route: '/editor/pro-shirt/bc3001y',
+      image: IMAGE_URLS.bc3001y,
+      tip: 'Youth staple tee with custom artwork, color selection, and a separate store listing.'
+    },
+    {
+      id: 'm2580',
+      badge: 'Pullover Hoodie',
+      title: 'Indep. Trading Co. M2580',
+      subtitle: 'Premium pullover · Front or front + back · Up to 2 colors',
+      route: '/editor/pro-shirt/m2580',
+      image: IMAGE_URLS.m2580,
+      tip: 'Premium pullover hoodie with custom artwork and up to 2 hoodie colors.'
+    },
+    {
+      id: 'm2480',
+      badge: 'Crewneck Sweatshirt',
+      title: 'Cotton Heritage M2480',
+      subtitle: 'Premium crewneck · Front or front + back · Up to 2 colors',
+      route: '/editor/pro-shirt/m2480',
+      image: IMAGE_URLS.m2480,
+      tip: 'Premium unisex crewneck sweatshirt with custom artwork and up to 2 sweatshirt colors.'
+    },
+    {
+      id: 'ls14003',
+      badge: 'Full-Zip Hoodie',
+      title: 'Lane Seven LS14003',
+      subtitle: 'Full zip · Front or front + back · Up to 2 colors',
+      route: '/editor/pro-shirt/ls14003',
+      image: IMAGE_URLS.ls14003,
+      tip: 'Full zip hoodie with custom artwork, up to 2 garment colors, and a separate store listing.'
+    },
+    {
+      id: 'cc1717',
+      badge: 'Garment-Dyed Tee',
+      title: 'Comfort Colors CC1717',
+      subtitle: 'Heavyweight · Front or front + back · Up to 2 colors',
+      route: '/editor/pro-shirt/cc1717',
+      image: IMAGE_URLS.cc1717,
+      tip: 'Premium heavyweight garment-dyed tee with custom artwork and up to 2 garment colors.'
+    },
+    {
+      id: 'nl6733',
+      badge: "Women's Tank",
+      title: "Next Level NL6733",
+      subtitle: "Racerback · Front artwork only · Up to 2 colors",
+      route: '/editor/pro-shirt/nl6733',
+      image: IMAGE_URLS.nl6733,
+      tip: "Women's racerback tank with custom front artwork, color selection, and a separate store listing."
+    },
+    {
+      id: 'mc1790',
+      badge: "Men's Tank",
+      title: "Cotton Heritage MC1790",
+      subtitle: "Premium tank · Front artwork only · Up to 2 colors",
+      route: '/editor/pro-shirt/mc1790',
+      image: IMAGE_URLS.mc1790,
+      tip: "Men's premium tank top with custom front artwork, color selection, and a separate store listing."
+    }
   ];
+
+  var STYLES = [
+    '#apCustomBuildersContainer{',
+      'display:grid!important;',
+      'grid-template-columns:repeat(auto-fill,minmax(196px,1fr))!important;',
+      'gap:18px!important;',
+      'padding:4px 0 20px!important;',
+    '}',
+
+    '.ss-catalog-card{',
+      'display:flex;flex-direction:column;',
+      'border-radius:16px;overflow:visible;',
+      'background:#fff;',
+      'border:1.5px solid rgba(17,16,14,.09);',
+      'box-shadow:0 2px 10px rgba(17,16,14,.05);',
+      'transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;',
+      'position:relative;',
+    '}',
+    '.ss-catalog-card:hover{',
+      'transform:translateY(-4px);',
+      'box-shadow:0 12px 32px rgba(17,16,14,.12);',
+      'border-color:rgba(183,163,106,.5);',
+    '}',
+
+    '.ss-catalog-card__img-wrap{',
+      'position:relative;width:100%;',
+      'aspect-ratio:1;overflow:hidden;',
+      'border-radius:14px 14px 0 0;',
+      'background:#f5f1e8;',
+    '}',
+    '.ss-catalog-card__img-wrap img{',
+      'width:100%;height:100%;',
+      'object-fit:cover;display:block;',
+    '}',
+
+    '.ss-catalog-badge{',
+      'position:absolute;top:9px;left:9px;',
+      'background:rgba(17,16,14,.74);',
+      'backdrop-filter:blur(4px);',
+      'color:#fff;',
+      'font-size:9.5px;font-weight:800;',
+      'letter-spacing:.05em;text-transform:uppercase;',
+      'padding:3px 8px;border-radius:999px;',
+      'pointer-events:none;',
+    '}',
+
+    '.ss-catalog-card__body{',
+      'padding:13px 14px 15px;',
+      'display:flex;flex-direction:column;flex:1;',
+    '}',
+    '.ss-catalog-card__title{',
+      'font-size:13.5px;font-weight:900;',
+      'color:#11100e;letter-spacing:-.02em;',
+      'line-height:1.2;',
+    '}',
+    '.ss-catalog-card__sub{',
+      'font-size:11px;color:rgba(17,16,14,.52);',
+      'margin-top:5px;line-height:1.4;',
+      'font-weight:500;flex:1;',
+    '}',
+    '.ss-catalog-card__btn{',
+      'margin-top:13px;display:block;width:100%;',
+      'padding:10px 14px;',
+      'background:#11100e;color:#fff;',
+      'border:none;border-radius:10px;',
+      'font-size:12.5px;font-weight:800;',
+      'cursor:pointer;text-align:center;',
+      'transition:background .15s,color .15s;',
+      'box-sizing:border-box;',
+    '}',
+    '.ss-catalog-card__btn:hover{',
+      'background:rgba(183,163,106,1);color:#11100e;',
+    '}',
+
+    '.ss-catalog-tip{',
+      'display:none;',
+      'position:absolute;',
+      'left:50%;bottom:calc(100% + 10px);',
+      'transform:translateX(-50%);',
+      'width:min(280px,calc(100vw - 32px));',
+      'padding:12px 14px;',
+      'background:#11100e;color:rgba(255,255,255,.82);',
+      'border:1px solid rgba(183,163,106,.22);',
+      'border-radius:14px;',
+      'box-shadow:0 20px 60px rgba(0,0,0,.26);',
+      'font-size:11.5px;line-height:1.45;',
+      'text-align:left;z-index:10090;pointer-events:none;',
+    '}',
+    '.ss-catalog-tip::after{',
+      'content:"";position:absolute;',
+      'left:50%;top:100%;width:10px;height:10px;',
+      'background:#11100e;',
+      'transform:translate(-50%,-5px) rotate(45deg);',
+      'border-right:1px solid rgba(183,163,106,.18);',
+      'border-bottom:1px solid rgba(183,163,106,.18);',
+    '}',
+    '.ss-catalog-card:hover .ss-catalog-tip,',
+    '.ss-catalog-card:focus-within .ss-catalog-tip{display:block;}',
+
+    '@media(max-width:540px){',
+      '#apCustomBuildersContainer{',
+        'grid-template-columns:repeat(2,1fr)!important;',
+        'gap:12px!important;',
+      '}',
+    '}',
+    '@media(max-width:340px){',
+      '#apCustomBuildersContainer{',
+        'grid-template-columns:1fr!important;',
+      '}',
+    '}'
+  ].join('');
 
   function ready(fn) { document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn, { once: true }) : fn(); }
   function $(s) { return document.querySelector(s); }
@@ -39,60 +216,67 @@
     return url;
   }
 
-  function makeThumb(builder) {
-    var wrap = document.createElement('div');
-    wrap.className = 'ss-pro-builder-thumb';
+  function makeCard(builder) {
+    var card = document.createElement('div');
+    card.className = 'ss-catalog-card';
+    card.setAttribute('data-ss-builder-id', builder.id);
+
+    var imgWrap = document.createElement('div');
+    imgWrap.className = 'ss-catalog-card__img-wrap';
+
     var img = document.createElement('img');
-    img.src = builder.fixedImage;
+    img.src = builder.image;
     img.alt = builder.title;
     img.loading = 'eager';
     img.decoding = 'async';
-    wrap.appendChild(img);
-    return wrap;
-  }
 
-  function makeCard(builder) {
-    var card = document.createElement('div');
-    card.className = 'ap-product-row ap-add-product-row ss-pro-builder-card';
-    card.setAttribute('data-ss-builder-id', builder.id);
+    var badge = document.createElement('span');
+    badge.className = 'ss-catalog-badge';
+    badge.textContent = builder.badge;
 
-    var tid = 'ss-pro-builder-tip-' + builder.id;
-    var tip = document.createElement('div');
-    tip.className = 'ss-pro-builder-tooltip';
-    tip.id = tid;
-    tip.innerHTML = '<strong>' + esc(builder.tipTitle) + '</strong><span>' + esc(builder.tipBody) + '</span>';
+    imgWrap.appendChild(img);
+    imgWrap.appendChild(badge);
 
-    var copy = document.createElement('div');
-    copy.className = 'ss-pro-builder-copy';
-    copy.innerHTML = '<div class="ss-pro-builder-title">' + esc(builder.title) + '</div><div class="ss-pro-builder-subtitle">' + esc(builder.subtitle) + '</div>';
+    var body = document.createElement('div');
+    body.className = 'ss-catalog-card__body';
 
-    var actions = document.createElement('div');
-    actions.className = 'ap-product-row__actions ss-pro-builder-actions';
+    var title = document.createElement('div');
+    title.className = 'ss-catalog-card__title';
+    title.textContent = builder.title;
+
+    var sub = document.createElement('div');
+    sub.className = 'ss-catalog-card__sub';
+    sub.textContent = builder.subtitle;
 
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'ss-pro-builder-button';
-    btn.textContent = '✨ Add to Store';
-    btn.setAttribute('aria-describedby', tid);
+    btn.className = 'ss-catalog-card__btn';
+    btn.textContent = 'Add to Store';
     btn.addEventListener('click', function () {
       var url = editorUrl(builder);
       if (typeof window.apOpenEditorModal === 'function') window.apOpenEditorModal(url);
       else window.open(url, '_blank', 'noopener,noreferrer');
     });
 
-    actions.appendChild(btn);
-    card.appendChild(makeThumb(builder));
-    card.appendChild(copy);
-    card.appendChild(actions);
+    body.appendChild(title);
+    body.appendChild(sub);
+    body.appendChild(btn);
+
+    var tip = document.createElement('div');
+    tip.className = 'ss-catalog-tip';
+    tip.innerHTML = '<strong style="display:block;color:#fff;font-size:12px;font-weight:900;margin-bottom:5px;">' + esc(builder.title) + '</strong><span>' + esc(builder.tip) + '</span>';
+
+    card.appendChild(imgWrap);
+    card.appendChild(body);
     card.appendChild(tip);
     return card;
   }
 
   function injectStyles() {
-    if ($('#ss-pro-builder-card-styles')) return;
+    if ($('#ss-catalog-styles')) return;
     var style = document.createElement('style');
-    style.id = 'ss-pro-builder-card-styles';
-    style.textContent = '.ss-pro-builder-card{position:relative!important;border:2px dashed rgba(183,163,106,.34)!important;background:rgba(183,163,106,.075)!important;overflow:visible!important}.ss-pro-builder-card:hover{border-color:rgba(183,163,106,.58)!important;background:rgba(183,163,106,.105)!important}.ss-pro-builder-thumb{width:64px;height:64px;border-radius:18px;flex:0 0 auto;display:grid;place-items:center;background:#f5f1e8;overflow:hidden;border:1px solid rgba(17,16,14,.10);box-shadow:0 10px 26px rgba(17,16,14,.08)}.ss-pro-builder-thumb img{width:100%;height:100%;object-fit:cover;display:block}.ss-pro-builder-copy{flex:1;min-width:0}.ss-pro-builder-title{font-size:15px;font-weight:900;color:var(--ap-text,#11100e);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.02em}.ss-pro-builder-subtitle{font-size:12px;color:var(--ap-gray,rgba(17,16,14,.55));margin-top:4px;line-height:1.35;font-weight:600}.ss-pro-builder-actions{width:auto!important;display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:8px!important;flex:0 0 auto!important;margin-top:0!important}.ss-pro-builder-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:0 18px;background:#11100e;color:#fff;border:1px solid rgba(183,163,106,.22);border-radius:999px;font-size:13px;font-weight:950;cursor:pointer;box-shadow:0 14px 34px rgba(17,16,14,.14);white-space:nowrap}.ss-pro-builder-button:hover{background:#28251e;transform:translateY(-1px)}.ss-pro-builder-tooltip{display:none;position:absolute;left:50%;bottom:calc(100% + 12px);transform:translateX(-50%);width:min(320px,calc(100vw - 40px));padding:14px 16px;background:#11100e;color:rgba(255,255,255,.82);border:1px solid rgba(183,163,106,.22);border-radius:18px;box-shadow:0 24px 70px rgba(0,0,0,.28);font-size:12px;line-height:1.45;text-align:left;z-index:10090;pointer-events:none}.ss-pro-builder-tooltip:after{content:"";position:absolute;left:50%;top:100%;width:12px;height:12px;background:#11100e;transform:translate(-50%,-6px) rotate(45deg);border-right:1px solid rgba(183,163,106,.18);border-bottom:1px solid rgba(183,163,106,.18)}.ss-pro-builder-tooltip strong{display:block;color:#fff;font-size:13px;font-weight:950;margin-bottom:6px}.ss-pro-builder-card:hover>.ss-pro-builder-tooltip,.ss-pro-builder-card:focus-within>.ss-pro-builder-tooltip{display:block}@media(max-width:700px){.ss-pro-builder-tooltip{display:none!important}.ss-pro-builder-card{display:grid!important;grid-template-columns:74px minmax(0,1fr)!important;gap:12px!important;align-items:center!important}.ss-pro-builder-thumb{width:74px;height:74px;border-radius:20px}.ss-pro-builder-title{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.ss-pro-builder-actions{grid-column:1/-1!important;width:100%!important}.ss-pro-builder-button{width:100%;min-height:46px}}';
+    style.id = 'ss-catalog-styles';
+    style.textContent = STYLES;
     document.head.appendChild(style);
   }
 
@@ -105,12 +289,12 @@
     var count = $('#apBuilderProductCount');
 
     if (!container) return false;
-    if (!force && container.getAttribute('data-ss-pro-builder-version') === VERSION && container.children.length === BUILDERS.length) return true;
+    if (!force && container.getAttribute('data-ss-catalog-version') === VERSION && container.children.length === BUILDERS.length) return true;
 
     injectStyles();
     container.innerHTML = '';
     BUILDERS.forEach(function (b) { container.appendChild(makeCard(b)); });
-    container.setAttribute('data-ss-pro-builder-version', VERSION);
+    container.setAttribute('data-ss-catalog-version', VERSION);
 
     if (section) section.style.display = 'block';
     if (empty) empty.style.display = 'none';
@@ -124,7 +308,7 @@
 
   function boot() {
     var attempts = 0;
-    var maxAttempts = 240; // 30 seconds at 125ms
+    var maxAttempts = 240;
 
     var timer = window.setInterval(function () {
       attempts += 1;
@@ -136,7 +320,7 @@
       if (!shouldTryAdminPatch()) return;
       var container = findContainer();
       if (!container) return;
-      if (container.getAttribute('data-ss-pro-builder-version') !== VERSION || container.children.length !== BUILDERS.length) {
+      if (container.getAttribute('data-ss-catalog-version') !== VERSION || container.children.length !== BUILDERS.length) {
         window.setTimeout(function () { renderCards(true); }, 30);
       }
     });
