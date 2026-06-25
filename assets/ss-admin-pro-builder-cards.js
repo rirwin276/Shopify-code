@@ -242,7 +242,7 @@
       'position:fixed;inset:0;',
       'background:rgba(15,14,12,.6);',
       'backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);',
-      'z-index:20000;',
+      'z-index:9990;',
       'display:flex;align-items:center;justify-content:center;',
       'padding:20px;box-sizing:border-box;',
       'opacity:0;transition:opacity .22s ease;pointer-events:none;',
@@ -527,6 +527,7 @@
       '<button class="ss-modal__cta" data-builder-id="' + esc(b.id) + '">Add to Store</button>';
 
     detailEl.querySelector('.ss-modal__cta').addEventListener('click', function () {
+      closeModal();
       launch(b);
     });
   }
