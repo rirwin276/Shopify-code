@@ -1,300 +1,617 @@
-/* Stella & Sage — Admin Pro Builder Cards (catalog grid) */
+/* Stella & Sage — Admin Pro Builder Catalog */
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v1';
-  var RAILWAY_BASE = 'https://printfulautomation-production.up.railway.app';
+  var VERSION = 'catalog-v2';
+  var RAILWAY = 'https://printfulautomation-production.up.railway.app';
+  var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
-  var IMAGE_URLS = {
-    bc3413:  'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/bc3413-front-clay-triblend.png?v=1777937830',
-    bc3001y: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/bc3001y-front-natural_dd41b37c-8fb7-4aec-bb0d-9191145a77ca.png?v=1778476357',
-    m2580:   'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/m2580-front-latte.png?v=1778444002',
-    m2480:   'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/m2480_front_editor_background_style3433.png?v=1782189743',
-    ls14003: 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ls14003_front_editor_background_style28668.png?v=1779070307',
-    cc1717:  'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/cc1717-front-pepper.png?v=1780468020',
-    nl6733:  RAILWAY_BASE + '/editor/pro-shirt/nl6733/card-image',
-    mc1790:  RAILWAY_BASE + '/editor/pro-shirt/mc1790/card-image'
+  var IMG = {
+    bc3413:      CDN + 'bc3413-front-clay-triblend.png?v=1777937830',
+    bc3001y:     CDN + 'bc3001y-front-natural_dd41b37c-8fb7-4aec-bb0d-9191145a77ca.png?v=1778476357',
+    m2580:       CDN + 'm2580-front-latte.png?v=1778444002',
+    m2480:       CDN + 'm2480_front_editor_background_style3433.png?v=1782189743',
+    ls14003_f:   CDN + 'ls14003_front_editor_background_style28668.png?v=1779070307',
+    ls14003_b:   CDN + 'ls14003_back_editor_background_style28669.png?v=1779070374',
+    cc1717:      CDN + 'cc1717-front-pepper.png?v=1780468020',
+    nl6733:      RAILWAY + '/editor/pro-shirt/nl6733/card-image',
+    mc1790:      RAILWAY + '/editor/pro-shirt/mc1790/card-image'
   };
 
   var BUILDERS = [
     {
       id: 'bc3413',
       badge: 'Unisex Tee',
-      title: 'Bella + Canvas BC3413',
-      subtitle: 'Tri-blend · Front or front + back · Up to 2 colors',
+      name: 'Bella + Canvas BC3413',
+      from: '$24',
+      hint: 'Front or front + back printing',
       route: '/editor/pro-shirt/bc3413',
-      image: IMAGE_URLS.bc3413,
-      tip: 'Premium unisex tri-blend tee with custom artwork and up to 2 garment colors.'
+      gallery: [IMG.bc3413],
+      desc: 'The BC3413 is a cult-favorite unisex tri-blend tee known for its super-soft hand feel and flattering drape. Made from a premium cotton-poly-rayon blend, it holds vibrant prints beautifully and has the kind of lived-in quality your customers will reach for every day.',
+      specs: ['52% Cotton · 25% Polyester · 23% Rayon', 'Ultra-lightweight 3.8 oz/yd²', 'Retail fit · Side-seamed · Tearaway label'],
+      sizes: 'S · M · L · XL · 2XL · 3XL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$24' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$29' }
+      ]
     },
     {
       id: 'bc3001y',
       badge: 'Youth Tee',
-      title: 'Bella + Canvas BC3001Y',
-      subtitle: 'Youth staple · Front or front + back · Up to 2 colors',
+      name: 'Bella + Canvas BC3001Y',
+      from: '$18',
+      hint: 'Youth sizes · Front or front + back',
       route: '/editor/pro-shirt/bc3001y',
-      image: IMAGE_URLS.bc3001y,
-      tip: 'Youth staple tee with custom artwork, color selection, and a separate store listing.'
+      gallery: [IMG.bc3001y],
+      desc: 'The BC3001Y Youth Staple Tee brings the same premium Bella + Canvas quality to youth sizing. Soft, durable, and available in dozens of colors — perfect for team events, schools, or family campaigns. Creates its own separate listing in your store.',
+      specs: ['100% Airlume Combed/Ring-Spun Cotton', 'Lightweight 4.2 oz/yd²', 'Classic fit · Youth XS–XL + Adult S–XL'],
+      sizes: 'YXS · YS · YM · YL · YXL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$18' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$24' }
+      ]
     },
     {
       id: 'm2580',
       badge: 'Pullover Hoodie',
-      title: 'Indep. Trading Co. M2580',
-      subtitle: 'Premium pullover · Front or front + back · Up to 2 colors',
+      name: 'Independent Trading Co. M2580',
+      from: '$34',
+      hint: 'Front or front + back printing',
       route: '/editor/pro-shirt/m2580',
-      image: IMAGE_URLS.m2580,
-      tip: 'Premium pullover hoodie with custom artwork and up to 2 hoodie colors.'
+      gallery: [IMG.m2580],
+      desc: 'The M2580 is the go-to premium pullover hoodie — mid-weight, relaxed fit, and built to last. With a kangaroo pocket, reinforced ribbed cuffs, and a clean front canvas, it\'s ideal for bold logos and statement designs your customers will actually wear out.',
+      specs: ['80% Cotton · 20% Polyester fleece', 'Mid-weight 8.5 oz/yd²', 'Relaxed unisex fit · Kangaroo pocket'],
+      sizes: 'S · M · L · XL · 2XL · 3XL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$34' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$39' }
+      ]
     },
     {
       id: 'm2480',
       badge: 'Crewneck Sweatshirt',
-      title: 'Cotton Heritage M2480',
-      subtitle: 'Premium crewneck · Front or front + back · Up to 2 colors',
+      name: 'Cotton Heritage M2480',
+      from: '$39',
+      hint: 'Front or front + back printing',
       route: '/editor/pro-shirt/m2480',
-      image: IMAGE_URLS.m2480,
-      tip: 'Premium unisex crewneck sweatshirt with custom artwork and up to 2 sweatshirt colors.'
+      gallery: [IMG.m2480],
+      desc: 'The M2480 is a premium heavyweight crewneck sweatshirt with a luxuriously soft fleece interior and a clean, modern silhouette. It strikes the perfect balance between comfort and structure — and its clean front canvas is made for statement prints.',
+      specs: ['60% Cotton · 40% Polyester ring-spun fleece', 'Heavyweight 10 oz/yd²', 'Relaxed unisex fit · Ribbed cuffs & hem'],
+      sizes: 'S · M · L · XL · 2XL · 3XL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$39' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$44' }
+      ]
     },
     {
       id: 'ls14003',
       badge: 'Full-Zip Hoodie',
-      title: 'Lane Seven LS14003',
-      subtitle: 'Full zip · Front or front + back · Up to 2 colors',
+      name: 'Lane Seven LS14003',
+      from: '$37',
+      hint: 'Front or front + back printing',
       route: '/editor/pro-shirt/ls14003',
-      image: IMAGE_URLS.ls14003,
-      tip: 'Full zip hoodie with custom artwork, up to 2 garment colors, and a separate store listing.'
+      gallery: [IMG.ls14003_f, IMG.ls14003_b],
+      desc: 'The LS14003 is Lane Seven\'s premium full-zip hoodie — a versatile layering piece built from a cozy fleece blend with a flattering athletic silhouette. Front-zip convenience meets clean left-chest and back print areas, creating a product your customers will live in.',
+      specs: ['60% Cotton · 40% Polyester fleece', 'Mid-weight 8.5 oz/yd²', 'Unisex athletic fit · Full-zip with kangaroo pocket'],
+      sizes: 'S · M · L · XL · 2XL · 3XL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$37' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$43' }
+      ]
     },
     {
       id: 'cc1717',
       badge: 'Garment-Dyed Tee',
-      title: 'Comfort Colors CC1717',
-      subtitle: 'Heavyweight · Front or front + back · Up to 2 colors',
+      name: 'Comfort Colors CC1717',
+      from: '$30',
+      hint: 'Front or front + back printing',
       route: '/editor/pro-shirt/cc1717',
-      image: IMAGE_URLS.cc1717,
-      tip: 'Premium heavyweight garment-dyed tee with custom artwork and up to 2 garment colors.'
+      gallery: [IMG.cc1717],
+      desc: 'The CC1717 is Comfort Colors\' signature heavyweight garment-dyed tee — pigment-washed for a unique, worn-in look that can\'t be replicated. Every shirt has a slightly one-of-a-kind character. Thick, premium, and wildly popular in lifestyle and vintage-inspired brands.',
+      specs: ['100% Ring-Spun Cotton (some colors are blended)', 'Heavyweight 6.1 oz/yd²', 'Relaxed unisex fit · Pigment-dyed · Oversized feel'],
+      sizes: 'S · M · L · XL · 2XL · 3XL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$30' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$35' }
+      ]
     },
     {
       id: 'nl6733',
-      badge: "Women's Tank",
-      title: "Next Level NL6733",
-      subtitle: "Racerback · Front artwork only · Up to 2 colors",
+      badge: "Women's Racerback Tank",
+      name: 'Next Level NL6733',
+      from: '$22',
+      hint: 'Front print only',
       route: '/editor/pro-shirt/nl6733',
-      image: IMAGE_URLS.nl6733,
-      tip: "Women's racerback tank with custom front artwork, color selection, and a separate store listing."
+      gallery: [IMG.nl6733],
+      desc: 'The NL6733 is a women\'s ideal racerback tank built from Next Level\'s signature 60/40 blend — incredibly soft, moisture-wicking, and designed to move. The racerback cut flatters every body type, making it a top pick for yoga studios, gyms, and lifestyle brands.',
+      specs: ['60% Cotton · 40% Polyester jersey', 'Lightweight 3.7 oz/yd²', 'Fitted women\'s cut · Racerback · Tearaway label'],
+      sizes: 'XS · S · M · L · XL · 2XL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front (back print not available)', price: '$22' }
+      ]
     },
     {
       id: 'mc1790',
       badge: "Men's Tank",
-      title: "Cotton Heritage MC1790",
-      subtitle: "Premium tank · Front artwork only · Up to 2 colors",
+      name: 'Cotton Heritage MC1790',
+      from: '$22',
+      hint: 'Front print only',
       route: '/editor/pro-shirt/mc1790',
-      image: IMAGE_URLS.mc1790,
-      tip: "Men's premium tank top with custom front artwork, color selection, and a separate store listing."
+      gallery: [IMG.mc1790],
+      desc: 'The MC1790 is Cotton Heritage\'s premium men\'s muscle tank — a gym-ready staple with a clean cut and exceptional softness. Ideal for athletic brands, outdoor lifestyle, and anyone who wants a bold front-print product that feels and looks premium.',
+      specs: ['100% Combed Cotton jersey', 'Lightweight 4.3 oz/yd²', 'Athletic men\'s cut · Sleeveless · Side-seamed'],
+      sizes: 'S · M · L · XL · 2XL · 3XL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front (back print not available)', price: '$22' }
+      ]
     }
   ];
 
-  var STYLES = [
-    '#apCustomBuildersContainer{',
-      'display:grid!important;',
-      'grid-template-columns:repeat(auto-fill,minmax(196px,1fr))!important;',
-      'gap:18px!important;',
-      'padding:4px 0 20px!important;',
-    '}',
-
-    '.ss-catalog-card{',
-      'display:flex;flex-direction:column;',
-      'border-radius:16px;overflow:visible;',
-      'background:#fff;',
-      'border:1.5px solid rgba(17,16,14,.09);',
-      'box-shadow:0 2px 10px rgba(17,16,14,.05);',
-      'transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;',
-      'position:relative;',
-    '}',
-    '.ss-catalog-card:hover{',
-      'transform:translateY(-4px);',
-      'box-shadow:0 12px 32px rgba(17,16,14,.12);',
-      'border-color:rgba(183,163,106,.5);',
-    '}',
-
-    '.ss-catalog-card__img-wrap{',
-      'position:relative;width:100%;',
-      'aspect-ratio:1;overflow:hidden;',
-      'border-radius:14px 14px 0 0;',
-      'background:#f5f1e8;',
-    '}',
-    '.ss-catalog-card__img-wrap img{',
-      'width:100%;height:100%;',
-      'object-fit:cover;display:block;',
-    '}',
-
-    '.ss-catalog-badge{',
-      'position:absolute;top:9px;left:9px;',
-      'background:rgba(17,16,14,.74);',
-      'backdrop-filter:blur(4px);',
-      'color:#fff;',
-      'font-size:9.5px;font-weight:800;',
-      'letter-spacing:.05em;text-transform:uppercase;',
-      'padding:3px 8px;border-radius:999px;',
-      'pointer-events:none;',
-    '}',
-
-    '.ss-catalog-card__body{',
-      'padding:13px 14px 15px;',
-      'display:flex;flex-direction:column;flex:1;',
-    '}',
-    '.ss-catalog-card__title{',
-      'font-size:13.5px;font-weight:900;',
-      'color:#11100e;letter-spacing:-.02em;',
-      'line-height:1.2;',
-    '}',
-    '.ss-catalog-card__sub{',
-      'font-size:11px;color:rgba(17,16,14,.52);',
-      'margin-top:5px;line-height:1.4;',
-      'font-weight:500;flex:1;',
-    '}',
-    '.ss-catalog-card__btn{',
-      'margin-top:13px;display:block;width:100%;',
-      'padding:10px 14px;',
-      'background:#11100e;color:#fff;',
-      'border:none;border-radius:10px;',
-      'font-size:12.5px;font-weight:800;',
-      'cursor:pointer;text-align:center;',
-      'transition:background .15s,color .15s;',
-      'box-sizing:border-box;',
-    '}',
-    '.ss-catalog-card__btn:hover{',
-      'background:rgba(183,163,106,1);color:#11100e;',
-    '}',
-
-    '.ss-catalog-tip{',
-      'display:none;',
-      'position:absolute;',
-      'left:50%;bottom:calc(100% + 10px);',
-      'transform:translateX(-50%);',
-      'width:min(280px,calc(100vw - 32px));',
-      'padding:12px 14px;',
-      'background:#11100e;color:rgba(255,255,255,.82);',
-      'border:1px solid rgba(183,163,106,.22);',
-      'border-radius:14px;',
-      'box-shadow:0 20px 60px rgba(0,0,0,.26);',
-      'font-size:11.5px;line-height:1.45;',
-      'text-align:left;z-index:10090;pointer-events:none;',
-    '}',
-    '.ss-catalog-tip::after{',
-      'content:"";position:absolute;',
-      'left:50%;top:100%;width:10px;height:10px;',
-      'background:#11100e;',
-      'transform:translate(-50%,-5px) rotate(45deg);',
-      'border-right:1px solid rgba(183,163,106,.18);',
-      'border-bottom:1px solid rgba(183,163,106,.18);',
-    '}',
-    '.ss-catalog-card:hover .ss-catalog-tip,',
-    '.ss-catalog-card:focus-within .ss-catalog-tip{display:block;}',
-
-    '@media(max-width:540px){',
-      '#apCustomBuildersContainer{',
-        'grid-template-columns:repeat(2,1fr)!important;',
-        'gap:12px!important;',
-      '}',
-    '}',
-    '@media(max-width:340px){',
-      '#apCustomBuildersContainer{',
-        'grid-template-columns:1fr!important;',
-      '}',
-    '}'
-  ].join('');
-
-  function ready(fn) { document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn, { once: true }) : fn(); }
+  /* ─── Utilities ─────────────────────────────────────────────────────────── */
   function $(s) { return document.querySelector(s); }
+  function ready(fn) { document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', fn, {once: true}) : fn(); }
   function ssap() { return window.SSAP || {}; }
-  function esc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+  function esc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  function editorUrl(builder) {
+  function editorUrl(b) {
     var s = ssap();
-    var key = 'sec' + 'ret';
-    var val = s['editor' + 'Secret'] || '';
-    var url = RAILWAY_BASE + builder.route + '?shop_handle=' + encodeURIComponent(s.shopHandle || '') + '&' + key + '=' + encodeURIComponent(val) + '&mode=embedded';
+    var url = RAILWAY + b.route + '?shop_handle=' + encodeURIComponent(s.shopHandle||'') + '&' + 'sec'+'ret' + '=' + encodeURIComponent(s['editor'+'Secret']||'') + '&mode=embedded';
     if (s.shopLogoSrc) url += '&logo_url=' + encodeURIComponent(s.shopLogoSrc);
     return url;
   }
 
-  function makeCard(builder) {
-    var card = document.createElement('div');
-    card.className = 'ss-catalog-card';
-    card.setAttribute('data-ss-builder-id', builder.id);
+  function launch(b) {
+    var url = editorUrl(b);
+    if (typeof window.apOpenEditorModal === 'function') window.apOpenEditorModal(url);
+    else window.open(url, '_blank', 'noopener,noreferrer');
+  }
 
-    var imgWrap = document.createElement('div');
-    imgWrap.className = 'ss-catalog-card__img-wrap';
+  /* ─── Styles ────────────────────────────────────────────────────────────── */
+  var CSS = [
+    /* Grid */
+    '#apCustomBuildersContainer{',
+      'display:grid!important;',
+      'grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!important;',
+      'gap:18px!important;',
+      'padding:4px 0 24px!important;',
+    '}',
+
+    /* Card */
+    '.ss-cat{',
+      'display:flex;flex-direction:column;',
+      'background:#fff;',
+      'border-radius:20px;overflow:hidden;',
+      'border:1.5px solid rgba(17,16,14,.08);',
+      'box-shadow:0 2px 14px rgba(17,16,14,.05);',
+      'cursor:pointer;',
+      'transition:transform .22s cubic-bezier(.34,1.56,.64,1),',
+        'box-shadow .18s ease,border-color .18s ease;',
+      'user-select:none;',
+      '-webkit-tap-highlight-color:transparent;',
+    '}',
+    '.ss-cat:hover{',
+      'transform:translateY(-5px);',
+      'box-shadow:0 18px 44px rgba(17,16,14,.12);',
+      'border-color:rgba(183,163,106,.55);',
+    '}',
+    '.ss-cat:active{transform:translateY(-2px);}',
+
+    '.ss-cat__media{',
+      'position:relative;width:100%;',
+      'aspect-ratio:1;background:#f5f1e8;overflow:hidden;',
+    '}',
+    '.ss-cat__media img{',
+      'width:100%;height:100%;object-fit:cover;display:block;',
+      'transition:transform .3s ease;',
+    '}',
+    '.ss-cat:hover .ss-cat__media img{transform:scale(1.04);}',
+
+    '.ss-cat__badge{',
+      'position:absolute;top:10px;left:10px;',
+      'background:rgba(17,16,14,.68);',
+      'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);',
+      'color:#fff;font-size:9.5px;font-weight:800;',
+      'letter-spacing:.06em;text-transform:uppercase;',
+      'padding:4px 9px;border-radius:999px;',
+    '}',
+
+    '.ss-cat__info{padding:13px 14px 16px;}',
+    '.ss-cat__name{',
+      'font-size:13.5px;font-weight:900;color:#11100e;',
+      'letter-spacing:-.02em;line-height:1.2;',
+    '}',
+    '.ss-cat__price{',
+      'font-size:12.5px;font-weight:800;',
+      'color:rgba(183,163,106,1);margin-top:5px;',
+    '}',
+    '.ss-cat__hint{',
+      'font-size:10.5px;color:rgba(17,16,14,.42);',
+      'margin-top:3px;font-weight:500;',
+    '}',
+
+    /* Overlay */
+    '.ss-overlay{',
+      'position:fixed;inset:0;',
+      'background:rgba(15,14,12,.6);',
+      'backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);',
+      'z-index:20000;',
+      'display:flex;align-items:center;justify-content:center;',
+      'padding:20px;box-sizing:border-box;',
+      'opacity:0;transition:opacity .22s ease;pointer-events:none;',
+    '}',
+    '.ss-overlay.open{opacity:1;pointer-events:auto;}',
+
+    /* Modal panel */
+    '.ss-modal{',
+      'background:#fff;border-radius:26px;',
+      'width:100%;max-width:840px;',
+      'max-height:90vh;overflow:hidden;',
+      'display:grid;grid-template-columns:1fr 1fr;',
+      'position:relative;',
+      'box-shadow:0 50px 140px rgba(0,0,0,.35);',
+      'transform:scale(.94) translateY(16px);',
+      'transition:transform .28s cubic-bezier(.34,1.56,.64,1);',
+    '}',
+    '.ss-overlay.open .ss-modal{transform:scale(1) translateY(0);}',
+
+    /* Close btn */
+    '.ss-modal__x{',
+      'position:absolute;top:14px;right:14px;',
+      'width:36px;height:36px;border-radius:50%;',
+      'background:rgba(17,16,14,.08);border:none;cursor:pointer;',
+      'display:flex;align-items:center;justify-content:center;',
+      'font-size:17px;color:#11100e;z-index:3;',
+      'transition:background .15s;line-height:1;padding:0;',
+    '}',
+    '.ss-modal__x:hover{background:rgba(17,16,14,.16);}',
+
+    /* Image side */
+    '.ss-modal__img{',
+      'background:#f5f1e8;overflow:hidden;position:relative;',
+      'display:flex;flex-direction:column;',
+    '}',
+    '.ss-modal__hero{',
+      'flex:1;width:100%;object-fit:cover;display:block;',
+      'min-height:0;',
+    '}',
+    '.ss-modal__thumbs{',
+      'display:flex;gap:8px;',
+      'padding:10px 12px;',
+      'background:rgba(255,255,255,.6);',
+      'backdrop-filter:blur(4px);',
+      'overflow-x:auto;',
+    '}',
+    '.ss-modal__thumb{',
+      'width:52px;height:52px;flex-shrink:0;',
+      'border-radius:10px;overflow:hidden;',
+      'border:2.5px solid rgba(255,255,255,.5);',
+      'cursor:pointer;transition:border-color .15s;',
+    '}',
+    '.ss-modal__thumb.on{border-color:rgba(183,163,106,.9);}',
+    '.ss-modal__thumb img{width:100%;height:100%;object-fit:cover;display:block;}',
+
+    /* Detail side */
+    '.ss-modal__detail{',
+      'overflow-y:auto;padding:32px 28px 30px;',
+      'display:flex;flex-direction:column;gap:0;',
+      '-webkit-overflow-scrolling:touch;',
+    '}',
+    '.ss-modal__chip{',
+      'display:inline-block;',
+      'background:rgba(183,163,106,.14);',
+      'color:rgba(140,118,68,1);',
+      'font-size:10px;font-weight:800;',
+      'letter-spacing:.08em;text-transform:uppercase;',
+      'padding:4px 11px;border-radius:999px;',
+    '}',
+    '.ss-modal__title{',
+      'font-size:23px;font-weight:900;color:#11100e;',
+      'letter-spacing:-.03em;line-height:1.1;',
+      'margin:10px 0 0;',
+    '}',
+    '.ss-modal__desc{',
+      'font-size:13px;color:rgba(17,16,14,.62);',
+      'line-height:1.65;font-weight:450;',
+      'margin:16px 0 0;',
+    '}',
+
+    /* Spec chips */
+    '.ss-modal__specs{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;}',
+    '.ss-modal__spec{',
+      'font-size:11px;font-weight:700;',
+      'color:rgba(17,16,14,.68);',
+      'background:rgba(17,16,14,.055);',
+      'padding:5px 10px;border-radius:8px;',
+    '}',
+
+    /* Divider */
+    '.ss-modal__div{',
+      'height:1px;background:rgba(17,16,14,.07);',
+      'margin:20px 0;',
+    '}',
+
+    /* Pricing table */
+    '.ss-modal__price-head{',
+      'font-size:10.5px;font-weight:800;',
+      'letter-spacing:.08em;text-transform:uppercase;',
+      'color:rgba(17,16,14,.42);margin-bottom:10px;',
+    '}',
+    '.ss-modal__price-card{',
+      'border:1.5px solid rgba(17,16,14,.08);',
+      'border-radius:14px;overflow:hidden;',
+    '}',
+    '.ss-modal__price-row{',
+      'display:flex;justify-content:space-between;align-items:center;',
+      'padding:12px 15px;',
+    '}',
+    '.ss-modal__price-row+.ss-modal__price-row{border-top:1px solid rgba(17,16,14,.07);}',
+    '.ss-modal__pl{font-size:13px;font-weight:700;color:#11100e;}',
+    '.ss-modal__pn{font-size:10.5px;font-weight:500;color:rgba(17,16,14,.46);margin-top:2px;}',
+    '.ss-modal__pv{',
+      'font-size:18px;font-weight:900;color:#11100e;',
+      'letter-spacing:-.03em;white-space:nowrap;',
+    '}',
+
+    /* Sizes + colors */
+    '.ss-modal__meta-head{',
+      'font-size:10.5px;font-weight:800;letter-spacing:.08em;',
+      'text-transform:uppercase;color:rgba(17,16,14,.42);',
+      'margin:20px 0 7px;',
+    '}',
+    '.ss-modal__meta-val{',
+      'font-size:13px;font-weight:600;color:rgba(17,16,14,.7);',
+      'line-height:1.5;',
+    '}',
+
+    /* CTA */
+    '.ss-modal__cta{',
+      'display:block;width:100%;',
+      'padding:15px 20px;',
+      'background:#11100e;color:#fff;',
+      'border:none;border-radius:14px;',
+      'font-size:14px;font-weight:900;',
+      'letter-spacing:-.01em;',
+      'cursor:pointer;text-align:center;',
+      'box-sizing:border-box;',
+      'transition:background .15s,transform .12s;',
+      'margin-top:22px;',
+    '}',
+    '.ss-modal__cta:hover{background:rgba(183,163,106,1);color:#11100e;}',
+    '.ss-modal__cta:active{transform:scale(.98);}',
+
+    /* Mobile modal */
+    '@media(max-width:660px){',
+      '.ss-modal{',
+        'grid-template-columns:1fr!important;',
+        'grid-template-rows:min(52vw,260px) 1fr!important;',
+        'max-height:92vh;',
+      '}',
+      '.ss-modal__img{height:min(52vw,260px);}',
+      '.ss-modal__detail{padding:22px 20px 26px;gap:0;}',
+      '.ss-modal__title{font-size:20px;}',
+    '}',
+
+    /* Mobile catalog 2-col */
+    '@media(max-width:520px){',
+      '#apCustomBuildersContainer{',
+        'grid-template-columns:1fr 1fr!important;',
+        'gap:11px!important;',
+      '}',
+      '.ss-cat__name{font-size:12.5px;}',
+    '}',
+
+    /* Very small */
+    '@media(max-width:340px){',
+      '#apCustomBuildersContainer{grid-template-columns:1fr!important;}',
+    '}'
+  ].join('');
+
+  /* ─── Modal DOM (single, reused) ────────────────────────────────────────── */
+  var overlay, modal, heroImg, thumbsEl, detailEl, closeBtn;
+  var currentGallery = [], currentIdx = 0;
+
+  function buildModal() {
+    overlay = document.createElement('div');
+    overlay.className = 'ss-overlay';
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeModal();
+    });
+
+    modal = document.createElement('div');
+    modal.className = 'ss-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    closeBtn = document.createElement('button');
+    closeBtn.className = 'ss-modal__x';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.innerHTML = '&#10005;';
+    closeBtn.addEventListener('click', closeModal);
+
+    var imgSide = document.createElement('div');
+    imgSide.className = 'ss-modal__img';
+
+    heroImg = document.createElement('img');
+    heroImg.className = 'ss-modal__hero';
+    heroImg.alt = '';
+    heroImg.loading = 'eager';
+
+    thumbsEl = document.createElement('div');
+    thumbsEl.className = 'ss-modal__thumbs';
+
+    imgSide.appendChild(heroImg);
+    imgSide.appendChild(thumbsEl);
+
+    detailEl = document.createElement('div');
+    detailEl.className = 'ss-modal__detail';
+
+    modal.appendChild(closeBtn);
+    modal.appendChild(imgSide);
+    modal.appendChild(detailEl);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+      if (e.key === 'ArrowLeft' && overlay.classList.contains('open')) setGalleryIdx(currentIdx - 1);
+      if (e.key === 'ArrowRight' && overlay.classList.contains('open')) setGalleryIdx(currentIdx + 1);
+    });
+  }
+
+  function setGalleryIdx(n) {
+    if (!currentGallery.length) return;
+    currentIdx = (n + currentGallery.length) % currentGallery.length;
+    heroImg.src = currentGallery[currentIdx];
+    thumbsEl.querySelectorAll('.ss-modal__thumb').forEach(function (th, i) {
+      th.classList.toggle('on', i === currentIdx);
+    });
+  }
+
+  function populateModal(b) {
+    currentGallery = b.gallery;
+    currentIdx = 0;
+    heroImg.src = currentGallery[0];
+    heroImg.alt = b.name;
+    modal.setAttribute('aria-label', b.name);
+
+    thumbsEl.innerHTML = '';
+    if (currentGallery.length > 1) {
+      currentGallery.forEach(function (url, i) {
+        var th = document.createElement('div');
+        th.className = 'ss-modal__thumb' + (i === 0 ? ' on' : '');
+        var tImg = document.createElement('img');
+        tImg.src = url;
+        tImg.alt = i === 0 ? 'Front' : 'Back';
+        tImg.loading = 'lazy';
+        th.appendChild(tImg);
+        th.addEventListener('click', function () { setGalleryIdx(i); });
+        thumbsEl.appendChild(th);
+      });
+      thumbsEl.style.display = 'flex';
+    } else {
+      thumbsEl.style.display = 'none';
+    }
+
+    var priceRows = b.pricing.map(function (p) {
+      return '<div class="ss-modal__price-row">' +
+        '<div><div class="ss-modal__pl">' + esc(p.label) + '</div><div class="ss-modal__pn">' + esc(p.note) + '</div></div>' +
+        '<div class="ss-modal__pv">' + esc(p.price) + '</div>' +
+        '</div>';
+    }).join('');
+
+    var specChips = b.specs.map(function (s) {
+      return '<span class="ss-modal__spec">' + esc(s) + '</span>';
+    }).join('');
+
+    detailEl.innerHTML =
+      '<span class="ss-modal__chip">' + esc(b.badge) + '</span>' +
+      '<div class="ss-modal__title">' + esc(b.name) + '</div>' +
+      '<p class="ss-modal__desc">' + esc(b.desc) + '</p>' +
+      '<div class="ss-modal__specs">' + specChips + '</div>' +
+      '<div class="ss-modal__div"></div>' +
+      '<div class="ss-modal__price-head">Retail pricing</div>' +
+      '<div class="ss-modal__price-card">' + priceRows + '</div>' +
+      '<div class="ss-modal__meta-head">Available sizes</div>' +
+      '<div class="ss-modal__meta-val">' + esc(b.sizes) + '</div>' +
+      '<div class="ss-modal__meta-head">Colors</div>' +
+      '<div class="ss-modal__meta-val">' + esc(b.colors) + '</div>' +
+      '<button class="ss-modal__cta" data-builder-id="' + esc(b.id) + '">Add to Store</button>';
+
+    detailEl.querySelector('.ss-modal__cta').addEventListener('click', function () {
+      launch(b);
+    });
+  }
+
+  function openModal(b) {
+    if (!overlay) buildModal();
+    populateModal(b);
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    closeBtn.focus();
+  }
+
+  function closeModal() {
+    if (!overlay) return;
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  /* ─── Card factory ──────────────────────────────────────────────────────── */
+  function makeCard(b) {
+    var card = document.createElement('div');
+    card.className = 'ss-cat';
+    card.setAttribute('data-ss-builder-id', b.id);
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', 'Preview ' + b.name);
+
+    var media = document.createElement('div');
+    media.className = 'ss-cat__media';
 
     var img = document.createElement('img');
-    img.src = builder.image;
-    img.alt = builder.title;
+    img.src = b.gallery[0];
+    img.alt = b.name;
     img.loading = 'eager';
     img.decoding = 'async';
 
     var badge = document.createElement('span');
-    badge.className = 'ss-catalog-badge';
-    badge.textContent = builder.badge;
+    badge.className = 'ss-cat__badge';
+    badge.textContent = b.badge;
 
-    imgWrap.appendChild(img);
-    imgWrap.appendChild(badge);
+    media.appendChild(img);
+    media.appendChild(badge);
 
-    var body = document.createElement('div');
-    body.className = 'ss-catalog-card__body';
+    var info = document.createElement('div');
+    info.className = 'ss-cat__info';
+    info.innerHTML =
+      '<div class="ss-cat__name">' + esc(b.name) + '</div>' +
+      '<div class="ss-cat__price">From ' + esc(b.from) + '</div>' +
+      '<div class="ss-cat__hint">' + esc(b.hint) + '</div>';
 
-    var title = document.createElement('div');
-    title.className = 'ss-catalog-card__title';
-    title.textContent = builder.title;
+    card.appendChild(media);
+    card.appendChild(info);
 
-    var sub = document.createElement('div');
-    sub.className = 'ss-catalog-card__sub';
-    sub.textContent = builder.subtitle;
-
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'ss-catalog-card__btn';
-    btn.textContent = 'Add to Store';
-    btn.addEventListener('click', function () {
-      var url = editorUrl(builder);
-      if (typeof window.apOpenEditorModal === 'function') window.apOpenEditorModal(url);
-      else window.open(url, '_blank', 'noopener,noreferrer');
+    function activate() { openModal(b); }
+    card.addEventListener('click', activate);
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
     });
 
-    body.appendChild(title);
-    body.appendChild(sub);
-    body.appendChild(btn);
-
-    var tip = document.createElement('div');
-    tip.className = 'ss-catalog-tip';
-    tip.innerHTML = '<strong style="display:block;color:#fff;font-size:12px;font-weight:900;margin-bottom:5px;">' + esc(builder.title) + '</strong><span>' + esc(builder.tip) + '</span>';
-
-    card.appendChild(imgWrap);
-    card.appendChild(body);
-    card.appendChild(tip);
     return card;
   }
 
+  /* ─── Styles injection ──────────────────────────────────────────────────── */
   function injectStyles() {
-    if ($('#ss-catalog-styles')) return;
-    var style = document.createElement('style');
-    style.id = 'ss-catalog-styles';
-    style.textContent = STYLES;
-    document.head.appendChild(style);
+    if ($('#ss-catalog-css')) return;
+    var s = document.createElement('style');
+    s.id = 'ss-catalog-css';
+    s.textContent = CSS;
+    document.head.appendChild(s);
   }
 
-  function findContainer() { return $('#apCustomBuildersContainer'); }
-
+  /* ─── Render ────────────────────────────────────────────────────────────── */
   function renderCards(force) {
-    var container = findContainer();
+    var container = $('#apCustomBuildersContainer');
     var section = $('#apCustomBuildersSection');
     var empty = $('#apCustomBuildersEmpty');
     var count = $('#apBuilderProductCount');
 
     if (!container) return false;
-    if (!force && container.getAttribute('data-ss-catalog-version') === VERSION && container.children.length === BUILDERS.length) return true;
+    if (!force && container.getAttribute('data-ss-v') === VERSION && container.children.length === BUILDERS.length) return true;
 
     injectStyles();
     container.innerHTML = '';
     BUILDERS.forEach(function (b) { container.appendChild(makeCard(b)); });
-    container.setAttribute('data-ss-catalog-version', VERSION);
+    container.setAttribute('data-ss-v', VERSION);
 
     if (section) section.style.display = 'block';
     if (empty) empty.style.display = 'none';
@@ -302,29 +619,28 @@
     return true;
   }
 
-  function shouldTryAdminPatch() {
-    return window.location.pathname.indexOf('/pages/admin-powers') !== -1 || !!$('#apPanelAddProducts') || !!findContainer();
+  function shouldRun() {
+    return window.location.pathname.indexOf('/pages/admin-powers') !== -1
+      || !!$('#apPanelAddProducts')
+      || !!$('#apCustomBuildersContainer');
   }
 
+  /* ─── Boot ──────────────────────────────────────────────────────────────── */
   function boot() {
-    var attempts = 0;
-    var maxAttempts = 240;
-
-    var timer = window.setInterval(function () {
-      attempts += 1;
-      if (shouldTryAdminPatch()) renderCards(false);
-      if (attempts >= maxAttempts) window.clearInterval(timer);
+    var tries = 0;
+    var timer = setInterval(function () {
+      if (shouldRun()) renderCards(false);
+      if (++tries >= 240) clearInterval(timer);
     }, 125);
 
-    var observer = new MutationObserver(function () {
-      if (!shouldTryAdminPatch()) return;
-      var container = findContainer();
-      if (!container) return;
-      if (container.getAttribute('data-ss-catalog-version') !== VERSION || container.children.length !== BUILDERS.length) {
-        window.setTimeout(function () { renderCards(true); }, 30);
+    var obs = new MutationObserver(function () {
+      if (!shouldRun()) return;
+      var c = $('#apCustomBuildersContainer');
+      if (c && (c.getAttribute('data-ss-v') !== VERSION || c.children.length !== BUILDERS.length)) {
+        setTimeout(function () { renderCards(true); }, 30);
       }
     });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    obs.observe(document.documentElement, {childList: true, subtree: true});
   }
 
   ready(boot);
