@@ -2260,13 +2260,6 @@
   .ap-fr-zone {
     margin: 0 0 20px;
   }
-  /* When the zone lives inside the hero, force it onto its own full-width row
-     directly under the Dashboard / action buttons. */
-  .ap-hero > .ap-fr-zone--in-hero {
-    flex: 1 0 100%;
-    width: 100%;
-    margin: 18px 0 0;
-  }
   /* Pricing status banner — lives outside the active zone so it persists after Stop */
   #apFrPricingBanner {
     margin: -12px 0 16px;
@@ -2286,19 +2279,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 18px 24px;
-    background: #f8fafc;
-    border: 1.5px dashed #cbd5e1;
-    border-radius: 16px;
-    gap: 14px;
-  }
-  .ap-fr-zone-empty-icon { font-size: 24px; flex-shrink: 0; }
-  .ap-fr-zone-empty-copy { flex: 1; }
-  .ap-fr-zone-empty-copy p {
-    margin: 0; font-size: 13px; color: #64748b;
-  }
-  .ap-fr-zone-empty-copy strong {
-    display: block; font-size: 15px; color: #1e293b; font-weight: 700; margin-bottom: 2px;
+    padding: 4px 0 6px;
   }
   .ap-btn--fr-start,
   #apFrLaunchBtn {
@@ -2704,35 +2685,29 @@
       <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">Shop Store ↗</a>
       <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
     </div>
+  </div>
 
-    <!-- FUNDRAISING ZONE — sits inside the hero, underneath the Dashboard button -->
-    <div class="ap-fr-zone ap-fr-zone--in-hero" id="apFrZone">
-      <!-- Empty state — hidden by default; JS reveals it only when we confirm
-           there is no active fundraiser, so it can never show beside the active card. -->
-      <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:none;">
-        <div class="ap-fr-zone-empty-icon">💚</div>
-        <div class="ap-fr-zone-empty-copy">
-          <strong>Fundraise for your team</strong>
-          <p>Add a per-item donation to every purchase. Payments go straight to your cause — no middleman.</p>
+  <!-- FUNDRAISING ZONE — below hero, above tabs -->
+  <div class="ap-fr-zone" id="apFrZone">
+    <!-- Empty state — hidden by default; JS reveals it only when no active fundraiser -->
+    <div class="ap-fr-zone-empty" id="apFrZoneEmpty" style="display:none;">
+      <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">Start a Fundraiser Campaign →</button>
+    </div>
+    <!-- Active state (shown when fundraiser is running) -->
+    <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:none;">
+      <div class="ap-fr-zone-active-top">
+        <div class="ap-fr-zone-info">
+          <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
+          <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
+          <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
         </div>
-        <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">Start a Fundraiser Campaign →</button>
+        <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details</button>
       </div>
-      <!-- Active state (shown when fundraiser is running) -->
-      <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:none;">
-        <div class="ap-fr-zone-active-top">
-          <div class="ap-fr-zone-info">
-            <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
-            <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
-            <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
-          </div>
-          <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details</button>
-        </div>
-        <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:none;">
-          <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill"></div></div>
-          <div class="ap-fr-zone-progress-meta">
-            <span><strong id="apFrZoneRaised">$0</strong> raised</span>
-            <span id="apFrZoneGoal"></span>
-          </div>
+      <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:none;">
+        <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill"></div></div>
+        <div class="ap-fr-zone-progress-meta">
+          <span><strong id="apFrZoneRaised">$0</strong> raised</span>
+          <span id="apFrZoneGoal"></span>
         </div>
       </div>
     </div>
