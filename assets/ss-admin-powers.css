@@ -1935,6 +1935,7 @@
     .ap-add-product-row .ap-product-row__actions {
       grid-template-columns: 1fr !important;
     }
+  } /* ← close @media (max-width: 700px) — was missing, trapping all later rules */
 
   /* ══════════════════════════════════════════════════════════
      FUNDRAISING WIZARD — complete style system
@@ -2479,8 +2480,9 @@
   .ap-hero-logo img {
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain !important;
-    padding: clamp(10px, 1vw, 18px) !important;
+    object-fit: cover !important;
+    padding: 0 !important;
+    border-radius: 28px !important;
   }
   .ap-hero-logo span {
     font-size: clamp(48px, 6vw, 84px) !important;
