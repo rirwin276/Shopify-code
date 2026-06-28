@@ -934,42 +934,30 @@
       }
 
       if(isBc3413 && SSAP.editorSecret){
-        var logoSrc = SSAP.shopLogoSrc || '';
-        var editorBtn;
-        if(logoSrc){
-          var editorUrl = SSAP.editorBaseUrl
-            + '?logo_url=' + encodeURIComponent(logoSrc)
-            + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(product.handle || '')
+        // BC3413 now opens the full Pro Editor to edit IN PLACE — logo
+        // placement, shirt colors, a back image, and the image library — just
+        // like a pro-built product. Replaces the old single-purpose titan
+        // placement/colors editor. The pro editor preloads the product's saved
+        // artwork/colors and re-publishing updates this same product (the
+        // backend keys edit-in-place off edit_product_handle).
+        var _bc3413Origin = '';
+        try { _bc3413Origin = new URL(SSAP.editorProShirtBc3413BaseUrl || SSAP.editorBaseUrl || '').origin; } catch(_e){ _bc3413Origin = ''; }
+        if(_bc3413Origin){
+          var _bc3413ReturnUrl = (window.location.origin + window.location.pathname + window.location.search);
+          var _bc3413EditUrl = _bc3413Origin + '/editor/pro-shirt/bc3413/edit'
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
             + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_bc3413ReturnUrl)
             + '&mode=embedded';
-          editorBtn = document.createElement('button');
-          editorBtn.type = 'button';
-          editorBtn.className = 'ap-edit-placement-btn';
-          editorBtn.dataset.productHandle = product.handle || '';
-          editorBtn.innerHTML = '✏️ Edit Placement';
-          editorBtn.title = 'Adjust logo placement for this product only';
-          editorBtn.addEventListener('click', function(){ apOpenEditorModal(editorUrl); });
-          var editColorsBtn = document.createElement('button');
-          editColorsBtn.type = 'button';
-          editColorsBtn.className = 'ap-edit-placement-btn';
-          editColorsBtn.innerHTML = '🎨 Edit Colors';
-          editColorsBtn.title = 'Edit shirt colors for this product';
-          editColorsBtn.addEventListener('click', function(){ apOpenEditorModal(editorUrl + '&tab=colors'); });
-          actionsEl.appendChild(editorBtn);
-          actionsEl.appendChild(editColorsBtn);
-        } else {
-          editorBtn = document.createElement('span');
-          editorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          editorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          editorBtn.textContent = '✏️ Edit Placement (no logo)';
-          var editColorsDisabledBtn = document.createElement('span');
-          editColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          editColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          editColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
-          actionsEl.appendChild(editorBtn);
-          actionsEl.appendChild(editColorsDisabledBtn);
+          var bc3413EditBtn = document.createElement('button');
+          bc3413EditBtn.type = 'button';
+          bc3413EditBtn.className = 'ap-edit-placement-btn';
+          bc3413EditBtn.dataset.productHandle = product.handle || '';
+          bc3413EditBtn.innerHTML = '✏️ Edit';
+          bc3413EditBtn.title = 'Open the Pro Editor to change placement, colors, add a back image, or swap artwork — edits this product in place';
+          bc3413EditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_bc3413EditUrl));
+          actionsEl.appendChild(bc3413EditBtn);
         }
       }
 
