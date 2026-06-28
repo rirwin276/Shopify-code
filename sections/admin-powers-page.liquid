@@ -198,71 +198,67 @@
 
   <!-- HERO HEADER -->
   <div class="ap-hero">
-    <div class="ap-hero-body">
-      <div class="ap-hero-logo">
-        {%- if ap_shop_logo_src != '' -%}
-          <img src="{{ ap_shop_logo_src }}" alt="{{ store_name | escape }} logo" loading="lazy">
-        {%- else -%}
-          <span>{{ store_name | slice: 0, 1 | upcase }}</span>
-        {%- endif -%}
+    <div class="ap-hero-logo">
+      {%- if ap_shop_logo_src != '' -%}
+        <img src="{{ ap_shop_logo_src }}" alt="{{ store_name | escape }} logo" loading="lazy">
+      {%- else -%}
+        <span>{{ store_name | slice: 0, 1 | upcase }}</span>
+      {%- endif -%}
+    </div>
+
+    <div class="ap-hero-info">
+      <div class="ap-hero-badge">
+        <span class="dot"></span>
+        {% if is_super_admin %}Founder Control Center{% else %}Store Admin{% endif %}
       </div>
-
-      <div class="ap-hero-left">
-        <div class="ap-hero-info">
-          <div class="ap-hero-badge">
-            <span class="dot"></span>
-            {% if is_super_admin %}Founder Control Center{% else %}Store Admin{% endif %}
-          </div>
-          <h1>{{ store_name | capitalize }}</h1>
-          <div class="ap-hero-meta" aria-label="Store details">
-            <span class="ap-hero-pill">{{ shop_handle }}</span>
-            <span class="ap-hero-pill ap-hero-pill--status">{{ ap_store_status | capitalize }}</span>
-            <span class="ap-hero-pill">Member Storefront</span>
-          </div>
-        </div>
-
-        <div class="ap-hero-actions">
-          <span class="ap-share-help">
-            <button
-              id="apBtnShareStore"
-              type="button"
-              class="ap-btn ap-btn--share-primary"
-              aria-describedby="apShareHelpBubble"
-            >🔗 Share Store</button>
-            <span class="ap-share-help-bubble" id="apShareHelpBubble" role="tooltip">
-              <strong>Share member access</strong>
-              Send this link to parents, players, or group members. They will sign in or create an account, then this store will appear on their dashboard. They can shop, but they cannot manage products, members, or settings.
-              <span class="ap-smart-tooltip-arrow" aria-hidden="true"></span>
-            </span>
-          </span>
-          <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">Shop Store ↗</a>
-          <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
-        </div>
+      <h1>{{ store_name | capitalize }}</h1>
+      <div class="ap-hero-meta" aria-label="Store details">
+        <span class="ap-hero-pill">{{ shop_handle }}</span>
+        <span class="ap-hero-pill ap-hero-pill--status">{{ ap_store_status | capitalize }}</span>
+        <span class="ap-hero-pill">Member Storefront</span>
       </div>
     </div>
 
-    <!-- FUNDRAISING ZONE — integrated in hero card -->
-    <div class="ap-fr-strip" id="apFrZone">
-      <!-- Empty state — visible by default; JS hides it when an active fundraiser is running -->
-      <div class="ap-fr-zone-empty" id="apFrZoneEmpty">
-        <button id="apFrLaunchBtn" type="button" class="ap-btn--fr-start">💚 Start a Fundraiser Campaign →</button>
-      </div>
-      <!-- Active state (shown when fundraiser is running) -->
-      <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:none;">
-        <div class="ap-fr-zone-active-top">
-          <div class="ap-fr-zone-info">
-            <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
-            <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
-            <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
+    <div class="ap-hero-actions">
+      <span class="ap-share-help">
+        <button
+          id="apBtnShareStore"
+          type="button"
+          class="ap-btn ap-btn--share-primary"
+          aria-describedby="apShareHelpBubble"
+        >🔗 Share Store</button>
+        <span class="ap-share-help-bubble" id="apShareHelpBubble" role="tooltip">
+          <strong>Share member access</strong>
+          Send this link to parents, players, or group members. They will sign in or create an account, then this store will appear on their dashboard. They can shop, but they cannot manage products, members, or settings.
+          <span class="ap-smart-tooltip-arrow" aria-hidden="true"></span>
+        </span>
+      </span>
+      <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">Shop Store ↗</a>
+      <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
+
+      <!-- FUNDRAISING ZONE — last action in the hero button stack -->
+      <div class="ap-fr-zone" id="apFrZone">
+        <!-- Empty state — visible by default; JS hides it when an active fundraiser is running -->
+        <div class="ap-fr-zone-empty" id="apFrZoneEmpty">
+          <button id="apFrLaunchBtn" type="button" class="ap-btn ap-btn--fr-start">💚 Start a Fundraiser</button>
+        </div>
+        <!-- Active state (shown when fundraiser is running) -->
+        <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:none;">
+          <div class="ap-fr-zone-active-top">
+            <div class="ap-fr-zone-info">
+              <span class="ap-fr-zone-badge"><span class="ap-fr-zone-pulse"></span>Active Fundraiser</span>
+              <p class="ap-fr-zone-title" id="apFrZoneTitle">Your Fundraiser</p>
+              <p class="ap-fr-zone-sub" id="apFrZoneSub">Loading…</p>
+            </div>
+          </div>
+          <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:none;">
+            <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill"></div></div>
+            <div class="ap-fr-zone-progress-meta">
+              <span><strong id="apFrZoneRaised">$0</strong> raised</span>
+              <span id="apFrZoneGoal"></span>
+            </div>
           </div>
           <button type="button" class="ap-btn--fr-details" id="apFrDetailsBtn">View Details</button>
-        </div>
-        <div class="ap-fr-zone-progress" id="apFrZoneProgressWrap" style="display:none;">
-          <div class="ap-fr-zone-bar"><div class="ap-fr-zone-bar-fill" id="apFrZoneBarFill"></div></div>
-          <div class="ap-fr-zone-progress-meta">
-            <span><strong id="apFrZoneRaised">$0</strong> raised</span>
-            <span id="apFrZoneGoal"></span>
-          </div>
         </div>
       </div>
     </div>
