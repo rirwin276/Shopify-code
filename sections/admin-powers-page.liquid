@@ -661,38 +661,19 @@
         <div>
           <span class="ap-panel-kicker">Store build</span>
           <h2>Products</h2>
-          <p>Review live products, adjust placement/colors, hide items, or delete old products. Custom products appear first.</p>
+          <p>Review your live products. Edit artwork and colors, hide items, or remove products you no longer need.</p>
         </div>
-        <a class="ap-panel-mini-link" href="/collections/{{ collection_handle }}">View live store ↗</a>
+        <div class="ap-panel-head-right">
+          <span class="ap-product-count" id="apAllProductCount">0</span>
+          <a class="ap-panel-mini-link" href="/collections/{{ collection_handle }}">View live store ↗</a>
+        </div>
       </div>
 
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
       <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found for this store.</div>
 
-      <div class="ap-products-grid ap-products-grid--stacked" id="apProductsGrid">
-        <section class="ap-product-box ap-product-box--custom" id="apCustomProductsBox" style="display:none;">
-          <div class="ap-product-box-head">
-            <div>
-              <h3 class="ap-product-box-title">Custom / Pro Products</h3>
-              <p class="ap-product-box-sub">The premium products admins usually care about first.</p>
-            </div>
-            <span class="ap-product-count" id="apCustomProductCount">0</span>
-          </div>
-          <div id="apCustomProductsEmpty" class="ap-product-section-empty">No custom products have been built yet. Use the Add tab to create one.</div>
-          <div id="apProductsCustomContainer" class="ap-product-list"></div>
-        </section>
-
-        <section class="ap-product-box ap-product-box--main">
-          <div class="ap-product-box-head">
-            <div>
-              <h3 class="ap-product-box-title">Standard Products</h3>
-              <p class="ap-product-box-sub">The core products currently live in this storefront.</p>
-            </div>
-            <span class="ap-product-count" id="apMainProductCount">0</span>
-          </div>
-          <div id="apMainProductsEmpty" class="ap-product-section-empty">No standard products found yet.</div>
-          <div id="apProductsMainContainer" class="ap-product-list"></div>
-        </section>
+      <div class="ap-products-grid" id="apProductsGrid">
+        <div id="apProductsAllContainer" class="ap-product-list"></div>
       </div>
 
       <div id="apStatusProducts" class="ap-status"></div>

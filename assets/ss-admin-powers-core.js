@@ -788,14 +788,10 @@
   // ── PRODUCTS TAB ──────────────────────────────────────────────
   var apProductsSpinner         = document.getElementById('apProductsSpinner');
   var apProductsEmpty           = document.getElementById('apProductsEmpty');
-  var apProductsMainContainer   = document.getElementById('apProductsMainContainer');
-  var apProductsCustomContainer = document.getElementById('apProductsCustomContainer');
-  var apProductsContainer       = apProductsMainContainer; // legacy fallback for older helpers
-  var apCustomProductsBox       = document.getElementById('apCustomProductsBox');
-  var apMainProductsEmpty       = document.getElementById('apMainProductsEmpty');
-  var apCustomProductsEmpty     = document.getElementById('apCustomProductsEmpty');
-  var apMainProductCount        = document.getElementById('apMainProductCount');
-  var apCustomProductCount      = document.getElementById('apCustomProductCount');
+  // One unified product list (custom/pro products are sorted first within it).
+  var apProductsAllContainer    = document.getElementById('apProductsAllContainer');
+  var apProductsContainer       = apProductsAllContainer; // legacy fallback for older helpers
+  var apAllProductCount         = document.getElementById('apAllProductCount');
   var apStatusProducts          = document.getElementById('apStatusProducts');
 
   function apProductsStatus(msg, type){
@@ -823,17 +819,14 @@
     mainCount = mainCount || 0;
     customCount = customCount || 0;
     builderCount = builderCount || 0;
+    var storeCount = mainCount + customCount; // products live in the store (one list)
     var apBuilderProductCount = document.getElementById('apBuilderProductCount');
     var apCustomBuildersEmpty = document.getElementById('apCustomBuildersEmpty');
-    if(apMainProductCount) apMainProductCount.textContent = String(mainCount);
-    if(apCustomProductCount) apCustomProductCount.textContent = String(customCount);
+    if(apAllProductCount) apAllProductCount.textContent = String(storeCount);
     if(apBuilderProductCount) apBuilderProductCount.textContent = String(builderCount);
-    if(apMainProductsEmpty) apMainProductsEmpty.style.display = mainCount ? 'none' : 'block';
-    if(apCustomProductsEmpty) apCustomProductsEmpty.style.display = customCount ? 'none' : 'block';
     if(apCustomBuildersSection) apCustomBuildersSection.style.display = builderCount ? 'block' : 'none';
     if(apCustomBuildersEmpty) apCustomBuildersEmpty.style.display = builderCount ? 'none' : 'block';
-    if(apCustomProductsBox) apCustomProductsBox.style.display = customCount ? 'block' : 'none';
-    if(apProductsEmpty) apProductsEmpty.style.display = (mainCount || customCount || builderCount) ? 'none' : 'block';
+    if(apProductsEmpty) apProductsEmpty.style.display = storeCount ? 'none' : 'block';
   }
 
   function apPolishEditorButtons(actionsEl){
@@ -861,12 +854,15 @@
   }
 
   function apRenderProducts(products){
-    if(apProductsMainContainer) apProductsMainContainer.innerHTML = '';
-    if(apProductsCustomContainer) apProductsCustomContainer.innerHTML = '';
+    if(apProductsAllContainer) apProductsAllContainer.innerHTML = '';
     if(apCustomBuildersContainer) apCustomBuildersContainer.innerHTML = '';
     var apMainCount = 0;
     var apCustomCount = 0;
     var apBuilderCount = 0;
+    // Collect into two buckets so custom/pro products render first in the
+    // single unified list (no visible section split — just ordering).
+    var customRows = [];
+    var mainRows = [];
     if(!products || products.length === 0){
       apRefreshProductEmptyStates(0, 0);
       return;
@@ -877,6 +873,7 @@
     }
     products.forEach(function(product){
       var isHidden = !!product.hidden;
+      var isCustom = apIsCustomProduct(product);
       var row = document.createElement('div');
       row.className = 'ap-product-row';
       row.dataset.productHandle = product.handle || '';
@@ -1350,6 +1347,15 @@
         }
       }
 
+      // Subtle "Custom" badge on pro-built products so they're distinguishable
+      // without needing a separate section header.
+      if(isCustom){
+        var badgeEl = document.createElement('span');
+        badgeEl.className = 'ap-product-badge';
+        badgeEl.textContent = 'Custom';
+        row.appendChild(badgeEl);
+      }
+
       row.appendChild(imgEl);
       row.appendChild(titleEl);
       row.appendChild(actionsEl);
@@ -1362,14 +1368,20 @@
         apDeleteProduct(product.id, product.title || product.id, row);
       });
 
-      if(apIsCustomProduct(product)){
+      if(isCustom){
         apCustomCount++;
-        if(apProductsCustomContainer) apProductsCustomContainer.appendChild(row);
+        customRows.push(row);
       } else {
         apMainCount++;
-        if(apProductsMainContainer) apProductsMainContainer.appendChild(row);
+        mainRows.push(row);
       }
     }); // end products.forEach
+
+    // Render custom/pro products first, then standard — one unified grid.
+    if(apProductsAllContainer){
+      customRows.forEach(function(r){ apProductsAllContainer.appendChild(r); });
+      mainRows.forEach(function(r){ apProductsAllContainer.appendChild(r); });
+    }
 
     // ── Add Products catalog cards ──────────────────────────────────────────
     // The pro-builder catalog cards are rendered by the standalone asset
@@ -1398,8 +1410,7 @@
     if(apProductsSpinner && !silent) apProductsSpinner.style.display = 'block';
     if(apProductsEmpty && !silent) apProductsEmpty.style.display = 'none';
     if(!silent){
-      if(apProductsMainContainer) apProductsMainContainer.innerHTML = '';
-      if(apProductsCustomContainer) apProductsCustomContainer.innerHTML = '';
+      if(apProductsAllContainer) apProductsAllContainer.innerHTML = '';
       if(apCustomBuildersContainer) apCustomBuildersContainer.innerHTML = '';
       apProductsStatus('', '');
     }
@@ -1458,10 +1469,9 @@
       if(!res.ok) throw new Error('HTTP ' + res.status);
       row.remove();
       apProductsStatus('✅ Product deleted.', 'ok');
-      var mainCountAfterDelete = apProductsMainContainer ? apProductsMainContainer.children.length : 0;
-      var customCountAfterDelete = apProductsCustomContainer ? apProductsCustomContainer.children.length : 0;
+      var storeCountAfterDelete = apProductsAllContainer ? apProductsAllContainer.children.length : 0;
       var builderCountAfterDelete = apCustomBuildersContainer ? apCustomBuildersContainer.children.length : 0;
-      apRefreshProductEmptyStates(mainCountAfterDelete, customCountAfterDelete, builderCountAfterDelete);
+      apRefreshProductEmptyStates(storeCountAfterDelete, 0, builderCountAfterDelete);
     } catch(e){
       apProductsStatus('❌ Could not delete product: ' + (e.message || 'unknown error'), 'err');
     }
