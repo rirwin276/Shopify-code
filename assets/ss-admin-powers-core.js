@@ -843,7 +843,7 @@
     });
     Array.prototype.slice.call(actionsEl.querySelectorAll('.ap-edit-placement-btn')).forEach(function(btn){
       var noLogo = /no logo/i.test(btn.textContent || '') || btn.classList.contains('ap-edit-placement-btn--disabled');
-      btn.innerHTML = noLogo ? '✏️ Edit Placement + Colors (no logo)' : '✏️ Edit Placement + Colors';
+      btn.innerHTML = noLogo ? '✏️ Edit (add logo)' : '✏️ Edit';
       btn.title = noLogo
         ? 'Add a logo first before editing placement and colors.'
         : 'Click to adjust logo size, logo placement, and product color options.';
@@ -1343,7 +1343,7 @@
           var _proEditBtn = document.createElement('button');
           _proEditBtn.type = 'button';
           _proEditBtn.className = 'ap-edit-placement-btn';
-          _proEditBtn.innerHTML = '✏️ Edit in Pro Builder';
+          _proEditBtn.innerHTML = '✏️ Edit';
           _proEditBtn.title = 'Re-open this product in the Pro Builder to adjust image, placement, or colors';
           _proEditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_proEditUrl));
           actionsEl.appendChild(_proEditBtn);

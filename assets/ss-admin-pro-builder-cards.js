@@ -368,11 +368,22 @@
     '.ss-modal__thumb.on{border-color:rgba(183,163,106,.9);}',
     '.ss-modal__thumb img{width:100%;height:100%;object-fit:cover;display:block;}',
 
-    /* Detail side */
+    /* Detail side — split into a scroll area + a pinned footer so the
+       "Add to Store" CTA is ALWAYS visible without scrolling. */
     '.ss-modal__detail{',
-      'overflow-y:auto;padding:32px 28px 30px;',
-      'display:flex;flex-direction:column;gap:0;',
+      'overflow:hidden;padding:0;min-height:0;',
+      'display:flex;flex-direction:column;',
+    '}',
+    '.ss-modal__scroll{',
+      'flex:1 1 auto;min-height:0;overflow-y:auto;',
+      'padding:32px 28px 18px;',
       '-webkit-overflow-scrolling:touch;',
+    '}',
+    '.ss-modal__foot{',
+      'flex:0 0 auto;',
+      'padding:14px 28px 20px;',
+      'background:#fff;',
+      'border-top:1px solid rgba(17,16,14,.08);',
     '}',
     '.ss-modal__chip{',
       'display:inline-block;',
@@ -452,7 +463,7 @@
       'cursor:pointer;text-align:center;',
       'box-sizing:border-box;',
       'transition:background .15s,transform .12s;',
-      'margin-top:22px;',
+      'margin-top:0;',
     '}',
     '.ss-modal__cta:hover{background:rgba(183,163,106,1);color:#11100e;}',
     '.ss-modal__cta:active{transform:scale(.98);}',
@@ -465,7 +476,8 @@
         'max-height:92vh;',
       '}',
       '.ss-modal__img{height:min(52vw,260px);}',
-      '.ss-modal__detail{padding:22px 20px 26px;gap:0;}',
+      '.ss-modal__scroll{padding:20px 20px 14px;}',
+      '.ss-modal__foot{padding:12px 20px 18px;}',
       '.ss-modal__title{font-size:20px;}',
     '}',
 
@@ -588,18 +600,22 @@
     }).join('');
 
     detailEl.innerHTML =
-      '<span class="ss-modal__chip">' + esc(b.badge) + '</span>' +
-      '<div class="ss-modal__title">' + esc(b.name) + '</div>' +
-      '<p class="ss-modal__desc">' + esc(b.desc) + '</p>' +
-      '<div class="ss-modal__specs">' + specChips + '</div>' +
-      '<div class="ss-modal__div"></div>' +
-      '<div class="ss-modal__price-head">Retail pricing</div>' +
-      '<div class="ss-modal__price-card">' + priceRows + '</div>' +
-      '<div class="ss-modal__meta-head">Available sizes</div>' +
-      '<div class="ss-modal__meta-val">' + esc(b.sizes) + '</div>' +
-      '<div class="ss-modal__meta-head">Colors</div>' +
-      '<div class="ss-modal__meta-val">' + esc(b.colors) + '</div>' +
-      '<button class="ss-modal__cta" data-builder-id="' + esc(b.id) + '">Add to Store</button>';
+      '<div class="ss-modal__scroll">' +
+        '<span class="ss-modal__chip">' + esc(b.badge) + '</span>' +
+        '<div class="ss-modal__title">' + esc(b.name) + '</div>' +
+        '<p class="ss-modal__desc">' + esc(b.desc) + '</p>' +
+        '<div class="ss-modal__specs">' + specChips + '</div>' +
+        '<div class="ss-modal__div"></div>' +
+        '<div class="ss-modal__price-head">Retail pricing</div>' +
+        '<div class="ss-modal__price-card">' + priceRows + '</div>' +
+        '<div class="ss-modal__meta-head">Available sizes</div>' +
+        '<div class="ss-modal__meta-val">' + esc(b.sizes) + '</div>' +
+        '<div class="ss-modal__meta-head">Colors</div>' +
+        '<div class="ss-modal__meta-val">' + esc(b.colors) + '</div>' +
+      '</div>' +
+      '<div class="ss-modal__foot">' +
+        '<button class="ss-modal__cta" data-builder-id="' + esc(b.id) + '">✨ Add to Store</button>' +
+      '</div>';
 
     detailEl.querySelector('.ss-modal__cta').addEventListener('click', function () {
       closeModal();

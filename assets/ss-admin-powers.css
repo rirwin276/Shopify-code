@@ -2693,28 +2693,50 @@
     -webkit-box-orient: vertical;
   }
 
-  /* Actions live at the bottom of the card, wrapping as needed */
+  /* Actions live at the bottom of the card.
+     Layout: [ Hide | Delete ] on row 1, prominent [ Edit ] on row 2. */
   .ap-product-row__actions {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 7px !important;
+    gap: 8px !important;
     width: 100% !important;
     margin-top: auto !important;
-    padding: 12px 14px 14px !important;
+    padding: 12px 12px 13px !important;
     justify-content: flex-start !important;
   }
-  .ap-product-row__actions .ap-btn--outline-sm,
-  .ap-product-row__actions .ap-btn--danger-sm,
-  .ap-product-row__actions .ap-edit-placement-btn {
-    flex: 1 1 auto;
-    min-height: 36px;
-    justify-content: center;
-    font-size: 12px;
+  /* Hide + Delete share the top row, 50/50 */
+  .ap-product-row__actions > .ap-btn--outline-sm,
+  .ap-product-row__actions > .ap-btn--danger-sm {
+    flex: 1 1 calc(50% - 4px) !important;
+    min-width: 0 !important;
+    min-height: 38px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    border-radius: 11px !important;
     white-space: nowrap;
   }
-  /* Editor buttons get their own full-width row so long labels read clearly */
-  .ap-product-row__actions .ap-edit-placement-btn,
-  .ap-product-row__actions .ap-edit-placement-btn--disabled { flex: 1 1 100%; }
+  /* Editor button gets its own full-width row — covers both the wrapped
+     (placement/colors) case and the un-wrapped Pro Builder re-edit button. */
+  .ap-product-row__actions > .ap-product-editor-wrap,
+  .ap-product-row__actions > .ap-edit-placement-btn {
+    flex: 1 1 100% !important;
+    display: flex !important;
+  }
+  .ap-product-row__actions .ap-edit-placement-btn {
+    width: 100% !important;
+    min-height: 40px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    border-radius: 11px !important;
+    white-space: nowrap;
+  }
 
   /* Hidden products dimmed */
   .ap-product-row[data-hidden="true"] { opacity: 0.55; }
@@ -2730,9 +2752,19 @@
   }
 
 /* ═══════════════════════════════════════════════════════════════
-   REDESIGN v3 — Tab label "Add Products" shortens on tiny screens
+   REDESIGN v3 — Tab label "Add Products" shortens to "Add" on phones.
+   Higher specificity + !important so it beats the .ap-tab-label 8px rule
+   (otherwise the full label stays and ::after stacks a 2nd "Add" word).
    ═══════════════════════════════════════════════════════════════ */
-  @media (max-width: 440px) {
-    .ap-main-tab-btn[data-main-tab="apPanelAddProducts"] .ap-tab-label { font-size: 0; }
-    .ap-main-tab-btn[data-main-tab="apPanelAddProducts"] .ap-tab-label::after { content: 'Add'; font-size: 11px; }
+  @media (max-width: 480px) {
+    .ap-main-tab-btn[data-main-tab="apPanelAddProducts"] .ap-tab-label {
+      font-size: 0 !important;
+      line-height: 0 !important;
+    }
+    .ap-main-tab-btn[data-main-tab="apPanelAddProducts"] .ap-tab-label::after {
+      content: 'Add' !important;
+      font-size: 8px !important;
+      line-height: 1.15 !important;
+      font-weight: 700;
+    }
   }
