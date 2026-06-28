@@ -1066,42 +1066,30 @@
       }
 
       if(!isProEditorBuild && isNl6733 && SSAP.editorSecret){
-        var nl6733LogoSrc = SSAP.shopLogoSrc || '';
-        var nl6733EditorBtn;
-        if(nl6733LogoSrc){
-          var nl6733EditorUrl = SSAP.editorNl6733BaseUrl
-            + '?logo_url=' + encodeURIComponent(nl6733LogoSrc)
-            + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(product.handle || '')
-            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+        // NL6733 now opens the full Pro Editor (not the old placement editor).
+        // The tank pro-builder build is idempotent per store, so re-publishing
+        // updates this same product in place instead of creating a duplicate.
+        var _nl6733Origin = '';
+        try { _nl6733Origin = new URL(SSAP.editorNl6733BaseUrl || SSAP.editorBaseUrl || '').origin; } catch(_e){ _nl6733Origin = ''; }
+        if(_nl6733Origin){
+          var _nl6733ReturnUrl = (window.location.origin + window.location.pathname + window.location.search);
+          // No product_handle: matches the working Add Products publish flow.
+          // The tank build is idempotent per store, so this updates the existing
+          // tank in place rather than creating a duplicate.
+          var _nl6733EditUrl = _nl6733Origin + '/editor/pro-shirt/nl6733'
+            + '?shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_nl6733ReturnUrl)
             + '&mode=embedded';
-          nl6733EditorBtn = document.createElement('button');
-          nl6733EditorBtn.type = 'button';
-          nl6733EditorBtn.className = 'ap-edit-placement-btn';
-          nl6733EditorBtn.dataset.productHandle = product.handle || '';
-          nl6733EditorBtn.innerHTML = '✏️ Edit Placement';
-          nl6733EditorBtn.title = 'Adjust logo placement for this product only';
-          nl6733EditorBtn.addEventListener('click', function(){ apOpenEditorModal(nl6733EditorUrl); });
-          var nl6733EditColorsBtn = document.createElement('button');
-          nl6733EditColorsBtn.type = 'button';
-          nl6733EditColorsBtn.className = 'ap-edit-placement-btn';
-          nl6733EditColorsBtn.innerHTML = '🎨 Edit Colors';
-          nl6733EditColorsBtn.title = 'Edit shirt colors for this product';
-          nl6733EditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(nl6733EditorUrl + '&tab=colors'); });
-          actionsEl.appendChild(nl6733EditorBtn);
-          actionsEl.appendChild(nl6733EditColorsBtn);
-        } else {
-          nl6733EditorBtn = document.createElement('span');
-          nl6733EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          nl6733EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          nl6733EditorBtn.textContent = '✏️ Edit Placement (no logo)';
-          var nl6733EditColorsDisabledBtn = document.createElement('span');
-          nl6733EditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          nl6733EditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          nl6733EditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
-          actionsEl.appendChild(nl6733EditorBtn);
-          actionsEl.appendChild(nl6733EditColorsDisabledBtn);
+          if(SSAP.shopLogoSrc) _nl6733EditUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
+          var nl6733EditBtn = document.createElement('button');
+          nl6733EditBtn.type = 'button';
+          nl6733EditBtn.className = 'ap-edit-placement-btn';
+          nl6733EditBtn.dataset.productHandle = product.handle || '';
+          nl6733EditBtn.innerHTML = '✏️ Edit';
+          nl6733EditBtn.title = 'Open the Pro Editor to change placement, colors, or swap artwork — edits this tank in place';
+          nl6733EditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_nl6733EditUrl));
+          actionsEl.appendChild(nl6733EditBtn);
         }
       }
 
@@ -1119,42 +1107,30 @@
       }
 
       if(!isProEditorBuild && isMc1790 && SSAP.editorSecret){
-        var mc1790LogoSrc = SSAP.shopLogoSrc || '';
-        var mc1790EditorBtn;
-        if(mc1790LogoSrc){
-          var mc1790EditorUrl = SSAP.editorMc1790BaseUrl
-            + '?logo_url=' + encodeURIComponent(mc1790LogoSrc)
-            + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(product.handle || '')
-            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+        // MC1790 now opens the full Pro Editor (not the old placement editor).
+        // The tank pro-builder build is idempotent per store, so re-publishing
+        // updates this same product in place instead of creating a duplicate.
+        var _mc1790Origin = '';
+        try { _mc1790Origin = new URL(SSAP.editorMc1790BaseUrl || SSAP.editorBaseUrl || '').origin; } catch(_e){ _mc1790Origin = ''; }
+        if(_mc1790Origin){
+          var _mc1790ReturnUrl = (window.location.origin + window.location.pathname + window.location.search);
+          // No product_handle: matches the working Add Products publish flow.
+          // The tank build is idempotent per store, so this updates the existing
+          // tank in place rather than creating a duplicate.
+          var _mc1790EditUrl = _mc1790Origin + '/editor/pro-shirt/mc1790'
+            + '?shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_mc1790ReturnUrl)
             + '&mode=embedded';
-          mc1790EditorBtn = document.createElement('button');
-          mc1790EditorBtn.type = 'button';
-          mc1790EditorBtn.className = 'ap-edit-placement-btn';
-          mc1790EditorBtn.dataset.productHandle = product.handle || '';
-          mc1790EditorBtn.innerHTML = '✏️ Edit Placement';
-          mc1790EditorBtn.title = 'Adjust logo placement for this product only';
-          mc1790EditorBtn.addEventListener('click', function(){ apOpenEditorModal(mc1790EditorUrl); });
-          var mc1790EditColorsBtn = document.createElement('button');
-          mc1790EditColorsBtn.type = 'button';
-          mc1790EditColorsBtn.className = 'ap-edit-placement-btn';
-          mc1790EditColorsBtn.innerHTML = '🎨 Edit Colors';
-          mc1790EditColorsBtn.title = 'Edit shirt colors for this product';
-          mc1790EditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(mc1790EditorUrl + '&tab=colors'); });
-          actionsEl.appendChild(mc1790EditorBtn);
-          actionsEl.appendChild(mc1790EditColorsBtn);
-        } else {
-          mc1790EditorBtn = document.createElement('span');
-          mc1790EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          mc1790EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          mc1790EditorBtn.textContent = '✏️ Edit Placement (no logo)';
-          var mc1790EditColorsDisabledBtn = document.createElement('span');
-          mc1790EditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          mc1790EditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          mc1790EditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
-          actionsEl.appendChild(mc1790EditorBtn);
-          actionsEl.appendChild(mc1790EditColorsDisabledBtn);
+          if(SSAP.shopLogoSrc) _mc1790EditUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
+          var mc1790EditBtn = document.createElement('button');
+          mc1790EditBtn.type = 'button';
+          mc1790EditBtn.className = 'ap-edit-placement-btn';
+          mc1790EditBtn.dataset.productHandle = product.handle || '';
+          mc1790EditBtn.innerHTML = '✏️ Edit';
+          mc1790EditBtn.title = 'Open the Pro Editor to change placement, colors, or swap artwork — edits this tank in place';
+          mc1790EditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_mc1790EditUrl));
+          actionsEl.appendChild(mc1790EditBtn);
         }
       }
 
