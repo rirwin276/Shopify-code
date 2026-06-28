@@ -1028,42 +1028,27 @@
       }
 
       if(!isProEditorBuild && isBc3001y && SSAP.editorSecret){
-        var bc3001yLogoSrc = SSAP.shopLogoSrc || '';
-        var bc3001yEditorBtn;
-        if(bc3001yLogoSrc){
-          var bc3001yEditorUrl = SSAP.editorBc3001yBaseUrl
-            + '?logo_url=' + encodeURIComponent(bc3001yLogoSrc)
-            + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(product.handle || '')
+        // BC3001Y now opens the full Pro Editor to edit in place — placement,
+        // colors, back image, and the image library — re-publishing updates
+        // this same product (backend keys edit-in-place off edit_product_handle).
+        var _bc3001yOrigin = '';
+        try { _bc3001yOrigin = new URL(SSAP.editorProShirtBc3001yBaseUrl || SSAP.editorBaseUrl || '').origin; } catch(_e){ _bc3001yOrigin = ''; }
+        if(_bc3001yOrigin){
+          var _bc3001yReturnUrl = (window.location.origin + window.location.pathname + window.location.search);
+          var _bc3001yEditUrl = _bc3001yOrigin + '/editor/pro-shirt/bc3001y/edit'
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
             + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_bc3001yReturnUrl)
             + '&mode=embedded';
-          bc3001yEditorBtn = document.createElement('button');
-          bc3001yEditorBtn.type = 'button';
-          bc3001yEditorBtn.className = 'ap-edit-placement-btn';
-          bc3001yEditorBtn.dataset.productHandle = product.handle || '';
-          bc3001yEditorBtn.innerHTML = '✏️ Edit Placement';
-          bc3001yEditorBtn.title = 'Adjust logo placement for this youth tee product only';
-          bc3001yEditorBtn.addEventListener('click', function(){ apOpenEditorModal(bc3001yEditorUrl); });
-          var bc3001yEditColorsBtn = document.createElement('button');
-          bc3001yEditColorsBtn.type = 'button';
-          bc3001yEditColorsBtn.className = 'ap-edit-placement-btn';
-          bc3001yEditColorsBtn.innerHTML = '🎨 Edit Colors';
-          bc3001yEditColorsBtn.title = 'Edit shirt colors for this product';
-          bc3001yEditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(bc3001yEditorUrl + '&tab=colors'); });
-          actionsEl.appendChild(bc3001yEditorBtn);
-          actionsEl.appendChild(bc3001yEditColorsBtn);
-        } else {
-          bc3001yEditorBtn = document.createElement('span');
-          bc3001yEditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          bc3001yEditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          bc3001yEditorBtn.textContent = '✏️ Edit Placement (no logo)';
-          var bc3001yEditColorsDisabledBtn = document.createElement('span');
-          bc3001yEditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          bc3001yEditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          bc3001yEditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
-          actionsEl.appendChild(bc3001yEditorBtn);
-          actionsEl.appendChild(bc3001yEditColorsDisabledBtn);
+          var bc3001yEditBtn = document.createElement('button');
+          bc3001yEditBtn.type = 'button';
+          bc3001yEditBtn.className = 'ap-edit-placement-btn';
+          bc3001yEditBtn.dataset.productHandle = product.handle || '';
+          bc3001yEditBtn.innerHTML = '✏️ Edit';
+          bc3001yEditBtn.title = 'Open the Pro Editor to change placement, colors, add a back image, or swap artwork — edits this product in place';
+          bc3001yEditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_bc3001yEditUrl));
+          actionsEl.appendChild(bc3001yEditBtn);
         }
       }
 
@@ -1208,42 +1193,27 @@
         // Intentionally append nothing for new M2580 Pro Builder custom products.
         // Existing-product rebuild/edit will be added later as a separate real workflow.
       } else if(!isProEditorBuild && isM2580 && SSAP.editorSecret){
-        var m2580LogoSrc = SSAP.shopLogoSrc || '';
-        var m2580EditorBtn;
-        if(m2580LogoSrc){
-          var m2580EditorUrl = SSAP.editorM2580BaseUrl
-            + '?logo_url=' + encodeURIComponent(m2580LogoSrc)
-            + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(product.handle || '')
+        // M2580 now opens the full Pro Editor to edit in place — placement,
+        // colors, back image, and the image library — re-publishing updates
+        // this same product (backend keys edit-in-place off edit_product_handle).
+        var _m2580Origin = '';
+        try { _m2580Origin = new URL(SSAP.editorProShirtM2580BaseUrl || SSAP.editorBaseUrl || '').origin; } catch(_e){ _m2580Origin = ''; }
+        if(_m2580Origin){
+          var _m2580ReturnUrl = (window.location.origin + window.location.pathname + window.location.search);
+          var _m2580EditUrl = _m2580Origin + '/editor/pro-shirt/m2580/edit'
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
             + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_m2580ReturnUrl)
             + '&mode=embedded';
-          m2580EditorBtn = document.createElement('button');
-          m2580EditorBtn.type = 'button';
-          m2580EditorBtn.className = 'ap-edit-placement-btn';
-          m2580EditorBtn.dataset.productHandle = product.handle || '';
-          m2580EditorBtn.innerHTML = '✏️ Edit Placement';
-          m2580EditorBtn.title = 'Adjust logo placement for this product only';
-          m2580EditorBtn.addEventListener('click', function(){ apOpenEditorModal(m2580EditorUrl); });
-          var m2580EditColorsBtn = document.createElement('button');
-          m2580EditColorsBtn.type = 'button';
-          m2580EditColorsBtn.className = 'ap-edit-placement-btn';
-          m2580EditColorsBtn.innerHTML = '🎨 Edit Colors';
-          m2580EditColorsBtn.title = 'Edit shirt colors for this product';
-          m2580EditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(m2580EditorUrl + '&tab=colors'); });
-          actionsEl.appendChild(m2580EditorBtn);
-          actionsEl.appendChild(m2580EditColorsBtn);
-        } else {
-          m2580EditorBtn = document.createElement('span');
-          m2580EditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          m2580EditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          m2580EditorBtn.textContent = '✏️ Edit Placement (no logo)';
-          var m2580EditColorsDisabledBtn = document.createElement('span');
-          m2580EditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          m2580EditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          m2580EditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
-          actionsEl.appendChild(m2580EditorBtn);
-          actionsEl.appendChild(m2580EditColorsDisabledBtn);
+          var m2580EditBtn = document.createElement('button');
+          m2580EditBtn.type = 'button';
+          m2580EditBtn.className = 'ap-edit-placement-btn';
+          m2580EditBtn.dataset.productHandle = product.handle || '';
+          m2580EditBtn.innerHTML = '✏️ Edit';
+          m2580EditBtn.title = 'Open the Pro Editor to change placement, colors, add a back image, or swap artwork — edits this product in place';
+          m2580EditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_m2580EditUrl));
+          actionsEl.appendChild(m2580EditBtn);
         }
       }
 
