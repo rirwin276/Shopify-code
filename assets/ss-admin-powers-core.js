@@ -882,6 +882,19 @@
       var imgSrc = product.featured_image || product.image ||
                    (product.images && product.images[0] && (product.images[0].src || product.images[0])) ||
                    null;
+
+      // A builder-made product with no mockup image yet is still BUILDING —
+      // keep it out of the admin so nobody opens a half-made product. Mockups
+      // attach at the end of the build, and the silent 60s products refresh
+      // brings it in automatically once it's fully live. Covers pro-built
+      // (custom-build/pro-shirt tags) AND legacy-built products (model-- tags,
+      // e.g. the tanks).
+      var _pbTagsRaw = Array.isArray(product.tags) ? product.tags : String(product.tags || '').split(',');
+      var _pbBuilderMade = isCustom || _pbTagsRaw.some(function(t){
+        return String(t || '').toLowerCase().trim().indexOf('model--') === 0;
+      });
+      if (_pbBuilderMade && !imgSrc) { return; }
+
       var imgEl;
       if(imgSrc){
         imgEl = document.createElement('img');
@@ -1076,8 +1089,9 @@
           // No product_handle: matches the working Add Products publish flow.
           // The tank build is idempotent per store, so this updates the existing
           // tank in place rather than creating a duplicate.
-          var _nl6733EditUrl = _nl6733Origin + '/editor/pro-shirt/nl6733'
-            + '?shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+          var _nl6733EditUrl = _nl6733Origin + '/editor/pro-shirt/nl6733/edit'
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
             + '&return_url=' + encodeURIComponent(_nl6733ReturnUrl)
             + '&mode=embedded';
@@ -1117,8 +1131,9 @@
           // No product_handle: matches the working Add Products publish flow.
           // The tank build is idempotent per store, so this updates the existing
           // tank in place rather than creating a duplicate.
-          var _mc1790EditUrl = _mc1790Origin + '/editor/pro-shirt/mc1790'
-            + '?shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+          var _mc1790EditUrl = _mc1790Origin + '/editor/pro-shirt/mc1790/edit'
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
             + '&return_url=' + encodeURIComponent(_mc1790ReturnUrl)
             + '&mode=embedded';
@@ -1256,13 +1271,15 @@
       try { _proBuilderOrigin = new URL(SSAP.editorBaseUrl || SSAP.editorProShirtBc3413BaseUrl || '').origin; } catch(_e){ _proBuilderOrigin = ''; }
       if(isProEditorBuild && SSAP.editorSecret && _proBuilderOrigin){
         var _proTags = _tagListForProCheck;
-        var _isCc1717Pro  = _proTags.some(function(t){ return t === 'pro-shirt-cc1717'  || t === 'pro-builder-cc1717'; });
-        var _isM2580Pro   = _proTags.some(function(t){ return t === 'pro-shirt-m2580'   || t === 'pro-builder-m2580'; });
-        var _isLs14003Pro = _proTags.some(function(t){ return t === 'pro-shirt-ls14003' || t === 'pro-builder-ls14003'; });
+        function _hasProTag(model){
+          return _proTags.some(function(t){ return t === 'pro-shirt-' + model || t === 'pro-builder-' + model; });
+        }
         var _proEditPath  = null;
-        if(_isCc1717Pro)       _proEditPath = '/editor/pro-shirt/cc1717/edit';
-        else if(_isM2580Pro)   _proEditPath = '/editor/pro-shirt/m2580/edit';
-        else if(_isLs14003Pro) _proEditPath = '/editor/pro-shirt/ls14003/edit';
+        // Every pro-built model with a /edit route gets an Edit button.
+        ['cc1717', 'm2580', 'ls14003', 'm2480', 'bc3413', 'bc3001y', 'nl6733', 'mc1790'].some(function(model){
+          if(_hasProTag(model)){ _proEditPath = '/editor/pro-shirt/' + model + '/edit'; return true; }
+          return false;
+        });
         if(_proEditPath){
           var _returnUrl = (window.location.origin + window.location.pathname + window.location.search);
           var _proEditUrl = _proBuilderOrigin + _proEditPath
@@ -1271,6 +1288,8 @@
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
             + '&return_url=' + encodeURIComponent(_returnUrl)
             + '&mode=embedded';
+          // Tanks load their artwork from logo_url; other models ignore it.
+          if(SSAP.shopLogoSrc) _proEditUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
           var _proEditBtn = document.createElement('button');
           _proEditBtn.type = 'button';
           _proEditBtn.className = 'ap-edit-placement-btn';
