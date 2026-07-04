@@ -2787,3 +2787,44 @@
       font-weight: 700;
     }
   }
+
+/* ═══════════════════════════════════════════════════════════════
+   EDITOR MODAL SLIM CHROME (v2) — the header bar ("Edit Logo
+   Placement" + store title) wasted vertical space, especially on
+   mobile. The header collapses to a floating ✕ and the editor
+   iframe gets the full height. DELETE THIS BLOCK to restore the
+   classic header bar.
+   ═══════════════════════════════════════════════════════════════ */
+  .ap-editor-header {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    z-index: 6;
+    background: transparent !important;
+    border: none !important;
+    padding: 8px !important;
+    pointer-events: none;
+  }
+  #apEditorTitle { display: none !important; }  /* kept in DOM for aria-labelledby */
+  .ap-editor-close {
+    pointer-events: auto;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    background: rgba(0,0,0,0.55) !important;
+    border: 1px solid rgba(255,255,255,0.22) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-size: 15px !important;
+  }
+  .ap-editor-close:hover { background: rgba(0,0,0,0.75) !important; }
+  /* The dialog's height used to come from the iframe's min-height:640px.
+     Give the dialog an explicit height so the iframe can simply fill it. */
+  .ap-editor-dialog {
+    position: relative;
+    height: calc(100vh - 48px);
+  }
+  .ap-editor-iframe { min-height: 0 !important; flex: 1 1 auto !important; }
+  @media (max-width: 900px) {
+    .ap-editor-dialog { height: 100vh; height: 100dvh; }
+  }
