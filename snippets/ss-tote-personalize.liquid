@@ -1,0 +1,112 @@
+{%- comment -%}
+  ss-tote-personalize.liquid
+  --------------------------
+  Customer-facing "Name & Number on the back" widget for the EC8000 eco tote.
+  Renders ONLY on products tagged pro-builder-ec8000 (set automatically by
+  the Pro Builder publish). Included inside the product's <form> in
+  blocks/buy-buttons.liquid so its inputs submit as Shopify line-item
+  properties — no product/variant is created per order.
+
+  The live canvas preview here is an APPROXIMATION for the shopper. The
+  authoritative print file is rendered server-side at order-fulfillment time
+  (Printful_Automation's /editor/pro-shirt/ec8000/personalize-back), from
+  these exact same typed values, so what actually prints always matches what
+  the customer submitted — even if this preview's font/positioning drifts
+  slightly from the real thing.
+{%- endcomment -%}
+{%- if product.tags contains 'pro-builder-ec8000' -%}
+  <div class="ss-pers" data-ss-pers data-initial-color="{{ product.selected_or_first_available_variant.option1 | escape }}">
+    <div class="ss-pers-head">
+      <span class="ss-pers-kicker">Personalize the Back</span>
+      <p class="ss-pers-sub">Add a name and number — we print it exactly as you set it here.</p>
+    </div>
+
+    <div class="ss-pers-grid">
+      <div class="ss-pers-preview">
+        <canvas class="ss-pers-canvas" data-ss-pers-canvas width="640" height="640" aria-label="Personalization preview"></canvas>
+      </div>
+
+      <div class="ss-pers-fields">
+        <label class="ss-pers-label" for="PersName-{{ product.id }}">Name</label>
+        <input
+          class="ss-pers-input"
+          type="text"
+          id="PersName-{{ product.id }}"
+          name="properties[Name]"
+          data-ss-pers-name
+          maxlength="14"
+          required
+          pattern="[A-Za-z '\-]{1,14}"
+          placeholder="e.g. Emma"
+          autocomplete="off"
+        >
+
+        <label class="ss-pers-label" for="PersNumber-{{ product.id }}">Number</label>
+        <input
+          class="ss-pers-input ss-pers-input--number"
+          type="text"
+          id="PersNumber-{{ product.id }}"
+          name="properties[Number]"
+          data-ss-pers-number
+          inputmode="numeric"
+          pattern="[0-9]{1,2}"
+          maxlength="2"
+          required
+          placeholder="e.g. 7"
+          autocomplete="off"
+        >
+
+        <span class="ss-pers-label">Text Color</span>
+        <div class="ss-pers-colors" data-ss-pers-colors role="radiogroup" aria-label="Text color">
+          <button type="button" class="ss-pers-swatch" data-color="White" style="--sw:#ffffff" aria-label="White" role="radio" aria-checked="false"></button>
+          <button type="button" class="ss-pers-swatch" data-color="Black" style="--sw:#141414" aria-label="Black" role="radio" aria-checked="false"></button>
+          <button type="button" class="ss-pers-swatch ss-pers-swatch--active" data-color="Gold" style="--sw:#b7a36a" aria-label="Gold" role="radio" aria-checked="true"></button>
+        </div>
+        <input type="hidden" name="properties[Text Color]" value="Gold" data-ss-pers-color-input>
+      </div>
+    </div>
+  </div>
+
+  <script
+    src="{{ 'ss-tote-personalize.js' | asset_url }}"
+    defer
+    data-mockups-url="https://printfulautomation-production.up.railway.app/editor/pro-shirt/ec8000/mockups-public"
+  ></script>
+
+  {% stylesheet %}
+    .ss-pers {
+      margin: 18px 0;
+      padding: 18px;
+      border: 1px solid rgba(17,16,14,0.10);
+      border-radius: 18px;
+      background: rgba(183,163,106,0.05);
+    }
+    .ss-pers-kicker {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(183,163,106,1);
+    }
+    .ss-pers-sub { margin: 4px 0 16px; font-size: 13px; color: rgba(17,16,14,0.6); }
+    .ss-pers-grid { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 600px) { .ss-pers-grid { grid-template-columns: 1fr; } }
+    .ss-pers-preview {
+      position: relative; width: 100%; aspect-ratio: 1; border-radius: 14px; overflow: hidden;
+      background: #f5f1e8;
+    }
+    .ss-pers-canvas { width: 100%; height: 100%; display: block; }
+    .ss-pers-fields { display: flex; flex-direction: column; gap: 6px; }
+    .ss-pers-label { font-size: 12px; font-weight: 700; margin-top: 8px; }
+    .ss-pers-label:first-child { margin-top: 0; }
+    .ss-pers-input {
+      padding: 10px 12px; border: 1px solid rgba(17,16,14,0.16); border-radius: 10px;
+      font-size: 14px; width: 100%; box-sizing: border-box;
+    }
+    .ss-pers-input:invalid { border-color: rgba(220,38,38,0.45); }
+    .ss-pers-input--number { max-width: 100px; }
+    .ss-pers-colors { display: flex; gap: 10px; margin-top: 4px; }
+    .ss-pers-swatch {
+      width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+      background: var(--sw); border: 2px solid rgba(17,16,14,0.14); padding: 0;
+    }
+    .ss-pers-swatch--active { border-color: rgba(183,163,106,1); box-shadow: 0 0 0 2px rgba(183,163,106,0.35); }
+  {% endstylesheet %}
+{%- endif -%}
