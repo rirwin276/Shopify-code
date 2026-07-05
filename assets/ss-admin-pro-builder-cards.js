@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v3';
+  var VERSION = 'catalog-v4-ec8000';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -15,7 +15,9 @@
     ls14003_b:   CDN + 'ls14003_back_editor_background_style28669.png?v=1779070374',
     cc1717:      CDN + 'cc1717-front-pepper.png?v=1780468020',
     nl6733:      RAILWAY + '/editor/pro-shirt/nl6733/card-image',
-    mc1790:      RAILWAY + '/editor/pro-shirt/mc1790/card-image'
+    mc1790:      RAILWAY + '/editor/pro-shirt/mc1790/card-image',
+    ec8000_f:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-front-oyster.png?v=1783275244',
+    ec8000_b:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-back-oyster.png?v=1783275244'
   };
 
   var BUILDERS = [
@@ -153,6 +155,24 @@
         { label: 'Front print', note: 'Logo or design on front (back print not available)', price: '$22' }
       ]
     }
+    ,
+    {
+      id: 'ec8000',
+      badge: 'Eco Tote',
+      name: 'Econscious EC8000 Eco Tote Bag',
+      from: '$22',
+      hint: 'One size ? Front or front + back',
+      route: '/editor/pro-shirt/ec8000',
+      gallery: [IMG.ec8000_f, IMG.ec8000_b],
+      desc: 'The EC8000 is a reusable cotton tote with a clean square print area for teams, fundraisers, events, vacation groups, school campaigns, and everyday branded merch. It is simple to order, easy to carry, and does not require size collection.',
+      specs: ['Reusable cotton tote', '9.5 ? 9.5 inch print area', 'One size ? Two classic colors'],
+      sizes: 'One size',
+      colors: 'Choose up to 2 tote colors: Black or Oyster',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on one side', price: '$22' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$27' }
+      ]
+    }
   ];
 
   /* ─── Live pricing ──────────────────────────────────────────────────────── */
@@ -168,7 +188,8 @@
     ls14003: { front: 'LS14003_front', back: 'LS14003_front_back' },
     cc1717:  { front: 'CC1717_front',  back: 'CC1717_front_back' },
     nl6733:  { front: 'NL6733_front',  back: null },
-    mc1790:  { front: 'MC1790_front',  back: null }
+    mc1790:  { front: 'MC1790_front',  back: null },
+    ec8000:  { front: 'EC8000_front',  back: 'EC8000_front_back' }
   };
 
   var livePrices = null;
