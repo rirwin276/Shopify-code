@@ -289,6 +289,19 @@
         }
       })();
     </script>
+
+    {%- comment -%} Organization structured data — helps search & AI crawlers understand the site {%- endcomment -%}
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": {{ shop.name | json }},
+        "url": {{ shop.url | json }},
+        "description": "Custom online merch stores for teams, schools, clubs, and organizations. Print-on-demand apparel with your logo — no inventory, no minimums — with built-in team fundraising. Veteran owned and operated.",
+        "email": {{ shop.email | json }}{% if shop.brand.logo %},
+        "logo": {{ shop.brand.logo | image_url: width: 600 | prepend: 'https:' | json }}{% endif %}
+      }
+    </script>
   </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
