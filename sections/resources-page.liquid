@@ -1530,53 +1530,6 @@ Logo Requirements:
 </script>
 
 
-{%- comment -%} ── FROM THE BLOG — SEO/AI-crawlable content surfaced on Resources ── {%- endcomment -%}
-{%- assign ss_res_blog = blogs['news'] -%}
-{%- if ss_res_blog and ss_res_blog.articles_count > 0 -%}
-<section class="ss-res-blog" aria-label="From the blog">
-  <div class="ss-res-blog-wrap">
-    <div class="ss-res-blog-head">
-      <div>
-        <div class="ss-res-kicker">From the Blog</div>
-        <h2 class="ss-res-blog-h2">Guides &amp; updates</h2>
-      </div>
-      <a class="ss-res-blog-all" href="{{ ss_res_blog.url }}">View all posts →</a>
-    </div>
-    <div class="ss-res-blog-grid">
-      {%- for ss_res_article in ss_res_blog.articles limit: 3 -%}
-        <a class="ss-res-blog-card" href="{{ ss_res_article.url }}">
-          {%- if ss_res_article.image -%}
-            <div class="ss-res-blog-img"><img src="{{ ss_res_article.image | image_url: width: 640 }}" alt="{{ ss_res_article.title | escape }}" loading="lazy"></div>
-          {%- endif -%}
-          <div class="ss-res-blog-body">
-            <h3>{{ ss_res_article.title }}</h3>
-            <p>{{ ss_res_article.excerpt_or_content | strip_html | truncate: 130 }}</p>
-            <span class="ss-res-blog-read">Read article →</span>
-          </div>
-        </a>
-      {%- endfor -%}
-    </div>
-  </div>
-</section>
-<style>
-  .ss-res-blog { padding: 56px 20px 72px; }
-  .ss-res-blog-wrap { max-width: 1080px; margin: 0 auto; }
-  .ss-res-blog-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
-  .ss-res-blog-h2 { margin: 6px 0 0; font-size: clamp(26px, 3.4vw, 38px); font-weight: 900; letter-spacing: -0.03em; }
-  .ss-res-blog-all { font-weight: 800; text-decoration: none; color: inherit; opacity: .75; }
-  .ss-res-blog-all:hover { opacity: 1; }
-  .ss-res-blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-  .ss-res-blog-card { display: flex; flex-direction: column; background: #fff; border: 1px solid rgba(17,16,14,.09); border-radius: 20px; overflow: hidden; text-decoration: none; color: inherit; box-shadow: 0 2px 14px rgba(17,16,14,.05); transition: transform .2s ease, box-shadow .2s ease; }
-  .ss-res-blog-card:hover { transform: translateY(-4px); box-shadow: 0 18px 44px rgba(17,16,14,.12); }
-  .ss-res-blog-img { aspect-ratio: 16/9; background: #f5f1e8; }
-  .ss-res-blog-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .ss-res-blog-body { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 8px; }
-  .ss-res-blog-body h3 { margin: 0; font-size: 17px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.25; }
-  .ss-res-blog-body p { margin: 0; font-size: 13.5px; line-height: 1.55; opacity: .7; }
-  .ss-res-blog-read { margin-top: auto; padding-top: 6px; font-size: 13px; font-weight: 800; }
-</style>
-{%- endif -%}
-
 {% schema %}
 {
   "name": "Resources Page",
