@@ -138,6 +138,21 @@
       });
     });
 
+    // The theme's own add-to-cart handler silently no-ops on an invalid form
+    // (form.checkValidity() with no reportValidity()) — a customer who
+    // leaves Name/Number blank sees nothing happen with no explanation.
+    // Surface the native validation tooltip too. Purely additive: this only
+    // calls reportValidity() (which shows a message and returns a bool), it
+    // never calls preventDefault/stopPropagation, so it can't interfere with
+    // the theme's own submit handling either way.
+    var form = root.closest('form');
+    var submitBtn = form && form.querySelector('[type="submit"]');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function () {
+        if (form && !form.checkValidity()) form.reportValidity();
+      });
+    }
+
     // Follow garment color changes (theme's native variant-change event).
     document.addEventListener('variant:update', function (e) {
       try {
