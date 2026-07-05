@@ -89,10 +89,15 @@
       var number = (numberInput && numberInput.value || '');
       if (!name && !number) return;
 
-      var boxW = w * BBOX_PCT.width / 100;
-      var boxH = h * BBOX_PCT.height / 100;
-      var boxLeft = w * BBOX_PCT.left / 100;
-      var boxTop = h * BBOX_PCT.top / 100;
+      // The print file fills the whole print area with a 3% margin — mirror
+      // that inside the photo's print-area box.
+      var rawW = w * BBOX_PCT.width / 100;
+      var rawH = h * BBOX_PCT.height / 100;
+      var inset = rawW * 0.03;
+      var boxLeft = w * BBOX_PCT.left / 100 + inset;
+      var boxTop = h * BBOX_PCT.top / 100 + inset;
+      var boxW = rawW - inset * 2;
+      var boxH = rawH - inset * 2;
 
       ctx.fillStyle = colorHex;
       ctx.textBaseline = 'alphabetic';

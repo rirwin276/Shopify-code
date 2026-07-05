@@ -64,7 +64,69 @@
           ref="variantId"
           value="{{ product.selected_or_first_available_variant.id }}"
         >
-        {%- render 'ss-tote-personalize', product: product -%}
+        {%- comment -%}
+          Name & Number personalization (inlined — rendering a separate new
+          snippet file failed to sync to Shopify once, killing the widget
+          with "Could not find asset"; inline markup cannot go missing).
+          Renders only when the product carries the build-time
+          custom.personalization json metafield. Font + text color are the
+          ADMIN's saved choice; buyers type only Name + Number — required,
+          native validation — submitted as line-item properties. The live
+          canvas is an approximation; the print file is rendered server-side
+          from the same values at fulfillment.
+        {%- endcomment -%}
+        {%- assign ss_pers = product.metafields.custom.personalization.value -%}
+        {%- if ss_pers and ss_pers.enabled -%}
+          <div
+            class="ss-pers"
+            data-ss-pers
+            data-initial-color="{{ product.selected_or_first_available_variant.option1 | escape }}"
+            data-font-family="{{ ss_pers.font_family | escape }}"
+            data-font-weight="{{ ss_pers.font_weight | default: 700 }}"
+            data-color-hex="{{ ss_pers.color_hex | default: '#141414' | escape }}"
+            data-max-name="{{ ss_pers.max_name_len | default: 14 }}"
+            data-max-number="{{ ss_pers.max_number_len | default: 2 }}"
+          >
+            <span class="ss-pers-kicker">Personalize the Back</span>
+            <p class="ss-pers-sub">Add your name and number — printed on the back in {{ ss_pers.font_label | default: 'our jersey style' }}.</p>
+            <div class="ss-pers-grid">
+              <div class="ss-pers-preview">
+                <canvas class="ss-pers-canvas" data-ss-pers-canvas width="640" height="640" aria-label="Personalization preview"></canvas>
+              </div>
+              <div class="ss-pers-fields">
+                <label class="ss-pers-label" for="PersName-{{ product.id }}">Name</label>
+                <input class="ss-pers-input" type="text" id="PersName-{{ product.id }}"
+                  name="properties[Name]" data-ss-pers-name required autocomplete="off"
+                  maxlength="{{ ss_pers.max_name_len | default: 14 }}"
+                  pattern="[A-Za-z '\-]+" placeholder="e.g. Emma">
+                <label class="ss-pers-label" for="PersNumber-{{ product.id }}">Number</label>
+                <input class="ss-pers-input ss-pers-input--number" type="text" id="PersNumber-{{ product.id }}"
+                  name="properties[Number]" data-ss-pers-number required autocomplete="off"
+                  inputmode="numeric" maxlength="{{ ss_pers.max_number_len | default: 2 }}"
+                  pattern="[0-9]+" placeholder="e.g. 7">
+                <p class="ss-pers-note">Both fields are required — this item is printed just for you.</p>
+              </div>
+            </div>
+          </div>
+          <script src="{{ 'ss-tote-personalize.js' | asset_url }}" defer
+            data-mockups-url="https://printfulautomation-production.up.railway.app/editor/pro-shirt/ec8000/mockups-public"></script>
+          <style>
+            .ss-pers { margin: 16px 0; padding: 16px; border: 1px solid rgba(17,16,14,0.10); border-radius: 16px; background: rgba(183,163,106,0.05); }
+            .ss-pers-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #b7a36a; }
+            .ss-pers-sub { margin: 4px 0 14px; font-size: 13px; color: rgba(17,16,14,0.62); }
+            .ss-pers-grid { display: grid; grid-template-columns: 190px 1fr; gap: 16px; align-items: start; }
+            @media (max-width: 640px) { .ss-pers-grid { grid-template-columns: 1fr; } .ss-pers-preview { max-width: 320px; margin: 0 auto; } }
+            .ss-pers-preview { width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #f5f1e8; }
+            .ss-pers-canvas { width: 100%; height: 100%; display: block; }
+            .ss-pers-fields { display: flex; flex-direction: column; gap: 5px; }
+            .ss-pers-label { font-size: 12px; font-weight: 700; margin-top: 8px; }
+            .ss-pers-label:first-child { margin-top: 0; }
+            .ss-pers-input { padding: 10px 12px; border: 1px solid rgba(17,16,14,0.16); border-radius: 10px; font-size: 16px; width: 100%; box-sizing: border-box; }
+            .ss-pers-input:invalid { border-color: rgba(220,38,38,0.45); }
+            .ss-pers-input--number { max-width: 110px; }
+            .ss-pers-note { margin: 10px 0 0; font-size: 11.5px; color: rgba(17,16,14,0.5); }
+          </style>
+        {%- endif -%}
         {%- if block_settings.gift_card_form and product.gift_card? -%}
           {%- render 'gift-card-recipient-form', product: product, form: form, section: section, block: block -%}
         {%- endif -%}
