@@ -1,24 +1,37 @@
 {%- comment -%}
   ss-tote-personalize.liquid
   --------------------------
-  Customer-facing "Name & Number on the back" widget for the EC8000 eco tote.
-  Renders ONLY on products tagged pro-builder-ec8000 (set automatically by
-  the Pro Builder publish). Included inside the product's <form> in
-  blocks/buy-buttons.liquid so its inputs submit as Shopify line-item
-  properties — no product/variant is created per order.
+  Customer-facing "Name & Number on the back" widget.
 
-  The live canvas preview here is an APPROXIMATION for the shopper. The
+  Renders ONLY when the admin enabled personalization at build time — the
+  build writes a fully-resolved custom.personalization json metafield on the
+  product: {enabled, font, font_label, font_family, font_weight, color,
+  color_label, color_hex, max_name_len, max_number_len}. The font and text
+  color are the ADMIN's choice; the customer only types a name and number,
+  both required before add-to-cart (native form validation — these inputs
+  live inside the product form in blocks/buy-buttons.liquid and submit as
+  Shopify line-item properties; no product/variant is created per order).
+
+  The live canvas preview is an approximation for the shopper. The
   authoritative print file is rendered server-side at order-fulfillment time
-  (Printful_Automation's /editor/pro-shirt/ec8000/personalize-back), from
-  these exact same typed values, so what actually prints always matches what
-  the customer submitted — even if this preview's font/positioning drifts
-  slightly from the real thing.
+  from the same typed values + the admin's saved font/color, so what prints
+  always matches what was ordered.
 {%- endcomment -%}
-{%- if product.tags contains 'pro-builder-ec8000' -%}
-  <div class="ss-pers" data-ss-pers data-initial-color="{{ product.selected_or_first_available_variant.option1 | escape }}">
+{%- assign ss_pers = product.metafields.custom.personalization.value -%}
+{%- if ss_pers and ss_pers.enabled -%}
+  <div
+    class="ss-pers"
+    data-ss-pers
+    data-initial-color="{{ product.selected_or_first_available_variant.option1 | escape }}"
+    data-font-family="{{ ss_pers.font_family | escape }}"
+    data-font-weight="{{ ss_pers.font_weight | default: 700 }}"
+    data-color-hex="{{ ss_pers.color_hex | default: '#141414' | escape }}"
+    data-max-name="{{ ss_pers.max_name_len | default: 14 }}"
+    data-max-number="{{ ss_pers.max_number_len | default: 2 }}"
+  >
     <div class="ss-pers-head">
       <span class="ss-pers-kicker">Personalize the Back</span>
-      <p class="ss-pers-sub">Add a name and number — we print it exactly as you set it here.</p>
+      <p class="ss-pers-sub">Add your name and number — printed in {{ ss_pers.font_label | default: 'our jersey style' }}, {{ ss_pers.color_label | downcase | default: 'as shown' }}.</p>
     </div>
 
     <div class="ss-pers-grid">
@@ -34,9 +47,9 @@
           id="PersName-{{ product.id }}"
           name="properties[Name]"
           data-ss-pers-name
-          maxlength="14"
+          maxlength="{{ ss_pers.max_name_len | default: 14 }}"
           required
-          pattern="[A-Za-z '\-]{1,14}"
+          pattern="[A-Za-z '\-]{1,{{ ss_pers.max_name_len | default: 14 }}}"
           placeholder="e.g. Emma"
           autocomplete="off"
         >
@@ -49,20 +62,14 @@
           name="properties[Number]"
           data-ss-pers-number
           inputmode="numeric"
-          pattern="[0-9]{1,2}"
-          maxlength="2"
+          pattern="[0-9]{1,{{ ss_pers.max_number_len | default: 2 }}}"
+          maxlength="{{ ss_pers.max_number_len | default: 2 }}"
           required
           placeholder="e.g. 7"
           autocomplete="off"
         >
 
-        <span class="ss-pers-label">Text Color</span>
-        <div class="ss-pers-colors" data-ss-pers-colors role="radiogroup" aria-label="Text color">
-          <button type="button" class="ss-pers-swatch" data-color="White" style="--sw:#ffffff" aria-label="White" role="radio" aria-checked="false"></button>
-          <button type="button" class="ss-pers-swatch" data-color="Black" style="--sw:#141414" aria-label="Black" role="radio" aria-checked="false"></button>
-          <button type="button" class="ss-pers-swatch ss-pers-swatch--active" data-color="Gold" style="--sw:#b7a36a" aria-label="Gold" role="radio" aria-checked="true"></button>
-        </div>
-        <input type="hidden" name="properties[Text Color]" value="Gold" data-ss-pers-color-input>
+        <p class="ss-pers-note">Both fields are required — this item is printed just for you.</p>
       </div>
     </div>
   </div>
@@ -86,7 +93,7 @@
       color: rgba(183,163,106,1);
     }
     .ss-pers-sub { margin: 4px 0 16px; font-size: 13px; color: rgba(17,16,14,0.6); }
-    .ss-pers-grid { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: start; }
+    .ss-pers-grid { display: grid; grid-template-columns: 200px 1fr; gap: 20px; align-items: start; }
     @media (max-width: 600px) { .ss-pers-grid { grid-template-columns: 1fr; } }
     .ss-pers-preview {
       position: relative; width: 100%; aspect-ratio: 1; border-radius: 14px; overflow: hidden;
@@ -102,11 +109,6 @@
     }
     .ss-pers-input:invalid { border-color: rgba(220,38,38,0.45); }
     .ss-pers-input--number { max-width: 100px; }
-    .ss-pers-colors { display: flex; gap: 10px; margin-top: 4px; }
-    .ss-pers-swatch {
-      width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
-      background: var(--sw); border: 2px solid rgba(17,16,14,0.14); padding: 0;
-    }
-    .ss-pers-swatch--active { border-color: rgba(183,163,106,1); box-shadow: 0 0 0 2px rgba(183,163,106,0.35); }
+    .ss-pers-note { margin: 10px 0 0; font-size: 11.5px; color: rgba(17,16,14,0.5); }
   {% endstylesheet %}
 {%- endif -%}

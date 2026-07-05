@@ -1,56 +1,47 @@
-/* Stella & Sage — EC8000 tote personalization live preview.
-   Draws the customer's Name/Number over the current garment-color back
-   photo. This is an APPROXIMATION for the shopper — the authoritative print
-   file is rendered server-side at fulfillment time from the same typed
-   values (see Printful_Automation pro_builders/ec8000/personalize.py), so
-   what prints always matches what was submitted even if this preview's
-   exact typography drifts a little from the real thing. */
+/* Stella & Sage — Name & Number personalization live preview.
+   The FONT and TEXT COLOR come from the product's admin-configured
+   personalization metafield (data attributes on the widget) — the customer
+   only types the name and number. This canvas is an approximation for the
+   shopper; the authoritative print file is rendered server-side at
+   fulfillment from the same values (Printful_Automation
+   pro_builders/ec8000/personalize.py), so what prints always matches what
+   was ordered. */
 (function () {
   'use strict';
 
-  // Must match pro_builders/ec8000/personalize.py BACK_BBOX_PCT exactly —
-  // this is the approved print-safe zone from back_calibration.json.
+  // Must match personalize.py BACK_BBOX_PCT — the approved print-safe zone
+  // from the product's back calibration.
   var BBOX_PCT = { left: 31.6, top: 45.4, width: 37.0, height: 37.0 };
-  var TEXT_COLORS = { White: '#ffffff', Black: '#141414', Gold: '#b7a36a' };
-  var FONT_FAMILY = "'Big Shoulders', sans-serif";
 
-  var _fontLoaded = false;
-  function ensureFont(cb) {
-    if (_fontLoaded) { cb(); return; }
-    if (!document.getElementById('ss-pers-font-link')) {
+  function loadFont(family, weight, cb) {
+    var id = 'ss-pers-font-' + family.replace(/\W+/g, '-');
+    if (!document.getElementById(id)) {
       var link = document.createElement('link');
-      link.id = 'ss-pers-font-link';
+      link.id = id;
       link.rel = 'stylesheet';
-      link.href = 'https://fonts.googleapis.com/css2?family=Big+Shoulders:wght@700&display=swap';
+      link.href = 'https://fonts.googleapis.com/css2?family='
+        + family.replace(/ /g, '+') + ':wght@' + weight + '&display=swap';
       document.head.appendChild(link);
     }
     if (document.fonts && document.fonts.load) {
-      document.fonts.load('700 100px "Big Shoulders"').then(function () {
-        _fontLoaded = true; cb();
-      }).catch(function () { cb(); });
+      document.fonts.load(weight + ' 100px "' + family + '"').then(cb).catch(cb);
     } else {
       setTimeout(cb, 300);
     }
-  }
-
-  function fitFontSize(ctx, text, maxW, maxH, startSize, minSize) {
-    var size = startSize;
-    while (size > minSize) {
-      ctx.font = '700 ' + size + 'px ' + FONT_FAMILY;
-      var w = ctx.measureText(text).width;
-      if (w <= maxW && size <= maxH) return size;
-      size -= 4;
-    }
-    return minSize;
   }
 
   function initWidget(root) {
     var canvas = root.querySelector('[data-ss-pers-canvas]');
     var nameInput = root.querySelector('[data-ss-pers-name]');
     var numberInput = root.querySelector('[data-ss-pers-number]');
-    var colorInput = root.querySelector('[data-ss-pers-color-input]');
-    var swatches = root.querySelectorAll('[data-ss-pers-colors] .ss-pers-swatch');
     if (!canvas) return;
+
+    var fontFamily = root.getAttribute('data-font-family') || 'Big Shoulders';
+    var fontWeight = root.getAttribute('data-font-weight') || '700';
+    var colorHex = root.getAttribute('data-color-hex') || '#141414';
+    var maxName = parseInt(root.getAttribute('data-max-name') || '14', 10);
+    var maxNumber = parseInt(root.getAttribute('data-max-number') || '2', 10);
+    var fontCss = fontWeight + 'px \'' + fontFamily + '\', sans-serif';
 
     var ctx = canvas.getContext('2d');
     var scriptEl = document.querySelector('script[src*="ss-tote-personalize.js"]');
@@ -58,6 +49,20 @@
     var currentColor = root.getAttribute('data-initial-color') || '';
     var backMap = {};
     var bgImg = null;
+
+    function setFont(size) {
+      ctx.font = fontWeight + ' ' + size + 'px \'' + fontFamily + '\', sans-serif';
+    }
+
+    function fitSize(text, maxW, maxH, start, floor) {
+      var size = Math.max(start, floor);
+      while (size > floor) {
+        setFont(size);
+        if (ctx.measureText(text).width <= maxW && size <= maxH) return size;
+        size -= 4;
+      }
+      return floor;
+    }
 
     function loadBg(colorName) {
       var url = backMap[colorName] || backMap[Object.keys(backMap)[0]] || '';
@@ -75,7 +80,6 @@
       ctx.fillStyle = '#f5f1e8';
       ctx.fillRect(0, 0, w, h);
       if (bgImg) {
-        // cover-fit
         var scale = Math.max(w / bgImg.width, h / bgImg.height);
         var dw = bgImg.width * scale, dh = bgImg.height * scale;
         ctx.drawImage(bgImg, (w - dw) / 2, (h - dh) / 2, dw, dh);
@@ -89,62 +93,54 @@
       var boxH = h * BBOX_PCT.height / 100;
       var boxLeft = w * BBOX_PCT.left / 100;
       var boxTop = h * BBOX_PCT.top / 100;
-      var color = TEXT_COLORS[colorInput ? colorInput.value : 'Gold'] || '#b7a36a';
 
-      ctx.fillStyle = color;
+      ctx.fillStyle = colorHex;
       ctx.textBaseline = 'alphabetic';
 
-      var nameZoneH = boxH * 0.30;
-      var numberZoneH = boxH - nameZoneH - boxH * 0.06;
+      // Mirror the server layout: name zone on top, dominant number below,
+      // combined block centered vertically in the print box.
+      var gap = boxH * 0.05;
+      var nameZoneH = boxH * 0.28;
+      var numberZoneH = boxH - nameZoneH - gap;
+
+      var nameSize = name ? fitSize(name, boxW, nameZoneH, Math.floor(nameZoneH), 12) : 0;
+      var numSize = number ? fitSize(number, boxW, numberZoneH, Math.floor(numberZoneH), 24) : 0;
+
+      var nameH = name ? nameSize * 0.74 : 0;
+      var numH = number ? numSize * 0.74 : 0;
+      var blockH = nameH + (name && number ? gap : 0) + numH;
+      var y = boxTop + Math.max(0, (boxH - blockH) / 2);
 
       if (name) {
-        var nameSize = fitFontSize(ctx, name, boxW, nameZoneH, Math.floor(boxH / 3), 14);
-        ctx.font = '700 ' + nameSize + 'px ' + FONT_FAMILY;
-        var nameW = ctx.measureText(name).width;
-        ctx.fillText(name, boxLeft + (boxW - nameW) / 2, boxTop + nameSize * 0.85);
+        setFont(nameSize);
+        var nw = ctx.measureText(name).width;
+        ctx.fillText(name, boxLeft + (boxW - nw) / 2, y + nameH);
+        y += nameH + gap;
       }
       if (number) {
-        var numSize = fitFontSize(ctx, number, boxW, numberZoneH, Math.floor(boxH), 30);
-        ctx.font = '700 ' + numSize + 'px ' + FONT_FAMILY;
-        var numW = ctx.measureText(number).width;
-        var numTop = boxTop + nameZoneH + boxH * 0.06;
-        ctx.fillText(number, boxLeft + (boxW - numW) / 2, numTop + numSize * 0.85);
+        setFont(numSize);
+        var mw = ctx.measureText(number).width;
+        ctx.fillText(number, boxLeft + (boxW - mw) / 2, y + numH);
       }
     }
 
     // Sanitize as-you-type, mirroring the server-side allowlist.
     if (nameInput) {
       nameInput.addEventListener('input', function () {
-        nameInput.value = nameInput.value.replace(/[^A-Za-z '-]/g, '');
+        nameInput.value = nameInput.value.replace(/[^A-Za-z '-]/g, '').slice(0, maxName);
         draw();
       });
     }
     if (numberInput) {
       numberInput.addEventListener('input', function () {
-        numberInput.value = numberInput.value.replace(/[^0-9]/g, '').slice(0, 2);
+        numberInput.value = numberInput.value.replace(/[^0-9]/g, '').slice(0, maxNumber);
         draw();
       });
     }
-    swatches.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        swatches.forEach(function (b) {
-          b.classList.remove('ss-pers-swatch--active');
-          b.setAttribute('aria-checked', 'false');
-        });
-        btn.classList.add('ss-pers-swatch--active');
-        btn.setAttribute('aria-checked', 'true');
-        if (colorInput) colorInput.value = btn.getAttribute('data-color');
-        draw();
-      });
-    });
 
     // The theme's own add-to-cart handler silently no-ops on an invalid form
-    // (form.checkValidity() with no reportValidity()) — a customer who
-    // leaves Name/Number blank sees nothing happen with no explanation.
-    // Surface the native validation tooltip too. Purely additive: this only
-    // calls reportValidity() (which shows a message and returns a bool), it
-    // never calls preventDefault/stopPropagation, so it can't interfere with
-    // the theme's own submit handling either way.
+    // (checkValidity with no reportValidity) — surface the native validation
+    // tooltip so "Name and Number are required" is visible. Purely additive.
     var form = root.closest('form');
     var submitBtn = form && form.querySelector('[type="submit"]');
     if (submitBtn) {
@@ -165,7 +161,7 @@
       } catch (_err) { /* ignore */ }
     });
 
-    ensureFont(function () {
+    loadFont(fontFamily, fontWeight, function () {
       if (mockupsUrl) {
         fetch(mockupsUrl)
           .then(function (r) { return r.json(); })
