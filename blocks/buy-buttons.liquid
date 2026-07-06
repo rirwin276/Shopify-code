@@ -77,6 +77,7 @@
         {%- endcomment -%}
         {%- assign ss_pers = product.metafields.custom.personalization.value -%}
         {%- if ss_pers and ss_pers.enabled -%}
+          {%- assign ss_pers_model = ss_pers.model | default: 'ec8000' -%}
           <div
             class="ss-pers"
             data-ss-pers
@@ -86,6 +87,11 @@
             data-color-hex="{{ ss_pers.color_hex | default: '#141414' | escape }}"
             data-max-name="{{ ss_pers.max_name_len | default: 14 }}"
             data-max-number="{{ ss_pers.max_number_len | default: 2 }}"
+            data-mockups-url="https://printfulautomation-production.up.railway.app/editor/pro-shirt/{{ ss_pers_model }}/mockups-public"
+            data-bbox-left="{{ ss_pers.bbox_pct.left | default: 31.6 }}"
+            data-bbox-top="{{ ss_pers.bbox_pct.top | default: 45.4 }}"
+            data-bbox-width="{{ ss_pers.bbox_pct.width | default: 37.0 }}"
+            data-bbox-height="{{ ss_pers.bbox_pct.height | default: 37.0 }}"
           >
             <span class="ss-pers-kicker">Personalize the Back</span>
             <p class="ss-pers-sub">Add your name and number — printed on the back in {{ ss_pers.font_label | default: 'our jersey style' }}.</p>
@@ -108,8 +114,7 @@
               </div>
             </div>
           </div>
-          <script src="{{ 'ss-tote-personalize.js' | asset_url }}" defer
-            data-mockups-url="https://printfulautomation-production.up.railway.app/editor/pro-shirt/ec8000/mockups-public"></script>
+          <script src="{{ 'ss-tote-personalize.js' | asset_url }}" defer></script>
           <style>
             .ss-pers { margin: 16px 0; padding: 16px; border: 1px solid rgba(17,16,14,0.10); border-radius: 16px; background: rgba(183,163,106,0.05); }
             .ss-pers-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #b7a36a; }

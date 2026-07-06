@@ -1,17 +1,15 @@
 /* Stella & Sage — Name & Number personalization live preview.
-   The FONT and TEXT COLOR come from the product's admin-configured
-   personalization metafield (data attributes on the widget) — the customer
-   only types the name and number. This canvas is an approximation for the
-   shopper; the authoritative print file is rendered server-side at
-   fulfillment from the same values (Printful_Automation
-   pro_builders/ec8000/personalize.py), so what prints always matches what
-   was ordered. */
+   The FONT, TEXT COLOR, and print-zone box come from the product's
+   admin-configured personalization metafield (data attributes on the
+   widget) — the customer only types the name and number. This canvas is an
+   approximation for the shopper; the authoritative print file is rendered
+   server-side at fulfillment from the same values (Printful_Automation
+   pro_builders/common/personalization.py), so what prints always matches
+   what was ordered. Works for every personalizable product (tote, tees,
+   hoodie) — the model-specific bbox and mockups endpoint ride in the
+   metafield/Liquid data attributes, with EC8000 values as fallbacks. */
 (function () {
   'use strict';
-
-  // Must match personalize.py BACK_BBOX_PCT — the approved print-safe zone
-  // from the product's back calibration.
-  var BBOX_PCT = { left: 31.6, top: 45.4, width: 37.0, height: 37.0 };
 
   function loadFont(family, weight, cb) {
     var id = 'ss-pers-font-' + family.replace(/\W+/g, '-');
@@ -43,9 +41,19 @@
     var maxNumber = parseInt(root.getAttribute('data-max-number') || '2', 10);
     var fontCss = fontWeight + 'px \'' + fontFamily + '\', sans-serif';
 
+    // The mockup-photo print-zone box for THIS product (EC8000 calibrated
+    // values as fallback for products built before the metafield carried it).
+    var BBOX_PCT = {
+      left: parseFloat(root.getAttribute('data-bbox-left') || '31.6'),
+      top: parseFloat(root.getAttribute('data-bbox-top') || '45.4'),
+      width: parseFloat(root.getAttribute('data-bbox-width') || '37'),
+      height: parseFloat(root.getAttribute('data-bbox-height') || '37')
+    };
+
     var ctx = canvas.getContext('2d');
     var scriptEl = document.querySelector('script[src*="ss-tote-personalize.js"]');
-    var mockupsUrl = scriptEl ? scriptEl.getAttribute('data-mockups-url') : '';
+    var mockupsUrl = root.getAttribute('data-mockups-url')
+      || (scriptEl ? scriptEl.getAttribute('data-mockups-url') : '');
     var currentColor = root.getAttribute('data-initial-color') || '';
     var backMap = {};
     var bgImg = null;
