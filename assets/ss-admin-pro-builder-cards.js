@@ -207,6 +207,7 @@
   var PRICE_KEYS = {
     bc3413:  { front: 'BC3413_front',  back: 'BC3413_front_back' },
     bc3001y: { front: 'BC3001Y_front', back: 'BC3001Y_front_back' },
+    cc1467y: { front: 'CC1467Y_front', back: 'CC1467Y_front_back' },
     m2580:   { front: 'M2580_front',   back: 'M2580_front_back' },
     m2480:   { front: 'M2480_front',   back: 'M2480_front_back' },
     ls14003: { front: 'LS14003_front', back: 'LS14003_front_back' },
