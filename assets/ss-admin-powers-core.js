@@ -1222,42 +1222,29 @@
       }
 
       if(!isProEditorBuild && isCc1467y && SSAP.editorSecret){
-        var cc1467yLogoSrc = SSAP.shopLogoSrc || '';
-        var cc1467yEditorBtn;
-        if(cc1467yLogoSrc){
-          var cc1467yEditorUrl = SSAP.editorCc1467yBaseUrl
-            + '?logo_url=' + encodeURIComponent(cc1467yLogoSrc)
-            + '&logo_kind=titan'
-            + '&product_handle=' + encodeURIComponent(product.handle || '')
+        // CC1467Y now opens the full Pro Editor to edit in place — placement,
+        // colors, a back image, Name & Number, and the image library. The old
+        // single-purpose /editor/cc1467y placement editor is dead (it couldn't
+        // add a back image). Re-publishing deletes this product and rebuilds it
+        // fresh (backend keys the delete-then-rebuild off edit_product_handle).
+        var _cc1467yOrigin = '';
+        try { _cc1467yOrigin = new URL(SSAP.editorProShirtCc1467yBaseUrl || SSAP.editorBaseUrl || '').origin; } catch(_e){ _cc1467yOrigin = ''; }
+        if(_cc1467yOrigin){
+          var _cc1467yReturnUrl = (window.location.origin + window.location.pathname + window.location.search);
+          var _cc1467yEditUrl = _cc1467yOrigin + '/editor/pro-shirt/cc1467y/edit'
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
             + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
             + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_cc1467yReturnUrl)
             + '&mode=embedded';
-          cc1467yEditorBtn = document.createElement('button');
-          cc1467yEditorBtn.type = 'button';
-          cc1467yEditorBtn.className = 'ap-edit-placement-btn';
-          cc1467yEditorBtn.dataset.productHandle = product.handle || '';
-          cc1467yEditorBtn.innerHTML = '✏️ Edit Placement';
-          cc1467yEditorBtn.title = 'Adjust logo placement for this product only';
-          cc1467yEditorBtn.addEventListener('click', function(){ apOpenEditorModal(cc1467yEditorUrl); });
-          var cc1467yEditColorsBtn = document.createElement('button');
-          cc1467yEditColorsBtn.type = 'button';
-          cc1467yEditColorsBtn.className = 'ap-edit-placement-btn';
-          cc1467yEditColorsBtn.innerHTML = '🎨 Edit Colors';
-          cc1467yEditColorsBtn.title = 'Edit shirt colors for this product';
-          cc1467yEditColorsBtn.addEventListener('click', function(){ apOpenEditorModal(cc1467yEditorUrl + '&tab=colors'); });
-          actionsEl.appendChild(cc1467yEditorBtn);
-          actionsEl.appendChild(cc1467yEditColorsBtn);
-        } else {
-          cc1467yEditorBtn = document.createElement('span');
-          cc1467yEditorBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          cc1467yEditorBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          cc1467yEditorBtn.textContent = '✏️ Edit Placement (no logo)';
-          var cc1467yEditColorsDisabledBtn = document.createElement('span');
-          cc1467yEditColorsDisabledBtn.className = 'ap-edit-placement-btn ap-edit-placement-btn--disabled';
-          cc1467yEditColorsDisabledBtn.title = 'No logo on custom_shop metaobject — add a logo image first';
-          cc1467yEditColorsDisabledBtn.textContent = '🎨 Edit Colors (no logo)';
-          actionsEl.appendChild(cc1467yEditorBtn);
-          actionsEl.appendChild(cc1467yEditColorsDisabledBtn);
+          var cc1467yEditBtn = document.createElement('button');
+          cc1467yEditBtn.type = 'button';
+          cc1467yEditBtn.className = 'ap-edit-placement-btn';
+          cc1467yEditBtn.dataset.productHandle = product.handle || '';
+          cc1467yEditBtn.innerHTML = '✏️ Edit';
+          cc1467yEditBtn.title = 'Open the Pro Editor to change placement, colors, add a back image, or Name & Number — rebuilds this product';
+          cc1467yEditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_cc1467yEditUrl));
+          actionsEl.appendChild(cc1467yEditBtn);
         }
       }
       apPolishEditorButtons(actionsEl);
