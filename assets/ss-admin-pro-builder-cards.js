@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v5-personalize';
+  var VERSION = 'catalog-v6-cc1467y';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -16,6 +16,7 @@
     cc1717:      CDN + 'cc1717-front-pepper.png?v=1780468020',
     nl6733:      RAILWAY + '/editor/pro-shirt/nl6733/card-image',
     mc1790:      RAILWAY + '/editor/pro-shirt/mc1790/card-image',
+    cc1467y:     CDN + 'cc1467y_editor_background_style29570_7d6c40c4-f850-4427-bfe0-378bdf361460.png?v=1776975083',
     ec8000_f:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-front-oyster.png?v=1783275244',
     ec8000_b:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-back-oyster.png?v=1783275244'
   };
@@ -54,6 +55,24 @@
       pricing: [
         { label: 'Front print', note: 'Logo or design on front', price: '$18' },
         { label: 'Front + Back print', note: 'Artwork on both sides', price: '$24' }
+      ]
+    },
+    {
+      id: 'cc1467y',
+      personalize: true,
+      badge: 'Youth Hoodie',
+      name: 'Comfort Colors 1467Y',
+      from: '$32',
+      hint: 'Youth sizes · Front or front + back',
+      route: '/editor/pro-shirt/cc1467y',
+      gallery: [IMG.cc1467y],
+      desc: 'The Comfort Colors 1467Y is a garment-dyed youth hoodie with a soft, broken-in feel and rich pigment-dyed color. A cozy lightweight fleece that kids actually want to wear — perfect for teams, schools, camps, and family trips. Creates its own separate listing in your store.',
+      specs: ['Garment-dyed ring-spun cotton fleece', 'Lightweight, soft-hand hooded sweatshirt', 'Youth sizes · Relaxed everyday fit'],
+      sizes: 'YS · YM · YL · YXL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$32' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$37' }
       ]
     },
     {
