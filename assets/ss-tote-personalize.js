@@ -126,44 +126,34 @@
       ctx.fillStyle = colorHex;
       ctx.textBaseline = 'alphabetic';
 
-      // Adaptive two-pass fit (same as the print render): name opens at 30%
-      // of the box, the number grows into the ink the name doesn't use, then
-      // the name grows into the true leftover (capped so it stays
-      // subordinate). Combined block centered vertically.
-      var gap = (name && number) ? boxH * 0.04 : 0;
+      // Consistent jersey layout — the NAME is pinned to the TOP of the print
+      // box in a fixed band; the NUMBER is centered in the band below. Fixed
+      // zones (matching the server's NN_NAME_ZONE_PCT / NN_GAP_PCT) mean the
+      // number's size never moves the name — "7" and "88" leave the name in
+      // exactly the same spot.
+      var NAME_ZONE_PCT = 0.30, GAP_PCT = 0.04;
+      var gap = boxH * GAP_PCT;
       var fitW = boxW * 0.98;
-
-      var nameSize = 0, nameInk = { h: 0, ascent: 0 };
-      if (name) {
-        nameSize = fitSize(name, fitW, boxH * 0.30, 12);
-        nameInk = inkMetrics(name, nameSize);
-      }
-      var numSize = 0, numInk = { h: 0, ascent: 0 };
-      if (number) {
-        numSize = fitSize(number, fitW, Math.max(24, boxH - gap - nameInk.h), 24);
-        numInk = inkMetrics(number, numSize);
-      }
-      if (name) {
-        var nameCap = Math.min(boxH - gap - numInk.h, boxH * 0.42);
-        if (nameCap > nameInk.h) {
-          nameSize = fitSize(name, fitW, nameCap, 12);
-          nameInk = inkMetrics(name, nameSize);
-        }
-      }
-
-      var blockH = nameInk.h + gap + numInk.h;
-      var y = boxTop + Math.max(0, (boxH - blockH) / 2);
+      var nameZoneH = boxH * NAME_ZONE_PCT;
+      var numberZoneH = boxH - nameZoneH - gap;
 
       if (name) {
+        var nameSize = fitSize(name, fitW, nameZoneH, 12);
+        var nameInk = inkMetrics(name, nameSize);
         setFont(nameSize);
         var nw = ctx.measureText(name).width;
-        ctx.fillText(name, boxLeft + (boxW - nw) / 2, y + nameInk.ascent);
-        y += nameInk.h + gap;
+        // Ink top pinned to the top of the print box.
+        ctx.fillText(name, boxLeft + (boxW - nw) / 2, boxTop + nameInk.ascent);
       }
       if (number) {
+        var numSize = fitSize(number, fitW, numberZoneH, 24);
+        var numInk = inkMetrics(number, numSize);
         setFont(numSize);
         var mw = ctx.measureText(number).width;
-        ctx.fillText(number, boxLeft + (boxW - mw) / 2, y + numInk.ascent);
+        // Centered within its fixed band below the name.
+        var zoneTop = boxTop + nameZoneH + gap;
+        var numY = zoneTop + Math.max(0, (numberZoneH - numInk.h) / 2) + numInk.ascent;
+        ctx.fillText(number, boxLeft + (boxW - mw) / 2, numY);
       }
     }
 
