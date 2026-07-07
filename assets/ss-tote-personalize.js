@@ -62,12 +62,28 @@
       ctx.font = fontWeight + ' ' + size + 'px \'' + fontFamily + '\', sans-serif';
     }
 
-    function fitSize(text, maxW, maxH, start, floor) {
-      var size = Math.max(start, floor);
+    // Ink-based measurement, mirroring the server's adaptive two-pass fit
+    // (Printful_Automation personalization.py:render_back_png) so the
+    // preview matches what actually prints.
+    function inkMetrics(text, size) {
+      setFont(size);
+      var m = ctx.measureText(text);
+      if (m.actualBoundingBoxAscent !== undefined) {
+        return { h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, ascent: m.actualBoundingBoxAscent };
+      }
+      return { h: size * 0.74, ascent: size * 0.74 };
+    }
+
+    function fitSize(text, maxW, maxH, floor) {
+      var size = Math.max(Math.floor(maxH), floor);
       while (size > floor) {
         setFont(size);
-        if (ctx.measureText(text).width <= maxW && size <= maxH) return size;
-        size -= 4;
+        var m = ctx.measureText(text);
+        var h = (m.actualBoundingBoxAscent !== undefined)
+          ? m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+          : size * 0.74;
+        if (m.width <= maxW && h <= maxH) return size;
+        size -= 2;
       }
       return floor;
     }
@@ -110,30 +126,44 @@
       ctx.fillStyle = colorHex;
       ctx.textBaseline = 'alphabetic';
 
-      // Mirror the server layout: name zone on top, dominant number below,
-      // combined block centered vertically in the print box.
-      var gap = boxH * 0.05;
-      var nameZoneH = boxH * 0.28;
-      var numberZoneH = boxH - nameZoneH - gap;
+      // Adaptive two-pass fit (same as the print render): name opens at 30%
+      // of the box, the number grows into the ink the name doesn't use, then
+      // the name grows into the true leftover (capped so it stays
+      // subordinate). Combined block centered vertically.
+      var gap = (name && number) ? boxH * 0.04 : 0;
+      var fitW = boxW * 0.98;
 
-      var nameSize = name ? fitSize(name, boxW, nameZoneH, Math.floor(nameZoneH), 12) : 0;
-      var numSize = number ? fitSize(number, boxW, numberZoneH, Math.floor(numberZoneH), 24) : 0;
+      var nameSize = 0, nameInk = { h: 0, ascent: 0 };
+      if (name) {
+        nameSize = fitSize(name, fitW, boxH * 0.30, 12);
+        nameInk = inkMetrics(name, nameSize);
+      }
+      var numSize = 0, numInk = { h: 0, ascent: 0 };
+      if (number) {
+        numSize = fitSize(number, fitW, Math.max(24, boxH - gap - nameInk.h), 24);
+        numInk = inkMetrics(number, numSize);
+      }
+      if (name) {
+        var nameCap = Math.min(boxH - gap - numInk.h, boxH * 0.42);
+        if (nameCap > nameInk.h) {
+          nameSize = fitSize(name, fitW, nameCap, 12);
+          nameInk = inkMetrics(name, nameSize);
+        }
+      }
 
-      var nameH = name ? nameSize * 0.74 : 0;
-      var numH = number ? numSize * 0.74 : 0;
-      var blockH = nameH + (name && number ? gap : 0) + numH;
+      var blockH = nameInk.h + gap + numInk.h;
       var y = boxTop + Math.max(0, (boxH - blockH) / 2);
 
       if (name) {
         setFont(nameSize);
         var nw = ctx.measureText(name).width;
-        ctx.fillText(name, boxLeft + (boxW - nw) / 2, y + nameH);
-        y += nameH + gap;
+        ctx.fillText(name, boxLeft + (boxW - nw) / 2, y + nameInk.ascent);
+        y += nameInk.h + gap;
       }
       if (number) {
         setFont(numSize);
         var mw = ctx.measureText(number).width;
-        ctx.fillText(number, boxLeft + (boxW - mw) / 2, y + numH);
+        ctx.fillText(number, boxLeft + (boxW - mw) / 2, y + numInk.ascent);
       }
     }
 

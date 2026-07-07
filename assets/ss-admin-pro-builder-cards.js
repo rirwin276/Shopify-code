@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v4-ec8000';
+  var VERSION = 'catalog-v5-personalize';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -40,6 +40,7 @@
     },
     {
       id: 'bc3001y',
+      personalize: true,
       badge: 'Youth Tee',
       name: 'Bella + Canvas BC3001Y',
       from: '$18',
@@ -57,6 +58,7 @@
     },
     {
       id: 'm2580',
+      personalize: true,
       badge: 'Pullover Hoodie',
       name: 'Independent Trading Co. M2580',
       from: '$34',
@@ -74,6 +76,7 @@
     },
     {
       id: 'm2480',
+      personalize: true,
       badge: 'Crewneck Sweatshirt',
       name: 'Cotton Heritage M2480',
       from: '$39',
@@ -108,6 +111,7 @@
     },
     {
       id: 'cc1717',
+      personalize: true,
       badge: 'Garment-Dyed Tee',
       name: 'Comfort Colors CC1717',
       from: '$30',
@@ -158,6 +162,7 @@
     ,
     {
       id: 'ec8000',
+      personalize: true,
       badge: 'Eco Tote',
       name: 'Econscious EC8000 Eco Tote Bag',
       from: '$22',
@@ -312,6 +317,24 @@
       'color:#fff;font-size:9.5px;font-weight:800;',
       'letter-spacing:.06em;text-transform:uppercase;',
       'padding:4px 9px;border-radius:999px;',
+    '}',
+
+    '.ss-cat__pers{',
+      'position:absolute;top:10px;right:10px;',
+      'background:linear-gradient(135deg,#b7a36a,#d8c48a);',
+      'color:#17150f;font-size:9.5px;font-weight:900;',
+      'letter-spacing:.05em;text-transform:uppercase;',
+      'padding:4px 9px;border-radius:999px;',
+      'box-shadow:0 2px 8px rgba(183,163,106,.45);',
+    '}',
+    '.ss-modal__chip--pers{',
+      'background:linear-gradient(135deg,#b7a36a,#d8c48a);color:#17150f;',
+      'margin-left:6px;',
+    '}',
+    '.ss-modal__pers-note{',
+      'margin:10px 0 0;padding:10px 12px;border-radius:12px;',
+      'background:rgba(183,163,106,.12);border:1px solid rgba(183,163,106,.35);',
+      'font-size:12px;line-height:1.5;color:#3d382e;',
     '}',
 
     '.ss-cat__info{padding:13px 14px 16px;}',
@@ -623,8 +646,10 @@
     detailEl.innerHTML =
       '<div class="ss-modal__scroll">' +
         '<span class="ss-modal__chip">' + esc(b.badge) + '</span>' +
+        (b.personalize ? '<span class="ss-modal__chip ss-modal__chip--pers">\u2726 Name & Number available</span>' : '') +
         '<div class="ss-modal__title">' + esc(b.name) + '</div>' +
         '<p class="ss-modal__desc">' + esc(b.desc) + '</p>' +
+        (b.personalize ? '<p class="ss-modal__pers-note">\u2726 <strong>Name &amp; Number:</strong> flip one switch in the builder and every buyer can add their own name and number to the back \u2014 printed just for them, no extra work for you.</p>' : '') +
         '<div class="ss-modal__specs">' + specChips + '</div>' +
         '<div class="ss-modal__div"></div>' +
         '<div class="ss-modal__price-head">Retail pricing</div>' +
@@ -682,6 +707,14 @@
 
     media.appendChild(img);
     media.appendChild(badge);
+
+    if (b.personalize) {
+      var pers = document.createElement('span');
+      pers.className = 'ss-cat__pers';
+      pers.textContent = '\u2726 Name & Number';
+      pers.title = 'Buyers can add their own name and number to the back';
+      media.appendChild(pers);
+    }
 
     var info = document.createElement('div');
     info.className = 'ss-cat__info';

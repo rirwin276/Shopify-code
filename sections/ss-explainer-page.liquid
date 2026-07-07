@@ -238,6 +238,55 @@
       </div>
     </section>
 
+    <section class="ssx-sec ssx-nn ssx-reveal">
+      <div class="ssx-nn-card">
+        <div class="ssx-nn-copy">
+          <div class="ssx-kicker">New &middot; Name &amp; Number</div>
+          <h2 class="ssx-h2">Every player gets their own back.</h2>
+          <p class="ssx-lead">Select products can be personalized: at checkout, each buyer types a name and a number, sees a live preview on the product, and we print it on the back just for them. No roster to collect, no spreadsheet, no extra work for whoever runs the store.</p>
+          <div class="ssx-nn-steps">
+            <span><strong>1.</strong> The store picks a product &amp; style</span>
+            <span><strong>2.</strong> Buyers type their name &amp; number</span>
+            <span><strong>3.</strong> It prints on the back, made to order</span>
+          </div>
+        </div>
+        <div class="ssx-nn-visual" aria-hidden="true">
+          <div class="ssx-nn-jersey"><span class="ssx-nn-name">EMMA</span><span class="ssx-nn-num">7</span></div>
+        </div>
+      </div>
+      <style>
+        .ssx-nn-card{
+          display:grid;grid-template-columns:1.25fr 0.75fr;gap:32px;align-items:center;
+          background:linear-gradient(135deg,#141310,#26221a);
+          border:1px solid rgba(183,163,106,0.35);border-radius:24px;padding:38px 42px;
+        }
+        .ssx-nn-card .ssx-h2{color:#fff;}
+        .ssx-nn-card .ssx-lead{color:rgba(255,255,255,0.72);}
+        .ssx-nn-card .ssx-kicker{color:#d8c48a;}
+        .ssx-nn-steps{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+        .ssx-nn-steps span{
+          background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+          border-radius:999px;padding:8px 16px;color:rgba(255,255,255,0.85);
+          font-size:13.5px;width:fit-content;
+        }
+        .ssx-nn-steps strong{color:#d8c48a;margin-right:4px;}
+        .ssx-nn-visual{display:flex;justify-content:center;}
+        .ssx-nn-jersey{
+          width:min(200px,80%);aspect-ratio:3/3.6;border-radius:16px;
+          background:linear-gradient(180deg,#f5f1e8,#e9e2d2);
+          display:flex;flex-direction:column;align-items:center;justify-content:center;
+          box-shadow:0 16px 40px rgba(0,0,0,0.4);transform:rotate(-2deg);
+        }
+        .ssx-nn-name{font-family:'Arial Narrow',Impact,sans-serif;font-weight:900;font-size:clamp(30px,3.6vw,42px);letter-spacing:0.04em;color:#1e2a4a;line-height:1;}
+        .ssx-nn-num{font-family:'Arial Narrow',Impact,sans-serif;font-weight:900;font-size:clamp(84px,10vw,120px);color:#1e2a4a;line-height:0.9;margin-top:4px;}
+        @media (max-width: 760px){
+          .ssx-nn-card{grid-template-columns:1fr;padding:28px 22px;}
+          .ssx-nn-visual{order:-1;}
+          .ssx-nn-jersey{width:min(170px,60%);}
+        }
+      </style>
+    </section>
+
     <section class="ssx-sec ssx-trust ssx-reveal">
       <div class="ssx-trust-shell">
         <div>
