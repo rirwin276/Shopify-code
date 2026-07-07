@@ -142,10 +142,16 @@
 {%- assign editor_pro_shirt_bc3001y_base_url = printful_automation_base_url | append: '/editor/pro-shirt/bc3001y' -%}
 {%- assign editor_pro_shirt_m2580_base_url = printful_automation_base_url | append: '/editor/pro-shirt/m2580' -%}
 {%- assign editor_pro_shirt_zip_hoodie_base_url = section.settings.editor_pro_shirt_zip_hoodie_base_url | default: '' -%}
-{%- comment %} Hardcoded to match EDITOR_SECRET fallback in Printful_Automation app.py.
-   Not actually secret — it's already in the public repo, only gates the editor page,
-   and is visible in rendered HTML whenever the button is clicked. {% endcomment -%}
-{%- assign editor_secret = 'stellasage-god-mode-2026-xK9mP' -%}
+{%- comment %} The live secret comes from the shop metafield custom.editor_secret
+   (set it in Shopify admin → Settings → Custom data → Shop). Keeping the real
+   secret in a Shopify metafield — never in this public repo — is what lets the
+   leaked value be rotated out. The hardcoded string is only a legacy fallback
+   for when the metafield is unset; it must match a value EDITOR_SECRET still
+   accepts in Printful_Automation, or admin buttons won't authenticate.
+   This mirrors sections/price-editor-page.liquid. {% endcomment -%}
+{%- assign fallback_editor_secret = 'stellasage-god-mode-2026-xK9mP' -%}
+{%- assign mf_editor_secret = shop.metafields.custom.editor_secret.value | default: shop.metafields.custom.editor_secret -%}
+{%- assign editor_secret = mf_editor_secret | default: fallback_editor_secret -%}
 
 {%- assign ap_shop_logo_src = '' -%}
 {%- if shop_meta -%}
