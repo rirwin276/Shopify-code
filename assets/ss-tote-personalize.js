@@ -126,17 +126,17 @@
       ctx.fillStyle = colorHex;
       ctx.textBaseline = 'alphabetic';
 
-      // Consistent jersey layout — the NAME is pinned to the TOP of the print
-      // box in a fixed band; the NUMBER is centered in the band below. Fixed
-      // zones (matching the server's NN_NAME_ZONE_PCT / NN_GAP_PCT) mean the
-      // number's size never moves the name — "7" and "88" leave the name in
-      // exactly the same spot.
+      // Consistent jersey layout (matches the server + editor):
+      //   NAME  pinned to the TOP of the print box;
+      //   NUMBER a fixed gap below the name's real bottom, filling the rest.
+      // Anchoring the number to the name's ink bottom keeps the name→number
+      // distance identical for every number and font — no floating down.
       var NAME_ZONE_PCT = 0.30, GAP_PCT = 0.04;
       var gap = boxH * GAP_PCT;
       var fitW = boxW * 0.98;
       var nameZoneH = boxH * NAME_ZONE_PCT;
-      var numberZoneH = boxH - nameZoneH - gap;
 
+      var nameBottom = boxTop;   // if no name, number starts at the top
       if (name) {
         var nameSize = fitSize(name, fitW, nameZoneH, 12);
         var nameInk = inkMetrics(name, nameSize);
@@ -144,16 +144,17 @@
         var nw = ctx.measureText(name).width;
         // Ink top pinned to the top of the print box.
         ctx.fillText(name, boxLeft + (boxW - nw) / 2, boxTop + nameInk.ascent);
+        nameBottom = boxTop + nameInk.h;
       }
       if (number) {
-        var numSize = fitSize(number, fitW, numberZoneH, 24);
+        var numberTop = nameBottom + (name ? gap : 0);
+        var numberAvailH = Math.max(24, (boxTop + boxH) - numberTop);
+        var numSize = fitSize(number, fitW, numberAvailH, 24);
         var numInk = inkMetrics(number, numSize);
         setFont(numSize);
         var mw = ctx.measureText(number).width;
-        // Centered within its fixed band below the name.
-        var zoneTop = boxTop + nameZoneH + gap;
-        var numY = zoneTop + Math.max(0, (numberZoneH - numInk.h) / 2) + numInk.ascent;
-        ctx.fillText(number, boxLeft + (boxW - mw) / 2, numY);
+        // Ink top anchored a fixed gap below the name.
+        ctx.fillText(number, boxLeft + (boxW - mw) / 2, numberTop + numInk.ascent);
       }
     }
 
