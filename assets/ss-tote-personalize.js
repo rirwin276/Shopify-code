@@ -126,34 +126,33 @@
       ctx.fillStyle = colorHex;
       ctx.textBaseline = 'alphabetic';
 
-      // Consistent jersey layout (matches the server + editor):
-      //   NAME  pinned to the TOP of the print box;
-      //   NUMBER a fixed gap below the name's real bottom, filling the rest.
-      // Anchoring the number to the name's ink bottom keeps the name→number
-      // distance identical for every number and font — no floating down.
-      var NAME_ZONE_PCT = 0.30, GAP_PCT = 0.04;
+      // Fixed jersey geometry (matches the server render + editor overlay):
+      // the layout starts a fixed offset below the box top (jersey names sit
+      // below the collar); the NAME lives in its own fixed band; the NUMBER
+      // starts at the fixed band bottom + gap. A long name shrinks WITHIN its
+      // band — it can never change the number's size or placement.
+      var TOP_OFFSET_PCT = 0.10, NAME_ZONE_PCT = 0.28, GAP_PCT = 0.04;
+      var topOffset = boxH * TOP_OFFSET_PCT;
       var gap = boxH * GAP_PCT;
       var fitW = boxW * 0.98;
       var nameZoneH = boxH * NAME_ZONE_PCT;
 
-      var nameBottom = boxTop;   // if no name, number starts at the top
       if (name) {
         var nameSize = fitSize(name, fitW, nameZoneH, 12);
         var nameInk = inkMetrics(name, nameSize);
         setFont(nameSize);
         var nw = ctx.measureText(name).width;
-        // Ink top pinned to the top of the print box.
-        ctx.fillText(name, boxLeft + (boxW - nw) / 2, boxTop + nameInk.ascent);
-        nameBottom = boxTop + nameInk.h;
+        // Ink top pinned to the top of the name band.
+        ctx.fillText(name, boxLeft + (boxW - nw) / 2, boxTop + topOffset + nameInk.ascent);
       }
       if (number) {
-        var numberTop = nameBottom + (name ? gap : 0);
+        // Fixed start line — independent of the name's rendered size.
+        var numberTop = boxTop + topOffset + nameZoneH + gap;
         var numberAvailH = Math.max(24, (boxTop + boxH) - numberTop);
         var numSize = fitSize(number, fitW, numberAvailH, 24);
         var numInk = inkMetrics(number, numSize);
         setFont(numSize);
         var mw = ctx.measureText(number).width;
-        // Ink top anchored a fixed gap below the name.
         ctx.fillText(number, boxLeft + (boxW - mw) / 2, numberTop + numInk.ascent);
       }
     }
