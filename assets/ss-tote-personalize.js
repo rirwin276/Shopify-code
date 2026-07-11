@@ -133,9 +133,11 @@
       // band — it can never change the number's size or placement.
       var TOP_OFFSET_PCT = 0.10, NAME_ZONE_PCT = 0.28, GAP_PCT = 0.04;
       var topOffset = boxH * TOP_OFFSET_PCT;
-      var gap = boxH * GAP_PCT;
+      // Band + gap sized from the box WIDTH (matches the server) so tall
+      // print areas don't strand the number far below the name.
+      var gap = boxW * GAP_PCT;
       var fitW = boxW * 0.98;
-      var nameZoneH = boxH * NAME_ZONE_PCT;
+      var nameZoneH = boxW * NAME_ZONE_PCT;
 
       if (name) {
         var nameSize = fitSize(name, fitW, nameZoneH, 12);
