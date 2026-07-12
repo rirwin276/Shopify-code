@@ -102,7 +102,7 @@
               </select>
             </div>
 
-            <div class="sf-field">
+            <div class="sf-field sf-field--color">
               <label class="sf-label">Primary Shirt Color *</label>
               <div class="sf-swatches" role="radiogroup" aria-label="Primary shirt color">
                 {%- comment -%}
@@ -136,18 +136,13 @@
               </div>
               <p class="sf-help">Your pick becomes the store's display color — we fill the other variants with clean neutrals. You can fine-tune every product's colors later in the editor.</p>
             </div>
-          </div>
-        </div>
 
-        <div class="sf-divider"></div>
-
-        <div class="sf-block ss-reveal" data-stagger="true">
-          <div class="sf-legend">Store</div>
-          <div class="sf-field">
-            <label class="sf-label" for="StoreName">Storefront Name *</label>
-            <input type="text" id="StoreName" name="storefront_name" class="sf-input" placeholder="e.g. Santee Soccer Club" required oninput="generateHandle()" autocomplete="organization">
-            <p class="sf-help">Proposed Handle: <span id="HandlePreview" class="sf-mono">...</span></p>
-            <input type="hidden" id="HiddenHandle" name="storefront_handle">
+            <div class="sf-field">
+              <label class="sf-label" for="StoreName">Storefront Name *</label>
+              <input type="text" id="StoreName" name="storefront_name" class="sf-input" placeholder="e.g. Santee Soccer Club" required oninput="generateHandle()" autocomplete="organization">
+              <p class="sf-help">Proposed Handle: <span id="HandlePreview" class="sf-mono">...</span></p>
+              <input type="hidden" id="HiddenHandle" name="storefront_handle">
+            </div>
           </div>
         </div>
 
@@ -631,6 +626,11 @@
   .sf-sw:has(input:checked) { border-color: rgba(183,163,106,0.55); background: rgba(183,163,106,0.08); }
   .sf-sw input:focus-visible ~ .sf-sw-dot { outline: 2px solid #0f172a; outline-offset: 3px; }
   .sf-sw--wide .sf-sw-name { white-space: normal; text-align: center; line-height: 1.15; font-size: 10px; }
+  /* Color picker owns the right column of Step 1 (spanning the rows) so the
+     Store Type + conditional sport/branch + Storefront Name stack on the
+     left and never reflow it. */
+  .sf-field--color { grid-column: 2; grid-row: 1 / span 3; }
+  @media (max-width: 720px) { .sf-field--color { grid-column: auto; grid-row: auto; } }
   .sf-swatches.sf-field-error { border: 1.5px solid #dc2626 !important; border-radius: 14px; padding: 8px; background: #fff6f6; box-shadow: 0 0 0 3px rgba(220,38,38,0.10) !important; }
   .sf-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
   @media(max-width: 680px) { .sf-grid { grid-template-columns: 1fr; } }
