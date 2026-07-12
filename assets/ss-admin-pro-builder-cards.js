@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v6-cc1467y';
+  var VERSION = 'catalog-v7-hat39165';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -18,7 +18,8 @@
     mc1790:      RAILWAY + '/editor/pro-shirt/mc1790/card-image',
     cc1467y:     CDN + 'cc1467y_editor_background_style29570_7d6c40c4-f850-4427-bfe0-378bdf361460.png?v=1776975083',
     ec8000_f:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-front-oyster.png?v=1783275244',
-    ec8000_b:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-back-oyster.png?v=1783275244'
+    ec8000_b:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-back-oyster.png?v=1783275244',
+    hat39165:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/hat39165-front-dtf-hat-black.jpg?v=1783838485'
   };
 
   var BUILDERS = [
@@ -196,6 +197,22 @@
         { label: 'Front print', note: 'Logo or design on one side', price: '$22' },
         { label: 'Front + Back print', note: 'Artwork on both sides', price: '$27' }
       ]
+    },
+    {
+      id: 'hat39165',
+      badge: 'Foam Trucker Hat',
+      name: 'Otto Cap 39-165 Foam Trucker Hat',
+      from: '$19',
+      hint: 'One size ? Front DTFlex print',
+      route: '/editor/pro-shirt/hat39165',
+      gallery: [IMG.hat39165],
+      desc: 'The Otto Cap 39-165 is a classic foam trucker hat with a structured front panel, breathable mesh back, and snapback fit. It is a simple no-size-collection product for teams, units, schools, fundraisers, events, and vacation groups.',
+      specs: ['Structured foam front', 'Breathable mesh back', 'Adjustable snapback ? One size'],
+      sizes: 'One size',
+      colors: 'Choose up to 4 hat colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front DTFlex patch area', price: '$19' }
+      ]
     }
   ];
 
@@ -214,7 +231,8 @@
     cc1717:  { front: 'CC1717_front',  back: 'CC1717_front_back' },
     nl6733:  { front: 'NL6733_front',  back: null },
     mc1790:  { front: 'MC1790_front',  back: null },
-    ec8000:  { front: 'EC8000_front',  back: 'EC8000_front_back' }
+    ec8000:  { front: 'EC8000_front',  back: 'EC8000_front_back' },
+    hat39165:{ front: '39165_front',   back: null }
   };
 
   var livePrices = null;

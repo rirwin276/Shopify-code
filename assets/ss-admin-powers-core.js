@@ -261,6 +261,12 @@
       if (cc1467yJobId && cc1467yHandle) { apStartInlineRebuilding(cc1467yHandle, cc1467yJobId); } else { apShowRebuildingToast(); }
     } else if (data.type === 'cc1467y_close') {
       apCloseEditorModal();
+    } else if (data.type === 'hat39165_placement_saved') {
+      apCloseEditorModal();
+      var hat39165Handle = data.product_handle; var hat39165JobId = data.job_id;
+      if (hat39165JobId && hat39165Handle) { apStartInlineRebuilding(hat39165Handle, hat39165JobId); } else { apShowRebuildingToast(); }
+    } else if (data.type === 'hat39165_close') {
+      apCloseEditorModal();
     } else if (data.type === 'studio-uploader:done' && data.slot === 'settings-logo' && data.session_id) {
       if (typeof window.apSettingsHandleLogoDone === 'function') {
         window.apSettingsHandleLogoDone(data);
@@ -1247,6 +1253,41 @@
           actionsEl.appendChild(cc1467yEditBtn);
         }
       }
+
+      // 39165 Foam Trucker Hat initial-build editor ? show for legacy initial-build hats.
+      // New Pro Builder hats are handled below by the generic pro-built edit button.
+      var isHat39165 = _tagListForProCheck.some(function(tag){
+        return (
+          tag === '39165_front_dtflex' ||
+          tag === 'model--39165' ||
+          tag === 'module:39165_front_dtflex_printful'
+        );
+      });
+
+      if(!isProEditorBuild && isHat39165 && SSAP.editorSecret){
+        var _hat39165Origin = '';
+        try { _hat39165Origin = new URL(SSAP.editorBaseUrl || SSAP.editorProShirtBc3413BaseUrl || '').origin; } catch(_e){ _hat39165Origin = ''; }
+        if(_hat39165Origin){
+          var _hat39165ReturnUrl = (window.location.origin + window.location.pathname + window.location.search);
+          var _hat39165EditUrl = _hat39165Origin + '/editor/pro-shirt/hat39165/edit'
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_hat39165ReturnUrl)
+            + '&mode=embedded';
+          if(SSAP.shopLogoSrc) _hat39165EditUrl += '&logo_url=' + encodeURIComponent(SSAP.shopLogoSrc);
+
+          var hat39165EditBtn = document.createElement('button');
+          hat39165EditBtn.type = 'button';
+          hat39165EditBtn.className = 'ap-edit-placement-btn';
+          hat39165EditBtn.dataset.productHandle = product.handle || '';
+          hat39165EditBtn.innerHTML = 'Edit';
+          hat39165EditBtn.title = 'Open the Pro Editor to change hat logo placement, colors, or artwork - rebuilds this hat product';
+          hat39165EditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_hat39165EditUrl));
+          actionsEl.appendChild(hat39165EditBtn);
+        }
+      }
+
       apPolishEditorButtons(actionsEl);
       } // end if(!isProEditorBuild)
 
@@ -1263,7 +1304,7 @@
         }
         var _proEditPath  = null;
         // Every pro-built model with a /edit route gets an Edit button.
-        ['cc1717', 'm2580', 'ls14003', 'm2480', 'bc3413', 'bc3001y', 'cc1467y', 'nl6733', 'mc1790', 'ec8000'].some(function(model){
+        ['cc1717', 'm2580', 'ls14003', 'm2480', 'bc3413', 'bc3001y', 'cc1467y', 'nl6733', 'mc1790', 'ec8000', 'hat39165'].some(function(model){
           if(_hasProTag(model)){ _proEditPath = '/editor/pro-shirt/' + model + '/edit'; return true; }
           return false;
         });
@@ -1331,7 +1372,7 @@
     // We report a non-zero builder count here so apRefreshProductEmptyStates
     // keeps that section visible; the asset overwrites the exact count text
     // when it renders.
-    apBuilderCount = 8;
+    apBuilderCount = 11;
 
     apRefreshProductEmptyStates(apMainCount, apCustomCount, apBuilderCount);
   }    // end apRenderProducts
