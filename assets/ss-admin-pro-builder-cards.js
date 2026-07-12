@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v7-hat39165';
+  var VERSION = 'catalog-v8-hat39165-fix';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -203,11 +203,11 @@
       badge: 'Foam Trucker Hat',
       name: 'Otto Cap 39-165 Foam Trucker Hat',
       from: '$19',
-      hint: 'One size ? Front DTFlex print',
+      hint: 'One size \u00b7 Front DTFlex print',
       route: '/editor/pro-shirt/hat39165',
       gallery: [IMG.hat39165],
       desc: 'The Otto Cap 39-165 is a classic foam trucker hat with a structured front panel, breathable mesh back, and snapback fit. It is a simple no-size-collection product for teams, units, schools, fundraisers, events, and vacation groups.',
-      specs: ['Structured foam front', 'Breathable mesh back', 'Adjustable snapback ? One size'],
+      specs: ['Structured foam front', 'Breathable mesh back', 'Adjustable snapback \u00b7 One size'],
       sizes: 'One size',
       colors: 'Choose up to 4 hat colors per listing',
       pricing: [
