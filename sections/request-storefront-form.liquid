@@ -103,33 +103,38 @@
             </div>
 
             <div class="sf-field">
-              <label class="sf-label" for="PrimaryColor">Primary Shirt Color Preference *</label>
-              <select id="PrimaryColor" name="primary_color" class="sf-select" required>
-                <option value="" disabled selected>Select a color...</option>
-                <option value="No preference">No preference</option>
-                <option value="Black">Black</option>
-                <option value="White">White</option>
-                <option value="Gray">Gray</option>
-                <option value="Charcoal">Charcoal</option>
-                <option value="Navy">Navy</option>
-                <option value="Brown">Brown</option>
-                <option value="Tan / Khaki">Tan / Khaki</option>
-                <option value="Cream / Natural">Cream / Natural</option>
-                <option value="Olive / Military Green">Olive / Military Green</option>
-                <option value="Red">Red</option>
-                <option value="Blue">Blue</option>
-                <option value="Green">Green</option>
-                <option value="Orange">Orange</option>
-                <option value="Yellow">Yellow</option>
-                <option value="Purple">Purple</option>
-                <option value="Pink">Pink</option>
-                <option value="Light Blue">Light Blue</option>
-                <option value="Royal Blue">Royal Blue</option>
-                <option value="Teal">Teal</option>
-                <option value="Maroon">Maroon</option>
-                <option value="Burgundy">Burgundy</option>
-              </select>
-              <p class="sf-help">This helps us pick your default thumbnail color. You can still offer multiple colors later.</p>
+              <label class="sf-label">Primary Shirt Color *</label>
+              <div class="sf-swatches" role="radiogroup" aria-label="Primary shirt color">
+                {%- comment -%}
+                  These general colors are matched to each garment's REAL
+                  catalog color by hex on the backend (color_logic.py), so
+                  "Blue" reliably lands on True Royal / Team Royal etc.
+                  The picked color becomes the storefront display color;
+                  additional variants are filled with neutrals.
+                {%- endcomment -%}
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Black" required><span class="sf-sw-dot" style="--sw:#151515"></span><span class="sf-sw-name">Black</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Charcoal"><span class="sf-sw-dot" style="--sw:#3e3d3d"></span><span class="sf-sw-name">Charcoal</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Gray"><span class="sf-sw-dot" style="--sw:#8b8d8e"></span><span class="sf-sw-name">Gray</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="White"><span class="sf-sw-dot sf-sw-dot--light" style="--sw:#f7f7f4"></span><span class="sf-sw-name">White</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Cream / Natural"><span class="sf-sw-dot sf-sw-dot--light" style="--sw:#ece5d5"></span><span class="sf-sw-name">Cream</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Tan / Khaki"><span class="sf-sw-dot" style="--sw:#c8b088"></span><span class="sf-sw-name">Tan</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Brown"><span class="sf-sw-dot" style="--sw:#6b4a33"></span><span class="sf-sw-name">Brown</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Olive / Military Green"><span class="sf-sw-dot" style="--sw:#5f5849"></span><span class="sf-sw-name">Olive</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Green"><span class="sf-sw-dot" style="--sw:#2f7d3b"></span><span class="sf-sw-name">Green</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Teal"><span class="sf-sw-dot" style="--sw:#128a8a"></span><span class="sf-sw-name">Teal</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Light Blue"><span class="sf-sw-dot" style="--sw:#a5c8e4"></span><span class="sf-sw-name">Lt. Blue</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Blue"><span class="sf-sw-dot" style="--sw:#1d4e9e"></span><span class="sf-sw-name">Blue</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Navy"><span class="sf-sw-dot" style="--sw:#1f2a44"></span><span class="sf-sw-name">Navy</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Purple"><span class="sf-sw-dot" style="--sw:#5d3a8e"></span><span class="sf-sw-name">Purple</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Pink"><span class="sf-sw-dot" style="--sw:#e56ca5"></span><span class="sf-sw-name">Pink</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Maroon"><span class="sf-sw-dot" style="--sw:#6e2639"></span><span class="sf-sw-name">Maroon</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Red"><span class="sf-sw-dot" style="--sw:#c8102e"></span><span class="sf-sw-name">Red</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Orange"><span class="sf-sw-dot" style="--sw:#e8722a"></span><span class="sf-sw-name">Orange</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Yellow"><span class="sf-sw-dot" style="--sw:#f2c744"></span><span class="sf-sw-name">Yellow</span></label>
+                <label class="sf-sw sf-sw--wide"><input type="radio" name="primary_color" value="Earthy / Neutral tones"><span class="sf-sw-dot sf-sw-dot--earthy"></span><span class="sf-sw-name">Earthy tones</span></label>
+                <label class="sf-sw sf-sw--wide"><input type="radio" name="primary_color" value="No preference"><span class="sf-sw-dot sf-sw-dot--any">?</span><span class="sf-sw-name">No preference</span></label>
+              </div>
+              <p class="sf-help">Your pick becomes the store's display color — we fill the other variants with clean neutrals. You can fine-tune every product's colors later in the editor.</p>
             </div>
           </div>
         </div>
@@ -296,6 +301,12 @@
     if (!form) return;
     const clearIfValid = (el) => {
       if (!el || !el.classList) return;
+      // Picking a color swatch clears the group's error highlight.
+      if (el.type === 'radio' && el.checked) {
+        const group = el.closest('.sf-swatches');
+        if (group) group.classList.remove('sf-field-error');
+        return;
+      }
       if (el.classList.contains('sf-field-error') && (el.value || '').toString().trim()) el.classList.remove('sf-field-error');
     };
     form.addEventListener('input', (e) => clearIfValid(e.target), { passive: true });
@@ -444,6 +455,14 @@
     form.querySelectorAll('[required]').forEach((el) => {
       if (el.disabled || el.closest('.sf-hidden')) return;
       const tag = el.tagName.toLowerCase();
+      if (el.type === 'radio') {
+        // Radio groups (the color swatches): one of the group must be checked.
+        if (!form.querySelector('input[name="' + el.name + '"]:checked')) {
+          markFieldError(el.closest('.sf-swatches') || el);
+          ok = false;
+        }
+        return;
+      }
       const val = (el.value || '').toString().trim();
       if ((tag === 'select' && !el.value) || ((tag === 'input' || tag === 'textarea') && !val && el.type !== 'file')) { markFieldError(el); ok = false; }
     });
@@ -544,7 +563,7 @@
     document.getElementById('SF_TYPE_OF_STORE').value = typeOfStore;
     if (typeOfStore) formData.set("type_of_store", typeOfStore);
 
-    const pcVal = (document.getElementById("PrimaryColor")?.value || "").toString().trim();
+    const pcVal = (document.querySelector('input[name="primary_color"]:checked')?.value || "").toString().trim();
     formData.set("primary_color", pcVal || "No preference");
     const mainInput = document.getElementById("MainLogo");
     if (!mainInput || !mainInput.files || mainInput.files.length === 0 || (mainInput.files[0] && mainInput.files[0].size === 0)) formData.delete("storefront_logo_file");
@@ -593,8 +612,26 @@
   .sf-auth-text { max-width: 560px; margin: 0 auto 22px; color:#64748b; font-size: 15px; line-height: 1.55; }
   .sf-auth-actions { display:grid; gap: 10px; max-width: 430px; margin: 0 auto; }
   .sf-block { padding: 4px 0; }
-  .sf-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 18px 0; }
-  .sf-legend { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; color: #999; margin-bottom: 14px; }
+  .sf-divider { height: 1px; background: linear-gradient(90deg, rgba(183,163,106,0.35), rgba(0,0,0,0.06) 40%); margin: 22px 0; }
+  .sf-legend { font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 800; color: #8a7a4f; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .sf-legend::before { content: ''; width: 18px; height: 2px; border-radius: 2px; background: #b7a36a; }
+
+  /* ── Color swatch picker ─────────────────────────────────────────────── */
+  .sf-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 10px 6px; }
+  .sf-sw { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; padding: 7px 2px 6px; border-radius: 12px; border: 1.5px solid transparent; transition: background .15s ease, border-color .15s ease; }
+  .sf-sw:hover { background: #f7f5f0; }
+  .sf-sw input { position: absolute; opacity: 0; pointer-events: none; }
+  .sf-sw-dot { width: 34px; height: 34px; border-radius: 50%; background: var(--sw); box-shadow: inset 0 -2px 5px rgba(0,0,0,0.14); transition: transform .12s ease, box-shadow .15s ease; }
+  .sf-sw-dot--light { border: 1px solid #ddd; }
+  .sf-sw-dot--earthy { background: conic-gradient(#ece5d5 0 25%, #c8b088 0 50%, #8b8d8e 0 75%, #5f5849 0); }
+  .sf-sw-dot--any { background: #fff; border: 2px dashed #cbb; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #b7a36a; font-size: 15px; }
+  .sf-sw-name { font-size: 10.5px; font-weight: 800; color: #666; letter-spacing: 0.01em; white-space: nowrap; }
+  .sf-sw input:checked ~ .sf-sw-dot { transform: scale(1.12); box-shadow: 0 0 0 3px #fff, 0 0 0 6px #b7a36a, inset 0 -2px 5px rgba(0,0,0,0.14); }
+  .sf-sw input:checked ~ .sf-sw-name { color: #111; }
+  .sf-sw:has(input:checked) { border-color: rgba(183,163,106,0.55); background: rgba(183,163,106,0.08); }
+  .sf-sw input:focus-visible ~ .sf-sw-dot { outline: 2px solid #0f172a; outline-offset: 3px; }
+  .sf-sw--wide .sf-sw-name { white-space: normal; text-align: center; line-height: 1.15; font-size: 10px; }
+  .sf-swatches.sf-field-error { border: 1.5px solid #dc2626 !important; border-radius: 14px; padding: 8px; background: #fff6f6; box-shadow: 0 0 0 3px rgba(220,38,38,0.10) !important; }
   .sf-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
   @media(max-width: 680px) { .sf-grid { grid-template-columns: 1fr; } }
   .sf-field { margin-bottom: 0; }
