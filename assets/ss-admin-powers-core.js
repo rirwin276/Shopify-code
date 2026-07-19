@@ -160,12 +160,16 @@
   var apEditorClose   = document.getElementById('apEditorClose');
   var _apEditorKeydown = null;
 
+  var _apEditorSrcOrigin = '';
+
   function apOpenEditorModal(url) {
     if (!apEditorOverlay || !apEditorIframe) {
       // Modal DOM missing — fall back to new tab so the user isn't stuck
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
+    try { _apEditorSrcOrigin = new URL(url, window.location.href).origin; }
+    catch (_e) { _apEditorSrcOrigin = ''; }
     apEditorIframe.src = url;
     apEditorOverlay.classList.add('open');
     apEditorOverlay.setAttribute('aria-hidden', 'false');
@@ -210,63 +214,34 @@
     // from unrelated frames. Falls back to allowing the message if the base
     // URL is unavailable (shouldn't happen in practice).
     try {
+      // The origin of the URL this modal actually opened is always trusted —
+      // the configured base URLs can lag behind where the editors really
+      // live, and a mismatch silently dropped every close/save message,
+      // stranding the admin on the build-started screen.
       var _expectedOrigin = new URL(SSAP.editorBaseUrl || '').origin;
       var _railwayOrigin = new URL(SSAP.railwayUrl || '').origin;
-      if (_expectedOrigin && e.origin !== _expectedOrigin && e.origin !== _railwayOrigin) return;
+      if (e.origin !== _apEditorSrcOrigin
+          && _expectedOrigin && e.origin !== _expectedOrigin && e.origin !== _railwayOrigin) return;
     } catch(_origErr){}
-    if (data.type === 'bc3413_placement_saved') {
+    // Generic pro-builder close/save handling: every editor posts
+    // '<model>_placement_saved' (build kicked off) or '<model>_close'
+    // (back/cancel). A hardcoded per-model chain silently ignored any
+    // builder missing from it — cc1717, ec8000, m2480, and ls14003 never
+    // closed. Match the shape instead so every current and future builder
+    // works.
+    var _pbMsg = /^([a-z0-9]+)_(placement_saved|close)$/.exec(String(data.type || ''));
+    if (_pbMsg) {
       apCloseEditorModal();
-      var handle = data.product_handle;
-      var jobId  = data.job_id;
-      if (jobId && handle) {
-        apStartInlineRebuilding(handle, jobId);
-      } else {
-        // Fallback: no job_id (old async flow or missing handle)
-        apShowRebuildingToast();
+      if (_pbMsg[2] === 'placement_saved') {
+        var pbHandle = data.product_handle;
+        var pbJobId  = data.job_id;
+        if (pbJobId && pbHandle) {
+          apStartInlineRebuilding(pbHandle, pbJobId);
+        } else {
+          // Fallback: no job_id (old async flow or missing handle)
+          apShowRebuildingToast();
+        }
       }
-    } else if (data.type === 'bc3413_close') {
-      apCloseEditorModal();
-    } else if (data.type === 'bc3001y_placement_saved') {
-      apCloseEditorModal();
-      var bc3001yHandle = data.product_handle;
-      var bc3001yJobId  = data.job_id;
-      if (bc3001yJobId && bc3001yHandle) {
-        apStartInlineRebuilding(bc3001yHandle, bc3001yJobId);
-      } else {
-        apShowRebuildingToast();
-      }
-    } else if (data.type === 'bc3001y_close') {
-      apCloseEditorModal();
-    } else if (data.type === 'nl6733_placement_saved') {
-      apCloseEditorModal();
-      var nl6733Handle = data.product_handle; var nl6733JobId = data.job_id;
-      if (nl6733JobId && nl6733Handle) { apStartInlineRebuilding(nl6733Handle, nl6733JobId); } else { apShowRebuildingToast(); }
-    } else if (data.type === 'nl6733_close') {
-      apCloseEditorModal();
-    } else if (data.type === 'mc1790_placement_saved') {
-      apCloseEditorModal();
-      var mc1790Handle = data.product_handle; var mc1790JobId = data.job_id;
-      if (mc1790JobId && mc1790Handle) { apStartInlineRebuilding(mc1790Handle, mc1790JobId); } else { apShowRebuildingToast(); }
-    } else if (data.type === 'mc1790_close') {
-      apCloseEditorModal();
-    } else if (data.type === 'm2580_placement_saved') {
-      apCloseEditorModal();
-      var m2580Handle = data.product_handle; var m2580JobId = data.job_id;
-      if (m2580JobId && m2580Handle) { apStartInlineRebuilding(m2580Handle, m2580JobId); } else { apShowRebuildingToast(); }
-    } else if (data.type === 'm2580_close') {
-      apCloseEditorModal();
-    } else if (data.type === 'cc1467y_placement_saved') {
-      apCloseEditorModal();
-      var cc1467yHandle = data.product_handle; var cc1467yJobId = data.job_id;
-      if (cc1467yJobId && cc1467yHandle) { apStartInlineRebuilding(cc1467yHandle, cc1467yJobId); } else { apShowRebuildingToast(); }
-    } else if (data.type === 'cc1467y_close') {
-      apCloseEditorModal();
-    } else if (data.type === 'hat39165_placement_saved') {
-      apCloseEditorModal();
-      var hat39165Handle = data.product_handle; var hat39165JobId = data.job_id;
-      if (hat39165JobId && hat39165Handle) { apStartInlineRebuilding(hat39165Handle, hat39165JobId); } else { apShowRebuildingToast(); }
-    } else if (data.type === 'hat39165_close') {
-      apCloseEditorModal();
     } else if (data.type === 'studio-uploader:done' && data.slot === 'settings-logo' && data.session_id) {
       if (typeof window.apSettingsHandleLogoDone === 'function') {
         window.apSettingsHandleLogoDone(data);
