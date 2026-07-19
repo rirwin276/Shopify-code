@@ -1284,7 +1284,7 @@
         }
         var _proEditPath  = null;
         // Every pro-built model with a /edit route gets an Edit button.
-        ['cc1717', 'm2580', 'ls14003', 'm2480', 'bc3413', 'bc3001y', 'cc1467y', 'nl6733', 'mc1790', 'ec8000', 'hat39165'].some(function(model){
+        ['cc1717', 'm2580', 'ls14003', 'm2480', 'bc3413', 'bc3001y', 'bc3001', 'cc1467y', 'nl6733', 'mc1790', 'ec8000', 'hat39165'].some(function(model){
           if(_hasProTag(model)){ _proEditPath = '/editor/pro-shirt/' + model + '/edit'; return true; }
           return false;
         });

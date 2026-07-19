@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v8-hat39165-fix';
+  var VERSION = 'catalog-v9-bc3001';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -56,6 +56,24 @@
       pricing: [
         { label: 'Front print', note: 'Logo or design on front', price: '$18' },
         { label: 'Front + Back print', note: 'Artwork on both sides', price: '$24' }
+      ]
+    },
+    {
+      id: 'bc3001',
+      personalize: true,
+      badge: 'Staple Tee',
+      name: 'Bella + Canvas 3001',
+      from: '$24',
+      hint: 'Adult sizes \u00b7 Front or front + back',
+      route: '/editor/pro-shirt/bc3001',
+      gallery: [IMG.bc3001y],
+      desc: 'The BC3001 Unisex Staple Tee \u2014 the most popular custom tee in the world. Airlume combed cotton, retail fit, and a huge color range. Creates its own separate listing in your store.',
+      specs: ['100% Airlume Combed/Ring-Spun Cotton', 'Lightweight 4.2 oz/yd\u00b2', 'Retail fit \u00b7 Adult S\u20133XL'],
+      sizes: 'S \u00b7 M \u00b7 L \u00b7 XL \u00b7 2XL \u00b7 3XL',
+      colors: 'Choose up to 3 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$24' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$30' }
       ]
     },
     {
@@ -224,6 +242,7 @@
   var PRICE_KEYS = {
     bc3413:  { front: 'BC3413_front',  back: 'BC3413_front_back' },
     bc3001y: { front: 'BC3001Y_front', back: 'BC3001Y_front_back' },
+    bc3001: { front: 'BC3001_front', back: 'BC3001_front_back' },
     cc1467y: { front: 'CC1467Y_front', back: 'CC1467Y_front_back' },
     m2580:   { front: 'M2580_front',   back: 'M2580_front_back' },
     m2480:   { front: 'M2480_front',   back: 'M2480_front_back' },
