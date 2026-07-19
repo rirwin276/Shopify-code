@@ -297,6 +297,11 @@
     var actions = row.querySelector('.ap-product-row__actions');
     if (!actions) return;
 
+    // The editor may deliver placement_saved more than once (auto-return plus
+    // a manual "Back to Store Manager" tap). Re-initializing would overwrite
+    // the saved original actions with the spinner markup — skip duplicates.
+    if (actions.querySelector('.ap-rebuilding-inline')) return;
+
     actions.dataset.apOriginalActions = actions.innerHTML;
     actions.innerHTML =
       '<div class="ap-rebuilding-inline" data-job-id="' + apEscapeAttr(jobId) + '" data-product-handle="' + apEscapeAttr(productHandle) + '">' +
