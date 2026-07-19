@@ -54,6 +54,37 @@
     var scriptEl = document.querySelector('script[src*="ss-tote-personalize.js"]');
     var mockupsUrl = root.getAttribute('data-mockups-url')
       || (scriptEl ? scriptEl.getAttribute('data-mockups-url') : '');
+
+    // Camo ink: the admin picked a pattern instead of a flat color. The tile
+    // path is relative to the automation server — resolve it against the
+    // mockups URL origin. Until the tile loads (or if patterns are
+    // unsupported), the representative hex draws as a fallback.
+    var colorPattern = root.getAttribute('data-color-pattern') || '';
+    var colorTilePath = root.getAttribute('data-color-tile') || '';
+    var camoTileImg = null;
+    if (colorPattern && colorTilePath && mockupsUrl) {
+      try {
+        var tileUrl = new URL(colorTilePath, new URL(mockupsUrl).origin).href;
+        var t = new Image();
+        t.crossOrigin = 'anonymous';
+        t.onload = function () { camoTileImg = t; draw(); };
+        t.src = tileUrl;
+      } catch (_e) { /* fallback to solid hex */ }
+    }
+
+    function textPaint(boxW) {
+      if (camoTileImg) {
+        try {
+          var pat = ctx.createPattern(camoTileImg, 'repeat');
+          if (pat && pat.setTransform && typeof DOMMatrix !== 'undefined') {
+            var sc = (boxW / 4.5) / camoTileImg.width;
+            pat.setTransform(new DOMMatrix().scale(sc, sc));
+            return pat;
+          }
+        } catch (_e) { /* fallback below */ }
+      }
+      return colorHex;
+    }
     var currentColor = root.getAttribute('data-initial-color') || '';
     var backMap = {};
     var bgImg = null;
@@ -123,7 +154,7 @@
       var boxW = rawW - inset * 2;
       var boxH = rawH - inset * 2;
 
-      ctx.fillStyle = colorHex;
+      ctx.fillStyle = textPaint(boxW);
       ctx.textBaseline = 'alphabetic';
 
       // Fixed jersey geometry (matches the server render + editor overlay):
