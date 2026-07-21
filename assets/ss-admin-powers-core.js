@@ -1051,6 +1051,47 @@
         }
       }
 
+      // BC3001 (adult) editor — show for any initial-build product tagged
+      // bc3001_front / model--bc3001. Exact match so the youth tags
+      // (bc3001y_front / model--bc3001y) never collide with the adult tee.
+      function _isBc3001AdultTag(t){
+        var tag = String(t || '').toLowerCase().trim();
+        return tag === 'bc3001_front' || tag === 'model--bc3001';
+      }
+      var isBc3001Adult = false;
+      if(Array.isArray(productTags)){
+        for(var bc3001TagIdx = 0; bc3001TagIdx < productTags.length; bc3001TagIdx++){
+          if(_isBc3001AdultTag(productTags[bc3001TagIdx])){ isBc3001Adult = true; break; }
+        }
+      } else if(typeof productTags === 'string'){
+        isBc3001Adult = productTags.split(',').some(_isBc3001AdultTag);
+      }
+
+      if(!isProEditorBuild && isBc3001Adult && SSAP.editorSecret){
+        // Opens the full BC3001 Pro Editor preloaded with this product's saved
+        // artwork/colors; publishing rebuilds this same product (the backend
+        // routes provisioned products through the legacy rebuild flow).
+        var _bc3001Origin = '';
+        try { _bc3001Origin = new URL(SSAP.editorBaseUrl || SSAP.editorProShirtBc3413BaseUrl || '').origin; } catch(_e){ _bc3001Origin = ''; }
+        if(_bc3001Origin){
+          var _bc3001ReturnUrl = (window.location.origin + window.location.pathname + window.location.search);
+          var _bc3001EditUrl = _bc3001Origin + '/editor/pro-shirt/bc3001/edit'
+            + '?product_handle=' + encodeURIComponent(product.handle || '')
+            + '&shop_handle=' + encodeURIComponent(SSAP.shopHandle || '')
+            + '&secret=' + encodeURIComponent(SSAP.editorSecret)
+            + '&return_url=' + encodeURIComponent(_bc3001ReturnUrl)
+            + '&mode=embedded';
+          var bc3001EditBtn = document.createElement('button');
+          bc3001EditBtn.type = 'button';
+          bc3001EditBtn.className = 'ap-edit-placement-btn';
+          bc3001EditBtn.dataset.productHandle = product.handle || '';
+          bc3001EditBtn.innerHTML = '✏️ Edit';
+          bc3001EditBtn.title = 'Open the Pro Editor to change placement, colors, add a back image, or swap artwork — rebuilds this product';
+          bc3001EditBtn.addEventListener('click', (function(url){ return function(){ apOpenEditorModal(url); }; })(_bc3001EditUrl));
+          actionsEl.appendChild(bc3001EditBtn);
+        }
+      }
+
       // NL6733 placement editor — show for any product tagged nl6733_front
       function _isNl6733Tag(t){
         return String(t || '').toLowerCase().trim() === 'nl6733_front';

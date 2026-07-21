@@ -318,6 +318,10 @@
     var s = ssap();
     var url = RAILWAY + b.route + '?shop_handle=' + encodeURIComponent(s.shopHandle||'') + '&' + 'sec'+'ret' + '=' + encodeURIComponent(s['editor'+'Secret']||'') + '&mode=embedded';
     if (s.shopLogoSrc) url += '&logo_url=' + encodeURIComponent(s.shopLogoSrc);
+    // Always give the editor a way back to this admin page — without it, the
+    // post-publish auto-close has no exit target and strands the admin in the
+    // editor (worst on the new-tab fallback, where noreferrer kills history).
+    url += '&return_url=' + encodeURIComponent(window.location.origin + window.location.pathname + window.location.search);
     return url;
   }
 
