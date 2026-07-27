@@ -364,7 +364,7 @@
                      set yet it shows a NEEDS SETUP state instead of hiding entirely. {% endcomment -%}
                   {%- assign mf_se_url = shop.metafields.custom.social_engine_url.value | default: shop.metafields.custom.social_engine_url -%}
                   {%- assign mf_se_secret = shop.metafields.custom.social_engine_secret.value | default: shop.metafields.custom.social_engine_secret -%}
-                  {%- assign se_url = mf_se_url | default: 'https://social-engine-production.up.railway.app' -%}
+                  {%- assign se_url = mf_se_url | default: 'https://social-engine-production-68da.up.railway.app' -%}
                   {%- if mf_se_secret != blank -%}
                     {%- assign se_href = se_url | append: '/admin?key=' | append: mf_se_secret -%}
                     {%- assign se_status = 'FACEBOOK ADS' -%}
