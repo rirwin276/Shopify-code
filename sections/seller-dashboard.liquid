@@ -359,36 +359,43 @@
                 {% if is_god %}
                   {%- comment %} Social Engine (Facebook advertiser) lives on its own Railway app.
                      URL + admin secret come from shop metafields so the secret is not
-                     hard-coded in public theme source. Card only renders once both are set. {% endcomment -%}
-                  {%- assign se_url = shop.metafields.custom.social_engine_url -%}
-                  {%- assign se_secret = shop.metafields.custom.social_engine_secret -%}
-                  {% if se_url != blank and se_secret != blank %}
-                    {%- assign se_href = se_url | append: '/admin?key=' | append: se_secret -%}
-                    <!-- SOCIAL ENGINE CARD -->
-                    <div class="ss-store-card ss-clickrow ss-social-card" role="link" tabindex="0" data-href="{{ se_href }}" data-newtab="1" style="border-color: #1877f2; box-shadow: 0 0 0 1px rgba(24,119,242,0.15), 0 10px 24px rgba(24,119,242,0.08);">
-                      <div class="ss-col-identity">
-                        <div class="ss-logo-frame" style="background:#eff6ff; border-color:#bfdbfe;">
-                          <span style="font-size:24px;">📣</span>
-                        </div>
-                        <div class="ss-identity-text">
-                          <h3 class="ss-card-title" style="color:#1e40af;">Social Engine</h3>
-                          <span class="ss-card-subtitle" style="background:#dbeafe; color:#1e40af; border-color:#bfdbfe;">Super Admin</span>
-                        </div>
+                     hard-coded in public theme source. The card always renders for the
+                     super admin (never for anyone else); when the secret metafield is not
+                     set yet it shows a NEEDS SETUP state instead of hiding entirely. {% endcomment -%}
+                  {%- assign mf_se_url = shop.metafields.custom.social_engine_url.value | default: shop.metafields.custom.social_engine_url -%}
+                  {%- assign mf_se_secret = shop.metafields.custom.social_engine_secret.value | default: shop.metafields.custom.social_engine_secret -%}
+                  {%- assign se_url = mf_se_url | default: 'https://social-engine-production.up.railway.app' -%}
+                  {%- if mf_se_secret != blank -%}
+                    {%- assign se_href = se_url | append: '/admin?key=' | append: mf_se_secret -%}
+                    {%- assign se_status = 'FACEBOOK ADS' -%}
+                  {%- else -%}
+                    {%- assign se_href = se_url | append: '/admin' -%}
+                    {%- assign se_status = 'NEEDS SETUP' -%}
+                  {%- endif -%}
+                  <!-- SOCIAL ENGINE CARD -->
+                  <div class="ss-store-card ss-clickrow ss-social-card" role="link" tabindex="0" data-href="{{ se_href }}" data-newtab="1" style="border-color: #1877f2; box-shadow: 0 0 0 1px rgba(24,119,242,0.15), 0 10px 24px rgba(24,119,242,0.08);">
+                    <div class="ss-col-identity">
+                      <div class="ss-logo-frame" style="background:#eff6ff; border-color:#bfdbfe;">
+                        <span style="font-size:24px;">📣</span>
                       </div>
-                      <div class="ss-col-engine">
-                        <div class="ss-status-finished" style="background:#eff6ff; border-color:#bfdbfe;">
-                          <span class="ss-dot-live" style="background:#1877f2; box-shadow:0 0 0 3px rgba(24,119,242,0.2);"></span>
-                          <span class="ss-status-text" style="color:#1e40af;">FACEBOOK ADS</span>
-                        </div>
-                      </div>
-                      <div class="ss-col-controls">
-                        <a href="{{ se_href }}" target="_blank" rel="noopener" class="ss-open-btn" style="background:#1877f2;">
-                          <span>Open</span>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </a>
+                      <div class="ss-identity-text">
+                        <h3 class="ss-card-title" style="color:#1e40af;">Social Engine</h3>
+                        <span class="ss-card-subtitle" style="background:#dbeafe; color:#1e40af; border-color:#bfdbfe;">Super Admin</span>
                       </div>
                     </div>
-                  {% endif %}
+                    <div class="ss-col-engine">
+                      <div class="ss-status-finished" style="background:#eff6ff; border-color:#bfdbfe;">
+                        <span class="ss-dot-live" style="background:#1877f2; box-shadow:0 0 0 3px rgba(24,119,242,0.2);"></span>
+                        <span class="ss-status-text" style="color:#1e40af;">{{ se_status }}</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-controls">
+                      <a href="{{ se_href }}" target="_blank" rel="noopener" class="ss-open-btn" style="background:#1877f2;">
+                        <span>Open</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </a>
+                    </div>
+                  </div>
                 {% endif %}
 
                 {% for raw_handle in handles_array %}
