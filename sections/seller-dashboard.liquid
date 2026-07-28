@@ -1338,57 +1338,98 @@
     // the App Proxy relay. The "Active Fundraiser" pill shows whenever a
     // fundraiser is live; the progress bar (with goal + days left) only shows
     // when the seller chose to display progress publicly. Degrades silently.
+    // Fetching is throttled and painting is batched. Previously every card
+    // fired at once and revealed its own strip the moment it answered: with 18
+    // stores that is 18 parallel requests and 18 separate reflows landing at
+    // random times, each one growing a card by a strip's height. Scrolling
+    // while that happens is what makes the page jump under your thumb.
     (function ssFundraiserStrips(){
       function frMoney(n){ return '$' + (Math.round(Number(n)) || 0).toLocaleString('en-US'); }
       var cards = document.querySelectorAll('.ss-store-card[data-ss-handle]');
+
+      // Results queue up and are applied together on the next animation frame,
+      // so several answers arriving at once cost one reflow instead of one
+      // each — and never mid-scroll-frame.
+      var pending = [];
+      var flushQueued = false;
+
+      function flush(){
+        flushQueued = false;
+        var batch = pending;
+        pending = [];
+        batch.forEach(function(fn){ try { fn(); } catch (e) {} });
+      }
+
+      function paint(fn){
+        pending.push(fn);
+        if (flushQueued) return;
+        flushQueued = true;
+        (window.requestAnimationFrame || function(cb){ setTimeout(cb, 16); })(flush);
+      }
+
+      function apply(card, strip, handle, j){
+        // Verify the response belongs to this card — guards against CDN
+        // serving a cached response from a different store's request.
+        if (!j || !j.enabled) return;
+        if (j.handle && j.handle !== handle) return;
+        card.classList.add('ss-card-has-fr');
+        strip.style.display = '';
+
+        var causeEl = strip.querySelector('[data-ss-fr-cause]');
+        var daysEl  = strip.querySelector('[data-ss-fr-days]');
+        var progEl  = strip.querySelector('[data-ss-fr-progress]');
+
+        // Bar + amounts + cause + days only exist when show_bar is on.
+        if (j.show_bar) {
+          if (causeEl && j.cause_name) causeEl.textContent = j.cause_name;
+
+          var raised = parseFloat(j.total_raised || 0);
+          var goal   = parseFloat(j.goal || 0);
+
+          if (j.end_date && daysEl) {
+            // Match admin-powers: parse as UTC midnight, use ceiling of
+            // remaining ms to avoid adding phantom timezone-offset days.
+            var end = new Date(j.end_date);
+            var days = Math.ceil((end - new Date()) / 86400000);
+            daysEl.textContent = days > 0 ? (days + (days === 1 ? ' day left' : ' days left')) : 'Final day';
+          }
+
+          if (goal > 0 && progEl) {
+            progEl.style.display = '';
+            var pct = Math.min(100, (raised / goal) * 100);
+            var fill = progEl.querySelector('[data-ss-fr-fill]');
+            if (fill) fill.style.width = pct.toFixed(1) + '%';
+            var rEl = progEl.querySelector('[data-ss-fr-raised]');
+            var gEl = progEl.querySelector('[data-ss-fr-goal]');
+            if (rEl) rEl.innerHTML = '<strong>' + frMoney(raised) + '</strong> raised';
+            if (gEl) gEl.textContent = 'of ' + frMoney(goal) + ' goal';
+          }
+        }
+      }
+
+      // A small pool instead of everything at once. Eighteen parallel requests
+      // compete for the phone's connection limit and land in a clump; a few at
+      // a time arrive spread out and the queue drains just as fast.
+      var queue = [];
       Array.prototype.forEach.call(cards, function(card){
         var strip = card.querySelector('[data-ss-fr-strip]');
-        if (!strip) return;
         var handle = card.getAttribute('data-ss-handle');
-        if (!handle) return;
-        fetch('/apps/ss/relay/store/' + encodeURIComponent(handle) + '/fundraising/public', { cache: 'no-store' })
-          .then(function(r){ return r.json().catch(function(){ return {}; }); })
-          .then(function(j){
-            // Verify the response belongs to this card — guards against CDN
-            // serving a cached response from a different store's request.
-            if (!j || !j.enabled) return;
-            if (j.handle && j.handle !== handle) return;
-            card.classList.add('ss-card-has-fr');
-            strip.style.display = '';
-
-            var causeEl = strip.querySelector('[data-ss-fr-cause]');
-            var daysEl  = strip.querySelector('[data-ss-fr-days]');
-            var progEl  = strip.querySelector('[data-ss-fr-progress]');
-
-            // Bar + amounts + cause + days only exist when show_bar is on.
-            if (j.show_bar) {
-              if (causeEl && j.cause_name) causeEl.textContent = j.cause_name;
-
-              var raised = parseFloat(j.total_raised || 0);
-              var goal   = parseFloat(j.goal || 0);
-
-              if (j.end_date && daysEl) {
-                // Match admin-powers: parse as UTC midnight, use ceiling of
-                // remaining ms to avoid adding phantom timezone-offset days.
-                var end = new Date(j.end_date);
-                var days = Math.ceil((end - new Date()) / 86400000);
-                daysEl.textContent = days > 0 ? (days + (days === 1 ? ' day left' : ' days left')) : 'Final day';
-              }
-
-              if (goal > 0 && progEl) {
-                progEl.style.display = '';
-                var pct = Math.min(100, (raised / goal) * 100);
-                var fill = progEl.querySelector('[data-ss-fr-fill]');
-                if (fill) fill.style.width = pct.toFixed(1) + '%';
-                var rEl = progEl.querySelector('[data-ss-fr-raised]');
-                var gEl = progEl.querySelector('[data-ss-fr-goal]');
-                if (rEl) rEl.innerHTML = '<strong>' + frMoney(raised) + '</strong> raised';
-                if (gEl) gEl.textContent = 'of ' + frMoney(goal) + ' goal';
-              }
-            }
-          })
-          .catch(function(){ /* no strip on error */ });
+        if (strip && handle) queue.push({ card: card, strip: strip, handle: handle });
       });
+
+      var MAX_IN_FLIGHT = 4;
+
+      function next(){
+        var job = queue.shift();
+        if (!job) return;
+        fetch('/apps/ss/relay/store/' + encodeURIComponent(job.handle) + '/fundraising/public', { cache: 'no-store' })
+          .then(function(r){ return r.json().catch(function(){ return {}; }); })
+          .then(function(j){ paint(function(){ apply(job.card, job.strip, job.handle, j); }); })
+          .catch(function(){ /* no strip on error */ })
+          .then(next);
+      }
+
+      for (var i = 0; i < MAX_IN_FLIGHT; i++) next();
     })();
 
   })();
@@ -1637,14 +1678,29 @@
     color: #166534; background: rgba(22,163,74,0.10);
     border: 1px solid rgba(22,163,74,0.22); padding: 4px 10px; border-radius: 999px;
   }
+  /* The pulse rides on a pseudo-element using transform + opacity, which the
+     compositor can animate on its own. Animating box-shadow repaints the dot
+     every frame, and with a pulse on every visible card that repaint work
+     lands on the same thread doing the scrolling. */
   .ss-fr-dot {
+    position: relative;
     width: 7px; height: 7px; border-radius: 50%; background: #16a34a;
-    box-shadow: 0 0 0 0 rgba(22,163,74,0.5); animation: ssFrPulse 2s infinite;
+  }
+  .ss-fr-dot::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(22,163,74,0.5);
+    animation: ssFrPulse 2s infinite;
+    will-change: transform, opacity;
   }
   @keyframes ssFrPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); }
-    70%  { box-shadow: 0 0 0 6px rgba(22,163,74,0); }
-    100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+    0%   { transform: scale(1);   opacity: 0.5; }
+    70%  { transform: scale(2.7); opacity: 0; }
+    100% { transform: scale(2.7); opacity: 0; }
+  }
+  /* Respect a reduced-motion preference — an infinite pulse per card is a lot
+     of movement for anyone who has asked for less of it. */
+  @media (prefers-reduced-motion: reduce) {
+    .ss-fr-dot::after { animation: none; opacity: 0; }
   }
   .ss-fr-cause { font-size: 13px; font-weight: 800; color: #14532d; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .ss-fr-days { font-size: 11.5px; font-weight: 700; color: #64748b; margin-left: auto; white-space: nowrap; }
@@ -1656,7 +1712,6 @@
   }
   .ss-fr-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #64748b; }
   .ss-fr-meta strong { color: #14532d; font-weight: 800; }
-  @media (prefers-reduced-motion: reduce) { .ss-fr-dot { animation: none; } }
 
   .ss-admin-btn {
     text-decoration: none;
@@ -1949,6 +2004,20 @@
     .ss-store-card { animation: none !important; transition: none !important; }
     .ss-dot-building-anim { animation: none !important; }
     .ss-progress-bar-anim { animation: none !important; }
+  }
+
+  /* Backdrop blur is cheap on one element and expensive on a list of them: the
+     compositor re-samples and re-blurs what sits behind every card on every
+     scrolled frame. One hero panel is fine; eighteen store cards on a phone is
+     the jump you feel under your thumb.
+     Dropped on small screens only, so the desktop dashboard looks unchanged.
+     The cards keep their own translucent background, so the difference is a
+     slightly crisper edge rather than a missing surface. */
+  @media (max-width: 850px) {
+    .ss-store-card {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
   }
 
   .ss-leave-btn {
