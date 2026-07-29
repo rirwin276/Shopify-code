@@ -314,6 +314,62 @@
       .catch(function () { /* keep hardcoded fallbacks */ });
   }
 
+  // Product Lab (Printful_Automation's own admin page) can install a builder
+  // end to end — config.py, routes.py, the editor, the build module — and
+  // none of that ever reached this array, because this catalog lives in a
+  // completely different repository that Product Lab has no way to touch.
+  // Every product before this fetch needed BUILDERS hand-edited here first.
+  //
+  // This merges in anything installed there that this file does not already
+  // know about, by id. An id already present keeps its hand-curated card
+  // untouched — Product Lab only fills a gap, it never overrides a card
+  // someone took the time to write copy for.
+  function mergeDynamicCatalog(products) {
+    var added = false;
+    (products || []).forEach(function (p) {
+      if (!p || !p.id || BUILDERS.some(function (b) { return b.id === p.id; })) return;
+      BUILDERS.push({
+        id: p.id,
+        badge: p.badge || 'Custom Product',
+        name: p.name || p.id,
+        from: p.from || '',
+        hint: p.hint || '',
+        route: p.route,
+        gallery: Array.isArray(p.gallery) ? p.gallery : [],
+        desc: p.desc || '',
+        specs: Array.isArray(p.specs) ? p.specs : [],
+        sizes: p.sizes || '',
+        colors: p.colors || '',
+        pricing: Array.isArray(p.pricing) ? p.pricing : [],
+      });
+      var keys = p.price_keys || {};
+      if (keys.front) PRICE_KEYS[p.id] = { front: keys.front, back: keys.back || null };
+      added = true;
+    });
+    return added;
+  }
+
+  function fetchDynamicCatalog() {
+    var secret = ssap()['editor' + 'Secret'] || '';
+    if (!secret) return;
+    fetch(RAILWAY + '/api/pro-builder-catalog', {
+      method: 'GET',
+      headers: { 'X-Editor-Secret': secret },
+      cache: 'no-store'
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        var products = data && (data.products || data);
+        if (!Array.isArray(products)) return;
+        if (mergeDynamicCatalog(products)) {
+          var c = $('#apCustomBuildersContainer');
+          if (c) { c.removeAttribute('data-ss-v'); renderCards(true); }
+          fetchLivePrices(); // pick up a live price if one already exists for a new id
+        }
+      })
+      .catch(function () { /* a newly installed builder just stays invisible until this succeeds */ });
+  }
+
   function editorUrl(b) {
     var s = ssap();
     var url = RAILWAY + b.route + '?shop_handle=' + encodeURIComponent(s.shopHandle||'') + '&' + 'sec'+'ret' + '=' + encodeURIComponent(s['editor'+'Secret']||'') + '&mode=embedded';
@@ -836,10 +892,12 @@
   function boot() {
     var tries = 0;
     var pricesRequested = false;
+    var catalogRequested = false;
     var timer = setInterval(function () {
       if (shouldRun()) {
         renderCards(false);
         if (!pricesRequested) { pricesRequested = true; fetchLivePrices(); }
+        if (!catalogRequested) { catalogRequested = true; fetchDynamicCatalog(); }
       }
       if (++tries >= 240) clearInterval(timer);
     }, 125);
