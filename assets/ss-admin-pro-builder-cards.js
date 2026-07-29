@@ -361,6 +361,15 @@
       .then(function (data) {
         var products = data && (data.products || data);
         if (!Array.isArray(products)) return;
+        // Builders whose files are installed but whose routes the app has not
+        // picked up yet. Deliberately not shown as cards — clicking one would
+        // 404 — but worth saying out loud, because "I installed it and no card
+        // appeared" is otherwise indistinguishable from a broken fetch.
+        var pending = (data && data.pending_restart) || [];
+        if (pending.length) {
+          console.info('[ProBuilder] installed, waiting on an app restart before ' +
+                       'they can be opened: ' + pending.join(', '));
+        }
         if (mergeDynamicCatalog(products)) {
           var c = $('#apCustomBuildersContainer');
           if (c) { c.removeAttribute('data-ss-v'); renderCards(true); }
