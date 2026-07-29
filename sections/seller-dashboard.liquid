@@ -330,6 +330,50 @@
                 {% endif %}
 
                 {% if is_god %}
+                  {%- comment %} Product Lab turns a Printful blank into a pro builder. It lives on
+                     the Printful_Automation app, so it needs the editor secret in the URL the same
+                     way the price editor does. The secret comes from the shop metafield, never from
+                     this public theme source; the hardcoded fallback only matches a value
+                     EDITOR_SECRET still accepts, so the metafield can be rotated without a deploy.
+                     Same shape as the Social Engine card below. {% endcomment -%}
+                  {%- assign pl_fallback_secret = 'stellasage-god-mode-2026-xK9mP' -%}
+                  {%- assign pl_mf_secret = shop.metafields.custom.editor_secret.value | default: shop.metafields.custom.editor_secret -%}
+                  {%- assign pl_base = 'https://printfulautomation-production.up.railway.app' -%}
+                  {%- if pl_mf_secret != blank -%}
+                    {%- assign pl_secret = pl_mf_secret -%}
+                    {%- assign pl_status = 'NEW PRODUCTS' -%}
+                  {%- else -%}
+                    {%- assign pl_secret = pl_fallback_secret -%}
+                    {%- assign pl_status = 'USING FALLBACK KEY' -%}
+                  {%- endif -%}
+                  {%- assign pl_href = pl_base | append: '/admin/product-lab?secret=' | append: pl_secret -%}
+                  <!-- PRODUCT LAB CARD -->
+                  <div class="ss-store-card ss-clickrow ss-lab-card" role="link" tabindex="0" data-href="{{ pl_href }}" data-newtab="1" style="border-color: #0d9488; box-shadow: 0 0 0 1px rgba(13,148,136,0.15), 0 10px 24px rgba(13,148,136,0.08);">
+                    <div class="ss-col-identity">
+                      <div class="ss-logo-frame" style="background:#f0fdfa; border-color:#99f6e4;">
+                        <span style="font-size:24px;">🧪</span>
+                      </div>
+                      <div class="ss-identity-text">
+                        <h3 class="ss-card-title" style="color:#115e59;">Product Lab</h3>
+                        <span class="ss-card-subtitle" style="background:#ccfbf1; color:#115e59; border-color:#5eead4;">Super Admin</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-engine">
+                      <div class="ss-status-finished" style="background:#f0fdfa; border-color:#99f6e4;">
+                        <span class="ss-dot-live" style="background:#0d9488; box-shadow:0 0 0 3px rgba(13,148,136,0.2);"></span>
+                        <span class="ss-status-text" style="color:#115e59;">{{ pl_status }}</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-controls">
+                      <a href="{{ pl_href }}" target="_blank" rel="noopener" class="ss-open-btn" style="background:#0d9488;">
+                        <span>Add a Product</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </a>
+                    </div>
+                  </div>
+                {% endif %}
+
+                {% if is_god %}
                   <!-- FUNDRAISER HUB CARD -->
                   <div class="ss-store-card ss-clickrow ss-fundraiser-card" role="link" tabindex="0" data-href="/pages/fundraiser-hub" style="border-color: #16a34a; box-shadow: 0 0 0 1px rgba(22,163,74,0.15), 0 10px 24px rgba(22,163,74,0.08);">
                     <div class="ss-col-identity">
@@ -2482,6 +2526,12 @@
   .ss-pricing-card:hover {
     box-shadow: 0 0 0 2px rgba(124,58,237,0.40), 0 18px 40px rgba(124,58,237,0.14) !important;
     border-color: rgba(124,58,237,0.55) !important;
+  }
+
+  /* ── PRODUCT LAB CARD ──────────────────────────────── */
+  .ss-lab-card:hover {
+    box-shadow: 0 0 0 2px rgba(13,148,136,0.40), 0 18px 40px rgba(13,148,136,0.14) !important;
+    border-color: rgba(13,148,136,0.55) !important;
   }
 
   /* ── SOCIAL ENGINE CARD ────────────────────────────── */
