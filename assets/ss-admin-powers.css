@@ -2806,7 +2806,14 @@
     pointer-events: none;
   }
   #apEditorTitle { display: none !important; }  /* kept in DOM for aria-labelledby */
+  /* v3: the ✕ now lives INSIDE every editor page itself (the shared helper
+     bundle renders it in the canvas-topbar corner and posts the generic
+     '<model>_close' message this admin already listens for). Two X's stacked
+     in the same corner read as a glitch, so the modal's own is retired — the
+     kept fallbacks are backdrop-click and the editor's in-page ✕. DELETE the
+     display:none line to restore the modal-owned ✕. */
   .ap-editor-close {
+    display: none !important;
     pointer-events: auto;
     width: 38px !important;
     height: 38px !important;
