@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v9-bc3001';
+  var VERSION = 'catalog-v10-bc3001-card-image';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -66,7 +66,12 @@
       from: '$24',
       hint: 'Adult sizes \u00b7 Front or front + back',
       route: '/editor/pro-shirt/bc3001',
-      gallery: [IMG.bc3001y],
+      // Served from BC3001's own mockup library rather than a hardcoded CDN
+      // URL. This card shipped pointing at IMG.bc3001y \u2014 the YOUTH photo \u2014 so
+      // the adult staple tee advertised a youth shirt, and nothing here can
+      // tell one CDN filename from another. /card-image can only ever return
+      // the photo belonging to the builder in its own path.
+      gallery: [RAILWAY + '/editor/pro-shirt/bc3001/card-image'],
       desc: 'The BC3001 Unisex Staple Tee \u2014 the most popular custom tee in the world. Airlume combed cotton, retail fit, and a huge color range. Creates its own separate listing in your store.',
       specs: ['100% Airlume Combed/Ring-Spun Cotton', 'Lightweight 4.2 oz/yd\u00b2', 'Retail fit \u00b7 Adult S\u20133XL'],
       sizes: 'S \u00b7 M \u00b7 L \u00b7 XL \u00b7 2XL \u00b7 3XL',
