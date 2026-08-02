@@ -120,6 +120,41 @@
     {%- comment -%} INFO AREA {%- endcomment -%}
     <div class="ss-info-deck">
       <h3 class="ss-title">{{ p.title }}</h3>
+
+      {%- comment -%}
+        Which colours this garment comes in.
+
+        A team store is browsed by someone outfitting a roster, and their first
+        question about any garment is whether it comes in their colours. The
+        card shows one mockup in whichever colour happened to be first, so
+        until now the answer meant opening all fifteen products.
+
+        The swatches come from custom.color_swatches — the exact hex Printful
+        gave us, written at publish time — rather than from Shopify's native
+        swatches, which would mean hand-configuring every colour of every blank
+        in Settings and would show a blank circle for each one missed.
+
+        Purely visual: this card is one big anchor, so an interactive swatch
+        here would be a link inside a link.
+      {%- endcomment -%}
+      {%- assign swatches = p.metafields.custom.color_swatches.value -%}
+      {%- if swatches and swatches.size > 1 -%}
+        {%- assign swatch_limit = 6 -%}
+        <div class="ss-swatch-row" aria-label="Available in {{ swatches.size }} colors">
+          {%- for swatch in swatches limit: swatch_limit -%}
+            <span
+              class="ss-swatch"
+              style="background: {{ swatch.hex }};"
+              title="{{ swatch.name | escape }}"
+            ></span>
+          {%- endfor -%}
+          {%- if swatches.size > swatch_limit -%}
+            {%- assign more = swatches.size | minus: swatch_limit -%}
+            <span class="ss-swatch-more">+{{ more }}</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
       <div class="ss-meta-row">
         <span class="ss-price">{{ p.price | money_without_trailing_zeros }}</span>
       </div>
@@ -189,6 +224,33 @@
     line-height: 1.2;
     letter-spacing: 0.02em;
     pointer-events: none;
+  }
+
+  /* --- COLOUR SWATCHES --- */
+  .ss-swatch-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .ss-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    /* Inset rather than an outline so a white or cream blank still reads as a
+       circle against the card, without a ring heavy enough to distort the
+       colour it is meant to be showing. */
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+    flex: 0 0 auto;
+  }
+
+  .ss-swatch-more {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.5);
+    line-height: 1;
   }
 
   .ss-link-wrapper {
