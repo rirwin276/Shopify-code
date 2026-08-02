@@ -31,30 +31,13 @@
   {%- endif -%}
 
   {%- comment -%}
-    What this listing includes, for pro-builder products.
-
-    Two listings of the same garment differ only by a back print or by name &
-    number, and on a phone that is two identical-looking tiles at different
-    prices. The build tags every published product with its pricing key
-    (..._front vs ..._front_back) and with personalized-back, so the truth is
-    already on the product — it was simply never shown anywhere a shopper
-    looks.
-
-    Name & number takes precedence: it is the thing being paid for, and it
-    implies a back print anyway.
+    What this listing includes, for pro-builder products. The rule itself
+    lives in pro-listing-includes so this card and the Stella & Sage catalog
+    card cannot disagree about it.
   {%- endcomment -%}
-  {%- assign pro_extra = null -%}
-  {%- if product.tags contains 'personalized-back' -%}
-    {%- assign pro_extra = 'Name & Number' -%}
-  {%- else -%}
-    {%- for tag in product.tags -%}
-      {%- if tag contains '_front_back' -%}
-        {%- assign pro_extra = 'Front & Back' -%}
-        {%- break -%}
-      {%- endif -%}
-    {%- endfor -%}
-  {%- endif -%}
-  {%- if pro_extra -%}
+  {%- capture pro_extra -%}{%- render 'pro-listing-includes', product: product -%}{%- endcapture -%}
+  {%- assign pro_extra = pro_extra | strip -%}
+  {%- if pro_extra != blank -%}
     <div class="product-badges__badge product-badges__badge--rectangle product-badges__badge--pro-extra">
       {{ pro_extra }}
     </div>

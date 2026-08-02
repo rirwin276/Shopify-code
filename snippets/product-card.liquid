@@ -43,6 +43,15 @@
   assign second_media = p.media[1]
 
   # --- ZONE READER ---
+  # --- WHAT THIS LISTING INCLUDES ---
+  #
+  # This card is rendered with a `children` capture that the theme fills with
+  # product-card-badges (and quick-add). It has never output `children`, so
+  # every badge the theme produced — sale, sold out, and now the pro-builder
+  # inclusion — was assembled and thrown away. Rendering `children` wholesale
+  # would drop quick-add markup into a hand-built layout that has no place for
+  # it, so the one badge that has to reach shoppers is drawn here directly,
+  # from the same shared rule the theme card uses.
   assign zone_style = "top: 20%; left: 20%; width: 60%; height: 60%;"
   for tag in p.tags
     assign tag_down = tag | downcase
@@ -66,6 +75,11 @@
     
     {%- comment -%} IMAGE AREA {%- endcomment -%}
     <div class="ss-image-stage">
+      {%- capture pro_extra -%}{%- render 'pro-listing-includes', product: p -%}{%- endcapture -%}
+      {%- assign pro_extra = pro_extra | strip -%}
+      {%- if pro_extra != blank -%}
+        <span class="ss-includes-badge">{{ pro_extra }}</span>
+      {%- endif -%}
       <div class="ss-master-box" style="aspect-ratio: {{ pixel_ratio }};">
         <div class="ss-image-layers">
           {%- if p.featured_media -%}
@@ -156,6 +170,27 @@
     box-sizing: border-box;
   }
   
+  /* Reads as information about the product, not as a discount: a shopper who
+     mistakes an inclusion for a promotion is worse off than one who missed it.
+     Sits above .ss-zone-box (z-index 10) and .ss-logo-wrapper (11) so the
+     admin logo overlay cannot cover it. */
+  .ss-includes-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 12;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(17, 16, 14, 0.82);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+
   .ss-link-wrapper {
     text-decoration: none;
     color: inherit;

@@ -1,0 +1,40 @@
+{%- doc -%}
+  Echoes what a pro-builder listing includes beyond a plain front print, or
+  nothing at all when it is a plain front print.
+
+  Two listings of the same garment can differ only by a back print or by name
+  & number, and on a phone that is two tiles with the same photo at different
+  prices. Every published product is already tagged with its pricing key
+  (..._front vs ..._front_back) and with personalized-back, so the truth was on
+  the product all along — it was simply never shown anywhere a shopper looks.
+
+  Name & number takes precedence: it is what is being paid for, and a
+  personalized product carries the front_back pricing key anyway, so checking
+  it first is what stops both labels applying at once.
+
+  This lives in one snippet because the storefront has two unrelated product
+  cards — the theme's block card and the Stella & Sage catalog card — and the
+  rule must not drift between them.
+
+  @param {object} product - The product object.
+
+  @example
+  {%- capture pro_extra -%}{%- render 'pro-listing-includes', product: product -%}{%- endcapture -%}
+  {%- assign pro_extra = pro_extra | strip -%}
+{%- enddoc -%}
+{%- liquid
+  assign pro_extra = ''
+
+  if product.tags contains 'personalized-back'
+    assign pro_extra = 'Name & Number'
+  else
+    for tag in product.tags
+      if tag contains '_front_back'
+        assign pro_extra = 'Front & Back'
+        break
+      endif
+    endfor
+  endif
+
+  echo pro_extra
+-%}
