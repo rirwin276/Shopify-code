@@ -29,6 +29,36 @@
       {%- endif -%}
     </div>
   {%- endif -%}
+
+  {%- comment -%}
+    What this listing includes, for pro-builder products.
+
+    Two listings of the same garment differ only by a back print or by name &
+    number, and on a phone that is two identical-looking tiles at different
+    prices. The build tags every published product with its pricing key
+    (..._front vs ..._front_back) and with personalized-back, so the truth is
+    already on the product — it was simply never shown anywhere a shopper
+    looks.
+
+    Name & number takes precedence: it is the thing being paid for, and it
+    implies a back print anyway.
+  {%- endcomment -%}
+  {%- assign pro_extra = null -%}
+  {%- if product.tags contains 'personalized-back' -%}
+    {%- assign pro_extra = 'Name & Number' -%}
+  {%- else -%}
+    {%- for tag in product.tags -%}
+      {%- if tag contains '_front_back' -%}
+        {%- assign pro_extra = 'Front & Back' -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if pro_extra -%}
+    <div class="product-badges__badge product-badges__badge--rectangle product-badges__badge--pro-extra">
+      {{ pro_extra }}
+    </div>
+  {%- endif -%}
 </div>
 
 {% stylesheet %}
@@ -68,6 +98,15 @@
     font-weight: var(--badge-font-weight);
     text-transform: var(--badge-text-transform);
     border-radius: var(--badge-border-radius);
+  }
+
+  /* Reads as information about the product, not as a discount: the sale and
+     sold-out badges own the loud colours, and a shopper who mistakes an
+     inclusion for a promotion is worse off than one who missed it. */
+  .product-badges__badge--pro-extra {
+    background: rgb(17 16 14 / 0.82);
+    color: #fff;
+    letter-spacing: 0.02em;
   }
 
   .product-badges__badge--rectangle {
