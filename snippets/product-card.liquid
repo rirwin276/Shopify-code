@@ -141,12 +141,22 @@
       {%- if swatches and swatches.size > 1 -%}
         {%- assign swatch_limit = 6 -%}
         <div class="ss-swatch-row" aria-label="Available in {{ swatches.size }} colors">
+          {%- comment -%}
+            Skip anything without a hex rather than emitting an empty
+            background. If the metafield ever arrives as a raw string instead
+            of a parsed array — no definition, a hand-edited value — iterating
+            it yields entries whose .hex is nil, and "background: ;" renders as
+            a row of invisible circles that is harder to diagnose than nothing
+            at all.
+          {%- endcomment -%}
           {%- for swatch in swatches limit: swatch_limit -%}
-            <span
-              class="ss-swatch"
-              style="background: {{ swatch.hex }};"
-              title="{{ swatch.name | escape }}"
-            ></span>
+            {%- if swatch.hex != blank -%}
+              <span
+                class="ss-swatch"
+                style="background: {{ swatch.hex }};"
+                title="{{ swatch.name | escape }}"
+              ></span>
+            {%- endif -%}
           {%- endfor -%}
           {%- if swatches.size > swatch_limit -%}
             {%- assign more = swatches.size | minus: swatch_limit -%}
