@@ -36,5 +36,24 @@
     endfor
   endif
 
+  # Say it once per card.
+  #
+  # The publisher also appends "— Front & Back" / "— Name & Number" to the
+  # title, because the title is the only text that survives the cart, the order
+  # confirmation email and search, where no badge can follow it. On a card that
+  # shows both, the same three words appear twice stacked on top of each other,
+  # which reads as a bug rather than as emphasis. The badge yields: it is the
+  # one of the two that has an alternative already on screen.
+  #
+  # Matched on the label alone rather than the full " — label" suffix, so a
+  # title that spells the separator differently is still deduplicated.
+  if pro_extra != blank
+    assign title_down = product.title | downcase
+    assign label_down = pro_extra | downcase
+    if title_down contains label_down
+      assign pro_extra = ''
+    endif
+  endif
+
   echo pro_extra
 -%}
