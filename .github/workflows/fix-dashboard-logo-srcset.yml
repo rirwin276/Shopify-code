@@ -1,0 +1,83 @@
+name: Fix dashboard logo srcset
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-dashboard-logo-srcset.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-dashboard-logo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Replace stale responsive image nodes
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          path = Path("templates/page.portal.json")
+          data = json.loads(path.read_text(encoding="utf-8"))
+          block = data["sections"]["main"]["blocks"]["dashboard_rendering_fix"]["settings"]["custom_liquid"]
+
+          old = """          var img = logoFrame.querySelector('img');
+          if(!img){
+            img = document.createElement('img');
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            img.width = 72;
+            img.height = 72;
+            logoFrame.innerHTML = '';
+            logoFrame.appendChild(img);
+          }
+          img.setAttribute('src', store.logo);
+          img.setAttribute('alt', store.name || handle);"""
+
+          new = """          var currentLogo = logoFrame.querySelector('img[data-ss-dashboard-logo]');
+          if(!currentLogo || currentLogo.getAttribute('src') !== store.logo){
+            var img = document.createElement('img');
+            img.setAttribute('data-ss-dashboard-logo', '1');
+            img.loading = 'eager';
+            img.decoding = 'async';
+            img.width = 72;
+            img.height = 72;
+            img.setAttribute('src', store.logo);
+            img.setAttribute('alt', store.name || handle);
+            if(logoFrame.replaceChildren){
+              logoFrame.replaceChildren(img);
+            } else {
+              logoFrame.innerHTML = '';
+              logoFrame.appendChild(img);
+            }
+          } else {
+            currentLogo.setAttribute('alt', store.name || handle);
+          }"""
+
+          if old not in block:
+              if "data-ss-dashboard-logo" in block:
+                  print("Dashboard logo node fix already present")
+              else:
+                  raise SystemExit("Expected dashboard logo repair block was not found")
+          else:
+              block = block.replace(old, new, 1)
+              data["sections"]["main"]["blocks"]["dashboard_rendering_fix"]["settings"]["custom_liquid"] = block
+              path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+              print("Replaced responsive image node instead of mutating src")
+
+      - name: Commit fix
+        run: |
+          if git diff --quiet -- templates/page.portal.json; then
+            echo "No dashboard change needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add templates/page.portal.json
+          git commit -m "Fix stale lazy dashboard logo thumbnails"
+          git push
