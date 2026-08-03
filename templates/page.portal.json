@@ -11,6 +11,18 @@
   "sections": {
     "main": {
       "type": "main-page",
+      "blocks": {
+        "dashboard_rendering_fix": {
+          "type": "custom-liquid",
+          "settings": {
+            "custom_liquid": "<style>\n  .ss-store-card {\n    contain: none !important;\n    content-visibility: visible !important;\n    contain-intrinsic-size: auto !important;\n  }\n</style>"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "dashboard_rendering_fix"
+      ],
       "settings": {
         "content_direction": "column",
         "gap": 12,
