@@ -13,6 +13,10 @@
       "type": "private-store-collection",
       "settings": {}
     },
+    "fundraiser_bar": {
+      "type": "fundraiser-bar",
+      "settings": {}
+    },
     "partner_jump": {
       "type": "partner-jump-btn",
       "settings": {}
@@ -154,6 +158,7 @@
   },
   "order": [
     "hero",
+    "fundraiser_bar",
     "partner_jump",
     "main",
     "local_partner_hicPjc"
