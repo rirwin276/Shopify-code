@@ -36,24 +36,23 @@
     endfor
   endif
 
-  # Say it once per card.
+  # The badge always shows. The title yields instead — see
+  # pro-listing-title, which strips the suffix for display on the card.
   #
-  # The publisher also appends "— Front & Back" / "— Name & Number" to the
-  # title, because the title is the only text that survives the cart, the order
-  # confirmation email and search, where no badge can follow it. On a card that
-  # shows both, the same three words appear twice stacked on top of each other,
-  # which reads as a bug rather than as emphasis. The badge yields: it is the
-  # one of the two that has an alternative already on screen.
+  # This used to work the other way round: a title already saying "Front &
+  # Back" suppressed the badge, on the reasoning that the same words twice on
+  # one card reads as a bug. In a real grid that was wrong twice over.
   #
-  # Matched on the label alone rather than the full " — label" suffix, so a
-  # title that spells the separator differently is still deduplicated.
-  if pro_extra != blank
-    assign title_down = product.title | downcase
-    assign label_down = pro_extra | downcase
-    if title_down contains label_down
-      assign pro_extra = ''
-    endif
-  endif
+  # It made the grid inconsistent — products published before titles carried
+  # the suffix showed a badge, products published after did not, so the same
+  # attribute appeared and disappeared down the page and looked like the badge
+  # was broken. And it dropped the more legible of the two: the badge sits on
+  # the image where the eye already is, while the suffix lands at the end of a
+  # title that wraps to three lines on a narrow card.
+  #
+  # The title keeps its suffix everywhere that is not a product card — the
+  # cart, the order confirmation, search results — because no badge can follow
+  # it there.
 
   echo pro_extra
 -%}

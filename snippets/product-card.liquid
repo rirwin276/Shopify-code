@@ -119,7 +119,15 @@
 
     {%- comment -%} INFO AREA {%- endcomment -%}
     <div class="ss-info-deck">
-      <h3 class="ss-title">{{ p.title }}</h3>
+      {%- comment -%}
+        The badge on the image already says "Front & Back" / "Name & Number",
+        so the title drops the matching suffix here. It keeps it everywhere a
+        badge cannot reach — cart, order emails, search.
+      {%- endcomment -%}
+      {%- capture ss_card_title -%}
+        {%- render 'pro-listing-title', product: p, badge: pro_extra -%}
+      {%- endcapture -%}
+      <h3 class="ss-title">{{ ss_card_title | strip }}</h3>
 
       {%- comment -%}
         Which colours this garment comes in.

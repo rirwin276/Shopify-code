@@ -1,0 +1,36 @@
+{%- doc -%}
+  The product title as a card should show it — without the suffix the badge is
+  already saying.
+
+  The publisher appends "— Front & Back" / "— Name & Number" to the title so
+  the information survives the cart, the order confirmation email and search
+  results, where a badge cannot follow it. On a product card the badge does say
+  it, right on the image, so repeating it at the end of a title that wraps to
+  three lines is noise.
+
+  Only the exact suffix the badge is showing is removed, and only from the end.
+  A product genuinely named something ending in those words keeps its name, and
+  nothing anywhere else is affected — this changes one line of display text.
+
+  @param {object} product - The product object.
+  @param {string} badge - The label the card is already showing, or empty.
+
+  @example
+  {%- capture card_title -%}{%- render 'pro-listing-title', product: p, badge: pro_extra -%}{%- endcapture -%}
+{%- enddoc -%}
+{%- liquid
+  assign shown = product.title
+
+  if badge != blank
+    assign em_dash_suffix = ' — ' | append: badge
+    assign hyphen_suffix = ' - ' | append: badge
+
+    if shown contains em_dash_suffix
+      assign shown = shown | split: em_dash_suffix | first
+    elsif shown contains hyphen_suffix
+      assign shown = shown | split: hyphen_suffix | first
+    endif
+  endif
+
+  echo shown | strip
+-%}
