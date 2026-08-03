@@ -514,10 +514,24 @@
 
                       {% assign lf = entry.logo.value | default: entry.logo %}
                       {% if lf != blank %}{% assign tile_logo_file = lf %}{% endif %}
-                      {% if tile_logo_clean != blank %}
-                        {% assign tile_onboarding_image = tile_logo_clean %}
-                      {% elsif tile_logo_file != blank %}
+                      {%- comment -%}
+                        entry.logo wins over logo_clean_url.
+
+                        The store page renders entry.logo and has always shown
+                        the right mark; the dashboard preferred the
+                        background-removed copy, which is a second field that
+                        can drift out of sync with the first and did. One
+                        source for both surfaces means a correct store page can
+                        no longer sit beside a wrong dashboard card.
+
+                        The clean copy stays as the fallback for stores that
+                        only ever had one.
+                      {%- endcomment -%}
+                      {% if tile_logo_file != blank %}
+                        {% assign tile_logo_clean = blank %}
                         {% assign tile_onboarding_image = tile_logo_file | image_url: width: 1200 %}
+                      {% elsif tile_logo_clean != blank %}
+                        {% assign tile_onboarding_image = tile_logo_clean %}
                       {% endif %}
 
                       {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}

@@ -87,13 +87,39 @@
         var mappedSrc = mapped && typeof mapped === 'object' ? mapped.src : mapped;
         var mappedSrcset = mapped && typeof mapped === 'object' ? mapped.srcset : '';
         var current = img.getAttribute('src') || '';
-        var upgraded = mappedSrc || upgradeShopifyImageUrl(current);
+
+        // This function sharpens. It does not choose.
+        //
+        // It used to prefer mappedSrc over the card's own image, which made it
+        // the deciding vote on WHICH logo a store shows — and the map is built
+        // from customer tags against entry.logo while the card renders
+        // logo_clean_url, so the two can disagree and the JS silently won.
+        // That is how a run of stores ended up wearing one logo while every
+        // store page showed the right one.
+        //
+        // Now the card's server-rendered src is the only source of truth and
+        // the upgrade is a width bump on that exact file.
+        var upgraded = upgradeShopifyImageUrl(current);
+
+        // The high-res srcset is only safe when it points at the same file as
+        // the image already on the card. Same path, different width — anything
+        // else is a different picture, which is not this function's call.
+        var srcsetIsSameImage = false;
+        if (mappedSrcset && mappedSrc && current) {
+          try {
+            srcsetIsSameImage =
+              new URL(mappedSrc, window.location.origin).pathname ===
+              new URL(current, window.location.origin).pathname;
+          } catch (e) {
+            srcsetIsSameImage = false;
+          }
+        }
 
         if (upgraded && img.dataset.ssDashboardMapped !== upgraded) {
           var pre = new Image();
           pre.onload = function () {
             img.removeAttribute('srcset');
-            if (mappedSrcset) img.setAttribute('srcset', mappedSrcset);
+            if (srcsetIsSameImage) img.setAttribute('srcset', mappedSrcset);
             img.setAttribute('sizes', '(max-width: 850px) 104px, 88px');
             img.setAttribute('src', upgraded);
             img.dataset.ssDashboardMapped = upgraded;
