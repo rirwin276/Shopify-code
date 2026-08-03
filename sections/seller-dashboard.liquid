@@ -442,6 +442,46 @@
                   </div>
                 {% endif %}
 
+                {%- comment -%}
+                  Find any "clean" logo URL that more than one store resolves
+                  to, so it can be ignored.
+
+                  The dashboard prefers logo_clean_url (a background-removed
+                  copy) over the store's own logo media. When that field is
+                  stale or was written wrong, a run of stores all render the
+                  same picture — which is what happened here: four stores in a
+                  row showing one logo on the dashboard while each store page,
+                  which reads entry.logo, showed the correct one.
+
+                  A clean URL shared by two stores is not a store's logo by
+                  definition, so those fall back to entry.logo. Stores whose
+                  clean URL is unique keep it, and nothing has to be migrated
+                  for the dashboard to stop lying.
+                {%- endcomment -%}
+                {%- assign all_clean_urls = '' -%}
+                {%- for raw_handle in handles_array -%}
+                  {%- assign h = raw_handle | strip -%}
+                  {%- if h != blank -%}
+                    {%- assign e = shop.metaobjects.custom_shop[h] -%}
+                    {%- if e -%}
+                      {%- assign u = e.logo_clean_url.value | default: e.logo_clean_url -%}
+                      {%- if u == blank -%}{%- assign u = e.logo_clean.value | default: e.logo_clean -%}{%- endif -%}
+                      {%- if u == blank -%}{%- assign u = e.logo_clean_url_.value | default: e.logo_clean_url_ -%}{%- endif -%}
+                      {%- if u != blank -%}
+                        {%- assign all_clean_urls = all_clean_urls | append: '|' | append: u | strip -%}
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                {%- comment -%}
+                  Trailing separator so the last URL is never at the very end
+                  of the string. Liquid's split drops trailing empty segments,
+                  so without this a duplicate whose second occurrence is last
+                  counts as unique — and the final store keeps the wrong logo,
+                  which is exactly the store that had it.
+                {%- endcomment -%}
+                {%- assign all_clean_urls = all_clean_urls | append: '|' -%}
+
                 {% for raw_handle in handles_array %}
                   {% assign handle = raw_handle | strip %}
                   {% if handle != blank %}
@@ -464,7 +504,13 @@
                       {% assign lcu = entry.logo_clean_url.value | default: entry.logo_clean_url %}
                       {% if lcu == blank %}{% assign lcu = entry.logo_clean.value | default: entry.logo_clean %}{% endif %}
                       {% if lcu == blank %}{% assign lcu = entry.logo_clean_url_.value | default: entry.logo_clean_url_ %}{% endif %}
-                      {% if lcu != blank %}{% assign tile_logo_clean = lcu | strip %}{% endif %}
+                      {% if lcu != blank %}
+                        {% assign lcu = lcu | strip %}
+                        {% assign clean_uses = all_clean_urls | split: lcu | size | minus: 1 %}
+                        {% if clean_uses <= 1 %}
+                          {% assign tile_logo_clean = lcu %}
+                        {% endif %}
+                      {% endif %}
 
                       {% assign lf = entry.logo.value | default: entry.logo %}
                       {% if lf != blank %}{% assign tile_logo_file = lf %}{% endif %}
@@ -650,6 +696,8 @@
 
                   {% endif %}
                 {% endfor %}
+
+                {% render 'logo-frame-contrast' %}
               </div>
 
               <div class="ss-mobile-insights">

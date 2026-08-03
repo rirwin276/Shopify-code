@@ -1,0 +1,117 @@
+{%- doc -%}
+  Picks a frame background that the store's logo can actually be seen against.
+
+  Store logos are uploaded by customers and we do not get to choose them. A
+  mostly-white logo with pale blue detail — a very normal thing for a fire
+  department or a school crest — vanishes completely against the white frame
+  the dashboard uses, and the card reads as broken or empty.
+
+  Liquid cannot inspect an image, so the measurement happens in the browser:
+  the logo is drawn to a tiny canvas and its visible pixels are averaged. Light
+  logos get a dark frame, dark and colourful ones keep the white one.
+
+  Only pixels with real opacity are counted. Background-removed logos are
+  mostly transparent, and averaging the empty space would make every one of
+  them look light regardless of the mark itself.
+
+  Reading pixels back from a canvas requires the image to be CORS-clean. If it
+  is not, the read throws and the frame simply keeps its default — a logo that
+  looks the same as it does today, never a broken card.
+
+  Render once per page that shows .ss-logo-frame.
+{%- enddoc -%}
+<script>
+  (function () {
+    // Above this mean luminance (0-255) a logo is "light" and needs a dark
+    // frame behind it. Chosen well above mid-grey: the failure being prevented
+    // is a near-white mark disappearing, and darkening a merely pale-ish logo
+    // costs more than it gains.
+    var LIGHT_THRESHOLD = 186;
+    var SAMPLE = 24;
+
+    function measure(img) {
+      var canvas = document.createElement('canvas');
+      canvas.width = SAMPLE;
+      canvas.height = SAMPLE;
+      var ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return null;
+
+      try {
+        ctx.drawImage(img, 0, 0, SAMPLE, SAMPLE);
+        var data = ctx.getImageData(0, 0, SAMPLE, SAMPLE).data;
+        var sum = 0;
+        var counted = 0;
+        for (var i = 0; i < data.length; i += 4) {
+          var alpha = data[i + 3];
+          if (alpha < 40) continue;  // transparent padding is not the logo
+          // Rec. 601 luma — matches how bright a colour looks, which is the
+          // question being asked, rather than its raw channel average.
+          sum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          counted++;
+        }
+        if (counted < 12) return null;  // too little ink to judge
+        return sum / counted;
+      } catch (e) {
+        // Tainted canvas (image served without CORS headers). Leave it alone.
+        return null;
+      }
+    }
+
+    function apply(img) {
+      if (!img || img.dataset.ssContrastDone) return;
+      var frame = img.closest('.ss-logo-frame');
+      if (!frame) return;
+      // An inline background is a deliberate choice by whoever wrote the
+      // markup (the onboarding sample tiles set their own); do not override it.
+      if (frame.getAttribute('style') && /background/.test(frame.getAttribute('style'))) return;
+
+      var luma = measure(img);
+      img.dataset.ssContrastDone = '1';
+      if (luma === null) return;
+      if (luma > LIGHT_THRESHOLD) frame.classList.add('ss-logo-frame--dark');
+    }
+
+    function watch(img) {
+      if (img.complete && img.naturalWidth) apply(img);
+      else img.addEventListener('load', function () { apply(img); }, { once: true });
+    }
+
+    function sweep() {
+      var imgs = document.querySelectorAll('.ss-logo-frame img');
+      for (var i = 0; i < imgs.length; i++) watch(imgs[i]);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', sweep, { once: true });
+    } else {
+      sweep();
+    }
+
+    // Cards are lazy-rendered and re-rendered as stores wake or sleep. The
+    // observer only reads images and toggles a class — it never inserts or
+    // removes nodes, and it does not watch attributes, so it cannot retrigger
+    // itself.
+    if (window.MutationObserver) {
+      new MutationObserver(function (records) {
+        for (var i = 0; i < records.length; i++) {
+          var added = records[i].addedNodes;
+          for (var j = 0; j < added.length; j++) {
+            var node = added[j];
+            if (node.nodeType !== 1) continue;
+            if (node.tagName === 'IMG' && node.closest('.ss-logo-frame')) watch(node);
+            else if (node.querySelectorAll) {
+              var inner = node.querySelectorAll('.ss-logo-frame img');
+              for (var k = 0; k < inner.length; k++) watch(inner[k]);
+            }
+          }
+        }
+      }).observe(document.documentElement, { childList: true, subtree: true });
+    }
+  })();
+</script>
+<style>
+  .ss-logo-frame--dark {
+    background: #2f3542 !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+  }
+</style>
