@@ -1772,7 +1772,22 @@
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; border: 1px solid rgba(15,23,42,0.08); flex-shrink: 0;
   }
-  .ss-logo-frame img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+  /* One inset for every breakpoint.
+     Six different pixel paddings were competing here — 4, 6, 3, 1 and two
+     zeroes — and on desktop the zeroes won, so the artwork ran edge to edge
+     and the wordmark ended up flush against the rounded corner. A percentage
+     is relative to the image's own width, which is the frame's width, so a
+     single value stays proportional at 66px and at 104px instead of needing a
+     new number each time the frame is resized.
+     box-sizing is explicit: without it the padding is added OUTSIDE the 100%
+     box and pushes the image out of the frame rather than insetting it. */
+  .ss-logo-frame img {
+    width: 100%; height: 100%;
+    box-sizing: border-box !important;
+    object-fit: contain;
+    object-position: center center;
+    padding: 9% !important;
+  }
 
   .ss-logo-fallback { font-size: 18px; font-weight: 850; color: rgba(148,163,184,0.9); }
 
@@ -3036,7 +3051,7 @@
 }
 
 .ss-logo-frame img {
-  padding: 6px !important;
+  padding: 9% !important;
 }
 
 .ss-logo-fallback {
@@ -3480,7 +3495,7 @@
   }
 
   .ss-logo-frame img {
-    padding: 3px !important;
+    padding: 9% !important;
   }
 
   .ss-identity-text {
@@ -3855,7 +3870,7 @@
   }
 
   .ss-logo-frame img {
-    padding: 1px !important;
+    padding: 9% !important;
     filter: saturate(1.24) contrast(1.08) brightness(1.04) !important;
   }
 
@@ -3905,7 +3920,7 @@
   }
 
   .ss-logo-frame img {
-    padding: 0 !important;
+    padding: 9% !important;
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
