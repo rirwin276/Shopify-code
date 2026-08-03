@@ -77,6 +77,24 @@
       }
     }
 
+    function setDark(frame) {
+      frame.classList.add('ss-logo-frame--dark');
+      // Also written inline with !important, which outranks every stylesheet
+      // rule regardless of source order or selector weight.
+      //
+      // The class alone was not enough on the dashboard, and only there: it is
+      // outgunned by ".ss-portal .ss-logo-frame { background: ... !important }"
+      // on specificity, and tied-but-later-declared by a second
+      // ".ss-logo-frame { background: ... !important }" further down the same
+      // section. Both are dashboard-only, which is exactly why the storefront
+      // hero and admin portal picked the dark frame up and the store cards did
+      // not. Escalating specificity here would just be the next move in an
+      // arms race with stylesheets this snippet does not own.
+      frame.dataset.ssContrastApplied = '1';
+      frame.style.setProperty('background', '#2f3542', 'important');
+      frame.style.setProperty('border-color', 'rgba(255,255,255,0.14)', 'important');
+    }
+
     function apply(img) {
       if (!img || img.dataset.ssContrastDone) return;
       var src = img.currentSrc || img.getAttribute('src') || '';
@@ -85,9 +103,10 @@
       var frame = img.closest(FRAME_SELECTOR);
       if (!frame) return;
       // An inline background is a deliberate choice by whoever wrote the
-      // markup (the onboarding sample tiles set their own); do not override it.
+      // markup (the onboarding sample tiles set their own); do not override
+      // it. Our own inline style does not count — see setDark.
       var inline = frame.getAttribute('style') || '';
-      if (/background/.test(inline)) return;
+      if (/background/.test(inline) && frame.dataset.ssContrastApplied !== '1') return;
 
       img.dataset.ssContrastDone = '1';
 
@@ -95,9 +114,7 @@
       probe.crossOrigin = 'anonymous';
       probe.onload = function () {
         var luma = luminanceOf(probe);
-        if (luma !== null && luma > LIGHT_THRESHOLD) {
-          frame.classList.add('ss-logo-frame--dark');
-        }
+        if (luma !== null && luma > LIGHT_THRESHOLD) setDark(frame);
       };
       probe.onerror = function () { /* no CORS copy available; keep default */ };
       probe.src = src;
