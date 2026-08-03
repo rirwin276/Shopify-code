@@ -2,18 +2,23 @@
   Keeps a preview session alive as the visitor moves around the store.
 
   A preview is unlocked by ?preview=<token> on the URL, so any link that drops
-  the token drops the visitor onto "Sign in to access your private store". The
-  first version of this ran only on the collection hero, so opening a product
-  worked (that link was rewritten) but "← Back to Storefront" on the product
-  page did not — the preview ended on the way back, which is worse than it
-  never starting, because by then the prospect has seen the gear and is being
-  told they have no access to it.
+  the token lands the visitor on "Sign in to access your private store". A
+  prospect who has just watched their own name render on the back of a jersey
+  reads that as the platform being broken.
 
-  Rewriting happens at click time in the capture phase, so it beats any other
-  script that sets an href later — the back-to-storefront button is filled in
-  by its own inline script, and this still wins.
+  Rewriting happens in two passes, because one is not enough:
 
-  Render it on every page that can render in preview.
+  1. On load, every in-store link on the page is rewritten immediately. This
+     matters because the theme does its own things with hrefs — the
+     back-to-storefront button is filled in by an inline script, product cards
+     carry view-transition wiring, and anything that reads an href before a
+     click would otherwise read the tokenless one.
+
+  2. A click handler in the capture phase catches links added after load
+     (recommendations, quick views, anything lazily rendered).
+
+  Neither pass is a guarantee on its own, which is why the no-access screens
+  also carry private-store-preview-resume as the final backstop.
 
   @param {string} handle - The store handle this preview belongs to.
 {%- enddoc -%}
@@ -32,13 +37,13 @@
       sessionStorage.setItem('ss_preview_token__{{ handle }}', token);
     } catch (e) {}
 
-    document.addEventListener('click', function (e) {
-      var a = e.target.closest && e.target.closest('a[href]');
-      if (!a) return;
+    function withToken(a) {
+      if (!a || !a.getAttribute) return;
+      var raw = a.getAttribute('href');
+      if (!raw) return;
 
       var url;
-      try { url = new URL(a.getAttribute('href'), window.location.origin); }
-      catch (err) { return; }
+      try { url = new URL(raw, window.location.origin); } catch (err) { return; }
 
       if (url.origin !== window.location.origin) return;
       // Only store pages. Account, cart and marketing links are meant to leave
@@ -48,7 +53,54 @@
       if (url.searchParams.get('preview')) return;
 
       url.searchParams.set('preview', token);
-      a.href = url.toString();
+      a.setAttribute('href', url.toString());
+    }
+
+    function sweep(root) {
+      var links = (root || document).querySelectorAll('a[href]');
+      for (var i = 0; i < links.length; i++) withToken(links[i]);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { sweep(); }, { once: true });
+    } else {
+      sweep();
+    }
+
+    // Backstop for links that appear later. Capture phase, so it still wins
+    // against handlers that read the href on the way up.
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (a) withToken(a);
     }, true);
+
+    // A middle-click or ctrl-click opens a new tab without firing 'click'.
+    document.addEventListener('auxclick', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (a) withToken(a);
+    }, true);
+
+    // Shopify sections re-render on variant and filter changes, replacing
+    // whole blocks of markup and every link inside them.
+    //
+    // The observer only reads and rewrites hrefs — it never adds or removes
+    // nodes — so it cannot retrigger itself. Attribute changes are not
+    // watched, for the same reason: rewriting an href would be an attribute
+    // change, and watching those is how an observer feeds itself into a loop
+    // that starves the main thread.
+    if (window.MutationObserver) {
+      var observer = new MutationObserver(function (records) {
+        for (var i = 0; i < records.length; i++) {
+          var added = records[i].addedNodes;
+          for (var j = 0; j < added.length; j++) {
+            var node = added[j];
+            if (node.nodeType !== 1) continue;
+            if (node.tagName === 'A') withToken(node);
+            else if (node.querySelectorAll) sweep(node);
+          }
+        }
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
   })();
 </script>
