@@ -14,22 +14,14 @@
 {% assign access_tag = 'custom_storefront_access' %}
 {% assign shop_admin_tag = 'custom_shop_admin' %}
 
+{% capture ps_access %}{% render 'private-store-access', handle: handle %}{% endcapture %}
+{% assign ps_access = ps_access | strip %}
 {% assign is_admin = false %}
 {% assign allowed = false %}
-
-{% if customer %}
-  {% for t in customer.tags %}
-    {% assign td = t | downcase | strip %}
-    {% if td == shop_admin_tag or td == admin_tag %}
-      {% assign is_admin = true %}
-      {% assign allowed = true %}
-      {% break %}
-    {% endif %}
-    {% if td == access_tag or td == member_tag %}
-      {% assign allowed = true %}
-    {% endif %}
-  {% endfor %}
-{% endif %}
+{% assign is_preview = false %}
+{% if ps_access == 'admin' %}{% assign is_admin = true %}{% assign allowed = true %}{% endif %}
+{% if ps_access == 'member' %}{% assign allowed = true %}{% endif %}
+{% if ps_access == 'preview' %}{% assign allowed = true %}{% assign is_preview = true %}{% endif %}
 
 {% assign entry = shop.metaobjects.custom_shop[handle] %}
 {% assign store_name = collection.title %}
@@ -57,7 +49,59 @@
   {% assign join_link = join_link | append: '&code=' | append: join_code %}
 {% endif %}
 
-{% if customer and allowed %}
+{% if allowed %}
+
+  {%- if is_preview -%}
+    {%- comment -%}
+      What a prospect sees first. They arrived from a cold email, so the page
+      has to say what this is and what happens next before they wonder.
+    {%- endcomment -%}
+    <div class="ps-preview-banner">
+      <div class="ps-preview-banner__inner">
+        <span class="ps-preview-banner__label">Live preview</span>
+        <span class="ps-preview-banner__text">
+          This is a working store built for {{ store_name }}. Open any product to pick
+          colors, sizes and add a name &amp; number. Nothing here is public.
+        </span>
+      </div>
+    </div>
+    <style>
+      .ps-preview-banner { padding: 10px 16px 0; }
+      .ps-preview-banner__inner {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+        max-width: 1200px; margin: 0 auto; padding: 12px 16px;
+        background: rgb(17 16 14 / 0.92); color: #fff; border-radius: 12px;
+        font-size: 14px; line-height: 1.4;
+      }
+      .ps-preview-banner__label {
+        font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+        background: rgba(183,163,106,.9); color: #1a160c; padding: 4px 9px; border-radius: 999px;
+        white-space: nowrap;
+      }
+      .ps-preview-banner__text { flex: 1 1 260px; }
+    </style>
+    <script>
+      // Carry the preview token onto every in-store link, so opening a product
+      // does not drop the visitor back onto a sign-in wall. Without this the
+      // preview ends at the first click, which is the click that matters.
+      (function () {
+        var token = new URLSearchParams(window.location.search).get('preview');
+        if (!token) return;
+        document.addEventListener('click', function (e) {
+          var a = e.target.closest && e.target.closest('a[href]');
+          if (!a) return;
+          var url;
+          try { url = new URL(a.href, window.location.origin); } catch (err) { return; }
+          if (url.origin !== window.location.origin) return;
+          if (!/^\/(products|collections)\//.test(url.pathname)) return;
+          if (url.searchParams.get('preview')) return;
+          url.searchParams.set('preview', token);
+          a.href = url.toString();
+        }, true);
+      })();
+    </script>
+  {%- endif -%}
+
 
   {% if is_admin %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -168,7 +212,7 @@
     </div>
   {% endif %}
 
-{% elsif customer and allowed == false %}
+{% elsif customer %}
 
   <section class="ps-hero ps-hero--auth">
     <div class="ps-wrap ps-center">

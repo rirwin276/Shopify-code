@@ -1,0 +1,63 @@
+{%- doc -%}
+  Echoes this visitor's access level for one private store, or nothing.
+
+  Values: "admin", "member", "preview", or empty.
+
+  Three sections independently decided who may see a private store — the
+  collection hero, the product grid, and the product page — each with its own
+  copy of the same tag loop. A rule written three times drifts, and a preview
+  that unlocks the grid but not the product page is worse than no preview at
+  all: a prospect clicks the first shirt and hits a sign-in wall.
+
+  PREVIEW
+  -------
+  A link carrying ?preview=<the store's join_code> opens the store read-only
+  for someone with no account. That is what a cold outreach email needs: the
+  recipient sees their own logo on real garments in a couple of seconds
+  instead of being bounced to Shopify account creation before seeing anything.
+
+  join_code is already the per-store shared secret behind the join link, so no
+  new field is needed and access is revoked by rotating it. Preview is not a
+  weaker member tag — callers must decide separately what a previewer may do,
+  and none of them may let one check out.
+
+  @param {string} handle - The store handle (collection handle).
+
+  @example
+  {%- capture ps_access -%}{%- render 'private-store-access', handle: handle -%}{%- endcapture -%}
+  {%- assign ps_access = ps_access | strip -%}
+{%- enddoc -%}
+{%- liquid
+  assign ps_handle = handle | downcase | strip
+  assign ps_level = ''
+
+  if customer and ps_handle != blank
+    assign ps_member_tag = 'storefront-member--' | append: ps_handle
+    assign ps_admin_tag = 'storefront-admin--' | append: ps_handle
+    for tag in customer.tags
+      assign t = tag | downcase | strip
+      if t == 'custom_shop_admin' or t == ps_admin_tag
+        assign ps_level = 'admin'
+        break
+      endif
+      if t == 'custom_storefront_access' or t == ps_member_tag
+        assign ps_level = 'member'
+      endif
+    endfor
+  endif
+
+  if ps_level == blank and ps_handle != blank
+    assign ps_supplied = request.params.preview | default: '' | strip
+    if ps_supplied != blank
+      assign ps_entry = shop.metaobjects.custom_shop[ps_handle]
+      if ps_entry
+        assign ps_code = ps_entry.join_code.value | default: ps_entry.join_code | default: '' | strip
+        if ps_code != blank and ps_supplied == ps_code
+          assign ps_level = 'preview'
+        endif
+      endif
+    endif
+  endif
+
+  echo ps_level
+-%}

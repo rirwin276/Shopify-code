@@ -36,20 +36,23 @@
     endfor
   endif
 
-  if is_private_store_product and customer
-    assign private_member_tag = 'storefront-member--' | append: private_store_handle
-    assign private_admin_tag = 'storefront-admin--' | append: private_store_handle
+  if is_private_store_product
+    capture private_store_level
+      render 'private-store-access', handle: private_store_handle
+    endcapture
+    assign private_store_level = private_store_level | strip
 
-    for tag in customer.tags
-      assign normalized_tag = tag | downcase | strip
-      if normalized_tag == 'custom_shop_admin' or normalized_tag == private_admin_tag
-        assign has_private_store_access = true
-        break
-      endif
-      if normalized_tag == 'custom_storefront_access' or normalized_tag == private_member_tag
-        assign has_private_store_access = true
-      endif
-    endfor
+    if private_store_level != blank
+      assign has_private_store_access = true
+    endif
+
+    # A previewer may look at the product and drive the personalization
+    # preview — that is the demo — but may not order. Buying is what the store
+    # is private for, and "join to order" is the moment the account finally
+    # asks for something the visitor now wants.
+    if private_store_level == 'preview'
+      assign private_store_preview = true
+    endif
   endif
 
   if section.settings.desktop_media_position == 'left'
@@ -109,6 +112,63 @@
     </div>
   </div>
 {% else %}
+{%- if private_store_preview -%}
+  {%- comment -%}
+    Preview: look, personalize, but do not order.
+
+    The buy form is disabled rather than removed — the block that renders it
+    owns a lot of variant wiring, and tearing it out here would break the
+    live personalization preview, which is the single thing this whole page
+    exists to show a prospect.
+
+    This is a soft gate on purpose. It stops the honest visitor, and the worst
+    a determined one achieves is buying a shirt at full price. It is also
+    strictly stronger than what existed before preview, when nobody outside
+    the store could reach this page at all.
+  {%- endcomment -%}
+  {%- assign ps_join_link = '/pages/join-store?shop=' | append: private_store_handle -%}
+  <div class="ps-preview-bar">
+    <span class="ps-preview-bar__label">Preview</span>
+    <span class="ps-preview-bar__text">
+      Try the colors, sizes and personalization. Ordering opens once this store is yours.
+    </span>
+    <a class="ps-preview-bar__cta" href="{{ ps_join_link }}">Get this store</a>
+  </div>
+  <style>
+    .ps-preview-bar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+      max-width: 1200px; margin: 0 auto 8px; padding: 12px 16px;
+      background: rgb(17 16 14 / 0.92); color: #fff; border-radius: 12px;
+      font-size: 14px; line-height: 1.35;
+    }
+    .ps-preview-bar__label {
+      font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+      background: rgba(183,163,106,.9); color: #1a160c; padding: 4px 9px; border-radius: 999px;
+    }
+    .ps-preview-bar__text { flex: 1 1 240px; }
+    .ps-preview-bar__cta {
+      background: #fff; color: #17150f; text-decoration: none; font-weight: 700;
+      padding: 9px 16px; border-radius: 999px; white-space: nowrap;
+    }
+    /* Keep the buttons in the layout so nothing reflows, but make them inert
+       and obviously not the next thing to do. */
+    .ps-is-preview .product-form-buttons button,
+    .ps-is-preview .product-form-buttons [type="submit"],
+    .ps-is-preview .shopify-payment-button { opacity: .35; pointer-events: none; }
+  </style>
+  <script>
+    (function () {
+      document.documentElement.classList.add('ps-is-preview');
+      document.addEventListener('submit', function (e) {
+        var f = e.target;
+        if (f && f.getAttribute && f.getAttribute('data-type') === 'add-to-cart-form') {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+    })();
+  </script>
+{%- endif -%}
 <script type="application/ld+json">
   {{ closest.product | structured_data }}
 </script>
