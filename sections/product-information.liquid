@@ -100,6 +100,7 @@
     style="{% render 'spacing-style', settings: section.settings %} --gap: {{ section.settings.gap }}px;"
   >
     <div class="product-information__private-gate">
+      {% render 'private-store-preview-resume', handle: private_store_handle %}
       {% if customer %}
         <h1>Access required</h1>
         <p>You do not currently have access to this private store product.</p>
@@ -156,6 +157,7 @@
     .ps-is-preview .product-form-buttons [type="submit"],
     .ps-is-preview .shopify-payment-button { opacity: .35; pointer-events: none; }
   </style>
+  {% render 'private-store-preview-links', handle: private_store_handle %}
   <script>
     (function () {
       document.documentElement.classList.add('ps-is-preview');

@@ -90,26 +90,7 @@
         padding: 9px 16px; border-radius: 999px; white-space: nowrap;
       }
     </style>
-    <script>
-      // Carry the preview token onto every in-store link, so opening a product
-      // does not drop the visitor back onto a sign-in wall. Without this the
-      // preview ends at the first click, which is the click that matters.
-      (function () {
-        var token = new URLSearchParams(window.location.search).get('preview');
-        if (!token) return;
-        document.addEventListener('click', function (e) {
-          var a = e.target.closest && e.target.closest('a[href]');
-          if (!a) return;
-          var url;
-          try { url = new URL(a.href, window.location.origin); } catch (err) { return; }
-          if (url.origin !== window.location.origin) return;
-          if (!/^\/(products|collections)\//.test(url.pathname)) return;
-          if (url.searchParams.get('preview')) return;
-          url.searchParams.set('preview', token);
-          a.href = url.toString();
-        }, true);
-      })();
-    </script>
+    {% render 'private-store-preview-links', handle: handle %}
   {%- endif -%}
 
 
@@ -250,6 +231,7 @@
     <div class="ps-wrap ps-center">
       <div class="ps-auth-card">
         <div class="ps-auth-icon">🔒</div>
+        {% render 'private-store-preview-resume', handle: handle %}
         <h1 class="ps-title">Sign in to access your private store</h1>
         <p class="ps-sub">This storefront is private. Sign in to view approved products and reorders.</p>
         <div class="ps-actions">

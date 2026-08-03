@@ -1,0 +1,54 @@
+{%- doc -%}
+  Keeps a preview session alive as the visitor moves around the store.
+
+  A preview is unlocked by ?preview=<token> on the URL, so any link that drops
+  the token drops the visitor onto "Sign in to access your private store". The
+  first version of this ran only on the collection hero, so opening a product
+  worked (that link was rewritten) but "← Back to Storefront" on the product
+  page did not — the preview ended on the way back, which is worse than it
+  never starting, because by then the prospect has seen the gear and is being
+  told they have no access to it.
+
+  Rewriting happens at click time in the capture phase, so it beats any other
+  script that sets an href later — the back-to-storefront button is filled in
+  by its own inline script, and this still wins.
+
+  Render it on every page that can render in preview.
+
+  @param {string} handle - The store handle this preview belongs to.
+{%- enddoc -%}
+<script>
+  (function () {
+    var token = new URLSearchParams(window.location.search).get('preview');
+    if (!token) return;
+
+    // Remembered so a navigation that loses the token can be recovered — see
+    // private-store-preview-resume.
+    //
+    // Keyed by store. A single shared key would mean previewing one store
+    // hands out a token that the resume path then replays at every other
+    // store, quietly unlocking stores nobody sent this person a link to.
+    try {
+      sessionStorage.setItem('ss_preview_token__{{ handle }}', token);
+    } catch (e) {}
+
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+
+      var url;
+      try { url = new URL(a.getAttribute('href'), window.location.origin); }
+      catch (err) { return; }
+
+      if (url.origin !== window.location.origin) return;
+      // Only store pages. Account, cart and marketing links are meant to leave
+      // the preview, and tagging them would be noise on a URL a prospect may
+      // well copy and send to someone else.
+      if (!/^\/(products|collections)\//.test(url.pathname)) return;
+      if (url.searchParams.get('preview')) return;
+
+      url.searchParams.set('preview', token);
+      a.href = url.toString();
+    }, true);
+  })();
+</script>

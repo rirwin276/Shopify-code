@@ -1,0 +1,30 @@
+{%- doc -%}
+  Puts a previewer back into their preview instead of showing them a wall.
+
+  Rewriting links at click time covers ordinary navigation, but not a typed
+  URL, a middle-click into a new tab, a back-forward restore, or any link this
+  theme builds in a way the rewriter does not see. When one of those drops the
+  token, the visitor lands on "Sign in to access your private store" — and a
+  prospect who has just been looking at their own logo on a shirt reads that as
+  the platform breaking, not as a missing query parameter.
+
+  So the preview token is remembered for the session, and the no-access screens
+  quietly restore it. A member who is simply signed out has no token stored and
+  sees the sign-in screen exactly as before.
+
+  Render this inside the "no access" branch of any private-store page.
+
+  @param {string} handle - The store handle this page is for.
+{%- enddoc -%}
+<script>
+  (function () {
+    try {
+      var stored = sessionStorage.getItem('ss_preview_token__{{ handle }}');
+      if (!stored) return;
+      var url = new URL(window.location.href);
+      if (url.searchParams.get('preview')) return;  // already tried; do not loop
+      url.searchParams.set('preview', stored);
+      window.location.replace(url.toString());
+    } catch (e) {}
+  })();
+</script>
