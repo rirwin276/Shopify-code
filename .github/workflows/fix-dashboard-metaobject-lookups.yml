@@ -1,0 +1,90 @@
+name: Fix dashboard metaobject lookups
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-dashboard-metaobject-lookups.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Patch dashboard lookup and rendering
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("sections/seller-dashboard.liquid")
+          text = path.read_text(encoding="utf-8")
+
+          old_loop = """                {% for raw_handle in handles_array %}
+                  {% assign handle = raw_handle | strip %}
+                  {% if handle != blank %}
+
+                    {% assign entry = shop.metaobjects.custom_shop[handle] %}
+"""
+          new_loop = """                {% for raw_handle in handles_array %}
+                  {% assign handle = raw_handle | strip %}
+                  {% if handle != blank %}
+
+                    {%- comment -%}
+                      Always clear the previous metaobject before resolving the next
+                      handle. Shopify can leave the previous MetaobjectDrop in the
+                      variable when a dynamic handle lookup misses, which caused one
+                      store (for example Stella & Sage) to be repeated across later
+                      cards. Validate the returned handle and fall back to scanning
+                      the storefront-visible values so every card is tied to its own
+                      actual metaobject.
+                    {%- endcomment -%}
+                    {% assign entry = blank %}
+                    {% assign entry = shop.metaobjects.custom_shop[handle] %}
+                    {% assign resolved_entry_handle = entry.system.handle | default: '' | strip %}
+                    {% if resolved_entry_handle != handle %}
+                      {% assign entry = blank %}
+                      {% for candidate_entry in shop.metaobjects.custom_shop.values %}
+                        {% assign candidate_handle = candidate_entry.system.handle | default: '' | strip %}
+                        {% if candidate_handle == handle %}
+                          {% assign entry = candidate_entry %}
+                          {% break %}
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+"""
+
+          if old_loop in text:
+              if text.count(old_loop) != 1:
+                  raise SystemExit(f"Expected one dashboard card loop, found {text.count(old_loop)}")
+              text = text.replace(old_loop, new_loop, 1)
+          elif "resolved_entry_handle" not in text:
+              raise SystemExit("Dashboard card loop anchor was not found")
+
+          old_css = """    contain: content;
+    content-visibility: auto;
+    contain-intrinsic-size: 110px;
+"""
+          new_css = """    contain: none;
+    content-visibility: visible;
+"""
+          if old_css in text:
+              text = text.replace(old_css, new_css, 1)
+
+          path.write_text(text, encoding="utf-8")
+
+      - name: Commit fix
+        run: |
+          if git diff --quiet -- sections/seller-dashboard.liquid; then
+            echo "No dashboard change needed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sections/seller-dashboard.liquid
+          git commit -m "Fix repeated dashboard metaobject cards"
+          git push
