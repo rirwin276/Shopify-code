@@ -673,6 +673,13 @@
       j = await r.json().catch(function(){ return {}; });
     } catch(e) { j = {}; /* store may not have a fundraiser yet */ }
 
+    // "Test mode active — no real money moves" used to be hardcoded into the
+    // page, so it kept reassuring organizers that nothing was real long after
+    // the Stripe key went live. The server reports which key will actually
+    // process the money; the note is hidden unless that key is a test one.
+    var testNote = document.getElementById('apFrwStripeTestNote');
+    if (testNote && j && j.stripe_livemode === false) testNote.style.display = '';
+
     if (j && j.ok !== false && j.enabled) {
       serverActive = true;
       _state.enabled = true;
