@@ -2671,6 +2671,14 @@
     letter-spacing: 0.06em; text-transform: uppercase;
     padding: 4px 9px; border-radius: 999px;
   }
+  /* Sits opposite the CUSTOM pill rather than under it: both are absolutely
+     positioned to the same corner, so a second one in the same spot would
+     simply cover the first. */
+  .ap-product-badge--includes {
+    left: auto; right: 10px;
+    background: rgba(17,16,14,0.86);
+    letter-spacing: 0.04em;
+  }
   /* Products panel head: count + view-live-store link on the right */
   .ap-panel-head-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
   .ap-product-row:hover {

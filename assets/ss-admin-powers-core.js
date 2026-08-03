@@ -1358,6 +1358,29 @@
         row.appendChild(badgeEl);
       }
 
+      // What the listing includes, matching the storefront card.
+      //
+      // Two products can be the same garment and differ only by a back print
+      // or by name & number. The storefront badges that; this grid did not, so
+      // an admin looking at their own catalogue had to read to the end of a
+      // wrapping title to tell two otherwise identical rows apart.
+      //
+      // Same rule as snippets/pro-listing-includes: name & number wins,
+      // because it is what is being paid for and it implies a back print
+      // anyway.
+      var includesLabel = '';
+      if(_pbTagsRaw.some(function(t){ return String(t).trim() === 'personalized-back'; })){
+        includesLabel = 'Name & Number';
+      } else if(_pbTagsRaw.some(function(t){ return String(t).indexOf('_front_back') !== -1; })){
+        includesLabel = 'Front & Back';
+      }
+      if(includesLabel){
+        var includesEl = document.createElement('span');
+        includesEl.className = 'ap-product-badge ap-product-badge--includes';
+        includesEl.textContent = includesLabel;
+        row.appendChild(includesEl);
+      }
+
       row.appendChild(imgEl);
       row.appendChild(titleEl);
       row.appendChild(actionsEl);
