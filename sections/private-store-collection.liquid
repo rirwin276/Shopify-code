@@ -63,6 +63,12 @@
           This is a working store built for {{ store_name }}. Open any product to pick
           colors, sizes and add a name &amp; number. Nothing here is public.
         </span>
+        {%- comment -%}
+          Joining has to be reachable from wherever the visitor is convinced,
+          which is in here looking at the gear — not back on the card they
+          clicked through a minute ago.
+        {%- endcomment -%}
+        <a class="ps-preview-banner__cta" href="{{ join_link }}">Join this store</a>
       </div>
     </div>
     <style>
@@ -79,6 +85,10 @@
         white-space: nowrap;
       }
       .ps-preview-banner__text { flex: 1 1 260px; }
+      .ps-preview-banner__cta {
+        background: #fff; color: #17150f; text-decoration: none; font-weight: 700;
+        padding: 9px 16px; border-radius: 999px; white-space: nowrap;
+      }
     </style>
     <script>
       // Carry the preview token onto every in-store link, so opening a product
@@ -147,9 +157,15 @@
             Shop products ↓
           </a>
 
-          <a class="ps-btn ps-btn-ghost" href="/pages/portal">
-            ← Dashboard
-          </a>
+          {% if is_preview %}
+            <a class="ps-btn ps-btn-ghost" href="{{ join_link }}">
+              Join this store
+            </a>
+          {% else %}
+            <a class="ps-btn ps-btn-ghost" href="/pages/portal">
+              ← Dashboard
+            </a>
+          {% endif %}
 
           {% if is_admin %}
             <button class="ps-btn ps-btn-soft" id="psShareStoreBtn" type="button">

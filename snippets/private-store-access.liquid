@@ -52,7 +52,21 @@
       assign ps_entry = shop.metaobjects.custom_shop[ps_handle]
       if ps_entry
         assign ps_code = ps_entry.join_code.value | default: ps_entry.join_code | default: '' | strip
-        if ps_code != blank and ps_supplied == ps_code
+        if ps_code != blank
+          # The store has a secret. Preview must present it.
+          if ps_supplied == ps_code
+            assign ps_level = 'preview'
+          endif
+        else
+          # No join_code means this store's join link is just ?shop=<handle> —
+          # anyone holding it can already JOIN and become a member. Letting the
+          # same person merely look is strictly less access than the store
+          # already grants, so any ?preview value opens it.
+          #
+          # This branch exists because gating preview on a code that most
+          # stores do not have is how the button silently failed to appear at
+          # all: the card rendered, the option did not, and the visitor was
+          # left with nothing but a sign-in.
           assign ps_level = 'preview'
         endif
       endif
