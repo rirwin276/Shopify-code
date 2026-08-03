@@ -47,7 +47,30 @@
   endif
 
   if ps_level == blank and ps_handle != blank
-    assign ps_supplied = request.params.preview | default: '' | strip
+    # Read ?preview from the page URL inside content_for_header.
+    #
+    # Shopify Liquid has no request.params — the object exposes host, origin,
+    # path, page_type, locale and design_mode, and nothing else. Reading
+    # request.params.preview therefore always produced nil, so every preview
+    # link landed on the sign-in card no matter what token it carried.
+    #
+    # This is the same parser the join-store page already carries as its
+    # "Backup URL Parser", for exactly this reason.
+    assign ps_supplied = ''
+    assign ps_page_url = content_for_header | split: '"pageurl":"' | last | split: '"' | first
+    # content_for_header is JSON, so the ampersands arrive escaped. Without
+    # this the whole query string stays one unsplittable token.
+    assign ps_page_url = ps_page_url | replace: '\u0026', '&'
+    if ps_page_url contains '?'
+      assign ps_pairs = ps_page_url | split: '?' | last | split: '&'
+      for ps_pair in ps_pairs
+        assign ps_kv = ps_pair | split: '='
+        if ps_kv[0] == 'preview'
+          assign ps_supplied = ps_kv[1] | default: '' | strip
+        endif
+      endfor
+    endif
+
     if ps_supplied != blank
       assign ps_entry = shop.metaobjects.custom_shop[ps_handle]
       if ps_entry
