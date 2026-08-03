@@ -2,73 +2,105 @@
   Picks a frame background that the store's logo can actually be seen against.
 
   Store logos are uploaded by customers and we do not get to choose them. A
-  mostly-white logo with pale blue detail — a very normal thing for a fire
-  department or a school crest — vanishes completely against the white frame
-  the dashboard uses, and the card reads as broken or empty.
+  mostly-white mark — a drilling company wordmark, a fire department crest, a
+  school shield — vanishes completely against a white frame, and the card reads
+  as broken or empty.
 
   Liquid cannot inspect an image, so the measurement happens in the browser:
-  the logo is drawn to a tiny canvas and its visible pixels are averaged. Light
-  logos get a dark frame, dark and colourful ones keep the white one.
+  the logo is drawn to a tiny canvas and its visible pixels averaged. Light
+  logos get a dark frame; dark and colourful ones keep white.
+
+  MEASURING A COPY, NOT THE ON-PAGE IMAGE
+  ---------------------------------------
+  The page's <img> is loaded without a crossorigin attribute, which taints any
+  canvas it is drawn to — getImageData then throws and every logo silently
+  measures as "unknown". That is why the first version of this changed nothing
+  on real cards. So a second Image is loaded with crossOrigin='anonymous' and
+  measured instead. Shopify's CDN serves the header this needs; a host that
+  does not simply leaves the frame at its default.
 
   Only pixels with real opacity are counted. Background-removed logos are
   mostly transparent, and averaging the empty space would make every one of
   them look light regardless of the mark itself.
 
-  Reading pixels back from a canvas requires the image to be CORS-clean. If it
-  is not, the read throws and the frame simply keeps its default — a logo that
-  looks the same as it does today, never a broken card.
-
-  Render once per page that shows .ss-logo-frame.
+  Runs on any surface that shows a store logo — the dashboard, the join card,
+  the storefront hero, the admin portal — by matching a broad set of frames.
 {%- enddoc -%}
 <script>
   (function () {
+    if (window.__ssLogoContrast) return;   // one instance per page
+    window.__ssLogoContrast = true;
+
     // Above this mean luminance (0-255) a logo is "light" and needs a dark
-    // frame behind it. Chosen well above mid-grey: the failure being prevented
-    // is a near-white mark disappearing, and darkening a merely pale-ish logo
+    // frame. Set well above mid-grey on purpose: the failure being prevented
+    // is a near-white mark disappearing, and darkening a merely pale logo
     // costs more than it gains.
     var LIGHT_THRESHOLD = 186;
     var SAMPLE = 24;
+    var MIN_INK = 12;
 
-    function measure(img) {
+    // Every place a store logo is framed. A logo that is invisible on the
+    // dashboard is just as invisible on the join card and the store hero, so
+    // one rule covers all of them.
+    var SELECTORS = [
+      '.ss-logo-frame img',        // seller dashboard cards
+      '.sf-logo-area img',         // join-store invite card
+      '.ps-logo img',              // private storefront hero
+      '.ap-hero-logo img',         // admin powers header
+      '#ssOnboardingLogoShell img' // new-store tutorial
+    ].join(',');
+
+    var FRAME_SELECTOR =
+      '.ss-logo-frame, .sf-logo-area, .ps-logo, .ap-hero-logo, #ssOnboardingLogoShell';
+
+    function luminanceOf(sample) {
       var canvas = document.createElement('canvas');
       canvas.width = SAMPLE;
       canvas.height = SAMPLE;
       var ctx = canvas.getContext('2d', { willReadFrequently: true });
       if (!ctx) return null;
-
       try {
-        ctx.drawImage(img, 0, 0, SAMPLE, SAMPLE);
+        ctx.drawImage(sample, 0, 0, SAMPLE, SAMPLE);
         var data = ctx.getImageData(0, 0, SAMPLE, SAMPLE).data;
-        var sum = 0;
-        var counted = 0;
+        var sum = 0, counted = 0;
         for (var i = 0; i < data.length; i += 4) {
-          var alpha = data[i + 3];
-          if (alpha < 40) continue;  // transparent padding is not the logo
-          // Rec. 601 luma — matches how bright a colour looks, which is the
-          // question being asked, rather than its raw channel average.
+          if (data[i + 3] < 40) continue;   // transparent padding is not the logo
+          // Rec. 601 luma — how bright a colour looks, which is the question
+          // being asked, rather than a flat channel average.
           sum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
           counted++;
         }
-        if (counted < 12) return null;  // too little ink to judge
+        if (counted < MIN_INK) return null;  // too little ink to judge
         return sum / counted;
       } catch (e) {
-        // Tainted canvas (image served without CORS headers). Leave it alone.
-        return null;
+        return null;   // tainted canvas — leave the frame alone
       }
     }
 
     function apply(img) {
       if (!img || img.dataset.ssContrastDone) return;
-      var frame = img.closest('.ss-logo-frame');
+      var src = img.currentSrc || img.getAttribute('src') || '';
+      if (!src) return;
+
+      var frame = img.closest(FRAME_SELECTOR);
       if (!frame) return;
       // An inline background is a deliberate choice by whoever wrote the
       // markup (the onboarding sample tiles set their own); do not override it.
-      if (frame.getAttribute('style') && /background/.test(frame.getAttribute('style'))) return;
+      var inline = frame.getAttribute('style') || '';
+      if (/background/.test(inline)) return;
 
-      var luma = measure(img);
       img.dataset.ssContrastDone = '1';
-      if (luma === null) return;
-      if (luma > LIGHT_THRESHOLD) frame.classList.add('ss-logo-frame--dark');
+
+      var probe = new Image();
+      probe.crossOrigin = 'anonymous';
+      probe.onload = function () {
+        var luma = luminanceOf(probe);
+        if (luma !== null && luma > LIGHT_THRESHOLD) {
+          frame.classList.add('ss-logo-frame--dark');
+        }
+      };
+      probe.onerror = function () { /* no CORS copy available; keep default */ };
+      probe.src = src;
     }
 
     function watch(img) {
@@ -76,21 +108,21 @@
       else img.addEventListener('load', function () { apply(img); }, { once: true });
     }
 
-    function sweep() {
-      var imgs = document.querySelectorAll('.ss-logo-frame img');
+    function sweep(root) {
+      var imgs = (root || document).querySelectorAll(SELECTORS);
       for (var i = 0; i < imgs.length; i++) watch(imgs[i]);
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', sweep, { once: true });
+      document.addEventListener('DOMContentLoaded', function () { sweep(); }, { once: true });
     } else {
       sweep();
     }
 
-    // Cards are lazy-rendered and re-rendered as stores wake or sleep. The
-    // observer only reads images and toggles a class — it never inserts or
-    // removes nodes, and it does not watch attributes, so it cannot retrigger
-    // itself.
+    // Cards are lazy-rendered, the tutorial swaps its own image, and stores
+    // wake and sleep. The observer only reads images and toggles a class — it
+    // never inserts or removes nodes, and it does not watch attributes, so it
+    // cannot retrigger itself.
     if (window.MutationObserver) {
       new MutationObserver(function (records) {
         for (var i = 0; i < records.length; i++) {
@@ -98,20 +130,37 @@
           for (var j = 0; j < added.length; j++) {
             var node = added[j];
             if (node.nodeType !== 1) continue;
-            if (node.tagName === 'IMG' && node.closest('.ss-logo-frame')) watch(node);
-            else if (node.querySelectorAll) {
-              var inner = node.querySelectorAll('.ss-logo-frame img');
-              for (var k = 0; k < inner.length; k++) watch(inner[k]);
-            }
+            if (node.tagName === 'IMG') watch(node);
+            else if (node.querySelectorAll) sweep(node);
           }
         }
       }).observe(document.documentElement, { childList: true, subtree: true });
     }
+
+    // The tutorial replaces its logo's src after the element already exists,
+    // so a one-shot measurement per element would miss the real image.
+    document.addEventListener('load', function (e) {
+      var el = e.target;
+      if (el && el.tagName === 'IMG' && el.matches && el.matches(SELECTORS)) {
+        delete el.dataset.ssContrastDone;
+        apply(el);
+      }
+    }, true);
   })();
 </script>
 <style>
   .ss-logo-frame--dark {
     background: #2f3542 !important;
     border-color: rgba(255, 255, 255, 0.14) !important;
+  }
+  /* The join card and storefront hero frames have no background of their own,
+     so they need one before the dark treatment reads as deliberate. */
+  .sf-logo-area.ss-logo-frame--dark,
+  .ps-logo.ss-logo-frame--dark,
+  .ap-hero-logo.ss-logo-frame--dark,
+  #ssOnboardingLogoShell.ss-logo-frame--dark {
+    background: #2f3542 !important;
+    border-radius: 16px;
+    padding: 8px;
   }
 </style>

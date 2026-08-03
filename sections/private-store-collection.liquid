@@ -103,6 +103,7 @@
       <div class="ps-hero-card">
 
         <div class="ps-hero-main">
+          {% render 'logo-frame-contrast' %}
           <div class="ps-logo">
             {% if store_logo != blank %}
               {{ store_logo | image_url: width: 520 | image_tag: class: 'ps-logo-img', loading: 'eager', alt: store_name }}

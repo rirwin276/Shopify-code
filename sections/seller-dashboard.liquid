@@ -957,11 +957,32 @@
           return (el.getAttribute('data-ss-handle') || '') === storeHandle;
         });
       }
-      if(!card){
+      if(!card && !storeHandle){
+        // Only guess when the URL never said which store this is.
+        //
+        // This fallback used to run even WITH a store_handle in the URL, and
+        // that is how a phone showed someone else's logo in the tutorial:
+        // right after creating a store the customer tag has not propagated, so
+        // the new store's card is not on the page yet, the lookup above finds
+        // nothing, and this grabs the first admin card it can see — a
+        // different store entirely. Every image and name in the tutorial then
+        // came from that store.
+        //
+        // Desktop tended to get away with it because the page was usually
+        // loaded after the tag landed. A phone finishing checkout and
+        // redirecting immediately does not have that luxury.
         card = document.querySelector('.ss-store-card[data-ss-building="1"][data-ss-onboarding-admin="1"]') || document.querySelector('.ss-store-card[data-ss-handle][data-ss-onboarding-admin="1"]');
       }
-      if(!card) return;
-      if(!storeHandle) storeHandle = (card.getAttribute('data-ss-handle') || '').trim();
+      // No card is a normal state, not a reason to bail.
+      //
+      // The card only exists once the customer's storefront-admin tag has
+      // propagated. On a phone that redirects the instant the store is created
+      // it usually has not, so requiring a card meant either no tutorial at
+      // all or — before this — a tutorial wearing whichever store happened to
+      // be first on the page.
+      if(!card && !storeHandle) return;
+
+      if(!storeHandle && card) storeHandle = (card.getAttribute('data-ss-handle') || '').trim();
 
       var storageKey = storeHandle ? ('ss-new-store-onboarding-seen-' + storeHandle) : 'ss-new-store-onboarding-seen-generic';
       if(!forceOnboarding && localStorage.getItem(storageKey) === '1'){
@@ -969,19 +990,28 @@
         return;
       }
 
-      var isStoreAdmin = card.getAttribute('data-ss-onboarding-admin') === '1';
+      // Arriving from the store-creation redirect with an explicit handle is
+      // its own proof of ownership — that URL is only ever produced for the
+      // person who just made the store.
+      var isStoreAdmin = card ? (card.getAttribute('data-ss-onboarding-admin') === '1') : !!storeHandle;
       if(!isStoreAdmin && !forceOnboarding){
         try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
         return;
       }
 
+      // Identity comes from THIS store's card or from nowhere. Never from a
+      // neighbouring card: a wrong logo and a wrong name in the first thing a
+      // new customer sees is worse than a plain one.
       var storeName = 'your store';
-      var logoSrc = card.getAttribute('data-ss-onboarding-image') || '';
-      var title = card.querySelector('.ss-card-title');
-      if(title && title.textContent.trim()) storeName = title.textContent.trim();
-      if(!logoSrc){
-        var img = card.querySelector('.ss-logo-frame img');
-        if(img && img.getAttribute('src')) logoSrc = img.getAttribute('src');
+      var logoSrc = '';
+      if(card){
+        logoSrc = card.getAttribute('data-ss-onboarding-image') || '';
+        var title = card.querySelector('.ss-card-title');
+        if(title && title.textContent.trim()) storeName = title.textContent.trim();
+        if(!logoSrc){
+          var img = card.querySelector('.ss-logo-frame img');
+          if(img && img.getAttribute('src')) logoSrc = img.getAttribute('src');
+        }
       }
 
       var media = document.getElementById('ssOnboardingMedia');

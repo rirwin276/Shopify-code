@@ -204,6 +204,7 @@
 
   <!-- HERO HEADER -->
   <div class="ap-hero">
+    {% render 'logo-frame-contrast' %}
     <div class="ap-hero-logo">
       {%- if ap_shop_logo_src != '' -%}
         <img src="{{ ap_shop_logo_src }}" alt="{{ store_name | escape }} logo" loading="lazy">
