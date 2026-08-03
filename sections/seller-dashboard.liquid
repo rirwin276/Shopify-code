@@ -588,9 +588,27 @@
                               width="72"
                               height="72">
                           {% elsif tile_logo_file != blank %}
+                            {%- comment -%}
+                              Sized here, in Liquid, rather than upgraded by JS
+                              after load. A script that rewrites src/srcset is
+                              a script that can put one store's picture on
+                              another's card, which is exactly what happened —
+                              and it re-ran on every DOM mutation, which is
+                              what made a long dashboard stutter while
+                              scrolling. Shopify builds the correct srcset from
+                              the file itself, so nothing has to run at all.
+                            {%- endcomment -%}
                             {{ tile_logo_file
-                              | image_url: width: 300
-                              | image_tag: loading: 'lazy', decoding: 'async', alt: tile_name, width: 72, height: 72 }}
+                              | image_url: width: 320
+                              | image_tag:
+                                  loading: 'lazy',
+                                  decoding: 'async',
+                                  fetchpriority: 'low',
+                                  alt: tile_name,
+                                  width: 72,
+                                  height: 72,
+                                  widths: '104, 160, 208, 320',
+                                  sizes: '(max-width: 850px) 104px, 88px' }}
                           {% else %}
                             <span class="ss-logo-fallback">{{ tile_name | slice: 0, 2 | upcase }}</span>
                           {% endif %}

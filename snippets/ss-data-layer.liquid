@@ -7,7 +7,11 @@
 <script>
   window.SS = window.SS || {};
   window.SS.config = window.SS.config || {};
-  window.SS.dashboardLogoMap = window.SS.dashboardLogoMap || {};
+  // dashboardLogoMap removed: the dashboard sizes logos in Liquid now, and
+  // nothing reads a JS-side image map. See sharpenDashboardLogos.
+  //
+  // The store config below is unrelated and still live — ss-canvas-overlay.js
+  // reads config.logoUrl to draw the logo onto product previews.
 
   {%- if collection and collection.handle -%}
     {%- assign store_handle = collection.handle -%}
@@ -22,119 +26,31 @@
     {%- endif -%}
   {%- endif -%}
 
-  {%- if customer -%}
-    {%- assign ss_dash_handles_blob = '||' -%}
-    {%- for tag in customer.tags -%}
-      {%- assign tag_stripped = tag | strip -%}
-      {%- assign tag_down = tag_stripped | downcase -%}
-      {%- assign ss_dash_handle = '' -%}
-      {%- if tag_down contains 'storefront-admin--' -%}
-        {%- assign ss_dash_handle = tag_stripped | remove: 'storefront-admin--' | remove: 'STOREFRONT-ADMIN--' | strip -%}
-      {%- elsif tag_down contains 'storefront-member--' -%}
-        {%- assign ss_dash_handle = tag_stripped | remove: 'storefront-member--' | remove: 'STOREFRONT-MEMBER--' | strip -%}
-      {%- endif -%}
-      {%- if ss_dash_handle != blank -%}
-        {%- capture ss_dash_needle -%}||{{ ss_dash_handle }}||{%- endcapture -%}
-        {%- unless ss_dash_handles_blob contains ss_dash_needle -%}
-          {%- assign ss_dash_handles_blob = ss_dash_handles_blob | append: ss_dash_handle | append: '||' -%}
-          {%- assign ss_dash_entry = shop.metaobjects.custom_shop[ss_dash_handle] -%}
-          {%- if ss_dash_entry -%}
-            {%- assign ss_dash_logo_file = ss_dash_entry.logo.value | default: ss_dash_entry.logo -%}
-            {%- assign ss_dash_logo_clean = ss_dash_entry.logo_clean_url.value | default: ss_dash_entry.logo_clean_url -%}
-            {%- if ss_dash_logo_clean == blank -%}{%- assign ss_dash_logo_clean = ss_dash_entry.logo_clean.value | default: ss_dash_entry.logo_clean -%}{%- endif -%}
-            {%- if ss_dash_logo_file != blank -%}
-              {%- assign ss_logo_900 = ss_dash_logo_file | image_url: width: 900 -%}
-              {%- assign ss_logo_1600 = ss_dash_logo_file | image_url: width: 1600 -%}
-              {%- assign ss_logo_2400 = ss_dash_logo_file | image_url: width: 2400 -%}
-              {%- capture ss_logo_srcset -%}{{ ss_logo_900 }} 900w, {{ ss_logo_1600 }} 1600w, {{ ss_logo_2400 }} 2400w{%- endcapture -%}
-              window.SS.dashboardLogoMap[{{ ss_dash_handle | json }}] = {
-                src: {{ ss_logo_1600 | json }},
-                srcset: {{ ss_logo_srcset | strip | json }}
-              };
-            {%- elsif ss_dash_logo_clean != blank -%}
-              window.SS.dashboardLogoMap[{{ ss_dash_handle | json }}] = { src: {{ ss_dash_logo_clean | json }}, srcset: '' };
-            {%- endif -%}
-          {%- endif -%}
-        {%- endunless -%}
-      {%- endif -%}
-    {%- endfor -%}
-  {%- endif -%}
-
   (function () {
     var path = window.location.pathname || '';
     if (path.indexOf('/pages/portal') !== 0) return;
 
-    function upgradeShopifyImageUrl(src) {
-      if (!src || src.indexOf('cdn.shopify.com') === -1) return src;
-      try {
-        var url = new URL(src, window.location.origin);
-        url.searchParams.set('width', '1600');
-        return url.toString();
-      } catch (e) {
-        if (src.indexOf('width=') !== -1) return src.replace(/width=\d+/g, 'width=1600');
-        return src + (src.indexOf('?') === -1 ? '?' : '&') + 'width=1600';
-      }
-    }
-
+    // Deliberately does NOT touch src or srcset.
+    //
+    // This used to rewrite both from a handle-keyed map built by walking
+    // customer.tags. That made a "sharpening" pass the deciding vote on WHICH
+    // logo a card shows, and it got it wrong — one store's picture on several
+    // cards, worst at the end of a long list. It also ran in full on every DOM
+    // mutation, re-querying the document and re-setting attributes on every
+    // card while the fundraiser strips and product counts were still landing,
+    // which is what made a dashboard with many stores stutter under a scroll.
+    //
+    // The logo is now sized in Liquid with a real Shopify srcset, so the
+    // resolution problem this was written to solve no longer needs any
+    // JavaScript. Nothing here can change which image is displayed.
     function sharpenDashboardLogos() {
-      var cards = document.querySelectorAll('.ss-store-card[data-ss-handle]');
-      cards.forEach(function (card, index) {
-        var img = card.querySelector('.ss-logo-frame img');
-        if (!img) return;
-
-        var handle = card.getAttribute('data-ss-handle') || '';
-        var mapped = window.SS && window.SS.dashboardLogoMap ? window.SS.dashboardLogoMap[handle] : null;
-        var mappedSrc = mapped && typeof mapped === 'object' ? mapped.src : mapped;
-        var mappedSrcset = mapped && typeof mapped === 'object' ? mapped.srcset : '';
-        var current = img.getAttribute('src') || '';
-
-        // This function sharpens. It does not choose.
-        //
-        // It used to prefer mappedSrc over the card's own image, which made it
-        // the deciding vote on WHICH logo a store shows — and the map is built
-        // from customer tags against entry.logo while the card renders
-        // logo_clean_url, so the two can disagree and the JS silently won.
-        // That is how a run of stores ended up wearing one logo while every
-        // store page showed the right one.
-        //
-        // Now the card's server-rendered src is the only source of truth and
-        // the upgrade is a width bump on that exact file.
-        var upgraded = upgradeShopifyImageUrl(current);
-
-        // The high-res srcset is only safe when it points at the same file as
-        // the image already on the card. Same path, different width — anything
-        // else is a different picture, which is not this function's call.
-        var srcsetIsSameImage = false;
-        if (mappedSrcset && mappedSrc && current) {
-          try {
-            srcsetIsSameImage =
-              new URL(mappedSrc, window.location.origin).pathname ===
-              new URL(current, window.location.origin).pathname;
-          } catch (e) {
-            srcsetIsSameImage = false;
-          }
-        }
-
-        if (upgraded && img.dataset.ssDashboardMapped !== upgraded) {
-          var pre = new Image();
-          pre.onload = function () {
-            img.removeAttribute('srcset');
-            if (srcsetIsSameImage) img.setAttribute('srcset', mappedSrcset);
-            img.setAttribute('sizes', '(max-width: 850px) 104px, 88px');
-            img.setAttribute('src', upgraded);
-            img.dataset.ssDashboardMapped = upgraded;
-          };
-          pre.src = upgraded;
-        }
-
+      var imgs = document.querySelectorAll('.ss-store-card[data-ss-handle] .ss-logo-frame img');
+      for (var i = 0; i < imgs.length; i++) {
+        var img = imgs[i];
+        if (img.dataset.ssDecodeHinted === '1') continue;
+        img.dataset.ssDecodeHinted = '1';
         img.setAttribute('decoding', 'async');
-        img.setAttribute('loading', index < 5 ? 'eager' : 'lazy');
-        if (index < 5) img.setAttribute('fetchpriority', 'high');
-        img.style.imageRendering = 'auto';
-        img.style.transform = 'translateZ(0)';
-        img.style.webkitBackfaceVisibility = 'hidden';
-        img.dataset.ssQualityUpgraded = '1';
-      });
+      }
     }
 
     function addProductCounts() {
@@ -162,7 +78,23 @@
       polishDashboardCards();
     }
 
-    var observer = new MutationObserver(polishDashboardCards);
+    // Batched onto one animation frame.
+    //
+    // polishDashboardCards ran in full on every mutation, and addProductCounts
+    // inserts an element — so each pass fed the next. With fundraiser strips,
+    // ready-status polling and image loads all mutating the page at once, a
+    // long dashboard spent its scroll budget re-scanning itself.
+    var polishQueued = false;
+    var observer = new MutationObserver(function (records) {
+      if (polishQueued) return;
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].addedNodes.length) {
+          polishQueued = true;
+          requestAnimationFrame(function () { polishQueued = false; polishDashboardCards(); });
+          return;
+        }
+      }
+    });
     if (document.body) observer.observe(document.body, { childList: true, subtree: true });
   })();
 </script>

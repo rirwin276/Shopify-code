@@ -53,6 +53,24 @@
     var FRAME_SELECTOR =
       '.ss-logo-frame, .sf-logo-area, .ps-logo, .ap-hero-logo, #ssOnboardingLogoShell';
 
+    // A 64px copy is plenty to average colour from, and it is the difference
+    // between a second full-size download per logo and a negligible one.
+    //
+    // A CORS probe cannot reuse the browser's cached copy of the on-page image
+    // — CORS and non-CORS responses are cached separately — so every logo was
+    // being fetched twice, at whatever width the card displayed. On a
+    // dashboard with many stores that is what made loading stutter.
+    function thumbOf(src) {
+      try {
+        var url = new URL(src, window.location.origin);
+        if (url.hostname.indexOf('cdn.shopify.com') === -1) return src;
+        url.searchParams.set('width', '64');
+        return url.toString();
+      } catch (e) {
+        return src;
+      }
+    }
+
     function luminanceOf(sample) {
       var canvas = document.createElement('canvas');
       canvas.width = SAMPLE;
@@ -96,7 +114,7 @@
     }
 
     function apply(img) {
-      if (!img || img.dataset.ssContrastDone) return;
+      if (!img) return;
       var src = img.currentSrc || img.getAttribute('src') || '';
       if (!src) return;
 
@@ -108,7 +126,10 @@
       var inline = frame.getAttribute('style') || '';
       if (/background/.test(inline) && frame.dataset.ssContrastApplied !== '1') return;
 
-      img.dataset.ssContrastDone = '1';
+      // Measured once per resolved source. Re-measuring on every load event
+      // meant a fresh full-size download each time an image settled.
+      if (img.dataset.ssContrastSrc === src) return;
+      img.dataset.ssContrastSrc = src;
 
       var probe = new Image();
       probe.crossOrigin = 'anonymous';
@@ -117,7 +138,7 @@
         if (luma !== null && luma > LIGHT_THRESHOLD) setDark(frame);
       };
       probe.onerror = function () { /* no CORS copy available; keep default */ };
-      probe.src = src;
+      probe.src = thumbOf(src);
     }
 
     function watch(img) {
@@ -141,14 +162,18 @@
     // never inserts or removes nodes, and it does not watch attributes, so it
     // cannot retrigger itself.
     if (window.MutationObserver) {
+      // Batched onto one animation frame. Sweeping synchronously inside the
+      // callback meant a full-document querySelectorAll per mutation, and the
+      // dashboard mutates constantly while product counts and fundraiser
+      // strips land — dozens of scans competing with the scroll.
+      var sweepQueued = false;
       new MutationObserver(function (records) {
+        if (sweepQueued) return;
         for (var i = 0; i < records.length; i++) {
-          var added = records[i].addedNodes;
-          for (var j = 0; j < added.length; j++) {
-            var node = added[j];
-            if (node.nodeType !== 1) continue;
-            if (node.tagName === 'IMG') watch(node);
-            else if (node.querySelectorAll) sweep(node);
+          if (records[i].addedNodes.length) {
+            sweepQueued = true;
+            requestAnimationFrame(function () { sweepQueued = false; sweep(); });
+            return;
           }
         }
       }).observe(document.documentElement, { childList: true, subtree: true });
@@ -159,8 +184,7 @@
     document.addEventListener('load', function (e) {
       var el = e.target;
       if (el && el.tagName === 'IMG' && el.matches && el.matches(SELECTORS)) {
-        delete el.dataset.ssContrastDone;
-        apply(el);
+        apply(el);   // apply() no-ops unless the source actually changed
       }
     }, true);
   })();
