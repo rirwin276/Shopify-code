@@ -1,238 +1,300 @@
-{%- doc -%}
-  A diagnostic for the "wrong logo on a dashboard card" bug.
+{%- comment -%}
+  Dashboard image safeguards.
 
-  Four separate fixes have been shipped for this and the wrong picture keeps
-  coming back, which means the cause has not actually been found yet. Every
-  round so far has been argued from a screenshot, and a screenshot cannot show
-  the one thing that matters: whether the server picked the wrong file, or the
-  browser fetched a different file than the server asked for. Those are
-  opposite problems with opposite fixes.
+  1. Remove responsive candidates from the small dashboard logos so every
+     card uses the exact URL emitted in its own src attribute.
+  2. Bind the new-store onboarding modal to the exact handle that was just
+     submitted. Never borrow a logo from a neighbouring card.
+  3. If the customer tag has not propagated yet, briefly poll the rendered
+     portal until that exact store card exists, then place its logo in the
+     tutorial.
 
-  So the page reports it. For each card this lists, side by side:
-
-    - the name the card displays        (what the shopper sees)
-    - the handle Liquid resolved        (which store the server thought it was)
-    - which field the logo came from    (entry.logo, logo_clean_url, or none)
-    - the file the browser really loaded (img.currentSrc, not the src attribute)
-
-  Read it like this:
-
-    Name and handle disagree     -> the store list is wrong (customer tags)
-    Name and handle agree, file
-      belongs to another store   -> the metaobject data is wrong
-    Two rows share one file      -> flagged DUPLICATE below; one file is being
-                                    reused across stores
-    Everything agrees but the
-      picture is still wrong     -> the CDN is serving a stale object for a
-                                    correct URL
-
-  Off unless the URL says otherwise, so it costs a shopper nothing:
-
-      /pages/portal?logodebug=1
-
-  The diagnostic only reads the DOM. The small safeguard immediately below
-  removes responsive image candidates from dashboard logos so each card can
-  only display the exact URL in its own src attribute.
-{%- enddoc -%}
+  A compact read-only source report remains available at:
+    /pages/portal?logodebug=1
+{%- endcomment -%}
 
 <script>
   (function () {
-    function forceSingleLogoSource() {
-      var images = document.querySelectorAll('.ss-logo-frame[data-ss-logo-for] img');
+    var CONTEXT_KEY = 'ss_new_store_context';
+    var CONTEXT_TTL = 30 * 60 * 1000;
+    var params = new URLSearchParams(window.location.search || '');
+    var isNewStoreVisit = params.get('new_store') === '1' || !!params.get('store_handle');
+
+    function readStoredContext() {
+      var raw = '';
+      try { raw = sessionStorage.getItem(CONTEXT_KEY) || ''; } catch (e) {}
+      if (!raw) {
+        try { raw = localStorage.getItem(CONTEXT_KEY) || ''; } catch (e) {}
+      }
+      if (!raw) return null;
+
+      try {
+        var parsed = JSON.parse(raw);
+        var savedAt = Number(parsed.savedAt || 0);
+        if (!parsed.handle || !savedAt || Date.now() - savedAt > CONTEXT_TTL) {
+          clearStoredContext();
+          return null;
+        }
+        return parsed;
+      } catch (e) {
+        clearStoredContext();
+        return null;
+      }
+    }
+
+    function clearStoredContext() {
+      try { sessionStorage.removeItem(CONTEXT_KEY); } catch (e) {}
+      try { localStorage.removeItem(CONTEXT_KEY); } catch (e) {}
+    }
+
+    function cardsFor(root) {
+      return Array.prototype.slice.call(
+        (root || document).querySelectorAll('.ss-store-card[data-ss-handle]')
+      );
+    }
+
+    function cardForHandle(root, handle) {
+      if (!handle) return null;
+      var cards = cardsFor(root);
+      for (var i = 0; i < cards.length; i++) {
+        if ((cards[i].getAttribute('data-ss-handle') || '').trim() === handle) {
+          return cards[i];
+        }
+      }
+      return null;
+    }
+
+    var context = readStoredContext();
+    var exactHandle = (params.get('store_handle') || (context && context.handle) || '').trim();
+
+    // Older provisioning redirects sometimes returned only ?new_store=1. If
+    // there is exactly one admin-owned card currently building, it is safe to
+    // identify it; with zero or multiple candidates we deliberately do not
+    // guess.
+    if (!exactHandle && params.get('new_store') === '1') {
+      var building = Array.prototype.slice.call(
+        document.querySelectorAll('.ss-store-card[data-ss-building="1"][data-ss-onboarding-admin="1"]')
+      );
+      if (building.length === 1) {
+        exactHandle = (building[0].getAttribute('data-ss-handle') || '').trim();
+      }
+    }
+
+    // The main onboarding script runs later in seller-dashboard.liquid and
+    // reads the URL. Restore the missing handle before it executes, so its own
+    // exact-card lookup cannot fall back to a different store.
+    if (isNewStoreVisit && exactHandle && !params.get('store_handle')) {
+      params.set('store_handle', exactHandle);
+      try {
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname + '?' + params.toString() + window.location.hash
+        );
+      } catch (e) {}
+    }
+
+    // Hide the tutorial image until the exact card has been verified. This
+    // prevents even a brief flash of a neighbouring store's logo.
+    var guardStyle = null;
+    if (isNewStoreVisit) {
+      guardStyle = document.createElement('style');
+      guardStyle.id = 'ss-onboarding-exact-logo-guard';
+      guardStyle.textContent =
+        '#ssNewStoreOnboarding #ssOnboardingLogoImg{visibility:hidden!important;}';
+      (document.head || document.documentElement).appendChild(guardStyle);
+    }
+
+    function forceSingleLogoSource(root) {
+      var images = (root || document).querySelectorAll('.ss-logo-frame[data-ss-logo-for] img');
       for (var i = 0; i < images.length; i++) {
         images[i].removeAttribute('srcset');
         images[i].removeAttribute('sizes');
       }
     }
 
-    // This snippet is rendered immediately after the dashboard cards, so the
-    // first pass runs as soon as all card images exist. The DOMContentLoaded
-    // pass is a harmless fallback for any markup inserted later in parsing.
-    forceSingleLogoSource();
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', forceSingleLogoSource, { once: true });
+    // This snippet is rendered immediately after the dashboard cards.
+    forceSingleLogoSource(document);
+
+    function initials(name, handle) {
+      var source = String(name || handle || 'S S')
+        .replace(/-\d{4}\s*$/i, '')
+        .replace(/-/g, ' ')
+        .trim();
+      var words = source.split(/\s+/).filter(Boolean).slice(0, 2);
+      var out = words.map(function (word) { return word.charAt(0); }).join('').toUpperCase();
+      return out || 'S&S';
     }
-  })();
-</script>
 
-<script>
-  (function () {
-    if (window.location.search.indexOf('logodebug=1') === -1) return;
+    function freshUrl(url) {
+      if (!url) return '';
+      return url + (url.indexOf('?') === -1 ? '?' : '&') + 'ssv=' + Date.now();
+    }
 
-    // The frames are stamped by the section, but the images inside them are
-    // lazy — currentSrc is empty until one actually loads. Reporting before
-    // then would show blanks and prove nothing, so the report is built on
-    // demand from a button rather than once at page load.
-    function tail(url) {
-      if (!url) return '(not loaded yet)';
-      try {
-        var path = new URL(url, window.location.origin).pathname;
-        return path.split('/').pop() || url;
-      } catch (e) {
-        return url;
+    function modalParts() {
+      return {
+        modal: document.getElementById('ssNewStoreOnboarding'),
+        shell: document.getElementById('ssOnboardingLogoShell'),
+        image: document.getElementById('ssOnboardingLogoImg'),
+        fallback: document.getElementById('ssOnboardingLogoFallback')
+      };
+    }
+
+    function revealVerifiedImage() {
+      if (guardStyle && guardStyle.parentNode) guardStyle.parentNode.removeChild(guardStyle);
+      guardStyle = null;
+      var image = document.getElementById('ssOnboardingLogoImg');
+      if (image) image.style.visibility = 'visible';
+    }
+
+    function showSafeFallback(name) {
+      var parts = modalParts();
+      if (!parts.shell || !parts.image) return;
+      parts.image.removeAttribute('src');
+      parts.image.removeAttribute('srcset');
+      parts.image.removeAttribute('sizes');
+      parts.shell.classList.remove('has-img');
+      if (parts.fallback) parts.fallback.textContent = initials(name, exactHandle);
+      revealVerifiedImage();
+    }
+
+    function applyExactCard(card) {
+      if (!card) return false;
+
+      var title = card.querySelector('.ss-card-title');
+      var name = title ? (title.textContent || '').trim() : ((context && context.name) || exactHandle);
+      var cardImage = card.querySelector('.ss-logo-frame img');
+      var url = (card.getAttribute('data-ss-onboarding-image') || '').trim();
+      if (!url && cardImage) url = (cardImage.getAttribute('src') || '').trim();
+
+      if (!url) {
+        showSafeFallback(name);
+        return false;
       }
+
+      var parts = modalParts();
+      if (!parts.shell || !parts.image) return false;
+
+      parts.image.removeAttribute('srcset');
+      parts.image.removeAttribute('sizes');
+      parts.image.src = freshUrl(url);
+      parts.shell.classList.add('has-img');
+      if (parts.fallback) parts.fallback.textContent = initials(name, exactHandle);
+      revealVerifiedImage();
+      clearStoredContext();
+      return true;
     }
 
-    // src and currentSrc are reported SEPARATELY and never substituted for one
-    // another. The first version fell back from one to the other, which hid the
-    // single most important fact in this bug: before the images loaded every
-    // card reported its own correct file, and after they loaded a run of cards
-    // all reported one store's file. That is not one value being wrong — it is
-    // two values disagreeing, and only the pair identifies the culprit.
-    //
-    //   src attr correct, currentSrc wrong -> the browser chose a different
-    //     candidate than the attribute, which only srcset or <picture> can do
-    //   both wrong                         -> something rewrote the attribute
-    //     after render, or the server emitted it wrong
-    function collect() {
-      var frames = document.querySelectorAll('.ss-logo-frame[data-ss-logo-for]');
-      var rows = [];
-      for (var i = 0; i < frames.length; i++) {
-        var frame = frames[i];
-        var card = frame.closest('[data-ss-onboarding-image], .ss-store-card, li, article') || frame.parentNode;
-        var titleEl = card ? card.querySelector('.ss-card-title') : null;
-        var img = frame.querySelector('img');
-        var srcset = img ? (img.getAttribute('srcset') || '') : '';
-        rows.push({
-          n: i + 1,
-          shown: titleEl ? (titleEl.textContent || '').trim() : '(no title)',
-          handle: frame.getAttribute('data-ss-logo-for') || '',
-          attr: img ? tail(img.getAttribute('src')) : '(no img)',
-          live: img ? tail(img.currentSrc) : '(no img)',
-          srcset: srcset,
-          parent: img && img.parentNode ? img.parentNode.tagName : ''
+    function probeForExactCard(attempt) {
+      if (!exactHandle || attempt > 24) return;
+
+      var current = cardForHandle(document, exactHandle);
+      if (current && applyExactCard(current)) return;
+
+      fetch('/pages/portal?ss_onboarding_probe=1&ts=' + Date.now(), {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error('Portal probe failed: ' + response.status);
+          return response.text();
+        })
+        .then(function (html) {
+          var parsed = new DOMParser().parseFromString(html, 'text/html');
+          var exact = cardForHandle(parsed, exactHandle);
+          if (exact && applyExactCard(exact)) return;
+          window.setTimeout(function () { probeForExactCard(attempt + 1); }, 1500);
+        })
+        .catch(function () {
+          window.setTimeout(function () { probeForExactCard(attempt + 1); }, 2000);
         });
-      }
-      return rows;
     }
 
-    function report() {
-      var rows = collect();
+    function startExactOnboardingLogo() {
+      forceSingleLogoSource(document);
+      if (!isNewStoreVisit) return;
 
-      var lines = ['# | name | src attribute | actually displayed | flags'];
-      var firstBad = null;
-      for (var j = 0; j < rows.length; j++) {
-        var r = rows[j];
-        var flags = [];
-        // Empty currentSrc just means the image has not loaded yet. Saying so
-        // is the difference between "not measured" and "measured as wrong".
-        if (!r.live) {
-          flags.push('NOT LOADED YET');
-        } else if (r.live !== r.attr) {
-          flags.push('MISMATCH');
-          if (!firstBad) firstBad = r;
-        }
-        if (r.srcset) flags.push('HAS SRCSET');
-        if (r.parent && r.parent !== 'DIV') flags.push('IN <' + r.parent + '>');
-        lines.push(r.n + ' | ' + r.shown + ' | ' + r.attr + ' | ' + (r.live || '-') + ' | ' + flags.join(' '));
+      if (!exactHandle) {
+        // No exact identity is available. A neutral fallback is intentionally
+        // better than confidently displaying another customer's/store's logo.
+        showSafeFallback(context && context.name);
+        return;
       }
 
-      // One full srcset value is worth more than every summary line above it:
-      // if a srcset survives here it names the exact candidates the browser
-      // chose between, and the wrong logo is one of them.
-      if (firstBad && firstBad.srcset) {
-        lines.push('');
-        lines.push('srcset on first mismatching card (' + firstBad.shown + '):');
-        lines.push(firstBad.srcset.slice(0, 600));
-      }
-      return lines.join('\n');
-    }
+      var exact = cardForHandle(document, exactHandle);
+      if (exact && applyExactCard(exact)) return;
 
-    // Every script in the theme repo has been ruled out by reading it, and the
-    // images are still being rewritten — so the code doing it is code that is
-    // not in the repo. Two things can put JavaScript on this page without
-    // appearing in any theme file: the page body stored in the Shopify admin
-    // (which we already know holds a script, because the console reports a
-    // syntax error inside one) and an installed app.
-    //
-    // Rather than hunting through the admin by hand, the page reports its own
-    // scripts. Inline scripts that mention logos or assign to .src are printed
-    // in full; everything else is listed by size so nothing is hidden.
-    function scriptReport() {
-      var out = [];
-      var inline = document.querySelectorAll('script:not([src])');
-      var external = document.querySelectorAll('script[src]');
-
-      out.push('=== INLINE SCRIPTS (' + inline.length + ') ===');
-      var suspicious = /ss-logo-frame|logo|\.src\s*=|srcset|querySelectorAll/i;
-      for (var i = 0; i < inline.length; i++) {
-        var text = inline[i].textContent || '';
-        if (!text.trim()) continue;
-        var hit = suspicious.test(text);
-        out.push('');
-        out.push('--- inline #' + i + ' | ' + text.length + ' chars | ' +
-                 (hit ? 'MENTIONS LOGO/SRC' : 'no match') + ' ---');
-        // A matching script is printed generously: the point is to read it,
-        // and a truncated middle is where the bug would hide.
-        out.push(hit ? text.slice(0, 4000) : text.slice(0, 160) + '…');
-      }
-
-      out.push('');
-      out.push('=== EXTERNAL SCRIPTS (' + external.length + ') ===');
-      for (var j = 0; j < external.length; j++) {
-        out.push(external[j].getAttribute('src') || '');
-      }
-      return out.join('\n');
-    }
-
-    function panel() {
-      var box = document.createElement('div');
-      box.style.cssText =
-        'position:fixed;left:8px;right:8px;bottom:8px;max-height:52vh;z-index:2147483647;' +
-        'background:#11100e;color:#e8e8e8;font:11px/1.5 ui-monospace,Menlo,Consolas,monospace;' +
-        'border-radius:10px;padding:10px;overflow:auto;box-shadow:0 8px 30px rgba(0,0,0,.5)';
-
-      var bar = document.createElement('div');
-      bar.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;position:sticky;top:0;background:#11100e;padding-bottom:6px';
-
-      var pre = document.createElement('pre');
-      pre.style.cssText = 'margin:0;white-space:pre-wrap;word-break:break-all';
-
-      function refresh() { pre.textContent = report(); }
-
-      function button(label, fn) {
-        var b = document.createElement('button');
-        b.textContent = label;
-        b.style.cssText =
-          'font:600 11px/1 system-ui;padding:7px 10px;border-radius:6px;border:0;' +
-          'background:#3b82f6;color:#fff;cursor:pointer';
-        b.addEventListener('click', fn);
-        return b;
-      }
-
-      bar.appendChild(button('Refresh', refresh));
-      bar.appendChild(button('Scripts', function () { pre.textContent = scriptReport(); }));
-      bar.appendChild(button('Copy', function () {
-        var text = pre.textContent;
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(text);
-        } else {
-          // Older mobile Safari has no clipboard API; select it so the user
-          // can copy by hand rather than being told nothing happened.
-          var ta = document.createElement('textarea');
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          try { document.execCommand('copy'); } catch (e) {}
-          document.body.removeChild(ta);
-        }
-      }));
-      bar.appendChild(button('Close', function () { box.remove(); }));
-
-      box.appendChild(bar);
-      box.appendChild(pre);
-      document.body.appendChild(box);
-      refresh();
-
-      // Cards animate in and images settle late; one delayed pass means the
-      // first thing shown is already the settled state.
-      setTimeout(refresh, 1500);
+      // The customer tag can take a few seconds to appear after provisioning.
+      showSafeFallback((context && context.name) || exactHandle);
+      probeForExactCard(0);
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', panel, { once: true });
+      document.addEventListener('DOMContentLoaded', startExactOnboardingLogo, { once: true });
     } else {
-      panel();
+      startExactOnboardingLogo();
+    }
+
+    // Compact read-only diagnostic retained for future source-selection bugs.
+    if (window.location.search.indexOf('logodebug=1') !== -1) {
+      function sourceReport() {
+        var frames = document.querySelectorAll('.ss-logo-frame[data-ss-logo-for]');
+        var lines = ['# | handle | src | currentSrc | flags'];
+        for (var i = 0; i < frames.length; i++) {
+          var img = frames[i].querySelector('img');
+          var src = img ? (img.getAttribute('src') || '') : '';
+          var live = img ? (img.currentSrc || '') : '';
+          var flags = [];
+          if (img && img.getAttribute('srcset')) flags.push('HAS SRCSET');
+          if (src && live && src !== live) flags.push('MISMATCH');
+          lines.push(
+            (i + 1) + ' | ' +
+            (frames[i].getAttribute('data-ss-logo-for') || '') + ' | ' +
+            src + ' | ' + live + ' | ' + flags.join(' ')
+          );
+        }
+        return lines.join('\n');
+      }
+
+      function makePanel() {
+        var box = document.createElement('div');
+        box.style.cssText =
+          'position:fixed;left:8px;right:8px;bottom:8px;max-height:52vh;z-index:2147483647;' +
+          'background:#11100e;color:#e8e8e8;font:11px/1.5 ui-monospace,Menlo,Consolas,monospace;' +
+          'border-radius:10px;padding:10px;overflow:auto;box-shadow:0 8px 30px rgba(0,0,0,.5)';
+
+        var bar = document.createElement('div');
+        bar.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;position:sticky;top:0;background:#11100e;padding-bottom:6px';
+        var pre = document.createElement('pre');
+        pre.style.cssText = 'margin:0;white-space:pre-wrap;word-break:break-all';
+
+        function button(label, action) {
+          var btn = document.createElement('button');
+          btn.textContent = label;
+          btn.style.cssText = 'font:600 11px/1 system-ui;padding:7px 10px;border-radius:6px;border:0;background:#3b82f6;color:#fff;cursor:pointer';
+          btn.addEventListener('click', action);
+          return btn;
+        }
+
+        function refresh() { pre.textContent = sourceReport(); }
+        bar.appendChild(button('Refresh', refresh));
+        bar.appendChild(button('Copy', function () {
+          if (navigator.clipboard) navigator.clipboard.writeText(pre.textContent);
+        }));
+        bar.appendChild(button('Close', function () { box.remove(); }));
+        box.appendChild(bar);
+        box.appendChild(pre);
+        document.body.appendChild(box);
+        refresh();
+        window.setTimeout(refresh, 1500);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', makePanel, { once: true });
+      } else {
+        makePanel();
+      }
     }
   })();
 </script>
