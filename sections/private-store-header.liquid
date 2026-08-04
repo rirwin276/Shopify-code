@@ -68,7 +68,12 @@
     <div class="ss-storehead__left">
       <div class="ss-storehead__logo" aria-hidden="true">
         {% if tile_logo != blank %}
-          {{ tile_logo | image_url: width: 240 | image_tag: class: 'ss-storehead__logoimg', loading: 'lazy', alt: tile_name }}
+          {%- comment -%}
+            Eager: this is the store's logo in the page header, always above
+            the fold, so there is no scroll for a lazy load to wait for — the
+            only thing deferring it buys is a header that fills in late.
+          {%- endcomment -%}
+          {{ tile_logo | image_url: width: 240 | image_tag: class: 'ss-storehead__logoimg', loading: 'eager', alt: tile_name }}
         {% else %}
           <span class="ss-storehead__logofallback">S&amp;S</span>
         {% endif %}

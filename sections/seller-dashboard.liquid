@@ -617,9 +617,8 @@
                           {% if tile_logo_clean != blank %}
                             <img
                               src="{{ tile_logo_clean | escape }}"
-                              loading="lazy"
+                              loading="eager"
                               decoding="async"
-                              fetchpriority="low"
                               alt="{{ tile_name | escape }}"
                               width="72"
                               height="72">
@@ -635,27 +634,34 @@
                               the file itself, so nothing has to run at all.
                             {%- endcomment -%}
                             {%- comment -%}
-                              One src, no srcset.
+                              One src, no srcset, and no lazy loading.
 
                               A browser renders whichever candidate srcset
-                              selects and ignores src entirely — so a srcset is
+                              selects and ignores src entirely, so a srcset is
                               the only attribute that can make an <img> display
-                              a picture other than the one in its src. This
-                              card was showing the wrong logo while its own alt
-                              text was correct, which is exactly that shape.
+                              a picture other than the one in its src. At
+                              72-92px it buys nothing worth that risk.
 
-                              image_url returns a URL string, and piping a
-                              string into image_tag with `widths` asks it to
-                              synthesise variants of something it can no longer
-                              introspect. At 72-104px a srcset buys nothing
-                              worth that risk.
+                              Lazy loading is gone for the same reason: it is
+                              the one behaviour here that makes WHEN an image
+                              resolves depend on scroll position, and every
+                              version of this bug has been a run of trailing
+                              cards — the ones furthest down — wearing one
+                              store's logo. A dashboard shows a handful of
+                              stores for almost everyone, and these are ~10KB
+                              logos at 92px, so deferring them was saving
+                              nothing measurable while making the load order
+                              unpredictable.
+
+                              Width 512 covers the largest frame (92px) at 3x
+                              device pixel ratio with room to spare, since
+                              there is no srcset to pick a sharper candidate.
                             {%- endcomment -%}
                             {{ tile_logo_file
-                              | image_url: width: 320
+                              | image_url: width: 512
                               | image_tag:
-                                  loading: 'lazy',
+                                  loading: 'eager',
                                   decoding: 'async',
-                                  fetchpriority: 'low',
                                   alt: tile_name,
                                   width: 72,
                                   height: 72 }}
