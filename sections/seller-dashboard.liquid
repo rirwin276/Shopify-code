@@ -501,6 +501,22 @@
                       {% assign ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
                       {% if ready == true or ready == 'true' %}{% assign is_fully_ready = true %}{% endif %}
 
+                      {%- comment -%}
+                        Reset before use, every iteration.
+
+                        tile_logo_clean and tile_logo_file are cleared at the
+                        top of the loop, but the scratch variables they are
+                        derived from — lcu and lf — were not. Liquid has no
+                        block scope: a `for` body shares one variable space
+                        with every other iteration, so any path that reads one
+                        of these without overwriting it first reads the
+                        PREVIOUS store's value. That is precisely the shape of
+                        the bug: a run of consecutive cards all wearing the
+                        logo of the last store above them that had one.
+                      {%- endcomment -%}
+                      {% assign lcu = '' %}
+                      {% assign lf = '' %}
+
                       {% assign lcu = entry.logo_clean_url.value | default: entry.logo_clean_url %}
                       {% if lcu == blank %}{% assign lcu = entry.logo_clean.value | default: entry.logo_clean %}{% endif %}
                       {% if lcu == blank %}{% assign lcu = entry.logo_clean_url_.value | default: entry.logo_clean_url_ %}{% endif %}
@@ -512,8 +528,19 @@
                         {% endif %}
                       {% endif %}
 
+                      {%- comment -%}
+                        `.width` rather than `!= blank`.
+
+                        A metaobject file field that exists but holds nothing
+                        still returns an object, and an object is never blank —
+                        so `lf != blank` passes for a store with no logo and
+                        hands image_url something it cannot render. Asking for
+                        a property only a real image has is the difference
+                        between "there is a field here" and "there is a picture
+                        here".
+                      {%- endcomment -%}
                       {% assign lf = entry.logo.value | default: entry.logo %}
-                      {% if lf != blank %}{% assign tile_logo_file = lf %}{% endif %}
+                      {% if lf.width %}{% assign tile_logo_file = lf %}{% endif %}
                       {%- comment -%}
                         entry.logo wins over logo_clean_url.
 
@@ -577,7 +604,16 @@
                     >
 
                       <div class="ss-col-identity">
-                        <div class="ss-logo-frame">
+                        {%- comment -%}
+                          The resolved source is stamped on the frame so this
+                          is checkable from the page itself. Three rounds were
+                          spent arguing about whether a wrong logo came from
+                          the server or from JavaScript; one attribute settles
+                          it, and it costs nothing.
+                        {%- endcomment -%}
+                        <div class="ss-logo-frame"
+                             data-ss-logo-for="{{ handle | escape }}"
+                             data-ss-logo-kind="{% if tile_logo_clean != blank %}clean{% elsif tile_logo_file %}file{% else %}none{% endif %}">
                           {% if tile_logo_clean != blank %}
                             <img
                               src="{{ tile_logo_clean | escape }}"
