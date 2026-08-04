@@ -1,0 +1,153 @@
+{%- doc -%}
+  A diagnostic for the "wrong logo on a dashboard card" bug.
+
+  Four separate fixes have been shipped for this and the wrong picture keeps
+  coming back, which means the cause has not actually been found yet. Every
+  round so far has been argued from a screenshot, and a screenshot cannot show
+  the one thing that matters: whether the server picked the wrong file, or the
+  browser fetched a different file than the server asked for. Those are
+  opposite problems with opposite fixes.
+
+  So the page reports it. For each card this lists, side by side:
+
+    - the name the card displays        (what the shopper sees)
+    - the handle Liquid resolved        (which store the server thought it was)
+    - which field the logo came from    (entry.logo, logo_clean_url, or none)
+    - the file the browser really loaded (img.currentSrc, not the src attribute)
+
+  Read it like this:
+
+    Name and handle disagree     -> the store list is wrong (customer tags)
+    Name and handle agree, file
+      belongs to another store   -> the metaobject data is wrong
+    Two rows share one file      -> flagged DUPLICATE below; one file is being
+                                    reused across stores
+    Everything agrees but the
+      picture is still wrong     -> the CDN is serving a stale object for a
+                                    correct URL
+
+  Off unless the URL says otherwise, so it costs a shopper nothing:
+
+      /pages/portal?logodebug=1
+
+  It only reads the DOM — it never changes an image, a class or a style — so
+  turning it on cannot alter the behaviour it is measuring.
+{%- enddoc -%}
+<script>
+  (function () {
+    if (window.location.search.indexOf('logodebug=1') === -1) return;
+
+    // The frames are stamped by the section, but the images inside them are
+    // lazy — currentSrc is empty until one actually loads. Reporting before
+    // then would show blanks and prove nothing, so the report is built on
+    // demand from a button rather than once at page load.
+    function tail(url) {
+      if (!url) return '(not loaded yet)';
+      try {
+        var path = new URL(url, window.location.origin).pathname;
+        return path.split('/').pop() || url;
+      } catch (e) {
+        return url;
+      }
+    }
+
+    function collect() {
+      var frames = document.querySelectorAll('.ss-logo-frame[data-ss-logo-for]');
+      var rows = [];
+      for (var i = 0; i < frames.length; i++) {
+        var frame = frames[i];
+        var card = frame.closest('[data-ss-onboarding-image], .ss-store-card, li, article') || frame.parentNode;
+        var titleEl = card ? card.querySelector('.ss-card-title') : null;
+        var img = frame.querySelector('img');
+        rows.push({
+          n: i + 1,
+          shown: titleEl ? (titleEl.textContent || '').trim() : '(no title)',
+          handle: frame.getAttribute('data-ss-logo-for') || '',
+          kind: frame.getAttribute('data-ss-logo-kind') || '',
+          file: img ? tail(img.currentSrc || img.getAttribute('src')) : '(no img)'
+        });
+      }
+      return rows;
+    }
+
+    function report() {
+      var rows = collect();
+
+      // The single most diagnostic fact: is one file being painted onto more
+      // than one card? If so the argument about lazy loading is over.
+      var seen = {};
+      for (var i = 0; i < rows.length; i++) {
+        var f = rows[i].file;
+        if (f.indexOf('(') === 0) continue;
+        seen[f] = (seen[f] || 0) + 1;
+      }
+
+      var lines = ['# card | name shown | handle Liquid used | source | file actually loaded'];
+      for (var j = 0; j < rows.length; j++) {
+        var r = rows[j];
+        var dup = seen[r.file] > 1 ? '  <== DUPLICATE FILE' : '';
+        lines.push(r.n + ' | ' + r.shown + ' | ' + r.handle + ' | ' + r.kind + ' | ' + r.file + dup);
+      }
+      return lines.join('\n');
+    }
+
+    function panel() {
+      var box = document.createElement('div');
+      box.style.cssText =
+        'position:fixed;left:8px;right:8px;bottom:8px;max-height:52vh;z-index:2147483647;' +
+        'background:#11100e;color:#e8e8e8;font:11px/1.5 ui-monospace,Menlo,Consolas,monospace;' +
+        'border-radius:10px;padding:10px;overflow:auto;box-shadow:0 8px 30px rgba(0,0,0,.5)';
+
+      var bar = document.createElement('div');
+      bar.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;position:sticky;top:0;background:#11100e;padding-bottom:6px';
+
+      var pre = document.createElement('pre');
+      pre.style.cssText = 'margin:0;white-space:pre-wrap;word-break:break-all';
+
+      function refresh() { pre.textContent = report(); }
+
+      function button(label, fn) {
+        var b = document.createElement('button');
+        b.textContent = label;
+        b.style.cssText =
+          'font:600 11px/1 system-ui;padding:7px 10px;border-radius:6px;border:0;' +
+          'background:#3b82f6;color:#fff;cursor:pointer';
+        b.addEventListener('click', fn);
+        return b;
+      }
+
+      bar.appendChild(button('Refresh', refresh));
+      bar.appendChild(button('Copy', function () {
+        var text = pre.textContent;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text);
+        } else {
+          // Older mobile Safari has no clipboard API; select it so the user
+          // can copy by hand rather than being told nothing happened.
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+      }));
+      bar.appendChild(button('Close', function () { box.remove(); }));
+
+      box.appendChild(bar);
+      box.appendChild(pre);
+      document.body.appendChild(box);
+      refresh();
+
+      // Cards animate in and images settle late; one delayed pass means the
+      // first thing shown is already the settled state.
+      setTimeout(refresh, 1500);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', panel, { once: true });
+    } else {
+      panel();
+    }
+  })();
+</script>
