@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v10-bc3001-card-image';
+  var VERSION = 'catalog-v11-g3719-pullover-hoodie';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -19,7 +19,9 @@
     cc1467y:     CDN + 'cc1467y_editor_background_style29570_7d6c40c4-f850-4427-bfe0-378bdf361460.png?v=1776975083',
     ec8000_f:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-front-oyster.png?v=1783275244',
     ec8000_b:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/ec8000-back-oyster.png?v=1783275244',
-    hat39165:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/hat39165-front-dtf-hat-black.jpg?v=1783838485'
+    hat39165:    'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/hat39165-front-dtf-hat-black.jpg?v=1783838485',
+    g3719_f:     CDN + '3719_front_editor_background_style22528.png?v=1785820275',
+    g3719_b:     CDN + '3719_back_editor_background_style22529.png?v=1785820328'
   };
 
   var BUILDERS = [
@@ -115,6 +117,23 @@
       pricing: [
         { label: 'Front print', note: 'Logo or design on front', price: '$34' },
         { label: 'Front + Back print', note: 'Artwork on both sides', price: '$39' }
+      ]
+    },
+    {
+      id: 'g3719',
+      badge: 'Pullover Hoodie',
+      name: 'Bella + Canvas 3719',
+      from: '$42',
+      hint: 'Front or front + back printing',
+      route: '/editor/pro-shirt/g3719',
+      gallery: [IMG.g3719_f, IMG.g3719_b],
+      desc: 'The 3719 is Bella + Canvas’ premium pullover hoodie — airlume combed cotton against a soft poly fleece interior, with a roomy front pouch and cuffed long sleeves. Side-seamed for a cleaner drape than a boxy hoodie, so a chest logo sits straight instead of rolling with the fabric.',
+      specs: ['52% airlume combed ring-spun cotton · 48% poly fleece', 'Heathers 60% cotton · 40% poly fleece', '6.5 oz/yd² · regular fit · side-seamed'],
+      sizes: 'S · M · L · XL · 2XL',
+      colors: 'Choose up to 2 garment colors per listing',
+      pricing: [
+        { label: 'Front print', note: 'Logo or design on front', price: '$42' },
+        { label: 'Front + Back print', note: 'Artwork on both sides', price: '$47' }
       ]
     },
     {
@@ -250,6 +269,7 @@
     bc3001: { front: 'BC3001_front', back: 'BC3001_front_back' },
     cc1467y: { front: 'CC1467Y_front', back: 'CC1467Y_front_back' },
     m2580:   { front: 'M2580_front',   back: 'M2580_front_back' },
+    g3719:   { front: 'G3719_front',   back: 'G3719_front_back' },
     m2480:   { front: 'M2480_front',   back: 'M2480_front_back' },
     ls14003: { front: 'LS14003_front', back: 'LS14003_front_back' },
     cc1717:  { front: 'CC1717_front',  back: 'CC1717_front_back' },
