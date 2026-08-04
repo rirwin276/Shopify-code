@@ -51,6 +51,17 @@
       }
     }
 
+    // src and currentSrc are reported SEPARATELY and never substituted for one
+    // another. The first version fell back from one to the other, which hid the
+    // single most important fact in this bug: before the images loaded every
+    // card reported its own correct file, and after they loaded a run of cards
+    // all reported one store's file. That is not one value being wrong — it is
+    // two values disagreeing, and only the pair identifies the culprit.
+    //
+    //   src attr correct, currentSrc wrong -> the browser chose a different
+    //     candidate than the attribute, which only srcset or <picture> can do
+    //   both wrong                         -> something rewrote the attribute
+    //     after render, or the server emitted it wrong
     function collect() {
       var frames = document.querySelectorAll('.ss-logo-frame[data-ss-logo-for]');
       var rows = [];
@@ -59,12 +70,15 @@
         var card = frame.closest('[data-ss-onboarding-image], .ss-store-card, li, article') || frame.parentNode;
         var titleEl = card ? card.querySelector('.ss-card-title') : null;
         var img = frame.querySelector('img');
+        var srcset = img ? (img.getAttribute('srcset') || '') : '';
         rows.push({
           n: i + 1,
           shown: titleEl ? (titleEl.textContent || '').trim() : '(no title)',
           handle: frame.getAttribute('data-ss-logo-for') || '',
-          kind: frame.getAttribute('data-ss-logo-kind') || '',
-          file: img ? tail(img.currentSrc || img.getAttribute('src')) : '(no img)'
+          attr: img ? tail(img.getAttribute('src')) : '(no img)',
+          live: img ? tail(img.currentSrc) : '(no img)',
+          srcset: srcset,
+          parent: img && img.parentNode ? img.parentNode.tagName : ''
         });
       }
       return rows;
@@ -73,20 +87,31 @@
     function report() {
       var rows = collect();
 
-      // The single most diagnostic fact: is one file being painted onto more
-      // than one card? If so the argument about lazy loading is over.
-      var seen = {};
-      for (var i = 0; i < rows.length; i++) {
-        var f = rows[i].file;
-        if (f.indexOf('(') === 0) continue;
-        seen[f] = (seen[f] || 0) + 1;
-      }
-
-      var lines = ['# card | name shown | handle Liquid used | source | file actually loaded'];
+      var lines = ['# | name | src attribute | actually displayed | flags'];
+      var firstBad = null;
       for (var j = 0; j < rows.length; j++) {
         var r = rows[j];
-        var dup = seen[r.file] > 1 ? '  <== DUPLICATE FILE' : '';
-        lines.push(r.n + ' | ' + r.shown + ' | ' + r.handle + ' | ' + r.kind + ' | ' + r.file + dup);
+        var flags = [];
+        // Empty currentSrc just means the image has not loaded yet. Saying so
+        // is the difference between "not measured" and "measured as wrong".
+        if (!r.live) {
+          flags.push('NOT LOADED YET');
+        } else if (r.live !== r.attr) {
+          flags.push('MISMATCH');
+          if (!firstBad) firstBad = r;
+        }
+        if (r.srcset) flags.push('HAS SRCSET');
+        if (r.parent && r.parent !== 'DIV') flags.push('IN <' + r.parent + '>');
+        lines.push(r.n + ' | ' + r.shown + ' | ' + r.attr + ' | ' + (r.live || '-') + ' | ' + flags.join(' '));
+      }
+
+      // One full srcset value is worth more than every summary line above it:
+      // if a srcset survives here it names the exact candidates the browser
+      // chose between, and the wrong logo is one of them.
+      if (firstBad && firstBad.srcset) {
+        lines.push('');
+        lines.push('srcset on first mismatching card (' + firstBad.shown + '):');
+        lines.push(firstBad.srcset.slice(0, 600));
       }
       return lines.join('\n');
     }
