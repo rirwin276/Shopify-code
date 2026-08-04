@@ -3,6 +3,34 @@
 (function() {
   if (typeof window === 'undefined') return;
 
+  // Remember the exact store being submitted before the provisioning flow
+  // redirects to the dashboard. Some backend redirects only include
+  // ?new_store=1; without the handle the onboarding modal used to guess from
+  // the first building card and could display another store's logo.
+  function initNewStoreContextCapture() {
+    document.addEventListener('submit', function(event) {
+      var form = event.target;
+      if (!form || form.id !== 'sf-request-form') return;
+
+      var handleEl = document.getElementById('HiddenHandle');
+      var nameEl = document.getElementById('StoreName');
+      var handle = handleEl ? String(handleEl.value || '').trim() : '';
+      var name = nameEl ? String(nameEl.value || '').trim() : '';
+      if (!handle) return;
+
+      var payload = JSON.stringify({
+        handle: handle,
+        name: name,
+        savedAt: Date.now()
+      });
+
+      try { sessionStorage.setItem('ss_new_store_context', payload); } catch (e) {}
+      // Local storage is only a short-lived fallback for browsers that lose
+      // sessionStorage while crossing the provisioning redirect.
+      try { localStorage.setItem('ss_new_store_context', payload); } catch (e) {}
+    }, true);
+  }
+
   // --- SCROLL REVEAL ---
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -105,6 +133,10 @@
 
     counters.forEach(el => counterObserver.observe(el));
   }
+
+  // Capture submit context immediately; this listener must exist before the
+  // inline form handler starts the provisioning timer.
+  initNewStoreContextCapture();
 
   // --- INIT ---
   if (document.readyState === 'loading') {
