@@ -116,6 +116,43 @@
       return lines.join('\n');
     }
 
+    // Every script in the theme repo has been ruled out by reading it, and the
+    // images are still being rewritten — so the code doing it is code that is
+    // not in the repo. Two things can put JavaScript on this page without
+    // appearing in any theme file: the page body stored in the Shopify admin
+    // (which we already know holds a script, because the console reports a
+    // syntax error inside one) and an installed app.
+    //
+    // Rather than hunting through the admin by hand, the page reports its own
+    // scripts. Inline scripts that mention logos or assign to .src are printed
+    // in full; everything else is listed by size so nothing is hidden.
+    function scriptReport() {
+      var out = [];
+      var inline = document.querySelectorAll('script:not([src])');
+      var external = document.querySelectorAll('script[src]');
+
+      out.push('=== INLINE SCRIPTS (' + inline.length + ') ===');
+      var suspicious = /ss-logo-frame|logo|\.src\s*=|srcset|querySelectorAll/i;
+      for (var i = 0; i < inline.length; i++) {
+        var text = inline[i].textContent || '';
+        if (!text.trim()) continue;
+        var hit = suspicious.test(text);
+        out.push('');
+        out.push('--- inline #' + i + ' | ' + text.length + ' chars | ' +
+                 (hit ? 'MENTIONS LOGO/SRC' : 'no match') + ' ---');
+        // A matching script is printed generously: the point is to read it,
+        // and a truncated middle is where the bug would hide.
+        out.push(hit ? text.slice(0, 4000) : text.slice(0, 160) + '…');
+      }
+
+      out.push('');
+      out.push('=== EXTERNAL SCRIPTS (' + external.length + ') ===');
+      for (var j = 0; j < external.length; j++) {
+        out.push(external[j].getAttribute('src') || '');
+      }
+      return out.join('\n');
+    }
+
     function panel() {
       var box = document.createElement('div');
       box.style.cssText =
@@ -142,6 +179,7 @@
       }
 
       bar.appendChild(button('Refresh', refresh));
+      bar.appendChild(button('Scripts', function () { pre.textContent = scriptReport(); }));
       bar.appendChild(button('Copy', function () {
         var text = pre.textContent;
         if (navigator.clipboard) {
