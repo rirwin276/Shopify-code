@@ -634,6 +634,22 @@
                               scrolling. Shopify builds the correct srcset from
                               the file itself, so nothing has to run at all.
                             {%- endcomment -%}
+                            {%- comment -%}
+                              One src, no srcset.
+
+                              A browser renders whichever candidate srcset
+                              selects and ignores src entirely — so a srcset is
+                              the only attribute that can make an <img> display
+                              a picture other than the one in its src. This
+                              card was showing the wrong logo while its own alt
+                              text was correct, which is exactly that shape.
+
+                              image_url returns a URL string, and piping a
+                              string into image_tag with `widths` asks it to
+                              synthesise variants of something it can no longer
+                              introspect. At 72-104px a srcset buys nothing
+                              worth that risk.
+                            {%- endcomment -%}
                             {{ tile_logo_file
                               | image_url: width: 320
                               | image_tag:
@@ -642,9 +658,7 @@
                                   fetchpriority: 'low',
                                   alt: tile_name,
                                   width: 72,
-                                  height: 72,
-                                  widths: '104, 160, 208, 320',
-                                  sizes: '(max-width: 850px) 104px, 88px' }}
+                                  height: 72 }}
                           {% else %}
                             <span class="ss-logo-fallback">{{ tile_name | slice: 0, 2 | upcase }}</span>
                           {% endif %}
