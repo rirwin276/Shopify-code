@@ -30,9 +30,31 @@
 
       /pages/portal?logodebug=1
 
-  It only reads the DOM — it never changes an image, a class or a style — so
-  turning it on cannot alter the behaviour it is measuring.
+  The diagnostic only reads the DOM. The small safeguard immediately below
+  removes responsive image candidates from dashboard logos so each card can
+  only display the exact URL in its own src attribute.
 {%- enddoc -%}
+
+<script>
+  (function () {
+    function forceSingleLogoSource() {
+      var images = document.querySelectorAll('.ss-logo-frame[data-ss-logo-for] img');
+      for (var i = 0; i < images.length; i++) {
+        images[i].removeAttribute('srcset');
+        images[i].removeAttribute('sizes');
+      }
+    }
+
+    // This snippet is rendered immediately after the dashboard cards, so the
+    // first pass runs as soon as all card images exist. The DOMContentLoaded
+    // pass is a harmless fallback for any markup inserted later in parsing.
+    forceSingleLogoSource();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', forceSingleLogoSource, { once: true });
+    }
+  })();
+</script>
+
 <script>
   (function () {
     if (window.location.search.indexOf('logodebug=1') === -1) return;
