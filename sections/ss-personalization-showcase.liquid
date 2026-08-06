@@ -1,0 +1,147 @@
+{% comment %}
+  Public personalization showcase.
+  The image picker is intentionally manual so Ryan can upload the exact
+  checkout screenshot that shows the buyer-entered name and number.
+{% endcomment %}
+
+<section class="ss-pers-showcase" id="ss-pers-{{ section.id }}">
+  <div class="ss-pers-showcase__wrap">
+    <div class="ss-pers-showcase__copy">
+      <p class="ss-pers-showcase__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      <h2>{{ section.settings.heading | escape }}</h2>
+      <div class="ss-pers-showcase__lead">{{ section.settings.body }}</div>
+
+      <div class="ss-pers-showcase__steps">
+        <div><span>1</span><p><strong>The organizer turns personalization on.</strong><br>Eligible products can offer a back name, number, or both.</p></div>
+        <div><span>2</span><p><strong>Each buyer enters their own information.</strong><br>No spreadsheet, money collection, or manual list for the organizer.</p></div>
+        <div><span>3</span><p><strong>The order carries the details into production.</strong><br>The buyer reviews spelling, number, size, and color before checkout.</p></div>
+      </div>
+
+      {% if section.settings.button_label != blank %}
+        <a class="ss-pers-showcase__button" href="{{ section.settings.button_url | default: '/pages/request-storefront-form' }}">
+          {{ section.settings.button_label | escape }}
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="ss-pers-showcase__media">
+      {% if section.settings.checkout_example_image != blank %}
+        {{
+          section.settings.checkout_example_image
+          | image_url: width: 1500
+          | image_tag:
+            loading: 'lazy',
+            widths: '480, 720, 960, 1200, 1500',
+            sizes: '(max-width: 800px) 100vw, 48vw',
+            alt: section.settings.image_alt
+        }}
+      {% else %}
+        <div class="ss-pers-showcase__placeholder">
+          <div class="ss-pers-showcase__mock">
+            <span>Checkout personalization screenshot</span>
+            <strong>Name: CAMPBELL</strong>
+            <strong>Number: 17</strong>
+          </div>
+          <p>Open the theme editor and upload your checkout name-and-number screenshot here.</p>
+        </div>
+      {% endif %}
+      {% if section.settings.image_caption != blank %}
+        <p class="ss-pers-showcase__caption">{{ section.settings.image_caption | escape }}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<style>
+  #ss-pers-{{ section.id }}{
+    --ink:#11100e;
+    --muted:#6d675e;
+    --gold:#b7a36a;
+    background:#f7f4ed;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  #ss-pers-{{ section.id }} *{box-sizing:border-box}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__wrap{max-width:1160px;margin:0 auto;padding:78px 24px;display:grid;grid-template-columns:1fr 1fr;gap:68px;align-items:center}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__eyebrow{font-size:11px;letter-spacing:.15em;font-weight:900;color:var(--gold);margin:0 0 12px}
+  #ss-pers-{{ section.id }} h2{font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:-.05em;margin:0 0 18px}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__lead{font-size:17px;line-height:1.65;color:var(--muted);margin:0 0 28px}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__lead p{margin:0}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__steps{display:flex;flex-direction:column;gap:15px}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__steps>div{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__steps span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-size:12px;font-weight:900}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__steps p{font-size:13px;line-height:1.55;color:var(--muted);margin:0}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__steps strong{color:var(--ink);font-size:14px}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__button{display:inline-flex;margin-top:28px;padding:13px 20px;border-radius:999px;background:var(--ink);color:#fff;text-decoration:none;font-weight:900;font-size:14px}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__media{min-width:0}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__media>img{display:block;width:100%;height:auto;border-radius:24px;border:1px solid rgba(17,16,14,.1);box-shadow:0 24px 60px rgba(17,16,14,.14);background:#fff}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__placeholder{min-height:430px;border:2px dashed rgba(17,16,14,.18);border-radius:24px;background:#fff;padding:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted)}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__mock{width:min(360px,100%);border:1px solid rgba(17,16,14,.12);border-radius:18px;padding:24px;text-align:left;display:flex;flex-direction:column;gap:12px;background:#fbfbfb}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__mock span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__mock strong{background:#fff;border:1px solid rgba(17,16,14,.1);padding:12px;border-radius:10px}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__placeholder>p{font-size:12px;max-width:360px;margin:18px 0 0}
+  #ss-pers-{{ section.id }} .ss-pers-showcase__caption{text-align:center;font-size:12px;color:var(--muted);margin:12px 0 0}
+  @media(max-width:850px){
+    #ss-pers-{{ section.id }} .ss-pers-showcase__wrap{grid-template-columns:1fr;gap:40px;padding:58px 18px}
+    #ss-pers-{{ section.id }} .ss-pers-showcase__media{order:-1}
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Personalization showcase",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "OPTIONAL NAME + NUMBER"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Personalization without the spreadsheet."
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Description",
+      "default": "<p>Parents and supporters enter their own name and number while ordering. The organizer never has to collect a list, type everyone’s details, or match payments to sizes.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "checkout_example_image",
+      "label": "Checkout name-and-number screenshot"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image alt text",
+      "default": "Checkout showing a buyer-entered name and number"
+    },
+    {
+      "type": "text",
+      "id": "image_caption",
+      "label": "Image caption",
+      "default": "Each buyer reviews their own details before placing the order."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Create a free storefront"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Personalization showcase"
+    }
+  ]
+}
+{% endschema %}
