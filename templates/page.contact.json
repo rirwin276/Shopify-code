@@ -29,6 +29,17 @@
         "access_text": "Whether you need military-grade exclusivity or casual group sharing, we give you the keys."
       }
     },
+    "hide_legacy_personalization": {
+      "type": "custom-liquid",
+      "name": "Use editable personalization section",
+      "settings": {
+        "custom_liquid": "<style>/* The explainer's original jersey mock is replaced by the editable checkout screenshot section below. */ .ssx-nn{display:none!important;}</style>",
+        "color_scheme": "",
+        "section_width": "full-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
     "personalization_showcase": {
       "type": "ss-personalization-showcase",
       "settings": {
@@ -54,6 +65,7 @@
   "order": [
     "main",
     "ss_explainer_page_HDqmFq",
+    "hide_legacy_personalization",
     "personalization_showcase",
     "public_product_catalog"
   ]
