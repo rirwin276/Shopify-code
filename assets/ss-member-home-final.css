@@ -82,3 +82,55 @@
     white-space:nowrap!important;
   }
 }
+
+/* Final optical centering: draw each icon on an absolutely centered layer.
+ * This bypasses font baselines, inherited line-height, and browser glyph
+ * differences while leaving all links and DOM behavior untouched.
+ */
+.ss-command-primary__icon,
+.ss-command-tile__icon {
+  position:relative!important;
+  background-image:none!important;
+  color:transparent!important;
+  font-size:0!important;
+  line-height:0!important;
+  text-indent:0!important;
+}
+
+.ss-command-primary__icon::before,
+.ss-command-tile__icon::before {
+  content:""!important;
+  position:absolute!important;
+  top:50%!important;
+  left:50%!important;
+  width:21px!important;
+  height:21px!important;
+  margin:0!important;
+  transform:translate(-50%,-50%)!important;
+  background-position:50% 50%!important;
+  background-repeat:no-repeat!important;
+  background-size:contain!important;
+  pointer-events:none!important;
+}
+
+.ss-member-shell--has-store .ss-command-primary__icon::before {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5Z' fill='none' stroke='%23dfc47c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+}
+
+.ss-member-shell--no-store .ss-command-primary__icon::before,
+.ss-member-shell--has-store .ss-command-quick > .ss-command-tile:nth-of-type(1) .ss-command-tile__icon::before {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 5v14M5 12h14' fill='none' stroke='%23d9c27f' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+
+.ss-member-shell--no-store .ss-command-primary__icon::before {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 5v14M5 12h14' fill='none' stroke='%23dfc47c' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+
+.ss-member-shell--has-store .ss-command-quick > .ss-command-tile:nth-of-type(2) .ss-command-tile__icon::before,
+.ss-member-shell--no-store .ss-command-quick > .ss-command-tile:nth-of-type(1) .ss-command-tile__icon::before {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12a1 1 0 0 1 1 1v16l-3-2-2 2-2-2-2 2-2-2-3 2V4a1 1 0 0 1 1-1Z' fill='none' stroke='%23d9c27f' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M8 8h8M8 12h8' fill='none' stroke='%23d9c27f' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+
+.ss-member-shell--no-store .ss-command-quick > .ss-command-tile:nth-of-type(2) .ss-command-tile__icon::before {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23d9c27f' stroke-width='1.8'/%3E%3Cpath d='M9.8 9a2.4 2.4 0 1 1 3.4 2.2c-.8.4-1.2 1-1.2 1.8M12 17h.01' fill='none' stroke='%23d9c27f' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
