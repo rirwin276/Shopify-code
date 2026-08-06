@@ -86,7 +86,7 @@
       "type": "custom-liquid",
       "name": "Homepage catalog controller",
       "settings": {
-        "custom_liquid": "{% if customer %}<style>.ss-public-catalog{display:none!important}</style>{% endif %}<div data-ss-home-catalog-control data-signed-in=\"{% if customer %}true{% else %}false{% endif %}\" hidden></div><script src=\"{{ 'ss-home-catalog-controller.js' | asset_url }}\" defer=\"defer\"></script>",
+        "custom_liquid": "{% if customer %}<style>.ss-public-catalog{display:none!important}</style><link rel=\"stylesheet\" href=\"{{ 'ss-member-home.css' | asset_url }}\"><div data-ss-member-home-control data-request-url=\"/pages/storefront\" data-dashboard-url=\"/pages/portal?stay=1\" data-orders-url=\"/account\" data-support-url=\"/pages/support\" hidden></div><script src=\"{{ 'ss-member-home.js' | asset_url }}\" defer=\"defer\"></script>{% endif %}<div data-ss-home-catalog-control data-signed-in=\"{% if customer %}true{% else %}false{% endif %}\" hidden></div><script src=\"{{ 'ss-home-catalog-controller.js' | asset_url }}\" defer=\"defer\"></script>",
         "color_scheme": "",
         "section_width": "full-width",
         "padding-block-start": 0,
