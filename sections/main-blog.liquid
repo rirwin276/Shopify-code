@@ -1,169 +1,190 @@
-<script
-  src="{{ 'blog-posts-list.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
+{%- liquid
+  assign blog_heading = blog.title
+  if blog.handle == 'news'
+    assign blog_heading = 'Team Store Resources'
+  endif
+-%}
 
-<blog-posts-list section-id="{{ section.id }}">
-  <div class="section-background color-{{ section.settings.color_scheme }}"></div>
-  <div
-    class="
-      section
-      color-{{ section.settings.color_scheme }}
-      blog-posts
-      spacing-style
-      size-style
-    "
-    style="{% render 'spacing-style', settings: section.settings %}"
-  >
-    {% content_for 'blocks' %}
+<section class="ss-blog" data-ss-blog>
+  <header class="ss-blog__hero">
+    <div class="ss-blog__hero-glow ss-blog__hero-glow--one"></div>
+    <div class="ss-blog__hero-glow ss-blog__hero-glow--two"></div>
+    <div class="ss-blog__hero-inner">
+      <span class="ss-blog__eyebrow">PRACTICAL GUIDES FOR REAL ORGANIZERS</span>
+      <h1>{{ blog_heading | escape }}</h1>
+      <p>Clear answers about team stores, spirit wear, print-on-demand apparel, fundraising, logos, products, and the small details that make group merch easier.</p>
 
-    {%- paginate blog.articles by 12 -%}
-      <span ref="viewMorePrevious"></span>
-      <div
-        ref="grid"
-        class="blog-posts-container"
-        data-last-page="{{ paginate.pages }}"
-      >
-        {% for article in blog.articles %}
-          <div
-            class="blog-post-item"
-            ref="cards[]"
-            data-page="{{ paginate.current_page }}"
-          >
-            {% content_for 'block', id: 'static-blog-post-card', type: '_blog-post-card', article: article %}
-          </div>
-        {% endfor %}
+      <div class="ss-blog__hero-actions">
+        <a class="ss-blog__primary" href="/pages/storefront">Start a free team store <span aria-hidden="true">→</span></a>
+        <a class="ss-blog__secondary" href="/pages/contact">See how it works</a>
       </div>
-      <span ref="viewMoreNext"></span>
-    {%- endpaginate -%}
-  </div>
-</blog-posts-list>
+
+      <div class="ss-blog__proof">
+        <span>No minimums</span>
+        <span>No upfront inventory</span>
+        <span>Parents order directly</span>
+        <span>Always open</span>
+      </div>
+    </div>
+  </header>
+
+  {%- if blog.all_tags.size > 0 -%}
+    <nav class="ss-blog__topics" aria-label="Blog topics">
+      <div class="ss-blog__topics-inner">
+        <span>Browse:</span>
+        <a href="{{ blog.url }}"{% unless current_tags %} class="is-active"{% endunless %}>All guides</a>
+        {%- for tag in blog.all_tags limit: 10 -%}
+          <a href="{{ blog.url }}/tagged/{{ tag | handle }}"{% if current_tags contains tag %} class="is-active"{% endif %}>{{ tag }}</a>
+        {%- endfor -%}
+      </div>
+    </nav>
+  {%- endif -%}
+
+  {%- paginate blog.articles by 12 -%}
+    <div class="ss-blog__content">
+      {%- if blog.articles.size > 0 -%}
+        {%- assign featured = blog.articles.first -%}
+        {%- assign featured_words = featured.content | strip_html | split: ' ' | size -%}
+        {%- assign featured_read = featured_words | divided_by: 220 -%}
+        {%- assign featured_remainder = featured_words | modulo: 220 -%}
+        {%- if featured_remainder > 0 -%}{%- assign featured_read = featured_read | plus: 1 -%}{%- endif -%}
+        {%- if featured_read < 1 -%}{%- assign featured_read = 1 -%}{%- endif -%}
+
+        <a class="ss-blog__featured" href="{{ featured.url }}">
+          <div class="ss-blog__featured-media">
+            {%- if featured.image -%}
+              {{ featured.image
+                | image_url: width: 1400
+                | image_tag:
+                  widths: '600, 900, 1200, 1400',
+                  sizes: '(max-width: 900px) 94vw, 56vw',
+                  loading: 'eager',
+                  fetchpriority: 'high',
+                  alt: featured.image.alt | default: featured.title
+              }}
+            {%- else -%}
+              <div class="ss-blog__image-fallback">
+                <span>S&amp;S</span>
+                <small>TEAM STORE GUIDE</small>
+              </div>
+            {%- endif -%}
+            <span class="ss-blog__featured-badge">LATEST GUIDE</span>
+          </div>
+
+          <div class="ss-blog__featured-copy">
+            <div class="ss-blog__card-meta">
+              <span>{{ featured.published_at | date: '%B %d, %Y' }}</span>
+              <span>{{ featured_read }} min read</span>
+            </div>
+            <h2>{{ featured.title }}</h2>
+            <p>{{ featured.excerpt_or_content | strip_html | truncatewords: 32 }}</p>
+            <strong>Read the full guide <span aria-hidden="true">→</span></strong>
+          </div>
+        </a>
+
+        {%- if blog.articles.size > 1 -%}
+          <div class="ss-blog__section-head">
+            <div>
+              <span>MORE RESOURCES</span>
+              <h2>Answers for teams, schools, clubs, and organizers</h2>
+            </div>
+            <p>Built from the questions people ask before they trust a platform with their group’s apparel.</p>
+          </div>
+
+          <div class="ss-blog__grid">
+            {%- for article in blog.articles offset: 1 -%}
+              {%- assign article_words = article.content | strip_html | split: ' ' | size -%}
+              {%- assign article_read = article_words | divided_by: 220 -%}
+              {%- assign article_remainder = article_words | modulo: 220 -%}
+              {%- if article_remainder > 0 -%}{%- assign article_read = article_read | plus: 1 -%}{%- endif -%}
+              {%- if article_read < 1 -%}{%- assign article_read = 1 -%}{%- endif -%}
+
+              <article class="ss-blog__card">
+                <a class="ss-blog__card-media" href="{{ article.url }}" tabindex="-1" aria-hidden="true">
+                  {%- if article.image -%}
+                    {{ article.image
+                      | image_url: width: 800
+                      | image_tag:
+                        widths: '360, 540, 720, 800',
+                        sizes: '(max-width: 720px) 92vw, 31vw',
+                        loading: 'lazy',
+                        alt: article.image.alt | default: article.title
+                    }}
+                  {%- else -%}
+                    <div class="ss-blog__image-fallback ss-blog__image-fallback--card">
+                      <span>S&amp;S</span>
+                    </div>
+                  {%- endif -%}
+                </a>
+
+                <div class="ss-blog__card-copy">
+                  <div class="ss-blog__card-meta">
+                    <span>{{ article.published_at | date: '%B %d, %Y' }}</span>
+                    <span>{{ article_read }} min read</span>
+                  </div>
+                  <h3><a href="{{ article.url }}">{{ article.title }}</a></h3>
+                  <p>{{ article.excerpt_or_content | strip_html | truncatewords: 23 }}</p>
+                  <a class="ss-blog__read" href="{{ article.url }}">Read guide <span aria-hidden="true">→</span></a>
+                </div>
+              </article>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      {%- else -%}
+        <div class="ss-blog__empty">
+          <h2>New resources are on the way.</h2>
+          <p>We are building practical guides for organizers who want team merch without the spreadsheets, order forms, and leftover inventory.</p>
+        </div>
+      {%- endif -%}
+
+      {%- if paginate.pages > 1 -%}
+        <div class="ss-blog__pagination">{{ paginate | default_pagination }}</div>
+      {%- endif -%}
+
+      <section class="ss-blog__cta">
+        <div>
+          <span>READY TO STOP MANAGING SHIRT ORDERS?</span>
+          <h2>Upload a logo. Share one link. Let everyone order for themselves.</h2>
+          <p>Your store stays open, buyers choose their own size and color, and every order ships directly to them.</p>
+        </div>
+        <a href="/pages/storefront">Build my free store <span aria-hidden="true">→</span></a>
+      </section>
+    </div>
+  {%- endpaginate -%}
+
+  {% content_for 'blocks' %}
+</section>
 
 {% stylesheet %}
-  /**
-   * Blog posts page layout
-   */
-  .blog-posts {
-    --page-content-width: var(--narrow-page-width);
-    --page-width: calc(var(--page-content-width) + (var(--page-margin) * 2));
-    --columns-gap: 36px;
-    --rows-gap: 36px;
-  }
-
-  .blog-posts-container {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 1rem;
-    width: 100%;
-    column-gap: var(--columns-gap);
-    row-gap: var(--rows-gap);
-  }
-
-  /**
-   * Apart from the first and second rows in the grid, all remaining blog posts
-   * are arranged in a three-column layout:
-   * +------------+------------+-------------+
-   * |            |            |             |
-   * |  (span 2)  |  (span 2)  |  (span 2)   |
-   * |            |            |             |
-   * +------------+------------+-------------+
-   */
-  .blog-post-item {
-    --blog-post-card-scale: 0.6;
-
-    grid-column: span 2;
-
-    @media screen and (max-width: 749px) {
-      --blog-post-card-scale: 0.5;
-
-      grid-column: span 6;
-    }
-  }
-
-  /**
-   * The second row of blog posts has two columns:
-   * +-------------------+-------------------+
-   * |                   |                   |
-   * |  (column span 3)  |  (column span 3)  |
-   * |                   |                   |
-   * +-------------------+-------------------+
-   */
-  .blog-post-item:nth-child(2),
-  .blog-post-item:nth-child(3) {
-    --blog-post-card-scale: 0.8;
-
-    grid-column: span 3;
-
-    @media screen and (max-width: 749px) {
-      --blog-post-card-scale: 0.5;
-
-      grid-column: span 6;
-    }
-  }
-
-  /**
-   * The first row of blog posts has only one column:
-   * +---------------------------------------+
-   * |                                       |
-   * |           (1 column span 6)           |
-   * |                                       |
-   * +---------------------------------------+
-   */
-  .blog-post-item:first-child {
-    --blog-post-card-scale: 1;
-
-    grid-column: span 6;
-  }
-
-  /**
-   * When there's no image, the blog post item has a border.
-   */
-  .blog-post-item {
-    border: 1px solid rgb(var(--color-foreground-rgb) / var(--opacity-20));
-    padding: 0 1rem 1rem;
-  }
-
-  .blog-post-item:has(.blog-post-card__image-container) {
-    border: none;
-    padding: 0;
-  }
+  .ss-blog{--ink:#11100e;--muted:#6e685f;--gold:#b89d57;color:var(--ink);background:#fff}
+  .ss-blog__hero{position:relative;overflow:hidden;padding:clamp(72px,9vw,126px) 20px clamp(58px,8vw,104px);background:linear-gradient(145deg,#11100e 0%,#211e19 62%,#343027 100%);color:#fff}
+  .ss-blog__hero:after{content:"";position:absolute;inset:auto 0 0;height:1px;background:linear-gradient(90deg,transparent,rgba(214,190,120,.52),transparent)}
+  .ss-blog__hero-glow{position:absolute;border-radius:50%;pointer-events:none}.ss-blog__hero-glow--one{width:560px;height:560px;top:-310px;right:-130px;background:radial-gradient(circle,rgba(214,190,120,.22),rgba(214,190,120,0) 68%)}.ss-blog__hero-glow--two{width:480px;height:480px;bottom:-350px;left:-170px;background:radial-gradient(circle,rgba(255,255,255,.08),rgba(255,255,255,0) 70%)}
+  .ss-blog__hero-inner{position:relative;z-index:1;max-width:1050px;margin:0 auto;text-align:center}.ss-blog__eyebrow{display:inline-flex;align-items:center;gap:9px;color:#d4bb72;font-size:10px;font-weight:900;letter-spacing:.17em}.ss-blog__eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#d4bb72;box-shadow:0 0 0 6px rgba(212,187,114,.12)}
+  .ss-blog__hero h1{max-width:940px;margin:19px auto 0;color:#fff;font-size:clamp(50px,8vw,92px);font-weight:900;line-height:.94;letter-spacing:-.06em;text-wrap:balance}.ss-blog__hero p{max-width:790px;margin:24px auto 0;color:#c3beb5;font-size:clamp(16px,2vw,20px);line-height:1.6;text-wrap:pretty}
+  .ss-blog__hero-actions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;margin-top:31px}.ss-blog__hero-actions a{min-height:50px;display:inline-flex;align-items:center;gap:14px;padding:0 20px;border-radius:999px;text-decoration:none;font-size:12px;font-weight:900}.ss-blog__primary{background:#fff;color:#11100e;box-shadow:0 14px 34px rgba(0,0,0,.24)}.ss-blog__primary span{color:#907636;font-size:16px}.ss-blog__secondary{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff}.ss-blog__hero-actions a:hover{transform:translateY(-2px)}
+  .ss-blog__proof{display:flex;justify-content:center;flex-wrap:wrap;gap:9px 21px;margin-top:28px;color:#9e988f;font-size:10px;font-weight:750}.ss-blog__proof span{display:inline-flex;align-items:center;gap:8px}.ss-blog__proof span:before{content:"";width:4px;height:4px;border-radius:50%;background:#b89d57}
+  .ss-blog__topics{position:relative;z-index:3;border-bottom:1px solid rgba(17,16,14,.08);background:#fff;box-shadow:0 8px 28px rgba(17,16,14,.035)}.ss-blog__topics-inner{max-width:1180px;display:flex;align-items:center;gap:8px;overflow-x:auto;margin:0 auto;padding:14px 20px;scrollbar-width:none}.ss-blog__topics-inner::-webkit-scrollbar{display:none}.ss-blog__topics span{flex:0 0 auto;margin-right:5px;color:#8a8379;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em}.ss-blog__topics a{flex:0 0 auto;min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border:1px solid rgba(17,16,14,.09);border-radius:999px;color:#554f47;text-decoration:none;font-size:10px;font-weight:800}.ss-blog__topics a:hover,.ss-blog__topics a.is-active{border-color:#11100e;background:#11100e;color:#fff}
+  .ss-blog__content{max-width:1180px;margin:0 auto;padding:clamp(54px,7vw,90px) 20px clamp(70px,8vw,108px)}
+  .ss-blog__featured{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(340px,.88fr);overflow:hidden;border:1px solid rgba(17,16,14,.08);border-radius:30px;background:#fff;color:#11100e;text-decoration:none;box-shadow:0 24px 72px rgba(17,16,14,.1);transition:transform .22s ease,box-shadow .22s ease}.ss-blog__featured:hover{transform:translateY(-4px);box-shadow:0 34px 86px rgba(17,16,14,.15)}
+  .ss-blog__featured-media{position:relative;min-height:450px;overflow:hidden;background:linear-gradient(135deg,#171612,#cab168)}.ss-blog__featured-media img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .55s ease}.ss-blog__featured:hover .ss-blog__featured-media img{transform:scale(1.025)}.ss-blog__featured-badge{position:absolute;top:18px;left:18px;display:inline-flex;align-items:center;min-height:30px;padding:0 11px;border-radius:999px;background:rgba(17,16,14,.88);color:#e4cb84;font-size:8px;font-weight:900;letter-spacing:.14em;backdrop-filter:blur(10px)}
+  .ss-blog__image-fallback{width:100%;height:100%;display:grid;place-items:center;align-content:center;gap:8px;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.14),transparent 36%),linear-gradient(135deg,#11100e,#b69a52);color:#fff}.ss-blog__image-fallback span{font-size:52px;font-weight:900;letter-spacing:.05em}.ss-blog__image-fallback small{color:#eadba9;font-size:9px;font-weight:900;letter-spacing:.18em}.ss-blog__image-fallback--card span{font-size:30px}
+  .ss-blog__featured-copy{display:flex;flex-direction:column;justify-content:center;padding:clamp(32px,5vw,58px)}.ss-blog__card-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;color:#8b847a;font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.07em}.ss-blog__card-meta span+span{display:inline-flex;align-items:center;gap:14px}.ss-blog__card-meta span+span:before{content:"";width:4px;height:4px;border-radius:50%;background:#b89d57}.ss-blog__featured h2{margin:18px 0 0;font-size:clamp(32px,4vw,50px);font-weight:900;line-height:1.02;letter-spacing:-.045em;text-wrap:balance}.ss-blog__featured-copy p{margin:18px 0 0;color:#6f6960;font-size:15px;line-height:1.65}.ss-blog__featured-copy>strong{display:flex;align-items:center;gap:12px;margin-top:25px;color:#66552c;font-size:11px;font-weight:900}.ss-blog__featured-copy>strong span{font-size:16px}
+  .ss-blog__section-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);align-items:end;gap:32px;margin:clamp(62px,8vw,100px) 0 29px}.ss-blog__section-head>div>span{color:#8b7337;font-size:9px;font-weight:900;letter-spacing:.14em}.ss-blog__section-head h2{max-width:720px;margin:8px 0 0;font-size:clamp(34px,4.6vw,56px);line-height:.98;letter-spacing:-.05em;text-wrap:balance}.ss-blog__section-head>p{max-width:440px;margin:0;color:#777168;font-size:13px;line-height:1.6}
+  .ss-blog__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.ss-blog__card{overflow:hidden;border:1px solid rgba(17,16,14,.08);border-radius:22px;background:#fff;box-shadow:0 8px 28px rgba(17,16,14,.045);transition:transform .2s ease,box-shadow .2s ease}.ss-blog__card:hover{transform:translateY(-4px);box-shadow:0 20px 46px rgba(17,16,14,.1)}.ss-blog__card-media{display:block;aspect-ratio:16/9;overflow:hidden;background:#ece8de}.ss-blog__card-media img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .45s ease}.ss-blog__card:hover .ss-blog__card-media img{transform:scale(1.035)}.ss-blog__card-copy{padding:20px 20px 22px}.ss-blog__card h3{margin:13px 0 0;font-size:21px;line-height:1.15;letter-spacing:-.03em}.ss-blog__card h3 a{color:#11100e;text-decoration:none}.ss-blog__card-copy p{margin:12px 0 0;color:#756f66;font-size:12px;line-height:1.55}.ss-blog__read{display:inline-flex;align-items:center;gap:9px;margin-top:18px;color:#715d2b;text-decoration:none;font-size:10px;font-weight:900}.ss-blog__read span{font-size:14px;transition:transform .18s ease}.ss-blog__card:hover .ss-blog__read span{transform:translateX(2px)}
+  .ss-blog__pagination{display:flex;justify-content:center;margin-top:42px}.ss-blog__pagination .pagination{display:flex;align-items:center;gap:7px}.ss-blog__pagination a,.ss-blog__pagination span{min-width:38px;height:38px;display:grid;place-items:center;border:1px solid rgba(17,16,14,.1);border-radius:10px;color:#11100e;text-decoration:none;font-size:11px;font-weight:800}.ss-blog__pagination .current,.ss-blog__pagination a:hover{background:#11100e;color:#fff}
+  .ss-blog__cta{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:30px;margin-top:clamp(68px,8vw,104px);padding:clamp(31px,5vw,50px);overflow:hidden;border-radius:28px;background:radial-gradient(circle at 90% 20%,rgba(210,187,120,.17),transparent 32%),linear-gradient(135deg,#11100e,#29261f);color:#fff;box-shadow:0 26px 62px rgba(17,16,14,.19)}.ss-blog__cta span{color:#d5bc75;font-size:9px;font-weight:900;letter-spacing:.14em}.ss-blog__cta h2{max-width:760px;margin:10px 0 0;color:#fff;font-size:clamp(31px,4.5vw,52px);line-height:1.02;letter-spacing:-.05em}.ss-blog__cta p{max-width:690px;margin:14px 0 0;color:#bab5ac;font-size:13px;line-height:1.55}.ss-blog__cta>a{min-height:52px;display:inline-flex;align-items:center;gap:14px;padding:0 20px;border-radius:999px;background:#fff;color:#11100e;text-decoration:none;font-size:11px;font-weight:900;white-space:nowrap}.ss-blog__cta>a span{color:#8c7436;font-size:16px;letter-spacing:0}
+  .ss-blog__empty{padding:70px 20px;text-align:center;border:1px dashed rgba(17,16,14,.16);border-radius:24px;background:#faf8f3}.ss-blog__empty h2{margin:0;font-size:36px}.ss-blog__empty p{max-width:640px;margin:12px auto 0;color:#756f66}
+  @media(max-width:920px){.ss-blog__featured{grid-template-columns:1fr}.ss-blog__featured-media{min-height:360px}.ss-blog__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ss-blog__section-head{grid-template-columns:1fr}.ss-blog__cta{grid-template-columns:1fr}.ss-blog__cta>a{justify-self:start}}
+  @media(max-width:620px){.ss-blog__hero{padding:58px 16px 66px}.ss-blog__hero h1{font-size:clamp(44px,14vw,61px)}.ss-blog__hero p{font-size:15px}.ss-blog__content{padding:43px 13px 68px}.ss-blog__featured{border-radius:21px}.ss-blog__featured-media{min-height:245px}.ss-blog__featured-copy{padding:25px 20px 28px}.ss-blog__featured h2{font-size:31px}.ss-blog__section-head{margin-top:60px}.ss-blog__section-head h2{font-size:36px}.ss-blog__grid{grid-template-columns:1fr}.ss-blog__card{border-radius:19px}.ss-blog__cta{margin-top:62px;padding:27px 21px;border-radius:22px}.ss-blog__cta h2{font-size:34px}}
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:names.blog_posts",
   "blocks": [
-    {
-      "type": "@theme"
-    },
-    {
-      "type": "@app"
-    },
-    {
-      "type": "text"
-    },
-    {
-      "type": "icon"
-    },
-    {
-      "type": "image"
-    },
-    {
-      "type": "button"
-    },
-    {
-      "type": "video"
-    },
-    {
-      "type": "group"
-    },
-    {
-      "type": "spacer"
-    },
-    {
-      "type": "_divider"
-    }
+    { "type": "@theme" },
+    { "type": "@app" }
   ],
   "disabled_on": {
     "groups": ["header"]
@@ -174,10 +195,6 @@
       "id": "color_scheme",
       "label": "t:settings.color_scheme",
       "default": "scheme-1"
-    },
-    {
-      "type": "header",
-      "content": "t:content.padding"
     },
     {
       "type": "range",

@@ -1,3 +1,20 @@
+{%- liquid
+  assign word_count = article.content | strip_html | split: ' ' | size
+  assign read_time = word_count | divided_by: 220
+  assign read_remainder = word_count | modulo: 220
+  if read_remainder > 0
+    assign read_time = read_time | plus: 1
+  endif
+  if read_time < 1
+    assign read_time = 1
+  endif
+
+  assign article_label = 'Team Store Guide'
+  if article.tags.size > 0
+    assign article_label = article.tags.first
+  endif
+-%}
+
 <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -6,149 +23,282 @@
     "description": {{ article.excerpt_or_content | strip_html | truncate: 300 | json }},
     "url": {{ request.origin | append: article.url | json }},
     "datePublished": {{ article.published_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
-    {% if article.updated_at %}"dateModified": {{ article.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},{% endif %}
-    {% if article.image %}"image": {{ article.image | image_url: width: 1200 | prepend: 'https:' | json }},{% endif %}
-    "author": { "@type": "Organization", "name": {{ shop.name | json }} },
-    "publisher": { "@type": "Organization", "name": {{ shop.name | json }}, "url": {{ shop.url | json }} }
+    "dateModified": {{ article.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' | json }},
+    {% if article.image %}"image": {{ article.image | image_url: width: 1600 | prepend: 'https:' | json }},{% endif %}
+    "author": {
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | json }}
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "url": {{ shop.url | json }}
+    }
   }
 </script>
-<div class="section-background color-{{ section.settings.color_scheme }}"></div>
-<div class="section color-{{ section.settings.color_scheme }}">
-  <div
-    class="
-      spacing-style
-      layout-panel-flex
-      layout-panel-flex--column
-      section-content-wrapper
-      mobile-column
-    "
-    style="
-      {% render 'layout-panel-style', settings: section.settings %}
-      {% render 'spacing-style', settings: section.settings %}
-    "
-  >
-    <header>
-      {%- content_for 'block', id: 'blog-post-title', type: 'text' %}
-      {%- content_for 'block', id: 'blog-post-details', type: '_blog-post-info-text' %}
-    </header>
 
-    {%- if article.image -%}
-      {%- content_for 'block', id: 'blog-post-image', type: '_blog-post-featured-image' %}
-    {%- endif -%}
-    {%- content_for 'block', id: 'blog-post-content', type: '_blog-post-content' %}
+<article class="ss-article" data-ss-article>
+  <div class="ss-article__progress" data-ss-reading-progress aria-hidden="true"></div>
 
-    {% comment %} Dynamic area for @app blocks only, at the bottom {% endcomment %}
-    {% content_for 'blocks' %}
+  <header class="ss-article__hero">
+    <div class="ss-article__hero-glow ss-article__hero-glow--one"></div>
+    <div class="ss-article__hero-glow ss-article__hero-glow--two"></div>
 
-    {% if blog.comments_enabled? %}
-      <div class="blog-post-comments-container">
-        <h2 class="h3">{{- 'blogs.article.comments_heading' | t: count: article.comments_count -}}</h2>
+    <div class="ss-article__hero-inner">
+      <nav class="ss-article__breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href="{{ blog.url }}">Resources</a>
+      </nav>
 
-        <div class="blog-post-comments">
-          {% paginate article.comments by 10 %}
-            {% for comment in article.comments %}
-              <div class="blog-post-comment">
-                {{ comment.content }}
-                <div class="blog-post-comment__author">
-                  <span class="blog-post-comment__author-name">{{- comment.author -}}</span>
-                  <span>{{- 'blogs.article.comment_author_separator' | t -}}</span>
-                  <span class="blog-post-comment__date">
-                    {{- comment.created_at | time_tag: format: 'date' -}}
-                  </span>
-                </div>
-              </div>
-            {% endfor %}
-
-            <div class="blog-post-comments-pagination">
-              {{- paginate | default_pagination -}}
-            </div>
-          {% endpaginate %}
-        </div>
-
-        {% render 'blog-comment-form', article: article, section_id: section.id %}
+      <div class="ss-article__meta-row">
+        <span class="ss-article__tag">{{ article_label | escape }}</span>
+        <span>{{ article.published_at | date: '%B %d, %Y' }}</span>
+        <span>{{ read_time }} min read</span>
       </div>
-    {% endif %}
-  </div>
-</div>
 
-<script type="application/ld+json">
-  {{ article | structured_data }}
+      <h1>{{ article.title | escape }}</h1>
+
+      <p class="ss-article__dek">
+        {%- if article.excerpt != blank -%}
+          {{ article.excerpt | strip_html | escape }}
+        {%- else -%}
+          {{ article.content | strip_html | truncatewords: 34 | escape }}
+        {%- endif -%}
+      </p>
+
+      <div class="ss-article__byline">
+        <span class="ss-article__byline-mark" aria-hidden="true">S&amp;S</span>
+        <span>
+          <strong>Stella &amp; Sage Co.</strong>
+          <small>Practical guides for easier team merch</small>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  {%- if article.image -%}
+    <div class="ss-article__image-wrap">
+      {{ article.image
+        | image_url: width: 1800
+        | image_tag:
+          class: 'ss-article__image',
+          widths: '600, 900, 1200, 1500, 1800',
+          sizes: '(max-width: 800px) 94vw, 1160px',
+          loading: 'eager',
+          fetchpriority: 'high',
+          alt: article.image.alt | default: article.title
+      }}
+    </div>
+  {%- endif -%}
+
+  <div class="ss-article__layout">
+    <aside class="ss-article__sidebar" aria-label="Article navigation">
+      <div class="ss-article__toc-card" data-ss-toc-card hidden>
+        <p>IN THIS GUIDE</p>
+        <nav data-ss-toc></nav>
+      </div>
+
+      <div class="ss-article__sidebar-cta">
+        <span>FREE TEAM STORE</span>
+        <strong>Stop collecting sizes and payments.</strong>
+        <p>Build an always-open store where every buyer orders directly.</p>
+        <a href="/pages/storefront">Create your store <span aria-hidden="true">→</span></a>
+      </div>
+    </aside>
+
+    <div class="ss-article__main">
+      <div class="ss-article__content rte" data-ss-article-content>
+        {{ article.content }}
+      </div>
+
+      <div class="ss-article__share">
+        <div>
+          <span>Found this useful?</span>
+          <strong>Share it with another coach or organizer.</strong>
+        </div>
+        <button type="button" data-ss-share>Share article</button>
+      </div>
+
+      <section class="ss-article__end-cta">
+        <div>
+          <span>THE EASY BUTTON FOR TEAM MERCH</span>
+          <h2>Your store can be live in about 15 minutes.</h2>
+          <p>No minimums, no upfront inventory, no closing date, and no organizer collecting money or sizes.</p>
+        </div>
+        <a href="/pages/storefront">Start a free team store <span aria-hidden="true">→</span></a>
+      </section>
+
+      {% content_for 'blocks' %}
+
+      {% if blog.comments_enabled? %}
+        <section class="ss-article__comments">
+          <h2>{{ 'blogs.article.comments_heading' | t: count: article.comments_count }}</h2>
+
+          {% paginate article.comments by 10 %}
+            <div class="ss-article__comment-list">
+              {% for comment in article.comments %}
+                <article class="ss-article__comment">
+                  {{ comment.content }}
+                  <footer>
+                    <strong>{{ comment.author }}</strong>
+                    <span>{{ comment.created_at | time_tag: format: 'date' }}</span>
+                  </footer>
+                </article>
+              {% endfor %}
+            </div>
+            <div class="ss-article__comment-pagination">{{ paginate | default_pagination }}</div>
+          {% endpaginate %}
+
+          {% render 'blog-comment-form', article: article, section_id: section.id %}
+        </section>
+      {% endif %}
+    </div>
+  </div>
+
+  <section class="ss-article__related">
+    <div class="ss-article__related-head">
+      <div>
+        <span>KEEP READING</span>
+        <h2>More team-store resources</h2>
+      </div>
+      <a href="{{ blog.url }}">View all articles <span aria-hidden="true">→</span></a>
+    </div>
+
+    <div class="ss-article__related-grid">
+      {%- assign related_count = 0 -%}
+      {%- for related in blog.articles -%}
+        {%- unless related.id == article.id -%}
+          <a class="ss-article__related-card" href="{{ related.url }}">
+            <div class="ss-article__related-image">
+              {%- if related.image -%}
+                {{ related.image
+                  | image_url: width: 700
+                  | image_tag:
+                    widths: '360, 540, 700',
+                    sizes: '(max-width: 760px) 92vw, 31vw',
+                    loading: 'lazy',
+                    alt: related.image.alt | default: related.title
+                }}
+              {%- else -%}
+                <span aria-hidden="true">S&amp;S</span>
+              {%- endif -%}
+            </div>
+            <div class="ss-article__related-copy">
+              <small>{{ related.published_at | date: '%B %d, %Y' }}</small>
+              <strong>{{ related.title }}</strong>
+              <span>Read article →</span>
+            </div>
+          </a>
+          {%- assign related_count = related_count | plus: 1 -%}
+          {%- if related_count == 3 -%}{%- break -%}{%- endif -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    </div>
+  </section>
+</article>
+
+<script>
+  (() => {
+    const root = document.querySelector('[data-ss-article]');
+    if (!root || root.dataset.ready === 'true') return;
+    root.dataset.ready = 'true';
+
+    const content = root.querySelector('[data-ss-article-content]');
+    const toc = root.querySelector('[data-ss-toc]');
+    const tocCard = root.querySelector('[data-ss-toc-card]');
+    const headings = content ? Array.from(content.querySelectorAll('h2, h3')) : [];
+
+    if (toc && tocCard && headings.length) {
+      headings.forEach((heading, index) => {
+        if (!heading.id) heading.id = `section-${index + 1}`;
+        const link = document.createElement('a');
+        link.href = `#${heading.id}`;
+        link.textContent = heading.textContent.trim();
+        if (heading.tagName === 'H3') link.classList.add('is-subheading');
+        toc.appendChild(link);
+      });
+      tocCard.hidden = false;
+    }
+
+    const progress = root.querySelector('[data-ss-reading-progress]');
+    const updateProgress = () => {
+      if (!progress || !content) return;
+      const rect = content.getBoundingClientRect();
+      const total = Math.max(1, content.offsetHeight - window.innerHeight * 0.45);
+      const traveled = Math.min(total, Math.max(0, -rect.top + window.innerHeight * 0.25));
+      progress.style.transform = `scaleX(${traveled / total})`;
+    };
+    updateProgress();
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+
+    root.querySelector('[data-ss-share]')?.addEventListener('click', async (event) => {
+      const button = event.currentTarget;
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: document.title, url: window.location.href });
+        } else {
+          await navigator.clipboard.writeText(window.location.href);
+          const original = button.textContent;
+          button.textContent = 'Link copied';
+          setTimeout(() => { button.textContent = original; }, 1800);
+        }
+      } catch (_) {}
+    });
+  })();
 </script>
 
 {% stylesheet %}
-  .blog-post-comments-container {
-    width: 100%;
-    max-width: var(--normal-content-width);
-    margin: 0 auto;
-  }
-
-  .blog-post-comments {
-    display: flex;
-    flex-direction: column;
-    gap: var(--gap-3xl);
-  }
-
-  .blog-post-comment__author {
-    display: flex;
-    align-items: center;
-    gap: var(--gap-2xs);
-    margin-top: var(--margin-md);
-    font-size: var(--font-size--body-sm);
-    color: rgb(var(--color-foreground-rgb) / var(--opacity-subdued-text));
-  }
-
-  .blog-post-comments-pagination {
-    display: flex;
-    justify-content: center;
-    gap: var(--gap-2xs);
-  }
-
-  .blog-post-comments-pagination,
-  .blog-post-comments-pagination a {
-    color: var(--color-foreground);
-  }
-
-  .blog-post-comments-pagination .current {
-    color: var(--color-foreground);
-  }
-
-  .blog-post-comments-pagination .current,
-  .blog-post-comments-pagination a {
-    display: block;
-    padding: var(--padding-2xs) var(--padding-xs);
-  }
-
-  .blog-post-comments-pagination .current,
-  .blog-post-comments-pagination a:hover {
-    border-bottom: 1px solid var(--color-foreground);
-  }
+  .ss-article{--ink:#11100e;--muted:#6f6a61;--gold:#b89d57;--cream:#f7f3e9;color:var(--ink);background:#fff}
+  .ss-article__progress{position:fixed;z-index:60;top:0;left:0;width:100%;height:3px;transform:scaleX(0);transform-origin:left;background:linear-gradient(90deg,#11100e,#b89d57);pointer-events:none}
+  .ss-article__hero{position:relative;overflow:hidden;padding:clamp(58px,8vw,112px) 20px clamp(46px,7vw,86px);background:linear-gradient(145deg,#faf8f2 0%,#fff 48%,#f8f4e9 100%);border-bottom:1px solid rgba(17,16,14,.07)}
+  .ss-article__hero-glow{position:absolute;border-radius:50%;pointer-events:none;filter:blur(2px)}
+  .ss-article__hero-glow--one{width:420px;height:420px;top:-240px;right:-90px;background:radial-gradient(circle,rgba(184,157,87,.22),rgba(184,157,87,0) 70%)}
+  .ss-article__hero-glow--two{width:360px;height:360px;bottom:-250px;left:-100px;background:radial-gradient(circle,rgba(17,16,14,.07),rgba(17,16,14,0) 70%)}
+  .ss-article__hero-inner{position:relative;z-index:1;max-width:980px;margin:0 auto;text-align:center}
+  .ss-article__breadcrumb{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:26px;font-size:11px;font-weight:750;color:#827c72}
+  .ss-article__breadcrumb a{color:inherit;text-decoration:none}.ss-article__breadcrumb a:hover{color:var(--ink)}
+  .ss-article__meta-row{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px 16px;margin-bottom:22px;color:#766f64;font-size:11px;font-weight:700}
+  .ss-article__tag{display:inline-flex;align-items:center;min-height:28px;padding:0 11px;border:1px solid rgba(184,157,87,.34);border-radius:999px;background:rgba(255,255,255,.7);color:#695a31;font-size:9px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
+  .ss-article__hero h1{max-width:920px;margin:0 auto;font-size:clamp(42px,7vw,82px);font-weight:900;line-height:.98;letter-spacing:-.055em;text-wrap:balance}
+  .ss-article__dek{max-width:760px;margin:25px auto 0;color:#69645c;font-size:clamp(16px,2vw,21px);line-height:1.55;text-wrap:pretty}
+  .ss-article__byline{display:inline-flex;align-items:center;gap:11px;margin-top:29px;text-align:left}
+  .ss-article__byline-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#11100e;color:#d9bf76;font-size:10px;font-weight:900;letter-spacing:.05em;box-shadow:0 10px 24px rgba(17,16,14,.15)}
+  .ss-article__byline strong,.ss-article__byline small{display:block}.ss-article__byline strong{font-size:12px}.ss-article__byline small{margin-top:2px;color:#847e74;font-size:10px}
+  .ss-article__image-wrap{position:relative;z-index:2;max-width:1180px;margin:clamp(-34px,-4vw,-54px) auto 0;padding:0 20px}
+  .ss-article__image{width:100%;max-height:650px;display:block;object-fit:cover;aspect-ratio:16/8.5;border:1px solid rgba(17,16,14,.08);border-radius:28px;box-shadow:0 28px 80px rgba(17,16,14,.15)}
+  .ss-article__layout{max-width:1180px;display:grid;grid-template-columns:240px minmax(0,760px);justify-content:center;gap:clamp(34px,6vw,82px);margin:0 auto;padding:clamp(58px,8vw,96px) 22px}
+  .ss-article__sidebar{min-width:0}.ss-article__toc-card{position:sticky;top:110px;padding:19px;border:1px solid rgba(17,16,14,.09);border-radius:18px;background:#fff;box-shadow:0 8px 30px rgba(17,16,14,.05)}
+  .ss-article__toc-card[hidden]{display:none}.ss-article__toc-card>p{margin:0 0 12px;color:#8c7742;font-size:9px;font-weight:900;letter-spacing:.14em}
+  .ss-article__toc-card nav{display:flex;flex-direction:column;gap:4px}.ss-article__toc-card a{padding:7px 8px;border-radius:8px;color:#5f5a53;text-decoration:none;font-size:11px;font-weight:700;line-height:1.35}.ss-article__toc-card a:hover{background:#f6f2e8;color:#11100e}.ss-article__toc-card a.is-subheading{padding-left:18px;color:#89837a;font-size:10px}
+  .ss-article__sidebar-cta{margin-top:18px;padding:22px;border-radius:20px;background:#11100e;color:#fff;box-shadow:0 16px 36px rgba(17,16,14,.17)}
+  .ss-article__sidebar-cta>span{color:#cfb66f;font-size:8px;font-weight:900;letter-spacing:.15em}.ss-article__sidebar-cta strong{display:block;margin-top:9px;font-size:18px;line-height:1.12}.ss-article__sidebar-cta p{margin:10px 0 16px;color:#b8b3aa;font-size:11px;line-height:1.5}.ss-article__sidebar-cta a{display:flex;justify-content:space-between;align-items:center;color:#fff;text-decoration:none;font-size:11px;font-weight:900}.ss-article__sidebar-cta a span{color:#d8bf76}
+  .ss-article__main{min-width:0}.ss-article__content{max-width:none;margin:0;color:#302e2a;font-size:clamp(16px,1.6vw,18px);line-height:1.8}
+  .ss-article__content>*:first-child{margin-top:0}.ss-article__content p{margin:0 0 1.35em}.ss-article__content h2,.ss-article__content h3{scroll-margin-top:110px;color:#11100e;font-weight:900;letter-spacing:-.035em;text-wrap:balance}.ss-article__content h2{margin:2.1em 0 .65em;font-size:clamp(28px,3vw,40px);line-height:1.08}.ss-article__content h3{margin:1.8em 0 .6em;font-size:clamp(21px,2.2vw,28px);line-height:1.16}.ss-article__content h4{margin:1.5em 0 .55em;font-size:19px}.ss-article__content ul,.ss-article__content ol{margin:0 0 1.5em;padding-left:1.25em}.ss-article__content li{margin:.48em 0;padding-left:.25em}.ss-article__content strong{color:#11100e}.ss-article__content a{color:#6f5b27;text-decoration-thickness:1px;text-underline-offset:3px}.ss-article__content blockquote{margin:2em 0;padding:22px 24px;border:0;border-left:4px solid #b89d57;border-radius:0 18px 18px 0;background:#f8f4e9;color:#3d3932;font-size:1.08em;font-weight:650;line-height:1.6}.ss-article__content img{max-width:100%;height:auto;margin:1.7em auto;border-radius:18px}.ss-article__content hr{margin:2.5em 0;border:0;border-top:1px solid rgba(17,16,14,.1)}.ss-article__content table{width:100%;display:block;overflow-x:auto;margin:1.8em 0;border-collapse:collapse}.ss-article__content th,.ss-article__content td{padding:12px 14px;border:1px solid rgba(17,16,14,.1);text-align:left}.ss-article__content th{background:#f7f3e9;color:#11100e}
+  .ss-article__share{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:48px;padding:20px 0;border-top:1px solid rgba(17,16,14,.1);border-bottom:1px solid rgba(17,16,14,.1)}.ss-article__share span,.ss-article__share strong{display:block}.ss-article__share span{color:#8a8379;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.ss-article__share strong{margin-top:3px;font-size:13px}.ss-article__share button{min-height:42px;padding:0 16px;border:1px solid rgba(17,16,14,.13);border-radius:999px;background:#fff;color:#11100e;font:inherit;font-size:11px;font-weight:900;cursor:pointer}.ss-article__share button:hover{background:#11100e;color:#fff}
+  .ss-article__end-cta{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px;margin-top:48px;padding:clamp(26px,4vw,38px);border-radius:25px;background:linear-gradient(135deg,#11100e,#26231e);color:#fff;box-shadow:0 24px 54px rgba(17,16,14,.2)}.ss-article__end-cta span{color:#d4bb72;font-size:9px;font-weight:900;letter-spacing:.14em}.ss-article__end-cta h2{margin:8px 0 8px;color:#fff;font-size:clamp(27px,3vw,38px);line-height:1.05;letter-spacing:-.04em}.ss-article__end-cta p{max-width:590px;margin:0;color:#bdb8af;font-size:12px;line-height:1.5}.ss-article__end-cta>a{min-height:48px;display:inline-flex;align-items:center;gap:14px;padding:0 18px;border-radius:999px;background:#fff;color:#11100e;text-decoration:none;font-size:11px;font-weight:900;white-space:nowrap}.ss-article__end-cta>a span{color:#8a7134;font-size:15px;letter-spacing:0}
+  .ss-article__comments{margin-top:55px}.ss-article__comment-list{display:grid;gap:14px}.ss-article__comment{padding:20px;border:1px solid rgba(17,16,14,.09);border-radius:16px}.ss-article__comment footer{display:flex;gap:8px;margin-top:12px;color:#777168;font-size:11px}.ss-article__comment-pagination{text-align:center}
+  .ss-article__related{padding:clamp(58px,7vw,90px) 22px;background:#f7f4ed;border-top:1px solid rgba(17,16,14,.07)}.ss-article__related-head{max-width:1180px;display:flex;justify-content:space-between;align-items:end;gap:20px;margin:0 auto 28px}.ss-article__related-head span{color:#8a7137;font-size:9px;font-weight:900;letter-spacing:.14em}.ss-article__related-head h2{margin:7px 0 0;font-size:clamp(30px,4vw,48px);line-height:1;letter-spacing:-.045em}.ss-article__related-head>a{color:#11100e;text-decoration:none;font-size:11px;font-weight:900}.ss-article__related-grid{max-width:1180px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:0 auto}.ss-article__related-card{overflow:hidden;border:1px solid rgba(17,16,14,.08);border-radius:22px;background:#fff;color:#11100e;text-decoration:none;box-shadow:0 10px 30px rgba(17,16,14,.05);transition:transform .2s ease,box-shadow .2s ease}.ss-article__related-card:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(17,16,14,.1)}.ss-article__related-image{aspect-ratio:16/9;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,#171612,#d0b96f);color:#fff}.ss-article__related-image img{width:100%;height:100%;object-fit:cover}.ss-article__related-image>span{font-size:26px;font-weight:900;letter-spacing:.05em}.ss-article__related-copy{padding:18px}.ss-article__related-copy small,.ss-article__related-copy strong,.ss-article__related-copy span{display:block}.ss-article__related-copy small{color:#8a8379;font-size:9px;font-weight:800;text-transform:uppercase}.ss-article__related-copy strong{margin-top:8px;font-size:18px;line-height:1.2}.ss-article__related-copy>span{margin-top:15px;color:#806a34;font-size:10px;font-weight:900}
+  @media(max-width:980px){.ss-article__layout{grid-template-columns:minmax(0,760px)}.ss-article__sidebar{display:none}.ss-article__end-cta{grid-template-columns:1fr}.ss-article__end-cta>a{justify-self:start}.ss-article__related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ss-article__related-card:last-child{display:none}}
+  @media(max-width:640px){.ss-article__hero{padding:42px 16px 54px}.ss-article__hero h1{font-size:clamp(36px,12vw,50px)}.ss-article__dek{font-size:15px}.ss-article__image-wrap{margin-top:-27px;padding:0 12px}.ss-article__image{aspect-ratio:4/3;border-radius:19px}.ss-article__layout{padding:45px 17px 60px}.ss-article__content{font-size:16px;line-height:1.72}.ss-article__share{align-items:flex-start;flex-direction:column}.ss-article__end-cta{padding:25px 20px;border-radius:21px}.ss-article__related{padding:50px 15px}.ss-article__related-head{align-items:flex-start;flex-direction:column}.ss-article__related-grid{grid-template-columns:1fr}.ss-article__related-card:last-child{display:block}}
 {% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:names.blog_post",
   "blocks": [
-    {
-      "type": "@theme"
-    },
-    {
-      "type": "@app"
-    }
+    { "type": "@theme" },
+    { "type": "@app" }
   ],
   "class": "section-wrapper",
   "settings": [
     {
-      "type": "select",
-      "id": "content_direction",
-      "label": "t:settings.direction",
-      "options": [
-        {
-          "value": "column",
-          "label": "t:options.vertical"
-        }
-      ],
-      "default": "column",
-      "visible_if": "{{ section.settings.gap < 0 }}"
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
     },
     {
       "type": "range",
@@ -159,16 +309,6 @@
       "step": 1,
       "unit": "px",
       "default": 12
-    },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "t:settings.color_scheme",
-      "default": "scheme-1"
-    },
-    {
-      "type": "header",
-      "content": "t:content.padding"
     },
     {
       "type": "range",
