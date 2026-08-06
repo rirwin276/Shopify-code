@@ -5,20 +5,32 @@
  */
 {
   "sections": {
+    "support_runtime": {
+      "type": "custom-liquid",
+      "name": "Support form runtime",
+      "settings": {
+        "custom_liquid": "{%- capture ss_support_name -%}{{ customer.first_name }} {{ customer.last_name }}{%- endcapture -%}<script>window.SS_SUPPORT_CONTEXT={name:{{ ss_support_name | strip | json }},email:{{ customer.email | json }},phone:{{ customer.phone | default: customer.default_address.phone | json }},supportEmail:{{ shop.email | json }}};</script><script src=\"{{ 'ss-support-experience.js' | asset_url }}\" defer=\"defer\"></script>",
+        "color_scheme": "",
+        "section_width": "full-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
     "support_center": {
       "type": "ss-support-center",
       "settings": {
         "eyebrow": "STELLA & SAGE SUPPORT",
         "heading": "How can we help?",
-        "subheading": "Track an order, report a problem, request a return, or get answers about shipping and personalization.",
-        "tracking_url": "/pages/online-tracking",
-        "return_url": "/account",
+        "subheading": "View your orders, report a problem, contact support, or get answers about shipping and personalization.",
+        "tracking_url": "/account",
+        "return_url": "/policies/refund-policy",
         "contact_email": "",
         "form_endpoint": "https://printfulautomation-production.up.railway.app/support/cases"
       }
     }
   },
   "order": [
+    "support_runtime",
     "support_center"
   ]
 }
