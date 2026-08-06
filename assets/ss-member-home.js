@@ -172,8 +172,8 @@
     home.classList.add('ss-member-enhanced');
 
     const hasStore = marker.dataset.hasStore === 'true';
-    const requestUrl = marker.dataset.requestUrl || '/pages/storefront';
-    const dashboardUrl = marker.dataset.dashboardUrl || '/pages/portal?stay=1';
+    const requestUrl = marker.dataset.requestUrl || '/pages/request-storefront-form';
+    const dashboardUrl = '/pages/portal';
     const ordersUrl = marker.dataset.ordersUrl || '/account';
     const supportUrl = marker.dataset.supportUrl || '/pages/support';
     const currentTitle = cleanGreeting(shell.querySelector('.ss-member-title')?.textContent || 'Welcome back.');
@@ -205,6 +205,7 @@
     const primary = document.createElement('a');
     primary.className = 'ss-command-primary';
     primary.href = hasStore ? dashboardUrl : requestUrl;
+    if (hasStore) primary.setAttribute('data-ss-do-not-rewrite-auth', 'true');
     primary.innerHTML = `
       <span class="ss-command-primary__icon" aria-hidden="true">${hasStore ? iconSvg.dashboard : iconSvg.plus}</span>
       <span>
