@@ -81,10 +81,33 @@
         "second_store_body": "Different team, different logo — or a personal store for family reunions, fantasy leagues, anything. Same easy button. About 15 minutes.",
         "second_store_cta": "Create another store"
       }
+    },
+    "home_catalog_control": {
+      "type": "custom-liquid",
+      "name": "Homepage catalog controller",
+      "settings": {
+        "custom_liquid": "{% if customer %}<style>.ss-public-catalog{display:none!important}</style>{% endif %}<div data-ss-home-catalog-control data-signed-in=\"{% if customer %}true{% else %}false{% endif %}\" hidden></div><script src=\"{{ 'ss-home-catalog-controller.js' | asset_url }}\" defer=\"defer\"></script>",
+        "color_scheme": "",
+        "section_width": "full-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "home_product_catalog": {
+      "type": "ss-public-product-catalog",
+      "name": "Homepage product catalog",
+      "settings": {
+        "eyebrow": "AVAILABLE PRODUCTS",
+        "heading": "See what your store can sell.",
+        "subheading": "Start with four quick options, then open the full catalog when you are ready. Click any product to see sizes, pricing, personalization, and available color swatches.",
+        "catalog_endpoint": "https://printfulautomation-production.up.railway.app/public/catalog"
+      }
     }
   },
   "order": [
     "custom_liquid_kXiyBF",
-    "landing_dual_hub_rtcYFK"
+    "landing_dual_hub_rtcYFK",
+    "home_catalog_control",
+    "home_product_catalog"
   ]
 }
