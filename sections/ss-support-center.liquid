@@ -1,0 +1,383 @@
+{% comment %}
+  Stella & Sage Support Center
+  - Order tracking and account links
+  - Automated support intake with photo uploads
+  - Return-policy guidance and FAQs
+{% endcomment %}
+
+{% assign tracking_url = section.settings.tracking_url | default: '/pages/online-tracking' %}
+{% assign return_url = section.settings.return_url | default: routes.account_url %}
+{% assign contact_email = section.settings.contact_email | default: shop.email %}
+{% assign form_endpoint = section.settings.form_endpoint | default: 'https://printfulautomation-production.up.railway.app/support/cases' %}
+
+<section class="ss-help" id="ss-help-{{ section.id }}">
+  <div class="ss-help__wrap">
+    <header class="ss-help__hero">
+      <p class="ss-help__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      <h1>{{ section.settings.heading | escape }}</h1>
+      <p>{{ section.settings.subheading | escape }}</p>
+    </header>
+
+    <div class="ss-help__actions" aria-label="Support options">
+      <a class="ss-help__action" href="{{ tracking_url }}">
+        <span class="ss-help__icon" aria-hidden="true">↗</span>
+        <span>
+          <strong>Track my order</strong>
+          <small>View fulfillment and shipping updates.</small>
+        </span>
+      </a>
+
+      <button class="ss-help__action" type="button" data-ss-open-case>
+        <span class="ss-help__icon" aria-hidden="true">!</span>
+        <span>
+          <strong>Report an order problem</strong>
+          <small>Damage, misprints, missing items, or delivery trouble.</small>
+        </span>
+      </button>
+
+      <a class="ss-help__action" href="{{ return_url }}">
+        <span class="ss-help__icon" aria-hidden="true">↶</span>
+        <span>
+          <strong>Request a return</strong>
+          <small>Start from your account or order-status page.</small>
+        </span>
+      </a>
+
+      <a class="ss-help__action" href="mailto:{{ contact_email | escape }}">
+        <span class="ss-help__icon" aria-hidden="true">✉</span>
+        <span>
+          <strong>Contact support</strong>
+          <small>Most messages receive a reply within one business day.</small>
+        </span>
+      </a>
+    </div>
+
+    <div class="ss-help__case" data-ss-case-panel hidden>
+      <div class="ss-help__case-head">
+        <div>
+          <p class="ss-help__eyebrow">ORDER HELP</p>
+          <h2>Tell us what went wrong</h2>
+          <p>Include clear photos for damaged, defective, incorrect, or misprinted items. This helps us resolve the problem faster.</p>
+        </div>
+        <button type="button" class="ss-help__close" data-ss-close-case aria-label="Close support form">×</button>
+      </div>
+
+      <form class="ss-help__form" data-ss-case-form enctype="multipart/form-data" novalidate>
+        <div class="ss-help__form-grid">
+          <label>
+            <span>Order number</span>
+            <input name="order_number" type="text" placeholder="#1234" autocomplete="off" required>
+          </label>
+
+          <label>
+            <span>Email used for the order</span>
+            <input name="email" type="email" autocomplete="email" required>
+          </label>
+
+          <label>
+            <span>What happened?</span>
+            <select name="issue_type" required>
+              <option value="">Choose one</option>
+              <option value="damaged">Arrived damaged</option>
+              <option value="misprint">Print or production problem</option>
+              <option value="wrong-item">Wrong item received</option>
+              <option value="missing-item">Item missing from shipment</option>
+              <option value="lost-shipment">Shipment appears lost or stalled</option>
+              <option value="size-or-color">Size or color concern</option>
+              <option value="personalization">Name or number problem</option>
+              <option value="return">Return request</option>
+              <option value="other">Something else</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Affected item</span>
+            <input name="item" type="text" placeholder="Example: youth royal-blue hoodie">
+          </label>
+
+          <label>
+            <span>Preferred resolution</span>
+            <select name="preferred_resolution">
+              <option value="">No preference</option>
+              <option value="replacement">Replacement</option>
+              <option value="refund">Refund</option>
+              <option value="exchange">Exchange</option>
+              <option value="help">Help deciding</option>
+            </select>
+          </label>
+
+          <label class="ss-help__photos">
+            <span>Photos <small>(up to 4, 6 MB each)</small></span>
+            <input name="photos" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+          </label>
+        </div>
+
+        <label class="ss-help__full">
+          <span>Describe the problem</span>
+          <textarea name="description" rows="6" minlength="12" maxlength="4000" placeholder="Tell us what you expected, what arrived, and anything else that will help us review the order." required></textarea>
+        </label>
+
+        <label class="ss-help__honeypot" aria-hidden="true">
+          Website
+          <input name="website" type="text" tabindex="-1" autocomplete="off">
+        </label>
+
+        <div class="ss-help__submit-row">
+          <button type="submit" class="ss-help__submit">Submit support request</button>
+          <p class="ss-help__form-note">Submitting a request does not automatically approve a refund or replacement. We review the order and production details first.</p>
+        </div>
+
+        <div class="ss-help__status" data-ss-case-status role="status" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div class="ss-help__policy">
+      <div>
+        <p class="ss-help__eyebrow">MADE-TO-ORDER POLICY</p>
+        <h2>Clear answers before you order</h2>
+      </div>
+      <div class="ss-help__policy-copy">
+        <p><strong>Production problems:</strong> If an item arrives damaged, defective, misprinted, missing, or different from what was ordered, report it with clear photos. Approved cases may receive a replacement or refund.</p>
+        <p><strong>Personalized items:</strong> Products made with a buyer-entered name or number are normally final sale unless they were produced incorrectly or arrived damaged.</p>
+        <p><strong>Size, color, or change of mind:</strong> Because each item is made to order, these requests are not normally eligible for a free replacement. Contact us and we will review the options.</p>
+        <p><strong>Event dates:</strong> Production and delivery estimates are not guaranteed arrival dates. Order early when purchasing for a tournament, trip, ceremony, or other fixed event.</p>
+        <div class="ss-help__policy-links">
+          <a href="/policies/refund-policy">Refund policy</a>
+          <a href="/policies/shipping-policy">Shipping policy</a>
+          <a href="{{ tracking_url }}">Track an order</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ss-help__faq">
+      <div class="ss-help__faq-head">
+        <p class="ss-help__eyebrow">COMMON QUESTIONS</p>
+        <h2>Shipping, returns, personalization, and store help</h2>
+      </div>
+
+      <div class="ss-help__faq-list">
+        <details>
+          <summary>My tracking has not updated. What should I do?</summary>
+          <p>Carrier scans can pause between facilities. Check the tracking link first. If the estimated delivery date has passed or the package appears stalled, submit an order-problem request above.</p>
+        </details>
+        <details>
+          <summary>What happens if an item arrives damaged or misprinted?</summary>
+          <p>Send the order number, the email used at checkout, a description, and clear photos of the item and packaging. We will compare the order with the production record and work toward a replacement or refund when approved.</p>
+        </details>
+        <details>
+          <summary>Can I exchange a made-to-order item for another size?</summary>
+          <p>Made-to-order sizing exchanges are not automatically covered. Submit a request and we will review what options are available. Size charts should be reviewed before checkout.</p>
+        </details>
+        <details>
+          <summary>Can personalized names or numbers be changed after ordering?</summary>
+          <p>Production can begin quickly, so changes are not guaranteed. Contact support immediately. Once production begins, buyer-entered names and numbers normally cannot be changed or returned unless the item is produced incorrectly.</p>
+        </details>
+        <details>
+          <summary>How do tax-exempt organizations order?</summary>
+          <p>Contact support before ordering and provide the required exemption documentation. Once approved, checkout must use the same email connected to the tax-exempt customer profile.</p>
+        </details>
+        <details>
+          <summary>I organize a store. Where do I manage products and members?</summary>
+          <p>Sign in and open your Dashboard. Store admins can enter Admin Powers to add products, update designs, and manage access without collecting money or placing a group order.</p>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #ss-help-{{ section.id }}{
+    --ss-ink:#11100e;
+    --ss-muted:#68645c;
+    --ss-gold:#b7a36a;
+    --ss-paper:#f7f4ed;
+    color:var(--ss-ink);
+    background:#fff;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  #ss-help-{{ section.id }} *{box-sizing:border-box}
+  #ss-help-{{ section.id }} .ss-help__wrap{max-width:1120px;margin:0 auto;padding:70px 22px 90px}
+  #ss-help-{{ section.id }} .ss-help__hero{max-width:760px;margin-bottom:34px}
+  #ss-help-{{ section.id }} .ss-help__eyebrow{margin:0 0 10px;font-size:11px;letter-spacing:.15em;font-weight:900;color:var(--ss-gold)}
+  #ss-help-{{ section.id }} h1{font-size:clamp(38px,6vw,68px);line-height:.98;letter-spacing:-.055em;margin:0 0 18px;font-weight:900}
+  #ss-help-{{ section.id }} h2{font-size:clamp(25px,3.5vw,38px);line-height:1.05;letter-spacing:-.035em;margin:0 0 12px}
+  #ss-help-{{ section.id }} .ss-help__hero>p:last-child,
+  #ss-help-{{ section.id }} .ss-help__case-head p,
+  #ss-help-{{ section.id }} .ss-help__faq p{font-size:16px;line-height:1.65;color:var(--ss-muted)}
+  #ss-help-{{ section.id }} .ss-help__actions{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+  #ss-help-{{ section.id }} .ss-help__action{appearance:none;width:100%;border:1px solid rgba(17,16,14,.1);border-radius:18px;background:#fff;color:var(--ss-ink);padding:20px;text-decoration:none;text-align:left;display:flex;gap:14px;align-items:flex-start;cursor:pointer;box-shadow:0 4px 18px rgba(17,16,14,.04);transition:.2s ease;font:inherit}
+  #ss-help-{{ section.id }} .ss-help__action:hover{transform:translateY(-3px);border-color:rgba(183,163,106,.7);box-shadow:0 14px 34px rgba(17,16,14,.09)}
+  #ss-help-{{ section.id }} .ss-help__action strong{display:block;font-size:15px;margin-bottom:6px}
+  #ss-help-{{ section.id }} .ss-help__action small{display:block;font-size:12px;line-height:1.45;color:var(--ss-muted)}
+  #ss-help-{{ section.id }} .ss-help__icon{width:30px;height:30px;border-radius:10px;background:var(--ss-paper);display:grid;place-items:center;font-weight:900;flex:0 0 auto}
+  #ss-help-{{ section.id }} .ss-help__case{background:var(--ss-paper);border:1px solid rgba(17,16,14,.08);border-radius:24px;padding:28px;margin:18px 0 38px}
+  #ss-help-{{ section.id }} .ss-help__case[hidden]{display:none}
+  #ss-help-{{ section.id }} .ss-help__case-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:24px}
+  #ss-help-{{ section.id }} .ss-help__case-head>div{max-width:720px}
+  #ss-help-{{ section.id }} .ss-help__close{border:0;background:#fff;width:40px;height:40px;border-radius:50%;font-size:25px;cursor:pointer}
+  #ss-help-{{ section.id }} .ss-help__form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  #ss-help-{{ section.id }} label{display:flex;flex-direction:column;gap:7px;font-size:13px;font-weight:800}
+  #ss-help-{{ section.id }} label span small{font-weight:500;color:var(--ss-muted)}
+  #ss-help-{{ section.id }} input,
+  #ss-help-{{ section.id }} select,
+  #ss-help-{{ section.id }} textarea{width:100%;border:1px solid rgba(17,16,14,.14);border-radius:12px;background:#fff;color:var(--ss-ink);padding:13px 14px;font:inherit;font-size:15px}
+  #ss-help-{{ section.id }} textarea{resize:vertical}
+  #ss-help-{{ section.id }} input:focus,
+  #ss-help-{{ section.id }} select:focus,
+  #ss-help-{{ section.id }} textarea:focus{outline:2px solid rgba(183,163,106,.45);outline-offset:1px;border-color:var(--ss-gold)}
+  #ss-help-{{ section.id }} .ss-help__full{margin-top:16px}
+  #ss-help-{{ section.id }} .ss-help__honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+  #ss-help-{{ section.id }} .ss-help__submit-row{display:flex;align-items:center;gap:18px;margin-top:18px}
+  #ss-help-{{ section.id }} .ss-help__submit{border:0;border-radius:999px;background:var(--ss-ink);color:#fff;padding:14px 22px;font-weight:900;cursor:pointer;white-space:nowrap}
+  #ss-help-{{ section.id }} .ss-help__submit[disabled]{opacity:.55;cursor:wait}
+  #ss-help-{{ section.id }} .ss-help__form-note{font-size:12px;line-height:1.45;color:var(--ss-muted);margin:0}
+  #ss-help-{{ section.id }} .ss-help__status{margin-top:14px;font-size:14px;font-weight:800}
+  #ss-help-{{ section.id }} .ss-help__status.is-error{color:#a12222}
+  #ss-help-{{ section.id }} .ss-help__status.is-success{color:#176b42}
+  #ss-help-{{ section.id }} .ss-help__policy{display:grid;grid-template-columns:.8fr 1.2fr;gap:50px;background:var(--ss-ink);color:#fff;border-radius:28px;padding:40px;margin:40px 0}
+  #ss-help-{{ section.id }} .ss-help__policy-copy p{font-size:14px;line-height:1.65;color:rgba(255,255,255,.76);margin:0 0 15px}
+  #ss-help-{{ section.id }} .ss-help__policy-copy strong{color:#fff}
+  #ss-help-{{ section.id }} .ss-help__policy-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+  #ss-help-{{ section.id }} .ss-help__policy-links a{color:#fff;border-bottom:1px solid rgba(255,255,255,.45);text-decoration:none;font-weight:800;font-size:13px;padding-bottom:3px}
+  #ss-help-{{ section.id }} .ss-help__faq{display:grid;grid-template-columns:.8fr 1.2fr;gap:50px;padding-top:25px}
+  #ss-help-{{ section.id }} details{border-top:1px solid rgba(17,16,14,.12);padding:18px 2px}
+  #ss-help-{{ section.id }} details:last-child{border-bottom:1px solid rgba(17,16,14,.12)}
+  #ss-help-{{ section.id }} summary{font-weight:850;font-size:15px;cursor:pointer;list-style-position:outside}
+  #ss-help-{{ section.id }} details p{font-size:14px;margin:12px 0 0}
+  @media(max-width:900px){
+    #ss-help-{{ section.id }} .ss-help__actions{grid-template-columns:repeat(2,1fr)}
+    #ss-help-{{ section.id }} .ss-help__policy,
+    #ss-help-{{ section.id }} .ss-help__faq{grid-template-columns:1fr;gap:22px}
+  }
+  @media(max-width:600px){
+    #ss-help-{{ section.id }} .ss-help__wrap{padding:48px 16px 70px}
+    #ss-help-{{ section.id }} .ss-help__actions,
+    #ss-help-{{ section.id }} .ss-help__form-grid{grid-template-columns:1fr}
+    #ss-help-{{ section.id }} .ss-help__case{padding:20px 16px}
+    #ss-help-{{ section.id }} .ss-help__submit-row{align-items:stretch;flex-direction:column}
+    #ss-help-{{ section.id }} .ss-help__policy{padding:28px 22px}
+  }
+</style>
+
+<script>
+(() => {
+  const root = document.getElementById('ss-help-{{ section.id }}');
+  if (!root || root.dataset.ready === '1') return;
+  root.dataset.ready = '1';
+
+  const panel = root.querySelector('[data-ss-case-panel]');
+  const form = root.querySelector('[data-ss-case-form]');
+  const status = root.querySelector('[data-ss-case-status]');
+  const endpoint = {{ form_endpoint | json }};
+
+  const openPanel = () => {
+    panel.hidden = false;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => panel.querySelector('input[name="order_number"]')?.focus(), 350);
+  };
+
+  root.querySelector('[data-ss-open-case]')?.addEventListener('click', openPanel);
+  root.querySelector('[data-ss-close-case]')?.addEventListener('click', () => {
+    panel.hidden = true;
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('report') === '1' || window.location.hash === '#report-order-problem') {
+    openPanel();
+  }
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    status.textContent = '';
+    status.className = 'ss-help__status';
+
+    if (!form.reportValidity()) return;
+    if (!endpoint) {
+      status.textContent = 'The online form is not configured yet. Please email {{ contact_email | escape }}.';
+      status.classList.add('is-error');
+      return;
+    }
+
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    submit.textContent = 'Submitting…';
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      });
+
+      let data = {};
+      try { data = await response.json(); } catch (_) {}
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'We could not submit the request.');
+      }
+
+      status.textContent = `${data.message || 'Your request was submitted.'} Case number: ${data.case_id}.`;
+      status.classList.add('is-success');
+      form.reset();
+    } catch (error) {
+      status.textContent = `${error.message || 'We could not submit the request.'} You can also email {{ contact_email | escape }}.`;
+      status.classList.add('is-error');
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Submit support request';
+    }
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Support center",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "STELLA & SAGE SUPPORT"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "How can we help?"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Track an order, report a problem, request a return, or get answers about shipping and personalization."
+    },
+    {
+      "type": "url",
+      "id": "tracking_url",
+      "label": "Tracking page"
+    },
+    {
+      "type": "url",
+      "id": "return_url",
+      "label": "Return portal or account URL"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Support email"
+    },
+    {
+      "type": "text",
+      "id": "form_endpoint",
+      "label": "Support form API endpoint",
+      "default": "https://printfulautomation-production.up.railway.app/support/cases"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Support center"
+    }
+  ]
+}
+{% endschema %}

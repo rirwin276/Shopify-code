@@ -1,0 +1,330 @@
+{% comment %}
+  Public product catalog based on the same Pro Builder products used in Admin Powers.
+  Product details and current color maps are loaded from the sanitized Railway endpoint.
+{% endcomment %}
+
+{% assign catalog_endpoint = section.settings.catalog_endpoint | default: 'https://printfulautomation-production.up.railway.app/public/catalog' %}
+
+<section class="ss-public-catalog" id="ss-catalog-{{ section.id }}">
+  <div class="ss-public-catalog__wrap">
+    <header class="ss-public-catalog__head">
+      <div>
+        <p class="ss-public-catalog__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        <h2>{{ section.settings.heading | escape }}</h2>
+      </div>
+      <p>{{ section.settings.subheading | escape }}</p>
+    </header>
+
+    <div class="ss-public-catalog__toolbar">
+      <div class="ss-public-catalog__filters" role="group" aria-label="Filter catalog">
+        <button type="button" class="is-active" data-ss-filter="all">All products</button>
+        <button type="button" data-ss-filter="tee">Tees</button>
+        <button type="button" data-ss-filter="hoodie">Hoodies + fleece</button>
+        <button type="button" data-ss-filter="other">Bags, hats + tanks</button>
+      </div>
+      <span class="ss-public-catalog__count" data-ss-count></span>
+    </div>
+
+    <div class="ss-public-catalog__loading" data-ss-loading>
+      <span></span>
+      Loading product catalog…
+    </div>
+
+    <div class="ss-public-catalog__grid" data-ss-grid hidden></div>
+
+    <div class="ss-public-catalog__error" data-ss-error hidden>
+      The catalog could not load right now. Store admins can still view all available products from Admin Powers.
+    </div>
+  </div>
+
+  <dialog class="ss-public-catalog__dialog" data-ss-dialog>
+    <button class="ss-public-catalog__close" type="button" data-ss-dialog-close aria-label="Close product details">×</button>
+    <div class="ss-public-catalog__dialog-body" data-ss-dialog-body></div>
+  </dialog>
+</section>
+
+<style>
+  #ss-catalog-{{ section.id }}{
+    --ink:#11100e;
+    --muted:#6a655d;
+    --paper:#f7f4ed;
+    --gold:#b7a36a;
+    color:var(--ink);
+    background:#fff;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  #ss-catalog-{{ section.id }} *{box-sizing:border-box}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__wrap{max-width:1180px;margin:0 auto;padding:82px 22px 96px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__head{display:grid;grid-template-columns:1.2fr .8fr;gap:50px;align-items:end;margin-bottom:30px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__eyebrow{font-size:11px;letter-spacing:.15em;font-weight:900;color:var(--gold);margin:0 0 11px}
+  #ss-catalog-{{ section.id }} h2{font-size:clamp(36px,5vw,60px);line-height:1;letter-spacing:-.05em;margin:0}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__head>p{font-size:16px;line-height:1.65;color:var(--muted);margin:0}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__toolbar{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:0 0 22px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__filters{display:flex;gap:8px;flex-wrap:wrap}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__filters button{border:1px solid rgba(17,16,14,.12);background:#fff;color:var(--ink);border-radius:999px;padding:9px 13px;font-size:12px;font-weight:850;cursor:pointer}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__filters button.is-active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__count{font-size:12px;color:var(--muted);font-weight:800;white-space:nowrap}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__card{appearance:none;border:1px solid rgba(17,16,14,.09);background:#fff;border-radius:21px;overflow:hidden;text-align:left;padding:0;cursor:pointer;box-shadow:0 3px 15px rgba(17,16,14,.05);transition:.2s ease;color:var(--ink);font:inherit}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__card:hover{transform:translateY(-5px);border-color:rgba(183,163,106,.7);box-shadow:0 18px 42px rgba(17,16,14,.11)}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__media{aspect-ratio:1/1;background:var(--paper);position:relative;overflow:hidden}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__card:hover img{transform:scale(1.035)}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__badge,
+  #ss-catalog-{{ section.id }} .ss-public-catalog__personalized{position:absolute;top:10px;border-radius:999px;padding:5px 9px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;font-weight:900}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__badge{left:10px;background:rgba(17,16,14,.72);color:#fff}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__personalized{right:10px;background:linear-gradient(135deg,#b7a36a,#dbc78d);color:#17150f}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__info{padding:14px 15px 17px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__name{font-size:14px;font-weight:900;line-height:1.2;letter-spacing:-.02em}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__price{font-size:13px;font-weight:900;color:#9c874e;margin-top:7px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__hint{font-size:11px;line-height:1.4;color:var(--muted);margin-top:4px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__loading{min-height:280px;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-weight:800}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__loading span{width:18px;height:18px;border-radius:50%;border:2px solid rgba(17,16,14,.12);border-top-color:var(--gold);animation:ssCatalogSpin .8s linear infinite}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__error{background:#fff5f3;border:1px solid #efd0ca;color:#852d22;border-radius:14px;padding:18px;font-size:14px}
+  @keyframes ssCatalogSpin{to{transform:rotate(360deg)}}
+
+  #ss-catalog-{{ section.id }} .ss-public-catalog__dialog{width:min(920px,calc(100vw - 28px));max-height:min(86vh,820px);padding:0;border:0;border-radius:27px;overflow:hidden;box-shadow:0 35px 110px rgba(0,0,0,.3);color:var(--ink)}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__dialog::backdrop{background:rgba(12,11,10,.62);backdrop-filter:blur(8px)}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__close{position:absolute;right:14px;top:14px;z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid rgba(17,16,14,.1);background:rgba(255,255,255,.92);font-size:25px;line-height:1;cursor:pointer}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__modal-grid{display:grid;grid-template-columns:.9fr 1.1fr;min-height:570px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__modal-media{background:var(--paper);display:flex;align-items:center;justify-content:center;padding:26px;min-width:0}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__modal-media img{width:100%;height:auto;max-height:520px;object-fit:contain;display:block;border-radius:18px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__modal-copy{padding:42px 42px 36px;overflow-y:auto}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__modal-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__chip{background:var(--paper);border-radius:999px;padding:5px 9px;font-size:10px;letter-spacing:.05em;text-transform:uppercase;font-weight:900}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__chip--gold{background:#efe5c9}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__modal-copy h3{font-size:32px;line-height:1.04;letter-spacing:-.04em;margin:0 0 12px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__modal-copy>p{font-size:14px;line-height:1.65;color:var(--muted)}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__specs{margin:18px 0;padding:0;list-style:none;display:grid;gap:7px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__specs li{font-size:12px;line-height:1.45;padding-left:17px;position:relative}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__specs li::before{content:"✓";position:absolute;left:0;color:#8d7a46;font-weight:900}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__detail-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__detail-box{border:1px solid rgba(17,16,14,.1);border-radius:13px;padding:12px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__detail-box small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;margin-bottom:4px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__detail-box strong{font-size:13px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__color-head{display:flex;justify-content:space-between;gap:10px;align-items:end;margin:22px 0 12px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__color-head h4{margin:0;font-size:14px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__color-head span{font-size:10px;color:var(--muted)}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__swatches{display:flex;flex-wrap:wrap;gap:10px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__swatch{position:relative;width:27px;height:27px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(17,16,14,.2);background:var(--swatch,#d8d8d8);cursor:help}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__swatch::after{content:attr(data-name);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%) translateY(4px);background:#111;color:#fff;border-radius:7px;padding:5px 7px;font-size:10px;font-weight:800;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s ease;z-index:3}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__swatch:hover::after,
+  #ss-catalog-{{ section.id }} .ss-public-catalog__swatch:focus::after{opacity:1;transform:translateX(-50%) translateY(0)}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__price-list{margin-top:20px;display:grid;gap:8px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__price-row{display:flex;justify-content:space-between;gap:14px;border-top:1px solid rgba(17,16,14,.09);padding-top:9px;font-size:13px}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__modal-note{margin:18px 0 0!important;padding:12px 14px;border-radius:12px;background:#f7f4ed;color:#514b42!important;font-size:12px!important}
+  @media(max-width:1000px){
+    #ss-catalog-{{ section.id }} .ss-public-catalog__grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  }
+  @media(max-width:760px){
+    #ss-catalog-{{ section.id }} .ss-public-catalog__wrap{padding:58px 16px 70px}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__head{grid-template-columns:1fr;gap:16px}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__toolbar{align-items:flex-start;flex-direction:column}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__modal-grid{grid-template-columns:1fr}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__modal-media{padding:16px;max-height:38vh}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__modal-media img{max-height:34vh}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__modal-copy{padding:28px 20px 30px}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__dialog{overflow-y:auto}
+  }
+  @media(max-width:460px){
+    #ss-catalog-{{ section.id }} .ss-public-catalog__grid{grid-template-columns:1fr}
+  }
+</style>
+
+<script>
+(() => {
+  const root = document.getElementById('ss-catalog-{{ section.id }}');
+  if (!root || root.dataset.ready === '1') return;
+  root.dataset.ready = '1';
+
+  const endpoint = {{ catalog_endpoint | json }};
+  const grid = root.querySelector('[data-ss-grid]');
+  const loading = root.querySelector('[data-ss-loading]');
+  const error = root.querySelector('[data-ss-error]');
+  const count = root.querySelector('[data-ss-count]');
+  const dialog = root.querySelector('[data-ss-dialog]');
+  const dialogBody = root.querySelector('[data-ss-dialog-body]');
+  let products = [];
+  let activeFilter = 'all';
+
+  const escapeHtml = (value) => String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+
+  const categoryFor = (product) => {
+    const haystack = `${product.badge || ''} ${product.name || ''}`.toLowerCase();
+    if (haystack.includes('tee')) return 'tee';
+    if (haystack.includes('hoodie') || haystack.includes('crewneck') || haystack.includes('sweatshirt')) return 'hoodie';
+    return 'other';
+  };
+
+  const visibleProducts = () => activeFilter === 'all'
+    ? products
+    : products.filter((product) => categoryFor(product) === activeFilter);
+
+  const renderCards = () => {
+    const visible = visibleProducts();
+    count.textContent = `${visible.length} product${visible.length === 1 ? '' : 's'}`;
+    grid.innerHTML = visible.map((product) => `
+      <button class="ss-public-catalog__card" type="button" data-product-id="${escapeHtml(product.id)}" aria-label="View ${escapeHtml(product.name)} details">
+        <div class="ss-public-catalog__media">
+          <img src="${escapeHtml(product.image)}" alt="" loading="lazy">
+          <span class="ss-public-catalog__badge">${escapeHtml(product.badge)}</span>
+          ${product.personalizable ? '<span class="ss-public-catalog__personalized">Name + number</span>' : ''}
+        </div>
+        <div class="ss-public-catalog__info">
+          <div class="ss-public-catalog__name">${escapeHtml(product.name)}</div>
+          <div class="ss-public-catalog__price">From ${escapeHtml(product.from)}</div>
+          <div class="ss-public-catalog__hint">${escapeHtml(product.hint)}</div>
+        </div>
+      </button>
+    `).join('');
+
+    grid.querySelectorAll('[data-product-id]').forEach((card) => {
+      card.addEventListener('click', () => {
+        const product = products.find((row) => row.id === card.dataset.productId);
+        if (product) openProduct(product);
+      });
+    });
+  };
+
+  const openProduct = (product) => {
+    const colors = Array.isArray(product.colors) ? product.colors : [];
+    const specs = Array.isArray(product.specs) ? product.specs : [];
+    const prices = Array.isArray(product.pricing) ? product.pricing : [];
+
+    dialogBody.innerHTML = `
+      <div class="ss-public-catalog__modal-grid">
+        <div class="ss-public-catalog__modal-media">
+          <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
+        </div>
+        <div class="ss-public-catalog__modal-copy">
+          <div class="ss-public-catalog__modal-chips">
+            <span class="ss-public-catalog__chip">${escapeHtml(product.badge)}</span>
+            ${product.personalizable ? '<span class="ss-public-catalog__chip ss-public-catalog__chip--gold">Optional name + number</span>' : ''}
+          </div>
+          <h3>${escapeHtml(product.name)}</h3>
+          <p>${escapeHtml(product.description)}</p>
+
+          <ul class="ss-public-catalog__specs">
+            ${specs.map((spec) => `<li>${escapeHtml(spec)}</li>`).join('')}
+          </ul>
+
+          <div class="ss-public-catalog__detail-row">
+            <div class="ss-public-catalog__detail-box">
+              <small>Sizes</small>
+              <strong>${escapeHtml(product.sizes)}</strong>
+            </div>
+            <div class="ss-public-catalog__detail-box">
+              <small>Starting price</small>
+              <strong>${escapeHtml(product.from)}</strong>
+            </div>
+          </div>
+
+          <div class="ss-public-catalog__color-head">
+            <h4>Available garment colors</h4>
+            <span>Hover or focus a swatch for its name</span>
+          </div>
+          <div class="ss-public-catalog__swatches">
+            ${colors.length ? colors.map((color) => `
+              <span
+                class="ss-public-catalog__swatch"
+                tabindex="0"
+                role="img"
+                aria-label="${escapeHtml(color.name)}"
+                data-name="${escapeHtml(color.name)}"
+                style="--swatch:${escapeHtml(color.hex || '#d8d8d8')}"
+              ></span>
+            `).join('') : '<span style="font-size:12px;color:#6a655d">Color choices appear inside the product builder.</span>'}
+          </div>
+
+          <div class="ss-public-catalog__price-list">
+            ${prices.map((price) => `
+              <div class="ss-public-catalog__price-row">
+                <span>${escapeHtml(price.label)}</span>
+                <strong>${escapeHtml(price.price)}</strong>
+              </div>
+            `).join('')}
+          </div>
+
+          ${product.personalizable ? '<p class="ss-public-catalog__modal-note">This product can offer optional back names and numbers. Each buyer enters and reviews their own information while ordering.</p>' : ''}
+        </div>
+      </div>
+    `;
+
+    if (typeof dialog.showModal === 'function') dialog.showModal();
+    else dialog.setAttribute('open', '');
+  };
+
+  root.querySelector('[data-ss-dialog-close]')?.addEventListener('click', () => dialog.close());
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+
+  root.querySelectorAll('[data-ss-filter]').forEach((button) => {
+    button.addEventListener('click', () => {
+      activeFilter = button.dataset.ssFilter;
+      root.querySelectorAll('[data-ss-filter]').forEach((row) => row.classList.toggle('is-active', row === button));
+      renderCards();
+    });
+  });
+
+  fetch(endpoint, { headers: { 'Accept': 'application/json' }, cache: 'no-store' })
+    .then((response) => {
+      if (!response.ok) throw new Error(`Catalog HTTP ${response.status}`);
+      return response.json();
+    })
+    .then((data) => {
+      products = Array.isArray(data.products) ? data.products : [];
+      loading.hidden = true;
+      grid.hidden = false;
+      renderCards();
+    })
+    .catch((reason) => {
+      console.error('[Stella & Sage catalog]', reason);
+      loading.hidden = true;
+      error.hidden = false;
+    });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Public product catalog",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "AVAILABLE PRODUCTS"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "See what your store can sell."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Browse the same product catalog store admins use. Open any product to see its details, sizes, pricing, personalization options, and available color swatches."
+    },
+    {
+      "type": "text",
+      "id": "catalog_endpoint",
+      "label": "Catalog API endpoint",
+      "default": "https://printfulautomation-production.up.railway.app/public/catalog"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Public product catalog"
+    }
+  ]
+}
+{% endschema %}
