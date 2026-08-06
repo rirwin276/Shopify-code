@@ -1,10 +1,6 @@
 /*
  * ------------------------------------------------------------
  * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin theme editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
  * ------------------------------------------------------------
  */
 {
@@ -32,10 +28,33 @@
         "access_title": "You control the door.",
         "access_text": "Whether you need military-grade exclusivity or casual group sharing, we give you the keys."
       }
+    },
+    "personalization_showcase": {
+      "type": "ss-personalization-showcase",
+      "settings": {
+        "eyebrow": "OPTIONAL NAME + NUMBER",
+        "heading": "Personalization without the spreadsheet.",
+        "body": "<p>Parents and supporters enter their own name and number while ordering. The organizer never has to collect a list, type everyone’s details, or match payments to sizes.</p>",
+        "image_alt": "Checkout showing a buyer-entered name and number",
+        "image_caption": "Each buyer reviews their own details before placing the order.",
+        "button_label": "Create a free storefront",
+        "button_url": "/pages/request-storefront-form"
+      }
+    },
+    "public_product_catalog": {
+      "type": "ss-public-product-catalog",
+      "settings": {
+        "eyebrow": "AVAILABLE PRODUCTS",
+        "heading": "See what your store can sell.",
+        "subheading": "Browse the same product catalog store admins use. Open any product to see details, sizes, pricing, personalization options, and available color swatches.",
+        "catalog_endpoint": "https://printfulautomation-production.up.railway.app/public/catalog"
+      }
     }
   },
   "order": [
     "main",
-    "ss_explainer_page_HDqmFq"
+    "ss_explainer_page_HDqmFq",
+    "personalization_showcase",
+    "public_product_catalog"
   ]
 }
