@@ -1,12 +1,13 @@
 /* Stella & Sage purchase reassurance
- * Adds made-to-order guidance directly beside the buying decision without
- * changing Shopify's large product and cart templates.
+ * Adds made-to-order guidance directly beside the buying decision and keeps
+ * the public support page aligned with the store's refund rules.
  */
 (() => {
   'use strict';
 
   const PRODUCT_PATH = /^\/products\//;
   const CART_PATH = /^\/cart\/?$/;
+  const SUPPORT_PATH = /^\/pages\/support\/?$/;
 
   const styleId = 'ss-purchase-reassurance-style';
   if (!document.getElementById(styleId)) {
@@ -45,15 +46,16 @@
     const note = document.createElement('div');
     note.className = 'ss-purchase-note';
     note.innerHTML = `
-      <p class="ss-purchase-note__title">Made especially for your group</p>
+      <p class="ss-purchase-note__title">Custom made to order — all sales are final</p>
       <p class="ss-purchase-note__copy">
-        Items are made to order and ship directly to the buyer. Review size, color,
-        spelling, number, and preview carefully. Personalized items are normally final
-        sale unless damaged or produced incorrectly.
+        Review the size chart, garment color, design, spelling, name, number, shipping
+        address, and preview before ordering. Refunds or replacements are considered
+        only for verified damage, defects, misprints, incorrect items or sizes shipped,
+        missing items, or packages confirmed lost in transit.
       </p>
       <div class="ss-purchase-note__links">
-        <a href="/pages/support">Shipping & returns</a>
-        <a href="/pages/support?report=1#report-order-problem">Get order help</a>
+        <a href="/policies/refund-policy">Refund policy</a>
+        <a href="/pages/support?report=1#report-order-problem">Report an order problem</a>
       </div>
     `;
 
@@ -73,12 +75,58 @@
     const note = document.createElement('div');
     note.className = 'ss-event-note';
     note.innerHTML = `
-      <strong>Ordering for a specific event?</strong>
-      Production and delivery estimates are not guaranteed arrival dates. Order early
-      and review shipping information, size, color, and personalization before checkout.
+      <strong>Final review before checkout</strong>
+      Every item is custom made to order and all sales are final except verified
+      production or delivery errors. Check size, color, spelling, name, number,
+      shipping address, and event timing carefully. Delivery estimates are not
+      guaranteed arrival dates.
     `;
 
     checkout.parentElement?.insertBefore(note, checkout);
+  }
+
+  function supportPolicyCopy() {
+    if (!SUPPORT_PATH.test(location.pathname)) return;
+
+    const policyCopy = document.querySelector('.ss-help__policy-copy');
+    if (policyCopy && policyCopy.dataset.ssFinalSaleCopy !== 'true') {
+      policyCopy.dataset.ssFinalSaleCopy = 'true';
+      policyCopy.innerHTML = `
+        <p><strong>All products are custom made to order:</strong> Every item is produced specifically for the buyer. All sales are final except for verified production, fulfillment, or delivery errors.</p>
+        <p><strong>Eligible problems:</strong> Contact us if an item arrives damaged or defective, is misprinted, differs from the approved order, contains a production-caused personalization error, is the wrong item, color, or size, is missing from the shipment, or the package is confirmed lost in transit. Approved cases may receive a replacement or refund.</p>
+        <p><strong>Not eligible:</strong> We do not refund or exchange orders because the buyer selected the wrong size or color, entered the wrong spelling or number, changed their mind, dislikes the fit, feel, color, or design, supplied an incorrect address, or no longer needs the item. Review all details and size charts before checkout.</p>
+        <p><strong>Claim timing:</strong> Report damaged, defective, misprinted, missing, or incorrect items within 30 days of delivery. Lost-package claims must be submitted within 30 days after the estimated delivery date. Include clear photos whenever an item was received.</p>
+        <p><strong>Event dates:</strong> Production and delivery estimates are not guaranteed arrival dates. Missing a tournament, trip, ceremony, or other event date does not by itself make an otherwise correctly produced order refundable.</p>
+        <div class="ss-help__policy-links">
+          <a href="/policies/refund-policy">Full refund policy</a>
+          <a href="/policies/shipping-policy">Shipping policy</a>
+          <a href="/pages/online-tracking">Track an order</a>
+        </div>
+      `;
+    }
+
+    const actions = document.querySelectorAll('.ss-help__action');
+    actions.forEach((action) => {
+      const title = action.querySelector('strong');
+      const copy = action.querySelector('small');
+      if (title?.textContent.trim() === 'Request a return') {
+        title.textContent = 'Review refund eligibility';
+        if (copy) copy.textContent = 'Custom orders are final sale except verified production or delivery errors.';
+      }
+    });
+
+    const issueSelect = document.querySelector('select[name="issue_type"]');
+    if (issueSelect && issueSelect.dataset.ssFinalSaleOptions !== 'true') {
+      issueSelect.dataset.ssFinalSaleOptions = 'true';
+      const labels = {
+        'size-or-color': 'Wrong size or color was shipped',
+        personalization: 'Name or number was produced incorrectly',
+        return: 'I ordered incorrectly or changed my mind'
+      };
+      Array.from(issueSelect.options).forEach((option) => {
+        if (labels[option.value]) option.textContent = labels[option.value];
+      });
+    }
   }
 
   let queued = false;
@@ -89,6 +137,7 @@
       queued = false;
       productNote();
       cartNote();
+      supportPolicyCopy();
     });
   }
 
