@@ -13,6 +13,31 @@
     }
   };
 
+  const iconSvg = {
+    dashboard: `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `,
+    plus: `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    `,
+    orders: `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M6 3h12a1 1 0 0 1 1 1v16l-3-2-2 2-2-2-2 2-2-2-3 2V4a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M8 8h8M8 12h8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    `,
+    help: `
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9.8 9a2.4 2.4 0 1 1 3.4 2.2c-.8.4-1.2 1-1.2 1.8M12 17h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    `
+  };
+
   const runtimeCss = `
     .ss-member-control-section{display:none!important}
     .ss-member-enhanced .ss-member-hero{min-height:0!important;padding:clamp(24px,3.5vw,46px) 0 clamp(20px,3vw,36px)!important}
@@ -34,8 +59,9 @@
     .ss-command-sub{max-width:620px;margin:16px 0 0;color:#706b62;font-size:clamp(15px,1.45vw,18px);line-height:1.55}
     .ss-command-primary{width:min(100%,620px);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;margin-top:28px;padding:18px 19px;border:1px solid #11100e;border-radius:20px;background:linear-gradient(135deg,#11100e 0%,#24211d 100%);color:#fff;text-decoration:none;box-shadow:0 18px 38px rgba(17,16,14,.2);transition:transform .2s ease,box-shadow .2s ease}
     .ss-command-primary:hover{transform:translateY(-3px);box-shadow:0 24px 48px rgba(17,16,14,.27)}
-    .ss-command-primary__icon{width:46px;height:46px;display:grid;place-items:center;border:1px solid rgba(227,204,140,.26);border-radius:14px;background:rgba(227,204,140,.1);color:#dfc47c;font-size:21px;font-weight:600}
-    .ss-command-primary span{min-width:0;display:block}
+    .ss-command-primary__icon{width:46px;height:46px;display:flex!important;align-items:center!important;justify-content:center!important;flex:none;padding:0!important;border:1px solid rgba(227,204,140,.26);border-radius:14px;background:rgba(227,204,140,.1);color:#dfc47c;line-height:0}
+    .ss-command-primary__icon svg{display:block;width:22px;height:22px;flex:none}
+    .ss-command-primary > span:not(.ss-command-primary__icon){min-width:0;display:block}
     .ss-command-primary small,.ss-command-primary strong,.ss-command-primary em{display:block}
     .ss-command-primary small{margin-bottom:3px;color:#cdbb89;font-size:8.5px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
     .ss-command-primary strong{font-size:16px;line-height:1.25}
@@ -46,8 +72,9 @@
     .ss-command-quick__label{margin:0 0 3px;color:#777168;font-size:9px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
     .ss-command-tile{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:13px;padding:16px;border:1px solid rgba(17,16,14,.09);border-radius:18px;background:rgba(255,255,255,.86);color:#11100e;text-decoration:none;box-shadow:0 5px 18px rgba(17,16,14,.045);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease,background .2s ease}
     .ss-command-tile:hover{transform:translateY(-3px);border-color:rgba(184,157,87,.58);background:#fff;box-shadow:0 16px 30px rgba(17,16,14,.09)}
-    .ss-command-tile__icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#11100e;color:#d9c27f;font-size:19px;font-weight:500}
-    .ss-command-tile span{min-width:0;display:block}
+    .ss-command-tile__icon{width:44px;height:44px;display:flex!important;align-items:center!important;justify-content:center!important;flex:none;padding:0!important;border-radius:14px;background:#11100e;color:#d9c27f;line-height:0}
+    .ss-command-tile__icon svg{display:block;width:20px;height:20px;flex:none}
+    .ss-command-tile > span:not(.ss-command-tile__icon){min-width:0;display:block}
     .ss-command-tile strong,.ss-command-tile small{display:block}
     .ss-command-tile strong{font-size:13px;line-height:1.25}
     .ss-command-tile small{margin-top:4px;color:#777168;font-size:10px;line-height:1.4}
@@ -66,7 +93,8 @@
       .ss-command-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:18px 24px 24px;border-top:1px solid rgba(17,16,14,.07);border-left:0}
       .ss-command-quick__label{grid-column:1/-1}
       .ss-command-tile{grid-template-columns:38px minmax(0,1fr) auto;padding:13px}
-      .ss-command-tile__icon{width:38px;height:38px;border-radius:12px;font-size:17px}
+      .ss-command-tile__icon{width:38px;height:38px;border-radius:12px}
+      .ss-command-tile__icon svg{width:18px;height:18px}
     }
     @media(max-width:560px){
       .ss-command-topbar{padding:16px 17px}
@@ -77,7 +105,8 @@
       .ss-command-title{font-size:clamp(35px,11.5vw,46px)!important;line-height:.98!important}
       .ss-command-sub{margin-top:12px;font-size:13px;line-height:1.48}
       .ss-command-primary{grid-template-columns:40px minmax(0,1fr) auto;gap:12px;margin-top:18px;padding:14px;border-radius:17px}
-      .ss-command-primary__icon{width:40px;height:40px;border-radius:12px;font-size:18px}
+      .ss-command-primary__icon{width:40px;height:40px;border-radius:12px}
+      .ss-command-primary__icon svg{width:20px;height:20px}
       .ss-command-primary strong{font-size:14px}
       .ss-command-primary em{font-size:9.5px}
       .ss-command-quick{grid-template-columns:1fr;padding:16px 18px 19px}
@@ -110,7 +139,7 @@
     const iconNode = document.createElement('span');
     iconNode.className = 'ss-command-tile__icon';
     iconNode.setAttribute('aria-hidden', 'true');
-    iconNode.textContent = icon;
+    iconNode.innerHTML = iconSvg[icon] || '';
 
     const copy = document.createElement('span');
     const strong = document.createElement('strong');
@@ -177,7 +206,7 @@
     primary.className = 'ss-command-primary';
     primary.href = hasStore ? dashboardUrl : requestUrl;
     primary.innerHTML = `
-      <span class="ss-command-primary__icon" aria-hidden="true">${hasStore ? '⌂' : '+'}</span>
+      <span class="ss-command-primary__icon" aria-hidden="true">${hasStore ? iconSvg.dashboard : iconSvg.plus}</span>
       <span>
         <small>${hasStore ? 'YOUR COMMAND CENTER' : 'FREE STORE SETUP'}</small>
         <strong>${hasStore ? 'Open my dashboard' : 'Create my first store'}</strong>
@@ -198,13 +227,13 @@
       quick.append(
         makeTile({
           href: requestUrl,
-          icon: '+',
+          icon: 'plus',
           title: 'Create a new store',
           description: 'Launch another team, unit, business, or group.'
         }),
         makeTile({
           href: ordersUrl,
-          icon: '▤',
+          icon: 'orders',
           title: 'My orders',
           description: 'Check tracking, status, and previous purchases.'
         })
@@ -213,13 +242,13 @@
       quick.append(
         makeTile({
           href: ordersUrl,
-          icon: '▤',
+          icon: 'orders',
           title: 'My orders',
           description: 'Check tracking, status, and previous purchases.'
         }),
         makeTile({
           href: supportUrl,
-          icon: '?',
+          icon: 'help',
           title: 'Need help?',
           description: 'Get order support or help starting your store.'
         })
