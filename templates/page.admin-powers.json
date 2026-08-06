@@ -1,11 +1,16 @@
 {
   "sections": {
+    "storefront-settings": {
+      "type": "storefront-appearance-settings",
+      "settings": {}
+    },
     "admin-powers-page": {
       "type": "admin-powers-page",
       "settings": {}
     }
   },
   "order": [
+    "storefront-settings",
     "admin-powers-page"
   ]
 }
