@@ -5,7 +5,7 @@
   - Plain sign in / log in -> dashboard after login.
   - Create/start/request/build storefront/store CTAs -> storefront request form first.
   - The request form sign-in gate -> storefront request form after login.
-  - Real Orders/Profile/Account links remain untouched unless they are plain sign-in links.
+  - Real dashboards, existing storefronts, Orders/Profile/Account links remain untouched.
 {%- endcomment -%}
 
 {%- assign ss_dashboard_url = '/pages/portal' -%}
@@ -27,6 +27,14 @@
       return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
     }
 
+    function normalizePath(href) {
+      try {
+        return new URL(String(href || ''), window.location.origin).pathname.replace(/\/$/, '') || '/';
+      } catch (e) {
+        return String(href || '').split('?')[0].replace(/\/$/, '') || '/';
+      }
+    }
+
     function isPlainSignInText(text) {
       if (!text) return false;
       if (text === 'sign in' || text === 'log in' || text === 'login') return true;
@@ -37,13 +45,16 @@
 
     function isStorefrontCreateText(text) {
       if (!text) return false;
+
+      /* "Open" is intentionally excluded. Existing storefront and dashboard
+       * links commonly say Open and must never be converted into create links.
+       */
       var hasAction =
         text.indexOf('create') !== -1 ||
         text.indexOf('start') !== -1 ||
         text.indexOf('request') !== -1 ||
         text.indexOf('build') !== -1 ||
-        text.indexOf('launch') !== -1 ||
-        text.indexOf('open') !== -1;
+        text.indexOf('launch') !== -1;
 
       var hasStore =
         text.indexOf('storefront') !== -1 ||
@@ -55,14 +66,29 @@
     }
 
     function hrefLooksLikeStorefrontIntent(href) {
-      href = String(href || '');
-      return href.indexOf('/pages/request-storefront-form') !== -1 ||
-             href.indexOf('/pages/storefront') !== -1;
+      var path = normalizePath(href);
+      return path === '/pages/request-storefront-form' || path === '/pages/storefront';
     }
 
     function hrefLooksLikeLogin(href) {
       href = String(href || '');
       return href.indexOf('/account/login') !== -1 || href.indexOf('/account') !== -1 || href.indexOf('shopify.com') !== -1;
+    }
+
+    function isProtectedNavigation(link, href) {
+      var path = normalizePath(href);
+
+      if (link.hasAttribute('data-ss-do-not-rewrite-auth')) return true;
+      if (link.closest('[data-ss-do-not-rewrite-auth]')) return true;
+
+      /* Dashboard and admin destinations. */
+      if (path === '/pages/portal' || path === '/pages/admin-powers' || path === '/pages/maker-hub') return true;
+
+      /* Existing private stores and normal shopping destinations. */
+      if (path.indexOf('/collections/') === 0) return true;
+      if (path.indexOf('/products/') === 0) return true;
+
+      return false;
     }
 
     function shouldNotRewriteAsSignIn(link, text) {
@@ -78,6 +104,8 @@
       links.forEach(function (link) {
         var text = normalizeText(link.textContent || link.getAttribute('aria-label') || link.title || '');
         var href = link.getAttribute('href') || '';
+
+        if (isProtectedNavigation(link, href)) return;
 
         if (isStorefrontCreateText(text) || hrefLooksLikeStorefrontIntent(href)) {
           link.setAttribute('href', STOREFRONT_FORM_URL);
