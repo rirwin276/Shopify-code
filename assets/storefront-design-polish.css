@@ -1,59 +1,40 @@
 .sfs-sample{position:relative;isolation:isolate}
-.sfs-sample>*{position:relative;z-index:2}
 
-/* Paint Spray preview */
+/* Paint Spray preview: paint is placed directly on visible panels so it cannot hide behind them. */
 .sfs-sample[data-style="bold"][data-pattern="dots"]{
   overflow:hidden;
   background:#080d15;
   color:#fff;
 }
-.sfs-sample[data-style="bold"][data-pattern="dots"]::before,
-.sfs-sample[data-style="bold"][data-pattern="dots"]::after{
-  content:"";
-  position:absolute;
-  pointer-events:none;
-  z-index:0;
-}
-.sfs-sample[data-style="bold"][data-pattern="dots"]::before{
-  inset:-16% 30% 28% -20%;
-  opacity:.82;
-  transform:rotate(-9deg);
-  background:
-    radial-gradient(circle at 8% 35%,color-mix(in srgb,var(--sfs-primary) 92%,transparent) 0 2px,transparent 3px),
-    radial-gradient(circle at 16% 61%,color-mix(in srgb,var(--sfs-primary) 86%,transparent) 0 4px,transparent 5px),
-    radial-gradient(circle at 28% 22%,color-mix(in srgb,var(--sfs-primary) 84%,transparent) 0 6px,transparent 7px),
-    radial-gradient(circle at 39% 70%,color-mix(in srgb,var(--sfs-primary) 78%,transparent) 0 3px,transparent 4px),
-    radial-gradient(ellipse at 34% 48%,color-mix(in srgb,var(--sfs-primary) 58%,transparent) 0 19%,transparent 60%);
-}
-.sfs-sample[data-style="bold"][data-pattern="dots"]::after{
-  inset:46% -18% -18% 56%;
-  opacity:.62;
-  transform:rotate(13deg);
-  background:
-    radial-gradient(circle at 22% 24%,color-mix(in srgb,var(--sfs-secondary) 92%,transparent) 0 3px,transparent 4px),
-    radial-gradient(circle at 44% 67%,color-mix(in srgb,var(--sfs-secondary) 84%,transparent) 0 5px,transparent 6px),
-    radial-gradient(circle at 71% 34%,color-mix(in srgb,var(--sfs-secondary) 80%,transparent) 0 3px,transparent 4px),
-    radial-gradient(ellipse at 48% 50%,color-mix(in srgb,var(--sfs-secondary) 42%,transparent) 0 18%,transparent 61%);
-}
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-hero{
-  background:rgba(7,11,18,.75)!important;
-  border-color:rgba(255,255,255,.10)!important;
+  background:
+    radial-gradient(circle at 5% 18%,color-mix(in srgb,var(--sfs-primary) 96%,transparent) 0 2px,transparent 3px),
+    radial-gradient(circle at 9% 67%,color-mix(in srgb,var(--sfs-primary) 92%,transparent) 0 5px,transparent 6px),
+    radial-gradient(circle at 18% 29%,color-mix(in srgb,var(--sfs-primary) 88%,transparent) 0 8px,transparent 9px),
+    radial-gradient(circle at 29% 78%,color-mix(in srgb,var(--sfs-primary) 86%,transparent) 0 4px,transparent 5px),
+    radial-gradient(ellipse at 18% 48%,color-mix(in srgb,var(--sfs-primary) 82%,transparent) 0 20%,transparent 53%),
+    radial-gradient(circle at 76% 20%,color-mix(in srgb,var(--sfs-secondary) 94%,transparent) 0 4px,transparent 5px),
+    radial-gradient(circle at 91% 63%,color-mix(in srgb,var(--sfs-secondary) 90%,transparent) 0 7px,transparent 8px),
+    radial-gradient(ellipse at 86% 42%,color-mix(in srgb,var(--sfs-secondary) 66%,transparent) 0 18%,transparent 50%),
+    linear-gradient(135deg,#080d15,#111827 58%,#080d15)!important;
+  border-color:rgba(255,255,255,.14)!important;
 }
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-hero-copy>small,
-.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-toolbar{color:rgba(255,255,255,.74)!important}
+.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-toolbar{color:rgba(255,255,255,.78)!important}
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-pills span,
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-actions span{
-  border-color:rgba(255,255,255,.16)!important;
-  background:rgba(255,255,255,.08)!important;
+  border-color:rgba(255,255,255,.19)!important;
+  background:rgba(8,13,21,.66)!important;
   color:#fff!important;
+  backdrop-filter:blur(5px)
 }
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-category-tabs{
-  background:rgba(12,17,27,.94)!important;
+  background:#0d1420!important;
 }
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-category-tabs span{
-  border-color:rgba(255,255,255,.14)!important;
+  border-color:rgba(255,255,255,.17)!important;
   background:rgba(255,255,255,.08)!important;
-  color:rgba(255,255,255,.82)!important;
+  color:rgba(255,255,255,.86)!important;
 }
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-category-tabs span.active{
   border-color:var(--sfs-secondary)!important;
@@ -61,21 +42,29 @@
   color:var(--sfs-secondary-text)!important;
 }
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-catalog{
-  background:rgba(8,13,21,.90)!important;
+  background:
+    radial-gradient(circle at 6% 22%,color-mix(in srgb,var(--sfs-primary) 92%,transparent) 0 3px,transparent 4px),
+    radial-gradient(circle at 12% 71%,color-mix(in srgb,var(--sfs-primary) 86%,transparent) 0 7px,transparent 8px),
+    radial-gradient(circle at 27% 37%,color-mix(in srgb,var(--sfs-primary) 84%,transparent) 0 5px,transparent 6px),
+    radial-gradient(ellipse at 17% 48%,color-mix(in srgb,var(--sfs-primary) 62%,transparent) 0 18%,transparent 49%),
+    radial-gradient(circle at 78% 28%,color-mix(in srgb,var(--sfs-secondary) 90%,transparent) 0 5px,transparent 6px),
+    radial-gradient(circle at 92% 72%,color-mix(in srgb,var(--sfs-secondary) 84%,transparent) 0 8px,transparent 9px),
+    radial-gradient(ellipse at 84% 55%,color-mix(in srgb,var(--sfs-secondary) 48%,transparent) 0 16%,transparent 48%),
+    linear-gradient(180deg,#0b111b,#080d15)!important;
 }
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-product{
-  background:rgba(255,255,255,.97)!important;
+  background:rgba(255,255,255,.98)!important;
   color:#222!important;
-  box-shadow:0 10px 28px rgba(0,0,0,.28)
+  box-shadow:0 10px 28px rgba(0,0,0,.34)
 }
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-hero-copy .sfs-sample-announcement{
-  border-color:rgba(255,255,255,.14)!important;
+  border-color:rgba(255,255,255,.16)!important;
   border-left-color:var(--sfs-secondary)!important;
-  background:rgba(255,255,255,.09)!important;
+  background:rgba(8,13,21,.68)!important;
   color:#fff!important;
 }
 
-/* Pro Dark preview */
+/* Pro Dark preview remains restrained and professional. */
 .sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-hero{
   border-top:3px solid var(--sfs-secondary)!important;
 }
@@ -83,28 +72,17 @@
   box-shadow:0 10px 28px rgba(0,0,0,.26)
 }
 
-/* More realistic paint-spray preset thumbnail. */
+/* Paint Spray preset thumbnail. */
 .sfs-design-thumb--splash{
   position:relative;
   overflow:hidden;
-  background:#0a0f18!important;
-}
-.sfs-design-thumb--splash::before,
-.sfs-design-thumb--splash::after{
-  content:"";
-  position:absolute;
-  inset:-20%;
-}
-.sfs-design-thumb--splash::before{
   background:
-    radial-gradient(circle at 14% 28%,#2563eb 0 2px,transparent 3px),
-    radial-gradient(circle at 22% 66%,#2563eb 0 4px,transparent 5px),
-    radial-gradient(circle at 39% 22%,#2563eb 0 3px,transparent 4px),
-    radial-gradient(ellipse at 35% 48%,rgba(37,99,235,.82) 0 19%,transparent 60%);
-}
-.sfs-design-thumb--splash::after{
-  background:
-    radial-gradient(circle at 68% 29%,#eab308 0 2px,transparent 3px),
-    radial-gradient(circle at 78% 70%,#eab308 0 4px,transparent 5px),
-    radial-gradient(ellipse at 72% 51%,rgba(234,179,8,.62) 0 15%,transparent 58%);
+    radial-gradient(circle at 8% 24%,#2563eb 0 2px,transparent 3px),
+    radial-gradient(circle at 18% 68%,#2563eb 0 5px,transparent 6px),
+    radial-gradient(circle at 35% 22%,#2563eb 0 4px,transparent 5px),
+    radial-gradient(ellipse at 29% 49%,rgba(37,99,235,.92) 0 20%,transparent 52%),
+    radial-gradient(circle at 70% 27%,#eab308 0 3px,transparent 4px),
+    radial-gradient(circle at 83% 72%,#eab308 0 6px,transparent 7px),
+    radial-gradient(ellipse at 75% 52%,rgba(234,179,8,.76) 0 17%,transparent 50%),
+    #0a0f18!important;
 }
