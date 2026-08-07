@@ -17,6 +17,8 @@
 {% assign ss_secondary = '#d4af37' %}
 {% assign ss_primary_text = '#ffffff' %}
 {% assign ss_secondary_text = '#111111' %}
+{% assign ss_message = '' %}
+{% assign ss_show_message = false %}
 
 {% if ss_settings and ss_settings.enabled == true %}
   {% assign ss_enabled = true %}
@@ -26,6 +28,10 @@
   {% assign ss_secondary = ss_settings.secondary_color | default: ss_secondary %}
   {% assign ss_primary_text = ss_settings.primary_text | default: ss_primary_text %}
   {% assign ss_secondary_text = ss_settings.secondary_text | default: ss_secondary_text %}
+  {% assign ss_message = ss_settings.announcement | default: '' | strip %}
+  {% if ss_settings.show_announcement == true and ss_message != blank %}
+    {% assign ss_show_message = true %}
+  {% endif %}
 
   {% if ss_style == 'clean' and ss_pattern == 'diagonal' %}
     {% assign ss_layout = 'split' %}
@@ -53,6 +59,8 @@
   data-layout="{{ ss_layout }}"
   data-style="{{ ss_style | escape }}"
   data-pattern="{{ ss_pattern | escape }}"
+  data-show-message="{{ ss_show_message }}"
+  data-message="{{ ss_message | escape }}"
 ></div>
 
 <style>
@@ -71,6 +79,37 @@
     border: 0 !important;
   }
 </style>
+
+<script>
+  (function(){
+    function installStoreMessage(){
+      var state = document.getElementById('ss-private-store-state');
+      var copy = document.querySelector('.ps-hero .ps-copy');
+      if (!state || !copy) return;
+
+      var show = state.dataset.showMessage === 'true';
+      var text = (state.dataset.message || '').trim();
+      var message = copy.querySelector('.ss-hero-message');
+
+      if (!show || !text) {
+        if (message) message.hidden = true;
+        return;
+      }
+
+      if (!message) {
+        message = document.createElement('div');
+        message.className = 'ss-hero-message';
+        copy.appendChild(message);
+      }
+      message.textContent = text;
+      message.hidden = false;
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', installStoreMessage, { once: true });
+    else installStoreMessage();
+    document.addEventListener('shopify:section:load', installStoreMessage);
+  })();
+</script>
 
 {% schema %}
 {
