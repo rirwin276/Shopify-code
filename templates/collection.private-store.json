@@ -26,7 +26,7 @@
       "settings": {}
     },
     "catalog": {
-      "type": "private-store-catalog",
+      "type": "private-store-collection-catalog",
       "blocks": {
         "filters": {
           "type": "filters",
