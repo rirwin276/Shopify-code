@@ -1,27 +1,34 @@
-/* Final live-store continuity layer. Keep this last in collection.private-store. */
+/*
+  AUTHORITATIVE FINAL STOREFRONT LAYER
+  Loaded last on collection.private-store.
+  The appearance builder now previews the real collection page, so these rules
+  are the single visual source of truth for both saved stores and live preview.
+*/
 
-/* Category navigation is part of the storefront surface, never a floating white card. */
+/* ---------- Structural continuity ---------- */
 .ss-storefront-enhancements,
 .ss-category-shell-fix,
-.ss-category-shell-fix > *{
+.ss-storefront-tabs-section,
+.ss-storefront-products-section,
+.ss-storefront-fundraiser-section,
+.ss-storefront-partner-jump-section{
+  margin:0!important;
   border:0!important;
   border-radius:0!important;
+  background:transparent!important;
   box-shadow:none!important;
 }
-.ss-storefront-enhancements{
-  margin:0!important;
+
+.ss-storefront-enhancements,
+.ss-category-shell-fix,
+.ss-storefront-tabs-section{
   padding:0!important;
-  background:transparent!important;
 }
-.ss-category-shell-fix{
-  margin:0!important;
-  padding:0!important;
-  background:transparent!important;
-}
+
 .ss-category-nav{
   width:100%!important;
   margin:0!important;
-  padding:8px max(20px,calc((100vw - 1320px)/2)) 7px!important;
+  padding:8px max(20px,calc((100vw - 1320px)/2)) 8px!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
@@ -29,151 +36,326 @@
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
 }
+
 .ss-category-tabs{
   width:min(1320px,100%)!important;
   margin:0 auto!important;
   padding:0!important;
+  display:flex!important;
+  align-items:center!important;
   gap:7px!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
   box-shadow:none!important;
 }
+
 .ss-category-tab{
   min-height:34px!important;
+  padding:0 13px!important;
   border-radius:999px!important;
-  box-shadow:none;
+  box-shadow:none!important;
 }
 
-/* GRADIENT GLOW — same recipe used by the builder preview. */
-html.ss-store-custom.ss-style-bold.ss-pattern-none .ps-hero{
+/* Shopify's stock filter/sort row is intentionally replaced by our category tabs. */
+results-list .facets-block-wrapper,
+results-list .facets-container,
+results-list facet-filters-form,
+results-list .product-grid__item-count,
+results-list .sorting-filter,
+results-list .grid-density-controls{
+  display:none!important;
+}
+results-list .product-grid{
+  margin-top:0!important;
+  padding-top:8px!important;
+}
+
+/* ---------- Slightly larger store message ---------- */
+.ss-hero-message{
+  margin-top:12px!important;
+  padding:8px 11px!important;
+  gap:8px!important;
+  border-left-width:3px!important;
+  border-radius:10px!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  line-height:1.35!important;
+}
+.ss-hero-message::before{
+  width:7px!important;
+  height:7px!important;
+}
+
+/* ---------- Shared team-color behavior ---------- */
+html.ss-store-custom .ps-btn-solid{
+  background:var(--ss-team-primary)!important;
+  border-color:var(--ss-team-primary)!important;
+  color:var(--ss-team-primary-text)!important;
+}
+html.ss-store-custom .ps-btn-admin{
+  background:var(--ss-team-secondary)!important;
+  border-color:var(--ss-team-secondary)!important;
+  color:var(--ss-team-secondary-text)!important;
+}
+html.ss-store-custom .ps-btn-soft{
+  border-color:color-mix(in srgb,var(--ss-team-secondary) 35%,rgba(17,16,14,.12))!important;
+  background:color-mix(in srgb,var(--ss-team-secondary) 13%,#fff)!important;
+}
+html.ss-store-custom .ps-live-dot{
+  background:var(--ss-team-primary)!important;
+}
+html.ss-store-custom .ss-category-tab.active{
+  border-color:var(--ss-team-primary)!important;
+  background:var(--ss-team-primary)!important;
+  color:var(--ss-team-primary-text)!important;
+  box-shadow:0 7px 18px color-mix(in srgb,var(--ss-team-primary) 20%,transparent)!important;
+}
+
+/* Each custom design owns the whole collection main area. */
+html.ss-store-custom #MainContent{
+  position:relative;
+  isolation:isolate;
+  transition:background .2s ease;
+}
+html.ss-store-custom .ss-storefront-hero-section,
+html.ss-store-custom .ss-storefront-tabs-section,
+html.ss-store-custom .ss-storefront-products-section,
+html.ss-store-custom .ss-storefront-fundraiser-section,
+html.ss-store-custom .ss-storefront-partner-jump-section{
+  background:transparent!important;
+}
+
+/* ---------- CLASSIC TEAM ---------- */
+html.ss-store-custom.ss-style-clean.ss-pattern-none #MainContent{
   background:
-    radial-gradient(circle at 0% 0%,
-      color-mix(in srgb,var(--ss-team-primary) 82%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-primary) 58%,#fff) 18%,
-      color-mix(in srgb,var(--ss-team-primary) 30%,#fff) 38%,
-      transparent 63%),
-    radial-gradient(circle at 100% 100%,
-      color-mix(in srgb,var(--ss-team-secondary) 82%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-secondary) 58%,#fff) 20%,
-      color-mix(in srgb,var(--ss-team-secondary) 30%,#fff) 40%,
-      transparent 65%),
+    radial-gradient(circle at 4% 0%,color-mix(in srgb,var(--ss-team-primary) 14%,transparent),transparent 30%),
+    radial-gradient(circle at 96% 18%,color-mix(in srgb,var(--ss-team-secondary) 12%,transparent),transparent 31%),
+    linear-gradient(180deg,#fbf8f1 0%,#fffdf9 38%,#fff 100%)!important;
+}
+html.ss-store-custom.ss-style-clean.ss-pattern-none .ps-hero,
+html.ss-store-custom.ss-style-clean.ss-pattern-none results-list{
+  background:transparent!important;
+  background-image:none!important;
+}
+html.ss-store-custom.ss-style-clean.ss-pattern-none .ps-hero-card{
+  background:rgba(255,255,255,.82)!important;
+  border-color:rgba(255,255,255,.82)!important;
+}
+
+/* ---------- DIAGONAL SPLIT ---------- */
+html.ss-store-custom.ss-pattern-diagonal #MainContent{
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb,var(--ss-team-primary) 16%,#fff) 0 46%,
+      color-mix(in srgb,var(--ss-team-primary) 42%,var(--ss-team-secondary)) 46% 50%,
+      color-mix(in srgb,var(--ss-team-secondary) 16%,#fff) 50% 100%)!important;
+}
+html.ss-store-custom.ss-pattern-diagonal .ps-hero,
+html.ss-store-custom.ss-pattern-diagonal .ss-category-shell-fix,
+html.ss-store-custom.ss-pattern-diagonal results-list{
+  background:transparent!important;
+  background-image:none!important;
+}
+html.ss-store-custom.ss-pattern-diagonal .ps-hero-card{
+  background:rgba(255,255,255,.84)!important;
+  border-color:rgba(255,255,255,.74)!important;
+}
+
+/* ---------- GRADIENT GLOW ---------- */
+html.ss-store-custom.ss-style-bold.ss-pattern-none #MainContent{
+  background:
+    radial-gradient(ellipse 78% 58% at 0% 0%,
+      color-mix(in srgb,var(--ss-team-primary) 86%,#fff) 0%,
+      color-mix(in srgb,var(--ss-team-primary) 62%,#fff) 22%,
+      color-mix(in srgb,var(--ss-team-primary) 32%,#fff) 42%,
+      transparent 68%),
+    radial-gradient(ellipse 80% 62% at 100% 100%,
+      color-mix(in srgb,var(--ss-team-secondary) 86%,#fff) 0%,
+      color-mix(in srgb,var(--ss-team-secondary) 62%,#fff) 22%,
+      color-mix(in srgb,var(--ss-team-secondary) 32%,#fff) 44%,
+      transparent 70%),
     #fff!important;
 }
+html.ss-store-custom.ss-style-bold.ss-pattern-none .ps-hero,
+html.ss-store-custom.ss-style-bold.ss-pattern-none .ss-category-shell-fix,
+html.ss-store-custom.ss-style-bold.ss-pattern-none results-list{
+  background:transparent!important;
+  background-image:none!important;
+}
 html.ss-store-custom.ss-style-bold.ss-pattern-none .ps-hero-card{
-  background:rgba(255,255,255,.82)!important;
-  border-color:rgba(255,255,255,.68)!important;
+  background:rgba(255,255,255,.80)!important;
+  border-color:rgba(255,255,255,.70)!important;
   box-shadow:0 24px 68px rgba(17,16,14,.11)!important;
   backdrop-filter:blur(16px) saturate(1.08)!important;
   -webkit-backdrop-filter:blur(16px) saturate(1.08)!important;
 }
-html.ss-store-custom.ss-style-bold.ss-pattern-none .ss-category-shell-fix{
-  background:
-    linear-gradient(90deg,
-      color-mix(in srgb,var(--ss-team-primary) 24%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-primary) 9%,#fff) 38%,
-      rgba(255,255,255,.94) 50%,
-      color-mix(in srgb,var(--ss-team-secondary) 9%,#fff) 62%,
-      color-mix(in srgb,var(--ss-team-secondary) 24%,#fff) 100%)!important;
+
+/* ---------- SPRAY BURST ---------- */
+html.ss-store-custom.ss-style-bold.ss-pattern-dots #MainContent{
+  background:#080d15!important;
 }
-html.ss-store-custom.ss-style-bold.ss-pattern-none .ss-category-nav{
+html.ss-store-custom.ss-style-bold.ss-pattern-dots .ss-category-shell-fix,
+html.ss-store-custom.ss-style-bold.ss-pattern-dots .ss-storefront-tabs-section{
   background:transparent!important;
 }
-html.ss-store-custom.ss-style-bold.ss-pattern-none results-list{
-  background:
-    radial-gradient(ellipse 82% 94% at 0% 0%,
-      color-mix(in srgb,var(--ss-team-primary) 62%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-primary) 38%,#fff) 25%,
-      color-mix(in srgb,var(--ss-team-primary) 14%,#fff) 48%,
-      transparent 70%),
-    radial-gradient(ellipse 84% 96% at 100% 100%,
-      color-mix(in srgb,var(--ss-team-secondary) 62%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-secondary) 38%,#fff) 26%,
-      color-mix(in srgb,var(--ss-team-secondary) 14%,#fff) 50%,
-      transparent 72%),
-    #fff!important;
+/* Existing paint pseudo-elements live on hero/results-list; keep their dark canvas seamless. */
+html.ss-store-custom.ss-style-bold.ss-pattern-dots .ps-hero,
+html.ss-store-custom.ss-style-bold.ss-pattern-dots results-list{
+  border-color:transparent!important;
 }
-html.ss-store-custom.ss-style-bold.ss-pattern-none results-list .product-grid__item{
-  background:rgba(255,255,255,.95)!important;
-  border-color:rgba(255,255,255,.62)!important;
-  box-shadow:0 12px 30px rgba(17,16,14,.08)!important;
+html.ss-store-custom.ss-style-bold.ss-pattern-dots .ss-category-tab{
+  border-color:rgba(255,255,255,.15)!important;
+  background:rgba(255,255,255,.08)!important;
+  color:rgba(255,255,255,.84)!important;
+}
+html.ss-store-custom.ss-style-bold.ss-pattern-dots .ss-category-tab.active{
+  border-color:var(--ss-team-primary)!important;
+  background:var(--ss-team-primary)!important;
+  color:var(--ss-team-primary-text)!important;
 }
 
-/* PRO DARK — one uninterrupted surface from hero through catalog. */
+/* ---------- PRO DARK ---------- */
+html.ss-store-custom.ss-style-dark.ss-pattern-grid #MainContent{
+  background:#11161e!important;
+  background-image:none!important;
+}
 html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero,
 html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-shell-fix,
 html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-nav,
 html.ss-store-custom.ss-style-dark.ss-pattern-grid results-list{
-  background:#11161e!important;
+  background:transparent!important;
   background-image:none!important;
 }
 html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero-card{
   background:#171d26!important;
-  border-color:rgba(255,255,255,.10)!important;
-  border-top-color:var(--ss-team-secondary)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-top:3px solid var(--ss-team-secondary)!important;
+  color:#fff!important;
+}
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-title,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-sub,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-eyebrow,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel-title{
+  color:#fff!important;
+}
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-sub{opacity:.74!important;}
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-meta-row span,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-ghost,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-soft{
+  border-color:rgba(255,255,255,.14)!important;
+  background:rgba(255,255,255,.08)!important;
+  color:#fff!important;
 }
 html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-tab{
   background:#202632!important;
   border-color:#343b47!important;
   color:#dce0e7!important;
 }
-html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-tab.active{
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-hero-message{
+  border-color:rgba(255,255,255,.14)!important;
+  border-left-color:var(--ss-team-secondary)!important;
+  background:rgba(255,255,255,.09)!important;
+  color:#fff!important;
+}
+
+/* ---------- HERITAGE ---------- */
+html.ss-store-custom.ss-pattern-stripes #MainContent{
+  background:
+    linear-gradient(135deg,
+      #fbf6e9 0 34%,
+      color-mix(in srgb,var(--ss-team-primary) 54%,#fff) 34% 38%,
+      color-mix(in srgb,var(--ss-team-secondary) 64%,#fff) 38% 42%,
+      #fbf6e9 42% 100%)!important;
+}
+html.ss-store-custom.ss-pattern-stripes .ps-hero,
+html.ss-store-custom.ss-pattern-stripes .ss-category-shell-fix,
+html.ss-store-custom.ss-pattern-stripes results-list{
+  background:transparent!important;
+  background-image:none!important;
+}
+html.ss-store-custom.ss-pattern-stripes .ps-hero-card{
+  background:rgba(255,253,248,.88)!important;
+  border-color:rgba(255,255,255,.70)!important;
+}
+
+/* ---------- Product cards ---------- */
+html.ss-store-custom results-list .product-grid__item{
+  overflow:hidden;
+  border-radius:16px!important;
+  border:1px solid rgba(17,16,14,.07)!important;
+  background:rgba(250,249,246,.97)!important;
+  box-shadow:0 11px 28px rgba(17,16,14,.08)!important;
+}
+html.ss-store-custom:is(.ss-style-dark.ss-pattern-grid,.ss-style-bold.ss-pattern-dots) results-list .product-grid__item{
+  border-color:rgba(255,255,255,.16)!important;
+  background:rgba(248,247,243,.98)!important;
+  box-shadow:0 13px 32px rgba(0,0,0,.18)!important;
+}
+html.ss-store-custom:is(.ss-style-dark.ss-pattern-grid,.ss-style-bold.ss-pattern-dots) results-list .product-grid__item :is(a,p,span,strong,small){
+  color:#17150f!important;
+}
+
+/* ---------- Fundraiser continuity ---------- */
+html.ss-store-custom .ss-frbar{
+  width:min(960px,100%)!important;
+  margin:8px auto 10px!important;
+  padding:0 16px!important;
+}
+html.ss-store-custom .ss-frbar-inner{
+  border-color:color-mix(in srgb,var(--ss-team-secondary) 34%,rgba(255,255,255,.12))!important;
+  background:linear-gradient(135deg,
+    color-mix(in srgb,var(--ss-team-primary) 72%,#121722),
+    color-mix(in srgb,var(--ss-team-secondary) 28%,#121722))!important;
+}
+html.ss-store-custom .ss-frbar-badge,
+html.ss-store-custom .ss-frbar-fill{
   background:var(--ss-team-secondary)!important;
-  border-color:var(--ss-team-secondary)!important;
   color:var(--ss-team-secondary-text)!important;
-}
-
-/* Spray Burst stays one dark environment. */
-html.ss-store-custom.ss-style-bold.ss-pattern-dots .ss-category-shell-fix,
-html.ss-store-custom.ss-style-bold.ss-pattern-dots .ss-category-nav{
-  background:#080d15!important;
-}
-
-/* Heritage and diagonal keep only a flat full-width transition, never an outer capsule. */
-html.ss-store-custom.ss-pattern-stripes .ss-category-shell-fix{
-  background:#faf5e9!important;
-}
-html.ss-store-custom.ss-pattern-diagonal .ss-category-shell-fix{
-  background:linear-gradient(90deg,
-    color-mix(in srgb,var(--ss-team-primary) 10%,#fff),
-    #fff 48%,
-    color-mix(in srgb,var(--ss-team-secondary) 10%,#fff))!important;
 }
 
 @media(max-width:768px){
   .ss-category-nav{
-    width:100%!important;
-    margin:0!important;
-    padding:6px 8px 5px!important;
-    border-radius:0!important;
-    box-shadow:none!important;
+    padding:6px 8px 6px!important;
   }
-  html.ss-store-custom.ss-style-bold.ss-pattern-none .ps-hero{
+  .ss-category-tab{
+    min-height:32px!important;
+    padding:0 11px!important;
+    font-size:10px!important;
+  }
+  .ss-hero-message{
+    margin-top:7px!important;
+    padding:5px 8px!important;
+    gap:6px!important;
+    border-left-width:2px!important;
+    border-radius:8px!important;
+    font-size:10px!important;
+    line-height:1.3!important;
+    white-space:normal!important;
+  }
+  .ss-hero-message::before{
+    width:6px!important;
+    height:6px!important;
+  }
+  html.ss-store-custom.ss-style-bold.ss-pattern-none #MainContent{
     background:
-      radial-gradient(circle at 0% 0%,
-        color-mix(in srgb,var(--ss-team-primary) 74%,#fff) 0%,
-        color-mix(in srgb,var(--ss-team-primary) 40%,#fff) 30%,
-        transparent 62%),
-      radial-gradient(circle at 100% 100%,
-        color-mix(in srgb,var(--ss-team-secondary) 72%,#fff) 0%,
-        color-mix(in srgb,var(--ss-team-secondary) 38%,#fff) 32%,
-        transparent 64%),
+      radial-gradient(ellipse 100% 46% at 0% 0%,
+        color-mix(in srgb,var(--ss-team-primary) 78%,#fff) 0%,
+        color-mix(in srgb,var(--ss-team-primary) 40%,#fff) 36%,
+        transparent 70%),
+      radial-gradient(ellipse 100% 50% at 100% 100%,
+        color-mix(in srgb,var(--ss-team-secondary) 76%,#fff) 0%,
+        color-mix(in srgb,var(--ss-team-secondary) 38%,#fff) 38%,
+        transparent 72%),
       #fff!important;
   }
-  html.ss-store-custom.ss-style-bold.ss-pattern-none .ss-category-shell-fix{
-    background:linear-gradient(90deg,
-      color-mix(in srgb,var(--ss-team-primary) 20%,#fff),
-      #fff 50%,
-      color-mix(in srgb,var(--ss-team-secondary) 20%,#fff))!important;
+  html.ss-store-custom results-list .product-grid__item{
+    border-radius:12px!important;
+    box-shadow:0 8px 20px rgba(17,16,14,.08)!important;
   }
-  html.ss-store-custom.ss-style-bold.ss-pattern-none results-list{
-    background:
-      radial-gradient(ellipse 100% 76% at 0% 0%,
-        color-mix(in srgb,var(--ss-team-primary) 52%,#fff),
-        transparent 66%),
-      radial-gradient(ellipse 100% 78% at 100% 100%,
-        color-mix(in srgb,var(--ss-team-secondary) 50%,#fff),
-        transparent 68%),
-      #fff!important;
+  html.ss-store-custom .ss-frbar{
+    margin:5px auto 7px!important;
+    padding:0 8px!important;
   }
 }
