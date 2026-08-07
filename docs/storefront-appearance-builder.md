@@ -14,13 +14,14 @@ The save mutation patches only this field. Existing store fields such as name, l
 ## Theme behavior
 
 - `storefront-appearance-settings.liquid` appears above Admin Powers and previews the store's existing title, filters, and product cards.
-- `private-store-appearance.liquid` does nothing unless `storefront_settings.enabled` is true.
+- `private-store-appearance.liquid` renders nothing unless `storefront_settings.enabled` is true.
 - The only visible options are team colors, an optional announcement bar, and a background behind the existing product area.
 - Background choices are Original, Diagonal split, and Team stripe.
+- Original does not alter the product area. With no announcement, the storefront remains visually unchanged even after saving.
 - The original Shopify product grid, filters, sorting, product order, and cards are never replaced.
 - `private-store-catalog-tools.liquid` is intentionally a no-op in this version; featured rows and category tabs are deferred.
 
-A store with no saved settings remains visually unchanged. Selecting Original with no announcement also leaves the storefront unchanged.
+A store with no saved settings remains visually unchanged.
 
 ## Rollback
 
