@@ -1,4 +1,9 @@
 (function(){
+  function normalizeSavedLabel(scope){
+    var label = scope.querySelector && scope.querySelector('[data-sfs-current-label]');
+    if (label && label.textContent.trim() === 'Color Splash') label.textContent = 'Paint Spray';
+  }
+
   function polish(root){
     var paintButton = root.querySelector('[data-sfs-design="splash"]');
     if (paintButton) {
@@ -13,6 +18,12 @@
     if (proButton) {
       var proCopy = proButton.querySelector('small');
       if (proCopy) proCopy.textContent = 'Clean professional dark store with a subtle grid';
+    }
+
+    normalizeSavedLabel(root);
+    if (root.dataset.sfsDesignObserver !== '1') {
+      root.dataset.sfsDesignObserver = '1';
+      new MutationObserver(function(){ normalizeSavedLabel(root); }).observe(root, {childList:true, subtree:true, characterData:true});
     }
   }
 
