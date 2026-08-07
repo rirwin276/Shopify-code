@@ -158,13 +158,13 @@
         "padding-block-end": 32
       }
     },
-    "unified_polish": {
-      "type": "private-store-unified-polish",
-      "settings": {}
-    },
     "local_partner_hicPjc": {
       "type": "local-partner",
       "name": "Local Partner",
+      "settings": {}
+    },
+    "unified_polish": {
+      "type": "private-store-unified-polish",
       "settings": {}
     }
   },
@@ -175,7 +175,7 @@
     "storefront_enhancements",
     "legacy_appearance_fallback",
     "main",
-    "unified_polish",
-    "local_partner_hicPjc"
+    "local_partner_hicPjc",
+    "unified_polish"
   ]
 }
