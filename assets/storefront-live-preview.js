@@ -9,6 +9,16 @@
     ['preview_theme_id','pb','_fd'].forEach(function(key){
       if (current.searchParams.has(key)) url.searchParams.set(key,current.searchParams.get(key));
     });
+
+    /* Theme previews can be active through Shopify's theme context even when
+       preview_theme_id is not visible in the address bar. Keep the iframe on
+       the exact same theme as the Admin Powers page. */
+    try {
+      if (!url.searchParams.has('preview_theme_id') && window.Shopify && Shopify.theme && Shopify.theme.id && Shopify.theme.role !== 'main') {
+        url.searchParams.set('preview_theme_id', String(Shopify.theme.id));
+      }
+    } catch(_themeError) {}
+
     url.searchParams.set('ss_builder_preview','1');
     return url;
   }
