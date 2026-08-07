@@ -19,6 +19,12 @@
 
     root.querySelectorAll('[data-sfs-design="drip"]').forEach(function(button){ button.remove(); });
 
+    var gradientButton = root.querySelector('[data-sfs-design="gradient"]');
+    if (gradientButton) {
+      var gradientCopy = gradientButton.querySelector('small');
+      if (gradientCopy) gradientCopy.textContent = 'Soft two-color fade behind the store and products';
+    }
+
     var proButton = root.querySelector('[data-sfs-design="pro"]');
     if (proButton) {
       var proCopy = proButton.querySelector('small');
@@ -29,9 +35,14 @@
       var strong = heading.querySelector('strong');
       var small = heading.querySelector('small');
       if (strong && strong.textContent.trim() === 'Store design' && small) {
-        small.textContent = 'Five product-first looks inspired by modern team and fan stores.';
+        small.textContent = 'Six product-first looks inspired by modern team and fan stores.';
       }
     });
+
+    var launchCopy = root.querySelector('.sfs-admin-launch__copy p');
+    if (launchCopy && launchCopy.textContent.indexOf('five team-store designs') !== -1) {
+      launchCopy.textContent = 'Pick one of six team-store designs, then apply the team colors and an optional store message.';
+    }
 
     normalizeSavedLabel(root);
     if (root.dataset.sfsDesignObserver !== '1') {
