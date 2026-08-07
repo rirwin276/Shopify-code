@@ -6,14 +6,14 @@
   Keep this section intentionally thin.
 
   The external stylesheets above are the authoritative private-store appearance
-  layers, in cascade order. Do not add another inline preset stylesheet below
-  them: doing so previously overrode storefront-final-tune.css and made later
-  fixes appear to have no effect in both the real draft storefront and the
-  script-stripped Admin Powers snapshot.
+  layers, in cascade order. The final runtime normalizer below is deliberately
+  loaded last so category structure and critical readability fixes do not depend
+  on CSS cascade order.
 {% endcomment %}
 
 <script src="{{ 'storefront-live-structure.js' | asset_url }}" defer></script>
 <script src="{{ 'storefront-tab-runtime-fix.js' | asset_url }}" defer></script>
+<script src="{{ 'storefront-runtime-hard-fix.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
