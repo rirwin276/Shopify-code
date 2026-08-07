@@ -1,0 +1,191 @@
+/* Final targeted storefront tuning. Keep this loaded after the working appearance engine. */
+
+/* PRO DARK V2 — polished command-center treatment only. */
+html.ss-store-custom.ss-style-dark.ss-pattern-grid #MainContent {
+  background-color: #07101a !important;
+  background-image:
+    linear-gradient(rgba(129, 157, 187, .032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 157, 187, .032) 1px, transparent 1px),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.012) 0 1px, transparent 1px 12px),
+    radial-gradient(ellipse 58% 38% at -8% -5%, color-mix(in srgb, var(--ss-team-primary) 34%, transparent), transparent 70%),
+    radial-gradient(ellipse 46% 32% at 105% 8%, color-mix(in srgb, var(--ss-team-secondary) 22%, transparent), transparent 72%),
+    linear-gradient(145deg, #07101a 0%, #0b1420 52%, #08111b 100%) !important;
+  background-size: 32px 32px, 32px 32px, auto, auto, auto, auto !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero-card {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(145, 170, 198, .20) !important;
+  border-top: 2px solid color-mix(in srgb, var(--ss-team-secondary) 78%, #ffffff) !important;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--ss-team-primary) 16%, transparent), transparent 38%),
+    linear-gradient(145deg, rgba(15, 25, 38, .96), rgba(8, 15, 25, .95)) !important;
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.42),
+    inset 0 1px 0 rgba(255,255,255,.045),
+    0 0 52px color-mix(in srgb, var(--ss-team-secondary) 7%, transparent) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero-card::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 11px !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  opacity: .52 !important;
+  background:
+    linear-gradient(var(--ss-team-secondary), var(--ss-team-secondary)) top left / 54px 2px no-repeat,
+    linear-gradient(var(--ss-team-secondary), var(--ss-team-secondary)) top left / 2px 30px no-repeat,
+    linear-gradient(var(--ss-team-primary), var(--ss-team-primary)) bottom right / 54px 2px no-repeat,
+    linear-gradient(var(--ss-team-primary), var(--ss-team-primary)) bottom right / 2px 30px no-repeat !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero-card::after {
+  content: '' !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  width: 340px !important;
+  height: 1px !important;
+  top: 0 !important;
+  right: 38px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: linear-gradient(90deg, transparent, var(--ss-team-secondary), transparent) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--ss-team-secondary) 42%, transparent) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero-card > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-eyebrow {
+  border: 1px solid color-mix(in srgb, var(--ss-team-secondary) 26%, rgba(255,255,255,.10)) !important;
+  background: color-mix(in srgb, var(--ss-team-secondary) 9%, rgba(255,255,255,.035)) !important;
+  color: color-mix(in srgb, var(--ss-team-secondary) 76%, #ffffff) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-live-dot {
+  background: var(--ss-team-secondary) !important;
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--ss-team-secondary) 12%, transparent),
+    0 0 16px color-mix(in srgb, var(--ss-team-secondary) 65%, transparent) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-title {
+  color: #f7fbff !important;
+  text-shadow: 0 2px 18px rgba(0,0,0,.22) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-sub {
+  color: #aebdcd !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-meta-row span {
+  border: 1px solid rgba(143, 166, 191, .16) !important;
+  background: rgba(133, 157, 184, .075) !important;
+  color: #d8e3ee !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.025) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel {
+  border: 1px solid rgba(145, 170, 198, .18) !important;
+  background:
+    linear-gradient(180deg, rgba(20, 31, 45, .90), rgba(8, 15, 24, .86)) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.035),
+    0 16px 42px rgba(0,0,0,.24) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel-title {
+  color: color-mix(in srgb, var(--ss-team-secondary) 70%, #dbe7f4) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-ghost {
+  border-color: rgba(169, 188, 209, .28) !important;
+  background: rgba(229, 237, 246, .92) !important;
+  color: #09111b !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.16) !important;
+}
+
+/* Share Store needs to be unmistakably readable in Pro Dark. */
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-soft,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid button.ps-btn-soft {
+  border-color: color-mix(in srgb, var(--ss-team-secondary) 42%, rgba(255,255,255,.18)) !important;
+  background: color-mix(in srgb, var(--ss-team-secondary) 14%, rgba(255,255,255,.075)) !important;
+  color: #f7fbff !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,.35) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.05) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-soft:hover {
+  background: color-mix(in srgb, var(--ss-team-secondary) 21%, rgba(255,255,255,.09)) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-admin {
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--ss-team-secondary) 16%, transparent) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-tab {
+  border-color: rgba(145, 170, 198, .20) !important;
+  background: rgba(16, 27, 41, .86) !important;
+  color: #cbd8e5 !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.025) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-tab.active {
+  border-color: var(--ss-team-secondary) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--ss-team-secondary) 34%, transparent),
+    0 0 24px color-mix(in srgb, var(--ss-team-secondary) 22%, transparent) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-hero-message {
+  border-color: rgba(145, 170, 198, .18) !important;
+  border-left-color: var(--ss-team-secondary) !important;
+  background: rgba(4, 11, 19, .55) !important;
+  color: #e7eef6 !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.025) !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid results-list {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+html.ss-store-custom.ss-style-dark.ss-pattern-grid results-list .product-grid__item {
+  border-color: rgba(162, 181, 202, .14) !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.24) !important;
+}
+
+@media (max-width: 768px) {
+  html.ss-store-custom.ss-style-dark.ss-pattern-grid #MainContent {
+    background-size: 24px 24px, 24px 24px, auto, auto, auto, auto !important;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero-card::before {
+    inset: 6px !important;
+    opacity: .38 !important;
+    background:
+      linear-gradient(var(--ss-team-secondary), var(--ss-team-secondary)) top left / 32px 1px no-repeat,
+      linear-gradient(var(--ss-team-secondary), var(--ss-team-secondary)) top left / 1px 20px no-repeat,
+      linear-gradient(var(--ss-team-primary), var(--ss-team-primary)) bottom right / 32px 1px no-repeat,
+      linear-gradient(var(--ss-team-primary), var(--ss-team-primary)) bottom right / 1px 20px no-repeat !important;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-admin-mobile-bar .ps-mobile-pill {
+    border-color: rgba(145, 170, 198, .22) !important;
+    background: rgba(18, 29, 43, .88) !important;
+    color: #f2f7fb !important;
+  }
+}
