@@ -1052,3 +1052,85 @@
     padding: 9px 12px !important;
   }
 }
+
+/* ============================================================
+   THE PEEK: first product row visible without scrolling
+   ============================================================ */
+
+@media (max-width: 768px) {
+  /*
+    A store that opens to a full-screen header looks like it has nothing in
+    it. If the top of the first product row is showing, the page says "there
+    is more, keep going" without needing a prompt, and the shopper scrolls on
+    their own.
+
+    Everything above the grid is therefore sized against viewport HEIGHT, not
+    just width. Width-based sizing is why this broke: clamp(25px, 7.6vw, 34px)
+    gives an iPhone SE and a Pro Max nearly the same header, but the SE has
+    ~180px less screen to spend on it, so the grid fell off the bottom exactly
+    on the phones with least room.
+
+    dvh rather than vh, because vh on mobile Safari measures the viewport with
+    the address bar collapsed — the state the page is NOT in when it first
+    loads, which is the one moment this is trying to get right.
+  */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero {
+    padding-block: clamp(6px, 1dvh, 12px) clamp(4px, 0.8dvh, 10px) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+    padding: clamp(10px, 1.5dvh, 14px) 12px !important;
+    gap: clamp(6px, 1dvh, 10px) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-logo {
+    width: clamp(76px, 13dvh, 108px) !important;
+    height: clamp(76px, 13dvh, 108px) !important;
+  }
+
+  /* The store name still leads, but it yields on a short screen. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-title {
+    font-size: min(clamp(24px, 7.4vw, 34px), 5.2dvh) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+    margin-top: clamp(6px, 1dvh, 10px) !important;
+    padding: clamp(7px, 1.1dvh, 10px) 12px !important;
+    font-size: 12px !important;
+  }
+
+  /* The tab row is the last thing between the header and the grid. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-catalog-controls {
+    padding: clamp(5px, 0.9dvh, 8px) 8px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+    padding-top: 2px !important;
+  }
+
+  /*
+    Short phones give up more.
+
+    Below ~700px of viewport the header still eats the grid even after the
+    scaling above, so the announcement drops to one line and the action panel
+    tightens again. Nothing is hidden — an organiser's message and the store
+    actions both still render — they just stop competing with the products.
+  */
+  @media (max-height: 700px) {
+    #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+      display: -webkit-box !important;
+      -webkit-line-clamp: 1 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+    }
+
+    #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-btn {
+      min-height: 33px !important;
+      font-size: 11.5px !important;
+    }
+
+    #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-meta-row {
+      margin-top: 4px !important;
+    }
+  }
+}
