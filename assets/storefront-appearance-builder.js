@@ -33,7 +33,8 @@
     var designs = {
       classic: {style:'clean', pattern:'none', label:'Classic Team'},
       split: {style:'clean', pattern:'diagonal', label:'Diagonal Split'},
-      splash: {style:'bold', pattern:'dots', label:'Color Splash'},
+      splash: {style:'bold', pattern:'dots', label:'Spray Burst'},
+      drip: {style:'dark', pattern:'dots', label:'Water Drip'},
       pro: {style:'dark', pattern:'grid', label:'Pro Dark'},
       heritage: {style:'clean', pattern:'stripes', label:'Heritage'}
     };
