@@ -21,6 +21,10 @@
       "type": "partner-jump-btn",
       "settings": {}
     },
+    "storefront_enhancements": {
+      "type": "private-store-storefront-enhancements",
+      "settings": {}
+    },
     "main": {
       "type": "main-collection",
       "blocks": {
@@ -160,6 +164,7 @@
     "hero",
     "fundraiser_bar",
     "partner_jump",
+    "storefront_enhancements",
     "main",
     "local_partner_hicPjc"
   ]
