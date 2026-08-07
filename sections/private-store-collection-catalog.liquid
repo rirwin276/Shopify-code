@@ -1,8 +1,8 @@
 {% comment %}
   PRIVATE STORE COLLECTION CATALOG
-  The category navigation is the first row of the actual product collection
-  wrapper. It is not a separate Shopify section or a sibling surface, so the
-  real storefront and Admin Powers preview share the same structure.
+  The category controls are the first row of the actual product collection
+  wrapper. They intentionally use catalog-only hooks so legacy storefront
+  relocation scripts cannot move them back outside the product wrapper.
 {% endcomment %}
 
 <script
@@ -35,19 +35,17 @@
     {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
 
     <div class="collection-wrapper grid gap-style">
-      <nav class="ss-category-nav" aria-label="Shop by product type" data-ss-category-nav>
-        <div class="ss-category-tabs" role="tablist">
-          <button type="button" class="ss-category-tab active" data-ss-category="all" role="tab" aria-selected="true">All gear</button>
-          <button type="button" class="ss-category-tab" data-ss-category="shirts" role="tab" aria-selected="false">Shirts</button>
-          <button type="button" class="ss-category-tab" data-ss-category="youth" role="tab" aria-selected="false">Youth</button>
-          <button type="button" class="ss-category-tab" data-ss-category="hoodies" role="tab" aria-selected="false">Hoodies</button>
-          <button type="button" class="ss-category-tab" data-ss-category="tanks" role="tab" aria-selected="false">Tanks</button>
-          <button type="button" class="ss-category-tab" data-ss-category="headwear" role="tab" aria-selected="false">Hats</button>
-          <button type="button" class="ss-category-tab" data-ss-category="personalized" role="tab" aria-selected="false">Personalized</button>
-          <button type="button" class="ss-category-tab" data-ss-category="accessories" role="tab" aria-selected="false">Accessories</button>
-          <button type="button" class="ss-category-tab" data-ss-category="other" role="tab" aria-selected="false">More</button>
-        </div>
-      </nav>
+      <div class="ss-catalog-controls" data-ss-catalog-controls role="tablist" aria-label="Shop by product type">
+        <button type="button" class="ss-category-tab active" data-ss-category="all" role="tab" aria-selected="true">All gear</button>
+        <button type="button" class="ss-category-tab" data-ss-category="shirts" role="tab" aria-selected="false">Shirts</button>
+        <button type="button" class="ss-category-tab" data-ss-category="youth" role="tab" aria-selected="false">Youth</button>
+        <button type="button" class="ss-category-tab" data-ss-category="hoodies" role="tab" aria-selected="false">Hoodies</button>
+        <button type="button" class="ss-category-tab" data-ss-category="tanks" role="tab" aria-selected="false">Tanks</button>
+        <button type="button" class="ss-category-tab" data-ss-category="headwear" role="tab" aria-selected="false">Hats</button>
+        <button type="button" class="ss-category-tab" data-ss-category="personalized" role="tab" aria-selected="false">Personalized</button>
+        <button type="button" class="ss-category-tab" data-ss-category="accessories" role="tab" aria-selected="false">Accessories</button>
+        <button type="button" class="ss-category-tab" data-ss-category="other" role="tab" aria-selected="false">More</button>
+      </div>
 
       {% content_for 'block',
         type: 'filters',
@@ -125,7 +123,7 @@
       if (!root || root.dataset.ssCategoryReady === '1') return;
       root.dataset.ssCategoryReady = '1';
 
-      var nav = root.querySelector('[data-ss-category-nav]');
+      var controls = root.querySelector('[data-ss-catalog-controls]');
       var buttons = Array.from(root.querySelectorAll('[data-ss-category]'));
       var active = 'all';
 
@@ -151,7 +149,7 @@
           button.setAttribute('aria-selected', selected ? 'true' : 'false');
         });
 
-        if (nav) nav.hidden = !productItems.length;
+        if (controls) controls.hidden = !productItems.length;
       }
 
       buttons.forEach(function(button){
@@ -180,19 +178,38 @@
     }
   }
 
-  /* The tabs are now literally the first row of the product wrapper. */
-  .ss-private-catalog .collection-wrapper > .ss-category-nav,
-  .ss-private-catalog .collection-wrapper > .ss-category-nav > .ss-category-tabs {
+  /* Catalog controls are a real first row of the same wrapper as the products. */
+  .ss-private-catalog .collection-wrapper > .ss-catalog-controls {
     grid-column: 1 / -1;
-  }
-
-  .ss-private-catalog .collection-wrapper > .ss-category-nav {
-    width: 100%;
+    width: min(var(--ss-layout-page-width, 1320px), calc(100% - 40px));
+    max-width: min(var(--ss-layout-page-width, 1320px), calc(100% - 40px));
     min-width: 0;
+    margin: 0 auto;
+    padding: 10px 0 11px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    overflow-x: auto;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .ss-private-catalog :is(.facets-block-wrapper, .facets-container, facet-filters-form, .product-grid__item-count, .sorting-filter, .grid-density-controls) {
     display: none !important;
+  }
+
+  @media screen and (max-width: 768px) {
+    .ss-private-catalog .collection-wrapper > .ss-catalog-controls {
+      width: 100%;
+      max-width: 100%;
+      padding: 7px 8px 8px;
+    }
   }
 {% endstylesheet %}
 
