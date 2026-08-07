@@ -13,20 +13,20 @@
       "type": "private-store-collection",
       "settings": {}
     },
-    "storefront_enhancements": {
-      "type": "private-store-storefront-enhancements",
-      "settings": {}
-    },
-    "storefront_visual_polish": {
-      "type": "private-store-visual-polish",
-      "settings": {}
-    },
     "fundraiser_bar": {
       "type": "fundraiser-bar",
       "settings": {}
     },
     "partner_jump": {
       "type": "partner-jump-btn",
+      "settings": {}
+    },
+    "storefront_enhancements": {
+      "type": "private-store-storefront-enhancements",
+      "settings": {}
+    },
+    "storefront_visual_polish": {
+      "type": "private-store-visual-polish",
       "settings": {}
     },
     "main": {
@@ -166,10 +166,10 @@
   },
   "order": [
     "hero",
-    "storefront_enhancements",
-    "storefront_visual_polish",
     "fundraiser_bar",
     "partner_jump",
+    "storefront_enhancements",
+    "storefront_visual_polish",
     "main",
     "local_partner_hicPjc"
   ]
