@@ -1,5 +1,10 @@
 .sfs-sample{position:relative;isolation:isolate}
 
+/* The real private-store toolbar is disabled now, so do not show a fake toolbar in previews. */
+.sfs-sample-toolbar{display:none!important}
+.sfs-sample-category-tabs{margin:0!important;border-bottom:0!important}
+.sfs-sample-catalog{border-top:0!important;padding-top:10px!important}
+
 /* Spray Burst preview: visible two-color blast placed directly on the panels. */
 .sfs-sample[data-style="bold"][data-pattern="dots"]{
   overflow:hidden;
@@ -19,8 +24,7 @@
     linear-gradient(135deg,#080d15,#111827 58%,#080d15)!important;
   border-color:rgba(255,255,255,.14)!important;
 }
-.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-hero-copy>small,
-.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-toolbar{color:rgba(255,255,255,.78)!important}
+.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-hero-copy>small{color:rgba(255,255,255,.78)!important}
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-pills span,
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-actions span{
   border-color:rgba(255,255,255,.19)!important;
@@ -28,9 +32,7 @@
   color:#fff!important;
   backdrop-filter:blur(5px)
 }
-.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-category-tabs{
-  background:#0d1420!important;
-}
+.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-category-tabs{background:#0d1420!important}
 .sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-category-tabs span{
   border-color:rgba(255,255,255,.17)!important;
   background:rgba(255,255,255,.08)!important;
@@ -64,7 +66,7 @@
   color:#fff!important;
 }
 
-/* Water Drip preview: blended color edge with obvious descending drops. */
+/* WATER DRIP: one continuous painted top edge with irregular rounded drips. */
 .sfs-sample[data-style="dark"][data-pattern="dots"]{
   overflow:hidden;
   background:#080d15;
@@ -73,41 +75,69 @@
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-hero{
   position:relative;
   overflow:hidden;
-  padding-top:34px!important;
-  background:
-    linear-gradient(90deg,var(--sfs-primary),color-mix(in srgb,var(--sfs-primary) 48%,var(--sfs-secondary)),var(--sfs-secondary)) top/100% 28px no-repeat,
-    linear-gradient(135deg,#0a101a,#111827 58%,#080d15)!important;
+  padding-top:27px!important;
+  background:linear-gradient(135deg,#0a101a,#111827 58%,#080d15)!important;
   border-color:rgba(255,255,255,.14)!important;
 }
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-hero::before{
   content:"";
   position:absolute;
-  inset:18px 0 auto 0;
-  height:52px;
-  pointer-events:none;
   z-index:0;
-  background:
-    linear-gradient(var(--sfs-primary),color-mix(in srgb,var(--sfs-primary) 82%,transparent)) 8% 0/7px 34px no-repeat,
-    radial-gradient(circle at 8.9% 34px,color-mix(in srgb,var(--sfs-primary) 88%,transparent) 0 6px,transparent 7px),
-    linear-gradient(color-mix(in srgb,var(--sfs-primary) 64%,var(--sfs-secondary)),color-mix(in srgb,var(--sfs-primary) 54%,var(--sfs-secondary))) 29% 0/10px 22px no-repeat,
-    radial-gradient(circle at 30.3% 22px,color-mix(in srgb,var(--sfs-primary) 54%,var(--sfs-secondary)) 0 7px,transparent 8px),
-    linear-gradient(color-mix(in srgb,var(--sfs-secondary) 66%,var(--sfs-primary)),color-mix(in srgb,var(--sfs-secondary) 60%,transparent)) 66% 0/8px 42px no-repeat,
-    radial-gradient(circle at 67% 42px,color-mix(in srgb,var(--sfs-secondary) 78%,transparent) 0 6px,transparent 7px),
-    linear-gradient(var(--sfs-secondary),color-mix(in srgb,var(--sfs-secondary) 76%,transparent)) 89% 0/6px 28px no-repeat,
-    radial-gradient(circle at 89.7% 28px,color-mix(in srgb,var(--sfs-secondary) 86%,transparent) 0 5px,transparent 6px);
+  inset:0 0 auto 0;
+  height:96px;
+  pointer-events:none;
+  background:linear-gradient(90deg,var(--sfs-primary) 0%,color-mix(in srgb,var(--sfs-primary) 54%,var(--sfs-secondary)) 50%,var(--sfs-secondary) 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) top/100% 24px no-repeat,
+    radial-gradient(circle at 5% 23px,#000 0 13px,transparent 14px),
+    radial-gradient(circle at 19% 22px,#000 0 18px,transparent 19px),
+    radial-gradient(circle at 39% 24px,#000 0 14px,transparent 15px),
+    radial-gradient(circle at 58% 22px,#000 0 19px,transparent 20px),
+    radial-gradient(circle at 77% 24px,#000 0 15px,transparent 16px),
+    radial-gradient(circle at 94% 22px,#000 0 17px,transparent 18px),
+    linear-gradient(#000 0 0) 11% 0/10px 68px no-repeat,
+    radial-gradient(circle at 11.5% 68px,#000 0 6px,transparent 7px),
+    linear-gradient(#000 0 0) 29% 0/15px 45px no-repeat,
+    radial-gradient(circle at 29.8% 45px,#000 0 8px,transparent 9px),
+    linear-gradient(#000 0 0) 49% 0/8px 81px no-repeat,
+    radial-gradient(circle at 49.4% 81px,#000 0 6px,transparent 7px),
+    linear-gradient(#000 0 0) 68% 0/13px 56px no-repeat,
+    radial-gradient(circle at 68.7% 56px,#000 0 7px,transparent 8px),
+    linear-gradient(#000 0 0) 86% 0/9px 75px no-repeat,
+    radial-gradient(circle at 86.5% 75px,#000 0 6px,transparent 7px),
+    linear-gradient(#000 0 0) 96% 0/7px 43px no-repeat,
+    radial-gradient(circle at 96.4% 43px,#000 0 5px,transparent 6px);
+  mask:
+    linear-gradient(#000 0 0) top/100% 24px no-repeat,
+    radial-gradient(circle at 5% 23px,#000 0 13px,transparent 14px),
+    radial-gradient(circle at 19% 22px,#000 0 18px,transparent 19px),
+    radial-gradient(circle at 39% 24px,#000 0 14px,transparent 15px),
+    radial-gradient(circle at 58% 22px,#000 0 19px,transparent 20px),
+    radial-gradient(circle at 77% 24px,#000 0 15px,transparent 16px),
+    radial-gradient(circle at 94% 22px,#000 0 17px,transparent 18px),
+    linear-gradient(#000 0 0) 11% 0/10px 68px no-repeat,
+    radial-gradient(circle at 11.5% 68px,#000 0 6px,transparent 7px),
+    linear-gradient(#000 0 0) 29% 0/15px 45px no-repeat,
+    radial-gradient(circle at 29.8% 45px,#000 0 8px,transparent 9px),
+    linear-gradient(#000 0 0) 49% 0/8px 81px no-repeat,
+    radial-gradient(circle at 49.4% 81px,#000 0 6px,transparent 7px),
+    linear-gradient(#000 0 0) 68% 0/13px 56px no-repeat,
+    radial-gradient(circle at 68.7% 56px,#000 0 7px,transparent 8px),
+    linear-gradient(#000 0 0) 86% 0/9px 75px no-repeat,
+    radial-gradient(circle at 86.5% 75px,#000 0 6px,transparent 7px),
+    linear-gradient(#000 0 0) 96% 0/7px 43px no-repeat,
+    radial-gradient(circle at 96.4% 43px,#000 0 5px,transparent 6px);
+  filter:drop-shadow(0 5px 6px rgba(0,0,0,.24));
 }
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-hero>*{position:relative;z-index:1}
-.sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-hero-copy>small,
-.sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-toolbar{color:rgba(255,255,255,.76)!important}
+.sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-hero-copy>small{color:rgba(255,255,255,.78)!important}
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-pills span,
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-actions span{
   border-color:rgba(255,255,255,.17)!important;
-  background:rgba(255,255,255,.08)!important;
+  background:rgba(8,13,21,.66)!important;
   color:#fff!important;
 }
-.sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-category-tabs{
-  background:#0d1420!important;
-}
+.sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-category-tabs{background:#0d1420!important}
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-category-tabs span{
   border-color:rgba(255,255,255,.15)!important;
   background:rgba(255,255,255,.08)!important;
@@ -119,29 +149,9 @@
   color:var(--sfs-secondary-text)!important;
 }
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-catalog{
-  position:relative;
-  padding-top:30px!important;
-  background:
-    linear-gradient(90deg,var(--sfs-primary),color-mix(in srgb,var(--sfs-primary) 48%,var(--sfs-secondary)),var(--sfs-secondary)) top/100% 20px no-repeat,
-    linear-gradient(180deg,#0b111b,#080d15)!important;
+  padding-top:10px!important;
+  background:linear-gradient(180deg,#0b111b,#080d15)!important;
 }
-.sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-catalog::before{
-  content:"";
-  position:absolute;
-  top:12px;
-  left:0;
-  width:100%;
-  height:45px;
-  pointer-events:none;
-  background:
-    linear-gradient(var(--sfs-primary),color-mix(in srgb,var(--sfs-primary) 74%,transparent)) 13% 0/6px 29px no-repeat,
-    radial-gradient(circle at 13.7% 29px,color-mix(in srgb,var(--sfs-primary) 82%,transparent) 0 5px,transparent 6px),
-    linear-gradient(color-mix(in srgb,var(--sfs-primary) 48%,var(--sfs-secondary)),color-mix(in srgb,var(--sfs-primary) 42%,var(--sfs-secondary))) 47% 0/9px 18px no-repeat,
-    radial-gradient(circle at 48% 18px,color-mix(in srgb,var(--sfs-primary) 45%,var(--sfs-secondary)) 0 6px,transparent 7px),
-    linear-gradient(var(--sfs-secondary),color-mix(in srgb,var(--sfs-secondary) 72%,transparent)) 82% 0/7px 36px no-repeat,
-    radial-gradient(circle at 82.8% 36px,color-mix(in srgb,var(--sfs-secondary) 82%,transparent) 0 5px,transparent 6px);
-}
-.sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-catalog>*{position:relative;z-index:1}
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-product{
   background:rgba(248,247,243,.98)!important;
   color:#222!important;
@@ -150,17 +160,13 @@
 .sfs-sample[data-style="dark"][data-pattern="dots"] .sfs-sample-hero-copy .sfs-sample-announcement{
   border-color:rgba(255,255,255,.15)!important;
   border-left-color:var(--sfs-secondary)!important;
-  background:rgba(255,255,255,.09)!important;
+  background:rgba(8,13,21,.68)!important;
   color:#fff!important;
 }
 
 /* Pro Dark preview remains restrained and professional. */
-.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-hero{
-  border-top:3px solid var(--sfs-secondary)!important;
-}
-.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-product{
-  box-shadow:0 10px 28px rgba(0,0,0,.26)
-}
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-hero{border-top:3px solid var(--sfs-secondary)!important}
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-product{box-shadow:0 10px 28px rgba(0,0,0,.26)}
 
 /* Spray Burst preset thumbnail. */
 .sfs-design-thumb--splash{
@@ -177,17 +183,38 @@
     #0a0f18!important;
 }
 
-/* Water Drip preset thumbnail. */
+/* Water Drip preset thumbnail: a continuous painted edge, not isolated sticks. */
 .sfs-design-thumb--drip{
   position:relative;
   overflow:hidden;
-  background:
-    linear-gradient(#2563eb,#2563eb) 18% 0/7px 33px no-repeat,
-    radial-gradient(circle at 22% 34px,#2563eb 0 6px,transparent 7px),
-    linear-gradient(#6f55bd,#6f55bd) 52% 0/9px 22px no-repeat,
-    radial-gradient(circle at 57% 23px,#6f55bd 0 7px,transparent 8px),
-    linear-gradient(#eab308,#eab308) 82% 0/6px 39px no-repeat,
-    radial-gradient(circle at 86% 40px,#eab308 0 5px,transparent 6px),
-    linear-gradient(90deg,#2563eb,#eab308) top/100% 15px no-repeat,
-    #0a0f18!important;
+  background:#0a0f18!important;
+}
+.sfs-design-thumb--drip::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:48px;
+  background:linear-gradient(90deg,#2563eb,#7553bc 50%,#eab308);
+  -webkit-mask:
+    linear-gradient(#000 0 0) top/100% 12px no-repeat,
+    radial-gradient(circle at 12% 12px,#000 0 9px,transparent 10px),
+    radial-gradient(circle at 42% 12px,#000 0 7px,transparent 8px),
+    radial-gradient(circle at 76% 12px,#000 0 10px,transparent 11px),
+    linear-gradient(#000 0 0) 23% 0/5px 34px no-repeat,
+    radial-gradient(circle at 24% 34px,#000 0 4px,transparent 5px),
+    linear-gradient(#000 0 0) 57% 0/7px 25px no-repeat,
+    radial-gradient(circle at 59% 25px,#000 0 4px,transparent 5px),
+    linear-gradient(#000 0 0) 88% 0/5px 39px no-repeat,
+    radial-gradient(circle at 89% 39px,#000 0 4px,transparent 5px);
+  mask:
+    linear-gradient(#000 0 0) top/100% 12px no-repeat,
+    radial-gradient(circle at 12% 12px,#000 0 9px,transparent 10px),
+    radial-gradient(circle at 42% 12px,#000 0 7px,transparent 8px),
+    radial-gradient(circle at 76% 12px,#000 0 10px,transparent 11px),
+    linear-gradient(#000 0 0) 23% 0/5px 34px no-repeat,
+    radial-gradient(circle at 24% 34px,#000 0 4px,transparent 5px),
+    linear-gradient(#000 0 0) 57% 0/7px 25px no-repeat,
+    radial-gradient(circle at 59% 25px,#000 0 4px,transparent 5px),
+    linear-gradient(#000 0 0) 88% 0/5px 39px no-repeat,
+    radial-gradient(circle at 89% 39px,#000 0 4px,transparent 5px);
 }
