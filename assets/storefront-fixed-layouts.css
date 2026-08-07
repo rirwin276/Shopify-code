@@ -981,3 +981,74 @@
 #MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-swatch-more {
   color: rgba(233,240,248,.62) !important;
 }
+
+/* ============================================================
+   THE STORE LOGO ON A PHONE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  /*
+    The logo was a 72px square pinned to the left of a two-column row, next to
+    a title that wrapped past it. At that size a team crest is unreadable — the
+    thing that tells a parent they are in the right store — and sitting hard
+    left against wrapping text is what made it look bolted on.
+
+    Centred and stacked, at ~50% larger.
+
+    Stacking costs height, so it is paid for rather than simply added: the
+    action buttons, their panel, the card padding and every gap give back a
+    few pixels each, and the title tightens. What is left is a card that grows
+    by roughly a third of the logo's increase, in exchange for a crest that is
+    actually legible.
+  */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center !important;
+    gap: 9px !important;
+    padding: 13px 12px !important;
+    text-align: center !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-logo {
+    width: 108px !important;
+    height: 108px !important;
+    margin: 0 auto !important;
+    border-radius: 26px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-logo-img {
+    width: 90% !important;
+    height: 90% !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-copy {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-title {
+    font-size: clamp(25px, 7.6vw, 34px) !important;
+    line-height: .96 !important;
+  }
+
+  /* Chips and the notice centre with everything else. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-meta-row {
+    justify-content: center !important;
+    margin-top: 6px !important;
+  }
+
+  /* Paying for the logo: a few pixels back from each control. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-action-panel {
+    padding: 7px !important;
+    gap: 6px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-btn {
+    min-height: 35px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+    margin-top: 10px !important;
+    padding: 9px 12px !important;
+  }
+}
