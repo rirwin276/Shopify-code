@@ -64,6 +64,11 @@
 {{ 'storefront-fixed-layouts.css' | asset_url | stylesheet_tag }}
 {{ 'storefront-template-structure.css' | asset_url | stylesheet_tag }}
 
+{%- comment -%}
+  Off unless the URL asks for it: /collections/<handle>?layoutdebug=1
+{%- endcomment -%}
+{% render 'storefront-paint-report' %}
+
 <div
   id="ss-private-store-state"
   hidden
