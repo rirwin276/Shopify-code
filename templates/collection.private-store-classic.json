@@ -6,6 +6,18 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
+ * Rendered section set (must match the theme):
+ *   layout_state, hero, fundraiser_bar, partner_jump,
+ *   catalog, local_partner
+ *
+ * The theme editor keeps its own saved copy of this file, and
+ * Shopify only pushes a template that has actually changed. A
+ * theme whose copy predates the catalog rework therefore kept
+ * rendering storefront_enhancements + main forever, and no
+ * amount of editing sections or CSS in this repo could reach
+ * it. Touching this file is what forces the theme to take the
+ * repo's version.
+ * ------------------------------------------------------------
  */
 {
   "sections": {
