@@ -1,0 +1,457 @@
+/*
+  PRIVATE STOREFRONT FIXED LAYOUTS
+  One server-rendered state controls the real storefront and the Admin Powers
+  snapshot. No DOM relocation and no appearance-specific runtime patching.
+*/
+
+/* ---------- SHARED PRIVATE-STORE STRUCTURE ---------- */
+#MainContent:has(#ss-private-store-state) {
+  --ss-layout-page-width: 1320px;
+  position: relative;
+  isolation: isolate;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-private-catalog {
+  padding: 0 0 32px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-nav {
+  width: min(var(--ss-layout-page-width), calc(100% - 40px));
+  margin: 0 auto;
+  padding: 9px 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-tabs {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow-x: auto;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-tab {
+  min-height: 34px;
+  flex: 0 0 auto;
+  padding: 0 13px;
+  border-radius: 999px;
+  font: 850 11px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-private-catalog .product-grid {
+  margin-top: 0 !important;
+  padding-top: 6px !important;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-private-catalog .product-grid__item {
+  overflow: hidden;
+  border-radius: 15px !important;
+}
+
+/* The selected fixed layout owns the page surface. Shopify section backgrounds do not. */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) > .shopify-section,
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .section-background,
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero,
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .section-background {
+  display: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-btn-solid {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-btn-admin {
+  border-color: var(--ss-team-secondary) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-live-dot {
+  background: var(--ss-team-secondary) !important;
+}
+
+/* ---------- CLASSIC TEAM ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) {
+  background:
+    radial-gradient(circle at 5% 0%, color-mix(in srgb, var(--ss-team-primary) 14%, transparent), transparent 30%),
+    radial-gradient(circle at 96% 10%, color-mix(in srgb, var(--ss-team-secondary) 12%, transparent), transparent 31%),
+    linear-gradient(180deg, #fbf9f4 0%, #fffdf9 34%, #ffffff 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) .ps-hero-card {
+  border-color: rgba(255,255,255,.86) !important;
+  background: rgba(255,255,255,.86) !important;
+  box-shadow: 0 22px 62px rgba(17,16,14,.08) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) .ss-category-tab {
+  border: 1px solid rgba(17,16,14,.11) !important;
+  background: rgba(255,255,255,.86) !important;
+  color: #171717 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) .ss-category-tab.active {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) .product-grid__item {
+  border: 1px solid rgba(17,16,14,.08) !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 10px 26px rgba(17,16,14,.08) !important;
+}
+
+/* ---------- DIAGONAL SPLIT ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="split"]) {
+  background:
+    linear-gradient(132deg,
+      color-mix(in srgb, var(--ss-team-primary) 20%, #fff) 0 52%,
+      color-mix(in srgb, var(--ss-team-primary) 66%, var(--ss-team-secondary)) 52% 57%,
+      color-mix(in srgb, var(--ss-team-secondary) 23%, #fff) 57% 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="split"]) .ps-hero-card {
+  border-color: rgba(255,255,255,.76) !important;
+  background: rgba(255,255,255,.88) !important;
+  box-shadow: 0 24px 72px rgba(17,16,14,.10) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="split"]) .ss-category-tab {
+  border: 1px solid rgba(17,16,14,.12) !important;
+  background: rgba(255,255,255,.90) !important;
+  color: #151515 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="split"]) .ss-category-tab.active {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="split"]) .product-grid__item {
+  border: 1px solid rgba(17,16,14,.09) !important;
+  background: rgba(255,255,255,.94) !important;
+  box-shadow: 0 12px 30px rgba(17,16,14,.09) !important;
+}
+
+/* ---------- GRADIENT GLOW: ONE VIBRANT PAGE ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 92% 78% at -12% -14%,
+      color-mix(in srgb, var(--ss-team-primary) 98%, #fff) 0%,
+      color-mix(in srgb, var(--ss-team-primary) 85%, #fff) 22%,
+      color-mix(in srgb, var(--ss-team-primary) 56%, #fff) 44%,
+      color-mix(in srgb, var(--ss-team-primary) 22%, #fff) 63%,
+      transparent 79%),
+    radial-gradient(ellipse 98% 84% at 112% 114%,
+      color-mix(in srgb, var(--ss-team-secondary) 98%, #fff) 0%,
+      color-mix(in srgb, var(--ss-team-secondary) 85%, #fff) 23%,
+      color-mix(in srgb, var(--ss-team-secondary) 56%, #fff) 46%,
+      color-mix(in srgb, var(--ss-team-secondary) 22%, #fff) 65%,
+      transparent 80%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--ss-team-primary) 26%, #fff) 0%,
+      #fff 48%,
+      color-mix(in srgb, var(--ss-team-secondary) 28%, #fff) 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ps-hero-card {
+  border: 1px solid rgba(255,255,255,.78) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.89), rgba(255,255,255,.69)) !important;
+  box-shadow: 0 30px 92px rgba(37,22,48,.16), inset 0 1px rgba(255,255,255,.80) !important;
+  backdrop-filter: blur(18px) saturate(1.16) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.16) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ps-action-panel {
+  border-color: rgba(17,19,24,.10) !important;
+  background: rgba(255,255,255,.70) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) :is(.ps-title,.ps-sub,.ps-eyebrow,.ps-action-panel-title) {
+  color: #111318 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ps-sub {
+  opacity: .76 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ss-category-tab {
+  border: 1px solid rgba(17,19,24,.13) !important;
+  background: rgba(255,255,255,.88) !important;
+  color: #111318 !important;
+  text-shadow: none !important;
+  box-shadow: 0 4px 14px rgba(17,19,24,.07) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ss-category-tab.active {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+  box-shadow: 0 7px 20px color-mix(in srgb, var(--ss-team-primary) 30%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .product-grid__item {
+  border: 1px solid rgba(17,19,24,.10) !important;
+  background: rgba(255,255,255,.93) !important;
+  box-shadow: 0 14px 36px rgba(45,26,56,.13) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .product-grid__item :is(a,p,span,strong,small,.price,.price-item,.card__heading) {
+  color: #111318 !important;
+}
+
+/* ---------- SPRAY BURST: DARK MODE + COLOR ENERGY ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) {
+  min-height: 100vh;
+  background-color: #070c13 !important;
+  background-image:
+    radial-gradient(circle at 2% 4%, color-mix(in srgb, var(--ss-team-primary) 92%, transparent) 0 3px, transparent 4px),
+    radial-gradient(circle at 7% 13%, color-mix(in srgb, var(--ss-team-primary) 78%, transparent) 0 7px, transparent 8px),
+    radial-gradient(circle at 15% 6%, color-mix(in srgb, var(--ss-team-primary) 70%, transparent) 0 4px, transparent 5px),
+    radial-gradient(circle at 19% 18%, color-mix(in srgb, var(--ss-team-primary) 52%, transparent) 0 2px, transparent 3px),
+    radial-gradient(ellipse 62% 48% at -8% -4%, color-mix(in srgb, var(--ss-team-primary) 62%, transparent), transparent 70%),
+    radial-gradient(circle at 96% 82%, color-mix(in srgb, var(--ss-team-secondary) 92%, transparent) 0 5px, transparent 6px),
+    radial-gradient(circle at 89% 93%, color-mix(in srgb, var(--ss-team-secondary) 78%, transparent) 0 8px, transparent 9px),
+    radial-gradient(circle at 82% 86%, color-mix(in srgb, var(--ss-team-secondary) 60%, transparent) 0 3px, transparent 4px),
+    radial-gradient(ellipse 66% 52% at 108% 106%, color-mix(in srgb, var(--ss-team-secondary) 54%, transparent), transparent 72%),
+    linear-gradient(145deg, #070c13 0%, #0b121d 48%, #080d15 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ps-hero-card {
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: linear-gradient(145deg, rgba(12,20,31,.92), rgba(7,12,19,.88)) !important;
+  box-shadow: 0 30px 92px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.045) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) :is(.ps-title,.ps-eyebrow,.ps-action-panel-title) {
+  color: #f8fbff !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ps-sub {
+  color: #b9c4d0 !important;
+  opacity: 1 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ps-action-panel {
+  border-color: rgba(255,255,255,.15) !important;
+  background: rgba(4,9,16,.68) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ps-meta-row span {
+  border-color: rgba(255,255,255,.14) !important;
+  background: rgba(255,255,255,.085) !important;
+  color: #eef3f8 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) :is(.ps-btn-ghost,.ps-btn-soft) {
+  border-color: #d8e0e8 !important;
+  background: #f1f4f7 !important;
+  color: #0a111a !important;
+  text-shadow: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-category-tab {
+  border: 1px solid rgba(255,255,255,.18) !important;
+  background: #111b28 !important;
+  color: #f4f7fa !important;
+  text-shadow: none !important;
+  box-shadow: 0 5px 16px rgba(0,0,0,.20) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-category-tab.active {
+  border-color: var(--ss-team-secondary) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ss-team-secondary) 28%, transparent), 0 0 22px color-mix(in srgb, var(--ss-team-secondary) 22%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item {
+  border: 1px solid rgba(255,255,255,.15) !important;
+  background: #101923 !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.34) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item :is(.card__content,.card__information,.card-information) {
+  background: #101923 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item :is(.card__inner,.card__media,.media) {
+  background: #f4f5f6 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item :is(a,p,span,strong,small,.price,.price-item,.card__heading) {
+  color: #f6f8fb !important;
+}
+
+/* ---------- PRO DARK: ONE CLEAN CONTINUOUS PAGE ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) {
+  min-height: 100vh;
+  background-color: #050b12 !important;
+  background-image:
+    linear-gradient(rgba(151,177,205,.034) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(151,177,205,.034) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 52% at -12% -10%, color-mix(in srgb, var(--ss-team-primary) 34%, transparent), transparent 70%),
+    radial-gradient(ellipse 66% 52% at 112% 108%, color-mix(in srgb, var(--ss-team-secondary) 26%, transparent), transparent 72%),
+    linear-gradient(145deg, #050b12 0%, #09131f 48%, #060d16 100%) !important;
+  background-size: 32px 32px, 32px 32px, auto, auto, auto !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-hero-card {
+  border: 1px solid rgba(151,177,205,.20) !important;
+  border-top: 2px solid color-mix(in srgb, var(--ss-team-secondary) 84%, #fff) !important;
+  background: linear-gradient(145deg, rgba(16,27,41,.96), rgba(6,13,22,.94)) !important;
+  box-shadow: 0 30px 100px rgba(0,0,0,.46), inset 0 1px rgba(255,255,255,.05) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) :is(.ps-title,.ps-eyebrow,.ps-action-panel-title) {
+  color: #f8fbff !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-sub {
+  color: #afbdcc !important;
+  opacity: 1 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-action-panel {
+  border-color: rgba(151,177,205,.20) !important;
+  background: rgba(4,11,19,.70) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-meta-row span {
+  border-color: rgba(151,177,205,.18) !important;
+  background: rgba(133,157,184,.09) !important;
+  color: #dce6f0 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) :is(.ps-btn-ghost,.ps-btn-soft) {
+  border-color: #d5dee8 !important;
+  background: #f1f5f9 !important;
+  color: #07101a !important;
+  text-shadow: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-category-tab {
+  border: 1px solid rgba(151,177,205,.22) !important;
+  background: #101b29 !important;
+  color: #f2f6fa !important;
+  text-shadow: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-category-tab.active {
+  border-color: var(--ss-team-secondary) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item {
+  border: 1px solid rgba(151,177,205,.18) !important;
+  background: #0e1722 !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.34) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item :is(.card__content,.card__information,.card-information) {
+  background: #0e1722 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item :is(.card__inner,.card__media,.media) {
+  background: #f2f4f6 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item :is(a,p,span,strong,small,.price,.price-item,.card__heading) {
+  color: #f5f8fb !important;
+}
+
+/* ---------- HERITAGE ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+  background:
+    linear-gradient(132deg,
+      #fbf7ec 0 63%,
+      color-mix(in srgb, var(--ss-team-primary) 62%, #fff) 63% 67%,
+      color-mix(in srgb, var(--ss-team-secondary) 70%, #fff) 67% 71%,
+      #fbf7ec 71% 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) .ps-hero-card {
+  border-color: rgba(255,255,255,.76) !important;
+  background: rgba(255,253,247,.90) !important;
+  box-shadow: 0 24px 68px rgba(70,55,25,.10) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) .ss-category-tab {
+  border: 1px solid rgba(71,58,30,.15) !important;
+  background: rgba(255,253,247,.92) !important;
+  color: #272117 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) .ss-category-tab.active {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) .product-grid__item {
+  border: 1px solid rgba(71,58,30,.10) !important;
+  background: rgba(255,253,247,.95) !important;
+  box-shadow: 0 12px 30px rgba(70,55,25,.09) !important;
+}
+
+@media (max-width: 768px) {
+  #MainContent:has(#ss-private-store-state) .ss-category-nav {
+    width: 100%;
+    padding: 6px 8px 7px;
+  }
+
+  #MainContent:has(#ss-private-store-state) .ss-category-tab {
+    min-height: 31px;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-layout="gradient"]) {
+    background:
+      radial-gradient(ellipse 122% 70% at -18% -12%,
+        color-mix(in srgb, var(--ss-team-primary) 96%, #fff) 0%,
+        color-mix(in srgb, var(--ss-team-primary) 60%, #fff) 38%,
+        transparent 73%),
+      radial-gradient(ellipse 122% 74% at 118% 112%,
+        color-mix(in srgb, var(--ss-team-secondary) 96%, #fff) 0%,
+        color-mix(in srgb, var(--ss-team-secondary) 60%, #fff) 40%,
+        transparent 75%),
+      #fff !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-layout="pro"]) {
+    background-size: 24px 24px, 24px 24px, auto, auto, auto !important;
+  }
+}
