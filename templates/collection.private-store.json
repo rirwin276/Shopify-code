@@ -41,6 +41,10 @@
       "type": "private-store-legacy-appearance-fallback",
       "settings": {}
     },
+    "unified_polish": {
+      "type": "private-store-unified-polish",
+      "settings": {}
+    },
     "main": {
       "type": "main-collection",
       "blocks": {
@@ -185,6 +189,7 @@
     "storefront_continuity",
     "gradient_glow",
     "legacy_appearance_fallback",
+    "unified_polish",
     "main",
     "local_partner_hicPjc"
   ]
