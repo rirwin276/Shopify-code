@@ -19,12 +19,12 @@
   }
 
   function enhanceInput(input, role){
-    if (!input || input.dataset.sfsColorEnhanced === '1') return;
+    if (!input || input.dataset.sfsColorEnhanced === '1') return input;
     input.dataset.sfsColorEnhanced = '1';
 
     var label = input.closest('label');
     var oldEntry = input.parentElement;
-    if (!label || !oldEntry) return;
+    if (!label || !oldEntry) return input;
 
     label.classList.add('sfs-color-field');
     label.dataset.sfsColorField = role;
@@ -98,18 +98,20 @@
       apply(button.dataset.sfsSwatch, true);
     });
 
+    input.sfsSyncExactColor = function(){ apply(input.value, false); };
     apply(input.value, false);
+    return input;
   }
 
-  function updateAnnouncementLanguage(root){
-    root.querySelectorAll('.sfs-control-heading').forEach(function(group){
+  function updateAnnouncementLanguage(scope){
+    scope.querySelectorAll('.sfs-control-heading').forEach(function(group){
       var strong = group.querySelector('strong');
       var small = group.querySelector('small');
       if (!strong || strong.textContent.trim() !== 'Announcement bar') return;
       strong.textContent = 'Store message';
       if (small) small.textContent = 'Optional message shown inside the top store card, keeping products higher on the page.';
     });
-    root.querySelectorAll('.sfs-toggle').forEach(function(toggle){
+    scope.querySelectorAll('.sfs-toggle').forEach(function(toggle){
       var strong = toggle.querySelector('strong');
       var small = toggle.querySelector('small');
       if (strong && strong.textContent.trim() === 'Show announcement') strong.textContent = 'Show store message';
@@ -117,8 +119,8 @@
     });
   }
 
-  function movePreviewMessages(root){
-    root.querySelectorAll('[data-sfs-preview]').forEach(function(preview){
+  function movePreviewMessages(scope){
+    scope.querySelectorAll('[data-sfs-preview]').forEach(function(preview){
       var message = preview.querySelector('[data-sfs-preview-announcement]');
       var copy = preview.querySelector('.sfs-sample-hero-copy');
       if (message && copy && message.parentElement !== copy) copy.appendChild(message);
@@ -127,21 +129,22 @@
 
   function boot(){
     document.querySelectorAll('[data-sfs-root]').forEach(function(root){
-      enhanceInput(root.querySelector('[data-sfs-primary]'), 'primary');
-      enhanceInput(root.querySelector('[data-sfs-secondary]'), 'secondary');
-      updateAnnouncementLanguage(root);
-      movePreviewMessages(root);
+      var overlay = root.querySelector('[data-sfs-overlay]') || document.querySelector('[data-sfs-overlay]');
+      var primary = enhanceInput((overlay || root).querySelector('[data-sfs-primary]'), 'primary');
+      var secondary = enhanceInput((overlay || root).querySelector('[data-sfs-secondary]'), 'secondary');
+      updateAnnouncementLanguage(overlay || root);
+      movePreviewMessages(overlay || root);
 
       var open = root.querySelector('[data-sfs-open]');
       if (open && open.dataset.sfsColorSync !== '1') {
         open.dataset.sfsColorSync = '1';
         open.addEventListener('click', function(){
           setTimeout(function(){
-            [root.querySelector('[data-sfs-primary]'), root.querySelector('[data-sfs-secondary]')].forEach(function(input){
-              if (input) input.dispatchEvent(new Event('input', {bubbles:true}));
+            [primary, secondary].forEach(function(input){
+              if (input && input.sfsSyncExactColor) input.sfsSyncExactColor();
             });
-            movePreviewMessages(root);
-          }, 30);
+            if (overlay) movePreviewMessages(overlay);
+          }, 40);
         });
       }
     });
