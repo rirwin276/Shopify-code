@@ -1,3 +1,5 @@
+.sfs-design-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+
 .sfs-design-thumb--gradient{
   background:
     linear-gradient(90deg,
@@ -53,3 +55,6 @@
   background:rgba(255,255,255,.74)!important;
   border-left-color:var(--sfs-secondary)!important;
 }
+
+@media(max-width:1200px){.sfs-design-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:700px){.sfs-design-grid{grid-template-columns:1fr!important}}
