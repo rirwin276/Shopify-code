@@ -1,18 +1,48 @@
 {% comment %}
-  PRIVATE STORE LAYOUT STATE
-  Server-rendered source of truth for the storefront appearance.
-  The real collection page and the Admin Powers snapshot both consume this
-  exact state. No visible UI belongs in this section.
+  PRIVATE STORE TEMPLATE STATE
+  The assigned Shopify collection template is the source of truth for layout.
+  Colors/message still come from custom_shop.storefront_settings, but a saved
+  design no longer morphs one base page at runtime.
+
+  Template suffixes:
+    private-store            -> original
+    private-store-classic    -> classic
+    private-store-split      -> split
+    private-store-gradient   -> gradient
+    private-store-spray      -> spray
+    private-store-pro        -> pro
+    private-store-heritage   -> heritage
 {% endcomment %}
 
 {% assign ss_handle = collection.handle | downcase | strip %}
 {% assign ss_entry = shop.metaobjects.custom_shop[ss_handle] %}
 {% assign ss_settings = ss_entry.storefront_settings.value | default: ss_entry.storefront_settings %}
 
+{% assign ss_template_suffix = template.suffix | default: 'private-store' | downcase %}
 {% assign ss_enabled = false %}
-{% assign ss_style = 'clean' %}
-{% assign ss_pattern = 'none' %}
 {% assign ss_layout = 'original' %}
+
+{% case ss_template_suffix %}
+  {% when 'private-store-classic' %}
+    {% assign ss_enabled = true %}
+    {% assign ss_layout = 'classic' %}
+  {% when 'private-store-split' %}
+    {% assign ss_enabled = true %}
+    {% assign ss_layout = 'split' %}
+  {% when 'private-store-gradient' %}
+    {% assign ss_enabled = true %}
+    {% assign ss_layout = 'gradient' %}
+  {% when 'private-store-spray' %}
+    {% assign ss_enabled = true %}
+    {% assign ss_layout = 'spray' %}
+  {% when 'private-store-pro' %}
+    {% assign ss_enabled = true %}
+    {% assign ss_layout = 'pro' %}
+  {% when 'private-store-heritage' %}
+    {% assign ss_enabled = true %}
+    {% assign ss_layout = 'heritage' %}
+{% endcase %}
+
 {% assign ss_primary = '#1f2937' %}
 {% assign ss_secondary = '#d4af37' %}
 {% assign ss_primary_text = '#ffffff' %}
@@ -20,10 +50,7 @@
 {% assign ss_message = '' %}
 {% assign ss_show_message = false %}
 
-{% if ss_settings and ss_settings.enabled == true %}
-  {% assign ss_enabled = true %}
-  {% assign ss_style = ss_settings.style | default: 'clean' | downcase %}
-  {% assign ss_pattern = ss_settings.pattern | default: 'none' | downcase %}
+{% if ss_settings %}
   {% assign ss_primary = ss_settings.primary_color | default: ss_primary %}
   {% assign ss_secondary = ss_settings.secondary_color | default: ss_secondary %}
   {% assign ss_primary_text = ss_settings.primary_text | default: ss_primary_text %}
@@ -31,22 +58,6 @@
   {% assign ss_message = ss_settings.announcement | default: '' | strip %}
   {% if ss_settings.show_announcement == true and ss_message != blank %}
     {% assign ss_show_message = true %}
-  {% endif %}
-
-  {% if ss_style == 'clean' and ss_pattern == 'diagonal' %}
-    {% assign ss_layout = 'split' %}
-  {% elsif ss_style == 'bold' and ss_pattern == 'none' %}
-    {% assign ss_layout = 'gradient' %}
-  {% elsif ss_style == 'bold' and ss_pattern == 'dots' %}
-    {% assign ss_layout = 'spray' %}
-  {% elsif ss_style == 'dark' and ss_pattern == 'grid' %}
-    {% assign ss_layout = 'pro' %}
-  {% elsif ss_style == 'dark' and ss_pattern == 'dots' %}
-    {% assign ss_layout = 'pro' %}
-  {% elsif ss_style == 'clean' and ss_pattern == 'stripes' %}
-    {% assign ss_layout = 'heritage' %}
-  {% else %}
-    {% assign ss_layout = 'classic' %}
   {% endif %}
 {% endif %}
 
@@ -57,8 +68,7 @@
   hidden
   data-enabled="{{ ss_enabled }}"
   data-layout="{{ ss_layout }}"
-  data-style="{{ ss_style | escape }}"
-  data-pattern="{{ ss_pattern | escape }}"
+  data-template-suffix="{{ ss_template_suffix | escape }}"
   data-show-message="{{ ss_show_message }}"
   data-message="{{ ss_message | escape }}"
 ></div>
@@ -113,7 +123,7 @@
 
 {% schema %}
 {
-  "name": "Store layout state",
+  "name": "Store template state",
   "enabled_on": { "templates": ["collection"] },
   "settings": []
 }
