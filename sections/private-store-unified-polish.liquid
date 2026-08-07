@@ -1,4 +1,20 @@
 {{ 'storefront-unified-polish.css' | asset_url | stylesheet_tag }}
+<script>
+  (function () {
+    function markCategoryShell() {
+      document.querySelectorAll('.ss-category-nav').forEach(function (nav) {
+        var section = nav.closest('.shopify-section');
+        if (section) section.classList.add('ss-category-shell-fix');
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', markCategoryShell, { once: true });
+    } else {
+      markCategoryShell();
+    }
+    document.addEventListener('shopify:section:load', markCategoryShell);
+  })();
+</script>
 
 {% schema %}
 {
