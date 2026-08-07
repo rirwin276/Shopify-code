@@ -1,8 +1,7 @@
 {% comment %}
-  STOREFRONT APPEARANCE BUILDER — MINIMAL SKIN
-  This section is rendered by the Admin Powers page template, then moved by its
-  own script into the top of the existing Settings tab. It never replaces the
-  live private-store hero or product grid.
+  STOREFRONT APPEARANCE BUILDER — FIVE PRESET SKINS
+  The section is rendered by Admin Powers and moved into the top of Settings.
+  It changes only the visual skin stored in custom_shop.storefront_settings.
 {% endcomment %}
 
 {%- assign sfs_shop_handle = '' -%}
@@ -43,8 +42,8 @@
       <div class="sfs-admin-launch__icon" aria-hidden="true">🎨</div>
       <div class="sfs-admin-launch__copy">
         <span class="sfs-admin-launch__eyebrow">Storefront appearance</span>
-        <h3>Team colors & announcement</h3>
-        <p>Keep the current storefront layout and add a subtle team-color finish.</p>
+        <h3>Choose the store’s look</h3>
+        <p>Pick one of five team-store designs, then apply the team colors and an optional announcement.</p>
       </div>
       <div class="sfs-admin-launch__status" aria-label="Current storefront appearance">
         <span class="sfs-admin-launch__swatches"><i data-sfs-current-primary></i><i data-sfs-current-secondary></i></span>
@@ -59,7 +58,7 @@
           <div>
             <span class="sfs-dialog__eyebrow">Live storefront designer</span>
             <h2 id="sfs-title-{{ section.id }}">Customize {{ sfs_store_name | escape }}</h2>
-            <p>The existing hero, buttons, filters, products, and permissions stay in place.</p>
+            <p>The products, category tabs, filters, permissions, and checkout stay exactly the same.</p>
           </div>
           <button class="sfs-close" type="button" data-sfs-close aria-label="Close storefront designer">×</button>
         </header>
@@ -74,7 +73,7 @@
             <div class="sfs-preview-grid">
               <div class="sfs-preview-column">
                 <span class="sfs-preview-label">Desktop</span>
-                <div class="sfs-sample sfs-sample--desktop" data-sfs-preview data-pattern="none">
+                <div class="sfs-sample sfs-sample--desktop" data-sfs-preview data-style="clean" data-pattern="none">
                   <div class="sfs-sample-hero">
                     <div class="sfs-sample-logo">
                       {%- if sfs_logo != blank -%}
@@ -84,16 +83,19 @@
                       {%- endif -%}
                     </div>
                     <div class="sfs-sample-hero-copy">
+                      <small>Private storefront</small>
                       <h3>{{ sfs_store_name }}</h3>
                       <div class="sfs-sample-pills"><span>{{ sfs_collection.products_count | default: 0 }} items</span><span>Direct checkout</span><span>Reorder anytime</span></div>
                     </div>
                     <div class="sfs-sample-actions">
-                      <span data-sfs-action-primary>Share Store</span>
-                      <span data-sfs-action-secondary>Admin Powers</span>
+                      <span data-sfs-action-primary>Shop products</span>
                       <span>Dashboard</span>
+                      <span>Share Store</span>
+                      <span data-sfs-action-secondary>Admin Powers</span>
                     </div>
                   </div>
                   <div class="sfs-sample-announcement" data-sfs-preview-announcement hidden>New products are available now.</div>
+                  <div class="sfs-sample-category-tabs"><span class="active">All gear</span><span>Shirts</span><span>Youth</span><span>Hoodies</span><span>More</span></div>
                   <div class="sfs-sample-catalog">
                     <div class="sfs-sample-toolbar"><span>Availability⌄</span><span>Price⌄</span><span class="sfs-sample-toolbar__right">{{ sfs_collection.products_count | default: 0 }} items &nbsp; Sort⌄</span></div>
                     <div class="sfs-sample-products">
@@ -119,7 +121,7 @@
                 <span class="sfs-preview-label">Mobile</span>
                 <div class="sfs-phone-shell">
                   <div class="sfs-phone-speaker"></div>
-                  <div class="sfs-sample sfs-sample--mobile" data-sfs-preview data-pattern="none">
+                  <div class="sfs-sample sfs-sample--mobile" data-sfs-preview data-style="clean" data-pattern="none">
                     <div class="sfs-sample-hero">
                       <div class="sfs-sample-mobile-head">
                         <div class="sfs-sample-logo">
@@ -129,11 +131,12 @@
                             <span>{{ sfs_store_name | slice: 0, 1 | upcase }}</span>
                           {%- endif -%}
                         </div>
-                        <div class="sfs-sample-hero-copy"><h3>{{ sfs_store_name }}</h3><div class="sfs-sample-pills"><span>{{ sfs_collection.products_count | default: 0 }} items</span><span>Direct checkout</span></div></div>
+                        <div class="sfs-sample-hero-copy"><small>Private storefront</small><h3>{{ sfs_store_name }}</h3><div class="sfs-sample-pills"><span>{{ sfs_collection.products_count | default: 0 }} items</span><span>Direct checkout</span></div></div>
                       </div>
-                      <div class="sfs-sample-actions"><span data-sfs-action-primary>Share Store</span><span data-sfs-action-secondary>Admin Powers</span><span>Dashboard</span></div>
+                      <div class="sfs-sample-actions"><span>Share Store</span><span data-sfs-action-secondary>Admin Powers</span><span>Dashboard</span></div>
                     </div>
                     <div class="sfs-sample-announcement" data-sfs-preview-announcement hidden>New products are available now.</div>
+                    <div class="sfs-sample-category-tabs"><span class="active">All</span><span>Shirts</span><span>Youth</span><span>Hoodies</span></div>
                     <div class="sfs-sample-catalog">
                       <div class="sfs-sample-toolbar"><span>Filter</span><span class="sfs-sample-toolbar__right">Grid</span></div>
                       <div class="sfs-sample-products">
@@ -157,8 +160,19 @@
           </section>
 
           <section class="sfs-controls" aria-label="Storefront design controls">
+            <div class="sfs-control-group sfs-control-group--wide">
+              <div class="sfs-control-heading"><span>1</span><div><strong>Store design</strong><small>Five product-first looks inspired by modern team and fan stores.</small></div></div>
+              <div class="sfs-design-grid" role="radiogroup" aria-label="Store design">
+                <button type="button" data-sfs-design="classic"><i class="sfs-design-thumb sfs-design-thumb--classic"></i><strong>Classic Team</strong><small>Clean white, restrained color accents</small></button>
+                <button type="button" data-sfs-design="split"><i class="sfs-design-thumb sfs-design-thumb--split"></i><strong>Diagonal Split</strong><small>A clear two-color team division</small></button>
+                <button type="button" data-sfs-design="splash"><i class="sfs-design-thumb sfs-design-thumb--splash"></i><strong>Color Splash</strong><small>Energetic color behind the products</small></button>
+                <button type="button" data-sfs-design="pro"><i class="sfs-design-thumb sfs-design-thumb--pro"></i><strong>Pro Dark</strong><small>Professional charcoal and team accents</small></button>
+                <button type="button" data-sfs-design="heritage"><i class="sfs-design-thumb sfs-design-thumb--heritage"></i><strong>Heritage</strong><small>Warm varsity styling and team stripes</small></button>
+              </div>
+            </div>
+
             <div class="sfs-control-group">
-              <div class="sfs-control-heading"><span>1</span><div><strong>Team colors</strong><small>Tints the existing hero and its admin buttons without changing the layout.</small></div></div>
+              <div class="sfs-control-heading"><span>2</span><div><strong>Team colors</strong><small>Buttons, tabs, and design accents use these colors automatically.</small></div></div>
               <div class="sfs-color-grid">
                 <label><span>Primary color</span><div><input type="color" data-sfs-primary value="#1f2937"><output data-sfs-primary-output>#1f2937</output></div></label>
                 <label><span>Accent color</span><div><input type="color" data-sfs-secondary value="#d4af37"><output data-sfs-secondary-output>#d4af37</output></div></label>
@@ -166,18 +180,9 @@
             </div>
 
             <div class="sfs-control-group">
-              <div class="sfs-control-heading"><span>2</span><div><strong>Background behind products</strong><small>Optional. Product cards, filters, and ordering remain untouched.</small></div></div>
-              <div class="sfs-pattern-grid" role="radiogroup" aria-label="Product background">
-                <button type="button" data-sfs-pattern="none"><i class="sfs-pattern-thumb sfs-pattern-thumb--none"></i><strong>Original</strong><small>No product background change</small></button>
-                <button type="button" data-sfs-pattern="diagonal"><i class="sfs-pattern-thumb sfs-pattern-thumb--diagonal"></i><strong>Diagonal split</strong><small>Soft two-color division</small></button>
-                <button type="button" data-sfs-pattern="stripes"><i class="sfs-pattern-thumb sfs-pattern-thumb--stripes"></i><strong>Team stripe</strong><small>One simple diagonal accent</small></button>
-              </div>
-            </div>
-
-            <div class="sfs-control-group sfs-control-group--wide">
-              <div class="sfs-control-heading"><span>3</span><div><strong>Announcement bar</strong><small>Optional and intentionally compact on phones.</small></div></div>
+              <div class="sfs-control-heading"><span>3</span><div><strong>Announcement bar</strong><small>Optional, thin, and secondary to the shopping experience.</small></div></div>
               <label class="sfs-field"><span>Announcement <small data-sfs-announcement-count>0/120</small></span><input type="text" maxlength="120" data-sfs-announcement placeholder="Tournament gear is available through Friday."></label>
-              <label class="sfs-toggle"><input type="checkbox" data-sfs-show-announcement><span></span><div><strong>Show announcement bar</strong><small>Uses the primary color with a small accent-color marker.</small></div></label>
+              <label class="sfs-toggle"><input type="checkbox" data-sfs-show-announcement><span></span><div><strong>Show announcement</strong><small>Appears as a subtle strip above the category tabs.</small></div></label>
             </div>
           </section>
         </div>
