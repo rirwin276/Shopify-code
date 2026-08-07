@@ -1,0 +1,81 @@
+/* Final builder-preview continuity layer. */
+
+/* No long white capsule around category buttons in any preview. */
+.sfs-sample-category-tabs{
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+
+/* GRADIENT GLOW — stronger corner-to-corner color. */
+.sfs-sample[data-style="bold"][data-pattern="none"]{
+  background:
+    radial-gradient(circle at 0% 0%,
+      color-mix(in srgb,var(--sfs-primary) 72%,#fff) 0%,
+      color-mix(in srgb,var(--sfs-primary) 46%,#fff) 20%,
+      color-mix(in srgb,var(--sfs-primary) 18%,#fff) 42%,
+      transparent 62%),
+    radial-gradient(circle at 100% 100%,
+      color-mix(in srgb,var(--sfs-secondary) 70%,#fff) 0%,
+      color-mix(in srgb,var(--sfs-secondary) 44%,#fff) 22%,
+      color-mix(in srgb,var(--sfs-secondary) 18%,#fff) 44%,
+      transparent 64%),
+    #fff!important;
+}
+.sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-hero{
+  background:rgba(255,255,255,.80)!important;
+  border-color:rgba(255,255,255,.62)!important;
+}
+.sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-category-tabs{
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb,var(--sfs-primary) 15%,#fff),
+      rgba(255,255,255,.78) 48%,
+      color-mix(in srgb,var(--sfs-secondary) 15%,#fff))!important;
+}
+.sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-catalog{
+  background:
+    radial-gradient(ellipse 82% 90% at 0% 0%,
+      color-mix(in srgb,var(--sfs-primary) 50%,#fff) 0%,
+      color-mix(in srgb,var(--sfs-primary) 24%,#fff) 30%,
+      transparent 67%),
+    radial-gradient(ellipse 84% 92% at 100% 100%,
+      color-mix(in srgb,var(--sfs-secondary) 48%,#fff) 0%,
+      color-mix(in srgb,var(--sfs-secondary) 23%,#fff) 31%,
+      transparent 69%),
+    #fff!important;
+}
+.sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-product{
+  background:rgba(255,255,255,.96)!important;
+  box-shadow:0 8px 24px rgba(17,16,14,.08)!important;
+}
+
+/* PRO DARK — one uninterrupted dark tone in preview too. */
+.sfs-sample[data-style="dark"][data-pattern="grid"]{
+  background:#11161e!important;
+  background-image:none!important;
+}
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-hero,
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-category-tabs,
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-catalog{
+  background:#11161e!important;
+  background-image:none!important;
+}
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-hero{
+  border-top:3px solid var(--sfs-secondary)!important;
+}
+
+/* Spray Burst remains a continuous dark environment. */
+.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-category-tabs{
+  background:#080d15!important;
+}
+
+@media(max-width:700px){
+  .sfs-sample[data-style="bold"][data-pattern="none"]{
+    background:
+      radial-gradient(circle at 0% 0%,color-mix(in srgb,var(--sfs-primary) 62%,#fff),transparent 61%),
+      radial-gradient(circle at 100% 100%,color-mix(in srgb,var(--sfs-secondary) 60%,#fff),transparent 63%),
+      #fff!important;
+  }
+}
