@@ -4,6 +4,7 @@
     if (!label) return;
     var text = label.textContent.trim();
     if (text === 'Color Splash' || text === 'Paint Spray') label.textContent = 'Spray Burst';
+    if (text === 'Water Drip') label.textContent = 'Pro Dark';
   }
 
   function polish(root){
@@ -16,14 +17,7 @@
       sprayButton.setAttribute('aria-label','Spray Burst storefront design');
     }
 
-    var dripButton = root.querySelector('[data-sfs-design="drip"]');
-    if (dripButton) {
-      var dripTitle = dripButton.querySelector('strong');
-      var dripCopy = dripButton.querySelector('small');
-      if (dripTitle) dripTitle.textContent = 'Water Drip';
-      if (dripCopy) dripCopy.textContent = 'Dark store with two-color paint flowing and dripping from the top edge';
-      dripButton.setAttribute('aria-label','Water Drip storefront design');
-    }
+    root.querySelectorAll('[data-sfs-design="drip"]').forEach(function(button){ button.remove(); });
 
     var proButton = root.querySelector('[data-sfs-design="pro"]');
     if (proButton) {
@@ -35,7 +29,7 @@
       var strong = heading.querySelector('strong');
       var small = heading.querySelector('small');
       if (strong && strong.textContent.trim() === 'Store design' && small) {
-        small.textContent = 'Six product-first looks inspired by modern team and fan stores.';
+        small.textContent = 'Five product-first looks inspired by modern team and fan stores.';
       }
     });
 
