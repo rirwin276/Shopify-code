@@ -10,9 +10,6 @@
       if (current.searchParams.has(key)) url.searchParams.set(key,current.searchParams.get(key));
     });
 
-    /* Theme previews may be active through Shopify's theme context even when
-       preview_theme_id is not visible in the address bar. Fetch the exact same
-       draft theme as the Admin Powers page. */
     try {
       if (!url.searchParams.has('preview_theme_id') && window.Shopify && Shopify.theme && Shopify.theme.id && Shopify.theme.role !== 'main') {
         url.searchParams.set('preview_theme_id', String(Shopify.theme.id));
@@ -24,8 +21,15 @@
     return url;
   }
 
-  function makeUrl(handle){
-    return copyPreviewParams(new URL('/collections/' + encodeURIComponent(handle), window.location.origin)).toString();
+  function templateView(state){
+    if (!state || !state.active || !state.layout || state.layout === 'original') return 'private-store';
+    return 'private-store-' + state.layout;
+  }
+
+  function makeUrl(handle, view){
+    var url = new URL('/collections/' + encodeURIComponent(handle), window.location.origin);
+    url.searchParams.set('view', view || 'private-store');
+    return copyPreviewParams(url).toString();
   }
 
   function contrast(hex){
@@ -36,14 +40,26 @@
     return ((.2126*r + .7152*g + .0722*b)/255) > .58 ? '#111111' : '#ffffff';
   }
 
+  function layoutFrom(style, pattern){
+    style = style || 'clean';
+    pattern = pattern || 'none';
+    if (style === 'clean' && pattern === 'diagonal') return 'split';
+    if (style === 'bold' && pattern === 'none') return 'gradient';
+    if (style === 'bold' && pattern === 'dots') return 'spray';
+    if (style === 'dark' && (pattern === 'grid' || pattern === 'dots')) return 'pro';
+    if (style === 'clean' && pattern === 'stripes') return 'heritage';
+    return 'classic';
+  }
+
   function readState(source, overlay){
     var primary = source.style.getPropertyValue('--sfs-primary').trim() || '#1f2937';
     var secondary = source.style.getPropertyValue('--sfs-secondary').trim() || '#d4af37';
     var announcement = overlay.querySelector('[data-sfs-preview-announcement]');
+    var active = source.classList.contains('is-custom');
+    var layout = source.dataset.layout || layoutFrom(source.dataset.style, source.dataset.pattern);
     return {
-      active: source.classList.contains('is-custom'),
-      style: source.dataset.style || 'clean',
-      pattern: source.dataset.pattern || 'none',
+      active: active,
+      layout: active ? layout : 'original',
       primary: primary,
       secondary: secondary,
       primaryText: source.style.getPropertyValue('--sfs-primary-text').trim() || contrast(primary),
@@ -56,9 +72,8 @@
   function prepareSnapshot(html){
     var parsed = new DOMParser().parseFromString(html, 'text/html');
 
-    /* Shopify deliberately blocks direct framing. A srcdoc snapshot does not
-       need runtime scripts, so strip executable/CSP content but keep the real
-       Liquid markup, inline styles, and theme stylesheets. */
+    /* The preview uses the actual alternate-template HTML. Scripts are stripped
+       only because srcdoc cannot safely execute the live storefront runtime. */
     parsed.querySelectorAll('script,noscript,iframe,meta[http-equiv="Content-Security-Policy"],meta[http-equiv="content-security-policy"]').forEach(function(node){ node.remove(); });
     parsed.querySelectorAll('*').forEach(function(node){
       Array.from(node.attributes || []).forEach(function(attr){
@@ -80,16 +95,15 @@
       '.ps-preview-banner,[data-private-store-preview-links]{display:none!important;}',
       '#MainContent{padding-top:0!important;margin-top:0!important;min-height:100vh!important;}',
       'body{margin:0!important;overflow:hidden!important;background:transparent!important;}',
-      'a,button,input,select,textarea{pointer-events:none!important;}',
-      '.ss-smart-jump{display:none!important;}'
+      'a,button,input,select,textarea{pointer-events:none!important;}'
     ].join('');
     parsed.head.appendChild(style);
 
     return '<!doctype html>\n' + parsed.documentElement.outerHTML;
   }
 
-  async function fetchSnapshot(handle){
-    var response = await fetch(makeUrl(handle), {
+  async function fetchSnapshot(handle, view){
+    var response = await fetch(makeUrl(handle, view), {
       method:'GET',
       credentials:'same-origin',
       cache:'no-store',
@@ -101,31 +115,47 @@
     return prepareSnapshot(html);
   }
 
+  function normalizeCategories(doc){
+    var catalog = doc.querySelector('[data-ss-private-catalog]');
+    if (!catalog) return;
+    var available = {};
+    var items = Array.from(catalog.querySelectorAll('.product-grid__item[data-product-id]'));
+    items.forEach(function(item){
+      (item.dataset.ssCategories || 'other').split(/\s+/).filter(Boolean).forEach(function(category){ available[category] = true; });
+    });
+    catalog.querySelectorAll('[data-ss-category]').forEach(function(button){
+      var category = button.dataset.ssCategory || 'all';
+      if (category !== 'all') button.hidden = !available[category];
+    });
+    var nav = catalog.querySelector('[data-ss-category-nav]');
+    if (nav) nav.hidden = !items.length;
+  }
+
+  function normalizePartnerJump(doc){
+    var jump = doc.querySelector('.ss-smart-jump');
+    if (!jump) return;
+    var mobile = false;
+    try {
+      mobile = !!(doc.defaultView && doc.defaultView.matchMedia && doc.defaultView.matchMedia('(max-width: 768px)').matches);
+    } catch(_e) {}
+    jump.style.setProperty('display', mobile ? 'flex' : 'block', 'important');
+  }
+
   function applyState(frame, state){
     var doc;
     try { doc = frame.contentDocument; } catch(_e) { return; }
-    if (!doc || !doc.documentElement) return;
+    if (!doc) return;
 
-    var html = doc.documentElement;
-    ['ss-store-custom','ss-style-clean','ss-style-bold','ss-style-dark','ss-pattern-none','ss-pattern-diagonal','ss-pattern-stripes','ss-pattern-dots','ss-pattern-grid'].forEach(function(name){ html.classList.remove(name); });
-
-    html.style.setProperty('--ss-team-primary', state.primary);
-    html.style.setProperty('--ss-team-secondary', state.secondary);
-    html.style.setProperty('--ss-team-primary-text', state.primaryText);
-    html.style.setProperty('--ss-team-secondary-text', state.secondaryText);
-
-    if (state.active) {
-      html.classList.add('ss-store-custom');
-      html.classList.add('ss-style-' + state.style);
-      html.classList.add('ss-pattern-' + state.pattern);
+    var main = doc.querySelector('#MainContent');
+    if (main) {
+      main.style.setProperty('--ss-team-primary', state.primary);
+      main.style.setProperty('--ss-team-secondary', state.secondary);
+      main.style.setProperty('--ss-team-primary-text', state.primaryText);
+      main.style.setProperty('--ss-team-secondary-text', state.secondaryText);
     }
 
-    var enhancement = doc.querySelector('[data-ss-storefront-enhancements]');
-    if (enhancement) {
-      enhancement.dataset.enabled = state.active ? 'true' : 'false';
-      enhancement.dataset.style = state.style;
-      enhancement.dataset.pattern = state.pattern;
-    }
+    normalizeCategories(doc);
+    normalizePartnerJump(doc);
 
     var copy = doc.querySelector('.ps-hero .ps-copy');
     var message = doc.querySelector('.ps-hero .ss-hero-message');
@@ -179,17 +209,17 @@
 
     var label = document.createElement('span');
     label.className = 'sfs-real-preview__label';
-    label.textContent = mode === 'desktop' ? 'Desktop — storefront snapshot' : 'Mobile — storefront snapshot';
+    label.textContent = mode === 'desktop' ? 'Desktop — actual template' : 'Mobile — actual template';
 
     var stage = document.createElement('div');
     stage.className = 'sfs-real-preview__stage sfs-real-preview__stage--' + mode;
 
     var loading = document.createElement('div');
     loading.className = 'sfs-real-preview__loading';
-    loading.textContent = 'Loading storefront snapshot…';
+    loading.textContent = 'Loading selected storefront template…';
 
     var iframe = document.createElement('iframe');
-    iframe.title = mode === 'desktop' ? 'Desktop storefront snapshot' : 'Mobile storefront snapshot';
+    iframe.title = mode === 'desktop' ? 'Desktop storefront template preview' : 'Mobile storefront template preview';
     iframe.tabIndex = -1;
     iframe.setAttribute('aria-hidden','true');
     iframe.setAttribute('sandbox','allow-same-origin');
@@ -241,11 +271,9 @@
     var previews = [desktop,mobile];
     var handle = root.dataset.shopHandle || '';
     var lastState = readState(source,overlay);
-
-    function sync(){
-      lastState = readState(source, overlay);
-      previews.forEach(function(preview){ applyState(preview.iframe,lastState); });
-    }
+    var lastView = null;
+    var requestToken = 0;
+    var syncTimer = null;
 
     previews.forEach(function(preview){
       preview.iframe.addEventListener('load', function(){
@@ -256,16 +284,38 @@
       });
     });
 
-    try {
-      var snapshot = await fetchSnapshot(handle);
-      previews.forEach(function(preview){ preview.iframe.srcdoc = snapshot; });
-    } catch(error) {
-      previews.forEach(function(preview){ showError(preview,error.message || 'could not load'); });
+    async function sync(){
+      lastState = readState(source, overlay);
+      var view = templateView(lastState);
+
+      if (view === lastView) {
+        previews.forEach(function(preview){ applyState(preview.iframe,lastState); });
+        return;
+      }
+
+      lastView = view;
+      var token = ++requestToken;
+      try {
+        var snapshot = await fetchSnapshot(handle, view);
+        if (token !== requestToken) return;
+        previews.forEach(function(preview){
+          preview.wrapper.classList.remove('is-loaded');
+          preview.iframe.srcdoc = snapshot;
+        });
+      } catch(error) {
+        if (token !== requestToken) return;
+        previews.forEach(function(preview){ showError(preview,error.message || 'could not load'); });
+      }
     }
 
-    new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['class','data-style','data-pattern','style']});
+    function scheduleSync(){
+      window.clearTimeout(syncTimer);
+      syncTimer = window.setTimeout(sync, 35);
+    }
+
+    new MutationObserver(scheduleSync).observe(source,{attributes:true,attributeFilter:['class','data-layout','data-style','data-pattern','style']});
     overlay.querySelectorAll('[data-sfs-preview-announcement]').forEach(function(node){
-      new MutationObserver(sync).observe(node,{attributes:true,childList:true,characterData:true,subtree:true,attributeFilter:['hidden']});
+      new MutationObserver(scheduleSync).observe(node,{attributes:true,childList:true,characterData:true,subtree:true,attributeFilter:['hidden']});
     });
 
     if (window.ResizeObserver) {
