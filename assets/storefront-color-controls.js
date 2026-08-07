@@ -36,14 +36,17 @@
     input.dataset.sfsColorEnhanced = '1';
 
     var label = input.closest('label');
-    var oldEntry = input.parentElement;
-    if (!label || !oldEntry) return input;
+    var entry = input.parentElement;
+    if (!label || !entry) return input;
 
     label.classList.add('sfs-color-field');
     label.dataset.sfsColorField = role;
     var heading = label.querySelector(':scope > span');
-    if (heading) heading.classList.add('sfs-color-field__label');
-    oldEntry.classList.add('sfs-color-entry');
+    if (heading) {
+      heading.classList.add('sfs-color-field__label');
+      heading.textContent = role === 'primary' ? 'Primary' : 'Secondary';
+    }
+    entry.classList.add('sfs-color-entry');
 
     input.classList.add('sfs-native-color-input');
     input.setAttribute('aria-hidden','true');
@@ -52,9 +55,9 @@
     var pickerButton = document.createElement('button');
     pickerButton.type = 'button';
     pickerButton.className = 'sfs-color-picker-button';
-    pickerButton.setAttribute('aria-label', role === 'primary' ? 'Choose primary color' : 'Choose accent color');
-    pickerButton.innerHTML = '<i class="sfs-color-picker-chip"></i><span>Choose color</span>';
-    oldEntry.insertBefore(pickerButton, input);
+    pickerButton.setAttribute('aria-label', role === 'primary' ? 'Open primary color picker' : 'Open secondary color picker');
+    pickerButton.innerHTML = '<i class="sfs-color-picker-chip"></i>';
+    entry.insertBefore(pickerButton, input);
 
     var hex = document.createElement('input');
     hex.type = 'text';
@@ -63,26 +66,26 @@
     hex.spellcheck = false;
     hex.maxLength = 7;
     hex.className = 'sfs-hex-input';
-    hex.setAttribute('aria-label', role === 'primary' ? 'Primary color HEX value' : 'Accent color HEX value');
+    hex.setAttribute('aria-label', role === 'primary' ? 'Primary color HEX value' : 'Secondary color HEX value');
     hex.value = String(input.value || '#000000').toUpperCase();
-    oldEntry.appendChild(hex);
+    entry.appendChild(hex);
 
     var toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'sfs-color-palette-toggle';
     toggle.setAttribute('aria-expanded','false');
-    toggle.innerHTML = '<span class="sfs-color-palette-toggle__dots"><i></i><i></i><i></i><i></i></span><span>Color palette</span><b aria-hidden="true">+</b>';
-    label.appendChild(toggle);
+    toggle.innerHTML = '<span class="sfs-color-palette-toggle__dots"><i></i><i></i><i></i></span><span>Palette</span>';
+    entry.appendChild(toggle);
 
     var palette = document.createElement('div');
     palette.className = 'sfs-color-palette';
     palette.hidden = true;
     palette.setAttribute('role','dialog');
-    palette.setAttribute('aria-label', role === 'primary' ? 'Primary quick colors' : 'Accent quick colors');
+    palette.setAttribute('aria-label', role === 'primary' ? 'Primary color palette' : 'Secondary color palette');
 
     var paletteHead = document.createElement('div');
     paletteHead.className = 'sfs-color-palette__head';
-    paletteHead.innerHTML = '<strong>' + (role === 'primary' ? 'Primary color' : 'Accent color') + '</strong><button type="button" aria-label="Close color palette">×</button>';
+    paletteHead.innerHTML = '<strong>' + (role === 'primary' ? 'Primary color' : 'Secondary color') + '</strong><button type="button" aria-label="Close color palette">×</button>';
     palette.appendChild(paletteHead);
 
     var swatches = document.createElement('div');
@@ -104,7 +107,6 @@
       palette.hidden = !open;
       toggle.classList.toggle('open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggle.querySelector('b').textContent = open ? '−' : '+';
     }
 
     toggle.addEventListener('click', function(event){
@@ -113,7 +115,6 @@
     });
     palette.addEventListener('click', function(event){ event.stopPropagation(); });
     paletteHead.querySelector('button').addEventListener('click', function(){ setPalette(false); });
-
     pickerButton.addEventListener('click', function(){ input.click(); });
 
     function apply(value, dispatch){
