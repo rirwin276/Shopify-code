@@ -4,49 +4,117 @@
     node.style.setProperty(property, value, 'important');
   }
 
+  function isMobile(doc){
+    try {
+      var view = doc && doc.defaultView;
+      return !!(view && view.matchMedia && view.matchMedia('(max-width: 768px)').matches);
+    } catch(_e) {
+      return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+    }
+  }
+
+  /*
+    Structural fix for the category strip.
+
+    The tabs are authored inside the standalone storefront-enhancements Shopify
+    section because that section also owns the category data and appearance
+    bootstrap. Visually, however, the navigation belongs to the catalog. Move
+    the actual <nav> into <results-list>, immediately before the collection
+    wrapper. Then rename the outer nav hook so the old section-level :has()
+    cleanup rules cannot accidentally style the whole product section.
+
+    The existing category script captures references to the nav/buttons before
+    deferred scripts run, so moving the same DOM nodes preserves filtering and
+    click handlers. In the appearance-builder snapshot, this file performs the
+    same move directly inside the snapshot document.
+  */
+  function relocateTabs(doc){
+    if (!doc || !doc.querySelector) return null;
+
+    var nav = doc.querySelector(
+      '[data-ss-category-catalog-nav], .ss-category-catalog-nav, [data-ss-category-nav], .ss-category-nav'
+    );
+    var results = doc.querySelector('results-list');
+    var wrapper = results && results.querySelector('.collection-wrapper');
+
+    if (!nav || !results || !wrapper) return nav;
+
+    if (nav.parentNode !== results || nav.nextElementSibling !== wrapper) {
+      results.insertBefore(nav, wrapper);
+    }
+
+    nav.classList.remove('ss-category-nav');
+    nav.classList.add('ss-category-catalog-nav');
+    if (nav.hasAttribute('data-ss-category-nav')) nav.removeAttribute('data-ss-category-nav');
+    nav.setAttribute('data-ss-category-catalog-nav', '');
+
+    return nav;
+  }
+
   function cleanTabs(doc){
     if (!doc || !doc.querySelector) return;
 
     var root = doc.querySelector('[data-ss-storefront-enhancements]');
-    var nav = doc.querySelector('[data-ss-category-nav], .ss-category-nav');
-    var tabs = doc.querySelector('.ss-category-tabs');
-    var section = root && root.closest ? root.closest('.shopify-section') : null;
+    var originSection = root && root.closest ? root.closest('.shopify-section') : null;
+    var nav = relocateTabs(doc) || doc.querySelector('[data-ss-category-catalog-nav], .ss-category-catalog-nav');
+    var tabs = nav ? nav.querySelector('.ss-category-tabs') : doc.querySelector('.ss-category-tabs');
 
-    [root, nav, tabs, section].forEach(function(node){
+    /* The old enhancements section now contains only hidden data/message source. */
+    [root, originSection].forEach(function(node){
       if (!node) return;
+      important(node, 'margin', '0');
+      important(node, 'padding', '0');
+      important(node, 'border', '0');
+      important(node, 'border-radius', '0');
       important(node, 'background', 'transparent');
       important(node, 'background-color', 'transparent');
       important(node, 'background-image', 'none');
-      important(node, 'border', '0');
-      important(node, 'border-radius', '0');
       important(node, 'box-shadow', 'none');
-      important(node, 'backdrop-filter', 'none');
-      important(node, '-webkit-backdrop-filter', 'none');
+      important(node, 'min-height', '0');
     });
 
-    if (section) {
-      important(section, 'margin', '0');
-      important(section, 'padding', '0');
-      var sectionBackground = section.querySelector('.section-background');
+    if (originSection) {
+      var sectionBackground = originSection.querySelector('.section-background');
       if (sectionBackground) important(sectionBackground, 'display', 'none');
     }
 
     if (root) {
       important(root, 'width', '100%');
-      important(root, 'margin', '0');
-      important(root, 'padding', '0');
     }
 
+    /* Only the individual category buttons should read as pills. */
     if (nav) {
-      important(nav, 'width', window.matchMedia && window.matchMedia('(max-width: 768px)').matches ? '100%' : 'min(1320px, calc(100% - 40px))');
+      var mobile = isMobile(doc);
+      important(nav, 'display', 'block');
+      important(nav, 'width', mobile ? '100%' : 'min(1320px, calc(100% - 40px))');
       important(nav, 'margin', '0 auto');
-      important(nav, 'padding', window.matchMedia && window.matchMedia('(max-width: 768px)').matches ? '6px 8px 7px' : '9px 0 10px');
+      important(nav, 'padding', mobile ? '6px 8px 7px' : '9px 0 10px');
+      important(nav, 'border', '0');
+      important(nav, 'border-radius', '0');
+      important(nav, 'background', 'transparent');
+      important(nav, 'background-color', 'transparent');
+      important(nav, 'background-image', 'none');
+      important(nav, 'box-shadow', 'none');
+      important(nav, 'backdrop-filter', 'none');
+      important(nav, '-webkit-backdrop-filter', 'none');
     }
 
     if (tabs) {
       important(tabs, 'width', '100%');
       important(tabs, 'margin', '0');
       important(tabs, 'padding', '0');
+      important(tabs, 'display', 'flex');
+      important(tabs, 'align-items', 'center');
+      important(tabs, 'gap', '7px');
+      important(tabs, 'overflow-x', 'auto');
+      important(tabs, 'border', '0');
+      important(tabs, 'border-radius', '0');
+      important(tabs, 'background', 'transparent');
+      important(tabs, 'background-color', 'transparent');
+      important(tabs, 'background-image', 'none');
+      important(tabs, 'box-shadow', 'none');
+      important(tabs, 'backdrop-filter', 'none');
+      important(tabs, '-webkit-backdrop-filter', 'none');
     }
   }
 
