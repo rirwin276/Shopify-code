@@ -43,8 +43,16 @@
     hex.value = String(input.value || '#000000').toUpperCase();
     oldEntry.appendChild(hex);
 
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'sfs-color-palette-toggle';
+    toggle.setAttribute('aria-expanded','false');
+    toggle.innerHTML = '<span class="sfs-color-palette-toggle__dots"><i></i><i></i><i></i><i></i></span><span>Quick colors</span><b aria-hidden="true">⌄</b>';
+    label.appendChild(toggle);
+
     var palette = document.createElement('div');
     palette.className = 'sfs-color-palette';
+    palette.hidden = true;
     palette.setAttribute('aria-label', role === 'primary' ? 'Primary color quick choices' : 'Accent color quick choices');
     colors.forEach(function(color){
       var button = document.createElement('button');
@@ -57,10 +65,12 @@
     });
     label.appendChild(palette);
 
-    var help = document.createElement('small');
-    help.className = 'sfs-color-help';
-    help.textContent = 'Choose a quick team color, use the full picker, or enter an exact HEX code.';
-    label.appendChild(help);
+    toggle.addEventListener('click', function(){
+      var open = palette.hidden;
+      palette.hidden = !open;
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
 
     function apply(value, dispatch){
       var normalized = normalizeHex(value);
@@ -96,6 +106,11 @@
       var button = event.target.closest('[data-sfs-swatch]');
       if (!button) return;
       apply(button.dataset.sfsSwatch, true);
+      if (window.matchMedia('(max-width:700px)').matches) {
+        palette.hidden = true;
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded','false');
+      }
     });
 
     input.sfsSyncExactColor = function(){ apply(input.value, false); };
