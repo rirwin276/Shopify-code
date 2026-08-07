@@ -47,7 +47,7 @@
   /* Softer product surfaces on dark designs: still clear, less like stark boxes. */
   html.ss-store-custom:is(.ss-style-bold.ss-pattern-dots,.ss-style-dark.ss-pattern-grid,.ss-style-dark.ss-pattern-dots) results-list .product-grid__item {
     padding: 7px !important;
-    border: 1px solid rgba(255,255,255,.24) !important;
+    border: 1px solid rgba(255,255,255,.20) !important;
     border-radius: 16px !important;
     background: rgba(248,247,243,.98) !important;
     box-shadow: 0 13px 32px rgba(0,0,0,.18) !important;
@@ -57,58 +57,67 @@
     color: #17150f !important;
   }
 
-  /* WATER DRIP: dark base, blended two-tone paint edge, restrained drips. */
+  /* WATER DRIP: one continuous dark environment with true paint hanging from the top. */
   html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero,
   html.ss-store-custom.ss-style-dark.ss-pattern-dots results-list {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    background:
-      linear-gradient(180deg,
-        color-mix(in srgb, var(--ss-team-primary) 19%, #080d15),
-        #080d15 34%,
-        color-mix(in srgb, var(--ss-team-secondary) 8%, #080d15)) !important;
+    background: linear-gradient(180deg,#0b111b,#080d15) !important;
   }
 
-  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero::before,
-  html.ss-store-custom.ss-style-dark.ss-pattern-dots results-list::before {
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero::before {
     content: '';
     position: absolute;
     z-index: 0;
     inset: 0 0 auto 0;
-    height: 132px;
+    height: 150px;
     pointer-events: none;
-    background:
-      radial-gradient(ellipse at 8% -8%, color-mix(in srgb,var(--ss-team-primary) 92%,transparent) 0 34%, transparent 35%),
-      radial-gradient(ellipse at 34% -12%, color-mix(in srgb,var(--ss-team-primary) 78%,var(--ss-team-secondary)) 0 31%, transparent 32%),
-      radial-gradient(ellipse at 68% -14%, color-mix(in srgb,var(--ss-team-secondary) 82%,var(--ss-team-primary)) 0 32%, transparent 33%),
-      radial-gradient(ellipse at 96% -8%, color-mix(in srgb,var(--ss-team-secondary) 92%,transparent) 0 35%, transparent 36%),
-      linear-gradient(90deg,var(--ss-team-primary),var(--ss-team-secondary));
-    opacity: .88;
-    filter: saturate(1.08);
-  }
-
-  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero::after,
-  html.ss-store-custom.ss-style-dark.ss-pattern-dots results-list::after {
-    content: '';
-    position: absolute;
-    z-index: 1;
-    top: 58px;
-    left: 0;
-    width: 100%;
-    height: 118px;
-    pointer-events: none;
-    background:
-      radial-gradient(ellipse at 7% 0%, color-mix(in srgb,var(--ss-team-primary) 90%,transparent) 0 12px, transparent 13px),
-      linear-gradient(color-mix(in srgb,var(--ss-team-primary) 88%,transparent),color-mix(in srgb,var(--ss-team-primary) 70%,transparent)) 8% 0/8px 72px no-repeat,
-      radial-gradient(circle at 8.3% 72px,color-mix(in srgb,var(--ss-team-primary) 80%,transparent) 0 7px,transparent 8px),
-      linear-gradient(color-mix(in srgb,var(--ss-team-primary) 70%,var(--ss-team-secondary)),color-mix(in srgb,var(--ss-team-primary) 56%,var(--ss-team-secondary))) 31% 0/12px 48px no-repeat,
-      radial-gradient(circle at 31.4% 48px,color-mix(in srgb,var(--ss-team-primary) 60%,var(--ss-team-secondary)) 0 8px,transparent 9px),
-      linear-gradient(color-mix(in srgb,var(--ss-team-secondary) 72%,var(--ss-team-primary)),color-mix(in srgb,var(--ss-team-secondary) 62%,transparent)) 69% 0/9px 86px no-repeat,
-      radial-gradient(circle at 69.3% 86px,color-mix(in srgb,var(--ss-team-secondary) 76%,transparent) 0 7px,transparent 8px),
-      linear-gradient(color-mix(in srgb,var(--ss-team-secondary) 88%,transparent),color-mix(in srgb,var(--ss-team-secondary) 66%,transparent)) 91% 0/7px 58px no-repeat,
-      radial-gradient(circle at 91.2% 58px,color-mix(in srgb,var(--ss-team-secondary) 80%,transparent) 0 6px,transparent 7px);
-    opacity: .82;
+    background: linear-gradient(90deg,
+      var(--ss-team-primary) 0%,
+      color-mix(in srgb,var(--ss-team-primary) 55%,var(--ss-team-secondary)) 50%,
+      var(--ss-team-secondary) 100%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) top/100% 38px no-repeat,
+      radial-gradient(circle at 5% 36px,#000 0 21px,transparent 22px),
+      radial-gradient(circle at 20% 35px,#000 0 28px,transparent 29px),
+      radial-gradient(circle at 38% 38px,#000 0 22px,transparent 23px),
+      radial-gradient(circle at 58% 35px,#000 0 30px,transparent 31px),
+      radial-gradient(circle at 77% 38px,#000 0 23px,transparent 24px),
+      radial-gradient(circle at 94% 35px,#000 0 27px,transparent 28px),
+      linear-gradient(#000 0 0) 11% 0/15px 104px no-repeat,
+      radial-gradient(circle at 11.5% 104px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 29% 0/22px 72px no-repeat,
+      radial-gradient(circle at 29.8% 72px,#000 0 12px,transparent 13px),
+      linear-gradient(#000 0 0) 49% 0/12px 128px no-repeat,
+      radial-gradient(circle at 49.4% 128px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 68% 0/19px 88px no-repeat,
+      radial-gradient(circle at 68.7% 88px,#000 0 11px,transparent 12px),
+      linear-gradient(#000 0 0) 86% 0/14px 117px no-repeat,
+      radial-gradient(circle at 86.5% 117px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 96% 0/10px 67px no-repeat,
+      radial-gradient(circle at 96.4% 67px,#000 0 8px,transparent 9px);
+    mask:
+      linear-gradient(#000 0 0) top/100% 38px no-repeat,
+      radial-gradient(circle at 5% 36px,#000 0 21px,transparent 22px),
+      radial-gradient(circle at 20% 35px,#000 0 28px,transparent 29px),
+      radial-gradient(circle at 38% 38px,#000 0 22px,transparent 23px),
+      radial-gradient(circle at 58% 35px,#000 0 30px,transparent 31px),
+      radial-gradient(circle at 77% 38px,#000 0 23px,transparent 24px),
+      radial-gradient(circle at 94% 35px,#000 0 27px,transparent 28px),
+      linear-gradient(#000 0 0) 11% 0/15px 104px no-repeat,
+      radial-gradient(circle at 11.5% 104px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 29% 0/22px 72px no-repeat,
+      radial-gradient(circle at 29.8% 72px,#000 0 12px,transparent 13px),
+      linear-gradient(#000 0 0) 49% 0/12px 128px no-repeat,
+      radial-gradient(circle at 49.4% 128px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 68% 0/19px 88px no-repeat,
+      radial-gradient(circle at 68.7% 88px,#000 0 11px,transparent 12px),
+      linear-gradient(#000 0 0) 86% 0/14px 117px no-repeat,
+      radial-gradient(circle at 86.5% 117px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 96% 0/10px 67px no-repeat,
+      radial-gradient(circle at 96.4% 67px,#000 0 8px,transparent 9px);
+    filter: drop-shadow(0 7px 8px rgba(0,0,0,.28));
   }
 
   html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero > *,
@@ -118,9 +127,9 @@
   }
 
   html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero-card {
-    margin-top: 42px !important;
+    margin-top: 28px !important;
     border-color: rgba(255,255,255,.14) !important;
-    background: rgba(8,13,21,.78) !important;
+    background: rgba(8,13,21,.76) !important;
     color: #fff !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
@@ -138,13 +147,14 @@
   html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-btn-ghost,
   html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-btn-soft {
     border-color: rgba(255,255,255,.16) !important;
-    background: rgba(255,255,255,.09) !important;
+    background: rgba(8,13,21,.64) !important;
     color: #fff !important;
   }
 
   html.ss-store-custom.ss-style-dark.ss-pattern-dots .ss-category-nav {
     border-color: rgba(255,255,255,.14) !important;
-    background: rgba(10,15,24,.94) !important;
+    background: rgba(10,15,24,.96) !important;
+    margin-bottom: 0 !important;
   }
 
   html.ss-store-custom.ss-style-dark.ss-pattern-dots .ss-category-tab {
@@ -176,21 +186,36 @@
       box-shadow: 0 8px 20px rgba(0,0,0,.16) !important;
     }
 
-    html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero::before,
-    html.ss-store-custom.ss-style-dark.ss-pattern-dots results-list::before {
-      height: 92px;
-    }
-
-    html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero::after,
-    html.ss-store-custom.ss-style-dark.ss-pattern-dots results-list::after {
-      top: 39px;
-      height: 82px;
-      transform: scaleY(.72);
-      transform-origin: top;
+    html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero::before {
+      height: 105px;
+      -webkit-mask:
+        linear-gradient(#000 0 0) top/100% 26px no-repeat,
+        radial-gradient(circle at 9% 25px,#000 0 15px,transparent 16px),
+        radial-gradient(circle at 34% 25px,#000 0 20px,transparent 21px),
+        radial-gradient(circle at 62% 25px,#000 0 17px,transparent 18px),
+        radial-gradient(circle at 89% 25px,#000 0 19px,transparent 20px),
+        linear-gradient(#000 0 0) 17% 0/10px 78px no-repeat,
+        radial-gradient(circle at 17.7% 78px,#000 0 7px,transparent 8px),
+        linear-gradient(#000 0 0) 48% 0/13px 58px no-repeat,
+        radial-gradient(circle at 48.8% 58px,#000 0 8px,transparent 9px),
+        linear-gradient(#000 0 0) 78% 0/9px 88px no-repeat,
+        radial-gradient(circle at 78.7% 88px,#000 0 7px,transparent 8px);
+      mask:
+        linear-gradient(#000 0 0) top/100% 26px no-repeat,
+        radial-gradient(circle at 9% 25px,#000 0 15px,transparent 16px),
+        radial-gradient(circle at 34% 25px,#000 0 20px,transparent 21px),
+        radial-gradient(circle at 62% 25px,#000 0 17px,transparent 18px),
+        radial-gradient(circle at 89% 25px,#000 0 19px,transparent 20px),
+        linear-gradient(#000 0 0) 17% 0/10px 78px no-repeat,
+        radial-gradient(circle at 17.7% 78px,#000 0 7px,transparent 8px),
+        linear-gradient(#000 0 0) 48% 0/13px 58px no-repeat,
+        radial-gradient(circle at 48.8% 58px,#000 0 8px,transparent 9px),
+        linear-gradient(#000 0 0) 78% 0/9px 88px no-repeat,
+        radial-gradient(circle at 78.7% 88px,#000 0 7px,transparent 8px);
     }
 
     html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero-card {
-      margin-top: 28px !important;
+      margin-top: 18px !important;
     }
   }
 </style>
