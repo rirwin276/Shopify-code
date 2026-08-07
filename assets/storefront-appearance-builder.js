@@ -17,8 +17,9 @@
     if (!launch || !overlay) return;
 
     var defaults = {
-      version: 1,
+      version: 2,
       enabled: false,
+      layout: 'original',
       style: 'clean',
       pattern: 'none',
       primary_color: '#1f2937',
@@ -31,29 +32,43 @@
     };
 
     var designs = {
-      classic: {style:'clean', pattern:'none', label:'Classic Team'},
-      split: {style:'clean', pattern:'diagonal', label:'Diagonal Split'},
-      gradient: {style:'bold', pattern:'none', label:'Gradient Glow'},
-      splash: {style:'bold', pattern:'dots', label:'Spray Burst'},
-      pro: {style:'dark', pattern:'grid', label:'Pro Dark'},
-      heritage: {style:'clean', pattern:'stripes', label:'Heritage'}
+      classic: {layout:'classic', style:'clean', pattern:'none', label:'Classic Team'},
+      split: {layout:'split', style:'clean', pattern:'diagonal', label:'Diagonal Split'},
+      gradient: {layout:'gradient', style:'bold', pattern:'none', label:'Gradient Glow'},
+      splash: {layout:'spray', style:'bold', pattern:'dots', label:'Spray Burst'},
+      pro: {layout:'pro', style:'dark', pattern:'grid', label:'Pro Dark'},
+      heritage: {layout:'heritage', style:'clean', pattern:'stripes', label:'Heritage'}
     };
 
     function normalizeLegacyDesign(settings){
-      if (settings && settings.style === 'dark' && settings.pattern === 'dots') {
+      if (!settings) return settings;
+      if (settings.style === 'dark' && settings.pattern === 'dots') {
         settings.style = 'dark';
         settings.pattern = 'grid';
+      }
+      if (!settings.layout || settings.layout === 'original') {
+        var style = settings.style || 'clean';
+        var pattern = settings.pattern || 'none';
+        if (settings.enabled) {
+          if (style === 'clean' && pattern === 'diagonal') settings.layout = 'split';
+          else if (style === 'bold' && pattern === 'none') settings.layout = 'gradient';
+          else if (style === 'bold' && pattern === 'dots') settings.layout = 'spray';
+          else if (style === 'dark' && pattern === 'grid') settings.layout = 'pro';
+          else if (style === 'clean' && pattern === 'stripes') settings.layout = 'heritage';
+          else settings.layout = 'classic';
+        } else {
+          settings.layout = 'original';
+        }
       }
       return settings;
     }
 
     function designFromState(settings){
       normalizeLegacyDesign(settings);
-      var style = settings.style || 'clean';
-      var pattern = settings.pattern || 'none';
+      var layout = settings.layout || 'original';
       var found = 'classic';
       Object.keys(designs).some(function(key){
-        if (designs[key].style === style && designs[key].pattern === pattern) {
+        if (designs[key].layout === layout) {
           found = key;
           return true;
         }
@@ -99,13 +114,14 @@
 
     function applySelectedDesign(){
       var design = designs[selectedDesign] || designs.classic;
+      state.layout = design.layout;
       state.style = design.style;
       state.pattern = design.pattern;
     }
 
     function pullInputs(){
       applySelectedDesign();
-      state.version = 1;
+      state.version = 2;
       state.primary_color = primary.value;
       state.secondary_color = secondary.value;
       state.announcement = announcement.value.trim();
@@ -135,6 +151,7 @@
 
       overlay.querySelectorAll('[data-sfs-preview]').forEach(function(sample){
         sample.classList.toggle('is-custom', active);
+        sample.dataset.layout = active ? state.layout : 'original';
         sample.dataset.style = active ? state.style : 'clean';
         sample.dataset.pattern = active ? state.pattern : 'none';
         sample.style.setProperty('--sfs-primary', state.primary_color);
@@ -229,7 +246,7 @@
 
       state.enabled = true;
       busy(true);
-      setStatus('Saving storefront settings…','');
+      setStatus('Saving storefront template…','');
 
       try {
         var response = await fetch(endpoint, {
@@ -249,7 +266,7 @@
         updateSummary();
         render();
         setStatus('✓ Saved.','ok');
-        window.alert('Storefront settings saved. Allow up to a minute for the changes to appear on the store.');
+        window.alert('Storefront template saved. The live store now uses the selected Shopify template.');
         close();
       } catch (error) {
         setStatus('Could not save: ' + (error.message || 'Unknown error'),'err');
@@ -262,7 +279,7 @@
       if (!window.confirm('Restore the original Stella & Sage storefront design?')) return;
 
       busy(true);
-      setStatus('Restoring original storefront…','');
+      setStatus('Restoring original storefront template…','');
 
       try {
         var response = await fetch(endpoint, {
@@ -281,7 +298,7 @@
         syncInputs();
         updateSummary();
         setStatus('✓ Original design restored.','ok');
-        window.alert('The original storefront design was restored. Allow up to a minute for the store to update.');
+        window.alert('The original storefront template was restored.');
         close();
       } catch (error) {
         setStatus('Could not restore: ' + (error.message || 'Unknown error'),'err');
