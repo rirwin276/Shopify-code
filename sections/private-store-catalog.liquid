@@ -1,325 +1,120 @@
 {% comment %}
-  PRIVATE STORE CATALOG
-  The category navigation and product grid are authored together here.
-  Nothing is relocated after load. This is the exact structure used by both
-  the real storefront and the Admin Powers storefront snapshot.
+  Private Store Catalog
+  - Automatically loads products from a collection
+  - Collection handle MUST match page.handle
+  Example:
+    Page: /pages/j-combs
+    Collection handle: j-combs
 {% endcomment %}
 
-<script
-  src="{{ 'results-list.js' | asset_url }}"
-  type="module"
-  fetchpriority="low"
-></script>
+{% assign handle = page.handle | downcase | strip %}
+{% assign collection = collections[handle] %}
+{% assign member_tag = 'storefront-member--' | append: handle %}
+{% assign admin_tag  = 'storefront-admin--'  | append: handle %}
+{% assign access_tag = 'custom_storefront_access' %}
+{% assign shop_admin_tag = 'custom_shop_admin' %}
+{% assign has_access = false %}
 
-{% liquid
-  assign hide_private_store_collection = false
-  assign private_handle = collection.handle | downcase | strip
-  capture private_access
-    render 'private-store-access', handle: private_handle
-  endcapture
-  assign private_access = private_access | strip
+{% if customer %}
+  {% for tag in customer.tags %}
+    {% assign normalized_tag = tag | downcase | strip %}
+    {% if normalized_tag == shop_admin_tag or normalized_tag == admin_tag %}
+      {% assign has_access = true %}
+      {% break %}
+    {% endif %}
+    {% if normalized_tag == access_tag or normalized_tag == member_tag %}
+      {% assign has_access = true %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
 
-  unless private_access != blank
-    assign hide_private_store_collection = true
-  endunless
-%}
+{% if has_access %}
+<section class="ps-catalog">
+  <div class="ps-wrap">
 
-{% unless hide_private_store_collection %}
-  <results-list
-    class="section product-grid-container ss-private-catalog"
-    style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
-    section-id="{{ section.id }}"
-    infinite-scroll="{{ section.settings.enable_infinite_scroll }}"
-    data-ss-private-catalog
-  >
-    {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
+    {% if collection and collection.products_count > 0 %}
 
-    <nav class="ss-category-nav" aria-label="Shop by product type" data-ss-category-nav>
-      <div class="ss-category-tabs" role="tablist">
-        <button type="button" class="ss-category-tab active" data-ss-category="all" role="tab" aria-selected="true">All gear</button>
-        <button type="button" class="ss-category-tab" data-ss-category="shirts" role="tab" aria-selected="false">Shirts</button>
-        <button type="button" class="ss-category-tab" data-ss-category="youth" role="tab" aria-selected="false">Youth</button>
-        <button type="button" class="ss-category-tab" data-ss-category="hoodies" role="tab" aria-selected="false">Hoodies</button>
-        <button type="button" class="ss-category-tab" data-ss-category="tanks" role="tab" aria-selected="false">Tanks</button>
-        <button type="button" class="ss-category-tab" data-ss-category="headwear" role="tab" aria-selected="false">Hats</button>
-        <button type="button" class="ss-category-tab" data-ss-category="personalized" role="tab" aria-selected="false">Personalized</button>
-        <button type="button" class="ss-category-tab" data-ss-category="accessories" role="tab" aria-selected="false">Accessories</button>
-        <button type="button" class="ss-category-tab" data-ss-category="other" role="tab" aria-selected="false">More</button>
+      <div class="ps-grid">
+        {% for product in collection.products %}
+          <div class="ps-item">
+            <a href="{{ product.url }}">
+              {{ product.featured_image | image_url: width: 600 | image_tag }}
+            </a>
+
+            <div class="ps-meta">
+              <div class="ps-title">{{ product.title }}</div>
+
+              {% if section.settings.show_price %}
+                <div class="ps-price">{{ product.price | money }}</div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
       </div>
-    </nav>
 
-    <div class="collection-wrapper grid gap-style">
-      {% content_for 'block',
-        type: 'filters',
-        id: 'filters',
-        results: collection,
-        results_size: collection.products_count
-      %}
+    {% else %}
+      <div class="ps-empty">
+        No products have been added to this store yet.
+      </div>
+    {% endif %}
 
-      {% assign products_per_page = 24 %}
-      {% if section.settings.enable_infinite_scroll == false %}
-        {% assign products_per_page = section.settings.products_per_page %}
-      {% endif %}
+  </div>
+</section>
+{% endif %}
 
-      {% paginate collection.products by products_per_page %}
-        {% capture children %}
-          {% for product in collection.products %}
-            {% capture ss_search_text %} {{ product.title }} {{ product.tags | join: ' ' }} {% endcapture %}
-            {% assign ss_search_text = ss_search_text | downcase %}
-            {% assign ss_categories = '' %}
+<style>
+.ps-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
 
-            {% if ss_search_text contains 'youth' or ss_search_text contains 'toddler' or ss_search_text contains 'kids' or ss_search_text contains 'kid ' %}
-              {% assign ss_categories = ss_categories | append: ' youth' %}
-            {% endif %}
-            {% if ss_search_text contains 'hoodie' or ss_search_text contains 'sweatshirt' or ss_search_text contains 'pullover' %}
-              {% assign ss_categories = ss_categories | append: ' hoodies' %}
-            {% endif %}
-            {% if ss_search_text contains 'tank' or ss_search_text contains 'racerback' %}
-              {% assign ss_categories = ss_categories | append: ' tanks' %}
-            {% endif %}
-            {% if ss_search_text contains 'tee' or ss_search_text contains 't-shirt' or ss_search_text contains 'shirt' or ss_search_text contains 'long sleeve' or ss_search_text contains 'crewneck' %}
-              {% assign ss_categories = ss_categories | append: ' shirts' %}
-            {% endif %}
-            {% if ss_search_text contains 'hat' or ss_search_text contains 'cap' or ss_search_text contains 'beanie' or ss_search_text contains 'trucker' %}
-              {% assign ss_categories = ss_categories | append: ' headwear' %}
-            {% endif %}
-            {% if ss_search_text contains 'name & number' or ss_search_text contains 'name and number' or ss_search_text contains 'personalized' or ss_search_text contains 'personalization' %}
-              {% assign ss_categories = ss_categories | append: ' personalized' %}
-            {% endif %}
-            {% if ss_search_text contains 'tote' or ss_search_text contains 'bag' or ss_search_text contains 'mug' or ss_search_text contains 'bottle' or ss_search_text contains 'blanket' or ss_search_text contains 'accessory' %}
-              {% assign ss_categories = ss_categories | append: ' accessories' %}
-            {% endif %}
-            {% if ss_categories == blank %}
-              {% assign ss_categories = ' other' %}
-            {% endif %}
+.ps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
 
-            <li
-              id="{{ section.id }}-{{ product.id }}"
-              class="product-grid__item product-grid__item--{{ forloop.index0 }}"
-              data-page="{{ paginate.current_page }}"
-              data-product-id="{{ product.id }}"
-              data-ss-categories="{{ ss_categories | strip | escape }}"
-              ref="cards[]"
-            >
-              {% # theme-check-disable %}
-              {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
-              {% # theme-check-enable %}
-            </li>
-          {% endfor %}
-        {% endcapture %}
+.ps-item img {
+  width: 100%;
+  border-radius: 14px;
+}
 
-        {% render 'product-grid',
-          section: section,
-          children: children,
-          products: collection.products,
-          paginate: paginate,
-          enable_infinite_scroll: section.settings.enable_infinite_scroll
-        %}
-      {% endpaginate %}
-    </div>
-  </results-list>
+.ps-meta {
+  margin-top: 8px;
+}
 
-  <script>
-    (function(){
-      var root = document.querySelector('[data-ss-private-catalog]');
-      if (!root || root.dataset.ssCategoryReady === '1') return;
-      root.dataset.ssCategoryReady = '1';
+.ps-title {
+  font-weight: 700;
+}
 
-      var nav = root.querySelector('[data-ss-category-nav]');
-      var buttons = Array.from(root.querySelectorAll('[data-ss-category]'));
-      var active = 'all';
+.ps-price {
+  color: #555;
+  font-size: 14px;
+}
 
-      function items(){
-        return Array.from(root.querySelectorAll('.product-grid__item[data-product-id]'));
-      }
-
-      function apply(){
-        var available = {};
-        var productItems = items();
-
-        productItems.forEach(function(item){
-          var categories = (item.dataset.ssCategories || 'other').split(/\s+/).filter(Boolean);
-          categories.forEach(function(category){ available[category] = true; });
-          item.hidden = active !== 'all' && categories.indexOf(active) === -1;
-        });
-
-        buttons.forEach(function(button){
-          var category = button.dataset.ssCategory || 'all';
-          if (category !== 'all') button.hidden = !available[category];
-          var selected = category === active;
-          button.classList.toggle('active', selected);
-          button.setAttribute('aria-selected', selected ? 'true' : 'false');
-        });
-
-        if (nav) nav.hidden = !productItems.length;
-      }
-
-      buttons.forEach(function(button){
-        button.addEventListener('click', function(){
-          if (button.hidden) return;
-          active = button.dataset.ssCategory || 'all';
-          apply();
-        });
-      });
-
-      apply();
-      new MutationObserver(apply).observe(root, { childList: true, subtree: true });
-    })();
-  </script>
-{% endunless %}
-
-{% stylesheet %}
-  .ss-private-catalog .collection-wrapper {
-    @media screen and (min-width: 750px) {
-      grid-template-columns:
-        1fr repeat(
-          var(--centered-column-number),
-          minmax(0, calc((var(--page-width) - var(--page-margin) * 2) / var(--centered-column-number)))
-        )
-        1fr;
-    }
-  }
-
-  .ss-private-catalog :is(.facets-block-wrapper, .facets-container, facet-filters-form, .product-grid__item-count, .sorting-filter, .grid-density-controls) {
-    display: none !important;
-  }
-{% endstylesheet %}
+.ps-empty {
+  padding: 40px;
+  text-align: center;
+  opacity: 0.7;
+}
+</style>
 
 {% schema %}
 {
-  "name": "Private store catalog",
-  "enabled_on": { "templates": ["collection"] },
+  "name": "Private Store Catalog",
   "settings": [
     {
-      "type": "select",
-      "id": "layout_type",
-      "label": "Layout",
-      "options": [
-        { "value": "grid", "label": "Grid" },
-        { "value": "organic", "label": "Editorial" }
-      ],
-      "default": "grid"
-    },
-    {
-      "type": "select",
-      "id": "product_card_size",
-      "label": "Card size",
-      "options": [
-        { "value": "small", "label": "Small" },
-        { "value": "medium", "label": "Medium" },
-        { "value": "large", "label": "Large" },
-        { "value": "extra-large", "label": "Extra large" }
-      ],
-      "default": "small"
-    },
-    {
-      "type": "select",
-      "id": "mobile_product_card_size",
-      "label": "Mobile card size",
-      "options": [
-        { "value": "small", "label": "Small" },
-        { "value": "large", "label": "Large" }
-      ],
-      "default": "small"
-    },
-    {
       "type": "checkbox",
-      "id": "enable_infinite_scroll",
-      "label": "Auto-load products",
+      "id": "show_price",
+      "label": "Show price",
       "default": true
-    },
-    {
-      "type": "range",
-      "id": "products_per_page",
-      "label": "Products per page",
-      "min": 8,
-      "max": 36,
-      "step": 4,
-      "default": 24
-    },
-    {
-      "type": "select",
-      "id": "product_grid_width",
-      "label": "Width",
-      "options": [
-        { "value": "centered", "label": "Page" },
-        { "value": "full-width", "label": "Full" }
-      ],
-      "default": "centered"
-    },
-    {
-      "type": "checkbox",
-      "id": "full_width_on_mobile",
-      "label": "Full width on mobile",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "columns_gap_horizontal",
-      "label": "Horizontal gap",
-      "min": 0,
-      "max": 50,
-      "step": 1,
-      "unit": "px",
-      "default": 16
-    },
-    {
-      "type": "range",
-      "id": "columns_gap_vertical",
-      "label": "Vertical gap",
-      "min": 0,
-      "max": 50,
-      "step": 1,
-      "unit": "px",
-      "default": 24
-    },
-    {
-      "type": "range",
-      "id": "padding-inline-start",
-      "label": "Left padding",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "padding-inline-end",
-      "label": "Right padding",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "Color scheme",
-      "default": "scheme-1"
-    },
-    {
-      "type": "range",
-      "id": "padding-block-start",
-      "label": "Top padding",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "padding-block-end",
-      "label": "Bottom padding",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "default": 32
     }
   ],
-  "presets": []
+  "presets": [
+    {
+      "name": "Private Store Catalog"
+    }
+  ]
 }
 {% endschema %}
