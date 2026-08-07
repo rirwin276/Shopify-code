@@ -1,0 +1,499 @@
+{% comment %}
+  PRIVATE STOREFRONT ENHANCEMENTS
+  - Compact existing hero for every private store.
+  - Moves the optional store message inside the hero card.
+  - Adds product-type tabs without replacing the Shopify product grid.
+  - Applies one of five visual skins from custom_shop.storefront_settings.
+{% endcomment %}
+
+{% assign ss_handle = collection.handle | downcase | strip %}
+{% capture ss_access %}{% render 'private-store-access', handle: ss_handle %}{% endcapture %}
+{% assign ss_access = ss_access | strip %}
+{% assign ss_entry = shop.metaobjects.custom_shop[ss_handle] %}
+{% assign ss_settings = ss_entry.storefront_settings.value | default: ss_entry.storefront_settings %}
+{% assign ss_enabled = false %}
+{% assign ss_style = 'clean' %}
+{% assign ss_pattern = 'none' %}
+{% assign ss_primary = '#11100e' %}
+{% assign ss_secondary = '#b7a36a' %}
+{% assign ss_primary_text = '#ffffff' %}
+{% assign ss_secondary_text = '#111111' %}
+{% assign ss_message = '' %}
+{% assign ss_show_message = false %}
+
+{% if ss_settings and ss_settings.enabled == true %}
+  {% assign ss_enabled = true %}
+  {% assign ss_style = ss_settings.style | default: 'clean' | downcase %}
+  {% assign ss_pattern = ss_settings.pattern | default: 'none' | downcase %}
+  {% assign ss_primary = ss_settings.primary_color | default: ss_primary %}
+  {% assign ss_secondary = ss_settings.secondary_color | default: ss_secondary %}
+  {% assign ss_primary_text = ss_settings.primary_text | default: ss_primary_text %}
+  {% assign ss_secondary_text = ss_settings.secondary_text | default: ss_secondary_text %}
+  {% assign ss_message = ss_settings.announcement | default: '' | strip %}
+  {% if ss_settings.show_announcement == true and ss_message != blank %}
+    {% assign ss_show_message = true %}
+  {% endif %}
+{% endif %}
+
+{% if ss_access != blank %}
+  <div
+    class="ss-storefront-enhancements"
+    data-ss-storefront-enhancements
+    data-style="{{ ss_style | escape }}"
+    data-pattern="{{ ss_pattern | escape }}"
+    data-enabled="{{ ss_enabled }}"
+  >
+    {% if ss_show_message %}
+      <div hidden data-ss-store-message>{{ ss_message | escape }}</div>
+    {% endif %}
+
+    <nav class="ss-category-nav" aria-label="Shop by product type" data-ss-category-nav>
+      <div class="ss-category-tabs" role="tablist">
+        <button type="button" class="ss-category-tab active" data-ss-category="all" role="tab" aria-selected="true">All gear</button>
+        <button type="button" class="ss-category-tab" data-ss-category="shirts" role="tab" aria-selected="false">Shirts</button>
+        <button type="button" class="ss-category-tab" data-ss-category="youth" role="tab" aria-selected="false">Youth</button>
+        <button type="button" class="ss-category-tab" data-ss-category="hoodies" role="tab" aria-selected="false">Hoodies</button>
+        <button type="button" class="ss-category-tab" data-ss-category="tanks" role="tab" aria-selected="false">Tanks</button>
+        <button type="button" class="ss-category-tab" data-ss-category="headwear" role="tab" aria-selected="false">Hats</button>
+        <button type="button" class="ss-category-tab" data-ss-category="personalized" role="tab" aria-selected="false">Personalized</button>
+        <button type="button" class="ss-category-tab" data-ss-category="accessories" role="tab" aria-selected="false">Accessories</button>
+        <button type="button" class="ss-category-tab" data-ss-category="other" role="tab" aria-selected="false">More</button>
+      </div>
+    </nav>
+
+    <div hidden data-ss-category-data>
+      {% for ss_product in collection.products %}
+        {% capture ss_search_text %} {{ ss_product.title }} {{ ss_product.tags | join: ' ' }} {% endcapture %}
+        {% assign ss_search_text = ss_search_text | downcase %}
+        {% assign ss_categories = '' %}
+
+        {% if ss_search_text contains 'youth' or ss_search_text contains 'toddler' or ss_search_text contains 'kids' or ss_search_text contains 'kid ' %}
+          {% assign ss_categories = ss_categories | append: ' youth' %}
+        {% endif %}
+        {% if ss_search_text contains 'hoodie' or ss_search_text contains 'sweatshirt' or ss_search_text contains 'pullover' %}
+          {% assign ss_categories = ss_categories | append: ' hoodies' %}
+        {% endif %}
+        {% if ss_search_text contains 'tank' or ss_search_text contains 'racerback' %}
+          {% assign ss_categories = ss_categories | append: ' tanks' %}
+        {% endif %}
+        {% if ss_search_text contains 'tee' or ss_search_text contains 't-shirt' or ss_search_text contains 'shirt' or ss_search_text contains 'long sleeve' or ss_search_text contains 'crewneck' %}
+          {% assign ss_categories = ss_categories | append: ' shirts' %}
+        {% endif %}
+        {% if ss_search_text contains 'hat' or ss_search_text contains 'cap' or ss_search_text contains 'beanie' or ss_search_text contains 'trucker' %}
+          {% assign ss_categories = ss_categories | append: ' headwear' %}
+        {% endif %}
+        {% if ss_search_text contains 'name & number' or ss_search_text contains 'name and number' or ss_search_text contains 'personalized' or ss_search_text contains 'personalization' %}
+          {% assign ss_categories = ss_categories | append: ' personalized' %}
+        {% endif %}
+        {% if ss_search_text contains 'tote' or ss_search_text contains 'bag' or ss_search_text contains 'mug' or ss_search_text contains 'bottle' or ss_search_text contains 'blanket' or ss_search_text contains 'accessory' %}
+          {% assign ss_categories = ss_categories | append: ' accessories' %}
+        {% endif %}
+        {% if ss_categories == blank %}
+          {% assign ss_categories = ' other' %}
+        {% endif %}
+
+        <i data-product-id="{{ ss_product.id }}" data-categories="{{ ss_categories | strip | escape }}"></i>
+      {% endfor %}
+    </div>
+  </div>
+
+  <style>
+    html {
+      --ss-team-primary: {{ ss_primary }};
+      --ss-team-secondary: {{ ss_secondary }};
+      --ss-team-primary-text: {{ ss_primary_text }};
+      --ss-team-secondary-text: {{ ss_secondary_text }};
+    }
+
+    /* The old standalone bar is intentionally replaced by a message inside the hero. */
+    .ss-team-announcement { display: none !important; }
+
+    /* Compact the existing live hero without changing its permissions or actions. */
+    .ps-hero {
+      padding: 20px 20px 16px !important;
+    }
+    .ps-hero .ps-shell {
+      width: min(1320px, 100%) !important;
+    }
+    .ps-hero .ps-hero-card {
+      min-height: 220px !important;
+      grid-template-columns: minmax(0, 1fr) 238px !important;
+      gap: 24px !important;
+      padding: clamp(22px, 3vw, 34px) !important;
+      border-radius: 32px !important;
+    }
+    .ps-hero .ps-hero-main {
+      gap: clamp(18px, 2.4vw, 30px) !important;
+    }
+    .ps-hero .ps-logo {
+      width: clamp(104px, 11vw, 152px) !important;
+      height: clamp(104px, 11vw, 152px) !important;
+      border-radius: 26px !important;
+    }
+    .ps-hero .ps-eyebrow {
+      min-height: 28px !important;
+      margin-bottom: 10px !important;
+      padding: 0 10px !important;
+      font-size: 10px !important;
+    }
+    .ps-hero .ps-title {
+      font-size: clamp(40px, 5.2vw, 70px) !important;
+      line-height: .94 !important;
+    }
+    .ps-hero .ps-sub {
+      margin-top: 11px !important;
+      font-size: clamp(15px, 1.35vw, 18px) !important;
+      line-height: 1.42 !important;
+    }
+    .ps-hero .ps-meta-row {
+      margin-top: 14px !important;
+    }
+    .ps-hero .ps-meta-row span {
+      min-height: 27px !important;
+      font-size: 9px !important;
+    }
+    .ps-hero .ps-action-panel {
+      gap: 7px !important;
+      padding: 12px !important;
+      border-radius: 24px !important;
+    }
+    .ps-hero .ps-btn {
+      min-height: 41px !important;
+      padding: 0 15px !important;
+      font-size: 12px !important;
+    }
+
+    .ss-hero-message {
+      max-width: 650px;
+      margin-top: 11px;
+      padding: 7px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid color-mix(in srgb, var(--ss-team-secondary) 34%, rgba(17,16,14,.08));
+      border-left: 3px solid var(--ss-team-secondary);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--ss-team-primary) 7%, #ffffff);
+      color: color-mix(in srgb, var(--ss-team-primary) 78%, #11100e);
+      font-size: 12px;
+      font-weight: 780;
+      line-height: 1.3;
+    }
+    .ss-hero-message::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--ss-team-secondary);
+    }
+
+    .ss-category-nav {
+      width: 100%;
+      padding: 7px 20px 5px;
+      background: color-mix(in srgb, var(--ss-team-primary) 3%, #ffffff);
+      border-top: 1px solid rgba(17,16,14,.055);
+      border-bottom: 1px solid rgba(17,16,14,.075);
+    }
+    .ss-category-tabs {
+      width: min(1320px, 100%);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 2px 0 5px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .ss-category-tabs::-webkit-scrollbar { display: none; }
+    .ss-category-tab {
+      min-height: 34px;
+      flex: 0 0 auto;
+      padding: 0 13px;
+      border: 1px solid color-mix(in srgb, var(--ss-team-primary) 16%, rgba(17,16,14,.09));
+      border-radius: 999px;
+      background: rgba(255,255,255,.88);
+      color: color-mix(in srgb, var(--ss-team-primary) 78%, #11100e);
+      font: 800 11px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .ss-category-tab.active {
+      border-color: var(--ss-team-primary);
+      background: var(--ss-team-primary);
+      color: var(--ss-team-primary-text);
+      box-shadow: 0 7px 18px color-mix(in srgb, var(--ss-team-primary) 18%, transparent);
+    }
+
+    /* Classic Team */
+    html.ss-store-custom.ss-style-clean.ss-pattern-none .ps-hero {
+      background:
+        radial-gradient(circle at 14% 0%, color-mix(in srgb, var(--ss-team-primary) 14%, transparent), transparent 34%),
+        radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--ss-team-secondary) 11%, transparent), transparent 30%),
+        linear-gradient(180deg, #fbf8f1 0%, #fffdf9 42%, #ffffff 100%) !important;
+    }
+
+    /* Diagonal Split */
+    html.ss-store-custom.ss-pattern-diagonal .ps-hero-card {
+      background:
+        linear-gradient(128deg,
+          color-mix(in srgb, var(--ss-team-primary) 9%, #ffffff) 0 67%,
+          color-mix(in srgb, var(--ss-team-secondary) 24%, #ffffff) 67% 70%,
+          color-mix(in srgb, var(--ss-team-secondary) 9%, #ffffff) 70% 100%) !important;
+    }
+    html.ss-store-custom.ss-pattern-diagonal results-list {
+      background:
+        linear-gradient(135deg,
+          color-mix(in srgb, var(--ss-team-primary) 8%, #ffffff) 0 47%,
+          color-mix(in srgb, var(--ss-team-secondary) 28%, #ffffff) 47% 51%,
+          color-mix(in srgb, var(--ss-team-secondary) 7%, #ffffff) 51% 100%) !important;
+    }
+
+    /* Color Splash */
+    html.ss-store-custom.ss-style-bold.ss-pattern-dots .ps-hero {
+      background:
+        radial-gradient(circle at 8% 10%, color-mix(in srgb, var(--ss-team-primary) 34%, transparent), transparent 32%),
+        radial-gradient(circle at 92% 82%, color-mix(in srgb, var(--ss-team-secondary) 32%, transparent), transparent 30%),
+        #f7f8fb !important;
+    }
+    html.ss-store-custom.ss-style-bold.ss-pattern-dots .ps-hero-card {
+      background: rgba(255,255,255,.80) !important;
+    }
+    html.ss-store-custom.ss-style-bold.ss-pattern-dots results-list {
+      background:
+        radial-gradient(circle at 10% 18%, color-mix(in srgb, var(--ss-team-primary) 21%, transparent), transparent 27%),
+        radial-gradient(circle at 88% 76%, color-mix(in srgb, var(--ss-team-secondary) 23%, transparent), transparent 32%),
+        #f7f8fb !important;
+    }
+
+    /* Pro Dark */
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero {
+      background:
+        radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--ss-team-primary) 50%, transparent), transparent 34%),
+        linear-gradient(135deg, #0d1118, #181e27) !important;
+    }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero-card {
+      background: rgba(18,23,31,.86) !important;
+      border-color: rgba(255,255,255,.10) !important;
+      box-shadow: 0 28px 90px rgba(0,0,0,.32) !important;
+    }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-title,
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-sub,
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-eyebrow,
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel-title {
+      color: #ffffff !important;
+    }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-sub { opacity: .70; }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-meta-row span,
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel {
+      background: rgba(255,255,255,.08) !important;
+      border-color: rgba(255,255,255,.12) !important;
+      color: #ffffff !important;
+    }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-hero-message {
+      background: rgba(255,255,255,.08);
+      color: #ffffff;
+      border-color: rgba(255,255,255,.12);
+    }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-nav {
+      background: #151a22;
+      border-color: rgba(255,255,255,.08);
+    }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-tab {
+      background: #202632;
+      border-color: #343b47;
+      color: #dce0e7;
+    }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-tab.active {
+      border-color: var(--ss-team-secondary);
+      background: var(--ss-team-secondary);
+      color: var(--ss-team-secondary-text);
+    }
+    html.ss-store-custom.ss-style-dark.ss-pattern-grid results-list {
+      background-color: #131820 !important;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) !important;
+      background-size: 34px 34px !important;
+    }
+
+    /* Heritage */
+    html.ss-store-custom.ss-pattern-stripes .ps-hero {
+      background: linear-gradient(180deg, #f8f1df, #fffdf8) !important;
+    }
+    html.ss-store-custom.ss-pattern-stripes .ps-hero-card {
+      background:
+        linear-gradient(128deg,
+          #fffdf8 0 70%,
+          color-mix(in srgb, var(--ss-team-primary) 48%, #ffffff) 70% 74%,
+          color-mix(in srgb, var(--ss-team-secondary) 58%, #ffffff) 74% 78%,
+          #fffdf8 78% 100%) !important;
+    }
+    html.ss-store-custom.ss-pattern-stripes .ss-category-nav {
+      background: #faf5e9;
+    }
+    html.ss-store-custom.ss-pattern-stripes results-list {
+      background:
+        linear-gradient(135deg,
+          #fbf6e9 0 34%,
+          color-mix(in srgb, var(--ss-team-primary) 48%, #ffffff) 34% 38%,
+          color-mix(in srgb, var(--ss-team-secondary) 58%, #ffffff) 38% 42%,
+          #fbf6e9 42% 100%) !important;
+    }
+
+    @media (max-width: 990px) {
+      .ps-hero .ps-hero-card {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .ps-hero {
+        padding: 6px 8px 6px !important;
+      }
+      .ps-hero .ps-hero-card {
+        grid-template-columns: 68px minmax(0,1fr) !important;
+        padding: 10px !important;
+        gap: 9px !important;
+        border-radius: 20px !important;
+      }
+      .ps-hero .ps-logo {
+        width: 68px !important;
+        height: 68px !important;
+        border-radius: 17px !important;
+      }
+      .ps-hero .ps-title {
+        font-size: clamp(25px, 8vw, 34px) !important;
+      }
+      .ps-hero .ps-meta-row {
+        margin-top: 6px !important;
+      }
+      .ps-hero .ps-action-panel {
+        padding: 6px !important;
+        gap: 6px !important;
+        border-radius: 16px !important;
+      }
+      .ps-hero .ps-btn {
+        min-height: 35px !important;
+        font-size: 11px !important;
+      }
+      .ss-hero-message {
+        max-width: 100%;
+        margin-top: 6px;
+        padding: 4px 7px;
+        border-left-width: 2px;
+        border-radius: 7px;
+        font-size: 9px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .ss-hero-message::before {
+        width: 5px;
+        height: 5px;
+      }
+      .ss-category-nav {
+        padding: 5px 8px 3px;
+      }
+      .ss-category-tabs {
+        gap: 6px;
+        padding-bottom: 4px;
+      }
+      .ss-category-tab {
+        min-height: 32px;
+        padding: 0 11px;
+        font-size: 10px;
+      }
+    }
+  </style>
+
+  <script>
+    (function(){
+      var root = document.querySelector('[data-ss-storefront-enhancements]');
+      if (!root) return;
+
+      var html = document.documentElement;
+      ['ss-store-custom','ss-style-clean','ss-style-bold','ss-style-dark','ss-pattern-none','ss-pattern-diagonal','ss-pattern-stripes','ss-pattern-dots','ss-pattern-grid'].forEach(function(name){ html.classList.remove(name); });
+      if (root.dataset.enabled === 'true') {
+        html.classList.add('ss-store-custom');
+        html.classList.add('ss-style-' + (root.dataset.style || 'clean'));
+        html.classList.add('ss-pattern-' + (root.dataset.pattern || 'none'));
+      }
+
+      function installMessage(){
+        var source = root.querySelector('[data-ss-store-message]');
+        var copy = document.querySelector('.ps-hero .ps-copy');
+        if (!source || !copy || copy.querySelector('.ss-hero-message')) return;
+        var message = document.createElement('div');
+        message.className = 'ss-hero-message';
+        message.textContent = source.textContent.trim();
+        copy.appendChild(message);
+      }
+
+      var categoryData = {};
+      root.querySelectorAll('[data-ss-category-data] [data-product-id]').forEach(function(item){
+        categoryData[item.dataset.productId] = (item.dataset.categories || 'other').split(/\s+/).filter(Boolean);
+      });
+
+      var activeCategory = 'all';
+      var nav = root.querySelector('[data-ss-category-nav]');
+      var buttons = Array.from(root.querySelectorAll('[data-ss-category]'));
+
+      function productItems(){
+        return Array.from(document.querySelectorAll('results-list .product-grid__item[data-product-id]'));
+      }
+
+      function applyCategory(){
+        var available = {};
+        var items = productItems();
+        items.forEach(function(item){
+          var categories = categoryData[item.dataset.productId] || ['other'];
+          item.dataset.ssCategories = categories.join(' ');
+          categories.forEach(function(category){ available[category] = true; });
+          item.hidden = activeCategory !== 'all' && categories.indexOf(activeCategory) === -1;
+        });
+        buttons.forEach(function(button){
+          var category = button.dataset.ssCategory;
+          if (category !== 'all') button.hidden = !available[category];
+        });
+        if (!items.length) nav.hidden = true;
+      }
+
+      buttons.forEach(function(button){
+        button.addEventListener('click', function(){
+          if (button.hidden) return;
+          activeCategory = button.dataset.ssCategory || 'all';
+          buttons.forEach(function(item){
+            var selected = item === button;
+            item.classList.toggle('active', selected);
+            item.setAttribute('aria-selected', selected ? 'true' : 'false');
+          });
+          applyCategory();
+        });
+      });
+
+      function boot(){
+        installMessage();
+        applyCategory();
+        var list = document.querySelector('results-list');
+        if (list && !list.dataset.ssCategoryObserver) {
+          list.dataset.ssCategoryObserver = '1';
+          new MutationObserver(function(){ applyCategory(); }).observe(list, {childList:true, subtree:true});
+        }
+      }
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+      else boot();
+      document.addEventListener('shopify:section:load', boot);
+    })();
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Storefront enhancements",
+  "enabled_on": { "templates": ["collection"] },
+  "settings": []
+}
+{% endschema %}
