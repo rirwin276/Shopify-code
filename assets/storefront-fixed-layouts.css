@@ -666,3 +666,175 @@
     border-radius: 22px !important;
   }
 }
+
+/* ============================================================
+   SECOND PASS: stripes you can actually see, spray you can't miss
+   ============================================================ */
+
+/*
+  Why the first attempt at these was not enough.
+
+  The store card and the product cards are opaque and sit in the middle of
+  the page, so a single diagonal band crossing the centre is hidden behind
+  them — only slivers survive in the outer margins. On a phone the content
+  spans nearly the full width, so there is almost no exposed background left
+  for a band to appear in at all, which is why Heritage read as a plain cream
+  rectangle there.
+
+  A repeating stripe fixes both cases: wherever a gap in the content exists —
+  page margins, the gutters between cards, the space below the grid — a stripe
+  is crossing it. That is also what varsity actually looks like, so the design
+  gets more honest rather than just louder.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+  background:
+    repeating-linear-gradient(
+      128deg,
+      transparent 0 186px,
+      color-mix(in srgb, var(--ss-team-primary) 62%, #fff) 186px 218px,
+      #fbf7ec 218px 228px,
+      color-mix(in srgb, var(--ss-team-secondary) 72%, #fff) 228px 258px,
+      transparent 258px 470px
+    ),
+    linear-gradient(180deg, #fdfaf2 0%, #f8f2e3 100%) !important;
+}
+
+/*
+  Split keeps its single division — that is the whole idea of the design — but
+  the band was 5% of the diagonal, thin enough to vanish behind the store card.
+  Wider, with a hard accent line so the edge stays crisp instead of blurring
+  into the two fields.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="split"]) {
+  background:
+    linear-gradient(128deg,
+      color-mix(in srgb, var(--ss-team-primary) 26%, #fff) 0 44%,
+      color-mix(in srgb, var(--ss-team-primary) 88%, var(--ss-team-secondary)) 44% 53%,
+      color-mix(in srgb, var(--ss-team-secondary) 92%, #fff) 53% 56%,
+      color-mix(in srgb, var(--ss-team-secondary) 30%, #fff) 56% 100%) !important;
+}
+
+/*
+  Spray was still reading as a soft glow because every blast faded to nothing
+  before it reached anything. The cores are now genuinely saturated and hold
+  their colour further out, and there are enough drips scattered across the
+  page that it looks sprayed rather than lit.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) {
+  background-image:
+    radial-gradient(circle at 12% 4%,
+      color-mix(in srgb, var(--ss-team-primary) 100%, transparent) 0%,
+      color-mix(in srgb, var(--ss-team-primary) 78%, transparent) 18%,
+      color-mix(in srgb, var(--ss-team-primary) 30%, transparent) 38%,
+      transparent 62%),
+    radial-gradient(circle at 90% 96%,
+      color-mix(in srgb, var(--ss-team-secondary) 100%, transparent) 0%,
+      color-mix(in srgb, var(--ss-team-secondary) 78%, transparent) 19%,
+      color-mix(in srgb, var(--ss-team-secondary) 30%, transparent) 40%,
+      transparent 64%),
+    radial-gradient(circle at 78% 12%, color-mix(in srgb, var(--ss-team-secondary) 85%, transparent) 0%, transparent 11%),
+    radial-gradient(circle at 22% 84%, color-mix(in srgb, var(--ss-team-primary) 82%, transparent) 0%, transparent 10%),
+    radial-gradient(circle at 62% 30%, color-mix(in srgb, var(--ss-team-secondary) 62%, transparent) 0%, transparent 7%),
+    radial-gradient(circle at 40% 68%, color-mix(in srgb, var(--ss-team-primary) 58%, transparent) 0%, transparent 6%),
+    radial-gradient(circle at 92% 42%, color-mix(in srgb, var(--ss-team-secondary) 52%, transparent) 0%, transparent 5%),
+    radial-gradient(circle at 8% 58%, color-mix(in srgb, var(--ss-team-primary) 48%, transparent) 0%, transparent 4.5%),
+    linear-gradient(150deg, #050b13 0%, #0a1522 52%, #04090f 100%) !important;
+}
+
+@media (max-width: 768px) {
+  /*
+    Tighter repeat on a phone: the exposed background is only the gutters
+    between cards and the strip below the grid, so the stripes have to arrive
+    often enough that one lands in view.
+  */
+  #MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+    background:
+      repeating-linear-gradient(
+        150deg,
+        transparent 0 104px,
+        color-mix(in srgb, var(--ss-team-primary) 66%, #fff) 104px 126px,
+        #fbf7ec 126px 133px,
+        color-mix(in srgb, var(--ss-team-secondary) 76%, #fff) 133px 155px,
+        transparent 155px 272px
+      ),
+      linear-gradient(180deg, #fdfaf2 0%, #f8f2e3 100%) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-layout="split"]) {
+    background:
+      linear-gradient(158deg,
+        color-mix(in srgb, var(--ss-team-primary) 26%, #fff) 0 40%,
+        color-mix(in srgb, var(--ss-team-primary) 88%, var(--ss-team-secondary)) 40% 51%,
+        color-mix(in srgb, var(--ss-team-secondary) 92%, #fff) 51% 55%,
+        color-mix(in srgb, var(--ss-team-secondary) 30%, #fff) 55% 100%) !important;
+  }
+}
+
+/* ============================================================
+   THE STORE MESSAGE
+   ============================================================ */
+
+/*
+  This had no styling at all on the live page.
+
+  Every rule for .ss-hero-message lived in storefront-unified-polish.css,
+  storefront-final-tune.css and storefront-gradient-glow-live.css — all three
+  retired with the old architecture and none of them loaded — so the element
+  was being injected with no appearance and inheriting body copy. The one line
+  an organiser writes to their team ("order before the season starts") was
+  arriving as small grey text below the badges, which is the opposite of what
+  it is for.
+
+  It is now a deliberate notice: team-coloured rail, a live dot, and type
+  heavy enough to read as an instruction rather than a caption.
+*/
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 16px 0 0 !important;
+  padding: 12px 18px 12px 15px !important;
+  border: 1px solid color-mix(in srgb, var(--ss-team-secondary) 30%, transparent) !important;
+  border-left: 4px solid var(--ss-team-secondary) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--ss-team-secondary) 9%, #ffffff) !important;
+  color: #17150f !important;
+  font: 800 13.5px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif !important;
+  letter-spacing: .005em !important;
+  text-align: left !important;
+}
+
+/* A small live dot, so the notice reads as current rather than decorative. */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message::before {
+  content: '' !important;
+  flex: 0 0 auto !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: var(--ss-team-secondary) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-team-secondary) 20%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message[hidden] {
+  display: none !important;
+}
+
+/* On the dark designs the light card would punch a hole in the page. */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-hero-message,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-hero-message {
+  border-color: color-mix(in srgb, var(--ss-team-secondary) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--ss-team-secondary) 13%, rgba(8,15,25,.72)) !important;
+  color: #f2f7fc !important;
+  box-shadow: 0 0 30px -14px color-mix(in srgb, var(--ss-team-secondary) 70%, transparent) !important;
+}
+
+@media (max-width: 768px) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+    width: 100% !important;
+    margin-top: 13px !important;
+    padding: 11px 14px 11px 12px !important;
+    font-size: 12.5px !important;
+  }
+}
