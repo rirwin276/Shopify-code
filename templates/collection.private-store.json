@@ -25,24 +25,8 @@
       "type": "private-store-storefront-enhancements",
       "settings": {}
     },
-    "storefront_visual_polish": {
-      "type": "private-store-visual-polish",
-      "settings": {}
-    },
-    "storefront_continuity": {
-      "type": "private-store-continuity-polish",
-      "settings": {}
-    },
-    "gradient_glow": {
-      "type": "private-store-gradient-glow",
-      "settings": {}
-    },
     "legacy_appearance_fallback": {
       "type": "private-store-legacy-appearance-fallback",
-      "settings": {}
-    },
-    "unified_polish": {
-      "type": "private-store-unified-polish",
       "settings": {}
     },
     "main": {
@@ -174,6 +158,10 @@
         "padding-block-end": 32
       }
     },
+    "unified_polish": {
+      "type": "private-store-unified-polish",
+      "settings": {}
+    },
     "local_partner_hicPjc": {
       "type": "local-partner",
       "name": "Local Partner",
@@ -185,12 +173,9 @@
     "fundraiser_bar",
     "partner_jump",
     "storefront_enhancements",
-    "storefront_visual_polish",
-    "storefront_continuity",
-    "gradient_glow",
     "legacy_appearance_fallback",
-    "unified_polish",
     "main",
+    "unified_polish",
     "local_partner_hicPjc"
   ]
 }
