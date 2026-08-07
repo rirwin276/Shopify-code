@@ -34,12 +34,20 @@
       classic: {style:'clean', pattern:'none', label:'Classic Team'},
       split: {style:'clean', pattern:'diagonal', label:'Diagonal Split'},
       splash: {style:'bold', pattern:'dots', label:'Spray Burst'},
-      drip: {style:'dark', pattern:'dots', label:'Water Drip'},
       pro: {style:'dark', pattern:'grid', label:'Pro Dark'},
       heritage: {style:'clean', pattern:'stripes', label:'Heritage'}
     };
 
+    function normalizeLegacyDesign(settings){
+      if (settings && settings.style === 'dark' && settings.pattern === 'dots') {
+        settings.style = 'dark';
+        settings.pattern = 'grid';
+      }
+      return settings;
+    }
+
     function designFromState(settings){
+      normalizeLegacyDesign(settings);
       var style = settings.style || 'clean';
       var pattern = settings.pattern || 'none';
       var found = 'classic';
@@ -57,6 +65,7 @@
     try {
       parsed = JSON.parse(builder.querySelector('[data-sfs-current-settings]').textContent || '{}') || {};
     } catch (_error) {}
+    normalizeLegacyDesign(parsed);
 
     var savedState = Object.assign({}, defaults, parsed);
     var state = Object.assign({}, savedState);
@@ -105,6 +114,7 @@
     }
 
     function syncInputs(){
+      normalizeLegacyDesign(state);
       selectedDesign = designFromState(state);
       primary.value = state.primary_color || defaults.primary_color;
       secondary.value = state.secondary_color || defaults.secondary_color;
@@ -161,6 +171,7 @@
     function open(){
       lastFocus = document.activeElement;
       state = Object.assign({}, savedState);
+      normalizeLegacyDesign(state);
       selectedDesign = designFromState(state);
       dirty = false;
       syncInputs();
@@ -230,6 +241,7 @@
         if (!response.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + response.status));
 
         savedState = Object.assign({}, defaults, data.settings || state);
+        normalizeLegacyDesign(savedState);
         state = Object.assign({}, savedState);
         selectedDesign = designFromState(savedState);
         dirty = false;
