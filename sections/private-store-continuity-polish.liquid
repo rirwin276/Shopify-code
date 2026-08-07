@@ -1,0 +1,253 @@
+{% comment %}
+  PRIVATE STOREFRONT CONTINUITY POLISH
+  Keeps the optional fundraiser compatible with all appearance presets,
+  removes leftover Shopify toolbar space, softens cards on dark themes,
+  and adds the Water Drip visual preset.
+{% endcomment %}
+
+<style>
+  /* Category tabs replace the standard private-store filter/sort toolbar. */
+  results-list .facets-block-wrapper,
+  results-list .facets-container,
+  results-list facet-filters-form,
+  results-list .product-grid__item-count,
+  results-list .sorting-filter,
+  results-list .grid-density-controls {
+    display: none !important;
+  }
+
+  results-list .product-grid {
+    margin-top: 0 !important;
+    padding-top: 8px !important;
+  }
+
+  /* Fundraiser remains fully supported and adopts the chosen team colors. */
+  .ss-frbar {
+    width: min(960px, 100%);
+    margin: 8px auto 10px !important;
+    padding: 0 16px !important;
+  }
+
+  .ss-frbar-inner {
+    border-color: color-mix(in srgb, var(--ss-team-secondary) 34%, rgba(255,255,255,.12)) !important;
+    background:
+      radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--ss-team-primary) 36%, transparent), transparent 38%),
+      linear-gradient(135deg,
+        color-mix(in srgb, var(--ss-team-primary) 68%, #121722),
+        color-mix(in srgb, var(--ss-team-secondary) 22%, #121722)) !important;
+    box-shadow: 0 14px 38px rgba(15,23,42,.20) !important;
+  }
+
+  .ss-frbar-badge,
+  .ss-frbar-fill {
+    background: var(--ss-team-secondary) !important;
+    color: var(--ss-team-secondary-text) !important;
+  }
+
+  /* Softer product surfaces on dark designs: still clear, less like stark boxes. */
+  html.ss-store-custom:is(.ss-style-bold.ss-pattern-dots,.ss-style-dark.ss-pattern-grid,.ss-style-dark.ss-pattern-dots) results-list .product-grid__item {
+    padding: 7px !important;
+    border: 1px solid rgba(255,255,255,.20) !important;
+    border-radius: 16px !important;
+    background: rgba(248,247,243,.98) !important;
+    box-shadow: 0 13px 32px rgba(0,0,0,.18) !important;
+  }
+
+  html.ss-store-custom:is(.ss-style-bold.ss-pattern-dots,.ss-style-dark.ss-pattern-grid,.ss-style-dark.ss-pattern-dots) results-list .product-grid__item :is(a,p,span,strong,small) {
+    color: #17150f !important;
+  }
+
+  /* WATER DRIP: one continuous dark environment with true paint hanging from the top. */
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero,
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots results-list {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: linear-gradient(180deg,#0b111b,#080d15) !important;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0 0 auto 0;
+    height: 150px;
+    pointer-events: none;
+    background: linear-gradient(90deg,
+      var(--ss-team-primary) 0%,
+      color-mix(in srgb,var(--ss-team-primary) 55%,var(--ss-team-secondary)) 50%,
+      var(--ss-team-secondary) 100%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) top/100% 38px no-repeat,
+      radial-gradient(circle at 5% 36px,#000 0 21px,transparent 22px),
+      radial-gradient(circle at 20% 35px,#000 0 28px,transparent 29px),
+      radial-gradient(circle at 38% 38px,#000 0 22px,transparent 23px),
+      radial-gradient(circle at 58% 35px,#000 0 30px,transparent 31px),
+      radial-gradient(circle at 77% 38px,#000 0 23px,transparent 24px),
+      radial-gradient(circle at 94% 35px,#000 0 27px,transparent 28px),
+      linear-gradient(#000 0 0) 11% 0/15px 104px no-repeat,
+      radial-gradient(circle at 11.5% 104px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 29% 0/22px 72px no-repeat,
+      radial-gradient(circle at 29.8% 72px,#000 0 12px,transparent 13px),
+      linear-gradient(#000 0 0) 49% 0/12px 128px no-repeat,
+      radial-gradient(circle at 49.4% 128px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 68% 0/19px 88px no-repeat,
+      radial-gradient(circle at 68.7% 88px,#000 0 11px,transparent 12px),
+      linear-gradient(#000 0 0) 86% 0/14px 117px no-repeat,
+      radial-gradient(circle at 86.5% 117px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 96% 0/10px 67px no-repeat,
+      radial-gradient(circle at 96.4% 67px,#000 0 8px,transparent 9px);
+    mask:
+      linear-gradient(#000 0 0) top/100% 38px no-repeat,
+      radial-gradient(circle at 5% 36px,#000 0 21px,transparent 22px),
+      radial-gradient(circle at 20% 35px,#000 0 28px,transparent 29px),
+      radial-gradient(circle at 38% 38px,#000 0 22px,transparent 23px),
+      radial-gradient(circle at 58% 35px,#000 0 30px,transparent 31px),
+      radial-gradient(circle at 77% 38px,#000 0 23px,transparent 24px),
+      radial-gradient(circle at 94% 35px,#000 0 27px,transparent 28px),
+      linear-gradient(#000 0 0) 11% 0/15px 104px no-repeat,
+      radial-gradient(circle at 11.5% 104px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 29% 0/22px 72px no-repeat,
+      radial-gradient(circle at 29.8% 72px,#000 0 12px,transparent 13px),
+      linear-gradient(#000 0 0) 49% 0/12px 128px no-repeat,
+      radial-gradient(circle at 49.4% 128px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 68% 0/19px 88px no-repeat,
+      radial-gradient(circle at 68.7% 88px,#000 0 11px,transparent 12px),
+      linear-gradient(#000 0 0) 86% 0/14px 117px no-repeat,
+      radial-gradient(circle at 86.5% 117px,#000 0 9px,transparent 10px),
+      linear-gradient(#000 0 0) 96% 0/10px 67px no-repeat,
+      radial-gradient(circle at 96.4% 67px,#000 0 8px,transparent 9px);
+    filter: drop-shadow(0 7px 8px rgba(0,0,0,.28));
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero > *,
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots results-list > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero-card {
+    margin-top: 28px !important;
+    border-color: rgba(255,255,255,.14) !important;
+    background: rgba(8,13,21,.76) !important;
+    color: #fff !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-title,
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-sub,
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-eyebrow,
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-action-panel-title {
+    color: #fff !important;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-meta-row span,
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-action-panel,
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-btn-ghost,
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-btn-soft {
+    border-color: rgba(255,255,255,.16) !important;
+    background: rgba(8,13,21,.64) !important;
+    color: #fff !important;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ss-category-nav {
+    border-color: rgba(255,255,255,.14) !important;
+    background: rgba(10,15,24,.96) !important;
+    margin-bottom: 0 !important;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ss-category-tab {
+    border-color: rgba(255,255,255,.15) !important;
+    background: rgba(255,255,255,.08) !important;
+    color: rgba(255,255,255,.84) !important;
+  }
+
+  html.ss-store-custom.ss-style-dark.ss-pattern-dots .ss-category-tab.active {
+    border-color: var(--ss-team-secondary) !important;
+    background: var(--ss-team-secondary) !important;
+    color: var(--ss-team-secondary-text) !important;
+  }
+
+  @media (max-width: 768px) {
+    .ss-frbar {
+      margin: 5px auto 7px !important;
+      padding: 0 8px !important;
+    }
+
+    .ss-frbar-inner {
+      padding: 11px 12px !important;
+      border-radius: 14px !important;
+    }
+
+    html.ss-store-custom:is(.ss-style-bold.ss-pattern-dots,.ss-style-dark.ss-pattern-grid,.ss-style-dark.ss-pattern-dots) results-list .product-grid__item {
+      padding: 5px !important;
+      border-radius: 12px !important;
+      box-shadow: 0 8px 20px rgba(0,0,0,.16) !important;
+    }
+
+    html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero::before {
+      height: 105px;
+      -webkit-mask:
+        linear-gradient(#000 0 0) top/100% 26px no-repeat,
+        radial-gradient(circle at 9% 25px,#000 0 15px,transparent 16px),
+        radial-gradient(circle at 34% 25px,#000 0 20px,transparent 21px),
+        radial-gradient(circle at 62% 25px,#000 0 17px,transparent 18px),
+        radial-gradient(circle at 89% 25px,#000 0 19px,transparent 20px),
+        linear-gradient(#000 0 0) 17% 0/10px 78px no-repeat,
+        radial-gradient(circle at 17.7% 78px,#000 0 7px,transparent 8px),
+        linear-gradient(#000 0 0) 48% 0/13px 58px no-repeat,
+        radial-gradient(circle at 48.8% 58px,#000 0 8px,transparent 9px),
+        linear-gradient(#000 0 0) 78% 0/9px 88px no-repeat,
+        radial-gradient(circle at 78.7% 88px,#000 0 7px,transparent 8px);
+      mask:
+        linear-gradient(#000 0 0) top/100% 26px no-repeat,
+        radial-gradient(circle at 9% 25px,#000 0 15px,transparent 16px),
+        radial-gradient(circle at 34% 25px,#000 0 20px,transparent 21px),
+        radial-gradient(circle at 62% 25px,#000 0 17px,transparent 18px),
+        radial-gradient(circle at 89% 25px,#000 0 19px,transparent 20px),
+        linear-gradient(#000 0 0) 17% 0/10px 78px no-repeat,
+        radial-gradient(circle at 17.7% 78px,#000 0 7px,transparent 8px),
+        linear-gradient(#000 0 0) 48% 0/13px 58px no-repeat,
+        radial-gradient(circle at 48.8% 58px,#000 0 8px,transparent 9px),
+        linear-gradient(#000 0 0) 78% 0/9px 88px no-repeat,
+        radial-gradient(circle at 78.7% 88px,#000 0 7px,transparent 8px);
+    }
+
+    html.ss-store-custom.ss-style-dark.ss-pattern-dots .ps-hero-card {
+      margin-top: 18px !important;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    function collapseInactiveFundraiser() {
+      document.querySelectorAll('.ss-frbar').forEach(function (bar) {
+        var section = bar.closest('.shopify-section');
+        if (!section) return;
+        section.style.display = bar.hidden ? 'none' : '';
+        if (bar.dataset.ssFundraiserWatch === '1') return;
+        bar.dataset.ssFundraiserWatch = '1';
+        new MutationObserver(function () {
+          section.style.display = bar.hidden ? 'none' : '';
+        }).observe(bar, { attributes: true, attributeFilter: ['hidden'] });
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', collapseInactiveFundraiser, { once: true });
+    } else {
+      collapseInactiveFundraiser();
+    }
+    document.addEventListener('shopify:section:load', collapseInactiveFundraiser);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Storefront continuity",
+  "enabled_on": { "templates": ["collection"] },
+  "settings": []
+}
+{% endschema %}

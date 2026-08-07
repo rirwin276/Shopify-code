@@ -1,0 +1,213 @@
+{% comment %}
+  STOREFRONT APPEARANCE BUILDER — FIVE PRESET SKINS
+  The section is rendered by Admin Powers and moved into the top of Settings.
+  It changes only the visual skin stored in custom_shop.storefront_settings.
+{% endcomment %}
+
+{%- assign sfs_shop_handle = '' -%}
+{%- assign sfs_page_url = content_for_header | split: '"pageurl":"' | last | split: '"' | first | replace: '\u0026', '&' -%}
+{%- if sfs_page_url contains '?' -%}
+  {%- assign sfs_pairs = sfs_page_url | split: '?' | last | split: '&' -%}
+  {%- for sfs_pair in sfs_pairs -%}
+    {%- assign sfs_kv = sfs_pair | split: '=' -%}
+    {%- if sfs_kv[0] == 'shop' -%}
+      {%- assign sfs_shop_handle = sfs_kv[1] | replace: '%2D', '-' | replace: '%5F', '_' | downcase | strip -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- assign sfs_allowed = false -%}
+{%- assign sfs_required_tag = 'storefront-admin--' | append: sfs_shop_handle -%}
+{%- if customer and sfs_shop_handle != blank -%}
+  {%- assign sfs_email = customer.email | default: '' | downcase | strip -%}
+  {%- if sfs_email == 'ryan.irwin@stellaandsagecompany.com' -%}{%- assign sfs_allowed = true -%}{%- endif -%}
+  {%- for sfs_tag in customer.tags -%}
+    {%- assign sfs_tag_down = sfs_tag | downcase | strip -%}
+    {%- if sfs_tag_down == 'super-admin' or sfs_tag_down == 'custom_shop_admin' or sfs_tag_down == sfs_required_tag -%}
+      {%- assign sfs_allowed = true -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- if sfs_allowed -%}
+  {%- assign sfs_shop = shop.metaobjects.custom_shop[sfs_shop_handle] -%}
+  {%- assign sfs_store_name = sfs_shop.name.value | default: sfs_shop.name | default: sfs_shop_handle -%}
+  {%- assign sfs_collection_handle = sfs_shop.collection_handle.value | default: sfs_shop.collection_handle | default: sfs_shop_handle -%}
+  {%- assign sfs_collection = collections[sfs_collection_handle] -%}
+  {%- assign sfs_settings = sfs_shop.storefront_settings.value | default: sfs_shop.storefront_settings -%}
+  {%- assign sfs_logo = sfs_shop.logo.value | default: sfs_shop.logo -%}
+
+  <div class="sfs-builder-root" data-sfs-root data-shop-handle="{{ sfs_shop_handle | escape }}">
+    <section class="sfs-admin-launch" data-sfs-launch>
+      <div class="sfs-admin-launch__icon" aria-hidden="true">🎨</div>
+      <div class="sfs-admin-launch__copy">
+        <span class="sfs-admin-launch__eyebrow">Storefront appearance</span>
+        <h3>Choose the store’s look</h3>
+        <p>Pick one of five team-store designs, then apply the team colors and an optional announcement.</p>
+      </div>
+      <div class="sfs-admin-launch__status" aria-label="Current storefront appearance">
+        <span class="sfs-admin-launch__swatches"><i data-sfs-current-primary></i><i data-sfs-current-secondary></i></span>
+        <span data-sfs-current-label>Original design</span>
+      </div>
+      <button class="sfs-open-builder" type="button" data-sfs-open>Customize storefront</button>
+    </section>
+
+    <div class="sfs-overlay" data-sfs-overlay aria-hidden="true">
+      <div class="sfs-dialog" role="dialog" aria-modal="true" aria-labelledby="sfs-title-{{ section.id }}">
+        <header class="sfs-dialog__header">
+          <div>
+            <span class="sfs-dialog__eyebrow">Live storefront designer</span>
+            <h2 id="sfs-title-{{ section.id }}">Customize {{ sfs_store_name | escape }}</h2>
+            <p>The products, category tabs, filters, permissions, and checkout stay exactly the same.</p>
+          </div>
+          <button class="sfs-close" type="button" data-sfs-close aria-label="Close storefront designer">×</button>
+        </header>
+
+        <div class="sfs-dialog__body">
+          <section class="sfs-preview-zone" aria-label="Live desktop and mobile previews">
+            <div class="sfs-preview-heading">
+              <div><span>Live preview</span><strong>Current admin storefront view</strong></div>
+              <span class="sfs-unsaved" data-sfs-unsaved>Preview only</span>
+            </div>
+
+            <div class="sfs-preview-grid">
+              <div class="sfs-preview-column">
+                <span class="sfs-preview-label">Desktop</span>
+                <div class="sfs-sample sfs-sample--desktop" data-sfs-preview data-style="clean" data-pattern="none">
+                  <div class="sfs-sample-hero">
+                    <div class="sfs-sample-logo">
+                      {%- if sfs_logo != blank -%}
+                        {{ sfs_logo | image_url: width: 260 | image_tag: loading: 'lazy', alt: sfs_store_name }}
+                      {%- else -%}
+                        <span>{{ sfs_store_name | slice: 0, 1 | upcase }}</span>
+                      {%- endif -%}
+                    </div>
+                    <div class="sfs-sample-hero-copy">
+                      <small>Private storefront</small>
+                      <h3>{{ sfs_store_name }}</h3>
+                      <div class="sfs-sample-pills"><span>{{ sfs_collection.products_count | default: 0 }} items</span><span>Direct checkout</span><span>Reorder anytime</span></div>
+                    </div>
+                    <div class="sfs-sample-actions">
+                      <span data-sfs-action-primary>Shop products</span>
+                      <span>Dashboard</span>
+                      <span>Share Store</span>
+                      <span data-sfs-action-secondary>Admin Powers</span>
+                    </div>
+                  </div>
+                  <div class="sfs-sample-announcement" data-sfs-preview-announcement hidden>New products are available now.</div>
+                  <div class="sfs-sample-category-tabs"><span class="active">All gear</span><span>Shirts</span><span>Youth</span><span>Hoodies</span><span>More</span></div>
+                  <div class="sfs-sample-catalog">
+                    <div class="sfs-sample-toolbar"><span>Availability⌄</span><span>Price⌄</span><span class="sfs-sample-toolbar__right">{{ sfs_collection.products_count | default: 0 }} items &nbsp; Sort⌄</span></div>
+                    <div class="sfs-sample-products">
+                      {%- assign sfs_desktop_count = 0 -%}
+                      {%- if sfs_collection -%}
+                        {%- for sfs_product in sfs_collection.products limit: 4 -%}
+                          {%- assign sfs_desktop_count = sfs_desktop_count | plus: 1 -%}
+                          <div class="sfs-sample-product">
+                            <div class="sfs-sample-product__image">{%- if sfs_product.featured_image -%}{{ sfs_product.featured_image | image_url: width: 420 | image_tag: loading: 'lazy', alt: sfs_product.title }}{%- endif -%}</div>
+                            <strong>{{ sfs_product.title | truncate: 28 }}</strong><small>{{ sfs_product.price | money }}</small>
+                          </div>
+                        {%- endfor -%}
+                      {%- endif -%}
+                      {%- for sfs_placeholder in (1..4) -%}
+                        {%- if sfs_placeholder > sfs_desktop_count -%}<div class="sfs-sample-product"><div class="sfs-sample-product__image"></div><strong>Team product</strong><small>$24.00</small></div>{%- endif -%}
+                      {%- endfor -%}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sfs-preview-column sfs-preview-column--phone">
+                <span class="sfs-preview-label">Mobile</span>
+                <div class="sfs-phone-shell">
+                  <div class="sfs-phone-speaker"></div>
+                  <div class="sfs-sample sfs-sample--mobile" data-sfs-preview data-style="clean" data-pattern="none">
+                    <div class="sfs-sample-hero">
+                      <div class="sfs-sample-mobile-head">
+                        <div class="sfs-sample-logo">
+                          {%- if sfs_logo != blank -%}
+                            {{ sfs_logo | image_url: width: 180 | image_tag: loading: 'lazy', alt: sfs_store_name }}
+                          {%- else -%}
+                            <span>{{ sfs_store_name | slice: 0, 1 | upcase }}</span>
+                          {%- endif -%}
+                        </div>
+                        <div class="sfs-sample-hero-copy"><small>Private storefront</small><h3>{{ sfs_store_name }}</h3><div class="sfs-sample-pills"><span>{{ sfs_collection.products_count | default: 0 }} items</span><span>Direct checkout</span></div></div>
+                      </div>
+                      <div class="sfs-sample-actions"><span>Share Store</span><span data-sfs-action-secondary>Admin Powers</span><span>Dashboard</span></div>
+                    </div>
+                    <div class="sfs-sample-announcement" data-sfs-preview-announcement hidden>New products are available now.</div>
+                    <div class="sfs-sample-category-tabs"><span class="active">All</span><span>Shirts</span><span>Youth</span><span>Hoodies</span></div>
+                    <div class="sfs-sample-catalog">
+                      <div class="sfs-sample-toolbar"><span>Filter</span><span class="sfs-sample-toolbar__right">Grid</span></div>
+                      <div class="sfs-sample-products">
+                        {%- assign sfs_mobile_count = 0 -%}
+                        {%- if sfs_collection -%}
+                          {%- for sfs_product in sfs_collection.products limit: 2 -%}
+                            {%- assign sfs_mobile_count = sfs_mobile_count | plus: 1 -%}
+                            <div class="sfs-sample-product">
+                              <div class="sfs-sample-product__image">{%- if sfs_product.featured_image -%}{{ sfs_product.featured_image | image_url: width: 280 | image_tag: loading: 'lazy', alt: sfs_product.title }}{%- endif -%}</div>
+                              <strong>{{ sfs_product.title | truncate: 18 }}</strong><small>{{ sfs_product.price | money }}</small>
+                            </div>
+                          {%- endfor -%}
+                        {%- endif -%}
+                        {%- if sfs_mobile_count < 1 -%}<div class="sfs-sample-product"><div class="sfs-sample-product__image"></div><strong>Team shirt</strong><small>$24.00</small></div><div class="sfs-sample-product"><div class="sfs-sample-product__image"></div><strong>Youth shirt</strong><small>$20.00</small></div>{%- endif -%}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="sfs-controls" aria-label="Storefront design controls">
+            <div class="sfs-control-group sfs-control-group--wide">
+              <div class="sfs-control-heading"><span>1</span><div><strong>Store design</strong><small>Five product-first looks inspired by modern team and fan stores.</small></div></div>
+              <div class="sfs-design-grid" role="radiogroup" aria-label="Store design">
+                <button type="button" data-sfs-design="classic"><i class="sfs-design-thumb sfs-design-thumb--classic"></i><strong>Classic Team</strong><small>Clean white, restrained color accents</small></button>
+                <button type="button" data-sfs-design="split"><i class="sfs-design-thumb sfs-design-thumb--split"></i><strong>Diagonal Split</strong><small>A clear two-color team division</small></button>
+                <button type="button" data-sfs-design="splash"><i class="sfs-design-thumb sfs-design-thumb--splash"></i><strong>Color Splash</strong><small>Energetic color behind the products</small></button>
+                <button type="button" data-sfs-design="pro"><i class="sfs-design-thumb sfs-design-thumb--pro"></i><strong>Pro Dark</strong><small>Professional charcoal and team accents</small></button>
+                <button type="button" data-sfs-design="heritage"><i class="sfs-design-thumb sfs-design-thumb--heritage"></i><strong>Heritage</strong><small>Warm varsity styling and team stripes</small></button>
+              </div>
+            </div>
+
+            <div class="sfs-control-group">
+              <div class="sfs-control-heading"><span>2</span><div><strong>Team colors</strong><small>Buttons, tabs, and design accents use these colors automatically.</small></div></div>
+              <div class="sfs-color-grid">
+                <label><span>Primary color</span><div><input type="color" data-sfs-primary value="#1f2937"><output data-sfs-primary-output>#1f2937</output></div></label>
+                <label><span>Accent color</span><div><input type="color" data-sfs-secondary value="#d4af37"><output data-sfs-secondary-output>#d4af37</output></div></label>
+              </div>
+            </div>
+
+            <div class="sfs-control-group">
+              <div class="sfs-control-heading"><span>3</span><div><strong>Announcement bar</strong><small>Optional, thin, and secondary to the shopping experience.</small></div></div>
+              <label class="sfs-field"><span>Announcement <small data-sfs-announcement-count>0/120</small></span><input type="text" maxlength="120" data-sfs-announcement placeholder="Tournament gear is available through Friday."></label>
+              <label class="sfs-toggle"><input type="checkbox" data-sfs-show-announcement><span></span><div><strong>Show announcement</strong><small>Appears as a subtle strip above the category tabs.</small></div></label>
+            </div>
+          </section>
+        </div>
+
+        <footer class="sfs-dialog__footer">
+          <div class="sfs-save-status" data-sfs-status aria-live="polite"></div>
+          <div class="sfs-footer-actions">
+            <button type="button" class="sfs-reset" data-sfs-reset>Restore original</button>
+            <button type="button" class="sfs-cancel" data-sfs-close>Cancel</button>
+            <button type="button" class="sfs-save" data-sfs-save>Save storefront</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script type="application/json" data-sfs-current-settings>{%- if sfs_settings != blank -%}{{ sfs_settings | json }}{%- else -%}{}{%- endif -%}</script>
+    {{ 'storefront-appearance-builder.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'storefront-appearance-builder.js' | asset_url }}" defer></script>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Storefront settings",
+  "enabled_on": { "templates": ["page"] },
+  "settings": []
+}
+{% endschema %}

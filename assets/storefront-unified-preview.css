@@ -1,0 +1,106 @@
+/* Final builder-preview layer. Values mirror storefront-unified-polish.css. */
+
+.sfs-sample-category-tabs{
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+
+/* GRADIENT GLOW — same top-left / bottom-right recipe as live. */
+.sfs-sample[data-style="bold"][data-pattern="none"]{
+  background:
+    radial-gradient(circle at 0% 0%,
+      color-mix(in srgb,var(--sfs-primary) 82%,#fff) 0%,
+      color-mix(in srgb,var(--sfs-primary) 58%,#fff) 18%,
+      color-mix(in srgb,var(--sfs-primary) 30%,#fff) 38%,
+      transparent 63%),
+    radial-gradient(circle at 100% 100%,
+      color-mix(in srgb,var(--sfs-secondary) 82%,#fff) 0%,
+      color-mix(in srgb,var(--sfs-secondary) 58%,#fff) 20%,
+      color-mix(in srgb,var(--sfs-secondary) 30%,#fff) 40%,
+      transparent 65%),
+    #fff!important;
+}
+.sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-hero{
+  background:rgba(255,255,255,.82)!important;
+  border-color:rgba(255,255,255,.68)!important;
+  box-shadow:0 10px 28px rgba(17,16,14,.08)!important;
+  backdrop-filter:blur(10px) saturate(1.08)!important;
+}
+.sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-category-tabs{
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--sfs-primary) 24%,#fff) 0%,
+    color-mix(in srgb,var(--sfs-primary) 9%,#fff) 38%,
+    rgba(255,255,255,.94) 50%,
+    color-mix(in srgb,var(--sfs-secondary) 9%,#fff) 62%,
+    color-mix(in srgb,var(--sfs-secondary) 24%,#fff) 100%)!important;
+}
+.sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-catalog{
+  background:
+    radial-gradient(ellipse 82% 94% at 0% 0%,
+      color-mix(in srgb,var(--sfs-primary) 62%,#fff) 0%,
+      color-mix(in srgb,var(--sfs-primary) 38%,#fff) 25%,
+      color-mix(in srgb,var(--sfs-primary) 14%,#fff) 48%,
+      transparent 70%),
+    radial-gradient(ellipse 84% 96% at 100% 100%,
+      color-mix(in srgb,var(--sfs-secondary) 62%,#fff) 0%,
+      color-mix(in srgb,var(--sfs-secondary) 38%,#fff) 26%,
+      color-mix(in srgb,var(--sfs-secondary) 14%,#fff) 50%,
+      transparent 72%),
+    #fff!important;
+}
+.sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-product{
+  background:rgba(255,255,255,.95)!important;
+  box-shadow:0 8px 24px rgba(17,16,14,.08)!important;
+}
+
+/* PRO DARK — one uninterrupted surface in preview and live. */
+.sfs-sample[data-style="dark"][data-pattern="grid"]{
+  background:#11161e!important;
+  background-image:none!important;
+}
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-hero,
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-category-tabs,
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-catalog{
+  background:#11161e!important;
+  background-image:none!important;
+}
+.sfs-sample[data-style="dark"][data-pattern="grid"] .sfs-sample-hero{
+  border-top:3px solid var(--sfs-secondary)!important;
+}
+
+.sfs-sample[data-style="bold"][data-pattern="dots"] .sfs-sample-category-tabs{
+  background:#080d15!important;
+}
+
+@media(max-width:700px){
+  .sfs-sample[data-style="bold"][data-pattern="none"]{
+    background:
+      radial-gradient(circle at 0% 0%,
+        color-mix(in srgb,var(--sfs-primary) 74%,#fff) 0%,
+        color-mix(in srgb,var(--sfs-primary) 40%,#fff) 30%,
+        transparent 62%),
+      radial-gradient(circle at 100% 100%,
+        color-mix(in srgb,var(--sfs-secondary) 72%,#fff) 0%,
+        color-mix(in srgb,var(--sfs-secondary) 38%,#fff) 32%,
+        transparent 64%),
+      #fff!important;
+  }
+  .sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-category-tabs{
+    background:linear-gradient(90deg,
+      color-mix(in srgb,var(--sfs-primary) 20%,#fff),
+      #fff 50%,
+      color-mix(in srgb,var(--sfs-secondary) 20%,#fff))!important;
+  }
+  .sfs-sample[data-style="bold"][data-pattern="none"] .sfs-sample-catalog{
+    background:
+      radial-gradient(ellipse 100% 76% at 0% 0%,
+        color-mix(in srgb,var(--sfs-primary) 52%,#fff),
+        transparent 66%),
+      radial-gradient(ellipse 100% 78% at 100% 100%,
+        color-mix(in srgb,var(--sfs-secondary) 50%,#fff),
+        transparent 68%),
+      #fff!important;
+  }
+}

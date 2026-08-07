@@ -1,0 +1,261 @@
+{%- doc -%}
+  Answers one question: which element is painting the band behind the category
+  row, and which CSS rule told it to.
+
+  Eight attempts have been made to remove that band by guessing at selectors
+  and setting them transparent. The current category row is already inside
+  .collection-wrapper, uses brand-new hooks nothing legacy can match, and
+  declares `background: transparent !important` — and the band is still there.
+  That is proof the band is not the element anyone has been styling, so the
+  ninth guess is not worth making.
+
+  This does not guess. It reads the pixels: elementsFromPoint at the band
+  itself returns the actual stack of elements under that point, in paint order.
+  For each one it reports the computed background, the painted rectangle, and
+  — by walking document.styleSheets — the exact rule and stylesheet file that
+  set it. Pseudo-elements are measured too, since a ::before is invisible to
+  every selector-based search anyone has run so far.
+
+  It also lists every stylesheet actually loaded on the page, which settles
+  separately whether any of the retired appearance files are still arriving.
+
+  Read-only: it never sets a style, adds a class, or moves a node, so it cannot
+  disturb the layout it is measuring.
+
+    /collections/<handle>?layoutdebug=1
+{%- enddoc -%}
+<script>
+  (function () {
+    if (window.location.search.indexOf('layoutdebug=1') === -1) return;
+
+    function describe(el) {
+      if (!el || !el.tagName) return '(none)';
+      var id = el.id ? '#' + el.id : '';
+      var cls = (el.getAttribute && el.getAttribute('class')) || '';
+      cls = cls ? '.' + cls.trim().split(/\s+/).join('.') : '';
+      return el.tagName.toLowerCase() + id + cls;
+    }
+
+    function paints(style) {
+      if (!style) return false;
+      var color = style.backgroundColor || '';
+      var image = style.backgroundImage || '';
+      var opaque = color && color !== 'transparent' &&
+                   color !== 'rgba(0, 0, 0, 0)';
+      var hasImage = image && image !== 'none';
+      return opaque || hasImage;
+    }
+
+    // Which rule actually set the background on this element, and in which
+    // file. This is the part a screenshot can never tell you, and the reason
+    // eight rounds of edits have landed on the wrong selector.
+    function sourceRules(el) {
+      var out = [];
+      var sheets = document.styleSheets;
+      for (var i = 0; i < sheets.length; i++) {
+        var href = sheets[i].href || '(inline <style>)';
+        var rules;
+        try {
+          rules = sheets[i].cssRules;
+        } catch (e) {
+          out.push('    [unreadable sheet: ' + href + ']');
+          continue;
+        }
+        if (!rules) continue;
+        for (var j = 0; j < rules.length; j++) {
+          var rule = rules[j];
+          if (!rule.selectorText || !rule.style) continue;
+          var bg = rule.style.getPropertyValue('background') ||
+                   rule.style.getPropertyValue('background-color') ||
+                   rule.style.getPropertyValue('background-image');
+          if (!bg) continue;
+          var matched = false;
+          try { matched = el.matches(rule.selectorText); } catch (e) {}
+          if (!matched) continue;
+          out.push('    ' + rule.selectorText + '  {' + bg + '}  <- ' +
+                   href.split('/').pop().split('?')[0]);
+        }
+      }
+      return out;
+    }
+
+    function report(el, label) {
+      var lines = [];
+      var style = getComputedStyle(el);
+      var rect = el.getBoundingClientRect();
+      lines.push(label + ' ' + describe(el));
+      lines.push('    rect      w=' + Math.round(rect.width) +
+                 ' h=' + Math.round(rect.height) +
+                 ' x=' + Math.round(rect.left) +
+                 ' y=' + Math.round(rect.top));
+      lines.push('    bg-color  ' + style.backgroundColor);
+      lines.push('    bg-image  ' + (style.backgroundImage || 'none'));
+      lines.push('    radius    ' + style.borderRadius);
+      lines.push('    display   ' + style.display + '   position ' + style.position);
+
+      // A ::before stretched across the row paints a band that no selector
+      // search for the row itself will ever surface.
+      ['::before', '::after'].forEach(function (pseudo) {
+        var ps = getComputedStyle(el, pseudo);
+        if (ps && ps.content && ps.content !== 'none' && paints(ps)) {
+          lines.push('    ' + pseudo + '  content=' + ps.content +
+                     '  bg=' + ps.backgroundColor +
+                     '  img=' + ps.backgroundImage);
+        }
+      });
+
+      if (paints(style)) {
+        lines.push('    PAINTS -> set by:');
+        var rules = sourceRules(el);
+        lines.push(rules.length ? rules.join('\n') : '    (inline style or UA default)');
+      }
+      return lines.join('\n');
+    }
+
+    function run() {
+      var out = [];
+      var row = document.querySelector('[data-ss-catalog-controls]');
+
+      out.push('=== STYLESHEETS ACTUALLY LOADED ===');
+      var links = document.querySelectorAll('link[rel="stylesheet"]');
+      for (var i = 0; i < links.length; i++) {
+        out.push('  ' + (links[i].getAttribute('href') || '').split('/').pop().split('?')[0]);
+      }
+      out.push('  (plus ' + document.querySelectorAll('style').length + ' inline <style> blocks)');
+
+      var state = document.getElementById('ss-private-store-state');
+      out.push('');
+      out.push('=== LAYOUT STATE ===');
+      out.push('  enabled=' + (state && state.getAttribute('data-enabled')) +
+               '  layout=' + (state && state.getAttribute('data-layout')) +
+               '  suffix=' + (state && state.getAttribute('data-template-suffix')));
+      out.push('  SAVED RECORD: enabled=' + (state && state.getAttribute('data-saved-enabled')) +
+               '  layout=' + (state && state.getAttribute('data-saved-layout')) +
+               '  style=' + (state && state.getAttribute('data-saved-style')) +
+               '  pattern=' + (state && state.getAttribute('data-saved-pattern')));
+
+      // Which sections the page ACTUALLY rendered.
+      //
+      // The templates on the branch say one thing and the page behaves like
+      // another, and no amount of reading the repo can settle which is true of
+      // the theme being served. The section IDs are the answer: they are
+      // written by Shopify from the template that really rendered, so they
+      // cannot be argued with.
+      out.push('');
+      out.push('=== SECTIONS ACTUALLY RENDERED ===');
+      out.push('  <html> class = ' + document.documentElement.className);
+      var main = document.getElementById('MainContent');
+      out.push('  data-template = ' + (main && main.getAttribute('data-template')));
+      var secs = main ? main.querySelectorAll(':scope > .shopify-section') : [];
+      for (var s = 0; s < secs.length; s++) {
+        var kid = secs[s].firstElementChild;
+        out.push('  ' + (secs[s].id || '(no id)') +
+                 '   first child: ' + (kid ? describe(kid) : '(empty)'));
+      }
+
+      out.push('');
+      out.push('=== KEY ELEMENTS PRESENT? ===');
+      [['#ss-private-store-state', 'new: layout state'],
+       ['[data-ss-catalog-controls]', 'new: category row'],
+       ['.ss-private-catalog', 'new: catalog'],
+       ['.ss-category-nav', 'LEGACY: enhancements nav'],
+       ['.ss-storefront-enhancements', 'LEGACY: enhancements wrapper'],
+       ['.ss-team-products', 'LEGACY: main-collection appearance']
+      ].forEach(function (pair) {
+        var found = document.querySelectorAll(pair[0]).length;
+        out.push('  ' + (found ? 'YES x' + found : 'no    ') + '  ' + pair[0] + '   (' + pair[1] + ')');
+      });
+
+      var rl = document.querySelector('results-list');
+      out.push('  results-list class = ' + (rl ? rl.className : '(none)'));
+
+      if (!row) {
+        out.push('');
+        out.push('!! [data-ss-catalog-controls] not found — the category row on this');
+        out.push('!! page is being rendered by something else. That alone is the answer.');
+        return out.join('\n');
+      }
+
+      // Probe the band by pixel, not by selector. Far-left is deliberate: the
+      // controls are centred at ~1320px, so a point near the viewport edge is
+      // OUTSIDE them and can only hit whatever paints the full-width band.
+      var r = row.getBoundingClientRect();
+      var probes = [
+        ['band far-left  ', 6, r.top + r.height / 2],
+        ['band mid-left  ', Math.max(6, r.left - 20), r.top + r.height / 2],
+        ['row centre     ', r.left + r.width / 2, r.top + r.height / 2],
+        ['just above row ', r.left + r.width / 2, r.top - 6],
+        ['just below row ', r.left + r.width / 2, r.bottom + 6]
+      ];
+
+      out.push('');
+      out.push('=== WHAT IS UNDER EACH POINT (paint order, topmost first) ===');
+      probes.forEach(function (p) {
+        out.push('');
+        out.push('--- ' + p[0] + ' at (' + Math.round(p[1]) + ',' + Math.round(p[2]) + ')');
+        var stack = document.elementsFromPoint(p[1], p[2]) || [];
+        for (var k = 0; k < Math.min(stack.length, 6); k++) {
+          var st = getComputedStyle(stack[k]);
+          out.push('  [' + k + '] ' + describe(stack[k]) +
+                   '   bg=' + st.backgroundColor +
+                   (st.backgroundImage !== 'none' ? '  img=YES' : '') +
+                   (paints(st) ? '   <== PAINTS' : ''));
+        }
+      });
+
+      out.push('');
+      out.push('=== ANCESTORS OF THE CATEGORY ROW ===');
+      var el = row;
+      var depth = 0;
+      while (el && el !== document.documentElement && depth < 9) {
+        out.push('');
+        out.push(report(el, '[' + depth + ']'));
+        el = el.parentElement;
+        depth++;
+      }
+      return out.join('\n');
+    }
+
+    function panel() {
+      var box = document.createElement('div');
+      box.style.cssText =
+        'position:fixed;left:8px;right:8px;bottom:8px;max-height:60vh;z-index:2147483647;' +
+        'background:#11100e;color:#e8e8e8;font:11px/1.45 ui-monospace,Menlo,Consolas,monospace;' +
+        'border-radius:10px;padding:10px;overflow:auto;box-shadow:0 8px 30px rgba(0,0,0,.55)';
+      var bar = document.createElement('div');
+      bar.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;position:sticky;top:0;background:#11100e;padding-bottom:6px';
+      var pre = document.createElement('pre');
+      pre.style.cssText = 'margin:0;white-space:pre-wrap;word-break:break-word';
+
+      function button(label, fn) {
+        var b = document.createElement('button');
+        b.textContent = label;
+        b.style.cssText = 'font:600 11px/1 system-ui;padding:7px 10px;border-radius:6px;border:0;background:#3b82f6;color:#fff;cursor:pointer';
+        b.addEventListener('click', fn);
+        return b;
+      }
+
+      function refresh() { pre.textContent = run(); }
+
+      bar.appendChild(button('Refresh', refresh));
+      bar.appendChild(button('Copy', function () {
+        if (navigator.clipboard) navigator.clipboard.writeText(pre.textContent);
+      }));
+      bar.appendChild(button('Close', function () { box.remove(); }));
+      box.appendChild(bar);
+      box.appendChild(pre);
+      document.body.appendChild(box);
+      refresh();
+
+      // Measured once the page has settled, so anything that only appears
+      // after scripts finish is included rather than missed.
+      setTimeout(refresh, 2000);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', panel, { once: true });
+    } else {
+      panel();
+    }
+  })();
+</script>

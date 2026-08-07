@@ -1,0 +1,122 @@
+{%- doc -%}
+  Marks product cards whose photo is NOT transparent, so the dark designs can
+  give the rest a dark tile.
+
+  On Pro Dark and Spray Burst the product photos sit on white tiles, so a grid
+  of seven reads as seven bright rectangles punched out of the page and the
+  garment is the last thing you look at. The fix is a dark tile — but only for
+  photos that are actually cut out. Printful's ghost mockups are transparent
+  PNGs and look excellent that way; anything published from a flat-lay style
+  is an opaque rectangle, and putting that on a dark tile produces a white box
+  with a dark frame, which is worse than what it replaced.
+
+  Liquid cannot inspect an image, so the question is answered in the browser:
+  a small copy is drawn to a canvas and the four corners are sampled. Corners
+  are the right sample because a cut-out garment never reaches them, so they
+  are transparent whenever the background was removed.
+
+  Anything that cannot be measured — a CDN without CORS, a canvas that taints,
+  an image that fails — keeps the light tile. The unknown case degrades to
+  exactly today's appearance rather than to the broken one.
+
+  Read-only: it adds one class and never changes a source, a style, or the
+  DOM structure, so it cannot fight the layout or retrigger itself.
+{%- enddoc -%}
+<script>
+  (function () {
+    if (window.__ssTileAlpha) return;
+    window.__ssTileAlpha = true;
+
+    var state = document.getElementById('ss-private-store-state');
+    if (!state) return;
+
+    // Only the dark designs change the tile, so only they need measuring.
+    var layout = state.getAttribute('data-layout') || '';
+    if (layout !== 'pro' && layout !== 'spray') return;
+
+    var SAMPLE = 20;
+    var CARD = '.ss-private-catalog .product-grid__item';
+
+    // A 40px copy is plenty to read corner alpha from, and it avoids pulling
+    // the full-size photo a second time. A CORS request cannot reuse the
+    // browser's existing cached copy — CORS and non-CORS responses are cached
+    // separately — so asking for the original would download every product
+    // image twice.
+    function thumb(src) {
+      try {
+        var url = new URL(src, window.location.origin);
+        if (url.hostname.indexOf('cdn.shopify.com') === -1) return src;
+        url.searchParams.set('width', '40');
+        return url.toString();
+      } catch (e) {
+        return src;
+      }
+    }
+
+    function cornersAreOpaque(image) {
+      var canvas = document.createElement('canvas');
+      canvas.width = SAMPLE;
+      canvas.height = SAMPLE;
+      var ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return null;
+      try {
+        ctx.drawImage(image, 0, 0, SAMPLE, SAMPLE);
+        var d = ctx.getImageData(0, 0, SAMPLE, SAMPLE).data;
+        var last = SAMPLE - 1;
+        var points = [[0, 0], [last, 0], [0, last], [last, last]];
+        for (var i = 0; i < points.length; i++) {
+          var idx = ((points[i][1] * SAMPLE) + points[i][0]) * 4;
+          if (d[idx + 3] < 200) return false;   // a see-through corner: cut out
+        }
+        return true;
+      } catch (e) {
+        return null;   // tainted canvas — treat as unknown
+      }
+    }
+
+    function measure(card) {
+      if (card.dataset.ssTileChecked === '1') return;
+      var img = card.querySelector('img');
+      if (!img) return;
+      var src = img.currentSrc || img.getAttribute('src') || '';
+      if (!src) return;
+      card.dataset.ssTileChecked = '1';
+
+      var probe = new Image();
+      probe.crossOrigin = 'anonymous';
+      probe.onload = function () {
+        if (cornersAreOpaque(probe) === true) card.classList.add('ss-tile-opaque');
+      };
+      probe.onerror = function () { /* unknown — keep the light tile */ };
+      probe.src = thumb(src);
+    }
+
+    function sweep() {
+      var cards = document.querySelectorAll(CARD);
+      for (var i = 0; i < cards.length; i++) measure(cards[i]);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', sweep, { once: true });
+    } else {
+      sweep();
+    }
+
+    // Category filtering and infinite scroll both change which cards exist.
+    // childList only, batched onto one frame, and the callback only ever adds
+    // a class — so it cannot feed itself.
+    if (window.MutationObserver) {
+      var queued = false;
+      new MutationObserver(function (records) {
+        if (queued) return;
+        for (var i = 0; i < records.length; i++) {
+          if (records[i].addedNodes.length) {
+            queued = true;
+            requestAnimationFrame(function () { queued = false; sweep(); });
+            return;
+          }
+        }
+      }).observe(document.documentElement, { childList: true, subtree: true });
+    }
+  })();
+</script>

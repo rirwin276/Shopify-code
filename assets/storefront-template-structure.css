@@ -1,0 +1,90 @@
+/*
+  PRIVATE STOREFRONT TEMPLATE STRUCTURE
+  Structural rules shared by every alternate private-store collection template.
+  This is intentionally loaded after storefront-fixed-layouts.css.
+
+  The category navigation must never render as a full-width card/pill. The nav
+  wrapper participates only semantically; the tab row owns spacing and only the
+  individual buttons own visible surfaces.
+*/
+
+#MainContent:has(#ss-private-store-state) .shopify-section:has(.ss-private-catalog),
+#MainContent:has(#ss-private-store-state) .ss-private-catalog,
+#MainContent:has(#ss-private-store-state) .ss-private-catalog .collection-wrapper {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#MainContent:has(#ss-private-store-state) .shopify-section:has(.ss-private-catalog) > .section-background,
+#MainContent:has(#ss-private-store-state) .ss-private-catalog > .section-background {
+  display: none !important;
+}
+
+/* Remove the category BAR as a box. Only its child buttons should be visible. */
+#MainContent:has(#ss-private-store-state) .ss-category-nav {
+  display: contents !important;
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-tabs {
+  width: min(var(--ss-layout-page-width, 1320px), calc(100% - 40px)) !important;
+  max-width: min(var(--ss-layout-page-width, 1320px), calc(100% - 40px)) !important;
+  margin: 0 auto !important;
+  padding: 10px 0 11px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  overflow-x: auto !important;
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Share Store is intentionally the same visual button family as Dashboard. */
+#MainContent:has(#ss-private-store-state) #psShareStoreBtn {
+  color: #11100e !important;
+  background: rgba(255,255,255,.75) !important;
+  border-color: rgba(17,16,14,.10) !important;
+  box-shadow: 0 12px 34px rgba(17,16,14,.07) !important;
+  text-shadow: none !important;
+}
+
+/* Dark layouts already give Dashboard a brighter ghost treatment. Match it exactly. */
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) #psShareStoreBtn {
+  border-color: #d8e0e8 !important;
+  background: #f1f4f7 !important;
+  color: #0a111a !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) #psShareStoreBtn {
+  border-color: #d5dee8 !important;
+  background: #f1f5f9 !important;
+  color: #07101a !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 768px) {
+  #MainContent:has(#ss-private-store-state) .ss-category-tabs {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 7px 8px 8px !important;
+  }
+}

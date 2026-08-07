@@ -1,0 +1,449 @@
+{% comment %}
+  PRIVATE STORE COLLECTION CATALOG
+  The category controls are the first row of the actual product collection
+  wrapper. They intentionally use catalog-only hooks so legacy storefront
+  relocation scripts cannot move them back outside the product wrapper.
+{% endcomment %}
+
+<script
+  src="{{ 'results-list.js' | asset_url }}"
+  type="module"
+  fetchpriority="low"
+></script>
+
+{% liquid
+  assign hide_private_store_collection = false
+  assign private_handle = collection.handle | downcase | strip
+  capture private_access
+    render 'private-store-access', handle: private_handle
+  endcapture
+  assign private_access = private_access | strip
+
+  unless private_access != blank
+    assign hide_private_store_collection = true
+  endunless
+%}
+
+{% unless hide_private_store_collection %}
+  <results-list
+    class="section product-grid-container ss-private-catalog"
+    style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
+    section-id="{{ section.id }}"
+    infinite-scroll="{{ section.settings.enable_infinite_scroll }}"
+    data-ss-private-catalog
+  >
+    {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
+
+    <div class="collection-wrapper grid gap-style">
+      <div class="ss-catalog-controls" data-ss-catalog-controls role="tablist" aria-label="Shop by product type">
+        <button type="button" class="ss-category-tab active" data-ss-category="all" role="tab" aria-selected="true">All gear</button>
+        <button type="button" class="ss-category-tab" data-ss-category="shirts" role="tab" aria-selected="false">Shirts</button>
+        <button type="button" class="ss-category-tab" data-ss-category="youth" role="tab" aria-selected="false">Youth</button>
+        <button type="button" class="ss-category-tab" data-ss-category="hoodies" role="tab" aria-selected="false">Hoodies</button>
+        <button type="button" class="ss-category-tab" data-ss-category="tanks" role="tab" aria-selected="false">Tanks</button>
+        <button type="button" class="ss-category-tab" data-ss-category="headwear" role="tab" aria-selected="false">Hats</button>
+        <button type="button" class="ss-category-tab" data-ss-category="personalized" role="tab" aria-selected="false">Personalized</button>
+        <button type="button" class="ss-category-tab" data-ss-category="accessories" role="tab" aria-selected="false">Accessories</button>
+        <button type="button" class="ss-category-tab" data-ss-category="other" role="tab" aria-selected="false">More</button>
+      </div>
+
+      {% content_for 'block',
+        type: 'filters',
+        id: 'filters',
+        results: collection,
+        results_size: collection.products_count
+      %}
+
+      {% assign products_per_page = 24 %}
+      {% if section.settings.enable_infinite_scroll == false %}
+        {% assign products_per_page = section.settings.products_per_page %}
+      {% endif %}
+
+      {% paginate collection.products by products_per_page %}
+        {% capture children %}
+          {% for product in collection.products %}
+            {% capture ss_search_text %} {{ product.title }} {{ product.tags | join: ' ' }} {% endcapture %}
+            {% assign ss_search_text = ss_search_text | downcase %}
+            {% assign ss_categories = '' %}
+
+            {% if ss_search_text contains 'youth' or ss_search_text contains 'toddler' or ss_search_text contains 'kids' or ss_search_text contains 'kid ' %}
+              {% assign ss_categories = ss_categories | append: ' youth' %}
+            {% endif %}
+            {% if ss_search_text contains 'hoodie' or ss_search_text contains 'sweatshirt' or ss_search_text contains 'pullover' %}
+              {% assign ss_categories = ss_categories | append: ' hoodies' %}
+            {% endif %}
+            {% if ss_search_text contains 'tank' or ss_search_text contains 'racerback' %}
+              {% assign ss_categories = ss_categories | append: ' tanks' %}
+            {% endif %}
+            {% if ss_search_text contains 'tee' or ss_search_text contains 't-shirt' or ss_search_text contains 'shirt' or ss_search_text contains 'long sleeve' or ss_search_text contains 'crewneck' %}
+              {% assign ss_categories = ss_categories | append: ' shirts' %}
+            {% endif %}
+            {% if ss_search_text contains 'hat' or ss_search_text contains 'cap' or ss_search_text contains 'beanie' or ss_search_text contains 'trucker' %}
+              {% assign ss_categories = ss_categories | append: ' headwear' %}
+            {% endif %}
+            {% if ss_search_text contains 'name & number' or ss_search_text contains 'name and number' or ss_search_text contains 'personalized' or ss_search_text contains 'personalization' %}
+              {% assign ss_categories = ss_categories | append: ' personalized' %}
+            {% endif %}
+            {% if ss_search_text contains 'tote' or ss_search_text contains 'bag' or ss_search_text contains 'mug' or ss_search_text contains 'bottle' or ss_search_text contains 'blanket' or ss_search_text contains 'accessory' %}
+              {% assign ss_categories = ss_categories | append: ' accessories' %}
+            {% endif %}
+            {% if ss_categories == blank %}
+              {% assign ss_categories = ' other' %}
+            {% endif %}
+
+            <li
+              id="{{ section.id }}-{{ product.id }}"
+              class="product-grid__item product-grid__item--{{ forloop.index0 }}"
+              data-page="{{ paginate.current_page }}"
+              data-product-id="{{ product.id }}"
+              data-ss-categories="{{ ss_categories | strip | escape }}"
+              ref="cards[]"
+            >
+              {%- comment -%}
+                What this listing includes, and which colours it comes in.
+
+                Both facts already exist on the product — the pricing tag says
+                whether there is a back print, and custom.color_swatches holds
+                the exact hex Printful gave us at publish time — and the
+                storefront's own catalog card has shown them for a while. This
+                grid renders the theme's card block, which knows about neither,
+                so a shopper here saw a photo, a name and a price and had to
+                open every listing to answer "does it come in our colours" and
+                "why is that one five dollars more".
+
+                Drawn around the theme block rather than inside it, so the
+                card itself stays the stock component.
+              {%- endcomment -%}
+              {%- capture ss_card_extra -%}
+                {%- render 'pro-listing-includes', product: product -%}
+              {%- endcapture -%}
+              {%- assign ss_card_extra = ss_card_extra | strip -%}
+              {%- if ss_card_extra != blank -%}
+                <span class="ss-grid-badge">{{ ss_card_extra }}</span>
+              {%- endif -%}
+
+              {% # theme-check-disable %}
+              {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
+              {% # theme-check-enable %}
+
+              {%- assign ss_card_swatches = product.metafields.custom.color_swatches.value -%}
+              {%- if ss_card_swatches and ss_card_swatches.size > 1 -%}
+                {%- assign ss_swatch_limit = 6 -%}
+                <div class="ss-grid-swatches" aria-label="Available in {{ ss_card_swatches.size }} colors">
+                  {%- comment -%}
+                    Anything without a hex is skipped rather than drawn empty.
+                    If the metafield ever arrives unparsed, iterating it yields
+                    entries whose .hex is nil, and a row of invisible circles
+                    is harder to diagnose than no row at all.
+                  {%- endcomment -%}
+                  {%- for ss_sw in ss_card_swatches limit: ss_swatch_limit -%}
+                    {%- if ss_sw.hex != blank -%}
+                      <span class="ss-grid-swatch" style="background: {{ ss_sw.hex }};" title="{{ ss_sw.name | escape }}"></span>
+                    {%- endif -%}
+                  {%- endfor -%}
+                  {%- if ss_card_swatches.size > ss_swatch_limit -%}
+                    {%- assign ss_more = ss_card_swatches.size | minus: ss_swatch_limit -%}
+                    <span class="ss-grid-swatch-more">+{{ ss_more }}</span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </li>
+          {% endfor %}
+        {% endcapture %}
+
+        {% render 'product-grid',
+          section: section,
+          children: children,
+          products: collection.products,
+          paginate: paginate,
+          enable_infinite_scroll: section.settings.enable_infinite_scroll
+        %}
+      {% endpaginate %}
+    </div>
+  </results-list>
+
+  <script>
+    (function(){
+      var root = document.querySelector('[data-ss-private-catalog]');
+      if (!root || root.dataset.ssCategoryReady === '1') return;
+      root.dataset.ssCategoryReady = '1';
+
+      var controls = root.querySelector('[data-ss-catalog-controls]');
+      var buttons = Array.from(root.querySelectorAll('[data-ss-category]'));
+      var active = 'all';
+
+      function items(){
+        return Array.from(root.querySelectorAll('.product-grid__item[data-product-id]'));
+      }
+
+      function apply(){
+        var available = {};
+        var productItems = items();
+
+        productItems.forEach(function(item){
+          var categories = (item.dataset.ssCategories || 'other').split(/\s+/).filter(Boolean);
+          categories.forEach(function(category){ available[category] = true; });
+          item.hidden = active !== 'all' && categories.indexOf(active) === -1;
+        });
+
+        buttons.forEach(function(button){
+          var category = button.dataset.ssCategory || 'all';
+          if (category !== 'all') button.hidden = !available[category];
+          var selected = category === active;
+          button.classList.toggle('active', selected);
+          button.setAttribute('aria-selected', selected ? 'true' : 'false');
+        });
+
+        if (controls) controls.hidden = !productItems.length;
+      }
+
+      buttons.forEach(function(button){
+        button.addEventListener('click', function(){
+          if (button.hidden) return;
+          active = button.dataset.ssCategory || 'all';
+          apply();
+        });
+      });
+
+      apply();
+      new MutationObserver(apply).observe(root, { childList: true, subtree: true });
+    })();
+  </script>
+{% endunless %}
+
+{% stylesheet %}
+  .ss-private-catalog .collection-wrapper {
+    @media screen and (min-width: 750px) {
+      grid-template-columns:
+        1fr repeat(
+          var(--centered-column-number),
+          minmax(0, calc((var(--page-width) - var(--page-margin) * 2) / var(--centered-column-number)))
+        )
+        1fr;
+    }
+  }
+
+  /* Catalog controls are a real first row of the same wrapper as the products. */
+  .ss-private-catalog .collection-wrapper > .ss-catalog-controls {
+    grid-column: 1 / -1;
+    width: min(var(--ss-layout-page-width, 1320px), calc(100% - 40px));
+    max-width: min(var(--ss-layout-page-width, 1320px), calc(100% - 40px));
+    min-width: 0;
+    margin: 0 auto;
+    padding: 10px 0 11px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    overflow-x: auto;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .ss-private-catalog :is(.facets-block-wrapper, .facets-container, facet-filters-form, .product-grid__item-count, .sorting-filter, .grid-density-controls) {
+    display: none !important;
+  }
+
+  /* The badge sits on the photo, where the eye already is. It reads as
+     information about the garment, not as a discount — a shopper who mistakes
+     an inclusion for a promotion is worse off than one who missed it. */
+  .ss-private-catalog .product-grid__item {
+    position: relative;
+  }
+
+  .ss-private-catalog .ss-grid-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 3;
+    padding: 4px 9px;
+    border-radius: 6px;
+    background: rgba(17, 16, 14, 0.84);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: .02em;
+    pointer-events: none;
+  }
+
+  .ss-private-catalog .ss-grid-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-top: -2px;
+    padding: 0 14px 14px;
+  }
+
+  .ss-private-catalog .ss-grid-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    /* Inset rather than an outline, so a white or cream blank still reads as
+       a circle without a ring heavy enough to distort the colour it shows. */
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2);
+    flex: 0 0 auto;
+  }
+
+  .ss-private-catalog .ss-grid-swatch-more {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: rgba(0, 0, 0, .5);
+    line-height: 1;
+  }
+
+  @media screen and (max-width: 768px) {
+    .ss-private-catalog .collection-wrapper > .ss-catalog-controls {
+      width: 100%;
+      max-width: 100%;
+      padding: 7px 8px 8px;
+    }
+  }
+{% endstylesheet %}
+
+{% render 'product-tile-transparency' %}
+
+{% schema %}
+{
+  "name": "Store collection catalog",
+  "enabled_on": { "templates": ["collection"] },
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout_type",
+      "label": "Layout",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "organic", "label": "Editorial" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "select",
+      "id": "product_card_size",
+      "label": "Card size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "extra-large", "label": "Extra large" }
+      ],
+      "default": "small"
+    },
+    {
+      "type": "select",
+      "id": "mobile_product_card_size",
+      "label": "Mobile card size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "small"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_infinite_scroll",
+      "label": "Auto-load products",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 36,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "product_grid_width",
+      "label": "Width",
+      "options": [
+        { "value": "centered", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "centered"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_on_mobile",
+      "label": "Full width on mobile",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_horizontal",
+      "label": "Horizontal gap",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "columns_gap_vertical",
+      "label": "Vertical gap",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 32
+    }
+  ],
+  "presets": []
+}
+{% endschema %}

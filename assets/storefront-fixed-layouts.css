@@ -1,0 +1,1136 @@
+/*
+  PRIVATE STOREFRONT FIXED LAYOUTS
+  One server-rendered state controls the real storefront and the Admin Powers
+  snapshot. No DOM relocation and no appearance-specific runtime patching.
+*/
+
+/* ---------- SHARED PRIVATE-STORE STRUCTURE ---------- */
+#MainContent:has(#ss-private-store-state) {
+  --ss-layout-page-width: 1320px;
+  position: relative;
+  isolation: isolate;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-private-catalog {
+  padding: 0 0 32px !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-nav {
+  width: min(var(--ss-layout-page-width), calc(100% - 40px));
+  margin: 0 auto;
+  padding: 9px 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-tabs {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow-x: auto;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-category-tab {
+  min-height: 34px;
+  flex: 0 0 auto;
+  padding: 0 13px;
+  border-radius: 999px;
+  font: 850 11px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-private-catalog .product-grid {
+  margin-top: 0 !important;
+  padding-top: 6px !important;
+}
+
+#MainContent:has(#ss-private-store-state) .ss-private-catalog .product-grid__item {
+  overflow: hidden;
+  border-radius: 15px !important;
+}
+
+/* The selected fixed layout owns the page surface. Shopify section backgrounds do not. */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) > .shopify-section,
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .section-background,
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero,
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .section-background {
+  display: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-btn-solid {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-btn-admin {
+  border-color: var(--ss-team-secondary) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-live-dot {
+  background: var(--ss-team-secondary) !important;
+}
+
+/* ---------- CLASSIC TEAM ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) {
+  background:
+    radial-gradient(circle at 5% 0%, color-mix(in srgb, var(--ss-team-primary) 14%, transparent), transparent 30%),
+    radial-gradient(circle at 96% 10%, color-mix(in srgb, var(--ss-team-secondary) 12%, transparent), transparent 31%),
+    linear-gradient(180deg, #fbf9f4 0%, #fffdf9 34%, #ffffff 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) .ps-hero-card {
+  border-color: rgba(255,255,255,.86) !important;
+  background: rgba(255,255,255,.86) !important;
+  box-shadow: 0 22px 62px rgba(17,16,14,.08) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) .ss-category-tab {
+  border: 1px solid rgba(17,16,14,.11) !important;
+  background: rgba(255,255,255,.86) !important;
+  color: #171717 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) .ss-category-tab.active {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="classic"]) .product-grid__item {
+  border: 1px solid rgba(17,16,14,.08) !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 10px 26px rgba(17,16,14,.08) !important;
+}
+
+/* ---------- DIAGONAL SPLIT ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="split"]) {
+  background:
+    linear-gradient(132deg,
+      color-mix(in srgb, var(--ss-team-primary) 20%, #fff) 0 52%,
+      color-mix(in srgb, var(--ss-team-primary) 66%, var(--ss-team-secondary)) 52% 57%,
+      color-mix(in srgb, var(--ss-team-secondary) 23%, #fff) 57% 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="split"]) .ps-hero-card {
+  border-color: rgba(255,255,255,.76) !important;
+  background: rgba(255,255,255,.88) !important;
+  box-shadow: 0 24px 72px rgba(17,16,14,.10) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="split"]) .ss-category-tab {
+  border: 1px solid rgba(17,16,14,.12) !important;
+  background: rgba(255,255,255,.90) !important;
+  color: #151515 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="split"]) .ss-category-tab.active {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="split"]) .product-grid__item {
+  border: 1px solid rgba(17,16,14,.09) !important;
+  background: rgba(255,255,255,.94) !important;
+  box-shadow: 0 12px 30px rgba(17,16,14,.09) !important;
+}
+
+/* ---------- GRADIENT GLOW: ONE VIBRANT PAGE ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 92% 78% at -12% -14%,
+      color-mix(in srgb, var(--ss-team-primary) 98%, #fff) 0%,
+      color-mix(in srgb, var(--ss-team-primary) 85%, #fff) 22%,
+      color-mix(in srgb, var(--ss-team-primary) 56%, #fff) 44%,
+      color-mix(in srgb, var(--ss-team-primary) 22%, #fff) 63%,
+      transparent 79%),
+    radial-gradient(ellipse 98% 84% at 112% 114%,
+      color-mix(in srgb, var(--ss-team-secondary) 98%, #fff) 0%,
+      color-mix(in srgb, var(--ss-team-secondary) 85%, #fff) 23%,
+      color-mix(in srgb, var(--ss-team-secondary) 56%, #fff) 46%,
+      color-mix(in srgb, var(--ss-team-secondary) 22%, #fff) 65%,
+      transparent 80%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--ss-team-primary) 26%, #fff) 0%,
+      #fff 48%,
+      color-mix(in srgb, var(--ss-team-secondary) 28%, #fff) 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ps-hero-card {
+  border: 1px solid rgba(255,255,255,.78) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.89), rgba(255,255,255,.69)) !important;
+  box-shadow: 0 30px 92px rgba(37,22,48,.16), inset 0 1px rgba(255,255,255,.80) !important;
+  backdrop-filter: blur(18px) saturate(1.16) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.16) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ps-action-panel {
+  border-color: rgba(17,19,24,.10) !important;
+  background: rgba(255,255,255,.70) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) :is(.ps-title,.ps-sub,.ps-eyebrow,.ps-action-panel-title) {
+  color: #111318 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ps-sub {
+  opacity: .76 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ss-category-tab {
+  border: 1px solid rgba(17,19,24,.13) !important;
+  background: rgba(255,255,255,.88) !important;
+  color: #111318 !important;
+  text-shadow: none !important;
+  box-shadow: 0 4px 14px rgba(17,19,24,.07) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .ss-category-tab.active {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+  box-shadow: 0 7px 20px color-mix(in srgb, var(--ss-team-primary) 30%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .product-grid__item {
+  border: 1px solid rgba(17,19,24,.10) !important;
+  background: rgba(255,255,255,.93) !important;
+  box-shadow: 0 14px 36px rgba(45,26,56,.13) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) .product-grid__item :is(a,p,span,strong,small,.price,.price-item,.card__heading) {
+  color: #111318 !important;
+}
+
+/* ---------- SPRAY BURST: DARK MODE + COLOR ENERGY ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) {
+  min-height: 100vh;
+  background-color: #070c13 !important;
+  background-image:
+    radial-gradient(circle at 2% 4%, color-mix(in srgb, var(--ss-team-primary) 92%, transparent) 0 3px, transparent 4px),
+    radial-gradient(circle at 7% 13%, color-mix(in srgb, var(--ss-team-primary) 78%, transparent) 0 7px, transparent 8px),
+    radial-gradient(circle at 15% 6%, color-mix(in srgb, var(--ss-team-primary) 70%, transparent) 0 4px, transparent 5px),
+    radial-gradient(circle at 19% 18%, color-mix(in srgb, var(--ss-team-primary) 52%, transparent) 0 2px, transparent 3px),
+    radial-gradient(ellipse 62% 48% at -8% -4%, color-mix(in srgb, var(--ss-team-primary) 62%, transparent), transparent 70%),
+    radial-gradient(circle at 96% 82%, color-mix(in srgb, var(--ss-team-secondary) 92%, transparent) 0 5px, transparent 6px),
+    radial-gradient(circle at 89% 93%, color-mix(in srgb, var(--ss-team-secondary) 78%, transparent) 0 8px, transparent 9px),
+    radial-gradient(circle at 82% 86%, color-mix(in srgb, var(--ss-team-secondary) 60%, transparent) 0 3px, transparent 4px),
+    radial-gradient(ellipse 66% 52% at 108% 106%, color-mix(in srgb, var(--ss-team-secondary) 54%, transparent), transparent 72%),
+    linear-gradient(145deg, #070c13 0%, #0b121d 48%, #080d15 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ps-hero-card {
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: linear-gradient(145deg, rgba(12,20,31,.92), rgba(7,12,19,.88)) !important;
+  box-shadow: 0 30px 92px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.045) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) :is(.ps-title,.ps-eyebrow,.ps-action-panel-title) {
+  color: #f8fbff !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ps-sub {
+  color: #b9c4d0 !important;
+  opacity: 1 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ps-action-panel {
+  border-color: rgba(255,255,255,.15) !important;
+  background: rgba(4,9,16,.68) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ps-meta-row span {
+  border-color: rgba(255,255,255,.14) !important;
+  background: rgba(255,255,255,.085) !important;
+  color: #eef3f8 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) :is(.ps-btn-ghost,.ps-btn-soft) {
+  border-color: #d8e0e8 !important;
+  background: #f1f4f7 !important;
+  color: #0a111a !important;
+  text-shadow: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-category-tab {
+  border: 1px solid rgba(255,255,255,.18) !important;
+  background: #111b28 !important;
+  color: #f4f7fa !important;
+  text-shadow: none !important;
+  box-shadow: 0 5px 16px rgba(0,0,0,.20) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-category-tab.active {
+  border-color: var(--ss-team-secondary) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ss-team-secondary) 28%, transparent), 0 0 22px color-mix(in srgb, var(--ss-team-secondary) 22%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item {
+  border: 1px solid rgba(255,255,255,.15) !important;
+  background: #101923 !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.34) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item :is(.card__content,.card__information,.card-information) {
+  background: #101923 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item :is(.card__inner,.card__media,.media) {
+  background: #f4f5f6 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item :is(a,p,span,strong,small,.price,.price-item,.card__heading) {
+  color: #f6f8fb !important;
+}
+
+/* ---------- PRO DARK: ONE CLEAN CONTINUOUS PAGE ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) {
+  min-height: 100vh;
+  background-color: #050b12 !important;
+  background-image:
+    linear-gradient(rgba(151,177,205,.034) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(151,177,205,.034) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 52% at -12% -10%, color-mix(in srgb, var(--ss-team-primary) 34%, transparent), transparent 70%),
+    radial-gradient(ellipse 66% 52% at 112% 108%, color-mix(in srgb, var(--ss-team-secondary) 26%, transparent), transparent 72%),
+    linear-gradient(145deg, #050b12 0%, #09131f 48%, #060d16 100%) !important;
+  background-size: 32px 32px, 32px 32px, auto, auto, auto !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-hero-card {
+  border: 1px solid rgba(151,177,205,.20) !important;
+  border-top: 2px solid color-mix(in srgb, var(--ss-team-secondary) 84%, #fff) !important;
+  background: linear-gradient(145deg, rgba(16,27,41,.96), rgba(6,13,22,.94)) !important;
+  box-shadow: 0 30px 100px rgba(0,0,0,.46), inset 0 1px rgba(255,255,255,.05) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) :is(.ps-title,.ps-eyebrow,.ps-action-panel-title) {
+  color: #f8fbff !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-sub {
+  color: #afbdcc !important;
+  opacity: 1 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-action-panel {
+  border-color: rgba(151,177,205,.20) !important;
+  background: rgba(4,11,19,.70) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-meta-row span {
+  border-color: rgba(151,177,205,.18) !important;
+  background: rgba(133,157,184,.09) !important;
+  color: #dce6f0 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) :is(.ps-btn-ghost,.ps-btn-soft) {
+  border-color: #d5dee8 !important;
+  background: #f1f5f9 !important;
+  color: #07101a !important;
+  text-shadow: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-category-tab {
+  border: 1px solid rgba(151,177,205,.22) !important;
+  background: #101b29 !important;
+  color: #f2f6fa !important;
+  text-shadow: none !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-category-tab.active {
+  border-color: var(--ss-team-secondary) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item {
+  border: 1px solid rgba(151,177,205,.18) !important;
+  background: #0e1722 !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.34) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item :is(.card__content,.card__information,.card-information) {
+  background: #0e1722 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item :is(.card__inner,.card__media,.media) {
+  background: #f2f4f6 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item :is(a,p,span,strong,small,.price,.price-item,.card__heading) {
+  color: #f5f8fb !important;
+}
+
+/* ---------- HERITAGE ---------- */
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+  background:
+    linear-gradient(132deg,
+      #fbf7ec 0 63%,
+      color-mix(in srgb, var(--ss-team-primary) 62%, #fff) 63% 67%,
+      color-mix(in srgb, var(--ss-team-secondary) 70%, #fff) 67% 71%,
+      #fbf7ec 71% 100%) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) .ps-hero-card {
+  border-color: rgba(255,255,255,.76) !important;
+  background: rgba(255,253,247,.90) !important;
+  box-shadow: 0 24px 68px rgba(70,55,25,.10) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) .ss-category-tab {
+  border: 1px solid rgba(71,58,30,.15) !important;
+  background: rgba(255,253,247,.92) !important;
+  color: #272117 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) .ss-category-tab.active {
+  border-color: var(--ss-team-primary) !important;
+  background: var(--ss-team-primary) !important;
+  color: var(--ss-team-primary-text) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) .product-grid__item {
+  border: 1px solid rgba(71,58,30,.10) !important;
+  background: rgba(255,253,247,.95) !important;
+  box-shadow: 0 12px 30px rgba(70,55,25,.09) !important;
+}
+
+@media (max-width: 768px) {
+  #MainContent:has(#ss-private-store-state) .ss-category-nav {
+    width: 100%;
+    padding: 6px 8px 7px;
+  }
+
+  #MainContent:has(#ss-private-store-state) .ss-category-tab {
+    min-height: 31px;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-layout="gradient"]) {
+    background:
+      radial-gradient(ellipse 122% 70% at -18% -12%,
+        color-mix(in srgb, var(--ss-team-primary) 96%, #fff) 0%,
+        color-mix(in srgb, var(--ss-team-primary) 60%, #fff) 38%,
+        transparent 73%),
+      radial-gradient(ellipse 122% 74% at 118% 112%,
+        color-mix(in srgb, var(--ss-team-secondary) 96%, #fff) 0%,
+        color-mix(in srgb, var(--ss-team-secondary) 60%, #fff) 40%,
+        transparent 75%),
+      #fff !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-layout="pro"]) {
+    background-size: 24px 24px, 24px 24px, auto, auto, auto !important;
+  }
+}
+
+/* ============================================================
+   REFINEMENT PASS
+   Layered after the base designs on purpose: same selector weight,
+   declared later, so these win without escalating specificity.
+   ============================================================ */
+
+/* ---------- SHARED: a bigger catalog and a tighter header ---------- */
+
+/*
+  Four across instead of seven.
+
+  The theme sizes the grid to fit as many cards as the page width allows,
+  which on a wide monitor produced seven thumbnails so small the print on a
+  shirt was unreadable. A team store is browsed by someone deciding whether
+  their kid's name will look right on a hoodie, so the artwork has to be
+  legible from the grid. Four cards across a 1320px page is ~330px each —
+  large enough to judge a print, and it makes a seven-item store read as a
+  real catalog rather than a thin row.
+*/
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+  --product-grid-columns-desktop: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media screen and (min-width: 990px) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/*
+  The store card carried a 310px floor and up to 56px of padding, which on a
+  laptop pushed the first product below the fold. Nothing is removed from it —
+  same logo, name, badges, actions — it simply stops reserving room it was not
+  using, so the catalog starts higher.
+*/
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+  min-height: 0 !important;
+  gap: 26px !important;
+  padding: clamp(22px, 2.7vw, 36px) !important;
+  border-radius: 30px !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero {
+  padding-block: clamp(16px, 2.2vw, 30px) clamp(10px, 1.4vw, 18px) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-action-panel {
+  padding: 16px !important;
+  border-radius: 20px !important;
+}
+
+/* Cards lift on hover so the grid feels responsive rather than printed. */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .product-grid__item {
+  border-radius: 18px !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+}
+
+@media (hover: hover) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .product-grid__item:hover {
+    transform: translateY(-4px) !important;
+  }
+}
+
+/* Tabs get a real tap target and a colour that moves when chosen. */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-category-tab {
+  min-height: 37px !important;
+  padding: 0 16px !important;
+  letter-spacing: .025em !important;
+  transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease !important;
+}
+
+/* ---------- PRO DARK: command centre ---------- */
+
+/*
+  The brief for this one is "command centre", so it earns the extras the light
+  designs do not: a tighter instrument grid, a lit rail under the header, and
+  a glow that follows the active control.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) {
+  background-size: 26px 26px, 26px 26px, auto, auto, auto !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-hero-card {
+  border-top-width: 3px !important;
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.5),
+    0 0 60px -22px color-mix(in srgb, var(--ss-team-secondary) 50%, transparent),
+    inset 0 1px rgba(255,255,255,.07) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-eyebrow {
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+  font-size: 10px !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-category-tab {
+  border: 1px solid rgba(151,177,205,.24) !important;
+  background: rgba(12,22,35,.86) !important;
+  color: #dbe6f2 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-category-tab.active {
+  border-color: color-mix(in srgb, var(--ss-team-secondary) 78%, #fff) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--ss-team-secondary) 34%, transparent),
+    0 0 26px color-mix(in srgb, var(--ss-team-secondary) 42%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item {
+  border: 1px solid rgba(151,177,205,.17) !important;
+  background: linear-gradient(160deg, rgba(15,26,40,.96), rgba(7,14,23,.96)) !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.44) !important;
+}
+
+@media (hover: hover) {
+  #MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item:hover {
+    border-color: color-mix(in srgb, var(--ss-team-secondary) 55%, transparent) !important;
+    box-shadow:
+      0 26px 60px rgba(0,0,0,.52),
+      0 0 32px -12px color-mix(in srgb, var(--ss-team-secondary) 46%, transparent) !important;
+  }
+}
+
+/* ---------- GRADIENT GLOW: turn it up ---------- */
+
+/*
+  The corners were washing out to near-white by the middle of the page, so the
+  design read as "slightly tinted" rather than as a glow. The colour now holds
+  further in from each corner before it releases.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) {
+  background:
+    radial-gradient(ellipse 96% 82% at -10% -12%,
+      color-mix(in srgb, var(--ss-team-primary) 100%, #fff) 0%,
+      color-mix(in srgb, var(--ss-team-primary) 92%, #fff) 26%,
+      color-mix(in srgb, var(--ss-team-primary) 68%, #fff) 48%,
+      color-mix(in srgb, var(--ss-team-primary) 30%, #fff) 68%,
+      transparent 84%),
+    radial-gradient(ellipse 100% 88% at 110% 112%,
+      color-mix(in srgb, var(--ss-team-secondary) 100%, #fff) 0%,
+      color-mix(in srgb, var(--ss-team-secondary) 92%, #fff) 27%,
+      color-mix(in srgb, var(--ss-team-secondary) 68%, #fff) 50%,
+      color-mix(in srgb, var(--ss-team-secondary) 30%, #fff) 70%,
+      transparent 85%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--ss-team-primary) 34%, #fff) 0%,
+      #fff 50%,
+      color-mix(in srgb, var(--ss-team-secondary) 36%, #fff) 100%) !important;
+}
+
+/* ---------- SPRAY BURST: make the burst read ---------- */
+
+/*
+  The two corner blasts were small enough to look like vignetting. They are now
+  large and offset enough to read as deliberate spray, with the overspray dots
+  carried further across the page.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) {
+  background-image:
+    radial-gradient(circle at 14% 8%, color-mix(in srgb, var(--ss-team-primary) 88%, transparent) 0%, color-mix(in srgb, var(--ss-team-primary) 40%, transparent) 26%, transparent 54%),
+    radial-gradient(circle at 88% 92%, color-mix(in srgb, var(--ss-team-secondary) 88%, transparent) 0%, color-mix(in srgb, var(--ss-team-secondary) 40%, transparent) 27%, transparent 56%),
+    radial-gradient(circle at 74% 16%, color-mix(in srgb, var(--ss-team-secondary) 62%, transparent) 0%, transparent 15%),
+    radial-gradient(circle at 26% 78%, color-mix(in srgb, var(--ss-team-primary) 58%, transparent) 0%, transparent 14%),
+    radial-gradient(circle at 58% 44%, color-mix(in srgb, var(--ss-team-secondary) 34%, transparent) 0%, transparent 9%),
+    linear-gradient(150deg, #060d16 0%, #0b1725 52%, #050b12 100%) !important;
+}
+
+/* ---------- DIAGONAL SPLIT + HERITAGE: the stripe on a phone ---------- */
+
+/*
+  Both designs are a thin diagonal band across a wide page. On a phone the
+  page is taller than it is wide, so that band crossed mostly off-screen and
+  the whole design read as a flat cream rectangle — the one thing that
+  distinguishes it was invisible exactly where most shoppers see it.
+
+  Steeper angle, wider band, positioned to cross the visible area.
+*/
+@media (max-width: 768px) {
+  #MainContent:has(#ss-private-store-state[data-layout="split"]) {
+    background:
+      linear-gradient(160deg,
+        color-mix(in srgb, var(--ss-team-primary) 22%, #fff) 0 44%,
+        color-mix(in srgb, var(--ss-team-primary) 70%, var(--ss-team-secondary)) 44% 53%,
+        color-mix(in srgb, var(--ss-team-secondary) 26%, #fff) 53% 100%) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+    background:
+      linear-gradient(160deg,
+        #fbf7ec 0 52%,
+        color-mix(in srgb, var(--ss-team-primary) 66%, #fff) 52% 60%,
+        color-mix(in srgb, var(--ss-team-secondary) 74%, #fff) 60% 68%,
+        #fbf7ec 68% 100%) !important;
+  }
+
+  /* Two across on a phone keeps the print legible without endless scrolling. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+    padding: 18px !important;
+    border-radius: 22px !important;
+  }
+}
+
+/* ============================================================
+   SECOND PASS: stripes you can actually see, spray you can't miss
+   ============================================================ */
+
+/*
+  Why the first attempt at these was not enough.
+
+  The store card and the product cards are opaque and sit in the middle of
+  the page, so a single diagonal band crossing the centre is hidden behind
+  them — only slivers survive in the outer margins. On a phone the content
+  spans nearly the full width, so there is almost no exposed background left
+  for a band to appear in at all, which is why Heritage read as a plain cream
+  rectangle there.
+
+  A repeating stripe fixes both cases: wherever a gap in the content exists —
+  page margins, the gutters between cards, the space below the grid — a stripe
+  is crossing it. That is also what varsity actually looks like, so the design
+  gets more honest rather than just louder.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+  background:
+    repeating-linear-gradient(
+      128deg,
+      transparent 0 186px,
+      color-mix(in srgb, var(--ss-team-primary) 62%, #fff) 186px 218px,
+      #fbf7ec 218px 228px,
+      color-mix(in srgb, var(--ss-team-secondary) 72%, #fff) 228px 258px,
+      transparent 258px 470px
+    ),
+    linear-gradient(180deg, #fdfaf2 0%, #f8f2e3 100%) !important;
+}
+
+/*
+  Split keeps its single division — that is the whole idea of the design — but
+  the band was 5% of the diagonal, thin enough to vanish behind the store card.
+  Wider, with a hard accent line so the edge stays crisp instead of blurring
+  into the two fields.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="split"]) {
+  background:
+    linear-gradient(128deg,
+      color-mix(in srgb, var(--ss-team-primary) 26%, #fff) 0 44%,
+      color-mix(in srgb, var(--ss-team-primary) 88%, var(--ss-team-secondary)) 44% 53%,
+      color-mix(in srgb, var(--ss-team-secondary) 92%, #fff) 53% 56%,
+      color-mix(in srgb, var(--ss-team-secondary) 30%, #fff) 56% 100%) !important;
+}
+
+/*
+  Spray was still reading as a soft glow because every blast faded to nothing
+  before it reached anything. The cores are now genuinely saturated and hold
+  their colour further out, and there are enough drips scattered across the
+  page that it looks sprayed rather than lit.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) {
+  background-image:
+    radial-gradient(circle at 12% 4%,
+      color-mix(in srgb, var(--ss-team-primary) 100%, transparent) 0%,
+      color-mix(in srgb, var(--ss-team-primary) 78%, transparent) 18%,
+      color-mix(in srgb, var(--ss-team-primary) 30%, transparent) 38%,
+      transparent 62%),
+    radial-gradient(circle at 90% 96%,
+      color-mix(in srgb, var(--ss-team-secondary) 100%, transparent) 0%,
+      color-mix(in srgb, var(--ss-team-secondary) 78%, transparent) 19%,
+      color-mix(in srgb, var(--ss-team-secondary) 30%, transparent) 40%,
+      transparent 64%),
+    radial-gradient(circle at 78% 12%, color-mix(in srgb, var(--ss-team-secondary) 85%, transparent) 0%, transparent 11%),
+    radial-gradient(circle at 22% 84%, color-mix(in srgb, var(--ss-team-primary) 82%, transparent) 0%, transparent 10%),
+    radial-gradient(circle at 62% 30%, color-mix(in srgb, var(--ss-team-secondary) 62%, transparent) 0%, transparent 7%),
+    radial-gradient(circle at 40% 68%, color-mix(in srgb, var(--ss-team-primary) 58%, transparent) 0%, transparent 6%),
+    radial-gradient(circle at 92% 42%, color-mix(in srgb, var(--ss-team-secondary) 52%, transparent) 0%, transparent 5%),
+    radial-gradient(circle at 8% 58%, color-mix(in srgb, var(--ss-team-primary) 48%, transparent) 0%, transparent 4.5%),
+    linear-gradient(150deg, #050b13 0%, #0a1522 52%, #04090f 100%) !important;
+}
+
+@media (max-width: 768px) {
+  /*
+    Tighter repeat on a phone: the exposed background is only the gutters
+    between cards and the strip below the grid, so the stripes have to arrive
+    often enough that one lands in view.
+  */
+  #MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+    background:
+      repeating-linear-gradient(
+        150deg,
+        transparent 0 104px,
+        color-mix(in srgb, var(--ss-team-primary) 66%, #fff) 104px 126px,
+        #fbf7ec 126px 133px,
+        color-mix(in srgb, var(--ss-team-secondary) 76%, #fff) 133px 155px,
+        transparent 155px 272px
+      ),
+      linear-gradient(180deg, #fdfaf2 0%, #f8f2e3 100%) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-layout="split"]) {
+    background:
+      linear-gradient(158deg,
+        color-mix(in srgb, var(--ss-team-primary) 26%, #fff) 0 40%,
+        color-mix(in srgb, var(--ss-team-primary) 88%, var(--ss-team-secondary)) 40% 51%,
+        color-mix(in srgb, var(--ss-team-secondary) 92%, #fff) 51% 55%,
+        color-mix(in srgb, var(--ss-team-secondary) 30%, #fff) 55% 100%) !important;
+  }
+}
+
+/* ============================================================
+   THE STORE MESSAGE
+   ============================================================ */
+
+/*
+  This had no styling at all on the live page.
+
+  Every rule for .ss-hero-message lived in storefront-unified-polish.css,
+  storefront-final-tune.css and storefront-gradient-glow-live.css — all three
+  retired with the old architecture and none of them loaded — so the element
+  was being injected with no appearance and inheriting body copy. The one line
+  an organiser writes to their team ("order before the season starts") was
+  arriving as small grey text below the badges, which is the opposite of what
+  it is for.
+
+  It is now a deliberate notice: team-coloured rail, a live dot, and type
+  heavy enough to read as an instruction rather than a caption.
+*/
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+  display: flex !important;
+  align-items: center !important;
+  gap: 11px !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 16px 0 0 !important;
+  padding: 12px 18px 12px 15px !important;
+  border: 1px solid color-mix(in srgb, var(--ss-team-secondary) 30%, transparent) !important;
+  border-left: 4px solid var(--ss-team-secondary) !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--ss-team-secondary) 9%, #ffffff) !important;
+  color: #17150f !important;
+  font: 800 13.5px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif !important;
+  letter-spacing: .005em !important;
+  text-align: left !important;
+}
+
+/* A small live dot, so the notice reads as current rather than decorative. */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message::before {
+  content: '' !important;
+  flex: 0 0 auto !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: var(--ss-team-secondary) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ss-team-secondary) 20%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message[hidden] {
+  display: none !important;
+}
+
+/* On the dark designs the light card would punch a hole in the page. */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-hero-message,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-hero-message {
+  border-color: color-mix(in srgb, var(--ss-team-secondary) 42%, transparent) !important;
+  background: color-mix(in srgb, var(--ss-team-secondary) 13%, rgba(8,15,25,.72)) !important;
+  color: #f2f7fc !important;
+  box-shadow: 0 0 30px -14px color-mix(in srgb, var(--ss-team-secondary) 70%, transparent) !important;
+}
+
+@media (max-width: 768px) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+    width: 100% !important;
+    margin-top: 13px !important;
+    padding: 11px 14px 11px 12px !important;
+    font-size: 12.5px !important;
+  }
+}
+
+/* ============================================================
+   THIRD PASS
+   ============================================================ */
+
+/*
+  The store card sizes itself to whoever is looking at it.
+
+  An admin sees four actions — shop, dashboard, share, admin powers. A member
+  sees two or three. The panel column was pinned at 280px and stretched to the
+  full card height either way, so a member got a tall, mostly empty box beside
+  their store name and the card reserved space for buttons that were never
+  rendered.
+
+  Counting is done with :has() on the panel's own children, so it follows
+  whatever the Liquid decided to render rather than duplicating the
+  permission rules in CSS.
+*/
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-action-panel {
+  align-self: start !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"])
+  .ps-hero-card:not(:has(.ps-action-panel > .ps-btn:nth-child(5))) {
+  grid-template-columns: minmax(0, 1fr) 236px !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"])
+  .ps-hero-card:not(:has(.ps-action-panel > .ps-btn:nth-child(4))) {
+  grid-template-columns: minmax(0, 1fr) 214px !important;
+}
+
+/*
+  The message reads as an announcement, so it is centred and spans the copy
+  column rather than sitting as a lozenge tucked under the badges.
+*/
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+  width: 100% !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 12px 18px !important;
+  border-left-width: 1px !important;
+  border-left-color: color-mix(in srgb, var(--ss-team-secondary) 30%, transparent) !important;
+  border-top: 2px solid var(--ss-team-secondary) !important;
+}
+
+/*
+  Heritage: one ribbon, not a field of them.
+
+  The repeating version solved visibility by covering the page, which turned a
+  restrained varsity look into wallpaper. This goes back to a single stripe
+  pair, but places it deliberately instead of running it across the middle
+  where the cards hide it: a sized, unrepeated ribbon anchored off the
+  top-right corner, so it crosses the open space above and beside the store
+  card at every width.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+  background-color: #fbf7ec !important;
+  background-image:
+    linear-gradient(128deg,
+      transparent 0 38%,
+      color-mix(in srgb, var(--ss-team-primary) 72%, #fff) 38% 45%,
+      #fdfaf2 45% 48%,
+      color-mix(in srgb, var(--ss-team-secondary) 80%, #fff) 48% 55%,
+      transparent 55% 100%),
+    linear-gradient(180deg, #fdfaf2 0%, #f6efdd 100%) !important;
+  background-size: 1180px 1180px, auto !important;
+  background-position: right -250px top -290px, center !important;
+  background-repeat: no-repeat, no-repeat !important;
+}
+
+@media (max-width: 768px) {
+  /* Pulled in and scaled down so the ribbon still crosses a phone's viewport. */
+  #MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+    background-size: 720px 720px, auto !important;
+    background-position: right -210px top -150px, center !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* ============================================================
+   PRODUCT CARDS ON THE DARK DESIGNS
+   ============================================================ */
+
+/*
+  The photo tile goes dark so the garment is what you see.
+
+  Every mockup sat on a white tile, so a grid of seven read as seven bright
+  rectangles punched out of the page and the artwork — the thing a shopper is
+  actually judging — came second. The tile was never the photo's own
+  background; it was CSS, which is why this is a colour change rather than an
+  image problem.
+
+  Printful's ghost mockups are cut out, so they float on the dark tile. A
+  photo that turns out to be an opaque rectangle would become a white box in
+  a dark frame, so product-tile-transparency measures each one and marks the
+  opaque ones to keep the light tile. Anything unmeasurable stays light too:
+  the unknown case degrades to how this looked before, not to the broken one.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item:not(.ss-tile-opaque) :is(.card__inner, .card__media, .media),
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item:not(.ss-tile-opaque) :is(.card__inner, .card__media, .media) {
+  background: transparent !important;
+}
+
+/* A hairline between photo and caption, so the card still has structure once
+   the tile stops providing the edge. */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item :is(.card__content, .card__information, .card-information),
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item :is(.card__content, .card__information, .card-information) {
+  background: transparent !important;
+  border-top: 1px solid rgba(151,177,205,.13) !important;
+}
+
+/* Opaque photos keep a light tile, inset so it reads as a deliberate frame
+   rather than a card that failed to style. */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item.ss-tile-opaque :is(.card__inner, .card__media, .media),
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item.ss-tile-opaque :is(.card__inner, .card__media, .media) {
+  background: #f4f5f6 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* ---------- badge + swatches across the designs ---------- */
+
+/* On dark cards the near-black badge disappears into the tile. */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-badge,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-badge {
+  background: color-mix(in srgb, var(--ss-team-secondary) 88%, #000) !important;
+  color: var(--ss-team-secondary-text) !important;
+  box-shadow: 0 0 18px -6px color-mix(in srgb, var(--ss-team-secondary) 70%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-swatch,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-swatch {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.34) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-swatch-more,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-swatch-more {
+  color: rgba(233,240,248,.62) !important;
+}
+
+/* ============================================================
+   THE STORE LOGO ON A PHONE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  /*
+    The logo was a 72px square pinned to the left of a two-column row, next to
+    a title that wrapped past it. At that size a team crest is unreadable — the
+    thing that tells a parent they are in the right store — and sitting hard
+    left against wrapping text is what made it look bolted on.
+
+    Centred and stacked, at ~50% larger.
+
+    Stacking costs height, so it is paid for rather than simply added: the
+    action buttons, their panel, the card padding and every gap give back a
+    few pixels each, and the title tightens. What is left is a card that grows
+    by roughly a third of the logo's increase, in exchange for a crest that is
+    actually legible.
+  */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center !important;
+    gap: 9px !important;
+    padding: 13px 12px !important;
+    text-align: center !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-logo {
+    width: 108px !important;
+    height: 108px !important;
+    margin: 0 auto !important;
+    border-radius: 26px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-logo-img {
+    width: 90% !important;
+    height: 90% !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-copy {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-title {
+    font-size: clamp(25px, 7.6vw, 34px) !important;
+    line-height: .96 !important;
+  }
+
+  /* Chips and the notice centre with everything else. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-meta-row {
+    justify-content: center !important;
+    margin-top: 6px !important;
+  }
+
+  /* Paying for the logo: a few pixels back from each control. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-action-panel {
+    padding: 7px !important;
+    gap: 6px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-btn {
+    min-height: 35px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+    margin-top: 10px !important;
+    padding: 9px 12px !important;
+  }
+}
+
+/* ============================================================
+   THE PEEK: first product row visible without scrolling
+   ============================================================ */
+
+@media (max-width: 768px) {
+  /*
+    A store that opens to a full-screen header looks like it has nothing in
+    it. If the top of the first product row is showing, the page says "there
+    is more, keep going" without needing a prompt, and the shopper scrolls on
+    their own.
+
+    Everything above the grid is therefore sized against viewport HEIGHT, not
+    just width. Width-based sizing is why this broke: clamp(25px, 7.6vw, 34px)
+    gives an iPhone SE and a Pro Max nearly the same header, but the SE has
+    ~180px less screen to spend on it, so the grid fell off the bottom exactly
+    on the phones with least room.
+
+    dvh rather than vh, because vh on mobile Safari measures the viewport with
+    the address bar collapsed — the state the page is NOT in when it first
+    loads, which is the one moment this is trying to get right.
+  */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero {
+    padding-block: clamp(6px, 1dvh, 12px) clamp(4px, 0.8dvh, 10px) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+    padding: clamp(10px, 1.5dvh, 14px) 12px !important;
+    gap: clamp(6px, 1dvh, 10px) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-logo {
+    width: clamp(76px, 13dvh, 108px) !important;
+    height: clamp(76px, 13dvh, 108px) !important;
+  }
+
+  /* The store name still leads, but it yields on a short screen. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-title {
+    font-size: min(clamp(24px, 7.4vw, 34px), 5.2dvh) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+    margin-top: clamp(6px, 1dvh, 10px) !important;
+    padding: clamp(7px, 1.1dvh, 10px) 12px !important;
+    font-size: 12px !important;
+  }
+
+  /* The tab row is the last thing between the header and the grid. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-catalog-controls {
+    padding: clamp(5px, 0.9dvh, 8px) 8px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+    padding-top: 2px !important;
+  }
+
+  /*
+    Short phones give up more.
+
+    Below ~700px of viewport the header still eats the grid even after the
+    scaling above, so the announcement drops to one line and the action panel
+    tightens again. Nothing is hidden — an organiser's message and the store
+    actions both still render — they just stop competing with the products.
+  */
+  @media (max-height: 700px) {
+    #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-hero-message {
+      display: -webkit-box !important;
+      -webkit-line-clamp: 1 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+    }
+
+    #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-btn {
+      min-height: 33px !important;
+      font-size: 11.5px !important;
+    }
+
+    #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-meta-row {
+      margin-top: 4px !important;
+    }
+  }
+}

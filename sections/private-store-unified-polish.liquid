@@ -1,0 +1,24 @@
+{{ 'storefront-unified-polish.css' | asset_url | stylesheet_tag }}
+{{ 'storefront-tab-strip-fix.css' | asset_url | stylesheet_tag }}
+{{ 'storefront-final-tune.css' | asset_url | stylesheet_tag }}
+
+{% comment %}
+  Keep this section intentionally thin.
+
+  The external stylesheets above are the authoritative private-store appearance
+  layers, in cascade order. The final runtime normalizer below is deliberately
+  loaded last so category structure and critical readability fixes do not depend
+  on CSS cascade order.
+{% endcomment %}
+
+<script src="{{ 'storefront-live-structure.js' | asset_url }}" defer></script>
+<script src="{{ 'storefront-tab-runtime-fix.js' | asset_url }}" defer></script>
+<script src="{{ 'storefront-runtime-hard-fix.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Storefront unified polish",
+  "enabled_on": { "templates": ["collection"] },
+  "settings": []
+}
+{% endschema %}
