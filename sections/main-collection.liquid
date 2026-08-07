@@ -6,6 +6,14 @@
 
 {% liquid
   assign hide_private_store_collection = false
+  assign ss_appearance_enabled = false
+  assign ss_primary = '#1f2937'
+  assign ss_secondary = '#d4af37'
+  assign ss_primary_text = '#ffffff'
+  assign ss_secondary_text = '#111111'
+  assign ss_pattern = 'none'
+  assign ss_announcement = ''
+  assign ss_show_announcement = false
 
   if collection and collection.template_suffix == 'private-store'
     assign private_handle = collection.handle | downcase | strip
@@ -21,6 +29,23 @@
     unless private_access != blank
       assign hide_private_store_collection = true
     endunless
+
+    assign ss_entry = shop.metaobjects.custom_shop[private_handle]
+    if ss_entry
+      assign ss_settings = ss_entry.storefront_settings.value | default: ss_entry.storefront_settings
+      if ss_settings and ss_settings.enabled == true
+        assign ss_appearance_enabled = true
+        assign ss_primary = ss_settings.primary_color | default: ss_primary
+        assign ss_secondary = ss_settings.secondary_color | default: ss_secondary
+        assign ss_primary_text = ss_settings.primary_text | default: ss_primary_text
+        assign ss_secondary_text = ss_settings.secondary_text | default: ss_secondary_text
+        assign ss_pattern = ss_settings.pattern | default: 'none' | downcase
+        assign ss_announcement = ss_settings.announcement | default: '' | strip
+        if ss_settings.show_announcement == true and ss_announcement != blank
+          assign ss_show_announcement = true
+        endif
+      endif
+    endif
   endif
 %}
 
@@ -40,11 +65,136 @@
   }
 {% endjavascript %}
 
+{% if ss_appearance_enabled %}
+  <style>
+    html {
+      --ss-team-primary: {{ ss_primary }};
+      --ss-team-secondary: {{ ss_secondary }};
+      --ss-team-primary-text: {{ ss_primary_text }};
+      --ss-team-secondary-text: {{ ss_secondary_text }};
+    }
+
+    /* Keep the existing private-store hero and only tint its current surfaces. */
+    .ps-hero {
+      background:
+        radial-gradient(circle at 14% 0%, color-mix(in srgb, var(--ss-team-primary) 18%, transparent), transparent 34%),
+        radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--ss-team-secondary) 14%, transparent), transparent 30%),
+        linear-gradient(180deg, #fbf8f1 0%, #fffdf9 42%, #ffffff 100%) !important;
+    }
+    .ps-hero .ps-hero-card {
+      border-color: color-mix(in srgb, var(--ss-team-secondary) 28%, rgba(255,255,255,.86)) !important;
+      box-shadow: 0 34px 120px color-mix(in srgb, var(--ss-team-primary) 13%, rgba(17,16,14,.08)) !important;
+    }
+    .ps-hero .ps-live-dot {
+      background: var(--ss-team-secondary) !important;
+      box-shadow: 0 0 0 7px color-mix(in srgb, var(--ss-team-secondary) 14%, transparent) !important;
+    }
+    .ps-hero .ps-eyebrow,
+    .ps-hero .ps-action-panel-title {
+      color: color-mix(in srgb, var(--ss-team-primary) 80%, #11100e) !important;
+    }
+    .ps-hero .ps-btn-solid,
+    .ps-hero .ps-mobile-pill--dark {
+      border-color: var(--ss-team-primary) !important;
+      background: var(--ss-team-primary) !important;
+      color: var(--ss-team-primary-text) !important;
+    }
+    .ps-hero .ps-btn-admin {
+      border-color: var(--ss-team-secondary) !important;
+      background: var(--ss-team-secondary) !important;
+      color: var(--ss-team-secondary-text) !important;
+    }
+    .ps-hero .ps-hero-pill,
+    .ps-hero .ps-btn-ghost,
+    .ps-hero .ps-btn-soft,
+    .ps-hero .ps-mobile-pill {
+      border-color: color-mix(in srgb, var(--ss-team-primary) 22%, rgba(17,16,14,.10)) !important;
+    }
+
+    .ss-team-announcement {
+      width: min(1440px, calc(100% - 40px));
+      margin: 12px auto 10px;
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      border: 1px solid color-mix(in srgb, var(--ss-team-secondary) 36%, transparent);
+      border-left: 5px solid var(--ss-team-secondary);
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--ss-team-primary) 92%, #ffffff);
+      color: var(--ss-team-primary-text);
+      box-shadow: 0 10px 30px color-mix(in srgb, var(--ss-team-primary) 16%, transparent);
+      font: 800 13px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      text-align: center;
+    }
+    .ss-team-announcement__dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--ss-team-secondary);
+    }
+
+    results-list.ss-team-products--diagonal {
+      background:
+        linear-gradient(
+          135deg,
+          color-mix(in srgb, var(--ss-team-primary) 11%, #ffffff) 0 47%,
+          color-mix(in srgb, var(--ss-team-secondary) 34%, #ffffff) 47% 52%,
+          color-mix(in srgb, var(--ss-team-secondary) 10%, #ffffff) 52% 100%
+        ) !important;
+    }
+    results-list.ss-team-products--stripes {
+      background:
+        linear-gradient(
+          135deg,
+          #ffffff 0 35%,
+          color-mix(in srgb, var(--ss-team-primary) 52%, #ffffff) 35% 39%,
+          color-mix(in srgb, var(--ss-team-secondary) 60%, #ffffff) 39% 43%,
+          #ffffff 43% 100%
+        ) !important;
+    }
+
+    @media screen and (max-width: 749px) {
+      .ps-hero {
+        background:
+          radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--ss-team-primary) 12%, transparent), transparent 38%),
+          linear-gradient(180deg, #fbf8f1 0%, #ffffff 100%) !important;
+      }
+      .ps-hero .ps-hero-card {
+        border-color: color-mix(in srgb, var(--ss-team-secondary) 22%, rgba(255,255,255,.9)) !important;
+        box-shadow: 0 16px 50px color-mix(in srgb, var(--ss-team-primary) 10%, rgba(17,16,14,.08)) !important;
+      }
+      .ss-team-announcement {
+        width: calc(100% - 24px);
+        margin: 7px auto 4px;
+        padding: 8px 11px;
+        gap: 7px;
+        border-left-width: 3px;
+        border-radius: 10px;
+        box-shadow: none;
+        font-size: 11px;
+      }
+      .ss-team-announcement__dot {
+        width: 6px;
+        height: 6px;
+      }
+    }
+  </style>
+{% endif %}
+
 {% comment %} We always render this full-width, as the child blocks have width: page/full settings {% endcomment %}
 {% unless hide_private_store_collection %}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
+{% if ss_show_announcement %}
+  <div class="ss-team-announcement" role="status">
+    <span class="ss-team-announcement__dot" aria-hidden="true"></span>
+    <span>{{ ss_announcement }}</span>
+  </div>
+{% endif %}
 <results-list
-  class="section product-grid-container color-{{ section.settings.color_scheme }}"
+  class="section product-grid-container color-{{ section.settings.color_scheme }}{% if ss_appearance_enabled %} ss-team-products ss-team-products--{{ ss_pattern | escape }}{% endif %}"
   style="--padding-block-start: {{ section.settings.padding-block-start }}px; --padding-block-end: {{ section.settings.padding-block-end }}px;"
   section-id="{{ section.id }}"
   infinite-scroll="{{ section.settings.enable_infinite_scroll }}"
