@@ -465,21 +465,31 @@
 /* ---------- SHARED: a bigger catalog and a tighter header ---------- */
 
 /*
-  Four across instead of seven.
+  Six across on a wide screen, stepping down with the viewport.
 
-  The theme sizes the grid to fit as many cards as the page width allows,
-  which on a wide monitor produced seven thumbnails so small the print on a
-  shirt was unreadable. A team store is browsed by someone deciding whether
-  their kid's name will look right on a hoodie, so the artwork has to be
-  legible from the grid. Four cards across a 1320px page is ~330px each —
-  large enough to judge a print, and it makes a seven-item store read as a
-  real catalog rather than a thin row.
+  The theme fit as many cards as the page allowed, which on a wide monitor
+  gave eight thumbnails small enough that the print on a shirt was
+  unreadable. Six at ~210px still shows the artwork clearly and makes a
+  fifteen-item store read as a full catalog, which four did not — four left
+  a wide store looking sparse.
 */
 #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
-  --product-grid-columns-desktop: repeat(4, minmax(0, 1fr)) !important;
+  --product-grid-columns-desktop: repeat(6, minmax(0, 1fr)) !important;
 }
 
-@media screen and (min-width: 990px) {
+@media screen and (min-width: 1400px) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+}
+
+@media screen and (min-width: 1100px) and (max-width: 1399px) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+@media screen and (min-width: 990px) and (max-width: 1099px) {
   #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }
@@ -965,15 +975,23 @@
 /* ---------- badge + swatches across the designs ---------- */
 
 /*
-  On the dark designs the theme's badge sits on a dark tile and its default
-  near-black fill disappears into it. This targets the theme's own badge — the
-  private grid deliberately does not draw a second one, which is what produced
-  two stacked pills on every personalised product.
+  The badge takes the store's own colour, and its text follows.
+
+  It was a fixed near-black pill with white text, which vanished into the tile
+  on the dark designs and ignored the team's colours on the light ones. The
+  builder already stores a text colour picked for contrast against each chosen
+  colour — that is what secondary_text is for — so using the pair keeps the
+  label readable whether the team picked navy or a bright yellow, without
+  guessing at luminance here.
 */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .product-badges__badge--pro-extra {
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+  letter-spacing: .02em !important;
+}
+
 #MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-badges__badge--pro-extra,
 #MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-badges__badge--pro-extra {
-  background: color-mix(in srgb, var(--ss-team-secondary) 88%, #000) !important;
-  color: var(--ss-team-secondary-text) !important;
   box-shadow: 0 0 18px -6px color-mix(in srgb, var(--ss-team-secondary) 70%, transparent) !important;
 }
 

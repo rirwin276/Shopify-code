@@ -62,33 +62,49 @@
       {% paginate collection.products by products_per_page %}
         {% capture children %}
           {% for product in collection.products %}
-            {% capture ss_search_text %} {{ product.title }} {{ product.tags | join: ' ' }} {% endcapture %}
-            {% assign ss_search_text = ss_search_text | downcase %}
+            {%- comment -%}
+              One garment type per product, decided by priority.
+
+              These used to be independent `contains` tests over the title AND
+              the tags joined together, which put hoodies in Shirts two ways
+              over: "sweatshirt" contains "shirt", and "crewneck" was mapped to
+              shirts outright. The tags made it worse — pro-builder products
+              carry routing tags like pro-shirt, so a hoodie matched "shirt"
+              even when its title never said it.
+
+              Garment type is now read from the title only and resolved as a
+              chain, so the first match wins and nothing lands in two garment
+              tabs. Youth and Personalized stay additive on top, because those
+              genuinely cross-cut: a youth tee belongs in both.
+            {%- endcomment -%}
+            {% assign ss_title = product.title | downcase %}
+            {% assign ss_tags_text = product.tags | join: ' ' | downcase %}
             {% assign ss_categories = '' %}
 
-            {% if ss_search_text contains 'youth' or ss_search_text contains 'toddler' or ss_search_text contains 'kids' or ss_search_text contains 'kid ' %}
+            {% if ss_title contains 'hat' or ss_title contains 'cap' or ss_title contains 'beanie' or ss_title contains 'trucker' %}
+              {% assign ss_categories = 'headwear' %}
+            {% elsif ss_title contains 'tote' or ss_title contains 'bag' or ss_title contains 'mug' or ss_title contains 'bottle' or ss_title contains 'blanket' %}
+              {% assign ss_categories = 'accessories' %}
+            {% elsif ss_title contains 'tank' or ss_title contains 'racerback' %}
+              {% assign ss_categories = 'tanks' %}
+            {% elsif ss_title contains 'hoodie' or ss_title contains 'sweatshirt' or ss_title contains 'pullover' or ss_title contains 'crewneck' %}
+              {% assign ss_categories = 'hoodies' %}
+            {% elsif ss_title contains 'tee' or ss_title contains 't-shirt' or ss_title contains 'shirt' or ss_title contains 'long sleeve' or ss_title contains 'jersey' %}
+              {% assign ss_categories = 'shirts' %}
+            {% else %}
+              {% assign ss_categories = 'other' %}
+            {% endif %}
+
+            {% if ss_title contains 'youth' or ss_title contains 'toddler' or ss_title contains 'kids' %}
               {% assign ss_categories = ss_categories | append: ' youth' %}
             {% endif %}
-            {% if ss_search_text contains 'hoodie' or ss_search_text contains 'sweatshirt' or ss_search_text contains 'pullover' %}
-              {% assign ss_categories = ss_categories | append: ' hoodies' %}
-            {% endif %}
-            {% if ss_search_text contains 'tank' or ss_search_text contains 'racerback' %}
-              {% assign ss_categories = ss_categories | append: ' tanks' %}
-            {% endif %}
-            {% if ss_search_text contains 'tee' or ss_search_text contains 't-shirt' or ss_search_text contains 'shirt' or ss_search_text contains 'long sleeve' or ss_search_text contains 'crewneck' %}
-              {% assign ss_categories = ss_categories | append: ' shirts' %}
-            {% endif %}
-            {% if ss_search_text contains 'hat' or ss_search_text contains 'cap' or ss_search_text contains 'beanie' or ss_search_text contains 'trucker' %}
-              {% assign ss_categories = ss_categories | append: ' headwear' %}
-            {% endif %}
-            {% if ss_search_text contains 'name & number' or ss_search_text contains 'name and number' or ss_search_text contains 'personalized' or ss_search_text contains 'personalization' %}
+
+            {%- comment -%}
+              personalized-back is the tag the publisher writes, so it is the
+              authoritative signal rather than hoping the words appear.
+            {%- endcomment -%}
+            {% if ss_tags_text contains 'personalized-back' or ss_title contains 'name & number' or ss_title contains 'name and number' or ss_title contains 'personalized' %}
               {% assign ss_categories = ss_categories | append: ' personalized' %}
-            {% endif %}
-            {% if ss_search_text contains 'tote' or ss_search_text contains 'bag' or ss_search_text contains 'mug' or ss_search_text contains 'bottle' or ss_search_text contains 'blanket' or ss_search_text contains 'accessory' %}
-              {% assign ss_categories = ss_categories | append: ' accessories' %}
-            {% endif %}
-            {% if ss_categories == blank %}
-              {% assign ss_categories = ' other' %}
             {% endif %}
 
             <li
@@ -240,11 +256,16 @@
     display: none !important;
   }
 
-  /* The grid item stays a positioning context: the theme's own badge is
-     absolutely placed inside it. */
-  .ss-private-catalog .product-grid__item {
-    position: relative;
-  }
+  /*
+    The grid item is deliberately NOT a positioning context.
+
+    It was made one for the badge this section used to draw. That badge is
+    gone — the theme's card already renders it — but the rule outlived it, and
+    the theme's badge is absolutely positioned, so it started resolving
+    against the <li> instead of the card's media box. It landed on the card's
+    rounded corner, half outside the tile, which is what looked like a second
+    box on hover.
+  */
 
   .ss-private-catalog .ss-grid-swatches {
     display: flex;

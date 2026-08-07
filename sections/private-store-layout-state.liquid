@@ -113,6 +113,27 @@
   {% endif %}
 {% endif %}
 
+{% comment %}
+  A store that has never been near the designer still gets a design.
+
+  "Original" was the old bare collection page — the one this whole feature
+  replaced — so leaving it as the default meant every store nobody had
+  customised kept shipping the version we stopped wanting anyone to see. An
+  organiser should not have to open a settings panel to stop looking dated.
+
+  Classic Team is the fallback because it is the restrained one: white, with
+  the team colours only as accents. The default colours below are a neutral
+  slate and gold, so an untouched store reads as deliberate rather than as a
+  half-configured one.
+
+  Anyone who explicitly wants the plain page still gets it — saving with the
+  design switched off writes enabled=false, and that is honoured above.
+{% endcomment %}
+{% if ss_enabled == false and ss_settings == blank %}
+  {% assign ss_enabled = true %}
+  {% assign ss_layout = 'classic' %}
+{% endif %}
+
 {% assign ss_primary = '#1f2937' %}
 {% assign ss_secondary = '#d4af37' %}
 {% assign ss_primary_text = '#ffffff' %}
