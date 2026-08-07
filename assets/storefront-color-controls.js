@@ -12,6 +12,19 @@
     return /^[0-9a-fA-F]{6}$/.test(text) ? ('#' + text.toUpperCase()) : null;
   }
 
+  function closeAllPalettes(except){
+    document.querySelectorAll('.sfs-color-palette').forEach(function(palette){
+      if (palette === except) return;
+      palette.hidden = true;
+      var field = palette.closest('[data-sfs-color-field]');
+      var toggle = field && field.querySelector('.sfs-color-palette-toggle');
+      if (toggle) {
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded','false');
+      }
+    });
+  }
+
   function syncActive(field, value){
     field.querySelectorAll('[data-sfs-swatch]').forEach(function(button){
       button.classList.toggle('active', button.dataset.sfsSwatch.toUpperCase() === value.toUpperCase());
@@ -58,13 +71,22 @@
     toggle.type = 'button';
     toggle.className = 'sfs-color-palette-toggle';
     toggle.setAttribute('aria-expanded','false');
-    toggle.innerHTML = '<span class="sfs-color-palette-toggle__dots"><i></i><i></i><i></i><i></i></span><span>Quick colors</span><b aria-hidden="true">⌄</b>';
+    toggle.innerHTML = '<span class="sfs-color-palette-toggle__dots"><i></i><i></i><i></i><i></i></span><span>Color palette</span><b aria-hidden="true">+</b>';
     label.appendChild(toggle);
 
     var palette = document.createElement('div');
     palette.className = 'sfs-color-palette';
     palette.hidden = true;
-    palette.setAttribute('aria-label', role === 'primary' ? 'Primary color quick choices' : 'Accent color quick choices');
+    palette.setAttribute('role','dialog');
+    palette.setAttribute('aria-label', role === 'primary' ? 'Primary quick colors' : 'Accent quick colors');
+
+    var paletteHead = document.createElement('div');
+    paletteHead.className = 'sfs-color-palette__head';
+    paletteHead.innerHTML = '<strong>' + (role === 'primary' ? 'Primary color' : 'Accent color') + '</strong><button type="button" aria-label="Close color palette">×</button>';
+    palette.appendChild(paletteHead);
+
+    var swatches = document.createElement('div');
+    swatches.className = 'sfs-color-palette__swatches';
     colors.forEach(function(color){
       var button = document.createElement('button');
       button.type = 'button';
@@ -72,20 +94,27 @@
       button.dataset.sfsSwatch = color;
       button.style.setProperty('--sfs-swatch', color);
       button.setAttribute('aria-label', 'Use ' + color);
-      palette.appendChild(button);
+      swatches.appendChild(button);
     });
+    palette.appendChild(swatches);
     label.appendChild(palette);
 
-    toggle.addEventListener('click', function(){
-      var open = palette.hidden;
+    function setPalette(open){
+      if (open) closeAllPalettes(palette);
       palette.hidden = !open;
       toggle.classList.toggle('open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
+      toggle.querySelector('b').textContent = open ? '−' : '+';
+    }
 
-    pickerButton.addEventListener('click', function(){
-      input.click();
+    toggle.addEventListener('click', function(event){
+      event.stopPropagation();
+      setPalette(palette.hidden);
     });
+    palette.addEventListener('click', function(event){ event.stopPropagation(); });
+    paletteHead.querySelector('button').addEventListener('click', function(){ setPalette(false); });
+
+    pickerButton.addEventListener('click', function(){ input.click(); });
 
     function apply(value, dispatch){
       var normalized = normalizeHex(value);
@@ -119,15 +148,11 @@
       }
     });
 
-    palette.addEventListener('click', function(event){
+    swatches.addEventListener('click', function(event){
       var button = event.target.closest('[data-sfs-swatch]');
       if (!button) return;
       apply(button.dataset.sfsSwatch, true);
-      if (window.matchMedia('(max-width:700px)').matches) {
-        palette.hidden = true;
-        toggle.classList.remove('open');
-        toggle.setAttribute('aria-expanded','false');
-      }
+      setPalette(false);
     });
 
     input.sfsSyncExactColor = function(){ apply(input.value, false); };
@@ -181,6 +206,9 @@
       }
     });
   }
+
+  document.addEventListener('click', function(){ closeAllPalettes(); });
+  document.addEventListener('keydown', function(event){ if (event.key === 'Escape') closeAllPalettes(); });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
   else boot();
