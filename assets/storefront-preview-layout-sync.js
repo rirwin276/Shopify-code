@@ -60,6 +60,16 @@
     if (nav) nav.hidden = !items.length;
   }
 
+  function normalizePartnerJump(doc){
+    var jump = doc.querySelector('.ss-smart-jump');
+    if (!jump) return;
+    var mobile = false;
+    try {
+      mobile = !!(doc.defaultView && doc.defaultView.matchMedia && doc.defaultView.matchMedia('(max-width: 768px)').matches);
+    } catch(_e) {}
+    jump.style.setProperty('display', mobile ? 'flex' : 'block', 'important');
+  }
+
   function apply(frame, state){
     if (!frame || !state) return;
     var doc;
@@ -78,6 +88,7 @@
     main.style.setProperty('--ss-team-secondary-text', state.secondaryText);
 
     normalizeCategories(doc);
+    normalizePartnerJump(doc);
 
     var copy = doc.querySelector('.ps-hero .ps-copy');
     var message = doc.querySelector('.ps-hero .ss-hero-message');
