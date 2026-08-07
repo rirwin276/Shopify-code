@@ -30,14 +30,36 @@
       featured_enabled: true
     };
 
+    var designs = {
+      classic: {style:'clean', pattern:'none', label:'Classic Team'},
+      split: {style:'clean', pattern:'diagonal', label:'Diagonal Split'},
+      splash: {style:'bold', pattern:'dots', label:'Color Splash'},
+      pro: {style:'dark', pattern:'grid', label:'Pro Dark'},
+      heritage: {style:'clean', pattern:'stripes', label:'Heritage'}
+    };
+
+    function designFromState(settings){
+      var style = settings.style || 'clean';
+      var pattern = settings.pattern || 'none';
+      var found = 'classic';
+      Object.keys(designs).some(function(key){
+        if (designs[key].style === style && designs[key].pattern === pattern) {
+          found = key;
+          return true;
+        }
+        return false;
+      });
+      return found;
+    }
+
     var parsed = {};
     try {
       parsed = JSON.parse(builder.querySelector('[data-sfs-current-settings]').textContent || '{}') || {};
     } catch (_error) {}
 
     var savedState = Object.assign({}, defaults, parsed);
-    if (['none','diagonal','stripes'].indexOf(savedState.pattern) === -1) savedState.pattern = 'none';
     var state = Object.assign({}, savedState);
+    var selectedDesign = designFromState(savedState);
     var dirty = false;
     var endpoint = '/apps/ss/relay/store/' + encodeURIComponent(builder.dataset.shopHandle || '') + '/appearance';
     var lastFocus = null;
@@ -59,35 +81,36 @@
       return ((.2126 * r + .7152 * g + .0722 * b) / 255) > .58 ? '#111111' : '#ffffff';
     }
 
-    function patternLabel(pattern){
-      if (pattern === 'diagonal') return 'Diagonal split';
-      if (pattern === 'stripes') return 'Team stripe';
-      return 'Original background';
-    }
-
     function setStatus(text, type){
       status.textContent = text || '';
       status.className = 'sfs-save-status ' + (type || '');
     }
 
+    function applySelectedDesign(){
+      var design = designs[selectedDesign] || designs.classic;
+      state.style = design.style;
+      state.pattern = design.pattern;
+    }
+
     function pullInputs(){
+      applySelectedDesign();
       state.version = 1;
       state.primary_color = primary.value;
       state.secondary_color = secondary.value;
       state.announcement = announcement.value.trim();
       state.show_announcement = showAnnouncement.checked && !!state.announcement;
-      state.style = 'clean';
       state.catalog_enabled = true;
       state.featured_enabled = true;
     }
 
     function syncInputs(){
+      selectedDesign = designFromState(state);
       primary.value = state.primary_color || defaults.primary_color;
       secondary.value = state.secondary_color || defaults.secondary_color;
       announcement.value = state.announcement || '';
       showAnnouncement.checked = !!state.show_announcement;
-      overlay.querySelectorAll('[data-sfs-pattern]').forEach(function(button){
-        button.classList.toggle('active', button.dataset.sfsPattern === (state.pattern || 'none'));
+      overlay.querySelectorAll('[data-sfs-design]').forEach(function(button){
+        button.classList.toggle('active', button.dataset.sfsDesign === selectedDesign);
       });
       render();
     }
@@ -100,7 +123,8 @@
 
       overlay.querySelectorAll('[data-sfs-preview]').forEach(function(sample){
         sample.classList.toggle('is-custom', active);
-        sample.dataset.pattern = active ? (state.pattern || 'none') : 'none';
+        sample.dataset.style = active ? state.style : 'clean';
+        sample.dataset.pattern = active ? state.pattern : 'none';
         sample.style.setProperty('--sfs-primary', state.primary_color);
         sample.style.setProperty('--sfs-secondary', state.secondary_color);
         sample.style.setProperty('--sfs-primary-text', primaryText);
@@ -127,14 +151,16 @@
     function updateSummary(){
       launch.querySelector('[data-sfs-current-primary]').style.background = savedState.primary_color || defaults.primary_color;
       launch.querySelector('[data-sfs-current-secondary]').style.background = savedState.secondary_color || defaults.secondary_color;
+      var designKey = designFromState(savedState);
       launch.querySelector('[data-sfs-current-label]').textContent = savedState.enabled
-        ? ('Customized · ' + patternLabel(savedState.pattern || 'none'))
+        ? designs[designKey].label
         : 'Original design';
     }
 
     function open(){
       lastFocus = document.activeElement;
       state = Object.assign({}, savedState);
+      selectedDesign = designFromState(state);
       dirty = false;
       syncInputs();
       setStatus('', '');
@@ -164,10 +190,10 @@
       if (event.key === 'Escape' && overlay.classList.contains('open')) close();
     });
 
-    overlay.querySelectorAll('[data-sfs-pattern]').forEach(function(button){
+    overlay.querySelectorAll('[data-sfs-design]').forEach(function(button){
       button.addEventListener('click', function(){
-        state.pattern = button.dataset.sfsPattern || 'none';
-        overlay.querySelectorAll('[data-sfs-pattern]').forEach(function(item){
+        selectedDesign = button.dataset.sfsDesign || 'classic';
+        overlay.querySelectorAll('[data-sfs-design]').forEach(function(item){
           item.classList.toggle('active', item === button);
         });
         markChanged();
@@ -204,6 +230,7 @@
 
         savedState = Object.assign({}, defaults, data.settings || state);
         state = Object.assign({}, savedState);
+        selectedDesign = designFromState(savedState);
         dirty = false;
         updateSummary();
         render();
@@ -235,6 +262,7 @@
 
         savedState = Object.assign({}, defaults, data.settings || {});
         state = Object.assign({}, savedState);
+        selectedDesign = designFromState(savedState);
         dirty = false;
         syncInputs();
         updateSummary();
