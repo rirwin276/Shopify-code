@@ -33,6 +33,10 @@
       "type": "private-store-continuity-polish",
       "settings": {}
     },
+    "gradient_glow": {
+      "type": "private-store-gradient-glow",
+      "settings": {}
+    },
     "legacy_appearance_fallback": {
       "type": "private-store-legacy-appearance-fallback",
       "settings": {}
@@ -179,6 +183,7 @@
     "storefront_enhancements",
     "storefront_visual_polish",
     "storefront_continuity",
+    "gradient_glow",
     "legacy_appearance_fallback",
     "main",
     "local_partner_hicPjc"
