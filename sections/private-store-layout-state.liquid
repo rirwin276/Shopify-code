@@ -1,0 +1,81 @@
+{% comment %}
+  PRIVATE STORE LAYOUT STATE
+  Server-rendered source of truth for the storefront appearance.
+  The real collection page and the Admin Powers snapshot both consume this
+  exact state. No visible UI belongs in this section.
+{% endcomment %}
+
+{% assign ss_handle = collection.handle | downcase | strip %}
+{% assign ss_entry = shop.metaobjects.custom_shop[ss_handle] %}
+{% assign ss_settings = ss_entry.storefront_settings.value | default: ss_entry.storefront_settings %}
+
+{% assign ss_enabled = false %}
+{% assign ss_style = 'clean' %}
+{% assign ss_pattern = 'none' %}
+{% assign ss_layout = 'original' %}
+{% assign ss_primary = '#1f2937' %}
+{% assign ss_secondary = '#d4af37' %}
+{% assign ss_primary_text = '#ffffff' %}
+{% assign ss_secondary_text = '#111111' %}
+
+{% if ss_settings and ss_settings.enabled == true %}
+  {% assign ss_enabled = true %}
+  {% assign ss_style = ss_settings.style | default: 'clean' | downcase %}
+  {% assign ss_pattern = ss_settings.pattern | default: 'none' | downcase %}
+  {% assign ss_primary = ss_settings.primary_color | default: ss_primary %}
+  {% assign ss_secondary = ss_settings.secondary_color | default: ss_secondary %}
+  {% assign ss_primary_text = ss_settings.primary_text | default: ss_primary_text %}
+  {% assign ss_secondary_text = ss_settings.secondary_text | default: ss_secondary_text %}
+
+  {% if ss_style == 'clean' and ss_pattern == 'diagonal' %}
+    {% assign ss_layout = 'split' %}
+  {% elsif ss_style == 'bold' and ss_pattern == 'none' %}
+    {% assign ss_layout = 'gradient' %}
+  {% elsif ss_style == 'bold' and ss_pattern == 'dots' %}
+    {% assign ss_layout = 'spray' %}
+  {% elsif ss_style == 'dark' and ss_pattern == 'grid' %}
+    {% assign ss_layout = 'pro' %}
+  {% elsif ss_style == 'dark' and ss_pattern == 'dots' %}
+    {% assign ss_layout = 'pro' %}
+  {% elsif ss_style == 'clean' and ss_pattern == 'stripes' %}
+    {% assign ss_layout = 'heritage' %}
+  {% else %}
+    {% assign ss_layout = 'classic' %}
+  {% endif %}
+{% endif %}
+
+{{ 'storefront-fixed-layouts.css' | asset_url | stylesheet_tag }}
+
+<div
+  id="ss-private-store-state"
+  hidden
+  data-enabled="{{ ss_enabled }}"
+  data-layout="{{ ss_layout }}"
+  data-style="{{ ss_style | escape }}"
+  data-pattern="{{ ss_pattern | escape }}"
+></div>
+
+<style>
+  #MainContent {
+    --ss-team-primary: {{ ss_primary }};
+    --ss-team-secondary: {{ ss_secondary }};
+    --ss-team-primary-text: {{ ss_primary_text }};
+    --ss-team-secondary-text: {{ ss_secondary_text }};
+  }
+  #shopify-section-{{ section.id }} {
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Private store layout state",
+  "enabled_on": { "templates": ["collection"] },
+  "settings": []
+}
+{% endschema %}
