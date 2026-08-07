@@ -21,7 +21,7 @@
       var dripTitle = dripButton.querySelector('strong');
       var dripCopy = dripButton.querySelector('small');
       if (dripTitle) dripTitle.textContent = 'Water Drip';
-      if (dripCopy) dripCopy.textContent = 'Dark base with a blended two-color drip edge';
+      if (dripCopy) dripCopy.textContent = 'Dark store with two-color paint flowing and dripping from the top edge';
       dripButton.setAttribute('aria-label','Water Drip storefront design');
     }
 
@@ -30,6 +30,14 @@
       var proCopy = proButton.querySelector('small');
       if (proCopy) proCopy.textContent = 'Clean professional dark store with a subtle grid';
     }
+
+    root.querySelectorAll('.sfs-control-heading').forEach(function(heading){
+      var strong = heading.querySelector('strong');
+      var small = heading.querySelector('small');
+      if (strong && strong.textContent.trim() === 'Store design' && small) {
+        small.textContent = 'Six product-first looks inspired by modern team and fan stores.';
+      }
+    });
 
     normalizeSavedLabel(root);
     if (root.dataset.sfsDesignObserver !== '1') {
