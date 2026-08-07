@@ -1,0 +1,10 @@
+{{ 'storefront-appearance-mobile-fix.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'storefront-appearance-mobile-fix.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Storefront mobile fix",
+  "enabled_on": { "templates": ["page"] },
+  "settings": []
+}
+{% endschema %}
