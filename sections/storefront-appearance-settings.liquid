@@ -1,9 +1,7 @@
 {% comment %}
-  STOREFRONT APPEARANCE BUILDER
-  Additive Admin Powers section. It is intentionally self-contained so it can
-  be removed from page.admin-powers.json without touching the existing control
-  center. Settings save to custom_shop.storefront_settings through the signed
-  Shopify App Proxy.
+  STOREFRONT APPEARANCE BUILDER — MINIMAL SKIN
+  Keeps the existing collection layout intact. Admins can only add team colors,
+  a simple background behind the current product grid, and an announcement bar.
 {% endcomment %}
 
 {%- assign sfs_shop_handle = '' -%}
@@ -22,9 +20,7 @@
 {%- assign sfs_required_tag = 'storefront-admin--' | append: sfs_shop_handle -%}
 {%- if customer and sfs_shop_handle != blank -%}
   {%- assign sfs_email = customer.email | default: '' | downcase | strip -%}
-  {%- if sfs_email == 'ryan.irwin@stellaandsagecompany.com' -%}
-    {%- assign sfs_allowed = true -%}
-  {%- endif -%}
+  {%- if sfs_email == 'ryan.irwin@stellaandsagecompany.com' -%}{%- assign sfs_allowed = true -%}{%- endif -%}
   {%- for sfs_tag in customer.tags -%}
     {%- assign sfs_tag_down = sfs_tag | downcase | strip -%}
     {%- if sfs_tag_down == 'super-admin' or sfs_tag_down == 'custom_shop_admin' or sfs_tag_down == sfs_required_tag -%}
@@ -34,214 +30,141 @@
 {%- endif -%}
 
 {%- if sfs_allowed -%}
-  <div class="sfs-builder-root" data-sfs-root data-shop-handle="{{ sfs_shop_handle | escape }}">
   {%- assign sfs_shop = shop.metaobjects.custom_shop[sfs_shop_handle] -%}
   {%- assign sfs_store_name = sfs_shop.name.value | default: sfs_shop.name | default: sfs_shop_handle -%}
-  {%- assign sfs_logo = sfs_shop.logo.value | default: sfs_shop.logo -%}
   {%- assign sfs_collection_handle = sfs_shop.collection_handle.value | default: sfs_shop.collection_handle | default: sfs_shop_handle -%}
   {%- assign sfs_collection = collections[sfs_collection_handle] -%}
   {%- assign sfs_settings = sfs_shop.storefront_settings.value | default: sfs_shop.storefront_settings -%}
 
-  <section class="sfs-admin-launch" data-sfs-launch>
-    <div class="sfs-admin-launch__copy">
-      <span class="sfs-admin-launch__eyebrow">Storefront settings</span>
-      <h2>Make this store feel like their team.</h2>
-      <p>Preview team colors, patterns, messaging, and catalog organization before anything changes.</p>
-    </div>
-    <div class="sfs-admin-launch__status" aria-label="Current storefront appearance">
-      <span class="sfs-admin-launch__swatches">
-        <i data-sfs-current-primary></i><i data-sfs-current-secondary></i>
-      </span>
-      <span data-sfs-current-label>Default appearance</span>
-    </div>
-    <button class="sfs-open-builder" type="button" data-sfs-open>Customize storefront</button>
-  </section>
-
-  <div class="sfs-overlay" data-sfs-overlay aria-hidden="true">
-    <div class="sfs-dialog" role="dialog" aria-modal="true" aria-labelledby="sfs-title-{{ section.id }}">
-      <header class="sfs-dialog__header">
-        <div>
-          <span class="sfs-dialog__eyebrow">Live storefront designer</span>
-          <h2 id="sfs-title-{{ section.id }}">Customize {{ sfs_store_name | escape }}</h2>
-          <p>Nothing changes until you press Save storefront.</p>
-        </div>
-        <button class="sfs-close" type="button" data-sfs-close aria-label="Close storefront designer">×</button>
-      </header>
-
-      <div class="sfs-dialog__body">
-        <section class="sfs-preview-zone" aria-label="Live desktop and mobile previews">
-          <div class="sfs-preview-heading">
-            <div>
-              <span>Live preview</span>
-              <strong>Desktop and mobile update together</strong>
-            </div>
-            <span class="sfs-unsaved" data-sfs-unsaved>Preview only</span>
-          </div>
-
-          <div class="sfs-preview-grid">
-            <div class="sfs-preview-column">
-              <span class="sfs-preview-label">Desktop</span>
-              <div class="sfs-sample sfs-sample--desktop" data-sfs-preview>
-                <div class="sfs-sample-hero">
-                  <div class="sfs-sample-logo">
-                    {%- if sfs_logo != blank -%}
-                      {{ sfs_logo | image_url: width: 300 | image_tag: loading: 'lazy', alt: sfs_store_name }}
-                    {%- else -%}
-                      <span>{{ sfs_store_name | slice: 0, 1 | upcase }}</span>
-                    {%- endif -%}
-                  </div>
-                  <div class="sfs-sample-copy">
-                    <small>Private Storefront</small>
-                    <h3>{{ sfs_store_name }}</h3>
-                    <p data-sfs-preview-message>Approved gear for your group. Choose your size and checkout directly.</p>
-                  </div>
-                  <button type="button" tabindex="-1">Shop products</button>
-                </div>
-                <div class="sfs-sample-announcement" data-sfs-preview-announcement hidden>New products are available now.</div>
-                <div class="sfs-sample-tabs" data-sfs-preview-tabs>
-                  <span class="active">All gear</span><span>Adult shirts</span><span>Youth</span><span>Personalized</span>
-                </div>
-                <div class="sfs-sample-products">
-                  {%- assign sfs_desktop_count = 0 -%}
-                  {%- if sfs_collection -%}
-                    {%- for sfs_product in sfs_collection.products limit: 4 -%}
-                      {%- assign sfs_desktop_count = sfs_desktop_count | plus: 1 -%}
-                      <div class="sfs-sample-product">
-                        <div class="sfs-sample-product__image">
-                          {%- if sfs_product.featured_image -%}
-                            {{ sfs_product.featured_image | image_url: width: 360 | image_tag: loading: 'lazy', alt: sfs_product.title }}
-                          {%- endif -%}
-                        </div>
-                        <strong>{{ sfs_product.title | truncate: 24 }}</strong>
-                        <small>{{ sfs_product.price | money }}</small>
-                      </div>
-                    {%- endfor -%}
-                  {%- endif -%}
-                  {%- for sfs_placeholder in (1..4) -%}
-                    {%- if sfs_placeholder > sfs_desktop_count -%}
-                      <div class="sfs-sample-product sfs-sample-product--placeholder">
-                        <div class="sfs-sample-product__image"></div><strong>Team shirt</strong><small>$24.00</small>
-                      </div>
-                    {%- endif -%}
-                  {%- endfor -%}
-                </div>
-              </div>
-            </div>
-
-            <div class="sfs-preview-column sfs-preview-column--phone">
-              <span class="sfs-preview-label">Mobile</span>
-              <div class="sfs-phone-shell">
-                <div class="sfs-phone-speaker"></div>
-                <div class="sfs-sample sfs-sample--mobile" data-sfs-preview>
-                  <div class="sfs-sample-hero">
-                    <div class="sfs-sample-logo">
-                      {%- if sfs_logo != blank -%}
-                        {{ sfs_logo | image_url: width: 180 | image_tag: loading: 'lazy', alt: sfs_store_name }}
-                      {%- else -%}
-                        <span>{{ sfs_store_name | slice: 0, 1 | upcase }}</span>
-                      {%- endif -%}
-                    </div>
-                    <div class="sfs-sample-copy">
-                      <small>Private Storefront</small>
-                      <h3>{{ sfs_store_name }}</h3>
-                      <p data-sfs-preview-message>Approved gear for your group.</p>
-                    </div>
-                    <button type="button" tabindex="-1">Shop</button>
-                  </div>
-                  <div class="sfs-sample-announcement" data-sfs-preview-announcement hidden>New products are available now.</div>
-                  <div class="sfs-sample-tabs" data-sfs-preview-tabs>
-                    <span class="active">All</span><span>Adult</span><span>Youth</span><span>Name + number</span>
-                  </div>
-                  <div class="sfs-sample-products">
-                    {%- assign sfs_mobile_count = 0 -%}
-                    {%- if sfs_collection -%}
-                      {%- for sfs_product in sfs_collection.products limit: 2 -%}
-                        {%- assign sfs_mobile_count = sfs_mobile_count | plus: 1 -%}
-                        <div class="sfs-sample-product">
-                          <div class="sfs-sample-product__image">
-                            {%- if sfs_product.featured_image -%}
-                              {{ sfs_product.featured_image | image_url: width: 260 | image_tag: loading: 'lazy', alt: sfs_product.title }}
-                            {%- endif -%}
-                          </div>
-                          <strong>{{ sfs_product.title | truncate: 18 }}</strong>
-                          <small>{{ sfs_product.price | money }}</small>
-                        </div>
-                      {%- endfor -%}
-                    {%- endif -%}
-                    {%- if sfs_mobile_count < 1 -%}
-                      <div class="sfs-sample-product sfs-sample-product--placeholder"><div class="sfs-sample-product__image"></div><strong>Team shirt</strong><small>$24.00</small></div>
-                      <div class="sfs-sample-product sfs-sample-product--placeholder"><div class="sfs-sample-product__image"></div><strong>Youth shirt</strong><small>$20.00</small></div>
-                    {%- endif -%}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="sfs-controls" aria-label="Storefront design controls">
-          <div class="sfs-control-group">
-            <div class="sfs-control-heading"><span>1</span><div><strong>Store style</strong><small>Controls the overall mood while preserving readability.</small></div></div>
-            <div class="sfs-choice-grid sfs-choice-grid--three" role="radiogroup" aria-label="Store style">
-              <button type="button" data-sfs-style="clean"><i class="sfs-style-thumb sfs-style-thumb--clean"></i><strong>Clean</strong><small>Light and minimal</small></button>
-              <button type="button" data-sfs-style="bold"><i class="sfs-style-thumb sfs-style-thumb--bold"></i><strong>Bold</strong><small>Team color forward</small></button>
-              <button type="button" data-sfs-style="dark"><i class="sfs-style-thumb sfs-style-thumb--dark"></i><strong>Dark</strong><small>Premium night look</small></button>
-            </div>
-          </div>
-
-          <div class="sfs-control-group">
-            <div class="sfs-control-heading"><span>2</span><div><strong>Team colors</strong><small>Buttons and text contrast are chosen automatically.</small></div></div>
-            <div class="sfs-color-grid">
-              <label><span>Primary color</span><div><input type="color" data-sfs-primary value="#1f2937"><output data-sfs-primary-output>#1f2937</output></div></label>
-              <label><span>Accent color</span><div><input type="color" data-sfs-secondary value="#d4af37"><output data-sfs-secondary-output>#d4af37</output></div></label>
-            </div>
-          </div>
-
-          <div class="sfs-control-group">
-            <div class="sfs-control-heading"><span>3</span><div><strong>Background pattern</strong><small>Subtle patterns keep the storefront branded without overpowering products.</small></div></div>
-            <div class="sfs-pattern-grid" role="radiogroup" aria-label="Background pattern">
-              <button type="button" data-sfs-pattern="none"><i class="sfs-pattern-thumb sfs-pattern-thumb--none"></i><span>None</span></button>
-              <button type="button" data-sfs-pattern="diagonal"><i class="sfs-pattern-thumb sfs-pattern-thumb--diagonal"></i><span>Diagonal</span></button>
-              <button type="button" data-sfs-pattern="stripes"><i class="sfs-pattern-thumb sfs-pattern-thumb--stripes"></i><span>Stripes</span></button>
-              <button type="button" data-sfs-pattern="dots"><i class="sfs-pattern-thumb sfs-pattern-thumb--dots"></i><span>Dots</span></button>
-              <button type="button" data-sfs-pattern="grid"><i class="sfs-pattern-thumb sfs-pattern-thumb--grid"></i><span>Grid</span></button>
-            </div>
-          </div>
-
-          <div class="sfs-control-group">
-            <div class="sfs-control-heading"><span>4</span><div><strong>Store message</strong><small>Welcome shoppers or share a quick instruction.</small></div></div>
-            <label class="sfs-field"><span>Welcome message <small data-sfs-message-count>0/180</small></span><textarea rows="3" maxlength="180" data-sfs-message placeholder="Approved gear for our team. Order anytime and ship directly to your home."></textarea></label>
-            <label class="sfs-field"><span>Announcement <small data-sfs-announcement-count>0/120</small></span><input type="text" maxlength="120" data-sfs-announcement placeholder="Tournament gear is available through Friday."></label>
-            <label class="sfs-toggle"><input type="checkbox" data-sfs-show-announcement><span></span><div><strong>Show announcement bar</strong><small>Only appears when announcement text is entered.</small></div></label>
-          </div>
-
-          <div class="sfs-control-group">
-            <div class="sfs-control-heading"><span>5</span><div><strong>Catalog organization</strong><small>Categories appear only when matching products exist.</small></div></div>
-            <label class="sfs-toggle"><input type="checkbox" data-sfs-catalog checked><span></span><div><strong>Organized product tabs</strong><small>All gear, adult shirts, youth, hoodies, personalized, and more.</small></div></label>
-            <label class="sfs-toggle"><input type="checkbox" data-sfs-featured checked><span></span><div><strong>Featured product row</strong><small>Shows up to four team favorites before the complete catalog.</small></div></label>
-          </div>
-        </section>
+  <div class="sfs-builder-root" data-sfs-root data-shop-handle="{{ sfs_shop_handle | escape }}">
+    <section class="sfs-admin-launch" data-sfs-launch>
+      <div class="sfs-admin-launch__copy">
+        <span class="sfs-admin-launch__eyebrow">Storefront settings</span>
+        <h2>Add the team’s colors without rebuilding the page.</h2>
+        <p>The existing storefront stays exactly the same. You can add a product-area background and an optional announcement.</p>
       </div>
+      <div class="sfs-admin-launch__status" aria-label="Current storefront appearance">
+        <span class="sfs-admin-launch__swatches"><i data-sfs-current-primary></i><i data-sfs-current-secondary></i></span>
+        <span data-sfs-current-label>Default appearance</span>
+      </div>
+      <button class="sfs-open-builder" type="button" data-sfs-open>Customize storefront</button>
+    </section>
 
-      <footer class="sfs-dialog__footer">
-        <div class="sfs-save-status" data-sfs-status aria-live="polite"></div>
-        <div class="sfs-footer-actions">
-          <button type="button" class="sfs-reset" data-sfs-reset>Restore default</button>
-          <button type="button" class="sfs-cancel" data-sfs-close>Cancel</button>
-          <button type="button" class="sfs-save" data-sfs-save>Save storefront</button>
+    <div class="sfs-overlay" data-sfs-overlay aria-hidden="true">
+      <div class="sfs-dialog" role="dialog" aria-modal="true" aria-labelledby="sfs-title-{{ section.id }}">
+        <header class="sfs-dialog__header">
+          <div>
+            <span class="sfs-dialog__eyebrow">Live storefront designer</span>
+            <h2 id="sfs-title-{{ section.id }}">Customize {{ sfs_store_name | escape }}</h2>
+            <p>The product layout does not change. Nothing goes live until you save.</p>
+          </div>
+          <button class="sfs-close" type="button" data-sfs-close aria-label="Close storefront designer">×</button>
+        </header>
+
+        <div class="sfs-dialog__body">
+          <section class="sfs-preview-zone" aria-label="Live desktop and mobile previews">
+            <div class="sfs-preview-heading">
+              <div><span>Live preview</span><strong>Your current store with a light team-color skin</strong></div>
+              <span class="sfs-unsaved" data-sfs-unsaved>Preview only</span>
+            </div>
+
+            <div class="sfs-preview-grid">
+              <div class="sfs-preview-column">
+                <span class="sfs-preview-label">Desktop</span>
+                <div class="sfs-sample sfs-sample--desktop" data-sfs-preview data-pattern="none">
+                  <div class="sfs-sample-page-head"><h3>{{ sfs_store_name }}</h3></div>
+                  <div class="sfs-sample-announcement" data-sfs-preview-announcement hidden>New products are available now.</div>
+                  <div class="sfs-sample-catalog">
+                    <div class="sfs-sample-toolbar"><span>Availability⌄</span><span>Price⌄</span><span class="sfs-sample-toolbar__right">{{ sfs_collection.products_count | default: 8 }} items &nbsp; Sort⌄</span></div>
+                    <div class="sfs-sample-products">
+                      {%- assign sfs_desktop_count = 0 -%}
+                      {%- if sfs_collection -%}
+                        {%- for sfs_product in sfs_collection.products limit: 4 -%}
+                          {%- assign sfs_desktop_count = sfs_desktop_count | plus: 1 -%}
+                          <div class="sfs-sample-product">
+                            <div class="sfs-sample-product__image">{%- if sfs_product.featured_image -%}{{ sfs_product.featured_image | image_url: width: 420 | image_tag: loading: 'lazy', alt: sfs_product.title }}{%- endif -%}</div>
+                            <strong>{{ sfs_product.title | truncate: 28 }}</strong><small>{{ sfs_product.price | money }}</small>
+                          </div>
+                        {%- endfor -%}
+                      {%- endif -%}
+                      {%- for sfs_placeholder in (1..4) -%}
+                        {%- if sfs_placeholder > sfs_desktop_count -%}<div class="sfs-sample-product"><div class="sfs-sample-product__image"></div><strong>Team product</strong><small>$24.00</small></div>{%- endif -%}
+                      {%- endfor -%}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="sfs-preview-column sfs-preview-column--phone">
+                <span class="sfs-preview-label">Mobile</span>
+                <div class="sfs-phone-shell">
+                  <div class="sfs-phone-speaker"></div>
+                  <div class="sfs-sample sfs-sample--mobile" data-sfs-preview data-pattern="none">
+                    <div class="sfs-sample-page-head"><h3>{{ sfs_store_name }}</h3></div>
+                    <div class="sfs-sample-announcement" data-sfs-preview-announcement hidden>New products are available now.</div>
+                    <div class="sfs-sample-catalog">
+                      <div class="sfs-sample-toolbar"><span>Filter</span><span class="sfs-sample-toolbar__right">Sort⌄</span></div>
+                      <div class="sfs-sample-products">
+                        {%- assign sfs_mobile_count = 0 -%}
+                        {%- if sfs_collection -%}
+                          {%- for sfs_product in sfs_collection.products limit: 2 -%}
+                            {%- assign sfs_mobile_count = sfs_mobile_count | plus: 1 -%}
+                            <div class="sfs-sample-product">
+                              <div class="sfs-sample-product__image">{%- if sfs_product.featured_image -%}{{ sfs_product.featured_image | image_url: width: 280 | image_tag: loading: 'lazy', alt: sfs_product.title }}{%- endif -%}</div>
+                              <strong>{{ sfs_product.title | truncate: 18 }}</strong><small>{{ sfs_product.price | money }}</small>
+                            </div>
+                          {%- endfor -%}
+                        {%- endif -%}
+                        {%- if sfs_mobile_count < 1 -%}<div class="sfs-sample-product"><div class="sfs-sample-product__image"></div><strong>Team shirt</strong><small>$24.00</small></div><div class="sfs-sample-product"><div class="sfs-sample-product__image"></div><strong>Youth shirt</strong><small>$20.00</small></div>{%- endif -%}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="sfs-controls" aria-label="Storefront design controls">
+            <div class="sfs-control-group">
+              <div class="sfs-control-heading"><span>1</span><div><strong>Team colors</strong><small>Used only for the background and announcement accents.</small></div></div>
+              <div class="sfs-color-grid">
+                <label><span>Primary color</span><div><input type="color" data-sfs-primary value="#1f2937"><output data-sfs-primary-output>#1f2937</output></div></label>
+                <label><span>Secondary color</span><div><input type="color" data-sfs-secondary value="#d4af37"><output data-sfs-secondary-output>#d4af37</output></div></label>
+              </div>
+            </div>
+
+            <div class="sfs-control-group">
+              <div class="sfs-control-heading"><span>2</span><div><strong>Background behind products</strong><small>The product cards and storefront structure stay untouched.</small></div></div>
+              <div class="sfs-pattern-grid" role="radiogroup" aria-label="Product background">
+                <button type="button" data-sfs-pattern="none"><i class="sfs-pattern-thumb sfs-pattern-thumb--none"></i><strong>Subtle</strong><small>Very light team tint</small></button>
+                <button type="button" data-sfs-pattern="diagonal"><i class="sfs-pattern-thumb sfs-pattern-thumb--diagonal"></i><strong>Diagonal split</strong><small>Two colors with one clean divider</small></button>
+                <button type="button" data-sfs-pattern="stripes"><i class="sfs-pattern-thumb sfs-pattern-thumb--stripes"></i><strong>Team stripe</strong><small>Simple two-color diagonal band</small></button>
+              </div>
+            </div>
+
+            <div class="sfs-control-group sfs-control-group--wide">
+              <div class="sfs-control-heading"><span>3</span><div><strong>Announcement bar</strong><small>Optional. It appears above the existing product area.</small></div></div>
+              <label class="sfs-field"><span>Announcement <small data-sfs-announcement-count>0/120</small></span><input type="text" maxlength="120" data-sfs-announcement placeholder="Tournament gear is available through Friday."></label>
+              <label class="sfs-toggle"><input type="checkbox" data-sfs-show-announcement><span></span><div><strong>Show announcement bar</strong><small>The bar uses the primary color with a secondary-color accent.</small></div></label>
+            </div>
+          </section>
         </div>
-      </footer>
+
+        <footer class="sfs-dialog__footer">
+          <div class="sfs-save-status" data-sfs-status aria-live="polite"></div>
+          <div class="sfs-footer-actions">
+            <button type="button" class="sfs-reset" data-sfs-reset>Restore default</button>
+            <button type="button" class="sfs-cancel" data-sfs-close>Cancel</button>
+            <button type="button" class="sfs-save" data-sfs-save>Save storefront</button>
+          </div>
+        </footer>
+      </div>
     </div>
+
+    <script type="application/json" data-sfs-current-settings>{%- if sfs_settings != blank -%}{{ sfs_settings | json }}{%- else -%}{}{%- endif -%}</script>
+    {{ 'storefront-appearance-builder.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'storefront-appearance-builder.js' | asset_url }}" defer></script>
   </div>
-
-  <script type="application/json" data-sfs-current-settings>
-    {%- if sfs_settings != blank -%}{{ sfs_settings | json }}{%- else -%}{}{%- endif -%}
-  </script>
-
-  {{ 'storefront-appearance-builder.css' | asset_url | stylesheet_tag }}
-  <script src="{{ 'storefront-appearance-builder.js' | asset_url }}" defer></script>
-  </div>
-
 {%- endif -%}
 
 {% schema %}
