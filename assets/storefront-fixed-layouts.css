@@ -455,3 +455,214 @@
     background-size: 24px 24px, 24px 24px, auto, auto, auto !important;
   }
 }
+
+/* ============================================================
+   REFINEMENT PASS
+   Layered after the base designs on purpose: same selector weight,
+   declared later, so these win without escalating specificity.
+   ============================================================ */
+
+/* ---------- SHARED: a bigger catalog and a tighter header ---------- */
+
+/*
+  Four across instead of seven.
+
+  The theme sizes the grid to fit as many cards as the page width allows,
+  which on a wide monitor produced seven thumbnails so small the print on a
+  shirt was unreadable. A team store is browsed by someone deciding whether
+  their kid's name will look right on a hoodie, so the artwork has to be
+  legible from the grid. Four cards across a 1320px page is ~330px each —
+  large enough to judge a print, and it makes a seven-item store read as a
+  real catalog rather than a thin row.
+*/
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+  --product-grid-columns-desktop: repeat(4, minmax(0, 1fr)) !important;
+}
+
+@media screen and (min-width: 990px) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+/*
+  The store card carried a 310px floor and up to 56px of padding, which on a
+  laptop pushed the first product below the fold. Nothing is removed from it —
+  same logo, name, badges, actions — it simply stops reserving room it was not
+  using, so the catalog starts higher.
+*/
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+  min-height: 0 !important;
+  gap: 26px !important;
+  padding: clamp(22px, 2.7vw, 36px) !important;
+  border-radius: 30px !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero {
+  padding-block: clamp(16px, 2.2vw, 30px) clamp(10px, 1.4vw, 18px) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-action-panel {
+  padding: 16px !important;
+  border-radius: 20px !important;
+}
+
+/* Cards lift on hover so the grid feels responsive rather than printed. */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .product-grid__item {
+  border-radius: 18px !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+}
+
+@media (hover: hover) {
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .product-grid__item:hover {
+    transform: translateY(-4px) !important;
+  }
+}
+
+/* Tabs get a real tap target and a colour that moves when chosen. */
+#MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-category-tab {
+  min-height: 37px !important;
+  padding: 0 16px !important;
+  letter-spacing: .025em !important;
+  transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease !important;
+}
+
+/* ---------- PRO DARK: command centre ---------- */
+
+/*
+  The brief for this one is "command centre", so it earns the extras the light
+  designs do not: a tighter instrument grid, a lit rail under the header, and
+  a glow that follows the active control.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) {
+  background-size: 26px 26px, 26px 26px, auto, auto, auto !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-hero-card {
+  border-top-width: 3px !important;
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.5),
+    0 0 60px -22px color-mix(in srgb, var(--ss-team-secondary) 50%, transparent),
+    inset 0 1px rgba(255,255,255,.07) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ps-eyebrow {
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+  font-size: 10px !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-category-tab {
+  border: 1px solid rgba(151,177,205,.24) !important;
+  background: rgba(12,22,35,.86) !important;
+  color: #dbe6f2 !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-category-tab.active {
+  border-color: color-mix(in srgb, var(--ss-team-secondary) 78%, #fff) !important;
+  background: var(--ss-team-secondary) !important;
+  color: var(--ss-team-secondary-text) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--ss-team-secondary) 34%, transparent),
+    0 0 26px color-mix(in srgb, var(--ss-team-secondary) 42%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item {
+  border: 1px solid rgba(151,177,205,.17) !important;
+  background: linear-gradient(160deg, rgba(15,26,40,.96), rgba(7,14,23,.96)) !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.44) !important;
+}
+
+@media (hover: hover) {
+  #MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item:hover {
+    border-color: color-mix(in srgb, var(--ss-team-secondary) 55%, transparent) !important;
+    box-shadow:
+      0 26px 60px rgba(0,0,0,.52),
+      0 0 32px -12px color-mix(in srgb, var(--ss-team-secondary) 46%, transparent) !important;
+  }
+}
+
+/* ---------- GRADIENT GLOW: turn it up ---------- */
+
+/*
+  The corners were washing out to near-white by the middle of the page, so the
+  design read as "slightly tinted" rather than as a glow. The colour now holds
+  further in from each corner before it releases.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="gradient"]) {
+  background:
+    radial-gradient(ellipse 96% 82% at -10% -12%,
+      color-mix(in srgb, var(--ss-team-primary) 100%, #fff) 0%,
+      color-mix(in srgb, var(--ss-team-primary) 92%, #fff) 26%,
+      color-mix(in srgb, var(--ss-team-primary) 68%, #fff) 48%,
+      color-mix(in srgb, var(--ss-team-primary) 30%, #fff) 68%,
+      transparent 84%),
+    radial-gradient(ellipse 100% 88% at 110% 112%,
+      color-mix(in srgb, var(--ss-team-secondary) 100%, #fff) 0%,
+      color-mix(in srgb, var(--ss-team-secondary) 92%, #fff) 27%,
+      color-mix(in srgb, var(--ss-team-secondary) 68%, #fff) 50%,
+      color-mix(in srgb, var(--ss-team-secondary) 30%, #fff) 70%,
+      transparent 85%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--ss-team-primary) 34%, #fff) 0%,
+      #fff 50%,
+      color-mix(in srgb, var(--ss-team-secondary) 36%, #fff) 100%) !important;
+}
+
+/* ---------- SPRAY BURST: make the burst read ---------- */
+
+/*
+  The two corner blasts were small enough to look like vignetting. They are now
+  large and offset enough to read as deliberate spray, with the overspray dots
+  carried further across the page.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) {
+  background-image:
+    radial-gradient(circle at 14% 8%, color-mix(in srgb, var(--ss-team-primary) 88%, transparent) 0%, color-mix(in srgb, var(--ss-team-primary) 40%, transparent) 26%, transparent 54%),
+    radial-gradient(circle at 88% 92%, color-mix(in srgb, var(--ss-team-secondary) 88%, transparent) 0%, color-mix(in srgb, var(--ss-team-secondary) 40%, transparent) 27%, transparent 56%),
+    radial-gradient(circle at 74% 16%, color-mix(in srgb, var(--ss-team-secondary) 62%, transparent) 0%, transparent 15%),
+    radial-gradient(circle at 26% 78%, color-mix(in srgb, var(--ss-team-primary) 58%, transparent) 0%, transparent 14%),
+    radial-gradient(circle at 58% 44%, color-mix(in srgb, var(--ss-team-secondary) 34%, transparent) 0%, transparent 9%),
+    linear-gradient(150deg, #060d16 0%, #0b1725 52%, #050b12 100%) !important;
+}
+
+/* ---------- DIAGONAL SPLIT + HERITAGE: the stripe on a phone ---------- */
+
+/*
+  Both designs are a thin diagonal band across a wide page. On a phone the
+  page is taller than it is wide, so that band crossed mostly off-screen and
+  the whole design read as a flat cream rectangle — the one thing that
+  distinguishes it was invisible exactly where most shoppers see it.
+
+  Steeper angle, wider band, positioned to cross the visible area.
+*/
+@media (max-width: 768px) {
+  #MainContent:has(#ss-private-store-state[data-layout="split"]) {
+    background:
+      linear-gradient(160deg,
+        color-mix(in srgb, var(--ss-team-primary) 22%, #fff) 0 44%,
+        color-mix(in srgb, var(--ss-team-primary) 70%, var(--ss-team-secondary)) 44% 53%,
+        color-mix(in srgb, var(--ss-team-secondary) 26%, #fff) 53% 100%) !important;
+  }
+
+  #MainContent:has(#ss-private-store-state[data-layout="heritage"]) {
+    background:
+      linear-gradient(160deg,
+        #fbf7ec 0 52%,
+        color-mix(in srgb, var(--ss-team-primary) 66%, #fff) 52% 60%,
+        color-mix(in srgb, var(--ss-team-secondary) 74%, #fff) 60% 68%,
+        #fbf7ec 68% 100%) !important;
+  }
+
+  /* Two across on a phone keeps the print legible without endless scrolling. */
+  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ps-hero-card {
+    padding: 18px !important;
+    border-radius: 22px !important;
+  }
+}
