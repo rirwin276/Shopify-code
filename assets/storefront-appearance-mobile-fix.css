@@ -1,0 +1,68 @@
+@media (max-width: 700px) {
+  .sfs-overlay {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+  }
+
+  .sfs-overlay.open {
+    display: block;
+  }
+
+  .sfs-dialog {
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    max-height: none;
+    display: block;
+    overflow: visible;
+    border-radius: 0;
+  }
+
+  .sfs-dialog__header {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+  }
+
+  .sfs-dialog__body {
+    min-height: 0;
+    overflow: visible;
+    padding: 11px;
+  }
+
+  .sfs-dialog__footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 6;
+  }
+
+  .sfs-preview-grid {
+    display: block;
+  }
+
+  .sfs-preview-column:not(.sfs-preview-column--phone) {
+    display: none !important;
+  }
+
+  .sfs-preview-column--phone {
+    width: min(390px, 100%);
+    margin: 0 auto;
+  }
+
+  .sfs-preview-heading strong {
+    font-size: 0;
+  }
+
+  .sfs-preview-heading strong::after {
+    content: "Mobile storefront preview";
+    font-size: 12px;
+  }
+
+  .sfs-phone-shell {
+    width: 100%;
+  }
+}
