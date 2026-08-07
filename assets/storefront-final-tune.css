@@ -1,5 +1,73 @@
 /* Final targeted storefront tuning. Keep this loaded after the working appearance engine. */
 
+/*
+  CATEGORY STRUCTURE — target the actual Shopify section id generated from
+  collection.private-store.json instead of relying on :has() or runtime JS.
+  This removes the standalone section surface in both the real storefront and
+  the script-stripped appearance snapshot. Only the individual buttons remain.
+*/
+#MainContent [id$="__storefront_enhancements"],
+#MainContent [id*="__storefront_enhancements"],
+#MainContent .ss-storefront-enhancements,
+#MainContent .ss-category-nav,
+#MainContent .ss-category-catalog-nav,
+#MainContent .ss-category-tabs {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#MainContent [id$="__storefront_enhancements"],
+#MainContent [id*="__storefront_enhancements"],
+#MainContent .ss-storefront-enhancements {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Make the Shopify wrapper itself disappear from layout. */
+#MainContent [id$="__storefront_enhancements"],
+#MainContent [id*="__storefront_enhancements"] {
+  display: contents !important;
+}
+
+#MainContent .ss-storefront-enhancements {
+  display: contents !important;
+}
+
+#MainContent .ss-category-nav,
+#MainContent .ss-category-catalog-nav {
+  display: block !important;
+  width: min(1320px, calc(100% - 40px)) !important;
+  margin: 0 auto !important;
+  padding: 9px 0 10px !important;
+}
+
+#MainContent .ss-category-tabs {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+}
+
+#MainContent .ss-category-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+#MainContent .ss-category-tab {
+  flex: 0 0 auto !important;
+  border-radius: 999px !important;
+}
+
 /* PRO DARK V2 — polished command-center treatment only. */
 html.ss-store-custom.ss-style-dark.ss-pattern-grid #MainContent {
   background-color: #07101a !important;
@@ -116,18 +184,20 @@ html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-ghost {
   box-shadow: 0 8px 24px rgba(0,0,0,.16) !important;
 }
 
-/* Share Store needs to be unmistakably readable in Pro Dark. */
-html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-soft,
-html.ss-store-custom.ss-style-dark.ss-pattern-grid button.ps-btn-soft {
-  border-color: color-mix(in srgb, var(--ss-team-secondary) 42%, rgba(255,255,255,.18)) !important;
-  background: color-mix(in srgb, var(--ss-team-secondary) 14%, rgba(255,255,255,.075)) !important;
-  color: #f7fbff !important;
-  text-shadow: 0 1px 8px rgba(0,0,0,.35) !important;
-  box-shadow: inset 0 1px rgba(255,255,255,.05) !important;
+/* Share Store is intentionally LIGHT in Pro Dark so it cannot disappear. */
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel .ps-btn-soft,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel button.ps-btn-soft,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid #psShareStoreBtn {
+  border-color: rgba(214, 224, 235, .88) !important;
+  background: rgba(239, 244, 250, .97) !important;
+  color: #07101a !important;
+  text-shadow: none !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.16) !important;
 }
 
-html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-soft:hover {
-  background: color-mix(in srgb, var(--ss-team-secondary) 21%, rgba(255,255,255,.09)) !important;
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-action-panel .ps-btn-soft:hover,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid #psShareStoreBtn:hover {
+  background: #ffffff !important;
 }
 
 html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-btn-admin {
@@ -169,6 +239,12 @@ html.ss-store-custom.ss-style-dark.ss-pattern-grid results-list .product-grid__i
 }
 
 @media (max-width: 768px) {
+  #MainContent .ss-category-nav,
+  #MainContent .ss-category-catalog-nav {
+    width: 100% !important;
+    padding: 6px 8px 7px !important;
+  }
+
   html.ss-store-custom.ss-style-dark.ss-pattern-grid #MainContent {
     background-size: 24px 24px, 24px 24px, auto, auto, auto, auto !important;
   }
