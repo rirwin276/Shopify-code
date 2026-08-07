@@ -22,13 +22,13 @@
     var gradientButton = root.querySelector('[data-sfs-design="gradient"]');
     if (gradientButton) {
       var gradientCopy = gradientButton.querySelector('small');
-      if (gradientCopy) gradientCopy.textContent = 'Soft two-color fade behind the store and products';
+      if (gradientCopy) gradientCopy.textContent = 'Bold corner-to-corner team-color glow behind the full store';
     }
 
     var proButton = root.querySelector('[data-sfs-design="pro"]');
     if (proButton) {
       var proCopy = proButton.querySelector('small');
-      if (proCopy) proCopy.textContent = 'Clean professional dark store with a subtle grid';
+      if (proCopy) proCopy.textContent = 'Clean professional dark store with one continuous tone';
     }
 
     root.querySelectorAll('.sfs-control-heading').forEach(function(heading){
