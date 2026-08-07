@@ -130,6 +130,41 @@
                '  layout=' + (state && state.getAttribute('data-layout')) +
                '  suffix=' + (state && state.getAttribute('data-template-suffix')));
 
+      // Which sections the page ACTUALLY rendered.
+      //
+      // The templates on the branch say one thing and the page behaves like
+      // another, and no amount of reading the repo can settle which is true of
+      // the theme being served. The section IDs are the answer: they are
+      // written by Shopify from the template that really rendered, so they
+      // cannot be argued with.
+      out.push('');
+      out.push('=== SECTIONS ACTUALLY RENDERED ===');
+      out.push('  <html> class = ' + document.documentElement.className);
+      var main = document.getElementById('MainContent');
+      out.push('  data-template = ' + (main && main.getAttribute('data-template')));
+      var secs = main ? main.querySelectorAll(':scope > .shopify-section') : [];
+      for (var s = 0; s < secs.length; s++) {
+        var kid = secs[s].firstElementChild;
+        out.push('  ' + (secs[s].id || '(no id)') +
+                 '   first child: ' + (kid ? describe(kid) : '(empty)'));
+      }
+
+      out.push('');
+      out.push('=== KEY ELEMENTS PRESENT? ===');
+      [['#ss-private-store-state', 'new: layout state'],
+       ['[data-ss-catalog-controls]', 'new: category row'],
+       ['.ss-private-catalog', 'new: catalog'],
+       ['.ss-category-nav', 'LEGACY: enhancements nav'],
+       ['.ss-storefront-enhancements', 'LEGACY: enhancements wrapper'],
+       ['.ss-team-products', 'LEGACY: main-collection appearance']
+      ].forEach(function (pair) {
+        var found = document.querySelectorAll(pair[0]).length;
+        out.push('  ' + (found ? 'YES x' + found : 'no    ') + '  ' + pair[0] + '   (' + pair[1] + ')');
+      });
+
+      var rl = document.querySelector('results-list');
+      out.push('  results-list class = ' + (rl ? rl.className : '(none)'));
+
       if (!row) {
         out.push('');
         out.push('!! [data-ss-catalog-controls] not found — the category row on this');

@@ -458,5 +458,18 @@
         }
       </script>
     {% endif %}
+
+    {%- comment -%}
+      Rendered from the layout, not from a section, and deliberately so.
+
+      It lived in private-store-layout-state, which means it could only report
+      on pages that already render the new architecture — useless for the one
+      question that matters, which is why a page renders something other than
+      what its template says. From here it runs on every page and can report
+      which sections actually rendered.
+
+      Inert unless the URL asks: ?layoutdebug=1
+    {%- endcomment -%}
+    {% render 'storefront-paint-report' %}
   </body>
 </html>
