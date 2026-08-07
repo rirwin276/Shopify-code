@@ -100,28 +100,19 @@
               ref="cards[]"
             >
               {%- comment -%}
-                What this listing includes, and which colours it comes in.
+                No "what this listing includes" badge is drawn here.
 
-                Both facts already exist on the product — the pricing tag says
-                whether there is a back print, and custom.color_swatches holds
-                the exact hex Printful gave us at publish time — and the
-                storefront's own catalog card has shown them for a while. This
-                grid renders the theme's card block, which knows about neither,
-                so a shopper here saw a photo, a name and a price and had to
-                open every listing to answer "does it come in our colours" and
-                "why is that one five dollars more".
+                The theme's own card already renders one — product-card-badges
+                calls the same pro-listing-includes rule — so adding a second
+                produced two stacked pills on every personalised and
+                front-and-back product. The shared rule exists precisely so the
+                two cards cannot disagree; the mistake was rendering it twice
+                rather than trusting the card.
 
-                Drawn around the theme block rather than inside it, so the
-                card itself stays the stock component.
+                Colours are different: the theme card has no concept of them,
+                so the swatch row below is genuinely missing rather than
+                duplicated.
               {%- endcomment -%}
-              {%- capture ss_card_extra -%}
-                {%- render 'pro-listing-includes', product: product -%}
-              {%- endcapture -%}
-              {%- assign ss_card_extra = ss_card_extra | strip -%}
-              {%- if ss_card_extra != blank -%}
-                <span class="ss-grid-badge">{{ ss_card_extra }}</span>
-              {%- endif -%}
-
               {% # theme-check-disable %}
               {% content_for 'block', type: '_product-card', id: 'product-card', closest.product: product %}
               {% # theme-check-enable %}
@@ -249,27 +240,10 @@
     display: none !important;
   }
 
-  /* The badge sits on the photo, where the eye already is. It reads as
-     information about the garment, not as a discount — a shopper who mistakes
-     an inclusion for a promotion is worse off than one who missed it. */
+  /* The grid item stays a positioning context: the theme's own badge is
+     absolutely placed inside it. */
   .ss-private-catalog .product-grid__item {
     position: relative;
-  }
-
-  .ss-private-catalog .ss-grid-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 3;
-    padding: 4px 9px;
-    border-radius: 6px;
-    background: rgba(17, 16, 14, 0.84);
-    color: #fff;
-    font-size: 10.5px;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: .02em;
-    pointer-events: none;
   }
 
   .ss-private-catalog .ss-grid-swatches {

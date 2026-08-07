@@ -964,9 +964,14 @@
 
 /* ---------- badge + swatches across the designs ---------- */
 
-/* On dark cards the near-black badge disappears into the tile. */
-#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-badge,
-#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-badge {
+/*
+  On the dark designs the theme's badge sits on a dark tile and its default
+  near-black fill disappears into it. This targets the theme's own badge — the
+  private grid deliberately does not draw a second one, which is what produced
+  two stacked pills on every personalised product.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-badges__badge--pro-extra,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-badges__badge--pro-extra {
   background: color-mix(in srgb, var(--ss-team-secondary) 88%, #000) !important;
   color: var(--ss-team-secondary-text) !important;
   box-shadow: 0 0 18px -6px color-mix(in srgb, var(--ss-team-secondary) 70%, transparent) !important;
