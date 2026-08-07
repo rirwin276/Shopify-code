@@ -1,0 +1,63 @@
+/* Final structural fix: category buttons float directly on the storefront surface.
+   No white/gray/dark outer bar or long pill should surround them. */
+#MainContent .shopify-section:has([data-ss-storefront-enhancements]),
+#MainContent .shopify-section:has(.ss-category-nav),
+#MainContent [data-ss-storefront-enhancements],
+#MainContent .ss-storefront-enhancements,
+#MainContent .ss-category-nav,
+#MainContent .ss-category-tabs {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#MainContent .shopify-section:has([data-ss-storefront-enhancements]),
+#MainContent .shopify-section:has(.ss-category-nav) {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#MainContent .shopify-section:has([data-ss-storefront-enhancements]) > .section-background,
+#MainContent .shopify-section:has(.ss-category-nav) > .section-background {
+  display: none !important;
+}
+
+#MainContent .ss-category-nav {
+  width: min(1320px, calc(100% - 40px)) !important;
+  margin: 0 auto !important;
+  padding: 9px 0 10px !important;
+}
+
+#MainContent .ss-category-tabs {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 7px !important;
+}
+
+#MainContent .ss-category-tab {
+  flex: 0 0 auto !important;
+  border-radius: 999px !important;
+}
+
+/* Continuous presets must show their page canvas through the category row. */
+html.ss-store-custom.ss-style-bold.ss-pattern-none #MainContent .shopify-section:has(.ss-category-nav),
+html.ss-store-custom.ss-style-bold.ss-pattern-dots #MainContent .shopify-section:has(.ss-category-nav),
+html.ss-store-custom.ss-style-dark.ss-pattern-grid #MainContent .shopify-section:has(.ss-category-nav),
+html.ss-store-custom.ss-style-bold.ss-pattern-none #MainContent [data-ss-storefront-enhancements],
+html.ss-store-custom.ss-style-bold.ss-pattern-dots #MainContent [data-ss-storefront-enhancements],
+html.ss-store-custom.ss-style-dark.ss-pattern-grid #MainContent [data-ss-storefront-enhancements] {
+  background: transparent !important;
+}
+
+@media (max-width: 768px) {
+  #MainContent .ss-category-nav {
+    width: 100% !important;
+    padding: 6px 8px 7px !important;
+  }
+}
