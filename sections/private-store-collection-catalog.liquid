@@ -1,8 +1,8 @@
 {% comment %}
   PRIVATE STORE COLLECTION CATALOG
-  The category navigation and product grid are authored together here.
-  Nothing is relocated after load. This is the exact structure used by both
-  the real storefront and the Admin Powers storefront snapshot.
+  The category navigation is the first row of the actual product collection
+  wrapper. It is not a separate Shopify section or a sibling surface, so the
+  real storefront and Admin Powers preview share the same structure.
 {% endcomment %}
 
 <script
@@ -34,21 +34,21 @@
   >
     {% render 'skip-to-content-link', href: '#ResultsList', text: 'accessibility.skip_to_results_list' %}
 
-    <nav class="ss-category-nav" aria-label="Shop by product type" data-ss-category-nav>
-      <div class="ss-category-tabs" role="tablist">
-        <button type="button" class="ss-category-tab active" data-ss-category="all" role="tab" aria-selected="true">All gear</button>
-        <button type="button" class="ss-category-tab" data-ss-category="shirts" role="tab" aria-selected="false">Shirts</button>
-        <button type="button" class="ss-category-tab" data-ss-category="youth" role="tab" aria-selected="false">Youth</button>
-        <button type="button" class="ss-category-tab" data-ss-category="hoodies" role="tab" aria-selected="false">Hoodies</button>
-        <button type="button" class="ss-category-tab" data-ss-category="tanks" role="tab" aria-selected="false">Tanks</button>
-        <button type="button" class="ss-category-tab" data-ss-category="headwear" role="tab" aria-selected="false">Hats</button>
-        <button type="button" class="ss-category-tab" data-ss-category="personalized" role="tab" aria-selected="false">Personalized</button>
-        <button type="button" class="ss-category-tab" data-ss-category="accessories" role="tab" aria-selected="false">Accessories</button>
-        <button type="button" class="ss-category-tab" data-ss-category="other" role="tab" aria-selected="false">More</button>
-      </div>
-    </nav>
-
     <div class="collection-wrapper grid gap-style">
+      <nav class="ss-category-nav" aria-label="Shop by product type" data-ss-category-nav>
+        <div class="ss-category-tabs" role="tablist">
+          <button type="button" class="ss-category-tab active" data-ss-category="all" role="tab" aria-selected="true">All gear</button>
+          <button type="button" class="ss-category-tab" data-ss-category="shirts" role="tab" aria-selected="false">Shirts</button>
+          <button type="button" class="ss-category-tab" data-ss-category="youth" role="tab" aria-selected="false">Youth</button>
+          <button type="button" class="ss-category-tab" data-ss-category="hoodies" role="tab" aria-selected="false">Hoodies</button>
+          <button type="button" class="ss-category-tab" data-ss-category="tanks" role="tab" aria-selected="false">Tanks</button>
+          <button type="button" class="ss-category-tab" data-ss-category="headwear" role="tab" aria-selected="false">Hats</button>
+          <button type="button" class="ss-category-tab" data-ss-category="personalized" role="tab" aria-selected="false">Personalized</button>
+          <button type="button" class="ss-category-tab" data-ss-category="accessories" role="tab" aria-selected="false">Accessories</button>
+          <button type="button" class="ss-category-tab" data-ss-category="other" role="tab" aria-selected="false">More</button>
+        </div>
+      </nav>
+
       {% content_for 'block',
         type: 'filters',
         id: 'filters',
@@ -178,6 +178,17 @@
         )
         1fr;
     }
+  }
+
+  /* The tabs are now literally the first row of the product wrapper. */
+  .ss-private-catalog .collection-wrapper > .ss-category-nav,
+  .ss-private-catalog .collection-wrapper > .ss-category-nav > .ss-category-tabs {
+    grid-column: 1 / -1;
+  }
+
+  .ss-private-catalog .collection-wrapper > .ss-category-nav {
+    width: 100%;
+    min-width: 0;
   }
 
   .ss-private-catalog :is(.facets-block-wrapper, .facets-container, facet-filters-form, .product-grid__item-count, .sorting-filter, .grid-density-controls) {
