@@ -88,7 +88,7 @@
     function updateSummary(){
       launch.querySelector('[data-sfs-current-primary]').style.background = savedState.primary_color || defaults.primary_color;
       launch.querySelector('[data-sfs-current-secondary]').style.background = savedState.secondary_color || defaults.secondary_color;
-      var labels = {none:'Subtle background', diagonal:'Diagonal split', stripes:'Team stripe'};
+      var labels = {none:'Original background', diagonal:'Diagonal split', stripes:'Team stripe'};
       launch.querySelector('[data-sfs-current-label]').textContent = savedState.enabled ? (labels[savedState.pattern] || labels.none) : 'Default appearance';
     }
     function open(){
