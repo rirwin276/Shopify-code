@@ -920,3 +920,64 @@
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* ============================================================
+   PRODUCT CARDS ON THE DARK DESIGNS
+   ============================================================ */
+
+/*
+  The photo tile goes dark so the garment is what you see.
+
+  Every mockup sat on a white tile, so a grid of seven read as seven bright
+  rectangles punched out of the page and the artwork — the thing a shopper is
+  actually judging — came second. The tile was never the photo's own
+  background; it was CSS, which is why this is a colour change rather than an
+  image problem.
+
+  Printful's ghost mockups are cut out, so they float on the dark tile. A
+  photo that turns out to be an opaque rectangle would become a white box in
+  a dark frame, so product-tile-transparency measures each one and marks the
+  opaque ones to keep the light tile. Anything unmeasurable stays light too:
+  the unknown case degrades to how this looked before, not to the broken one.
+*/
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item:not(.ss-tile-opaque) :is(.card__inner, .card__media, .media),
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item:not(.ss-tile-opaque) :is(.card__inner, .card__media, .media) {
+  background: transparent !important;
+}
+
+/* A hairline between photo and caption, so the card still has structure once
+   the tile stops providing the edge. */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item :is(.card__content, .card__information, .card-information),
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item :is(.card__content, .card__information, .card-information) {
+  background: transparent !important;
+  border-top: 1px solid rgba(151,177,205,.13) !important;
+}
+
+/* Opaque photos keep a light tile, inset so it reads as a deliberate frame
+   rather than a card that failed to style. */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .product-grid__item.ss-tile-opaque :is(.card__inner, .card__media, .media),
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .product-grid__item.ss-tile-opaque :is(.card__inner, .card__media, .media) {
+  background: #f4f5f6 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* ---------- badge + swatches across the designs ---------- */
+
+/* On dark cards the near-black badge disappears into the tile. */
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-badge,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-badge {
+  background: color-mix(in srgb, var(--ss-team-secondary) 88%, #000) !important;
+  color: var(--ss-team-secondary-text) !important;
+  box-shadow: 0 0 18px -6px color-mix(in srgb, var(--ss-team-secondary) 70%, transparent) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-swatch,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-swatch {
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.34) !important;
+}
+
+#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-swatch-more,
+#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-swatch-more {
+  color: rgba(233,240,248,.62) !important;
+}
