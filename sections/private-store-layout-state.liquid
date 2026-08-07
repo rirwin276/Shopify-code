@@ -43,6 +43,38 @@
     {% assign ss_layout = 'heritage' %}
 {% endcase %}
 
+{% comment %}
+  If the template suffix did not name a design, the saved one does.
+
+  Provisioning writes COLLECTION_TEMPLATE_SUFFIX, which is the bare
+  "private-store", and nothing in any backend ever changes it again — not
+  wakeup, and not saving a design. So every store resolved to "original" no
+  matter which design its owner had chosen and saved, and the appearance
+  builder truthfully reported "Pro Dark" while the storefront rendered light.
+  Reading only the suffix meant the feature could not work for any store,
+  including ones set up long before this.
+
+  The suffix still wins when it names a design, so assigning a template stays
+  an explicit override. This only fills in the case it left blank.
+
+  Safe because all seven private-store templates render the same section list
+  — the suffix encodes appearance, never structure — so nothing about the page
+  differs here except which stylesheet block applies. Still server-rendered:
+  no runtime morphing, no DOM relocation.
+{% endcomment %}
+{% if ss_enabled == false and ss_settings %}
+  {% assign ss_saved_layout = ss_settings.layout | default: '' | downcase | strip %}
+  {% assign ss_saved_enabled = ss_settings.enabled %}
+  {% assign ss_known_layouts = 'classic,split,gradient,spray,pro,heritage' | split: ',' %}
+
+  {% if ss_saved_enabled == true or ss_saved_enabled == 'true' %}
+    {% if ss_known_layouts contains ss_saved_layout %}
+      {% assign ss_enabled = true %}
+      {% assign ss_layout = ss_saved_layout %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+
 {% assign ss_primary = '#1f2937' %}
 {% assign ss_secondary = '#d4af37' %}
 {% assign ss_primary_text = '#ffffff' %}
