@@ -4,6 +4,10 @@
       "type": "storefront-appearance-settings",
       "settings": {}
     },
+    "storefront-mobile-fix": {
+      "type": "storefront-appearance-mobile-fix",
+      "settings": {}
+    },
     "admin-powers-page": {
       "type": "admin-powers-page",
       "settings": {}
@@ -11,6 +15,7 @@
   },
   "order": [
     "storefront-settings",
+    "storefront-mobile-fix",
     "admin-powers-page"
   ]
 }
