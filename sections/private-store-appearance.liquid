@@ -1,7 +1,7 @@
 {% comment %}
-  Applies optional custom_shop.storefront_settings to the existing private-store
-  hero. With no enabled settings this section renders nothing, preserving the
-  current storefront exactly.
+  Minimal storefront appearance layer.
+  When settings are absent or disabled, this section renders nothing and the
+  existing collection remains pixel-for-pixel unchanged.
 {% endcomment %}
 
 {%- assign ssa_handle = collection.handle | downcase | strip -%}
@@ -10,29 +10,16 @@
 {%- assign ssa_enabled = ssa_settings.enabled | default: false -%}
 
 {%- if ssa_enabled -%}
-  {%- assign ssa_style = ssa_settings.style | default: 'clean' | downcase -%}
   {%- assign ssa_pattern = ssa_settings.pattern | default: 'none' | downcase -%}
+  {%- unless ssa_pattern == 'diagonal' or ssa_pattern == 'stripes' -%}{%- assign ssa_pattern = 'none' -%}{%- endunless -%}
   {%- assign ssa_primary = ssa_settings.primary_color | default: '#1f2937' -%}
   {%- assign ssa_secondary = ssa_settings.secondary_color | default: '#d4af37' -%}
   {%- assign ssa_primary_text = ssa_settings.primary_text | default: '#ffffff' -%}
-  {%- assign ssa_secondary_text = ssa_settings.secondary_text | default: '#111111' -%}
-  {%- assign ssa_message = ssa_settings.welcome_message | default: '' | strip -%}
   {%- assign ssa_announcement = ssa_settings.announcement | default: '' | strip -%}
   {%- assign ssa_show_announcement = ssa_settings.show_announcement | default: false -%}
 
-  <div
-    class="ssa-config"
-    id="ssa-config-{{ section.id }}"
-    data-style="{{ ssa_style | escape }}"
-    data-pattern="{{ ssa_pattern | escape }}"
-    hidden
-  ></div>
-
   {%- if ssa_show_announcement and ssa_announcement != blank -%}
-    <div class="ssa-announcement" role="status">
-      <span class="ssa-announcement__dot"></span>
-      <span>{{ ssa_announcement }}</span>
-    </div>
+    <div class="ssa-announcement" role="status"><span>{{ ssa_announcement }}</span></div>
   {%- endif -%}
 
   <style>
@@ -40,160 +27,49 @@
       --ss-team-primary: {{ ssa_primary }};
       --ss-team-secondary: {{ ssa_secondary }};
       --ss-team-primary-text: {{ ssa_primary_text }};
-      --ss-team-secondary-text: {{ ssa_secondary_text }};
-    }
-    html.ss-storefront-themed .ps-hero {
-      position: relative !important;
-      isolation: isolate;
-    }
-    html.ss-storefront-themed .ps-hero:before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      opacity: .16;
-    }
-    html.ss-storefront-themed .ps-btn-solid,
-    html.ss-storefront-themed .ps-mobile-pill--dark {
-      background: var(--ss-team-primary) !important;
-      color: var(--ss-team-primary-text) !important;
-      border-color: var(--ss-team-primary) !important;
-    }
-    html.ss-storefront-themed .ps-btn-admin,
-    html.ss-storefront-themed .ps-live-dot {
-      background: var(--ss-team-secondary) !important;
-      color: var(--ss-team-secondary-text) !important;
-    }
-    html.ss-storefront-themed .ps-eyebrow,
-    html.ss-storefront-themed .ps-action-panel-title {
-      color: var(--ss-team-primary) !important;
-    }
-    html.ss-storefront-themed .ps-logo {
-      box-shadow: 0 22px 70px color-mix(in srgb, var(--ss-team-primary) 18%, transparent) !important;
     }
 
-    html.ss-storefront-style-clean .ps-hero {
-      background:
-        radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--ss-team-primary) 15%, transparent), transparent 34%),
-        radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--ss-team-secondary) 13%, transparent), transparent 28%),
-        linear-gradient(180deg,#fbfaf7,#fff) !important;
+    html.ss-storefront-themed results-list.product-grid-container {
+      position: relative;
+      background: linear-gradient(180deg,color-mix(in srgb,var(--ss-team-primary) 5%,#fff),#fff 68%) !important;
+      box-shadow: inset 0 4px 0 var(--ss-team-primary);
     }
-    html.ss-storefront-style-clean .ps-hero-card {
-      border-color: color-mix(in srgb, var(--ss-team-primary) 13%, white) !important;
-      background: linear-gradient(135deg,rgba(255,255,255,.94),rgba(255,255,255,.70)) !important;
+    html.ss-storefront-themed results-list.product-grid-container .collection-wrapper,
+    html.ss-storefront-themed results-list.product-grid-container .product-grid {
+      position: relative;
+      z-index: 1;
+      background: transparent !important;
     }
-
-    html.ss-storefront-style-bold .ps-hero {
-      background: linear-gradient(140deg,var(--ss-team-primary),color-mix(in srgb,var(--ss-team-primary) 78%, #000)) !important;
-      color: var(--ss-team-primary-text) !important;
+    html.ss-storefront-pattern-diagonal results-list.product-grid-container {
+      background: linear-gradient(135deg,color-mix(in srgb,var(--ss-team-primary) 16%,#fff) 0 47%,color-mix(in srgb,var(--ss-team-secondary) 58%,#fff) 47% 53%,color-mix(in srgb,var(--ss-team-secondary) 14%,#fff) 53% 100%) !important;
     }
-    html.ss-storefront-style-bold .ps-hero-card {
-      border-color: rgba(255,255,255,.24) !important;
-      background: linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.08)) !important;
-      box-shadow: 0 34px 120px rgba(0,0,0,.22) !important;
-    }
-    html.ss-storefront-style-bold .ps-title,
-    html.ss-storefront-style-bold .ps-sub,
-    html.ss-storefront-style-bold .ps-meta-row,
-    html.ss-storefront-style-bold .ps-eyebrow,
-    html.ss-storefront-style-bold .ps-action-panel-title {
-      color: var(--ss-team-primary-text) !important;
-    }
-    html.ss-storefront-style-bold .ps-sub,
-    html.ss-storefront-style-bold .ps-meta-row { opacity: .88; }
-    html.ss-storefront-style-bold .ps-btn-solid,
-    html.ss-storefront-style-bold .ps-mobile-pill--dark {
-      background: var(--ss-team-secondary) !important;
-      color: var(--ss-team-secondary-text) !important;
-      border-color: var(--ss-team-secondary) !important;
-    }
-    html.ss-storefront-style-bold .ps-btn-ghost,
-    html.ss-storefront-style-bold .ps-btn-soft {
-      border-color: rgba(255,255,255,.45) !important;
-      color: var(--ss-team-primary-text) !important;
-      background: rgba(255,255,255,.12) !important;
-    }
-
-    html.ss-storefront-style-dark .ps-hero {
-      background:
-        radial-gradient(circle at 8% 0%, color-mix(in srgb,var(--ss-team-primary) 35%, transparent), transparent 34%),
-        radial-gradient(circle at 88% 10%, color-mix(in srgb,var(--ss-team-secondary) 20%, transparent), transparent 26%),
-        linear-gradient(180deg,#0e1015,#161922) !important;
-      color: #fff !important;
-    }
-    html.ss-storefront-style-dark .ps-hero-card {
-      border-color: rgba(255,255,255,.10) !important;
-      background: linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.035)) !important;
-      box-shadow: 0 34px 120px rgba(0,0,0,.34) !important;
-    }
-    html.ss-storefront-style-dark .ps-title,
-    html.ss-storefront-style-dark .ps-sub,
-    html.ss-storefront-style-dark .ps-meta-row,
-    html.ss-storefront-style-dark .ps-action-panel-title { color:#fff !important; }
-    html.ss-storefront-style-dark .ps-sub,
-    html.ss-storefront-style-dark .ps-meta-row { color:#c8ccd5 !important; }
-    html.ss-storefront-style-dark .ps-eyebrow { color:var(--ss-team-secondary) !important; }
-    html.ss-storefront-style-dark .ps-btn-ghost,
-    html.ss-storefront-style-dark .ps-btn-soft {
-      color:#fff !important; background:rgba(255,255,255,.08) !important; border-color:rgba(255,255,255,.18) !important;
-    }
-
-    html.ss-storefront-pattern-diagonal .ps-hero:before {
-      background: repeating-linear-gradient(135deg,transparent 0 22px,var(--ss-team-secondary) 22px 25px);
-    }
-    html.ss-storefront-pattern-stripes .ps-hero:before {
-      background: repeating-linear-gradient(90deg,transparent 0 52px,var(--ss-team-secondary) 52px 60px);
-    }
-    html.ss-storefront-pattern-dots .ps-hero:before {
-      background-image: radial-gradient(var(--ss-team-secondary) 2px,transparent 2px);
-      background-size: 22px 22px;
-    }
-    html.ss-storefront-pattern-grid .ps-hero:before {
-      background-image:
-        linear-gradient(var(--ss-team-secondary) 1px,transparent 1px),
-        linear-gradient(90deg,var(--ss-team-secondary) 1px,transparent 1px);
-      background-size: 30px 30px;
+    html.ss-storefront-pattern-stripes results-list.product-grid-container {
+      background: linear-gradient(135deg,#fff 0 34%,color-mix(in srgb,var(--ss-team-primary) 62%,#fff) 34% 39%,color-mix(in srgb,var(--ss-team-secondary) 68%,#fff) 39% 44%,#fff 44% 100%) !important;
     }
 
     .ssa-announcement {
       width: min(1440px,calc(100% - 40px));
-      margin: -12px auto 24px;
+      margin: 8px auto 18px;
       padding: 12px 18px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:9px;
-      border-radius: 14px;
-      background: var(--ss-team-secondary);
-      color: var(--ss-team-secondary-text);
+      border-radius: 12px;
+      border-bottom: 4px solid var(--ss-team-secondary);
+      background: var(--ss-team-primary);
+      color: var(--ss-team-primary-text);
       font: 800 13px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
-      text-align:center;
-      box-shadow: 0 12px 34px color-mix(in srgb,var(--ss-team-secondary) 25%, transparent);
+      text-align: center;
+      box-shadow: 0 10px 28px color-mix(in srgb,var(--ss-team-primary) 18%,transparent);
     }
-    .ssa-announcement__dot { width:8px; height:8px; flex:0 0 auto; border-radius:50%; background:currentColor; opacity:.75; }
-
-    @media (max-width: 749px) {
-      .ssa-announcement { width:calc(100% - 24px); margin:-8px auto 14px; padding:10px 12px; border-radius:12px; font-size:12px; }
-      html.ss-storefront-themed .ps-hero:before { opacity:.12; }
+    @media(max-width:749px){
+      .ssa-announcement{width:calc(100% - 20px);margin:5px auto 12px;padding:10px 12px;border-radius:10px;font-size:12px}
+      html.ss-storefront-themed results-list.product-grid-container{box-shadow:inset 0 3px 0 var(--ss-team-primary)}
     }
   </style>
 
   <script>
     (function(){
-      var html = document.documentElement;
+      var html=document.documentElement;
       html.classList.add('ss-storefront-themed');
-      html.classList.add('ss-storefront-style-{{ ssa_style | escape }}');
       html.classList.add('ss-storefront-pattern-{{ ssa_pattern | escape }}');
-      var message = {{ ssa_message | json }};
-      if (message) {
-        var applyMessage = function(){
-          var subtitle = document.querySelector('.ps-hero .ps-sub');
-          if (subtitle) subtitle.textContent = message;
-        };
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyMessage, { once:true });
-        else applyMessage();
-      }
     })();
   </script>
 {%- endif -%}
