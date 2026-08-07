@@ -32,6 +32,17 @@
     if (heading) heading.classList.add('sfs-color-field__label');
     oldEntry.classList.add('sfs-color-entry');
 
+    input.classList.add('sfs-native-color-input');
+    input.setAttribute('aria-hidden','true');
+    input.tabIndex = -1;
+
+    var pickerButton = document.createElement('button');
+    pickerButton.type = 'button';
+    pickerButton.className = 'sfs-color-picker-button';
+    pickerButton.setAttribute('aria-label', role === 'primary' ? 'Choose primary color' : 'Choose accent color');
+    pickerButton.innerHTML = '<i class="sfs-color-picker-chip"></i><span>Choose color</span>';
+    oldEntry.insertBefore(pickerButton, input);
+
     var hex = document.createElement('input');
     hex.type = 'text';
     hex.inputMode = 'text';
@@ -72,11 +83,16 @@
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
+    pickerButton.addEventListener('click', function(){
+      input.click();
+    });
+
     function apply(value, dispatch){
       var normalized = normalizeHex(value);
       if (!normalized) return false;
       input.value = normalized.toLowerCase();
       hex.value = normalized;
+      pickerButton.querySelector('.sfs-color-picker-chip').style.background = normalized;
       syncActive(label, normalized);
       if (dispatch) input.dispatchEvent(new Event('input', {bubbles:true}));
       return true;
@@ -85,6 +101,7 @@
     input.addEventListener('input', function(){
       var normalized = normalizeHex(input.value) || '#000000';
       hex.value = normalized;
+      pickerButton.querySelector('.sfs-color-picker-chip').style.background = normalized;
       syncActive(label, normalized);
     });
 
