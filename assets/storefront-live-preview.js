@@ -10,16 +10,17 @@
       if (current.searchParams.has(key)) url.searchParams.set(key,current.searchParams.get(key));
     });
 
-    /* Theme previews can be active through Shopify's theme context even when
-       preview_theme_id is not visible in the address bar. Keep the iframe on
-       the exact same theme as the Admin Powers page. */
+    /* Theme previews may be active through Shopify's theme context even when
+       preview_theme_id is not visible in the address bar. Fetch the exact same
+       draft theme as the Admin Powers page. */
     try {
       if (!url.searchParams.has('preview_theme_id') && window.Shopify && Shopify.theme && Shopify.theme.id && Shopify.theme.role !== 'main') {
         url.searchParams.set('preview_theme_id', String(Shopify.theme.id));
       }
     } catch(_themeError) {}
 
-    url.searchParams.set('ss_builder_preview','1');
+    url.searchParams.set('ss_builder_snapshot','1');
+    url.searchParams.set('_sfs', String(Date.now()));
     return url;
   }
 
@@ -52,21 +53,52 @@
     };
   }
 
-  function hideChrome(doc){
-    if (!doc || doc.getElementById('sfsRealPreviewReset')) return;
-    var style = doc.createElement('style');
-    style.id = 'sfsRealPreviewReset';
+  function prepareSnapshot(html){
+    var parsed = new DOMParser().parseFromString(html, 'text/html');
+
+    /* Shopify deliberately blocks direct framing. A srcdoc snapshot does not
+       need runtime scripts, so strip executable/CSP content but keep the real
+       Liquid markup, inline styles, and theme stylesheets. */
+    parsed.querySelectorAll('script,noscript,iframe,meta[http-equiv="Content-Security-Policy"],meta[http-equiv="content-security-policy"]').forEach(function(node){ node.remove(); });
+    parsed.querySelectorAll('*').forEach(function(node){
+      Array.from(node.attributes || []).forEach(function(attr){
+        if (/^on/i.test(attr.name)) node.removeAttribute(attr.name);
+      });
+    });
+
+    var base = parsed.createElement('base');
+    base.href = window.location.origin + '/';
+    parsed.head.insertBefore(base, parsed.head.firstChild);
+
+    var style = parsed.createElement('style');
+    style.id = 'sfsSnapshotChrome';
     style.textContent = [
       'html,body{scrollbar-width:none!important;}',
       'body::-webkit-scrollbar,html::-webkit-scrollbar{display:none!important;}',
       '.shopify-section-group-header-group,.shopify-section-group-footer-group{display:none!important;}',
       'header-component,header,footer{display:none!important;}',
       '.ps-preview-banner,[data-private-store-preview-links]{display:none!important;}',
-      '#MainContent{padding-top:0!important;margin-top:0!important;}',
-      'body{margin:0!important;overflow:hidden!important;}',
-      'a,button,input,select,textarea{pointer-events:none!important;}'
+      '#MainContent{padding-top:0!important;margin-top:0!important;min-height:100vh!important;}',
+      'body{margin:0!important;overflow:hidden!important;background:transparent!important;}',
+      'a,button,input,select,textarea{pointer-events:none!important;}',
+      '.ss-smart-jump{display:none!important;}'
     ].join('');
-    (doc.head || doc.documentElement).appendChild(style);
+    parsed.head.appendChild(style);
+
+    return '<!doctype html>\n' + parsed.documentElement.outerHTML;
+  }
+
+  async function fetchSnapshot(handle){
+    var response = await fetch(makeUrl(handle), {
+      method:'GET',
+      credentials:'same-origin',
+      cache:'no-store',
+      headers:{'Accept':'text/html'}
+    });
+    if (!response.ok) throw new Error('Storefront preview returned HTTP ' + response.status);
+    var html = await response.text();
+    if (!html || html.indexOf('MainContent') === -1) throw new Error('Storefront HTML was incomplete');
+    return prepareSnapshot(html);
   }
 
   function applyState(frame, state){
@@ -74,7 +106,6 @@
     try { doc = frame.contentDocument; } catch(_e) { return; }
     if (!doc || !doc.documentElement) return;
 
-    hideChrome(doc);
     var html = doc.documentElement;
     ['ss-store-custom','ss-style-clean','ss-style-bold','ss-style-dark','ss-pattern-none','ss-pattern-diagonal','ss-pattern-stripes','ss-pattern-dots','ss-pattern-grid'].forEach(function(name){ html.classList.remove(name); });
 
@@ -111,26 +142,57 @@
     }
   }
 
-  function makePreview(mode, handle){
+  async function syncFundraiser(frame, handle){
+    var doc;
+    try { doc = frame.contentDocument; } catch(_e) { return; }
+    if (!doc) return;
+    var bar = doc.querySelector('.ss-frbar');
+    if (!bar) return;
+
+    try {
+      var response = await fetch('/apps/ss/relay/store/' + encodeURIComponent(handle) + '/fundraising/public', {cache:'no-store'});
+      var data = await response.json();
+      if (!data || !data.enabled || !data.show_bar) {
+        bar.hidden = true;
+        return;
+      }
+      var raised = parseFloat(data.total_raised || 0);
+      var goal = parseFloat(data.goal || 0);
+      var pct = goal > 0 ? Math.min(100,Math.round((raised/goal)*100)) : 100;
+      var cause = bar.querySelector('.ss-frbar-cause');
+      var fill = bar.querySelector('.ss-frbar-fill');
+      var raisedEl = bar.querySelector('[id$="FrBarRaised"]');
+      var goalEl = bar.querySelector('[id$="FrBarGoal"]');
+      if (cause) cause.textContent = data.cause_name || 'Support our team';
+      if (fill) fill.style.width = pct + '%';
+      if (raisedEl) raisedEl.textContent = '$' + Math.round(raised).toLocaleString() + ' raised';
+      if (goalEl) goalEl.textContent = goal > 0 ? ('of $' + Math.round(goal).toLocaleString() + ' goal') : '';
+      bar.hidden = false;
+    } catch(_error) {
+      bar.hidden = true;
+    }
+  }
+
+  function makePreview(mode){
     var wrapper = document.createElement('div');
     wrapper.className = 'sfs-real-preview sfs-real-preview--' + mode;
 
     var label = document.createElement('span');
     label.className = 'sfs-real-preview__label';
-    label.textContent = mode === 'desktop' ? 'Desktop — actual storefront' : 'Mobile — actual storefront';
+    label.textContent = mode === 'desktop' ? 'Desktop — storefront snapshot' : 'Mobile — storefront snapshot';
 
     var stage = document.createElement('div');
     stage.className = 'sfs-real-preview__stage sfs-real-preview__stage--' + mode;
 
     var loading = document.createElement('div');
     loading.className = 'sfs-real-preview__loading';
-    loading.textContent = 'Loading actual storefront…';
+    loading.textContent = 'Loading storefront snapshot…';
 
     var iframe = document.createElement('iframe');
-    iframe.title = mode === 'desktop' ? 'Actual desktop storefront preview' : 'Actual mobile storefront preview';
+    iframe.title = mode === 'desktop' ? 'Desktop storefront snapshot' : 'Mobile storefront snapshot';
     iframe.tabIndex = -1;
     iframe.setAttribute('aria-hidden','true');
-    iframe.src = makeUrl(handle);
+    iframe.setAttribute('sandbox','allow-same-origin');
     iframe.dataset.sfsRealFrame = mode;
     iframe.style.width = (mode === 'desktop' ? DESKTOP_WIDTH : MOBILE_WIDTH) + 'px';
     iframe.style.height = (mode === 'desktop' ? DESKTOP_HEIGHT : MOBILE_HEIGHT) + 'px';
@@ -151,7 +213,16 @@
     preview.stage.style.height = Math.round(naturalHeight * scale) + 'px';
   }
 
-  function init(root){
+  function showError(preview, message){
+    preview.wrapper.classList.remove('is-loaded');
+    var loading = preview.wrapper.querySelector('.sfs-real-preview__loading');
+    if (loading) {
+      loading.textContent = 'Preview unavailable — ' + message;
+      loading.classList.add('is-error');
+    }
+  }
+
+  async function init(root){
     if (!root || root.dataset.sfsRealPreviewReady === '1') return;
     var overlay = document.querySelector('[data-sfs-overlay]');
     if (!overlay) return;
@@ -162,13 +233,14 @@
     root.dataset.sfsRealPreviewReady = '1';
     grid.classList.add('sfs-preview-grid--real');
 
-    var desktop = makePreview('desktop', root.dataset.shopHandle || '');
-    var mobile = makePreview('mobile', root.dataset.shopHandle || '');
+    var desktop = makePreview('desktop');
+    var mobile = makePreview('mobile');
     grid.appendChild(desktop.wrapper);
     grid.appendChild(mobile.wrapper);
 
     var previews = [desktop,mobile];
-    var lastState = null;
+    var handle = root.dataset.shopHandle || '';
+    var lastState = readState(source,overlay);
 
     function sync(){
       lastState = readState(source, overlay);
@@ -178,10 +250,18 @@
     previews.forEach(function(preview){
       preview.iframe.addEventListener('load', function(){
         fit(preview);
-        applyState(preview.iframe,lastState || readState(source,overlay));
+        applyState(preview.iframe,lastState);
+        syncFundraiser(preview.iframe,handle);
         preview.wrapper.classList.add('is-loaded');
       });
     });
+
+    try {
+      var snapshot = await fetchSnapshot(handle);
+      previews.forEach(function(preview){ preview.iframe.srcdoc = snapshot; });
+    } catch(error) {
+      previews.forEach(function(preview){ showError(preview,error.message || 'could not load'); });
+    }
 
     new MutationObserver(sync).observe(source,{attributes:true,attributeFilter:['class','data-style','data-pattern','style']});
     overlay.querySelectorAll('[data-sfs-preview-announcement]').forEach(function(node){
