@@ -129,6 +129,10 @@
       out.push('  enabled=' + (state && state.getAttribute('data-enabled')) +
                '  layout=' + (state && state.getAttribute('data-layout')) +
                '  suffix=' + (state && state.getAttribute('data-template-suffix')));
+      out.push('  SAVED RECORD: enabled=' + (state && state.getAttribute('data-saved-enabled')) +
+               '  layout=' + (state && state.getAttribute('data-saved-layout')) +
+               '  style=' + (state && state.getAttribute('data-saved-style')) +
+               '  pattern=' + (state && state.getAttribute('data-saved-pattern')));
 
       // Which sections the page ACTUALLY rendered.
       //
