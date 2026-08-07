@@ -1,0 +1,35 @@
+{% comment %}
+  Legacy compatibility only.
+  Water Drip was removed from the designer. Any test store that previously
+  saved the old dark+dots combination now renders as Pro Dark (dark+grid)
+  until the organizer saves a current preset.
+{% endcomment %}
+
+<script>
+  (function () {
+    function normalizeLegacyAppearance() {
+      var root = document.querySelector('[data-ss-storefront-enhancements]');
+      if (!root) return;
+      if (root.dataset.style === 'dark' && root.dataset.pattern === 'dots') {
+        root.dataset.pattern = 'grid';
+        document.documentElement.classList.remove('ss-pattern-dots');
+        document.documentElement.classList.add('ss-pattern-grid');
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', normalizeLegacyAppearance, { once: true });
+    } else {
+      normalizeLegacyAppearance();
+    }
+    document.addEventListener('shopify:section:load', normalizeLegacyAppearance);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Legacy appearance fallback",
+  "enabled_on": { "templates": ["collection"] },
+  "settings": []
+}
+{% endschema %}
