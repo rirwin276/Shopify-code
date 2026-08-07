@@ -1,22 +1,43 @@
-/* Final continuity layer for all private storefront presets. */
+/* Final live-store continuity layer. Keep this last in collection.private-store. */
 
-/* The category row is part of the page, not a separate floating card. */
+/* Category navigation is part of the storefront surface, never a floating white card. */
+.ss-storefront-enhancements,
+.ss-category-shell-fix,
+.ss-category-shell-fix > *{
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.ss-storefront-enhancements{
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+}
+.ss-category-shell-fix{
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+}
 .ss-category-nav{
   width:100%!important;
   margin:0!important;
   padding:8px max(20px,calc((100vw - 1320px)/2)) 7px!important;
   border:0!important;
   border-radius:0!important;
+  background:transparent!important;
   box-shadow:none!important;
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
-  background:transparent!important;
 }
 .ss-category-tabs{
   width:min(1320px,100%)!important;
   margin:0 auto!important;
   padding:0!important;
   gap:7px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
 }
 .ss-category-tab{
   min-height:34px!important;
@@ -24,48 +45,52 @@
   box-shadow:none;
 }
 
-/* GRADIENT GLOW — deliberately vivid from top-left to bottom-right. */
+/* GRADIENT GLOW — same recipe used by the builder preview. */
 html.ss-store-custom.ss-style-bold.ss-pattern-none .ps-hero{
   background:
     radial-gradient(circle at 0% 0%,
-      color-mix(in srgb,var(--ss-team-primary) 76%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-primary) 52%,#fff) 18%,
-      color-mix(in srgb,var(--ss-team-primary) 24%,#fff) 38%,
-      transparent 61%),
-    radial-gradient(circle at 100% 100%,
-      color-mix(in srgb,var(--ss-team-secondary) 74%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-secondary) 48%,#fff) 20%,
-      color-mix(in srgb,var(--ss-team-secondary) 22%,#fff) 40%,
+      color-mix(in srgb,var(--ss-team-primary) 82%,#fff) 0%,
+      color-mix(in srgb,var(--ss-team-primary) 58%,#fff) 18%,
+      color-mix(in srgb,var(--ss-team-primary) 30%,#fff) 38%,
       transparent 63%),
-    linear-gradient(135deg,#fff 28%,#fffdf9 52%,#fff 72%)!important;
+    radial-gradient(circle at 100% 100%,
+      color-mix(in srgb,var(--ss-team-secondary) 82%,#fff) 0%,
+      color-mix(in srgb,var(--ss-team-secondary) 58%,#fff) 20%,
+      color-mix(in srgb,var(--ss-team-secondary) 30%,#fff) 40%,
+      transparent 65%),
+    #fff!important;
 }
 html.ss-store-custom.ss-style-bold.ss-pattern-none .ps-hero-card{
-  background:rgba(255,255,255,.84)!important;
-  border-color:rgba(255,255,255,.66)!important;
-  box-shadow:0 24px 68px rgba(17,16,14,.10)!important;
+  background:rgba(255,255,255,.82)!important;
+  border-color:rgba(255,255,255,.68)!important;
+  box-shadow:0 24px 68px rgba(17,16,14,.11)!important;
   backdrop-filter:blur(16px) saturate(1.08)!important;
   -webkit-backdrop-filter:blur(16px) saturate(1.08)!important;
 }
-html.ss-store-custom.ss-style-bold.ss-pattern-none .ss-category-nav{
+html.ss-store-custom.ss-style-bold.ss-pattern-none .ss-category-shell-fix{
   background:
     linear-gradient(90deg,
-      color-mix(in srgb,var(--ss-team-primary) 18%,#fff),
-      rgba(255,255,255,.88) 46%,
-      rgba(255,255,255,.88) 54%,
-      color-mix(in srgb,var(--ss-team-secondary) 18%,#fff))!important;
+      color-mix(in srgb,var(--ss-team-primary) 24%,#fff) 0%,
+      color-mix(in srgb,var(--ss-team-primary) 9%,#fff) 38%,
+      rgba(255,255,255,.94) 50%,
+      color-mix(in srgb,var(--ss-team-secondary) 9%,#fff) 62%,
+      color-mix(in srgb,var(--ss-team-secondary) 24%,#fff) 100%)!important;
+}
+html.ss-store-custom.ss-style-bold.ss-pattern-none .ss-category-nav{
+  background:transparent!important;
 }
 html.ss-store-custom.ss-style-bold.ss-pattern-none results-list{
   background:
-    radial-gradient(ellipse 78% 88% at 0% 0%,
-      color-mix(in srgb,var(--ss-team-primary) 54%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-primary) 30%,#fff) 24%,
-      color-mix(in srgb,var(--ss-team-primary) 10%,#fff) 46%,
-      transparent 68%),
-    radial-gradient(ellipse 82% 92% at 100% 100%,
-      color-mix(in srgb,var(--ss-team-secondary) 52%,#fff) 0%,
-      color-mix(in srgb,var(--ss-team-secondary) 28%,#fff) 25%,
-      color-mix(in srgb,var(--ss-team-secondary) 10%,#fff) 48%,
+    radial-gradient(ellipse 82% 94% at 0% 0%,
+      color-mix(in srgb,var(--ss-team-primary) 62%,#fff) 0%,
+      color-mix(in srgb,var(--ss-team-primary) 38%,#fff) 25%,
+      color-mix(in srgb,var(--ss-team-primary) 14%,#fff) 48%,
       transparent 70%),
+    radial-gradient(ellipse 84% 96% at 100% 100%,
+      color-mix(in srgb,var(--ss-team-secondary) 62%,#fff) 0%,
+      color-mix(in srgb,var(--ss-team-secondary) 38%,#fff) 26%,
+      color-mix(in srgb,var(--ss-team-secondary) 14%,#fff) 50%,
+      transparent 72%),
     #fff!important;
 }
 html.ss-store-custom.ss-style-bold.ss-pattern-none results-list .product-grid__item{
@@ -74,8 +99,9 @@ html.ss-store-custom.ss-style-bold.ss-pattern-none results-list .product-grid__i
   box-shadow:0 12px 30px rgba(17,16,14,.08)!important;
 }
 
-/* PRO DARK — one continuous tone. Team colors stay in accents/buttons only. */
+/* PRO DARK — one uninterrupted surface from hero through catalog. */
 html.ss-store-custom.ss-style-dark.ss-pattern-grid .ps-hero,
+html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-shell-fix,
 html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-nav,
 html.ss-store-custom.ss-style-dark.ss-pattern-grid results-list{
   background:#11161e!important;
@@ -97,21 +123,21 @@ html.ss-store-custom.ss-style-dark.ss-pattern-grid .ss-category-tab.active{
   color:var(--ss-team-secondary-text)!important;
 }
 
-/* Spray Burst: keep the nav embedded in the same dark environment. */
+/* Spray Burst stays one dark environment. */
+html.ss-store-custom.ss-style-bold.ss-pattern-dots .ss-category-shell-fix,
 html.ss-store-custom.ss-style-bold.ss-pattern-dots .ss-category-nav{
   background:#080d15!important;
 }
 
-/* Heritage and diagonal also lose the floating white outer capsule. */
-html.ss-store-custom.ss-pattern-stripes .ss-category-nav{
+/* Heritage and diagonal keep only a flat full-width transition, never an outer capsule. */
+html.ss-store-custom.ss-pattern-stripes .ss-category-shell-fix{
   background:#faf5e9!important;
 }
-html.ss-store-custom.ss-pattern-diagonal .ss-category-nav{
-  background:
-    linear-gradient(90deg,
-      color-mix(in srgb,var(--ss-team-primary) 8%,#fff),
-      #fff 48%,
-      color-mix(in srgb,var(--ss-team-secondary) 8%,#fff))!important;
+html.ss-store-custom.ss-pattern-diagonal .ss-category-shell-fix{
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--ss-team-primary) 10%,#fff),
+    #fff 48%,
+    color-mix(in srgb,var(--ss-team-secondary) 10%,#fff))!important;
 }
 
 @media(max-width:768px){
@@ -125,23 +151,29 @@ html.ss-store-custom.ss-pattern-diagonal .ss-category-nav{
   html.ss-store-custom.ss-style-bold.ss-pattern-none .ps-hero{
     background:
       radial-gradient(circle at 0% 0%,
-        color-mix(in srgb,var(--ss-team-primary) 68%,#fff) 0%,
-        color-mix(in srgb,var(--ss-team-primary) 34%,#fff) 30%,
-        transparent 60%),
-      radial-gradient(circle at 100% 100%,
-        color-mix(in srgb,var(--ss-team-secondary) 66%,#fff) 0%,
-        color-mix(in srgb,var(--ss-team-secondary) 32%,#fff) 32%,
+        color-mix(in srgb,var(--ss-team-primary) 74%,#fff) 0%,
+        color-mix(in srgb,var(--ss-team-primary) 40%,#fff) 30%,
         transparent 62%),
+      radial-gradient(circle at 100% 100%,
+        color-mix(in srgb,var(--ss-team-secondary) 72%,#fff) 0%,
+        color-mix(in srgb,var(--ss-team-secondary) 38%,#fff) 32%,
+        transparent 64%),
       #fff!important;
+  }
+  html.ss-store-custom.ss-style-bold.ss-pattern-none .ss-category-shell-fix{
+    background:linear-gradient(90deg,
+      color-mix(in srgb,var(--ss-team-primary) 20%,#fff),
+      #fff 50%,
+      color-mix(in srgb,var(--ss-team-secondary) 20%,#fff))!important;
   }
   html.ss-store-custom.ss-style-bold.ss-pattern-none results-list{
     background:
-      radial-gradient(ellipse 95% 70% at 0% 0%,
-        color-mix(in srgb,var(--ss-team-primary) 44%,#fff),
-        transparent 64%),
-      radial-gradient(ellipse 95% 72% at 100% 100%,
-        color-mix(in srgb,var(--ss-team-secondary) 42%,#fff),
+      radial-gradient(ellipse 100% 76% at 0% 0%,
+        color-mix(in srgb,var(--ss-team-primary) 52%,#fff),
         transparent 66%),
+      radial-gradient(ellipse 100% 78% at 100% 100%,
+        color-mix(in srgb,var(--ss-team-secondary) 50%,#fff),
+        transparent 68%),
       #fff!important;
   }
 }
