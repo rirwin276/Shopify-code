@@ -33,6 +33,10 @@
       "type": "private-store-continuity-polish",
       "settings": {}
     },
+    "legacy_appearance_fallback": {
+      "type": "private-store-legacy-appearance-fallback",
+      "settings": {}
+    },
     "main": {
       "type": "main-collection",
       "blocks": {
@@ -175,6 +179,7 @@
     "storefront_enhancements",
     "storefront_visual_polish",
     "storefront_continuity",
+    "legacy_appearance_fallback",
     "main",
     "local_partner_hicPjc"
   ]
