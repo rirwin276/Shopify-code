@@ -465,31 +465,19 @@
 /* ---------- SHARED: a bigger catalog and a tighter header ---------- */
 
 /*
-  Six across on a wide screen, stepping down with the viewport.
+  Four across on every desktop width.
 
-  The theme fit as many cards as the page allowed, which on a wide monitor
-  gave eight thumbnails small enough that the print on a shirt was
-  unreadable. Six at ~210px still shows the artwork clearly and makes a
-  fifteen-item store read as a full catalog, which four did not — four left
-  a wide store looking sparse.
+  This briefly stepped 6/5/4/3 with the viewport, which meant two stores side
+  by side showed different grids purely because of window width — and a store
+  looked like it changed shape when the browser was resized. A team store is
+  small enough that a fixed count reads as designed; the cards simply get
+  wider on a wider screen, which also keeps the print legible.
 */
 #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
-  --product-grid-columns-desktop: repeat(6, minmax(0, 1fr)) !important;
+  --product-grid-columns-desktop: repeat(4, minmax(0, 1fr)) !important;
 }
 
-@media screen and (min-width: 1400px) {
-  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
-  }
-}
-
-@media screen and (min-width: 1100px) and (max-width: 1399px) {
-  #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-  }
-}
-
-@media screen and (min-width: 990px) and (max-width: 1099px) {
+@media screen and (min-width: 990px) {
   #MainContent:has(#ss-private-store-state[data-enabled="true"]) .ss-private-catalog .product-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }
@@ -995,15 +983,7 @@
   box-shadow: 0 0 18px -6px color-mix(in srgb, var(--ss-team-secondary) 70%, transparent) !important;
 }
 
-#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-swatch,
-#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-swatch {
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.34) !important;
-}
 
-#MainContent:has(#ss-private-store-state[data-layout="pro"]) .ss-grid-swatch-more,
-#MainContent:has(#ss-private-store-state[data-layout="spray"]) .ss-grid-swatch-more {
-  color: rgba(233,240,248,.62) !important;
-}
 
 /* ============================================================
    THE STORE LOGO ON A PHONE
