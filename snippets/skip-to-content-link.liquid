@@ -16,6 +16,15 @@
     </script>
     <style>html, body { display: none !important; }</style>
   {%- endif -%}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var continueShopping = document.querySelector('.cart-items__empty-button');
+      if (continueShopping) {
+        continueShopping.setAttribute('href', "{{ pages['portal'].url | default: '/pages/portal' }}");
+      }
+    });
+  </script>
 {%- endunless -%}
 
 <a
