@@ -8,6 +8,16 @@
   @example
   {% render 'skip-to-content-link', href: '#MainContent', text: 'Skip to main content' %}
 {%- enddoc -%}
+
+{%- unless request.design_mode -%}
+  {%- if request.path == '/collections/all' or request.path == '/collections' -%}
+    <script>
+      window.location.replace("{{ pages['portal'].url | default: '/pages/portal' }}");
+    </script>
+    <style>html, body { display: none !important; }</style>
+  {%- endif -%}
+{%- endunless -%}
+
 <a
   class="skip-to-content-link button-secondary"
   href="{{ href }}"
