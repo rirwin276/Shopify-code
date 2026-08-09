@@ -364,6 +364,27 @@
               <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3413_front_back" value="">
             </div>
           </div>
+          <!--
+            Sleeve prints are an ADD-ON to whichever of the two above applies,
+            not a tier of their own: Printful bills the placement on top of the
+            garment, so a sleeve costs the same whether it joins a front print
+            or a front and back. Both sleeves is priced as a pair rather than
+            twice one, so the second sleeve can carry a smaller step.
+          -->
+          <div class="ap-input-col">
+            <span class="ap-col-label">+ One Sleeve</span>
+            <div class="ap-input-wrap">
+              <span class="ap-dollar">$</span>
+              <input class="ap-price-input" type="number" min="0" max="999" step="0.01" data-module="BC3413_sleeve" value="">
+            </div>
+          </div>
+          <div class="ap-input-col">
+            <span class="ap-col-label">+ Both Sleeves</span>
+            <div class="ap-input-wrap">
+              <span class="ap-dollar">$</span>
+              <input class="ap-price-input" type="number" min="0" max="999" step="0.01" data-module="BC3413_sleeves_both" value="">
+            </div>
+          </div>
         </div>
       </div>
 
