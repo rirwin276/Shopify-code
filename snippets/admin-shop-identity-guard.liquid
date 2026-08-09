@@ -1,0 +1,79 @@
+{%- doc -%}
+  Refuses to show an admin page for a store the URL did not ask for.
+
+  The symptom: /pages/admin-powers?shop=raptors-3978 rendered another store's
+  control centre entirely — its name, its logo, its products, and its handle in
+  the hero pill. That pill is server-rendered from shop_handle, so the page had
+  genuinely been built for a different store and served against this URL. The
+  page itself is self-consistent — the permission check and the content both
+  come from the same shop_handle — so this is not a case of a gate being
+  bypassed within one render. It is a render being reused for a request that
+  did not ask for it.
+
+  That distinction matters for what this can and cannot promise. It cannot make
+  a reused render safe; only the server can stop reusing it. What it can do is
+  refuse to let a wrong one stand: an admin page silently showing someone
+  else's store is the worst outcome, because everything on it — products,
+  members, danger-zone actions — then applies to a store the person did not
+  intend to open.
+
+  So the handle the server used is compared against the handle in the address
+  bar. On a mismatch the page is reloaded once with a cache-busting parameter;
+  if the second attempt still disagrees, it stops and says so instead of
+  rendering. One retry, tracked in sessionStorage, so a persistent mismatch
+  cannot become a reload loop.
+{%- enddoc -%}
+<script>
+  (function () {
+    var expected = '';
+    try {
+      expected = new URLSearchParams(window.location.search).get('shop') || '';
+    } catch (e) {
+      return;   // cannot read the URL: nothing to compare against
+    }
+    expected = expected.trim().toLowerCase();
+    if (!expected) return;   // no shop asked for; the page decides on its own
+
+    var served = String((window.SSAP && window.SSAP.shopHandle) || '').trim().toLowerCase();
+    if (!served || served === expected) return;   // agreed: nothing to do
+
+    var FLAG = 'ss_admin_shop_retry';
+    var already = '';
+    try { already = sessionStorage.getItem(FLAG) || ''; } catch (e) {}
+
+    if (already !== expected) {
+      // First disagreement: force a fresh render rather than accusing the
+      // page of anything. A cache-busting parameter is the only lever
+      // available from here — Liquid cannot set a response header.
+      try { sessionStorage.setItem(FLAG, expected); } catch (e) {}
+      var url = new URL(window.location.href);
+      url.searchParams.set('_ssr', Date.now().toString(36));
+      window.location.replace(url.toString());
+      return;
+    }
+
+    // Second disagreement for the same store: the reload did not help, so stop
+    // rather than let someone act on another store's control centre.
+    try { sessionStorage.removeItem(FLAG); } catch (e) {}
+
+    var wrap = document.querySelector('.ap-wrap');
+    if (wrap) wrap.setAttribute('hidden', 'hidden');
+
+    var notice = document.createElement('div');
+    notice.setAttribute('role', 'alert');
+    notice.style.cssText =
+      'max-width:640px;margin:64px auto;padding:26px 28px;border-radius:18px;' +
+      'border:1px solid rgba(180,35,24,.28);background:#fff6f5;color:#3d1512;' +
+      'font:500 15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;';
+    notice.innerHTML =
+      '<div style="font-weight:800;font-size:18px;margin-bottom:8px;">This page loaded the wrong store</div>' +
+      '<p style="margin:0 0 14px;">You asked for <strong>' + expected.replace(/[<>&]/g, '') +
+      '</strong> but the page came back for <strong>' + served.replace(/[<>&]/g, '') +
+      '</strong>, so it has been stopped. Nothing here would have applied to the store you wanted.</p>' +
+      '<p style="margin:0 0 18px;">Open it again from your dashboard. If this keeps happening, tell us which store — it means a page is being cached and served to the wrong request.</p>' +
+      '<a href="/pages/portal" style="display:inline-block;padding:11px 18px;border-radius:999px;' +
+      'background:#11100e;color:#fff;text-decoration:none;font-weight:700;">← Back to dashboard</a>';
+
+    (document.body || document.documentElement).appendChild(notice);
+  })();
+</script>

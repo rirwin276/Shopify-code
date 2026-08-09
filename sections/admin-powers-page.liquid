@@ -181,6 +181,16 @@
     SSAP.collectionHandle = {{ collection_handle | json }};
     SSAP.shopHandle = {{ shop_handle | json }};
     SSAP.isSuperAdmin = {{ is_super_admin | json }};
+  </script>
+
+  {%- comment -%}
+    Checked immediately after the handle is stamped, before any of the page's
+    own scripts run against it.
+  {%- endcomment -%}
+  {% render 'admin-shop-identity-guard' %}
+
+  <script>
+    window.SSAP = window.SSAP || {};
     SSAP.railwayUrl = {{ studio_uploader_base_url | json }};
     SSAP.editorBaseUrl = {{ editor_base_url | json }};
     SSAP.editorBc3001yBaseUrl = {{ editor_bc3001y_base_url | json }};
