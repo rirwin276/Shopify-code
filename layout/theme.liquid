@@ -55,8 +55,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="">
+    {%- liquid
+      assign is_private_store_collection = false
+      if request.page_type == 'collection' and template.suffix contains 'private-store'
+        assign is_private_store_collection = true
+      endif
+    -%}
     {%- if request.page_type == 'page' and page.handle == 'stella-sage-shop' -%}
       <link rel="canonical" href="{{ shop.url }}/">
+      <meta name="robots" content="noindex,follow">
+    {%- elsif is_private_store_collection or request.page_type == 'list-collections' -%}
+      <link rel="canonical" href="{{ canonical_url }}">
       <meta name="robots" content="noindex,follow">
     {%- else -%}
       <link rel="canonical" href="{{ canonical_url }}">
