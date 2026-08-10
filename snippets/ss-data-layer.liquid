@@ -10,8 +10,9 @@
   // dashboardLogoMap removed: the dashboard sizes logos in Liquid now, and
   // nothing reads a JS-side image map. See sharpenDashboardLogos.
   //
-  // The store config below is unrelated and still live — ss-canvas-overlay.js
-  // reads config.logoUrl to draw the logo onto product previews.
+  /* The store config below is unrelated and still live — ss-canvas-overlay.js
+     reads config.logoUrl to draw the logo onto product previews. This is a
+     block comment so Liquid whitespace trimming cannot swallow the IIFE below. */
 
   {%- if collection and collection.handle -%}
     {%- assign store_handle = collection.handle -%}
