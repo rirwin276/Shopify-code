@@ -57,14 +57,25 @@
     <meta name="theme-color" content="">
     {%- liquid
       assign is_private_store_collection = false
+      assign is_private_store_product = false
+
       if request.page_type == 'collection' and template.suffix contains 'private-store'
         assign is_private_store_collection = true
+      endif
+
+      if request.page_type == 'product'
+        for product_collection in product.collections
+          if product_collection.template_suffix contains 'private-store'
+            assign is_private_store_product = true
+            break
+          endif
+        endfor
       endif
     -%}
     {%- if request.page_type == 'page' and page.handle == 'stella-sage-shop' -%}
       <link rel="canonical" href="{{ shop.url }}/">
       <meta name="robots" content="noindex,follow">
-    {%- elsif is_private_store_collection or request.page_type == 'list-collections' -%}
+    {%- elsif is_private_store_collection or is_private_store_product or request.page_type == 'list-collections' -%}
       <link rel="canonical" href="{{ canonical_url }}">
       <meta name="robots" content="noindex,follow">
     {%- else -%}
