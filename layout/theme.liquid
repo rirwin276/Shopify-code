@@ -55,7 +55,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="">
-    <link rel="canonical" href="{{ canonical_url }}">
+    {%- if request.page_type == 'page' and page.handle == 'stella-sage-shop' -%}
+      <link rel="canonical" href="{{ shop.url }}/">
+      <meta name="robots" content="noindex,follow">
+    {%- else -%}
+      <link rel="canonical" href="{{ canonical_url }}">
+    {%- endif -%}
 
     {%- comment -%}
       STELLA & SAGE ANTI-FLASH GUARD
