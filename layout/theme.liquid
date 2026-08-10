@@ -154,15 +154,31 @@
       {%- endif -%}
     {%- endif -%}
 
+    {%- liquid
+      assign ss_seo_title = page_title
+      assign ss_seo_description = page_description
+
+      if request.page_type == 'index'
+        assign ss_seo_title = 'Custom Team Merch Stores | No Minimums | Stella & Sage'
+        assign ss_seo_description = 'Create a private custom team merch store in about 15 minutes. No minimum orders, upfront inventory, size collection, or payment chasing.'
+      elsif request.page_type == 'page' and page.handle == 'private-storefronts'
+        assign ss_seo_title = 'How Custom Team Merch Stores Work | Stella & Sage'
+        assign ss_seo_description = 'See how teams, military units, first responders, fundraisers, and groups can launch a private merch store with no minimum order or inventory.'
+      elsif request.page_type == 'page' and page.handle == 'resources'
+        assign ss_seo_title = 'Free Team Logo Prompts & Upload Guide | Stella & Sage'
+        assign ss_seo_description = 'Create an upload-ready sports or group logo with free prompts, transparent-background guidance, cleanup tools, and a practical print checklist.'
+      endif
+    -%}
+
     <title>
-      {{ page_title }}
+      {{ ss_seo_title }}
       {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', '}}"{% endif -%}
       {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
-      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+      {%- unless ss_seo_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
     </title>
 
-    {% if page_description %}
-      <meta name="description" content="{{ page_description | escape }}">
+    {% if ss_seo_description %}
+      <meta name="description" content="{{ ss_seo_description | escape }}">
     {% endif %}
 
     {%- render 'meta-tags' -%}
