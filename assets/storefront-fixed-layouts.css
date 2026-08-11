@@ -1137,3 +1137,53 @@
     }
   }
 }
+
+/* UNIVERSAL MOBILE HERO STACK
+   The base section's phone layout is a logo/title row. Previously the stacked
+   correction only matched data-enabled="true", so default storefronts kept the
+   old left-logo layout while configured storefronts stacked correctly. Every
+   private-store template renders #ss-private-store-state, so this final rule
+   deliberately applies to default, classic, split, gradient, spray, pro, and
+   heritage storefronts regardless of role or appearance-engine state. */
+@media (max-width: 768px) {
+  #MainContent:has(#ss-private-store-state) .ps-hero-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center !important;
+    gap: clamp(6px, 1dvh, 10px) !important;
+    padding: clamp(10px, 1.5dvh, 14px) 12px !important;
+    text-align: center !important;
+  }
+
+  #MainContent:has(#ss-private-store-state) .ps-logo {
+    width: clamp(76px, 13dvh, 108px) !important;
+    height: clamp(76px, 13dvh, 108px) !important;
+    margin: 0 auto !important;
+    border-radius: 26px !important;
+  }
+
+  #MainContent:has(#ss-private-store-state) .ps-logo-img {
+    width: 90% !important;
+    height: 90% !important;
+  }
+
+  #MainContent:has(#ss-private-store-state) .ps-copy {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-inline: 0 !important;
+    text-align: center !important;
+  }
+
+  #MainContent:has(#ss-private-store-state) .ps-title {
+    font-size: min(clamp(24px, 7.4vw, 34px), 5.2dvh) !important;
+    line-height: .96 !important;
+  }
+
+  #MainContent:has(#ss-private-store-state) .ps-meta-row {
+    justify-content: center !important;
+  }
+
+  #MainContent:has(#ss-private-store-state) .ps-action-panel {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+}
