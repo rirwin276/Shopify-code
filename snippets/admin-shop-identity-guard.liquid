@@ -1,50 +1,27 @@
-{%- doc -%}
-  Refuses to show an admin page for a store the URL did not ask for.
-
-  The symptom: /pages/admin-powers?shop=raptors-3978 rendered another store's
-  control centre entirely — its name, its logo, its products, and its handle in
-  the hero pill. That pill is server-rendered from shop_handle, so the page had
-  genuinely been built for a different store and served against this URL. The
-  page itself is self-consistent — the permission check and the content both
-  come from the same shop_handle — so this is not a case of a gate being
-  bypassed within one render. It is a render being reused for a request that
-  did not ask for it.
-
-  That distinction matters for what this can and cannot promise. It cannot make
-  a reused render safe; only the server can stop reusing it. What it can do is
-  refuse to let a wrong one stand: an admin page silently showing someone
-  else's store is the worst outcome, because everything on it — products,
-  members, danger-zone actions — then applies to a store the person did not
-  intend to open.
-
-  So the handle the server used is compared against the handle in the address
-  bar. On a mismatch the page is reloaded once with a cache-busting parameter;
-  if the second attempt still disagrees, it stops and says so instead of
-  rendering. One retry, tracked in sessionStorage, so a persistent mismatch
-  cannot become a reload loop.
-{%- enddoc -%}
+{%- comment -%}
+  Admin Powers safety guard + visual polish.
+  The guard refuses to leave the admin page usable if Shopify serves a render
+  for a different store than the ?shop= value in the address bar.
+{%- endcomment -%}
 <script>
   (function () {
     var expected = '';
     try {
       expected = new URLSearchParams(window.location.search).get('shop') || '';
     } catch (e) {
-      return;   // cannot read the URL: nothing to compare against
+      return;
     }
     expected = expected.trim().toLowerCase();
-    if (!expected) return;   // no shop asked for; the page decides on its own
+    if (!expected) return;
 
     var served = String((window.SSAP && window.SSAP.shopHandle) || '').trim().toLowerCase();
-    if (!served || served === expected) return;   // agreed: nothing to do
+    if (!served || served === expected) return;
 
     var FLAG = 'ss_admin_shop_retry';
     var already = '';
     try { already = sessionStorage.getItem(FLAG) || ''; } catch (e) {}
 
     if (already !== expected) {
-      // First disagreement: force a fresh render rather than accusing the
-      // page of anything. A cache-busting parameter is the only lever
-      // available from here — Liquid cannot set a response header.
       try { sessionStorage.setItem(FLAG, expected); } catch (e) {}
       var url = new URL(window.location.href);
       url.searchParams.set('_ssr', Date.now().toString(36));
@@ -52,8 +29,6 @@
       return;
     }
 
-    // Second disagreement for the same store: the reload did not help, so stop
-    // rather than let someone act on another store's control centre.
     try { sessionStorage.removeItem(FLAG); } catch (e) {}
 
     var wrap = document.querySelector('.ap-wrap');
@@ -69,8 +44,8 @@
       '<div style="font-weight:800;font-size:18px;margin-bottom:8px;">This page loaded the wrong store</div>' +
       '<p style="margin:0 0 14px;">You asked for <strong>' + expected.replace(/[<>&]/g, '') +
       '</strong> but the page came back for <strong>' + served.replace(/[<>&]/g, '') +
-      '</strong>, so it has been stopped. Nothing here would have applied to the store you wanted.</p>' +
-      '<p style="margin:0 0 18px;">Open it again from your dashboard. If this keeps happening, tell us which store — it means a page is being cached and served to the wrong request.</p>' +
+      '</strong>, so it has been stopped.</p>' +
+      '<p style="margin:0 0 18px;">Open it again from your dashboard. If this keeps happening, tell us which store.</p>' +
       '<a href="/pages/portal" style="display:inline-block;padding:11px 18px;border-radius:999px;' +
       'background:#11100e;color:#fff;text-decoration:none;font-weight:700;">← Back to dashboard</a>';
 
@@ -78,11 +53,6 @@
   })();
 </script>
 
-{%- comment -%}
-  ADMIN COMMAND CENTER POLISH
-  This snippet is rendered only by Admin Powers, which makes it a safe place
-  for the visual/interaction layer without touching the shared storefront.
-{%- endcomment -%}
 <script>
   (function () {
     document.documentElement.classList.add('ss-admin-command-center');
@@ -97,25 +67,20 @@
       if (!el.getAttribute('aria-label')) {
         el.setAttribute('aria-label', el.dataset.ssDesktopLabel || mobileText);
       }
-      el.textContent = mq.matches ? mobileText : el.dataset.ssDesktopLabel;
+      var wanted = mq.matches ? mobileText : el.dataset.ssDesktopLabel;
+      if ((el.textContent || '').trim() !== wanted) el.textContent = wanted;
     }
 
     function syncMobileHero() {
       var actions = document.querySelector('.ap-hero-actions');
       if (!actions) return;
 
-      var share = document.getElementById('apBtnShareStore');
-      var launch = document.getElementById('apFrLaunchBtn');
-      var details = document.getElementById('apFrDetailsBtn');
-      var actionLinks = actions.querySelectorAll('a.ap-btn');
-      var shopLink = actionLinks.length > 0 ? actionLinks[0] : null;
-      var dashLink = actionLinks.length > 1 ? actionLinks[1] : null;
-
-      rememberAndSet(share, 'Share');
-      rememberAndSet(shopLink, 'Shop Store');
-      rememberAndSet(dashLink, 'Dashboard');
-      rememberAndSet(launch, 'Fundraiser');
-      rememberAndSet(details, 'Fundraiser');
+      var links = actions.querySelectorAll('a.ap-btn');
+      rememberAndSet(document.getElementById('apBtnShareStore'), 'Share');
+      rememberAndSet(links.length > 0 ? links[0] : null, 'Shop');
+      rememberAndSet(links.length > 1 ? links[1] : null, 'Dashboard');
+      rememberAndSet(document.getElementById('apFrLaunchBtn'), 'Fundraiser');
+      rememberAndSet(document.getElementById('apFrDetailsBtn'), 'Fundraiser');
     }
 
     function hardenHeroRoutes() {
@@ -130,9 +95,52 @@
       }
     }
 
-    // Defensive fallbacks: the regular admin assets still own these actions.
-    // These only step in if a handler failed to attach, so a cached/late asset
-    // cannot leave the four hero controls looking live but doing nothing.
+    function compactProductName(raw) {
+      var s = String(raw || '').replace(/\s+/g, ' ').trim();
+      var l = s.toLowerCase();
+
+      if (/39165|trucker hat|snapback|\bcap\b|\bhat\b/.test(l)) return 'Trucker Hat';
+      if (/full[- ]?zip/.test(l) && /hood/.test(l)) return 'Full-Zip Hoodie';
+      if (/youth/.test(l) && /hood/.test(l)) return 'Youth Hoodie';
+      if (/youth/.test(l) && /(tee|t-shirt|shirt)/.test(l)) return 'Youth Tee';
+      if (/(women|womens|women's)/.test(l) && /(racerback|tank)/.test(l)) return "Women's Tank";
+      if (/(men|mens|men's)/.test(l) && /tank/.test(l)) return "Men's Tank";
+      if (/crewneck|sweatshirt|m2480/.test(l)) return 'Crewneck';
+      if (/hoodie|hooded|m2580|g3719|ls14003/.test(l)) return 'Hoodie';
+      if (/1717|garment[- ]?dyed/.test(l)) return 'Garment-Dyed Tee';
+      if (/3413|tri[- ]?blend/.test(l)) return 'Tri-Blend Tee';
+      if (/long sleeve/.test(l)) return 'Long Sleeve Tee';
+      if (/racerback/.test(l)) return 'Racerback Tank';
+      if (/tank|6733|1790/.test(l)) return 'Tank';
+      if (/3001|tee|t-shirt|shirt/.test(l)) return 'Unisex Tee';
+
+      var cleaned = s
+        .replace(/bella\s*\+?\s*canvas/ig, '')
+        .replace(/comfort colors/ig, '')
+        .replace(/independent trading co\.?/ig, '')
+        .replace(/cotton heritage/ig, '')
+        .replace(/lane seven/ig, '')
+        .replace(/next level/ig, '')
+        .replace(/econscious/ig, '')
+        .replace(/\b(?:bc|cc|nl|mc|ls|ec|m|g)?\d{4,5}[a-z]?\b/ig, '')
+        .replace(/[|·–—-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!cleaned) cleaned = s;
+      return cleaned.length > 24 ? cleaned.slice(0, 22).trim() + '…' : cleaned;
+    }
+
+    function syncProductTitles() {
+      document.querySelectorAll('.ap-product-title').forEach(function (el) {
+        if (!el.dataset.ssFullTitle) {
+          el.dataset.ssFullTitle = (el.textContent || '').trim();
+          if (el.dataset.ssFullTitle) el.setAttribute('title', el.dataset.ssFullTitle);
+        }
+        var wanted = mq.matches ? compactProductName(el.dataset.ssFullTitle) : el.dataset.ssFullTitle;
+        if ((el.textContent || '').trim() !== wanted) el.textContent = wanted;
+      });
+    }
+
     function installHeroFallbacks() {
       var share = document.getElementById('apBtnShareStore');
       var shareOverlay = document.getElementById('apShareOverlay');
@@ -157,6 +165,11 @@
             if (!fundraiserOverlay.classList.contains('open')) {
               fundraiserOverlay.classList.add('open');
               fundraiserOverlay.setAttribute('aria-hidden', 'false');
+              var active = fundraiserOverlay.querySelector('.ap-frw-step.ap-frw-active');
+              if (!active) {
+                var first = fundraiserOverlay.querySelector('.ap-frw-step');
+                if (first) first.classList.add('ap-frw-active');
+              }
               document.body.style.overflow = 'hidden';
             }
           }, 0);
@@ -164,8 +177,6 @@
       }
     }
 
-    // Same idea for the main Admin Powers tabs: core JS remains authoritative,
-    // but this keeps navigation usable if a cached asset misses its listener.
     function installTabFallback() {
       if (document.documentElement.dataset.ssAdminTabsFallback === '1') return;
       document.documentElement.dataset.ssAdminTabsFallback = '1';
@@ -191,6 +202,7 @@
     function boot() {
       syncMobileHero();
       hardenHeroRoutes();
+      syncProductTitles();
       installHeroFallbacks();
       installTabFallback();
     }
@@ -201,11 +213,13 @@
       boot();
     }
 
-    if (mq.addEventListener) mq.addEventListener('change', syncMobileHero);
-    else if (mq.addListener) mq.addListener(syncMobileHero);
+    function onBreakpointChange() {
+      syncMobileHero();
+      syncProductTitles();
+    }
+    if (mq.addEventListener) mq.addEventListener('change', onBreakpointChange);
+    else if (mq.addListener) mq.addListener(onBreakpointChange);
 
-    // Fundraiser state and product rows are filled asynchronously. Re-run the
-    // tiny label/layout sync when those nodes change without rebuilding them.
     var queued = false;
     new MutationObserver(function () {
       if (queued) return;
@@ -214,6 +228,7 @@
         queued = false;
         syncMobileHero();
         hardenHeroRoutes();
+        syncProductTitles();
         installHeroFallbacks();
       });
     }).observe(document.documentElement, { childList: true, subtree: true });
@@ -225,14 +240,15 @@
     color-scheme: dark;
     background: #04070b !important;
   }
+
   html.ss-admin-command-center body,
   html.ss-admin-command-center #MainContent,
   html.ss-admin-command-center main {
     background:
-      radial-gradient(circle at 12% -8%, rgba(45, 114, 173, .18), transparent 34%),
-      radial-gradient(circle at 96% 8%, rgba(201, 166, 91, .10), transparent 30%),
-      linear-gradient(rgba(145, 177, 207, .032) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(145, 177, 207, .032) 1px, transparent 1px),
+      radial-gradient(circle at 12% -8%, rgba(45,114,173,.18), transparent 34%),
+      radial-gradient(circle at 96% 8%, rgba(201,166,91,.10), transparent 30%),
+      linear-gradient(rgba(145,177,207,.032) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(145,177,207,.032) 1px, transparent 1px),
       #04070b !important;
     background-size: auto, auto, 32px 32px, 32px 32px, auto !important;
     color: #edf3f8 !important;
@@ -243,56 +259,50 @@
     --ap-card: #0a111a;
     --ap-text: #edf3f8;
     --ap-gray: #8f9daf;
-    --ap-border: rgba(151, 177, 205, .16);
+    --ap-border: rgba(151,177,205,.16);
     --ap-accent: #c9a65b;
     --ap-accent2: #4ca8ff;
     --ap-success: #34d399;
     --ap-danger: #fb7185;
-    --ap-shadow-sm: 0 8px 22px rgba(0, 0, 0, .20);
-    --ap-shadow: 0 16px 44px rgba(0, 0, 0, .28);
-    --ap-shadow-lg: 0 28px 80px rgba(0, 0, 0, .42);
     max-width: 1320px !important;
     color: var(--ap-text) !important;
   }
 
   html.ss-admin-command-center .ap-hero {
     background:
-      radial-gradient(circle at 82% 10%, rgba(76, 168, 255, .15), transparent 36%),
-      linear-gradient(145deg, rgba(14, 25, 39, .98), rgba(6, 12, 20, .98)) !important;
-    border: 1px solid rgba(151, 177, 205, .18) !important;
-    box-shadow: 0 28px 80px rgba(0, 0, 0, .42), inset 0 1px rgba(255, 255, 255, .04) !important;
+      radial-gradient(circle at 82% 10%, rgba(76,168,255,.15), transparent 36%),
+      linear-gradient(145deg, rgba(14,25,39,.98), rgba(6,12,20,.98)) !important;
+    border: 1px solid rgba(151,177,205,.18) !important;
+    box-shadow: 0 28px 80px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.04) !important;
   }
   html.ss-admin-command-center .ap-hero::before {
     background:
-      linear-gradient(90deg, transparent, rgba(76, 168, 255, .08), transparent),
-      radial-gradient(circle at 18% 0%, rgba(201, 166, 91, .10), transparent 44%) !important;
-    opacity: .9;
+      linear-gradient(90deg, transparent, rgba(76,168,255,.08), transparent),
+      radial-gradient(circle at 18% 0%, rgba(201,166,91,.10), transparent 44%) !important;
   }
   html.ss-admin-command-center .ap-hero-logo {
     background: #0b1420 !important;
-    border: 1px solid rgba(151, 177, 205, .22) !important;
+    border: 1px solid rgba(151,177,205,.22) !important;
     box-shadow: inset 0 1px rgba(255,255,255,.05), 0 12px 34px rgba(0,0,0,.32) !important;
   }
-  html.ss-admin-command-center .ap-hero-info,
-  html.ss-admin-command-center .ap-hero-actions,
-  html.ss-admin-command-center .ap-hero-logo { position: relative; z-index: 2; }
   html.ss-admin-command-center .ap-hero h1 { color: #f8fbff !important; }
   html.ss-admin-command-center .ap-hero-sub,
   html.ss-admin-command-center .ap-helper,
   html.ss-admin-command-center .ap-card-head p,
   html.ss-admin-command-center .ap-panel-head p,
-  html.ss-admin-command-center .ap-product-box-sub { color: #8f9daf !important; }
+  html.ss-admin-command-center .ap-product-box-sub,
+  html.ss-admin-command-center .ap-custom-builders-sub { color: #8f9daf !important; }
+
   html.ss-admin-command-center .ap-hero-badge,
   html.ss-admin-command-center .ap-hero-pill {
-    background: rgba(151, 177, 205, .08) !important;
-    border-color: rgba(151, 177, 205, .16) !important;
+    background: rgba(151,177,205,.08) !important;
+    border-color: rgba(151,177,205,.16) !important;
     color: #d8e4ef !important;
-    box-shadow: inset 0 1px rgba(255,255,255,.03) !important;
   }
   html.ss-admin-command-center .ap-hero-pill--status {
     color: #9df3ca !important;
-    border-color: rgba(52, 211, 153, .24) !important;
-    background: rgba(52, 211, 153, .08) !important;
+    border-color: rgba(52,211,153,.24) !important;
+    background: rgba(52,211,153,.08) !important;
   }
 
   html.ss-admin-command-center .ap-main-card,
@@ -300,15 +310,16 @@
   html.ss-admin-command-center .ap-product-box,
   html.ss-admin-command-center .ap-product-row,
   html.ss-admin-command-center .ap-custom-builders-section {
-    background: linear-gradient(145deg, rgba(12, 20, 31, .96), rgba(7, 13, 21, .96)) !important;
-    border-color: rgba(151, 177, 205, .15) !important;
+    background: linear-gradient(145deg, rgba(12,20,31,.96), rgba(7,13,21,.96)) !important;
+    border-color: rgba(151,177,205,.15) !important;
     color: #edf3f8 !important;
     box-shadow: 0 16px 44px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.025) !important;
   }
+
   html.ss-admin-command-center .ap-main-tabs-wrap,
   html.ss-admin-command-center .ap-main-tabs {
     background: #070d15 !important;
-    border-color: rgba(151, 177, 205, .14) !important;
+    border-color: rgba(151,177,205,.14) !important;
   }
   html.ss-admin-command-center .ap-main-tab-btn {
     color: #8f9daf !important;
@@ -316,149 +327,176 @@
   }
   html.ss-admin-command-center .ap-main-tab-btn:hover {
     color: #edf3f8 !important;
-    background: rgba(151, 177, 205, .07) !important;
+    background: rgba(151,177,205,.07) !important;
   }
   html.ss-admin-command-center .ap-main-tab-btn.active {
     color: #fff3ce !important;
-    background: rgba(201, 166, 91, .12) !important;
-    border-color: rgba(201, 166, 91, .28) !important;
-    box-shadow: inset 0 0 0 1px rgba(201,166,91,.05) !important;
+    background: rgba(201,166,91,.12) !important;
+    border-color: rgba(201,166,91,.28) !important;
   }
+
   html.ss-admin-command-center .ap-panel-kicker,
   html.ss-admin-command-center .ap-label,
   html.ss-admin-command-center .section-label {
     color: #7dbbf2 !important;
     letter-spacing: .12em !important;
   }
-  html.ss-admin-command-center :is(.ap-panel-head h2, .ap-card-head h3, .ap-product-box-title, .ap-product-title) {
+  html.ss-admin-command-center :is(.ap-panel-head h2,.ap-card-head h3,.ap-product-box-title,.ap-product-title) {
     color: #f4f8fc !important;
   }
 
-  html.ss-admin-command-center :is(.ap-input, .ap-textarea, .ap-select, .ap-input-mono) {
+  html.ss-admin-command-center :is(.ap-input,.ap-textarea,.ap-select,.ap-input-mono,.ap-nuke-confirm-input) {
     background: #07101a !important;
     color: #edf3f8 !important;
-    border-color: rgba(151, 177, 205, .20) !important;
+    border-color: rgba(151,177,205,.20) !important;
     box-shadow: inset 0 1px rgba(255,255,255,.025) !important;
   }
-  html.ss-admin-command-center :is(.ap-input, .ap-textarea, .ap-select):focus {
+  html.ss-admin-command-center :is(.ap-input,.ap-textarea,.ap-select,.ap-nuke-confirm-input):focus {
     border-color: #4ca8ff !important;
-    box-shadow: 0 0 0 3px rgba(76, 168, 255, .14) !important;
-  }
-  html.ss-admin-command-center .ap-select option { background: #07101a; color: #edf3f8; }
-  html.ss-admin-command-center .ap-radio {
-    background: #08111b !important;
-    border-color: rgba(151, 177, 205, .16) !important;
-  }
-  html.ss-admin-command-center .ap-radio:hover,
-  html.ss-admin-command-center .ap-radio.selected {
-    background: #0b1725 !important;
-    border-color: rgba(76, 168, 255, .44) !important;
+    box-shadow: 0 0 0 3px rgba(76,168,255,.14) !important;
   }
 
   html.ss-admin-command-center .ap-btn--primary {
     background: #c9a65b !important;
     color: #080b0f !important;
-    box-shadow: 0 8px 24px rgba(201, 166, 91, .18) !important;
+    box-shadow: 0 8px 24px rgba(201,166,91,.18) !important;
   }
-  html.ss-admin-command-center .ap-btn--primary:hover {
-    background: #ddbd70 !important;
-    color: #05070a !important;
-  }
-  html.ss-admin-command-center .ap-btn--glass,
-  html.ss-admin-command-center .ap-btn--outline,
-  html.ss-admin-command-center .ap-btn--icon {
-    background: rgba(151, 177, 205, .07) !important;
-    border-color: rgba(151, 177, 205, .18) !important;
+  html.ss-admin-command-center .ap-btn--primary:hover { background: #ddbd70 !important; }
+  html.ss-admin-command-center :is(.ap-btn--glass,.ap-btn--outline,.ap-btn--icon,.ap-btn--outline-sm) {
+    background: rgba(151,177,205,.07) !important;
+    border-color: rgba(151,177,205,.18) !important;
     color: #edf3f8 !important;
   }
-  html.ss-admin-command-center .ap-btn--glass:hover,
-  html.ss-admin-command-center .ap-btn--outline:hover,
-  html.ss-admin-command-center .ap-btn--icon:hover {
-    background: rgba(151, 177, 205, .13) !important;
-    border-color: rgba(151, 177, 205, .30) !important;
+  html.ss-admin-command-center .ap-edit-placement-btn {
+    background: rgba(76,168,255,.12) !important;
+    border: 1px solid rgba(76,168,255,.28) !important;
+    color: #b9ddff !important;
+    box-shadow: none !important;
+  }
+  html.ss-admin-command-center .ap-edit-placement-btn:hover { background: rgba(76,168,255,.19) !important; }
+  html.ss-admin-command-center .ap-btn--danger-sm,
+  html.ss-admin-command-center .ap-btn--danger {
+    background: rgba(251,113,133,.09) !important;
+    border-color: rgba(251,113,133,.20) !important;
+    color: #ffb5c1 !important;
   }
   html.ss-admin-command-center .ap-btn--share-primary {
     background: #e8edf2 !important;
     border-color: #e8edf2 !important;
     color: #07101a !important;
-    box-shadow: 0 10px 28px rgba(0,0,0,.24) !important;
-  }
-  html.ss-admin-command-center .ap-btn--danger {
-    background: rgba(251, 113, 133, .10) !important;
-    color: #ffb5c1 !important;
-    border: 1px solid rgba(251, 113, 133, .22) !important;
   }
 
+  html.ss-admin-command-center .ap-product-thumb,
+  html.ss-admin-command-center .ap-product-thumb-empty {
+    background: #eef1f3 !important;
+    border-color: rgba(255,255,255,.08) !important;
+  }
   html.ss-admin-command-center .ap-product-badge {
-    background: rgba(151, 177, 205, .10) !important;
+    background: rgba(151,177,205,.10) !important;
     color: #b9c9d8 !important;
-    border-color: rgba(151, 177, 205, .16) !important;
+    border-color: rgba(151,177,205,.16) !important;
   }
   html.ss-admin-command-center .ap-product-badge--includes {
-    background: rgba(76, 168, 255, .11) !important;
+    background: rgba(76,168,255,.11) !important;
     color: #9fd3ff !important;
-    border-color: rgba(76, 168, 255, .24) !important;
+    border-color: rgba(76,168,255,.24) !important;
   }
-  html.ss-admin-command-center .ap-badge--visible {
-    background: rgba(52, 211, 153, .10) !important;
-    color: #8ce9c0 !important;
+
+  /* Keep Add Products visually consistent with the admin instead of a white
+     card wall inside a dark control center. */
+  html.ss-admin-command-center .ss-cat {
+    background: linear-gradient(145deg,#0c1520,#08101a) !important;
+    border: 1px solid rgba(151,177,205,.15) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.24) !important;
   }
-  html.ss-admin-command-center .ap-badge--hidden {
-    background: rgba(151, 177, 205, .08) !important;
-    color: #8f9daf !important;
+  html.ss-admin-command-center .ss-cat:hover {
+    border-color: rgba(201,166,91,.42) !important;
+    box-shadow: 0 18px 42px rgba(0,0,0,.34) !important;
+  }
+  html.ss-admin-command-center .ss-cat__name { color: #f4f8fc !important; }
+  html.ss-admin-command-center .ss-cat__hint { color: #8796a7 !important; }
+  html.ss-admin-command-center .ss-cat__price { color: #d9b968 !important; }
+  html.ss-admin-command-center .ss-cat__media { background: #eef0ec !important; }
+
+  html.ss-admin-command-center .ss-modal {
+    background: #09111b !important;
+    color: #edf3f8 !important;
+    border: 1px solid rgba(151,177,205,.18) !important;
+    box-shadow: 0 40px 120px rgba(0,0,0,.58) !important;
+  }
+  html.ss-admin-command-center .ss-modal__detail,
+  html.ss-admin-command-center .ss-modal__scroll,
+  html.ss-admin-command-center .ss-modal__foot { background: #09111b !important; }
+  html.ss-admin-command-center .ss-modal__title,
+  html.ss-admin-command-center .ss-modal__pl,
+  html.ss-admin-command-center .ss-modal__pv { color: #f5f9fd !important; }
+  html.ss-admin-command-center .ss-modal__desc,
+  html.ss-admin-command-center .ss-modal__pn,
+  html.ss-admin-command-center .ss-modal__meta-val,
+  html.ss-admin-command-center .ss-modal__meta-head,
+  html.ss-admin-command-center .ss-modal__price-head { color: #9aa8b8 !important; }
+  html.ss-admin-command-center .ss-modal__price-card,
+  html.ss-admin-command-center .ss-modal__spec {
+    border-color: rgba(151,177,205,.16) !important;
+    background: rgba(151,177,205,.06) !important;
+    color: #d9e3ec !important;
+  }
+  html.ss-admin-command-center .ss-modal__price-row + .ss-modal__price-row {
+    border-top-color: rgba(151,177,205,.12) !important;
+  }
+  html.ss-admin-command-center .ss-modal__x {
+    background: rgba(8,16,26,.78) !important;
+    color: #edf3f8 !important;
+  }
+  html.ss-admin-command-center .ss-modal__cta {
+    background: #c9a65b !important;
+    color: #080b0f !important;
   }
 
   html.ss-admin-command-center .ap-share-overlay,
   html.ss-admin-command-center .ap-frw-overlay,
-  html.ss-admin-command-center .ap-frd-overlay {
-    background: rgba(0, 4, 9, .78) !important;
+  html.ss-admin-command-center .ap-frd-overlay,
+  html.ss-admin-command-center .ap-nuke-overlay {
+    background: rgba(0,4,9,.78) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
   }
-  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) {
+  html.ss-admin-command-center :is(.ap-share-dialog,.ap-frw-modal,.ap-frd-modal,.ap-nuke-dialog) {
     background: #09111b !important;
-    border: 1px solid rgba(151, 177, 205, .18) !important;
+    border: 1px solid rgba(151,177,205,.18) !important;
     color: #edf3f8 !important;
     box-shadow: 0 30px 100px rgba(0,0,0,.55) !important;
-  }
-  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) h2,
-  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) h3,
-  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) h4,
-  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) strong {
-    color: #f5f9fd !important;
-  }
-  html.ss-admin-command-center .ap-share-dialog p,
-  html.ss-admin-command-center .ap-frw-modal p,
-  html.ss-admin-command-center .ap-frd-modal p {
-    color: #9aa8b8 !important;
   }
 
   @media (max-width: 700px) {
     html.ss-admin-command-center .ap-wrap {
-      padding: 10px 10px 56px !important;
+      padding: 9px 9px 54px !important;
     }
+
+    /* Larger logo, tighter action cluster. The right-side controls no longer
+       stretch across the whole remaining width. */
     html.ss-admin-command-center .ap-hero {
       display: grid !important;
-      grid-template-columns: 82px minmax(0, 1fr) !important;
+      grid-template-columns: 104px minmax(0,1fr) !important;
       grid-template-areas:
         'logo actions'
         'info info' !important;
       align-items: start !important;
-      gap: 12px 12px !important;
-      padding: 14px !important;
-      margin-bottom: 14px !important;
+      gap: 11px !important;
+      padding: 13px !important;
+      margin-bottom: 13px !important;
       border-radius: 18px !important;
       overflow: visible !important;
     }
     html.ss-admin-command-center .ap-hero-logo {
       grid-area: logo !important;
-      width: 82px !important;
-      height: 82px !important;
-      min-width: 82px !important;
-      min-height: 82px !important;
+      width: 104px !important;
+      height: 104px !important;
+      min-width: 104px !important;
+      min-height: 104px !important;
       margin: 0 !important;
       padding: 7px !important;
-      border-radius: 16px !important;
+      border-radius: 18px !important;
       align-self: start !important;
     }
     html.ss-admin-command-center .ap-hero-logo img {
@@ -468,26 +506,26 @@
     }
     html.ss-admin-command-center .ap-hero-info {
       grid-area: info !important;
-      width: 100% !important;
       min-width: 0 !important;
     }
     html.ss-admin-command-center .ap-hero-info h1 {
       margin-top: 2px !important;
-      font-size: clamp(23px, 8vw, 32px) !important;
-      line-height: 1.02 !important;
+      font-size: clamp(24px,8vw,32px) !important;
+      line-height: 1.03 !important;
+      letter-spacing: -.04em !important;
     }
     html.ss-admin-command-center .ap-hero-actions {
       grid-area: actions !important;
       width: 100% !important;
-      min-width: 0 !important;
+      max-width: 184px !important;
+      justify-self: end !important;
       display: grid !important;
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      grid-template-columns: repeat(2,minmax(0,1fr)) !important;
       gap: 7px !important;
-      align-items: stretch !important;
-      align-content: start !important;
       margin: 0 !important;
+      align-content: start !important;
     }
-    html.ss-admin-command-center .ap-hero-actions > :is(.ap-share-help, a.ap-btn, .ap-fr-zone) {
+    html.ss-admin-command-center .ap-hero-actions > :is(.ap-share-help,a.ap-btn,.ap-fr-zone) {
       width: 100% !important;
       min-width: 0 !important;
       margin: 0 !important;
@@ -497,22 +535,23 @@
     html.ss-admin-command-center #apFrDetailsBtn {
       width: 100% !important;
       min-width: 0 !important;
-      min-height: 36px !important;
-      height: 36px !important;
-      padding: 0 7px !important;
-      border-radius: 9px !important;
-      font-size: 10.5px !important;
+      min-height: 38px !important;
+      height: 38px !important;
+      padding: 0 6px !important;
+      border-radius: 10px !important;
+      font-size: 10px !important;
       line-height: 1 !important;
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
+      box-shadow: none !important;
     }
     html.ss-admin-command-center .ap-share-help { display: block !important; }
     html.ss-admin-command-center .ap-fr-zone,
     html.ss-admin-command-center .ap-fr-zone-empty,
     html.ss-admin-command-center .ap-fr-zone-active {
-      min-width: 0 !important;
       width: 100% !important;
+      min-width: 0 !important;
     }
     html.ss-admin-command-center .ap-fr-zone-active {
       padding: 0 !important;
@@ -521,9 +560,7 @@
       box-shadow: none !important;
     }
     html.ss-admin-command-center .ap-fr-zone-active-top,
-    html.ss-admin-command-center .ap-fr-zone-progress {
-      display: none !important;
-    }
+    html.ss-admin-command-center .ap-fr-zone-progress { display: none !important; }
     html.ss-admin-command-center #apFrDetailsBtn {
       display: inline-flex !important;
       align-items: center !important;
@@ -531,26 +568,12 @@
     }
     html.ss-admin-command-center .ap-hero-meta {
       gap: 5px !important;
-      margin-top: 9px !important;
+      margin-top: 8px !important;
     }
     html.ss-admin-command-center .ap-hero-pill {
       min-height: 24px !important;
       padding: 0 8px !important;
       font-size: 8.5px !important;
-    }
-
-    /* On phone-sized product rows the useful Front & Back / Name & Number
-       badge wins. The generic Custom badge is redundant and was colliding with
-       it, so only the generic badge is removed on mobile. */
-    html.ss-admin-command-center .ap-product-row > .ap-product-badge:not(.ap-product-badge--includes) {
-      display: none !important;
-    }
-
-    /* The Pro Builder catalog used two narrow columns on phones. A single
-       column gives the artwork, title, price, and tap target enough room. */
-    html.ss-admin-command-center body #apCustomBuildersContainer#apCustomBuildersContainer {
-      grid-template-columns: minmax(0, 1fr) !important;
-      gap: 12px !important;
     }
 
     html.ss-admin-command-center .ap-main-card {
@@ -561,9 +584,169 @@
       position: sticky !important;
       top: 0 !important;
       z-index: 30 !important;
-      background: rgba(7, 13, 21, .94) !important;
+      padding: 7px 7px 0 !important;
+      background: rgba(7,13,21,.94) !important;
       backdrop-filter: blur(14px) !important;
       -webkit-backdrop-filter: blur(14px) !important;
+    }
+    html.ss-admin-command-center .ap-main-tabs {
+      gap: 3px !important;
+      padding: 4px !important;
+      border-radius: 16px !important;
+    }
+    html.ss-admin-command-center .ap-main-tab-btn {
+      min-height: 50px !important;
+      padding: 6px 2px !important;
+      border-radius: 12px !important;
+    }
+    html.ss-admin-command-center .ap-tab-label { font-size: 8.5px !important; }
+    html.ss-admin-command-center .ap-main-panel { padding: 16px 10px 20px !important; }
+    html.ss-admin-command-center .ap-panel-head h2 { font-size: 31px !important; }
+    html.ss-admin-command-center .ap-panel-head p { font-size: 13px !important; line-height: 1.45 !important; }
+
+    /* Existing products: simpler title, larger visual, compact three-action
+       row. Front & Back / Name & Number stays visible; generic Custom does not. */
+    html.ss-admin-command-center .ap-product-row {
+      position: relative !important;
+      display: grid !important;
+      grid-template-columns: 78px minmax(0,1fr) !important;
+      gap: 10px 12px !important;
+      align-items: center !important;
+      min-height: 0 !important;
+      padding: 11px !important;
+      border-radius: 17px !important;
+      box-shadow: 0 10px 26px rgba(0,0,0,.22) !important;
+    }
+    html.ss-admin-command-center .ap-product-thumb,
+    html.ss-admin-command-center .ap-product-thumb-empty {
+      width: 78px !important;
+      height: 78px !important;
+      border-radius: 15px !important;
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+    }
+    html.ss-admin-command-center .ap-product-title {
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+      align-self: center !important;
+      padding-right: 82px !important;
+      font-size: 15px !important;
+      line-height: 1.15 !important;
+      font-weight: 850 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    html.ss-admin-command-center .ap-product-row > .ap-product-badge:not(.ap-product-badge--includes) {
+      display: none !important;
+    }
+    html.ss-admin-command-center .ap-product-row > .ap-product-badge--includes {
+      position: absolute !important;
+      top: 12px !important;
+      right: 11px !important;
+      max-width: 82px !important;
+      min-height: 22px !important;
+      padding: 0 7px !important;
+      font-size: 8px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    html.ss-admin-command-center .ap-product-actions,
+    html.ss-admin-command-center .ap-product-row__actions {
+      grid-column: 1 / -1 !important;
+      width: 100% !important;
+      display: grid !important;
+      grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+      gap: 7px !important;
+      margin-top: 0 !important;
+    }
+    html.ss-admin-command-center :is(.ap-edit-placement-btn,.ap-edit-placement-btn--disabled,.ap-btn--outline-sm,.ap-btn--danger-sm) {
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 38px !important;
+      padding: 0 7px !important;
+      border-radius: 10px !important;
+      justify-content: center !important;
+      font-size: 10.5px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    /* Add Products stays two columns on mobile, with the card copy trimmed so
+       two columns look intentional rather than cramped. */
+    html.ss-admin-command-center body #apCustomBuildersContainer#apCustomBuildersContainer {
+      grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+      gap: 9px !important;
+      padding-bottom: 14px !important;
+    }
+    html.ss-admin-command-center .ss-cat {
+      border-radius: 15px !important;
+      overflow: hidden !important;
+    }
+    html.ss-admin-command-center .ss-cat__info { padding: 10px 10px 12px !important; }
+    html.ss-admin-command-center .ss-cat__name {
+      min-height: 29px !important;
+      font-size: 11.5px !important;
+      line-height: 1.22 !important;
+      display: -webkit-box !important;
+      -webkit-line-clamp: 2 !important;
+      -webkit-box-orient: vertical !important;
+      overflow: hidden !important;
+    }
+    html.ss-admin-command-center .ss-cat__price {
+      margin-top: 5px !important;
+      font-size: 11.5px !important;
+    }
+    html.ss-admin-command-center .ss-cat__hint { display: none !important; }
+    html.ss-admin-command-center .ss-cat__badge {
+      top: 7px !important;
+      left: 7px !important;
+      max-width: calc(100% - 14px) !important;
+      padding: 3px 6px !important;
+      font-size: 7.5px !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+    html.ss-admin-command-center .ss-cat__pers {
+      top: auto !important;
+      right: 7px !important;
+      bottom: 7px !important;
+      max-width: calc(100% - 14px) !important;
+      padding: 3px 6px !important;
+      font-size: 7px !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+  }
+
+  @media (max-width: 350px) {
+    html.ss-admin-command-center .ap-hero {
+      grid-template-columns: 94px minmax(0,1fr) !important;
+      gap: 9px !important;
+      padding: 10px !important;
+    }
+    html.ss-admin-command-center .ap-hero-logo {
+      width: 94px !important;
+      height: 94px !important;
+      min-width: 94px !important;
+      min-height: 94px !important;
+    }
+    html.ss-admin-command-center .ap-hero-actions { max-width: 164px !important; gap: 5px !important; }
+    html.ss-admin-command-center .ap-hero-actions .ap-btn,
+    html.ss-admin-command-center #apFrLaunchBtn,
+    html.ss-admin-command-center #apFrDetailsBtn {
+      font-size: 9px !important;
+      padding: 0 4px !important;
+    }
+    html.ss-admin-command-center .ap-product-title { padding-right: 70px !important; }
+    html.ss-admin-command-center .ap-product-row > .ap-product-badge--includes { max-width: 70px !important; }
+    html.ss-admin-command-center body #apCustomBuildersContainer#apCustomBuildersContainer {
+      grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+      gap: 7px !important;
     }
   }
 </style>
