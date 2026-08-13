@@ -77,3 +77,493 @@
     (document.body || document.documentElement).appendChild(notice);
   })();
 </script>
+
+{%- comment -%}
+  ADMIN COMMAND CENTER POLISH
+  This snippet is rendered only by Admin Powers, which makes it a safe place
+  for the visual/interaction layer without touching the shared storefront.
+{%- endcomment -%}
+<script>
+  (function () {
+    document.documentElement.classList.add('ss-admin-command-center');
+
+    var mq = window.matchMedia('(max-width: 700px)');
+
+    function rememberAndSet(el, mobileText) {
+      if (!el) return;
+      if (!el.dataset.ssDesktopLabel) {
+        el.dataset.ssDesktopLabel = (el.textContent || '').trim();
+      }
+      if (!el.getAttribute('aria-label')) {
+        el.setAttribute('aria-label', el.dataset.ssDesktopLabel || mobileText);
+      }
+      el.textContent = mq.matches ? mobileText : el.dataset.ssDesktopLabel;
+    }
+
+    function syncMobileHero() {
+      var actions = document.querySelector('.ap-hero-actions');
+      if (!actions) return;
+
+      var share = document.getElementById('apBtnShareStore');
+      var launch = document.getElementById('apFrLaunchBtn');
+      var details = document.getElementById('apFrDetailsBtn');
+      var actionLinks = actions.querySelectorAll('a.ap-btn');
+      var shopLink = actionLinks.length > 0 ? actionLinks[0] : null;
+      var dashLink = actionLinks.length > 1 ? actionLinks[1] : null;
+
+      rememberAndSet(share, 'Share');
+      rememberAndSet(shopLink, 'Shop Store');
+      rememberAndSet(dashLink, 'Dashboard');
+      rememberAndSet(launch, 'Fundraiser');
+      rememberAndSet(details, 'Fundraiser');
+    }
+
+    function hardenHeroRoutes() {
+      var actions = document.querySelector('.ap-hero-actions');
+      if (!actions) return;
+      var links = actions.querySelectorAll('a.ap-btn');
+      if (links[0] && window.SSAP && SSAP.collectionHandle) {
+        links[0].setAttribute('href', '/collections/' + encodeURIComponent(SSAP.collectionHandle));
+      }
+      if (links[1]) {
+        links[1].setAttribute('href', (window.SSAP && SSAP.dashboardUrl) || '/pages/portal');
+      }
+    }
+
+    // Defensive fallbacks: the regular admin assets still own these actions.
+    // These only step in if a handler failed to attach, so a cached/late asset
+    // cannot leave the four hero controls looking live but doing nothing.
+    function installHeroFallbacks() {
+      var share = document.getElementById('apBtnShareStore');
+      var shareOverlay = document.getElementById('apShareOverlay');
+      if (share && shareOverlay && !share.dataset.ssFallbackBound) {
+        share.dataset.ssFallbackBound = '1';
+        share.addEventListener('click', function () {
+          window.setTimeout(function () {
+            if (!shareOverlay.classList.contains('open')) {
+              shareOverlay.classList.add('open');
+              shareOverlay.setAttribute('aria-hidden', 'false');
+            }
+          }, 0);
+        });
+      }
+
+      var fundraiser = document.getElementById('apFrLaunchBtn');
+      var fundraiserOverlay = document.getElementById('apFrwOverlay');
+      if (fundraiser && fundraiserOverlay && !fundraiser.dataset.ssFallbackBound) {
+        fundraiser.dataset.ssFallbackBound = '1';
+        fundraiser.addEventListener('click', function () {
+          window.setTimeout(function () {
+            if (!fundraiserOverlay.classList.contains('open')) {
+              fundraiserOverlay.classList.add('open');
+              fundraiserOverlay.setAttribute('aria-hidden', 'false');
+              document.body.style.overflow = 'hidden';
+            }
+          }, 0);
+        });
+      }
+    }
+
+    // Same idea for the main Admin Powers tabs: core JS remains authoritative,
+    // but this keeps navigation usable if a cached asset misses its listener.
+    function installTabFallback() {
+      if (document.documentElement.dataset.ssAdminTabsFallback === '1') return;
+      document.documentElement.dataset.ssAdminTabsFallback = '1';
+      document.addEventListener('click', function (event) {
+        var btn = event.target.closest && event.target.closest('.ap-main-tab-btn[data-main-tab]');
+        if (!btn) return;
+        window.setTimeout(function () {
+          var targetId = btn.getAttribute('data-main-tab');
+          var target = targetId && document.getElementById(targetId);
+          if (!target || target.classList.contains('active')) return;
+          document.querySelectorAll('.ap-main-tab-btn[data-main-tab]').forEach(function (b) {
+            var on = b === btn;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+          document.querySelectorAll('.ap-main-panel').forEach(function (panel) {
+            panel.classList.toggle('active', panel === target);
+          });
+        }, 0);
+      });
+    }
+
+    function boot() {
+      syncMobileHero();
+      hardenHeroRoutes();
+      installHeroFallbacks();
+      installTabFallback();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+      boot();
+    }
+
+    if (mq.addEventListener) mq.addEventListener('change', syncMobileHero);
+    else if (mq.addListener) mq.addListener(syncMobileHero);
+
+    // Fundraiser state and product rows are filled asynchronously. Re-run the
+    // tiny label/layout sync when those nodes change without rebuilding them.
+    var queued = false;
+    new MutationObserver(function () {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(function () {
+        queued = false;
+        syncMobileHero();
+        hardenHeroRoutes();
+        installHeroFallbacks();
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  })();
+</script>
+
+<style id="ss-admin-command-center-theme">
+  html.ss-admin-command-center {
+    color-scheme: dark;
+    background: #04070b !important;
+  }
+  html.ss-admin-command-center body,
+  html.ss-admin-command-center #MainContent,
+  html.ss-admin-command-center main {
+    background:
+      radial-gradient(circle at 12% -8%, rgba(45, 114, 173, .18), transparent 34%),
+      radial-gradient(circle at 96% 8%, rgba(201, 166, 91, .10), transparent 30%),
+      linear-gradient(rgba(145, 177, 207, .032) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(145, 177, 207, .032) 1px, transparent 1px),
+      #04070b !important;
+    background-size: auto, auto, 32px 32px, 32px 32px, auto !important;
+    color: #edf3f8 !important;
+  }
+
+  html.ss-admin-command-center .ap-wrap {
+    --ap-bg: #04070b;
+    --ap-card: #0a111a;
+    --ap-text: #edf3f8;
+    --ap-gray: #8f9daf;
+    --ap-border: rgba(151, 177, 205, .16);
+    --ap-accent: #c9a65b;
+    --ap-accent2: #4ca8ff;
+    --ap-success: #34d399;
+    --ap-danger: #fb7185;
+    --ap-shadow-sm: 0 8px 22px rgba(0, 0, 0, .20);
+    --ap-shadow: 0 16px 44px rgba(0, 0, 0, .28);
+    --ap-shadow-lg: 0 28px 80px rgba(0, 0, 0, .42);
+    max-width: 1320px !important;
+    color: var(--ap-text) !important;
+  }
+
+  html.ss-admin-command-center .ap-hero {
+    background:
+      radial-gradient(circle at 82% 10%, rgba(76, 168, 255, .15), transparent 36%),
+      linear-gradient(145deg, rgba(14, 25, 39, .98), rgba(6, 12, 20, .98)) !important;
+    border: 1px solid rgba(151, 177, 205, .18) !important;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .42), inset 0 1px rgba(255, 255, 255, .04) !important;
+  }
+  html.ss-admin-command-center .ap-hero::before {
+    background:
+      linear-gradient(90deg, transparent, rgba(76, 168, 255, .08), transparent),
+      radial-gradient(circle at 18% 0%, rgba(201, 166, 91, .10), transparent 44%) !important;
+    opacity: .9;
+  }
+  html.ss-admin-command-center .ap-hero-logo {
+    background: #0b1420 !important;
+    border: 1px solid rgba(151, 177, 205, .22) !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.05), 0 12px 34px rgba(0,0,0,.32) !important;
+  }
+  html.ss-admin-command-center .ap-hero-info,
+  html.ss-admin-command-center .ap-hero-actions,
+  html.ss-admin-command-center .ap-hero-logo { position: relative; z-index: 2; }
+  html.ss-admin-command-center .ap-hero h1 { color: #f8fbff !important; }
+  html.ss-admin-command-center .ap-hero-sub,
+  html.ss-admin-command-center .ap-helper,
+  html.ss-admin-command-center .ap-card-head p,
+  html.ss-admin-command-center .ap-panel-head p,
+  html.ss-admin-command-center .ap-product-box-sub { color: #8f9daf !important; }
+  html.ss-admin-command-center .ap-hero-badge,
+  html.ss-admin-command-center .ap-hero-pill {
+    background: rgba(151, 177, 205, .08) !important;
+    border-color: rgba(151, 177, 205, .16) !important;
+    color: #d8e4ef !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.03) !important;
+  }
+  html.ss-admin-command-center .ap-hero-pill--status {
+    color: #9df3ca !important;
+    border-color: rgba(52, 211, 153, .24) !important;
+    background: rgba(52, 211, 153, .08) !important;
+  }
+
+  html.ss-admin-command-center .ap-main-card,
+  html.ss-admin-command-center .ap-card,
+  html.ss-admin-command-center .ap-product-box,
+  html.ss-admin-command-center .ap-product-row,
+  html.ss-admin-command-center .ap-custom-builders-section {
+    background: linear-gradient(145deg, rgba(12, 20, 31, .96), rgba(7, 13, 21, .96)) !important;
+    border-color: rgba(151, 177, 205, .15) !important;
+    color: #edf3f8 !important;
+    box-shadow: 0 16px 44px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.025) !important;
+  }
+  html.ss-admin-command-center .ap-main-tabs-wrap,
+  html.ss-admin-command-center .ap-main-tabs {
+    background: #070d15 !important;
+    border-color: rgba(151, 177, 205, .14) !important;
+  }
+  html.ss-admin-command-center .ap-main-tab-btn {
+    color: #8f9daf !important;
+    border-color: transparent !important;
+  }
+  html.ss-admin-command-center .ap-main-tab-btn:hover {
+    color: #edf3f8 !important;
+    background: rgba(151, 177, 205, .07) !important;
+  }
+  html.ss-admin-command-center .ap-main-tab-btn.active {
+    color: #fff3ce !important;
+    background: rgba(201, 166, 91, .12) !important;
+    border-color: rgba(201, 166, 91, .28) !important;
+    box-shadow: inset 0 0 0 1px rgba(201,166,91,.05) !important;
+  }
+  html.ss-admin-command-center .ap-panel-kicker,
+  html.ss-admin-command-center .ap-label,
+  html.ss-admin-command-center .section-label {
+    color: #7dbbf2 !important;
+    letter-spacing: .12em !important;
+  }
+  html.ss-admin-command-center :is(.ap-panel-head h2, .ap-card-head h3, .ap-product-box-title, .ap-product-title) {
+    color: #f4f8fc !important;
+  }
+
+  html.ss-admin-command-center :is(.ap-input, .ap-textarea, .ap-select, .ap-input-mono) {
+    background: #07101a !important;
+    color: #edf3f8 !important;
+    border-color: rgba(151, 177, 205, .20) !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.025) !important;
+  }
+  html.ss-admin-command-center :is(.ap-input, .ap-textarea, .ap-select):focus {
+    border-color: #4ca8ff !important;
+    box-shadow: 0 0 0 3px rgba(76, 168, 255, .14) !important;
+  }
+  html.ss-admin-command-center .ap-select option { background: #07101a; color: #edf3f8; }
+  html.ss-admin-command-center .ap-radio {
+    background: #08111b !important;
+    border-color: rgba(151, 177, 205, .16) !important;
+  }
+  html.ss-admin-command-center .ap-radio:hover,
+  html.ss-admin-command-center .ap-radio.selected {
+    background: #0b1725 !important;
+    border-color: rgba(76, 168, 255, .44) !important;
+  }
+
+  html.ss-admin-command-center .ap-btn--primary {
+    background: #c9a65b !important;
+    color: #080b0f !important;
+    box-shadow: 0 8px 24px rgba(201, 166, 91, .18) !important;
+  }
+  html.ss-admin-command-center .ap-btn--primary:hover {
+    background: #ddbd70 !important;
+    color: #05070a !important;
+  }
+  html.ss-admin-command-center .ap-btn--glass,
+  html.ss-admin-command-center .ap-btn--outline,
+  html.ss-admin-command-center .ap-btn--icon {
+    background: rgba(151, 177, 205, .07) !important;
+    border-color: rgba(151, 177, 205, .18) !important;
+    color: #edf3f8 !important;
+  }
+  html.ss-admin-command-center .ap-btn--glass:hover,
+  html.ss-admin-command-center .ap-btn--outline:hover,
+  html.ss-admin-command-center .ap-btn--icon:hover {
+    background: rgba(151, 177, 205, .13) !important;
+    border-color: rgba(151, 177, 205, .30) !important;
+  }
+  html.ss-admin-command-center .ap-btn--share-primary {
+    background: #e8edf2 !important;
+    border-color: #e8edf2 !important;
+    color: #07101a !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.24) !important;
+  }
+  html.ss-admin-command-center .ap-btn--danger {
+    background: rgba(251, 113, 133, .10) !important;
+    color: #ffb5c1 !important;
+    border: 1px solid rgba(251, 113, 133, .22) !important;
+  }
+
+  html.ss-admin-command-center .ap-product-badge {
+    background: rgba(151, 177, 205, .10) !important;
+    color: #b9c9d8 !important;
+    border-color: rgba(151, 177, 205, .16) !important;
+  }
+  html.ss-admin-command-center .ap-product-badge--includes {
+    background: rgba(76, 168, 255, .11) !important;
+    color: #9fd3ff !important;
+    border-color: rgba(76, 168, 255, .24) !important;
+  }
+  html.ss-admin-command-center .ap-badge--visible {
+    background: rgba(52, 211, 153, .10) !important;
+    color: #8ce9c0 !important;
+  }
+  html.ss-admin-command-center .ap-badge--hidden {
+    background: rgba(151, 177, 205, .08) !important;
+    color: #8f9daf !important;
+  }
+
+  html.ss-admin-command-center .ap-share-overlay,
+  html.ss-admin-command-center .ap-frw-overlay,
+  html.ss-admin-command-center .ap-frd-overlay {
+    background: rgba(0, 4, 9, .78) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) {
+    background: #09111b !important;
+    border: 1px solid rgba(151, 177, 205, .18) !important;
+    color: #edf3f8 !important;
+    box-shadow: 0 30px 100px rgba(0,0,0,.55) !important;
+  }
+  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) h2,
+  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) h3,
+  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) h4,
+  html.ss-admin-command-center :is(.ap-share-dialog, .ap-frw-modal, .ap-frd-modal) strong {
+    color: #f5f9fd !important;
+  }
+  html.ss-admin-command-center .ap-share-dialog p,
+  html.ss-admin-command-center .ap-frw-modal p,
+  html.ss-admin-command-center .ap-frd-modal p {
+    color: #9aa8b8 !important;
+  }
+
+  @media (max-width: 700px) {
+    html.ss-admin-command-center .ap-wrap {
+      padding: 10px 10px 56px !important;
+    }
+    html.ss-admin-command-center .ap-hero {
+      display: grid !important;
+      grid-template-columns: 82px minmax(0, 1fr) !important;
+      grid-template-areas:
+        'logo actions'
+        'info info' !important;
+      align-items: start !important;
+      gap: 12px 12px !important;
+      padding: 14px !important;
+      margin-bottom: 14px !important;
+      border-radius: 18px !important;
+      overflow: visible !important;
+    }
+    html.ss-admin-command-center .ap-hero-logo {
+      grid-area: logo !important;
+      width: 82px !important;
+      height: 82px !important;
+      min-width: 82px !important;
+      min-height: 82px !important;
+      margin: 0 !important;
+      padding: 7px !important;
+      border-radius: 16px !important;
+      align-self: start !important;
+    }
+    html.ss-admin-command-center .ap-hero-logo img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+    }
+    html.ss-admin-command-center .ap-hero-info {
+      grid-area: info !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+    html.ss-admin-command-center .ap-hero-info h1 {
+      margin-top: 2px !important;
+      font-size: clamp(23px, 8vw, 32px) !important;
+      line-height: 1.02 !important;
+    }
+    html.ss-admin-command-center .ap-hero-actions {
+      grid-area: actions !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 7px !important;
+      align-items: stretch !important;
+      align-content: start !important;
+      margin: 0 !important;
+    }
+    html.ss-admin-command-center .ap-hero-actions > :is(.ap-share-help, a.ap-btn, .ap-fr-zone) {
+      width: 100% !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+    }
+    html.ss-admin-command-center .ap-hero-actions .ap-btn,
+    html.ss-admin-command-center #apFrLaunchBtn,
+    html.ss-admin-command-center #apFrDetailsBtn {
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 36px !important;
+      height: 36px !important;
+      padding: 0 7px !important;
+      border-radius: 9px !important;
+      font-size: 10.5px !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    html.ss-admin-command-center .ap-share-help { display: block !important; }
+    html.ss-admin-command-center .ap-fr-zone,
+    html.ss-admin-command-center .ap-fr-zone-empty,
+    html.ss-admin-command-center .ap-fr-zone-active {
+      min-width: 0 !important;
+      width: 100% !important;
+    }
+    html.ss-admin-command-center .ap-fr-zone-active {
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    html.ss-admin-command-center .ap-fr-zone-active-top,
+    html.ss-admin-command-center .ap-fr-zone-progress {
+      display: none !important;
+    }
+    html.ss-admin-command-center #apFrDetailsBtn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    html.ss-admin-command-center .ap-hero-meta {
+      gap: 5px !important;
+      margin-top: 9px !important;
+    }
+    html.ss-admin-command-center .ap-hero-pill {
+      min-height: 24px !important;
+      padding: 0 8px !important;
+      font-size: 8.5px !important;
+    }
+
+    /* On phone-sized product rows the useful Front & Back / Name & Number
+       badge wins. The generic Custom badge is redundant and was colliding with
+       it, so only the generic badge is removed on mobile. */
+    html.ss-admin-command-center .ap-product-row > .ap-product-badge:not(.ap-product-badge--includes) {
+      display: none !important;
+    }
+
+    /* The Pro Builder catalog used two narrow columns on phones. A single
+       column gives the artwork, title, price, and tap target enough room. */
+    html.ss-admin-command-center body #apCustomBuildersContainer#apCustomBuildersContainer {
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 12px !important;
+    }
+
+    html.ss-admin-command-center .ap-main-card {
+      border-radius: 16px !important;
+      overflow: clip !important;
+    }
+    html.ss-admin-command-center .ap-main-tabs-wrap {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 30 !important;
+      background: rgba(7, 13, 21, .94) !important;
+      backdrop-filter: blur(14px) !important;
+      -webkit-backdrop-filter: blur(14px) !important;
+    }
+  }
+</style>
