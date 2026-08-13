@@ -1,2 +1,17 @@
 {{ 'overflow-list.css' | asset_url | preload_tag: as: 'style' }}
 {{ 'base.css' | asset_url | stylesheet_tag: preload: true }}
+<style>
+html.ss-admin-command-center .header-menu .menu-list__link,
+html.ss-admin-command-center .menu-list--mobile .menu-list__item {
+  color: #d9e4ee !important;
+}
+html.ss-admin-command-center .header-menu .menu-list__link:hover,
+html.ss-admin-command-center .header-menu .menu-list__link:focus,
+html.ss-admin-command-center .header-menu .menu-list__link--active,
+html.ss-admin-command-center .menu-list--mobile .menu-list__item:hover {
+  color: #ffffff !important;
+}
+html.ss-admin-command-center .header-menu .menu-list .menu-list__link {
+  opacity: 1 !important;
+}
+</style>
