@@ -34,13 +34,15 @@
   if customer and ps_handle != blank
     assign ps_member_tag = 'storefront-member--' | append: ps_handle
     assign ps_admin_tag = 'storefront-admin--' | append: ps_handle
+    assign ps_legacy_member_tag = 'b2b-' | append: ps_handle
+    assign ps_legacy_admin_tag = 'b2b-admin-' | append: ps_handle
     for tag in customer.tags
       assign t = tag | downcase | strip
-      if t == 'custom_shop_admin' or t == ps_admin_tag
+      if t == 'super-admin' or t == ps_admin_tag or t == ps_legacy_admin_tag
         assign ps_level = 'admin'
         break
       endif
-      if t == 'custom_storefront_access' or t == ps_member_tag
+      if t == ps_member_tag or t == ps_legacy_member_tag
         assign ps_level = 'member'
       endif
     endfor

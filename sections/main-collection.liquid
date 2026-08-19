@@ -49,6 +49,10 @@
   endif
 %}
 
+{% if collection and collection.template_suffix == 'private-store' and hide_private_store_collection == false %}
+  {% render 'storefront-activity-tracker', handle: private_handle %}
+{% endif %}
+
 {% javascript %}
   const url = new URL(window.location.href);
   if (url.hash) {

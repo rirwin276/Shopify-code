@@ -18,12 +18,14 @@
 
 {%- assign sfs_allowed = false -%}
 {%- assign sfs_required_tag = 'storefront-admin--' | append: sfs_shop_handle -%}
+{%- assign sfs_legacy_admin_tag = 'b2b-admin-' | append: sfs_shop_handle -%}
+{%- capture sfs_platform_access -%}{%- render 'platform-super-admin' -%}{%- endcapture -%}
+{%- assign sfs_platform_access = sfs_platform_access | strip -%}
 {%- if customer and sfs_shop_handle != blank -%}
-  {%- assign sfs_email = customer.email | default: '' | downcase | strip -%}
-  {%- if sfs_email == 'ryan.irwin@stellaandsagecompany.com' -%}{%- assign sfs_allowed = true -%}{%- endif -%}
+  {%- if sfs_platform_access == 'true' -%}{%- assign sfs_allowed = true -%}{%- endif -%}
   {%- for sfs_tag in customer.tags -%}
     {%- assign sfs_tag_down = sfs_tag | downcase | strip -%}
-    {%- if sfs_tag_down == 'super-admin' or sfs_tag_down == 'custom_shop_admin' or sfs_tag_down == sfs_required_tag -%}
+    {%- if sfs_tag_down == sfs_required_tag or sfs_tag_down == sfs_legacy_admin_tag -%}
       {%- assign sfs_allowed = true -%}
     {%- endif -%}
   {%- endfor -%}

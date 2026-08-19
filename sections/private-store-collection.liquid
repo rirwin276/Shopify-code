@@ -11,9 +11,6 @@
 {% assign handle = collection.handle | downcase | strip %}
 {% assign member_tag = 'storefront-member--' | append: handle %}
 {% assign admin_tag  = 'storefront-admin--'  | append: handle %}
-{% assign access_tag = 'custom_storefront_access' %}
-{% assign shop_admin_tag = 'custom_shop_admin' %}
-
 {% capture ps_access %}{% render 'private-store-access', handle: handle %}{% endcapture %}
 {% assign ps_access = ps_access | strip %}
 {% assign is_admin = false %}
@@ -50,6 +47,8 @@
 {% endif %}
 
 {% if allowed %}
+
+  {% render 'storefront-activity-tracker', handle: handle %}
 
   {%- if is_preview -%}
     {%- comment -%}

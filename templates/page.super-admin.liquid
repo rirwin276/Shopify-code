@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stella & Sage — God Mode</title>
+<title>Stella & Sage — Command Center</title>
 <style>
   :root {
     --bg: #f5f5f7;
@@ -128,13 +128,24 @@
     white-space: nowrap;
   }
 
-  .gm-pill-row,
+  .gm-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .gm-pill-row .gm-pill {
+    flex: 1 0 calc(33.333% - 6px);
+  }
+
   .gm-filter-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    -webkit-overflow-scrolling: touch;
+  }
+
+  .gm-filter-tabs .gm-filter-tab {
+    flex: 1 0 calc(50% - 4px);
   }
 
   .gm-pill,
@@ -171,6 +182,56 @@
     padding: 0 14px;
     font-size: 15px;
     margin-bottom: 10px;
+  }
+
+  .gm-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 150px;
+    gap: 8px;
+    align-items: end;
+    margin-bottom: 10px;
+  }
+
+  .gm-toolbar .gm-search-input { margin-bottom: 0; }
+
+  .gm-sort-label {
+    display: grid;
+    gap: 4px;
+    color: var(--gray);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .gm-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .gm-highlight {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    min-width: 0;
+  }
+
+  .gm-highlight span {
+    display: block;
+    color: var(--gray);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .gm-highlight strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
   }
 
   .gm-store-grid {
@@ -223,6 +284,44 @@
   .gm-badge.private { color: var(--warning); border-color: rgba(255,159,10,0.35); background: rgba(255,159,10,0.08); }
   .gm-badge.closed { color: var(--gray); }
 
+  .gm-decision-badge {
+    display: none;
+    width: fit-content;
+    margin: -2px 0 10px;
+    border-radius: 999px;
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #9a3412;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .gm-decision-badge.show { display: block; }
+
+  .gm-decision-badge.good {
+    border-color: rgba(52,199,89,0.35);
+    background: rgba(52,199,89,0.08);
+    color: #167c35;
+  }
+
+  .gm-decision-note {
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #7c2d12;
+    border-radius: 12px;
+    padding: 11px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .gm-decision-note.good {
+    border-color: rgba(52,199,89,0.35);
+    background: rgba(52,199,89,0.08);
+    color: #166534;
+  }
+
   .gm-card-actions {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -254,6 +353,136 @@
     margin: 0 0 10px;
     font-size: 15px;
     font-weight: 800;
+  }
+
+  .gm-section-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .gm-section-head .gm-section-title { margin-bottom: 3px; }
+
+  .gm-muted {
+    margin: 0;
+    color: var(--gray);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .gm-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .gm-kpi {
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px;
+    background: #fafafa;
+  }
+
+  .gm-kpi-label {
+    display: block;
+    color: var(--gray);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .gm-kpi-value {
+    display: block;
+    margin-top: 5px;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  .gm-store-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    margin: 0 0 10px;
+  }
+
+  .gm-store-metric {
+    border: 1px solid #e5e5ea;
+    border-radius: 10px;
+    padding: 8px;
+    min-width: 0;
+    background: #fafafa;
+  }
+
+  .gm-store-metric span {
+    display: block;
+    color: var(--gray);
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .gm-store-metric strong {
+    display: block;
+    font-size: 14px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .gm-store-activity {
+    border-top: 1px solid #ececf0;
+    padding-top: 9px;
+    margin: 0 0 10px;
+    display: grid;
+    gap: 5px;
+    color: var(--gray);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .gm-store-activity strong { color: var(--text); }
+
+  .gm-detail-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .gm-detail-row {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .gm-detail-row span {
+    display: block;
+    color: var(--gray);
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .gm-detail-row strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .gm-quality-warning {
+    display: none;
+    margin-top: 10px;
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #9a3412;
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 11px;
+    line-height: 1.45;
   }
 
   .gm-graveyard-toggle {
@@ -331,11 +560,15 @@
     display: flex;
     gap: 8px;
     margin-bottom: 10px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .gm-sheet-tab {
-    flex: 1;
+    flex: 0 0 auto;
     min-height: 44px;
+    padding: 0 16px;
     border-radius: 999px;
     border: 1px solid var(--border);
     background: var(--card);
@@ -399,6 +632,20 @@
   }
 
   .gm-member-row:last-child { border-bottom: none; }
+
+  .gm-log-row {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .gm-log-row:last-child { border-bottom: none; }
+  .gm-log-time { color: var(--gray); }
+  .gm-log-event { overflow-wrap: anywhere; }
 
   .gm-copy-row {
     border: 1px solid var(--border);
@@ -464,6 +711,14 @@
 
     .gm-store-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
+    .gm-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .gm-filter-tabs .gm-filter-tab { flex: 0 0 auto; }
+
+    .gm-pill-row .gm-pill { flex: 0 0 auto; }
+
+    .gm-highlight-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
     .gm-sheet {
       left: 50%;
       right: auto;
@@ -491,17 +746,20 @@
       z-index: 20;
     }
   }
+
+  @media (max-width: 480px) {
+    .gm-toolbar { grid-template-columns: 1fr; }
+    .gm-card-actions { grid-template-columns: 1fr 1fr; }
+    .gm-card-actions .gm-btn:first-child { grid-column: span 2; }
+  }
 </style>
 </head>
 <body>
 
+{% capture platform_access_value %}{% render 'platform-super-admin' %}{% endcapture %}
+{% assign platform_access_value = platform_access_value | strip %}
 {% assign is_super = false %}
-{% if customer %}
-  {% if customer.email == 'ryan.irwin@stellaandsagecompany.com' %}{% assign is_super = true %}{% endif %}
-  {% for t in customer.tags %}
-    {% if t contains 'super-admin' %}{% assign is_super = true %}{% endif %}
-  {% endfor %}
-{% endif %}
+{% if platform_access_value == 'true' %}{% assign is_super = true %}{% endif %}
 {% unless is_super %}
   <script>window.location.replace('/pages/portal');</script>
 {% endunless %}
@@ -534,7 +792,7 @@
 
   <header class="gm-header">
     <div class="gm-header-inner">
-      <h1 class="gm-title">⚡ God Mode <span class="gm-count-badge">{{ total_stores }} stores</span></h1>
+      <h1 class="gm-title">Command Center <span class="gm-count-badge" id="totalStoresHeader">{{ total_stores }} stores</span></h1>
       <button class="gm-search-icon" type="button" id="focusSearch" aria-label="Focus search">⌕</button>
     </div>
   </header>
@@ -547,25 +805,72 @@
     </div>
 
     <section class="gm-card">
-      <h2 class="gm-section-title">Stats</h2>
+      <h2 class="gm-section-title">Store status</h2>
       <div class="gm-pill-row" id="statsPills">
-        <button type="button" class="gm-pill is-active-filter" data-stat-filter="all">Total <span>{{ total_stores }}</span></button>
-        <button type="button" class="gm-pill" data-stat-filter="active">Active <span>{{ active_count }}</span></button>
-        <button type="button" class="gm-pill" data-stat-filter="sleeping">Sleeping <span>{{ sleeping_count }}</span></button>
-        <button type="button" class="gm-pill" data-stat-filter="waking">Waking <span>{{ waking_count }}</span></button>
-        <button type="button" class="gm-pill" data-stat-filter="closed">Closed <span>{{ closed_count }}</span></button>
+        <button type="button" class="gm-pill is-active-filter" data-stat-filter="all">Total <span id="statusTotal">{{ total_stores }}</span></button>
+        <button type="button" class="gm-pill" data-stat-filter="active">Active <span id="statusActive">{{ active_count }}</span></button>
+        <button type="button" class="gm-pill" data-stat-filter="sleeping">Sleeping <span id="statusSleeping">{{ sleeping_count }}</span></button>
+        <button type="button" class="gm-pill" data-stat-filter="waking">Waking <span id="statusWaking">{{ waking_count }}</span></button>
+        <button type="button" class="gm-pill" data-stat-filter="closed">Closed <span id="statusClosed">{{ closed_count }}</span></button>
+      </div>
+    </section>
+
+    <section class="gm-card" id="performanceCard" aria-busy="true">
+      <div class="gm-section-head">
+        <div>
+          <h2 class="gm-section-title">All-store performance</h2>
+          <p class="gm-muted" id="metricsCoverage">Loading verified Shopify and storefront activity…</p>
+        </div>
+        <button type="button" class="gm-btn" id="refreshMetricsBtn">Refresh</button>
+      </div>
+      <div class="gm-kpi-grid">
+        <div class="gm-kpi"><span class="gm-kpi-label">Stores</span><strong class="gm-kpi-value" id="totalStoreCount">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Gross sales</span><strong class="gm-kpi-value" id="totalGrossSales">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Paid orders</span><strong class="gm-kpi-value" id="totalPaidOrders">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Members</span><strong class="gm-kpi-value" id="totalTaggedCustomers">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Non-admin members</span><strong class="gm-kpi-value" id="totalShoppers">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Tracked sessions</span><strong class="gm-kpi-value" id="totalTrackedSessions">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Products</span><strong class="gm-kpi-value" id="totalProducts">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Needs attention</span><strong class="gm-kpi-value" id="totalNeedsAttention">—</strong></div>
+      </div>
+      <p class="gm-muted" id="adminCoverage" style="margin-top:10px;">Platform admins: —</p>
+      <div class="gm-quality-warning" id="metricsQuality"></div>
+    </section>
+
+    <section class="gm-card" id="latestChangesCard" aria-busy="true">
+      <h2 class="gm-section-title">Latest changes</h2>
+      <div class="gm-highlight-grid">
+        <div class="gm-highlight"><span>Newest store</span><strong id="highlightNewestStore">Loading…</strong></div>
+        <div class="gm-highlight"><span>Newest product built</span><strong id="highlightNewestProduct">Loading…</strong></div>
+        <div class="gm-highlight"><span>Latest paid sale</span><strong id="highlightLatestSale">Loading…</strong></div>
+        <div class="gm-highlight"><span>Latest non-founder visit</span><strong id="highlightLatestVisit">Loading…</strong></div>
       </div>
     </section>
 
     <section class="gm-card">
-      <input class="gm-search-input" id="storeSearch" type="text" placeholder="Search stores...">
+      <div class="gm-toolbar">
+        <input class="gm-search-input" id="storeSearch" type="text" placeholder="Search stores...">
+        <label class="gm-sort-label">Sort stores
+          <select class="gm-select" id="storeSort">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="sales">Highest sales</option>
+            <option value="orders">Most paid orders</option>
+            <option value="members">Most members</option>
+            <option value="sessions">Most sessions</option>
+            <option value="products">Most products</option>
+            <option value="name">Name A–Z</option>
+          </select>
+        </label>
+      </div>
       <div class="gm-filter-tabs" id="storeFilterTabs">
         <button type="button" class="gm-filter-tab is-active-filter" data-grid-filter="all">All</button>
-        <button type="button" class="gm-filter-tab" data-grid-filter="active">Active</button>
-        <button type="button" class="gm-filter-tab" data-grid-filter="sleeping">Sleeping</button>
-        <button type="button" class="gm-filter-tab" data-grid-filter="waking">Waking</button>
-        <button type="button" class="gm-filter-tab" data-grid-filter="closed">Closed</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="attention">Needs attention</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="new">New stores</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="review">No traction 7d+</button>
         <button type="button" class="gm-filter-tab" data-grid-filter="no-sales">No Sales</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="no-members">No Members</button>
+        <button type="button" class="gm-filter-tab" data-grid-filter="no-sessions">No Sessions</button>
       </div>
     </section>
 
@@ -598,6 +903,7 @@
               data-status="{% if _is_sleeping %}sleeping{% elsif _is_waking %}waking{% else %}active{% endif %}"
               data-private="{% if _is_private %}true{% else %}false{% endif %}"
               data-products="{{ _products_count }}"
+              data-order-count="unknown"
               data-store-name="{{ store.name | default: store.system.handle | escape }}">
               <div class="gm-store-top">
                 <div>
@@ -613,6 +919,21 @@
                 {% else %}
                   <span class="gm-badge active">Active</span>
                 {% endif %}
+              </div>
+              <div class="gm-decision-badge" data-decision-badge></div>
+              <div class="gm-store-metrics" data-store-metrics="{{ store.system.handle | escape }}">
+                <div class="gm-store-metric"><span>Paid orders</span><strong data-metric="orders">—</strong></div>
+                <div class="gm-store-metric"><span>Gross sales</span><strong data-metric="gross">—</strong></div>
+                <div class="gm-store-metric"><span>Members</span><strong data-metric="members">—</strong></div>
+                <div class="gm-store-metric"><span>Sessions</span><strong data-metric="sessions">—</strong></div>
+                <div class="gm-store-metric"><span>Products</span><strong data-metric="products">—</strong></div>
+                <div class="gm-store-metric"><span>Store age</span><strong data-metric="age">—</strong></div>
+              </div>
+              <div class="gm-store-activity" data-store-activity="{{ store.system.handle | escape }}">
+                <div><strong>Last purchase:</strong> <span data-activity="purchase">Loading…</span></div>
+                <div><strong>Last non-founder visit:</strong> <span data-activity="visit">Loading…</span></div>
+                <div><strong>Newest product:</strong> <span data-activity="product">Loading…</span></div>
+                <div><strong>Admins:</strong> <span data-activity="admins">Loading…</span></div>
               </div>
               <div class="gm-card-actions">
                 <a class="gm-btn gm-btn-primary" href="/pages/admin-powers?shop={{ store.system.handle | url_encode }}" target="_blank" rel="noopener">Admin →</a>
@@ -632,7 +953,7 @@
           {% for store in shop.metaobjects.custom_shop.values %}
             {% if store.tags contains 'status:closed' %}
               {% assign _collection_handle = store.collection_handle | default: store.system.handle %}
-              <article class="gm-store-card gm-closed-card" data-name="{{ store.name | default: store.system.handle | escape | downcase }}" data-status="closed" data-handle="{{ store.system.handle | escape }}" data-products="0">
+              <article class="gm-store-card gm-closed-card" data-name="{{ store.name | default: store.system.handle | escape | downcase }}" data-status="closed" data-handle="{{ store.system.handle | escape }}" data-collection="{{ _collection_handle | escape }}" data-store-name="{{ store.name | default: store.system.handle | escape }}" data-products="0" data-order-count="unknown">
                 <div class="gm-store-top">
                   <div>
                     <h3 class="gm-store-name">{{ store.name | default: store.system.handle }}</h3>
@@ -640,7 +961,24 @@
                   </div>
                   <span class="gm-badge closed">Closed</span>
                 </div>
-                <div class="gm-card-actions" style="grid-template-columns:1fr;">
+                <div class="gm-decision-badge" data-decision-badge></div>
+                <div class="gm-store-metrics" data-store-metrics="{{ store.system.handle | escape }}">
+                  <div class="gm-store-metric"><span>Paid orders</span><strong data-metric="orders">—</strong></div>
+                  <div class="gm-store-metric"><span>Gross sales</span><strong data-metric="gross">—</strong></div>
+                  <div class="gm-store-metric"><span>Members</span><strong data-metric="members">—</strong></div>
+                  <div class="gm-store-metric"><span>Sessions</span><strong data-metric="sessions">—</strong></div>
+                  <div class="gm-store-metric"><span>Products</span><strong data-metric="products">—</strong></div>
+                  <div class="gm-store-metric"><span>Store age</span><strong data-metric="age">—</strong></div>
+                </div>
+                <div class="gm-store-activity" data-store-activity="{{ store.system.handle | escape }}">
+                  <div><strong>Last purchase:</strong> <span data-activity="purchase">Loading…</span></div>
+                  <div><strong>Last non-founder visit:</strong> <span data-activity="visit">Loading…</span></div>
+                  <div><strong>Newest product:</strong> <span data-activity="product">Loading…</span></div>
+                  <div><strong>Admins:</strong> <span data-activity="admins">Loading…</span></div>
+                </div>
+                <div class="gm-card-actions">
+                  <a class="gm-btn gm-btn-primary" href="/pages/admin-powers?shop={{ store.system.handle | url_encode }}" target="_blank" rel="noopener">Admin →</a>
+                  <button type="button" class="gm-btn" data-open-manage="true">Stats ▾</button>
                   <button type="button" class="gm-btn gm-btn-primary" onclick="wakeStore('{{ store.system.handle | escape }}')">Wake Up ☀️</button>
                 </div>
               </article>
@@ -690,12 +1028,43 @@
     </div>
 
     <div class="gm-sheet-tabs">
-      <button type="button" class="gm-sheet-tab active" data-manage-tab="members">Members</button>
-      <button type="button" class="gm-sheet-tab" data-manage-tab="settings">Settings</button>
-      <button type="button" class="gm-sheet-tab" data-manage-tab="info">Info</button>
+      <button type="button" class="gm-sheet-tab active" data-manage-tab="overview">Overview</button>
+      <button type="button" class="gm-sheet-tab" data-manage-tab="activity">Activity</button>
+      <button type="button" class="gm-sheet-tab" data-manage-tab="people">People</button>
+      <button type="button" class="gm-sheet-tab" data-manage-tab="products">Products</button>
+      <button type="button" class="gm-sheet-tab" data-manage-tab="actions">Actions</button>
     </div>
 
-    <div class="gm-tab-pane active" data-pane="members">
+    <div class="gm-tab-pane active" data-pane="overview">
+      <div class="gm-decision-note" id="manageDecisionNote">Loading the store decision summary…</div>
+      <div class="gm-kpi-grid">
+        <div class="gm-kpi"><span class="gm-kpi-label">Gross sales</span><strong class="gm-kpi-value" id="manageGrossSales">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Paid orders</span><strong class="gm-kpi-value" id="manageOrders">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Sessions</span><strong class="gm-kpi-value" id="manageSessions">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Members</span><strong class="gm-kpi-value" id="manageCustomers">—</strong></div>
+      </div>
+      <div class="gm-detail-list" style="margin-top:10px;">
+        <div class="gm-detail-row"><span>Store age / source</span><strong id="manageStoreAge">—</strong></div>
+        <div class="gm-detail-row"><span>Traction state</span><strong id="manageTraction">—</strong></div>
+        <div class="gm-detail-row"><span>Admins with access</span><strong id="manageAdmins">—</strong></div>
+        <div class="gm-detail-row"><span>Last purchase</span><strong id="manageLastPurchase">—</strong></div>
+        <div class="gm-detail-row"><span>Last session not linked to platform super-admin</span><strong id="manageLastOtherSession">—</strong></div>
+        <div class="gm-detail-row"><span>Last signed-in customer activity</span><strong id="manageLastCustomer">—</strong></div>
+        <div class="gm-detail-row"><span>Products</span><strong id="manageProducts">—</strong></div>
+        <div class="gm-detail-row"><span>Newest product built</span><strong id="manageNewestProduct">—</strong></div>
+      </div>
+      <p class="gm-muted" id="manageCoverage" style="margin-top:10px;">Loading store statistics…</p>
+    </div>
+
+    <div class="gm-tab-pane" data-pane="activity">
+      <h3 class="gm-section-title" style="margin-top:14px;">Recent activity log</h3>
+      <div class="gm-member-list" id="manageActivityLog">
+        <div class="gm-log-row"><span class="gm-log-time">—</span><span class="gm-log-event">Loading activity…</span></div>
+      </div>
+      <p class="gm-muted" style="margin-top:10px;">Founder/platform-super-admin sessions are retained for total traffic but are explicitly separated from customer activity.</p>
+    </div>
+
+    <div class="gm-tab-pane" data-pane="people">
       <div class="gm-member-grid">
         <div class="gm-field" style="margin-bottom:0;">
           <label class="gm-label">Email address</label>
@@ -718,7 +1087,22 @@
       <div class="gm-member-list" id="memberList"></div>
     </div>
 
-    <div class="gm-tab-pane" data-pane="settings">
+    <div class="gm-tab-pane" data-pane="products">
+      <div class="gm-kpi-grid">
+        <div class="gm-kpi"><span class="gm-kpi-label">Total</span><strong class="gm-kpi-value" id="manageProductTotal">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Live</span><strong class="gm-kpi-value" id="manageProductLive">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Draft</span><strong class="gm-kpi-value" id="manageProductDraft">—</strong></div>
+        <div class="gm-kpi"><span class="gm-kpi-label">Archived</span><strong class="gm-kpi-value" id="manageProductArchived">—</strong></div>
+      </div>
+      <div class="gm-detail-list" style="margin-top:10px;">
+        <div class="gm-detail-row"><span>Newest product built</span><strong id="manageProductNewest">—</strong></div>
+        <div class="gm-detail-row"><span>Most recently updated product</span><strong id="manageProductUpdated">—</strong></div>
+      </div>
+      <a class="gm-btn gm-btn-primary" id="openProductAdminBtn" target="_blank" rel="noopener" style="margin-top:10px;">Open store product admin →</a>
+    </div>
+
+    <div class="gm-tab-pane" data-pane="actions">
+      <p class="gm-muted" style="margin-bottom:10px;">Monitoring is isolated from store creation, checkout, paid-order submission, and Printful fulfillment. Actions below run only when you tap them.</p>
       <div class="gm-setting-grid">
         <button type="button" class="gm-btn" id="makePublicBtn">Make Public</button>
         <button type="button" class="gm-btn" id="makePrivateBtn">Make Private</button>
@@ -728,9 +1112,6 @@
         <button type="button" class="gm-btn gm-btn-danger" id="nukeStoreBtn">NUKE</button>
       </div>
       <div class="gm-status-text" id="settingsStatus"></div>
-    </div>
-
-    <div class="gm-tab-pane" data-pane="info">
       <div class="gm-copy-row">
         <div class="gm-copy-label">Store Handle</div>
         <div class="gm-copy-value" id="infoHandle"></div>
@@ -796,7 +1177,12 @@
     const GM_STATE = {
       activeGridFilter: 'all',
       activeStatFilter: 'all',
-      currentStore: null
+      currentStore: null,
+      summaryByHandle: {},
+      dataQuality: {},
+      metricsLoaded: false,
+      storeSort: 'newest',
+      closedCount: Number({{ closed_count | json }})
     };
 
     function railwayHeaders() {
@@ -812,6 +1198,427 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    function formatNumber(value) {
+      var number = Number(value || 0);
+      return Number.isFinite(number) ? new Intl.NumberFormat().format(number) : '0';
+    }
+
+    function formatMoney(amount, currency) {
+      var number = Number(amount || 0);
+      if (!Number.isFinite(number)) return '—';
+      try {
+        return new Intl.NumberFormat(undefined, {
+          style: 'currency',
+          currency: currency || 'USD',
+          maximumFractionDigits: 2
+        }).format(number);
+      } catch (_error) {
+        return '$' + number.toFixed(2);
+      }
+    }
+
+    function formatDate(value) {
+      if (!value) return 'Never';
+      var date = new Date(value);
+      if (!Number.isFinite(date.getTime())) return 'Unknown time';
+      return date.toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+      });
+    }
+
+    function coverageLabel(value) {
+      if (value === 'lifetime') return 'Sales coverage: lifetime Shopify order history.';
+      if (value === 'last_60_days') return 'Sales coverage: Shopify’s available last 60 days. Add read_all_orders for lifetime totals.';
+      if (String(value || '').indexOf('first_') === 0) return 'Sales coverage is capped; totals are partial.';
+      return 'Sales coverage is not currently observable.';
+    }
+
+    function purchaseText(store) {
+      var purchase = store && store.sales && store.sales.last_purchase;
+      if (store && store.sales && store.sales.observable === false) return 'Sales are not observable right now';
+      if (!purchase) return 'No attributed paid purchase found';
+      return (purchase.order_name || 'Order') + ' · '
+        + (purchase.customer_display_name || 'Guest') + ' · '
+        + formatMoney(purchase.gross_amount, purchase.currency) + ' · '
+        + formatDate(purchase.created_at);
+    }
+
+    function otherVisitText(store) {
+      if (store && store.observability && store.observability.sessions === false) return 'Session data is unavailable';
+      var visit = store && store.activity && store.activity.last_non_super_admin_session;
+      if (!store || !store.activity || !store.activity.tracking_started_at) return 'Not tracked yet';
+      if (!visit) return 'No non-founder session since ' + formatDate(store.activity.tracking_started_at);
+      var visitor = visit.customer_display_name
+        || (visit.visitor_type === 'anonymous' ? 'Anonymous visitor' : 'Signed-in customer');
+      return visitor + ' · ' + formatDate(visit.at);
+    }
+
+    function lastCustomerText(store) {
+      if (store && store.observability && store.observability.sessions === false) return 'Customer activity is unavailable';
+      var activity = store && store.activity && store.activity.last_authenticated_customer_activity;
+      if (!activity) return 'No signed-in customer activity tracked yet';
+      return (activity.customer_display_name || 'Customer') + ' · ' + formatDate(activity.at);
+    }
+
+    function storeAgeText(store) {
+      if (store && store.observability && store.observability.store_age === false) return 'Age not observable';
+      var decision = (store && store.decision) || {};
+      if (decision.age_days === null || decision.age_days === undefined) return 'Age not observable';
+      var days = Number(decision.age_days || 0);
+      return days === 0 ? 'Built today' : (formatNumber(days) + ' day' + (days === 1 ? '' : 's') + ' old');
+    }
+
+    function productText(product, dateField) {
+      if (!product) return 'No attributed product found';
+      var at = product[dateField || 'created_at'];
+      return (product.title || 'Untitled product') + ' · ' + (product.status || 'Unknown') + ' · ' + formatDate(at);
+    }
+
+    function decisionLabel(store) {
+      var decision = (store && store.decision) || {};
+      var labels = {
+        converting: 'Converting',
+        engaged: 'Has engagement',
+        new: 'New store',
+        not_observable: 'Data unavailable',
+        not_tracked: 'Tracking not started',
+        no_traction: 'No traction — review',
+        watch: 'Watch'
+      };
+      return labels[decision.traction] || 'Status unavailable';
+    }
+
+    function decisionSummary(store) {
+      if (!store) return 'Statistics have not loaded yet.';
+      var decision = store.decision || {};
+      if (decision.delete_candidate) {
+        return 'Cold-outreach deletion candidate. It has at least 7 days of store age and tracking, with no paid orders, non-admin members, or non-founder sessions. Review manually before any action.';
+      }
+      if (decision.review_candidate) {
+        return 'No traction after a complete 7-day observation window. Confirm the store source and owner context before deleting it.';
+      }
+      if (decision.traction === 'not_tracked') {
+        return 'Session tracking has not started, so zero sessions cannot be used as evidence to delete this store.';
+      }
+      if (decision.traction === 'not_observable') {
+        return 'One or more required monitoring sources are unavailable. This store cannot be evaluated for deletion until reporting recovers.';
+      }
+      if (decision.traction === 'new') {
+        return 'This store is still inside its first 7 days. Watch members, non-founder sessions, and paid orders before judging traction.';
+      }
+      if (decision.traction === 'converting') return 'This store has at least one attributed paid order.';
+      if (decision.traction === 'engaged') return 'This store has member or non-founder storefront activity, even if it has not converted yet.';
+      return (decision.reasons || []).join(' · ') || 'No monitoring warning is active.';
+    }
+
+    function adminText(store) {
+      var customers = (store && store.customers) || {};
+      var names = [];
+      (customers.store_admins || []).forEach(function(admin){
+        names.push((admin.display_name || 'Store admin') + (admin.email ? ' (' + admin.email + ')' : ''));
+      });
+      (customers.platform_admins || []).forEach(function(admin){
+        names.push((admin.display_name || 'Platform admin') + ' — platform' + (admin.email ? ' (' + admin.email + ')' : ''));
+      });
+      return formatNumber(customers.effective_admin_count) + ' effective admin'
+        + (Number(customers.effective_admin_count) === 1 ? '' : 's')
+        + (names.length ? ': ' + names.join(', ') : '');
+    }
+
+    function ensureStoreCard(store) {
+      if (!store || !store.handle) return;
+      var handle = String(store.handle);
+      var exists = Array.prototype.some.call(document.querySelectorAll('.gm-store-card'), function(card){
+        return String(card.getAttribute('data-handle') || '') === handle;
+      });
+      if (exists) return;
+
+      var rawStatus = String(store.status || 'active').toLowerCase();
+      var status = ['sleeping', 'waking', 'closed'].indexOf(rawStatus) !== -1 ? rawStatus : 'active';
+      var isClosed = status === 'closed';
+      var collection = String(store.collection_handle || handle);
+      var name = String(store.name || handle);
+      var statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+      var grid = document.getElementById(isClosed ? 'closedStoreGrid' : 'activeStoreGrid');
+      if (!grid) return;
+
+      var article = document.createElement('article');
+      article.className = 'gm-store-card' + (isClosed ? ' gm-closed-card' : '');
+      article.setAttribute('data-name', name.toLowerCase());
+      article.setAttribute('data-handle', handle);
+      article.setAttribute('data-collection', collection);
+      article.setAttribute('data-store-name', name);
+      article.setAttribute('data-status', status);
+      article.setAttribute('data-products', '0');
+      article.setAttribute('data-order-count', 'unknown');
+      article.setAttribute('data-member-count', 'unknown');
+      article.setAttribute('data-session-count', 'unknown');
+      article.setAttribute('data-age-days', 'unknown');
+      article.setAttribute('data-created-at', '');
+      article.setAttribute('data-needs-attention', 'false');
+      article.setAttribute('data-review-candidate', 'false');
+      article.setAttribute('data-tracking-started', 'false');
+      var actions = isClosed
+        ? '<a class="gm-btn gm-btn-primary" href="/pages/admin-powers?shop=' + encodeURIComponent(handle) + '" target="_blank" rel="noopener">Admin →</a>'
+          + '<button type="button" class="gm-btn" data-open-manage="true">Stats ▾</button>'
+          + '<button type="button" class="gm-btn gm-btn-primary" data-wake-handle="' + escapeHtml(handle) + '">Wake Up ☀️</button>'
+        : '<a class="gm-btn gm-btn-primary" href="/pages/admin-powers?shop=' + encodeURIComponent(handle) + '" target="_blank" rel="noopener">Admin →</a>'
+          + '<a class="gm-btn" href="/collections/' + encodeURIComponent(collection) + '" target="_blank" rel="noopener">Visit ↗</a>'
+          + '<button type="button" class="gm-btn" data-open-manage="true">Manage ▾</button>';
+      article.innerHTML = '<div class="gm-store-top"><div><h3 class="gm-store-name">' + escapeHtml(name)
+        + '</h3><div class="gm-store-handle">' + escapeHtml(handle) + '</div></div><span class="gm-badge ' + status + '">' + escapeHtml(statusLabel) + '</span></div>'
+        + '<div class="gm-decision-badge" data-decision-badge></div>'
+        + '<div class="gm-store-metrics"><div class="gm-store-metric"><span>Paid orders</span><strong data-metric="orders">—</strong></div>'
+        + '<div class="gm-store-metric"><span>Gross sales</span><strong data-metric="gross">—</strong></div>'
+        + '<div class="gm-store-metric"><span>Members</span><strong data-metric="members">—</strong></div>'
+        + '<div class="gm-store-metric"><span>Sessions</span><strong data-metric="sessions">—</strong></div>'
+        + '<div class="gm-store-metric"><span>Products</span><strong data-metric="products">—</strong></div>'
+        + '<div class="gm-store-metric"><span>Store age</span><strong data-metric="age">—</strong></div></div>'
+        + '<div class="gm-store-activity"><div><strong>Last purchase:</strong> <span data-activity="purchase">Loading…</span></div>'
+        + '<div><strong>Last non-founder visit:</strong> <span data-activity="visit">Loading…</span></div>'
+        + '<div><strong>Newest product:</strong> <span data-activity="product">Loading…</span></div>'
+        + '<div><strong>Admins:</strong> <span data-activity="admins">Loading…</span></div></div>'
+        + '<div class="gm-card-actions">' + actions + '</div>';
+      grid.appendChild(article);
+    }
+
+    function renderActivityLog(store) {
+      var container = document.getElementById('manageActivityLog');
+      if (!container) return;
+      var events = (store && store.recent_activity) || [];
+      if (!events.length) {
+        container.innerHTML = '<div class="gm-log-row"><span class="gm-log-time">—</span><span class="gm-log-event">No tracked activity yet.</span></div>';
+        return;
+      }
+      container.innerHTML = events.map(function(event){
+        var text = '';
+        if (event.event_type === 'purchase') {
+          text = 'Purchase ' + (event.order_name || '') + ' · '
+            + (event.customer_display_name || 'Guest') + ' · '
+            + formatMoney(event.gross_amount, event.currency);
+        } else {
+          var visitor = event.customer_display_name
+            || (event.visitor_type === 'super_admin' ? 'Platform super-admin'
+              : (event.visitor_type === 'anonymous' ? 'Anonymous visitor'
+                : (event.visitor_type === 'role_unknown' ? 'Signed-in visitor (role unavailable)' : 'Signed-in customer')));
+          text = 'Storefront session · ' + visitor + (event.path ? ' · ' + event.path : '');
+        }
+        return '<div class="gm-log-row"><span class="gm-log-time">' + escapeHtml(formatDate(event.at || event.created_at))
+          + '</span><span class="gm-log-event">' + escapeHtml(text) + '</span></div>';
+      }).join('');
+    }
+
+    function renderStoreMetrics(store) {
+      if (!store || !store.handle) return;
+      var handle = String(store.handle);
+      document.querySelectorAll('.gm-store-card').forEach(function(card){
+        if (String(card.getAttribute('data-handle') || '') !== handle) return;
+        var sales = store.sales || {};
+        var activity = store.activity || {};
+        var customers = store.customers || {};
+        var products = store.products || {};
+        var decision = store.decision || {};
+        var observable = store.observability || {};
+        card.setAttribute('data-order-count', String(Number(sales.order_count || 0)));
+        card.setAttribute('data-products', String(Number(products.total || 0)));
+        card.setAttribute('data-member-count', String(Number(customers.shopper_count || 0)));
+        card.setAttribute('data-session-count', String(Number(activity.non_super_admin_sessions || 0)));
+        card.setAttribute('data-age-days', decision.age_days === null || decision.age_days === undefined ? 'unknown' : String(Number(decision.age_days || 0)));
+        card.setAttribute('data-created-at', String(store.created_at || ''));
+        card.setAttribute('data-gross-sales', String(Number(sales.gross_sales || 0)));
+        card.setAttribute('data-needs-attention', decision.needs_attention ? 'true' : 'false');
+        card.setAttribute('data-review-candidate', decision.review_candidate ? 'true' : 'false');
+        card.setAttribute('data-tracking-started', activity.tracking_started_at ? 'true' : 'false');
+        var metrics = card.querySelector('[data-store-metrics]');
+        if (metrics) {
+          var orders = metrics.querySelector('[data-metric="orders"]');
+          var gross = metrics.querySelector('[data-metric="gross"]');
+          var sessions = metrics.querySelector('[data-metric="sessions"]');
+          var memberCount = metrics.querySelector('[data-metric="members"]');
+          var productCount = metrics.querySelector('[data-metric="products"]');
+          var age = metrics.querySelector('[data-metric="age"]');
+          if (orders) orders.textContent = sales.observable === false ? 'Unavailable' : formatNumber(sales.order_count);
+          if (gross) gross.textContent = sales.observable === false ? 'Unavailable' : formatMoney(sales.gross_sales, sales.currency);
+          if (sessions) sessions.textContent = observable.sessions === false ? 'Unavailable' : (activity.tracking_started_at
+            ? (formatNumber(activity.non_super_admin_sessions) + ' non-founder / ' + formatNumber(activity.total_sessions) + ' total')
+            : 'Not tracked');
+          if (memberCount) memberCount.textContent = observable.customers === false ? 'Unavailable' : (formatNumber(customers.shopper_count) + ' shoppers / ' + formatNumber(customers.total) + ' tagged');
+          if (productCount) productCount.textContent = observable.products === false ? 'Unavailable' : formatNumber(products.total);
+          if (age) age.textContent = storeAgeText(store);
+        }
+        var badge = card.querySelector('[data-decision-badge]');
+        if (badge) {
+          badge.textContent = decisionLabel(store);
+          badge.classList.add('show');
+          badge.classList.toggle('good', decision.traction === 'converting' || decision.traction === 'engaged');
+        }
+        var activityBox = card.querySelector('[data-store-activity]');
+        if (activityBox) {
+          var purchase = activityBox.querySelector('[data-activity="purchase"]');
+          var visit = activityBox.querySelector('[data-activity="visit"]');
+          var newestProduct = activityBox.querySelector('[data-activity="product"]');
+          var admins = activityBox.querySelector('[data-activity="admins"]');
+          if (purchase) purchase.textContent = purchaseText(store);
+          if (visit) visit.textContent = otherVisitText(store);
+          if (newestProduct) newestProduct.textContent = observable.products === false ? 'Product data is unavailable' : productText(products.newest_product, 'created_at');
+          if (admins) admins.textContent = formatNumber(customers.effective_admin_count) + ' effective · ' + formatNumber(customers.store_admin_count) + ' store-scoped';
+        }
+      });
+    }
+
+    function renderManageStats(store) {
+      var sales = (store && store.sales) || {};
+      var activity = (store && store.activity) || {};
+      var customers = (store && store.customers) || {};
+      var products = (store && store.products) || {};
+      var decision = (store && store.decision) || {};
+      var observable = (store && store.observability) || {};
+      document.getElementById('manageGrossSales').textContent = store ? (sales.observable === false ? 'Unavailable' : formatMoney(sales.gross_sales, sales.currency)) : '—';
+      document.getElementById('manageOrders').textContent = store ? (sales.observable === false ? 'Unavailable' : formatNumber(sales.order_count)) : '—';
+      document.getElementById('manageSessions').textContent = store
+        ? (observable.sessions === false ? 'Unavailable' : (activity.tracking_started_at ? (formatNumber(activity.non_super_admin_sessions) + ' non-founder / ' + formatNumber(activity.total_sessions) + ' total') : 'Not tracked'))
+        : '—';
+      document.getElementById('manageCustomers').textContent = store ? (observable.customers === false ? 'Unavailable' : formatNumber(customers.total)) : '—';
+      var decisionNote = document.getElementById('manageDecisionNote');
+      decisionNote.textContent = decisionSummary(store);
+      decisionNote.classList.toggle('good', decision.traction === 'converting' || decision.traction === 'engaged');
+      document.getElementById('manageStoreAge').textContent = store
+        ? storeAgeText(store) + (observable.store_age === false ? '' : ' · built ' + formatDate(store.created_at)) + ' · source: ' + String(store.source || 'unknown').replace(/_/g, ' ')
+        : 'Statistics have not loaded yet';
+      document.getElementById('manageTraction').textContent = store
+        ? decisionLabel(store) + ((decision.reasons || []).length ? ' · ' + decision.reasons.join(' · ') : '')
+        : 'Statistics have not loaded yet';
+      document.getElementById('manageAdmins').textContent = store ? adminText(store) : 'Statistics have not loaded yet';
+      document.getElementById('manageLastPurchase').textContent = store ? purchaseText(store) : 'Statistics have not loaded yet';
+      document.getElementById('manageLastOtherSession').textContent = store ? otherVisitText(store) : 'Statistics have not loaded yet';
+      document.getElementById('manageLastCustomer').textContent = store ? lastCustomerText(store) : 'Statistics have not loaded yet';
+      document.getElementById('manageProducts').textContent = store
+        ? (observable.products === false ? 'Product data is unavailable' : formatNumber(products.total) + ' total · ' + formatNumber(products.live) + ' live · ' + formatNumber(products.draft) + ' draft · ' + formatNumber(products.archived) + ' archived')
+        : 'Statistics have not loaded yet';
+      document.getElementById('manageNewestProduct').textContent = store ? (observable.products === false ? 'Product data is unavailable' : productText(products.newest_product, 'created_at')) : 'Statistics have not loaded yet';
+      document.getElementById('manageProductTotal').textContent = store ? (observable.products === false ? '—' : formatNumber(products.total)) : '—';
+      document.getElementById('manageProductLive').textContent = store ? (observable.products === false ? '—' : formatNumber(products.live)) : '—';
+      document.getElementById('manageProductDraft').textContent = store ? (observable.products === false ? '—' : formatNumber(products.draft)) : '—';
+      document.getElementById('manageProductArchived').textContent = store ? (observable.products === false ? '—' : formatNumber(products.archived)) : '—';
+      document.getElementById('manageProductNewest').textContent = store ? (observable.products === false ? 'Product data is unavailable' : productText(products.newest_product, 'created_at')) : 'Statistics have not loaded yet';
+      document.getElementById('manageProductUpdated').textContent = store ? (observable.products === false ? 'Product data is unavailable' : productText(products.last_product_update, 'updated_at')) : 'Statistics have not loaded yet';
+      renderActivityLog(store);
+      document.getElementById('manageCoverage').textContent = store
+        ? coverageLabel(sales.coverage) + ' Sessions are counted only from ' + (activity.tracking_started_at ? formatDate(activity.tracking_started_at) : 'tracker deployment') + '. Monitoring never deletes a store automatically.'
+        : 'Loading store statistics…';
+    }
+
+    function renderCommandCenterSummary(data) {
+      var totals = data.totals || {};
+      var highlights = data.highlights || {};
+      GM_STATE.dataQuality = data.data_quality || {};
+      GM_STATE.summaryByHandle = {};
+      (data.stores || []).forEach(function(store){
+        GM_STATE.summaryByHandle[String(store.handle || '')] = store;
+        ensureStoreCard(store);
+        renderStoreMetrics(store);
+      });
+      var statuses = { active: 0, sleeping: 0, waking: 0, closed: 0 };
+      (data.stores || []).forEach(function(store){
+        var status = String(store.status || 'active').toLowerCase();
+        if (!Object.prototype.hasOwnProperty.call(statuses, status)) status = 'active';
+        statuses[status] += 1;
+      });
+      document.getElementById('totalStoresHeader').textContent = formatNumber(totals.stores) + ' stores';
+      document.getElementById('statusTotal').textContent = formatNumber(totals.stores);
+      document.getElementById('statusActive').textContent = formatNumber(statuses.active);
+      document.getElementById('statusSleeping').textContent = formatNumber(statuses.sleeping);
+      document.getElementById('statusWaking').textContent = formatNumber(statuses.waking);
+      document.getElementById('statusClosed').textContent = formatNumber(statuses.closed);
+      GM_STATE.closedCount = statuses.closed;
+      var closedToggle = document.getElementById('toggleGraveyard');
+      if (closedToggle) {
+        closedToggle.textContent = (document.getElementById('graveyardContent').hasAttribute('hidden') ? 'Show' : 'Hide')
+          + ' Closed Stores (' + formatNumber(statuses.closed) + ')';
+      }
+      window.GM_ALL_STORES = (data.stores || []).map(function(store){
+        return { handle: store.handle, name: store.name, collection_handle: store.collection_handle || store.handle };
+      });
+      renderNewStoreBanner();
+      GM_STATE.metricsLoaded = true;
+      document.getElementById('totalStoreCount').textContent = formatNumber(totals.stores);
+      document.getElementById('totalGrossSales').textContent = totals.sales_observable === false ? 'Unavailable' : formatMoney(totals.gross_sales, totals.currency);
+      document.getElementById('totalPaidOrders').textContent = totals.sales_observable === false ? 'Unavailable' : formatNumber(totals.paid_orders);
+      document.getElementById('totalTrackedSessions').textContent = totals.sessions_observable === false ? 'Unavailable' : formatNumber(totals.tracked_sessions);
+      document.getElementById('totalTaggedCustomers').textContent = totals.customers_observable === false ? 'Unavailable' : formatNumber(totals.unique_tagged_customers);
+      document.getElementById('totalShoppers').textContent = totals.customers_observable === false ? 'Unavailable' : formatNumber(totals.unique_shoppers);
+      document.getElementById('totalProducts').textContent = totals.products_observable === false ? 'Unavailable' : formatNumber(totals.products);
+      document.getElementById('totalNeedsAttention').textContent = formatNumber(totals.needs_attention);
+      document.getElementById('adminCoverage').textContent = 'Platform super-admins: ' + formatNumber(totals.platform_admins)
+        + ' · Store-admin assignments: ' + formatNumber(totals.store_admin_memberships)
+        + ' · No-traction reviews: ' + formatNumber(totals.review_candidates) + '.';
+      document.getElementById('metricsCoverage').textContent = coverageLabel(totals.sales_coverage)
+        + ' Session totals include all tracked visits; each store separately shows non-founder activity.';
+      document.getElementById('performanceCard').setAttribute('aria-busy', 'false');
+
+      var newestStore = highlights.newest_store;
+      var newestProduct = highlights.newest_product;
+      var latestSale = highlights.latest_purchase;
+      var latestVisit = highlights.latest_non_super_admin_session;
+      document.getElementById('highlightNewestStore').textContent = newestStore
+        ? (newestStore.name + ' · ' + (newestStore.age_days === 0 ? 'today' : formatNumber(newestStore.age_days) + 'd old') + ' · ' + formatDate(newestStore.created_at))
+        : 'Store age is not observable';
+      document.getElementById('highlightNewestProduct').textContent = newestProduct
+        ? (newestProduct.title + ' · ' + newestProduct.store_name + ' · ' + formatDate(newestProduct.created_at))
+        : 'No attributed product found';
+      document.getElementById('highlightLatestSale').textContent = latestSale
+        ? ((latestSale.order_name || 'Order') + ' · ' + (latestSale.store_handle || 'store') + ' · ' + formatMoney(latestSale.gross_amount, latestSale.currency) + ' · ' + formatDate(latestSale.created_at))
+        : (totals.sales_coverage === 'unavailable' ? 'Sales are not observable' : 'No attributed paid sale found');
+      document.getElementById('highlightLatestVisit').textContent = latestVisit
+        ? ((latestVisit.store_name || latestVisit.store_handle) + ' · ' + (latestVisit.customer_display_name || (latestVisit.visitor_type === 'anonymous' ? 'Anonymous visitor' : 'Signed-in member')) + ' · ' + formatDate(latestVisit.at))
+        : 'No non-founder visit tracked yet';
+      document.getElementById('latestChangesCard').setAttribute('aria-busy', 'false');
+
+      var quality = data.data_quality || {};
+      var qualityKeys = Object.keys(quality);
+      var qualityBox = document.getElementById('metricsQuality');
+      if (qualityKeys.length) {
+        qualityBox.style.display = 'block';
+        qualityBox.textContent = 'Some reporting is incomplete: ' + qualityKeys.join(', ').replace(/_/g, ' ') + '.';
+      } else {
+        qualityBox.style.display = 'none';
+        qualityBox.textContent = '';
+      }
+      if (GM_STATE.currentStore) {
+        renderManageStats(GM_STATE.summaryByHandle[GM_STATE.currentStore.handle]);
+      }
+      applyStoreFilters();
+    }
+
+    function loadCommandCenterSummary(forceRefresh) {
+      var button = document.getElementById('refreshMetricsBtn');
+      var coverage = document.getElementById('metricsCoverage');
+      document.getElementById('performanceCard').setAttribute('aria-busy', 'true');
+      if (button) button.disabled = true;
+      if (coverage) coverage.textContent = forceRefresh ? 'Refreshing verified store data…' : 'Loading verified Shopify and storefront activity…';
+      var endpoint = RAILWAY_URL + '/admin/command-center/summary' + (forceRefresh ? '?refresh=1' : '');
+      fetch(endpoint, { method: 'GET', headers: railwayHeaders(), cache: 'no-store' })
+        .then(function(response){
+          return response.json().catch(function(){ return {}; }).then(function(body){
+            if (!response.ok || !body.ok) throw new Error(body.error || 'Statistics request failed');
+            return body;
+          });
+        })
+        .then(renderCommandCenterSummary)
+        .catch(function(error){
+          GM_STATE.metricsLoaded = false;
+          document.getElementById('performanceCard').setAttribute('aria-busy', 'false');
+          document.getElementById('latestChangesCard').setAttribute('aria-busy', 'false');
+          document.getElementById('metricsCoverage').textContent = 'Store statistics are unavailable: ' + error.message;
+          document.getElementById('highlightNewestStore').textContent = 'Unavailable';
+          document.getElementById('highlightNewestProduct').textContent = 'Unavailable';
+          document.getElementById('highlightLatestSale').textContent = 'Unavailable';
+          document.getElementById('highlightLatestVisit').textContent = 'Unavailable';
+          showToast('Could not load store statistics', true);
+        })
+        .finally(function(){ if (button) button.disabled = false; });
     }
 
     function setStatus(id, text, color) {
@@ -890,25 +1697,81 @@
       allCards.forEach(function(card){
         var name = String(card.getAttribute('data-name') || '').toLowerCase();
         var status = String(card.getAttribute('data-status') || 'active');
-        var isPrivate = card.getAttribute('data-private') === 'true';
-        var products = parseInt(card.getAttribute('data-products') || '0', 10);
+        var orderCountRaw = card.getAttribute('data-order-count') || 'unknown';
+        var orderCount = orderCountRaw === 'unknown' ? null : parseInt(orderCountRaw, 10);
+        var memberCountRaw = card.getAttribute('data-member-count') || 'unknown';
+        var memberCount = memberCountRaw === 'unknown' ? null : parseInt(memberCountRaw, 10);
+        var sessionCountRaw = card.getAttribute('data-session-count') || 'unknown';
+        var sessionCount = sessionCountRaw === 'unknown' ? null : parseInt(sessionCountRaw, 10);
+        var ageDaysRaw = card.getAttribute('data-age-days') || 'unknown';
+        var ageDays = ageDaysRaw === 'unknown' ? null : parseInt(ageDaysRaw, 10);
         var inClosedGrid = card.closest('#closedStoreGrid') !== null;
 
         var statusMatches = true;
-        if (GM_STATE.activeGridFilter === 'closed' || GM_STATE.activeStatFilter === 'closed') {
-          statusMatches = inClosedGrid;
-        } else if (GM_STATE.activeGridFilter === 'sleeping' || GM_STATE.activeStatFilter === 'sleeping') {
-          statusMatches = !inClosedGrid && status === 'sleeping';
-        } else if (GM_STATE.activeGridFilter === 'waking' || GM_STATE.activeStatFilter === 'waking') {
-          statusMatches = !inClosedGrid && status === 'waking';
-        } else if (GM_STATE.activeGridFilter === 'active' || GM_STATE.activeStatFilter === 'active') {
-          statusMatches = !inClosedGrid && status !== 'sleeping' && status !== 'waking';
-        } else if (GM_STATE.activeGridFilter === 'no-sales') {
-          statusMatches = !inClosedGrid && status !== 'sleeping' && status !== 'waking' && !isPrivate && products === 0;
+        if (GM_STATE.activeStatFilter === 'closed') statusMatches = inClosedGrid;
+        else if (GM_STATE.activeStatFilter === 'sleeping') statusMatches = !inClosedGrid && status === 'sleeping';
+        else if (GM_STATE.activeStatFilter === 'waking') statusMatches = !inClosedGrid && status === 'waking';
+        else if (GM_STATE.activeStatFilter === 'active') statusMatches = !inClosedGrid && status !== 'sleeping' && status !== 'waking';
+        else statusMatches = !inClosedGrid || !document.getElementById('graveyardContent').hasAttribute('hidden');
+
+        var decisionMatches = true;
+        if (GM_STATE.activeGridFilter === 'no-sales') {
+          decisionMatches = !GM_STATE.dataQuality.sales && orderCount === 0;
+        } else if (GM_STATE.activeGridFilter === 'no-members') {
+          decisionMatches = !GM_STATE.dataQuality.customers && memberCount === 0;
+        } else if (GM_STATE.activeGridFilter === 'no-sessions') {
+          decisionMatches = !GM_STATE.dataQuality.sessions && card.getAttribute('data-tracking-started') === 'true' && sessionCount === 0;
+        } else if (GM_STATE.activeGridFilter === 'attention') {
+          decisionMatches = card.getAttribute('data-needs-attention') === 'true';
+        } else if (GM_STATE.activeGridFilter === 'review') {
+          decisionMatches = card.getAttribute('data-review-candidate') === 'true';
+        } else if (GM_STATE.activeGridFilter === 'new') {
+          decisionMatches = ageDays !== null && ageDays < 7;
         }
 
-        var matchesSearch = !search || name.indexOf(search) !== -1;
-        card.style.display = statusMatches && matchesSearch ? '' : 'none';
+        var handle = String(card.getAttribute('data-handle') || '').toLowerCase();
+        var matchesSearch = !search || name.indexOf(search) !== -1 || handle.indexOf(search) !== -1;
+        card.style.display = statusMatches && decisionMatches && matchesSearch ? '' : 'none';
+      });
+      sortStoreCards();
+    }
+
+    function sortStoreCards() {
+      var sort = String((document.getElementById('storeSort') || {}).value || GM_STATE.storeSort || 'newest');
+      GM_STATE.storeSort = sort;
+      document.querySelectorAll('.gm-store-grid').forEach(function(grid){
+        var cards = Array.prototype.slice.call(grid.querySelectorAll(':scope > .gm-store-card'));
+        cards.sort(function(a, b){
+          function number(card, attr) {
+            var raw = card.getAttribute(attr);
+            var value = Number(raw);
+            return raw && raw !== 'unknown' && Number.isFinite(value) ? value : null;
+          }
+          function descending(attr) {
+            var av = number(a, attr);
+            var bv = number(b, attr);
+            if (av === null && bv === null) return 0;
+            if (av === null) return 1;
+            if (bv === null) return -1;
+            return bv - av;
+          }
+          var compared = 0;
+          if (sort === 'newest' || sort === 'oldest') {
+            var at = Date.parse(a.getAttribute('data-created-at') || '');
+            var bt = Date.parse(b.getAttribute('data-created-at') || '');
+            var aValid = Number.isFinite(at);
+            var bValid = Number.isFinite(bt);
+            if (aValid && bValid) compared = sort === 'newest' ? bt - at : at - bt;
+            else if (aValid !== bValid) compared = aValid ? -1 : 1;
+          } else if (sort === 'sales') compared = descending('data-gross-sales');
+          else if (sort === 'orders') compared = descending('data-order-count');
+          else if (sort === 'members') compared = descending('data-member-count');
+          else if (sort === 'sessions') compared = descending('data-session-count');
+          else if (sort === 'products') compared = descending('data-products');
+          if (compared !== 0) return compared;
+          return String(a.getAttribute('data-name') || '').localeCompare(String(b.getAttribute('data-name') || ''));
+        });
+        cards.forEach(function(card){ grid.appendChild(card); });
       });
     }
 
@@ -920,13 +1783,13 @@
     }
 
     function syncGraveyardVisibilityForFilters() {
-      var wantsClosed = GM_STATE.activeGridFilter === 'closed' || GM_STATE.activeStatFilter === 'closed';
+      var wantsClosed = GM_STATE.activeStatFilter === 'closed';
       var content = document.getElementById('graveyardContent');
       var toggle = document.getElementById('toggleGraveyard');
       if (!content || !toggle) return;
       if (wantsClosed && content.hasAttribute('hidden')) {
         content.removeAttribute('hidden');
-        toggle.textContent = 'Hide Closed Stores ({{ closed_count }})';
+        toggle.textContent = 'Hide Closed Stores (' + formatNumber(GM_STATE.closedCount) + ')';
       }
     }
 
@@ -951,7 +1814,10 @@
       document.querySelectorAll('.gm-tab-pane[data-pane]').forEach(function(pane){
         pane.classList.toggle('active', pane.getAttribute('data-pane') === tab);
       });
-      if (tab === 'members') loadMembers();
+      if (tab === 'people') loadMembers();
+      if ((tab === 'overview' || tab === 'activity' || tab === 'products') && GM_STATE.currentStore) {
+        renderManageStats(GM_STATE.summaryByHandle[GM_STATE.currentStore.handle]);
+      }
     }
 
     function openManageFromCard(card) {
@@ -971,11 +1837,13 @@
       document.getElementById('manageTitle').textContent = name;
       document.getElementById('manageHandle').textContent = '@' + handle;
       document.getElementById('openFullAdminBtn').href = '/pages/admin-powers?shop=' + encodeURIComponent(handle);
+      document.getElementById('openProductAdminBtn').href = '/pages/admin-powers?shop=' + encodeURIComponent(handle);
       document.getElementById('infoHandle').textContent = handle;
       document.getElementById('infoJoinLink').textContent = 'https://stellasageco.com/pages/join-store?shop=' + handle;
       document.getElementById('infoProductCount').textContent = String(products);
       document.getElementById('infoVisitBtn').href = '/collections/' + encodeURIComponent(collection || handle);
-      switchManageTab('members');
+      renderManageStats(GM_STATE.summaryByHandle[handle]);
+      switchManageTab('overview');
       openSheet('manageSheet');
     }
 
@@ -1116,7 +1984,15 @@
 
     function nukeStore(handle) {
       if (!handle) return;
-      if (!confirm('☢️ NUKE store "' + handle + '"? This cannot be undone.')) return;
+      var summary = GM_STATE.summaryByHandle[handle];
+      if (!summary || !(summary.decision || {}).review_candidate) {
+        if (!confirm('Monitoring has not established a complete 7-day no-traction window for "' + handle + '". Continue to the deletion confirmation anyway?')) return;
+      }
+      var typed = prompt('This permanently deletes store "' + handle + '". Type the exact store handle to continue:');
+      if (String(typed || '').trim().toLowerCase() !== String(handle).toLowerCase()) {
+        showToast('Deletion cancelled — handle did not match.', true);
+        return;
+      }
       fetch(RAILWAY_URL + '/storefront/' + encodeURIComponent(handle) + '/nuke', {
         method: 'POST',
         headers: railwayHeaders(),
@@ -1227,6 +2103,7 @@
     });
 
     document.getElementById('storeSearch').addEventListener('input', applyStoreFilters);
+    document.getElementById('storeSort').addEventListener('change', applyStoreFilters);
 
     document.querySelectorAll('[data-grid-filter]').forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -1251,19 +2128,26 @@
       var isHidden = content.hasAttribute('hidden');
       if (isHidden) {
         content.removeAttribute('hidden');
-        this.textContent = 'Hide Closed Stores ({{ closed_count }})';
+        this.textContent = 'Hide Closed Stores (' + formatNumber(GM_STATE.closedCount) + ')';
       } else {
         content.setAttribute('hidden', 'hidden');
-        this.textContent = 'Show Closed Stores ({{ closed_count }})';
+        this.textContent = 'Show Closed Stores (' + formatNumber(GM_STATE.closedCount) + ')';
       }
       applyStoreFilters();
     });
 
-    document.getElementById('activeStoreGrid').addEventListener('click', function(event){
-      var target = event.target.closest('[data-open-manage]');
-      if (!target) return;
-      var card = target.closest('.gm-store-card');
-      openManageFromCard(card);
+    document.querySelectorAll('.gm-store-grid').forEach(function(grid){
+      grid.addEventListener('click', function(event){
+        var wakeTarget = event.target.closest('[data-wake-handle]');
+        if (wakeTarget) {
+          wakeStore(wakeTarget.getAttribute('data-wake-handle') || '');
+          return;
+        }
+        var target = event.target.closest('[data-open-manage]');
+        if (!target) return;
+        var card = target.closest('.gm-store-card');
+        openManageFromCard(card);
+      });
     });
 
     document.getElementById('sheetOverlay').addEventListener('click', closeSheets);
@@ -1305,12 +2189,16 @@
     });
 
     document.getElementById('markAllSeenBtn').addEventListener('click', markAllStoresSeen);
+    document.getElementById('refreshMetricsBtn').addEventListener('click', function(){
+      loadCommandCenterSummary(true);
+    });
 
     bindPriceOverride('btnUpdatePrice', 'targetTag', 'newPrice', 'priceStatus');
     bindPriceOverride('btnUpdatePrice_m', 'targetTag_m', 'newPrice_m', 'priceStatus_m');
 
     renderNewStoreBanner();
     applyStoreFilters();
+    loadCommandCenterSummary(false);
   </script>
 {% endif %}
 

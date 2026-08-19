@@ -49,8 +49,13 @@
       {% assign requested_badge = true %}
     {% endif %}
 
-    {% if tag_down contains 'storefront-admin--' %}
-      {% assign ah = tag_stripped | remove: 'storefront-admin--' | remove: 'STOREFRONT-ADMIN--' | strip %}
+    {% assign current_admin_prefix = tag_down | slice: 0, 18 %}
+    {% assign current_member_prefix = tag_down | slice: 0, 19 %}
+    {% assign legacy_admin_prefix = tag_down | slice: 0, 10 %}
+    {% assign legacy_member_prefix = tag_down | slice: 0, 4 %}
+
+    {% if current_admin_prefix == 'storefront-admin--' %}
+      {% assign ah = tag_down | remove: 'storefront-admin--' | strip %}
       {% if ah != blank %}
         {% capture admin_needle %}||{{ ah }}||{% endcapture %}
         {% unless admin_handles_blob contains admin_needle %}
@@ -66,8 +71,8 @@
       {% endif %}
     {% endif %}
 
-    {% if tag_down contains 'storefront-member--' %}
-      {% assign mh = tag_stripped | remove: 'storefront-member--' | remove: 'STOREFRONT-MEMBER--' | strip %}
+    {% if current_member_prefix == 'storefront-member--' %}
+      {% assign mh = tag_down | remove: 'storefront-member--' | strip %}
       {% if mh != blank %}
         {% capture member_needle %}||{{ mh }}||{% endcapture %}
         {% unless member_handles_blob contains member_needle %}
@@ -77,16 +82,40 @@
         {% endunless %}
       {% endif %}
     {% endif %}
+
+    {% if legacy_admin_prefix == 'b2b-admin-' %}
+      {% assign legacy_ah = tag_down | remove: 'b2b-admin-' | strip %}
+      {% if legacy_ah != blank %}
+        {% capture legacy_admin_needle %}||{{ legacy_ah }}||{% endcapture %}
+        {% unless admin_handles_blob contains legacy_admin_needle %}
+          {% assign admin_handles_blob = admin_handles_blob | append: legacy_ah | append: '||' %}
+          {% assign admin_count = admin_count | plus: 1 %}
+        {% endunless %}
+        {% unless member_handles_blob contains legacy_admin_needle %}
+          {% assign member_handles_blob = member_handles_blob | append: legacy_ah | append: '||' %}
+          {% assign store_count = store_count | plus: 1 %}
+          {% assign has_storefront = true %}
+        {% endunless %}
+      {% endif %}
+    {% elsif legacy_member_prefix == 'b2b-' %}
+      {% assign legacy_mh = tag_down | remove: 'b2b-' | strip %}
+      {% if legacy_mh != blank %}
+        {% capture legacy_member_needle %}||{{ legacy_mh }}||{% endcapture %}
+        {% unless member_handles_blob contains legacy_member_needle %}
+          {% assign member_handles_blob = member_handles_blob | append: legacy_mh | append: '||' %}
+          {% assign store_count = store_count | plus: 1 %}
+          {% assign has_storefront = true %}
+        {% endunless %}
+      {% endif %}
+    {% endif %}
   {% endfor %}
 {% endif %}
 
-{% comment %} --- CHECK FOR SUPER ADMIN STATUS --- {% endcomment %}
+{% comment %} --- CHECK FOR PLATFORM SUPER ADMIN STATUS --- {% endcomment %}
+{% capture platform_access_value %}{% render 'platform-super-admin' %}{% endcapture %}
+{% assign platform_access_value = platform_access_value | strip %}
 {% assign is_god = false %}
-{% if customer %}
-  {% if customer.email == 'ryan.irwin@stellaandsagecompany.com' or customer.tags contains 'super-admin' %}
-    {% assign is_god = true %}
-  {% endif %}
-{% endif %}
+{% if platform_access_value == 'true' %}{% assign is_god = true %}{% endif %}
 
 {% comment %} SMART SORTING LOGIC {% endcomment %}
 {% assign bucket_admin = '' %}
@@ -296,7 +325,7 @@
                     </div>
                     <div class="ss-col-controls">
                       <a href="/pages/super-admin" class="ss-open-btn" style="background:#2563eb;">
-                        <span>Enter God Mode</span>
+                        <span>Open Command Center</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                       </a>
                     </div>

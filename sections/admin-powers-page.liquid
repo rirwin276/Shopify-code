@@ -6,7 +6,7 @@
     Product thumbnails (52×52px) pulled from featured_image / image / images[0].src
     with 🖼️ placeholder. Products lazy-load when tab is clicked.
   - V11: Route all calls to Railway (remove Mechanic URL). Remove credentials:include from fetches.
-  - God Mode: Ryan Irwin hardcoded + super-admin tag.
+  - Platform access: exact super-admin tag.
   - QR code, public toggle, invite/remove members.
   - V13: Wider desktop layout, Products-first tabs, hero Share Store modal, split Main vs Custom/Pro products, single editor button, silent product refresh.
   - Premium design upgrade.
@@ -37,36 +37,24 @@
   2. ADMIN ACCESS CHECK
 
   Access rules:
-  - Founder access: customer tag `super-admin` can manage every storefront.
-  - Store admin access: customer tag `storefront-admin--<shop_handle>` can manage only that storefront.
-  - Temporary safety fallback: Ryan's owner email still gets founder access until the `super-admin`
-    tag is confirmed on the live Shopify customer account.
-
-  Do not remove the email fallback until owner access has been tested through the `super-admin` tag.
+  - Platform access: customer tag `super-admin` can manage every storefront.
+  - Store access: current or legacy per-store admin tags can manage only that storefront.
 {%- endcomment -%}
 {%- assign required_admin_tag = 'storefront-admin--' | append: shop_handle -%}
-{%- assign founder_access_tag = 'super-admin' -%}
-{%- assign owner_email_fallback = 'ryan.irwin@stellaandsagecompany.com' -%}
+{%- assign legacy_admin_tag = 'b2b-admin-' | append: shop_handle -%}
 {%- assign is_admin_for_shop = false -%}
+{%- capture platform_access_value -%}{%- render 'platform-super-admin' -%}{%- endcapture -%}
+{%- assign platform_access_value = platform_access_value | strip -%}
 {%- assign is_super_admin = false -%}
+{%- if platform_access_value == 'true' -%}{%- assign is_super_admin = true -%}{%- endif -%}
 
 {%- if customer and shop_handle != blank -%}
-  {%- assign customer_email_down = customer.email | default: '' | downcase | strip -%}
-
-  {%- if customer_email_down == owner_email_fallback -%}
-    {%- assign is_super_admin = true -%}
+  {%- if is_super_admin -%}
     {%- assign is_admin_for_shop = true -%}
   {%- endif -%}
-
   {%- for t in customer.tags -%}
     {%- assign tag_down = t | downcase | strip -%}
-
-    {%- if tag_down == founder_access_tag -%}
-      {%- assign is_super_admin = true -%}
-      {%- assign is_admin_for_shop = true -%}
-    {%- endif -%}
-
-    {%- if tag_down == required_admin_tag -%}
+    {%- if tag_down == required_admin_tag or tag_down == legacy_admin_tag -%}
       {%- assign is_admin_for_shop = true -%}
     {%- endif -%}
   {%- endfor -%}
