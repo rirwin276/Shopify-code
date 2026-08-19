@@ -92,6 +92,10 @@
   endcase
 %}
 
+{% if is_private_store_product and has_private_store_access %}
+  {% render 'storefront-activity-tracker', handle: private_store_handle %}
+{% endif %}
+
 {% if is_private_store_product and has_private_store_access == false %}
   {% assign private_store_return_url = private_store_collection_url | default: '/pages/portal' %}
   <div class="section-background color-{{ section.settings.color_scheme }}"></div>

@@ -1,0 +1,70 @@
+{%- doc -%}
+  Records one privacy-minimized first-party session per store after 30 minutes
+  of inactivity. Shopify's signed App Proxy supplies authenticated identity;
+  the browser sends no customer data and never receives a private credential.
+
+  @param {string} handle - Canonical private-store handle.
+{%- enddoc -%}
+{%- assign activity_handle = handle | default: '' | downcase | strip -%}
+{%- if activity_handle != blank -%}
+  <script data-storefront-activity-tracker="{{ activity_handle | escape }}">
+    (function () {
+      var handle = {{ activity_handle | json }};
+      var idleMs = 30 * 60 * 1000;
+      var key = 'ss-store-session-v1:' + handle;
+      var now = Date.now();
+      var state = null;
+
+      function newId() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+          return window.crypto.randomUUID();
+        }
+        return now.toString(36) + '-' + Math.random().toString(36).slice(2) + '-' + Math.random().toString(36).slice(2);
+      }
+
+      try { state = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_error) {}
+      if (!state || !state.id || !state.last_seen || now - Number(state.last_seen) > idleMs) {
+        state = { id: newId(), last_seen: now, reported: false };
+      } else {
+        state.last_seen = now;
+      }
+      try { localStorage.setItem(key, JSON.stringify(state)); } catch (_error) {}
+      if (state.reported) return;
+      if (state.pending_at && now - Number(state.pending_at) < 30000) return;
+      state.pending_at = now;
+      try { localStorage.setItem(key, JSON.stringify(state)); } catch (_error) {}
+
+      function reportWhenIdle() {
+        fetch('/apps/ss/relay/store/' + encodeURIComponent(handle) + '/activity/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: state.id, path: window.location.pathname }),
+          keepalive: true
+        }).then(function (response) {
+          if (!response.ok) throw new Error('activity tracker rejected');
+          state.reported = true;
+          delete state.pending_at;
+          state.last_seen = Date.now();
+          try { localStorage.setItem(key, JSON.stringify(state)); } catch (_error) {}
+        }).catch(function () {
+          // Analytics must never block the storefront. A later page view retries.
+          delete state.pending_at;
+          try { localStorage.setItem(key, JSON.stringify(state)); } catch (_error) {}
+        });
+      }
+
+      function scheduleReport() {
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(reportWhenIdle, { timeout: 2500 });
+        } else {
+          window.setTimeout(reportWhenIdle, 1200);
+        }
+      }
+
+      // Do not compete with product rendering, cart controls, or checkout
+      // navigation. Telemetry starts only after the storefront load event.
+      if (document.readyState === 'complete') scheduleReport();
+      else window.addEventListener('load', scheduleReport, { once: true });
+    })();
+  </script>
+{%- endif -%}

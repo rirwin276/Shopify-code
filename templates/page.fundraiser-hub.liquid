@@ -124,13 +124,10 @@
 </head>
 <body>
 
+{% capture platform_access_value %}{% render 'platform-super-admin' %}{% endcapture %}
+{% assign platform_access_value = platform_access_value | strip %}
 {% assign is_super = false %}
-{% if customer %}
-  {% if customer.email == 'ryan.irwin@stellaandsagecompany.com' %}{% assign is_super = true %}{% endif %}
-  {% for t in customer.tags %}
-    {% if t contains 'super-admin' %}{% assign is_super = true %}{% endif %}
-  {% endfor %}
-{% endif %}
+{% if platform_access_value == 'true' %}{% assign is_super = true %}{% endif %}
 {% unless is_super %}
   <script>window.location.replace('/pages/portal');</script>
 {% endunless %}
