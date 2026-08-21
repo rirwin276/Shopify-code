@@ -60,10 +60,23 @@
   {%- endfor -%}
 {%- endif -%}
 
+{%- comment -%}
+  Candidate rendering is intentionally narrower than authorization.  An
+  ownerless store may render the limited demo shell, but the signed relay must
+  still confirm outreach_tracking.store_status=prospect_unclaimed before the
+  two allowed controls are enabled.
+{%- endcomment -%}
+{%- assign prospect_shop_meta = shop.metaobjects.custom_shop[shop_handle] -%}
+{%- assign prospect_owner = prospect_shop_meta.owner_customer_id.value | default: prospect_shop_meta.owner_customer_id | default: '' | strip | downcase -%}
+{%- assign is_prospect_demo_candidate = false -%}
+{%- if shop_handle != blank and prospect_owner == 'unclaimed' and is_admin_for_shop == false and is_super_admin == false -%}
+  {%- assign is_prospect_demo_candidate = true -%}
+{%- endif -%}
+
 {{ 'ss-admin-powers.css' | asset_url | stylesheet_tag }}
 
 
-{%- if customer == nil -%}
+{%- if customer == nil and is_prospect_demo_candidate == false -%}
 
 <div class="ap-auth-wrap">
   <div class="ap-auth-card">
@@ -74,7 +87,7 @@
   </div>
 </div>
 
-{%- elsif is_admin_for_shop == false and is_super_admin == false -%}
+{%- elsif is_admin_for_shop == false and is_super_admin == false and is_prospect_demo_candidate == false -%}
 
 <div class="ap-auth-wrap">
   <div class="ap-auth-card">
@@ -162,13 +175,14 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<div class="ap-wrap">
+<div class="ap-wrap{% if is_prospect_demo_candidate %} ap-wrap--prospect-demo{% endif %}">
 
   <script>
     window.SSAP = window.SSAP || {};
     SSAP.collectionHandle = {{ collection_handle | json }};
     SSAP.shopHandle = {{ shop_handle | json }};
     SSAP.isSuperAdmin = {{ is_super_admin | json }};
+    SSAP.isProspectDemo = {{ is_prospect_demo_candidate | json }};
   </script>
 
   {%- comment -%}
@@ -191,14 +205,22 @@
     SSAP.editorProShirtBc3001yBaseUrl = {{ editor_pro_shirt_bc3001y_base_url | json }};
     SSAP.editorProShirtM2580BaseUrl = {{ editor_pro_shirt_m2580_base_url | json }};
     SSAP.editorProShirtZipHoodieBaseUrl = {{ editor_pro_shirt_zip_hoodie_base_url | json }};
-    SSAP.editorSecret = {{ editor_secret | json }};
+    SSAP.editorSecret = {% if is_prospect_demo_candidate %}""{% else %}{{ editor_secret | json }}{% endif %};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
     SSAP.joinLink = {{ join_link | json }};
-    SSAP.customerId = {{ customer.id | json }};
-    SSAP.customerEmail = {{ customer.email | json }};
+    SSAP.customerId = {% if customer %}{{ customer.id | json }}{% else %}null{% endif %};
+    SSAP.customerEmail = {% if customer %}{{ customer.email | json }}{% else %}null{% endif %};
     SSAP.dashboardUrl = {{ dashboard_url | json }};
     SSAP.storeName = {{ store_name | json }};
   </script>
+
+  {%- if is_prospect_demo_candidate -%}
+    <div class="ap-prospect-demo-notice" data-prospect-demo-notice>
+      <strong>You’re previewing your store admin.</strong>
+      Customize the storefront or build one real product—no sign-in required.
+      Protected controls unlock after you claim the store.
+    </div>
+  {%- endif -%}
 
   <!-- HERO HEADER -->
   <div class="ap-hero">
@@ -214,7 +236,7 @@
     <div class="ap-hero-info">
       <div class="ap-hero-badge">
         <span class="dot"></span>
-        {% if is_super_admin %}Founder Control Center{% else %}Store Admin{% endif %}
+        {% if is_prospect_demo_candidate %}Prospect Admin Preview{% elsif is_super_admin %}Founder Control Center{% else %}Store Admin{% endif %}
       </div>
       <h1>{{ store_name | capitalize }}</h1>
       <div class="ap-hero-meta" aria-label="Store details">
@@ -861,8 +883,13 @@
 
 </div><!-- /.ap-wrap -->
 
+{%- if is_prospect_demo_candidate -%}
+  <script src="{{ 'ss-prospect-admin-demo.js' | asset_url }}" defer></script>
+{%- endif -%}
 <script src="{{ 'ss-admin-powers-core.js' | asset_url }}" defer></script>
-<script src="{{ 'ss-admin-fundraiser.js' | asset_url }}" defer></script>
+{%- unless is_prospect_demo_candidate -%}
+  <script src="{{ 'ss-admin-fundraiser.js' | asset_url }}" defer></script>
+{%- endunless -%}
 
 {%- endif -%}
 

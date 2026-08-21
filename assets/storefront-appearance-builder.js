@@ -88,6 +88,7 @@
     var selectedDesign = designFromState(savedState);
     var dirty = false;
     var endpoint = '/apps/ss/relay/store/' + encodeURIComponent(builder.dataset.shopHandle || '') + '/appearance';
+    var isProspectDemo = builder.dataset.prospectDemo === 'true';
     var lastFocus = null;
 
     var primary = overlay.querySelector('[data-sfs-primary]');
@@ -187,6 +188,9 @@
     }
 
     function open(){
+      if (isProspectDemo && window.SSProspectDemo && window.SSProspectDemo.record) {
+        window.SSProspectDemo.record('store_customizer_opened');
+      }
       lastFocus = document.activeElement;
       state = Object.assign({}, savedState);
       normalizeLegacyDesign(state);
@@ -249,10 +253,16 @@
       setStatus('Saving storefront template…','');
 
       try {
+        var savePayload = Object.assign({}, state);
+        if (isProspectDemo) {
+          var demo = window.SSProspectDemo || {};
+          if (!demo.token) throw new Error('The secure demo session is still loading. Try again in a moment.');
+          savePayload._prospect_demo_token = demo.token;
+        }
         var response = await fetch(endpoint, {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
-          body: JSON.stringify(state),
+          body: JSON.stringify(savePayload),
           cache: 'no-store'
         });
         var data = await response.json().catch(function(){ return {}; });
@@ -282,10 +292,16 @@
       setStatus('Restoring original storefront template…','');
 
       try {
+        var resetPayload = {reset:true};
+        if (isProspectDemo) {
+          var demo = window.SSProspectDemo || {};
+          if (!demo.token) throw new Error('The secure demo session is still loading. Try again in a moment.');
+          resetPayload._prospect_demo_token = demo.token;
+        }
         var response = await fetch(endpoint, {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({reset:true}),
+          body: JSON.stringify(resetPayload),
           cache: 'no-store'
         });
         var data = await response.json().catch(function(){ return {}; });
