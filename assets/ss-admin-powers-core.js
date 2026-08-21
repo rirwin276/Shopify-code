@@ -380,7 +380,7 @@
       var panel = document.getElementById(targetId);
       if(panel) panel.classList.add('active');
       // Lazy-load products when Products tab is first clicked
-      if((targetId === 'apPanelProducts' || targetId === 'apPanelAddProducts') && !apProductsLoaded){
+      if(!SSAP.isProspectDemo && (targetId === 'apPanelProducts' || targetId === 'apPanelAddProducts') && !apProductsLoaded){
         apProductsLoaded = true;
         apLoadProducts();
       }
@@ -595,9 +595,12 @@
     }
   }
 
-  document.getElementById('apBtnAdd').addEventListener('click', function(){ handleMemberAction('add'); });
-  document.getElementById('apBtnRemove').addEventListener('click', function(){ handleMemberAction('remove'); });
-  document.getElementById('apBtnRemoveAdmin').addEventListener('click', function(){
+  var apBtnAddMember = document.getElementById('apBtnAdd');
+  var apBtnRemoveMember = document.getElementById('apBtnRemove');
+  var apBtnRemoveAdminRole = document.getElementById('apBtnRemoveAdmin');
+  if(apBtnAddMember) apBtnAddMember.addEventListener('click', function(){ handleMemberAction('add'); });
+  if(apBtnRemoveMember) apBtnRemoveMember.addEventListener('click', function(){ handleMemberAction('remove'); });
+  if(apBtnRemoveAdminRole) apBtnRemoveAdminRole.addEventListener('click', function(){
     var roleSelect = document.getElementById('apInputRole');
     if(roleSelect) roleSelect.value = 'remove-admin';
     handleMemberAction('remove-admin');
@@ -1503,12 +1506,14 @@
   }
 
   // Products is the default tab in V13, so load immediately.
-  apProductsLoaded = true;
-  apLoadProducts();
+  if(!SSAP.isProspectDemo){
+    apProductsLoaded = true;
+    apLoadProducts();
+  }
 
   // Quiet background refresh so newly built/rebuilt products show up without a manual browser refresh.
   setInterval(function(){
-    if(document.hidden) return;
+    if(document.hidden || SSAP.isProspectDemo) return;
     var productsPanel = document.getElementById('apPanelProducts');
     if(productsPanel && productsPanel.classList.contains('active')){
       apLoadProducts({ silent: true });

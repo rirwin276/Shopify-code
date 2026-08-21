@@ -31,6 +31,14 @@
   {%- endfor -%}
 {%- endif -%}
 
+{%- assign sfs_shop_candidate = shop.metaobjects.custom_shop[sfs_shop_handle] -%}
+{%- assign sfs_candidate_owner = sfs_shop_candidate.owner_customer_id.value | default: sfs_shop_candidate.owner_customer_id | default: '' | strip | downcase -%}
+{%- assign sfs_is_prospect_demo = false -%}
+{%- if sfs_allowed == false and sfs_shop_handle != blank and sfs_candidate_owner == 'unclaimed' -%}
+  {%- assign sfs_allowed = true -%}
+  {%- assign sfs_is_prospect_demo = true -%}
+{%- endif -%}
+
 {%- if sfs_allowed -%}
   {%- assign sfs_shop = shop.metaobjects.custom_shop[sfs_shop_handle] -%}
   {%- assign sfs_store_name = sfs_shop.name.value | default: sfs_shop.name | default: sfs_shop_handle -%}
@@ -39,7 +47,7 @@
   {%- assign sfs_settings = sfs_shop.storefront_settings.value | default: sfs_shop.storefront_settings -%}
   {%- assign sfs_logo = sfs_shop.logo.value | default: sfs_shop.logo -%}
 
-  <div class="sfs-builder-root" data-sfs-root data-shop-handle="{{ sfs_shop_handle | escape }}">
+  <div class="sfs-builder-root" data-sfs-root data-shop-handle="{{ sfs_shop_handle | escape }}" data-prospect-demo="{{ sfs_is_prospect_demo }}">
     <section class="sfs-admin-launch" data-sfs-launch>
       <div class="sfs-admin-launch__icon" aria-hidden="true">🎨</div>
       <div class="sfs-admin-launch__copy">

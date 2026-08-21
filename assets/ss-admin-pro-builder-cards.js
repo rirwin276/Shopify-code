@@ -376,16 +376,26 @@
 
   function fetchDynamicCatalog() {
     var secret = ssap()['editor' + 'Secret'] || '';
-    if (!secret) return;
-    fetch(RAILWAY + '/api/pro-builder-catalog', {
+    var isDemo = !!ssap().isProspectDemo;
+    if (!secret && !isDemo) return;
+    var endpoint = isDemo
+      ? '/apps/ss/relay/prospect/' + encodeURIComponent(ssap().shopHandle || '') + '/catalog'
+      : RAILWAY + '/api/pro-builder-catalog';
+    var options = {
       method: 'GET',
-      headers: { 'X-Editor-Secret': secret },
       cache: 'no-store'
-    })
+    };
+    if (!isDemo) options.headers = { 'X-Editor-Secret': secret };
+    fetch(endpoint, options)
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         var products = data && (data.products || data);
         if (!Array.isArray(products)) return;
+        var pricingChanged = false;
+        if (isDemo && data.prices && typeof data.prices === 'object') {
+          livePrices = data.prices;
+          pricingChanged = true;
+        }
         // Builders whose files are installed but whose routes the app has not
         // picked up yet. Deliberately not shown as cards — clicking one would
         // 404 — but worth saying out loud, because "I installed it and no card
@@ -395,10 +405,11 @@
           console.info('[ProBuilder] installed, waiting on an app restart before ' +
                        'they can be opened: ' + pending.join(', '));
         }
-        if (mergeDynamicCatalog(products)) {
+        var catalogChanged = mergeDynamicCatalog(products);
+        if (catalogChanged || pricingChanged) {
           var c = $('#apCustomBuildersContainer');
           if (c) { c.removeAttribute('data-ss-v'); renderCards(true); }
-          fetchLivePrices(); // pick up a live price if one already exists for a new id
+          if (catalogChanged && !isDemo) fetchLivePrices();
         }
       })
       .catch(function () { /* a newly installed builder just stays invisible until this succeeds */ });
@@ -415,10 +426,54 @@
     return url;
   }
 
-  function launch(b) {
-    var url = editorUrl(b);
+  function openEditor(url) {
     if (typeof window.apOpenEditorModal === 'function') window.apOpenEditorModal(url);
     else window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  function showDemoMessage(message) {
+    var status = document.getElementById('apStatusAddProducts');
+    if (status) {
+      status.textContent = message;
+      status.className = 'ap-status err';
+      status.scrollIntoView({behavior: 'smooth', block: 'center'});
+      return;
+    }
+    window.alert(message);
+  }
+
+  function launch(b) {
+    var s = ssap();
+    if (!s.isProspectDemo) {
+      openEditor(editorUrl(b));
+      return;
+    }
+    var demo = window.SSProspectDemo || {};
+    if (!demo.ready || !demo.token) {
+      showDemoMessage('Your secure product preview is still loading. Please try again in a moment.');
+      return;
+    }
+    fetch('/apps/ss/relay/prospect/' + encodeURIComponent(s.shopHandle || '') + '/builder-session', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({demo_token: demo.token, model: b.id})
+    })
+      .then(function (response) {
+        return response.json().catch(function () { return {}; }).then(function (body) {
+          if (!response.ok) throw new Error(body.error || ('HTTP ' + response.status));
+          return body;
+        });
+      })
+      .then(function (body) {
+        var url = String(body.editor_url || '');
+        if (!url) throw new Error('The product builder URL was not returned.');
+        if (s.shopLogoSrc) url += '&logo_url=' + encodeURIComponent(s.shopLogoSrc);
+        openEditor(url);
+      })
+      .catch(function (error) {
+        showDemoMessage(error.message || 'Claim your store to build more products.');
+        if (demo.refresh) demo.refresh();
+      });
   }
 
   /* ─── Styles ────────────────────────────────────────────────────────────── */

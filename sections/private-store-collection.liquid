@@ -25,6 +25,7 @@
 {% assign store_logo = blank %}
 {% assign join_mode = 'secure' %}
 {% assign join_code = '' %}
+{% assign prospect_owner = '' %}
 
 {% if entry %}
   {% assign n = entry.name.value | default: entry.name %}
@@ -38,6 +39,7 @@
   {% if jm == 'public' %}{% assign join_mode = 'public' %}{% endif %}
 
   {% assign join_code = entry.join_code.value | default: entry.join_code | default: '' | strip %}
+  {% assign prospect_owner = entry.owner_customer_id.value | default: entry.owner_customer_id | default: '' | strip | downcase %}
 {% endif %}
 
 {% assign logo_url = store_logo | image_url: width: 400 %}
@@ -68,6 +70,14 @@
           clicked through a minute ago.
         {%- endcomment -%}
         <a class="ps-preview-banner__cta" href="{{ join_link }}">Join this store</a>
+        {% if prospect_owner == 'unclaimed' %}
+          <a class="ps-preview-banner__cta ps-preview-banner__cta--demo"
+             href="/pages/admin-powers?shop={{ handle | url_encode }}&prospect_demo=1"
+             data-ss-prospect-demo-cta
+             data-shop-handle="{{ handle | escape }}"
+             data-claim-url="{{ join_link | escape }}"
+             hidden>Try the Admin</a>
+        {% endif %}
       </div>
     </div>
     <style>
@@ -88,8 +98,12 @@
         background: #fff; color: #17150f; text-decoration: none; font-weight: 700;
         padding: 9px 16px; border-radius: 999px; white-space: nowrap;
       }
+      .ps-preview-banner__cta--demo { background: #d7c17a; color: #17150f; }
     </style>
     {% render 'private-store-preview-links', handle: handle %}
+    {% if prospect_owner == 'unclaimed' %}
+      <script src="{{ 'ss-prospect-store-demo.js' | asset_url }}" defer></script>
+    {% endif %}
   {%- endif -%}
 
 
