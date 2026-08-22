@@ -32,17 +32,18 @@
       if (!state || state.enabled !== true || !state.demo_token) return;
       var token = state.demo_token;
       event(token, 'prospect_store_opened');
+      // Try the admin stays the way into the admin for the whole visit. It
+      // used to become the claim button once the free product existed, which
+      // took away the thing the visitor had just been shown working — right at
+      // the moment they were most interested in looking around. Claiming is the
+      // separate button below it, so both are reachable at once.
       ctas.forEach(function (cta) {
         reveal(cta);
-        if (state.product_status === 'completed') {
-          cta.textContent = 'Claim Your Store';
-          cta.href = cta.getAttribute('data-claim-url') || cta.href;
-          cta.setAttribute('data-prospect-claim', '1');
-          cta.addEventListener('click', function () { event(token, 'authentication_started'); });
-          var note = cta.parentNode && cta.parentNode.querySelector('.ps-demo-note');
-          if (note) {
-            note.textContent = 'You have already built a product here. Claim the store to keep it and unlock the full set of tools.';
-          }
+        if (state.product_status !== 'completed') return;
+        var note = cta.parentNode && cta.parentNode.querySelector('.ps-demo-note');
+        if (note) {
+          note.textContent = 'Your product is live. Keep exploring the admin and open any builder you like — '
+            + 'claim the store when you want to publish another one.';
         }
       });
       document.querySelectorAll('a[href*="/pages/join-store"]').forEach(function (link) {
