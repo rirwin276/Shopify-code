@@ -172,6 +172,10 @@
 {%- if join_code != blank -%}
   {%- assign join_link = join_link | append: '&code=' | append: join_code -%}
 {%- endif -%}
+{%- assign ap_live_store_url = '/collections/' | append: collection_handle -%}
+{%- if is_prospect_demo_candidate -%}
+  {%- assign ap_live_store_url = ap_live_store_url | append: '?preview=1' -%}
+{%- endif -%}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
@@ -212,6 +216,7 @@
     SSAP.customerEmail = {% if customer %}{{ customer.email | json }}{% else %}null{% endif %};
     SSAP.dashboardUrl = {{ dashboard_url | json }};
     SSAP.storeName = {{ store_name | json }};
+    SSAP.liveStoreUrl = {{ ap_live_store_url | json }};
   </script>
 
   {%- if is_prospect_demo_candidate -%}
@@ -260,7 +265,7 @@
           <span class="ap-smart-tooltip-arrow" aria-hidden="true"></span>
         </span>
       </span>
-      <a href="/collections/{{ collection_handle }}" class="ap-btn ap-btn--glass">Shop Store ↗</a>
+      <a href="{{ ap_live_store_url }}" class="ap-btn ap-btn--glass">Shop Store ↗</a>
       <a href="{{ dashboard_url }}" class="ap-btn ap-btn--glass">← Dashboard</a>
 
       <!-- FUNDRAISING ZONE — last action in the hero button stack -->
@@ -692,7 +697,7 @@
         </div>
         <div class="ap-panel-head-right">
           <span class="ap-product-count" id="apAllProductCount">0</span>
-          <a class="ap-panel-mini-link" href="/collections/{{ collection_handle }}">View live store ↗</a>
+          <a class="ap-panel-mini-link" href="{{ ap_live_store_url }}">View live store ↗</a>
         </div>
       </div>
 
