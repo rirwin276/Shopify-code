@@ -372,6 +372,62 @@
     line-height: 1.45;
   }
 
+  /* Overnight outreach review */
+  .gm-outreach-warning {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255,159,10,.12);
+    border: 1px solid rgba(255,159,10,.35);
+    color: #7a4a00;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .gm-outreach-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .gm-outreach-row:first-child { border-top: 0; }
+
+  .gm-outreach-main { flex: 1 1 260px; min-width: 0; }
+
+  .gm-outreach-name {
+    margin: 0 0 2px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .gm-outreach-meta {
+    margin: 0;
+    color: var(--gray);
+    font-size: 12px;
+    line-height: 1.5;
+    /* Long URLs and addresses must not push the buttons off a phone. */
+    overflow-wrap: anywhere;
+  }
+
+  .gm-outreach-meta a { color: var(--accent); }
+
+  .gm-outreach-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .gm-outreach-empty {
+    margin: 0;
+    padding: 18px 0 4px;
+    color: var(--gray);
+    font-size: 13px;
+  }
+
   .gm-kpi-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -803,6 +859,22 @@
       <div class="gm-banner-list" id="newStoreList"></div>
       <button type="button" class="gm-btn gm-btn-primary" id="markAllSeenBtn">Mark all seen ✓</button>
     </div>
+
+    {%- comment -%}
+      The overnight batch. First card on the page because it is the one thing
+      here that is waiting on a decision — everything below is reporting.
+    {%- endcomment -%}
+    <section class="gm-card" id="outreachReviewCard" aria-busy="true">
+      <div class="gm-section-head">
+        <div>
+          <h2 class="gm-section-title">Overnight outreach <span class="gm-count-badge" id="outreachPendingCount">—</span></h2>
+          <p class="gm-muted" id="outreachReviewStatus">Loading tonight's batch…</p>
+        </div>
+        <button type="button" class="gm-btn" id="outreachRefreshBtn">Refresh</button>
+      </div>
+      <div class="gm-outreach-warning" id="outreachEmailWarning" style="display:none;"></div>
+      <div id="outreachReviewList"></div>
+    </section>
 
     <section class="gm-card">
       <h2 class="gm-section-title">Store status</h2>
@@ -1621,6 +1693,140 @@
         .finally(function(){ if (button) button.disabled = false; });
     }
 
+    // ---- Overnight outreach review -------------------------------------
+    //
+    // Accept emails a real organization and decline permanently deletes a
+    // store, so both buttons disable the whole row while in flight. A double
+    // click here is not a duplicate request, it is a second email or a nuke
+    // racing a nuke.
+
+    function outreachRow(row) {
+      var lines = [];
+      if (row.type_of_store) lines.push(escapeHtml(row.type_of_store));
+      if (row.primary_color) lines.push(escapeHtml(row.primary_color));
+      if (row.source_agent) lines.push('via ' + escapeHtml(row.source_agent));
+      var meta = lines.join(' · ');
+
+      return '<div class="gm-outreach-row" data-outreach-handle="' + escapeHtml(row.handle) + '">'
+        + '<div class="gm-outreach-main">'
+        + '<h3 class="gm-outreach-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
+        + '<p class="gm-outreach-meta">' + meta
+        + (meta ? '<br>' : '')
+        + 'Emailing <strong>' + escapeHtml(row.contact_email || '—') + '</strong>'
+        + '<br><a href="' + escapeHtml(row.preview_url) + '" target="_blank" rel="noopener">Open the store preview ↗</a>'
+        + (row.organization_url ? ' · <a href="' + escapeHtml(row.organization_url) + '" target="_blank" rel="noopener">Their site ↗</a>' : '')
+        + (row.contact_source_url ? ' · <a href="' + escapeHtml(row.contact_source_url) + '" target="_blank" rel="noopener">Where the email came from ↗</a>' : '')
+        + '<br>Built ' + escapeHtml(formatDate(row.built_at))
+        + '</p></div>'
+        + '<div class="gm-outreach-actions">'
+        + '<button type="button" class="gm-btn gm-btn-primary" data-outreach-accept="' + escapeHtml(row.handle) + '">Accept &amp; send</button>'
+        + '<button type="button" class="gm-btn gm-btn-danger" data-outreach-decline="' + escapeHtml(row.handle) + '">Decline</button>'
+        + '</div></div>';
+    }
+
+    function renderOutreachQueue(body) {
+      var list = document.getElementById('outreachReviewList');
+      var count = document.getElementById('outreachPendingCount');
+      var status = document.getElementById('outreachReviewStatus');
+      var warning = document.getElementById('outreachEmailWarning');
+      var pending = (body && body.pending) || [];
+
+      count.textContent = pending.length + ' waiting';
+
+      if (body && body.email_configured === false) {
+        warning.style.display = 'block';
+        warning.innerHTML = 'Email is not configured yet, so <strong>Accept</strong> will fail. '
+          + 'Set SMTP_PASS in Railway. Decline still works.';
+      } else {
+        warning.style.display = 'none';
+        status.textContent = body && body.from
+          ? 'Sending as ' + body.from
+          : 'Ready to send.';
+      }
+
+      if (!pending.length) {
+        list.innerHTML = '<p class="gm-outreach-empty">Nothing waiting. Stores built overnight show up here to accept or decline.</p>';
+        return;
+      }
+      list.innerHTML = pending.map(outreachRow).join('');
+    }
+
+    function loadOutreachQueue() {
+      var card = document.getElementById('outreachReviewCard');
+      var button = document.getElementById('outreachRefreshBtn');
+      card.setAttribute('aria-busy', 'true');
+      if (button) button.disabled = true;
+      fetch(RAILWAY_URL + '/admin/outreach/queue', { method: 'GET', headers: railwayHeaders(), cache: 'no-store' })
+        .then(function(response){
+          return response.json().catch(function(){ return {}; }).then(function(body){
+            if (!response.ok || !body.ok) throw new Error(body.error || 'Could not load the queue');
+            return body;
+          });
+        })
+        .then(renderOutreachQueue)
+        .catch(function(error){
+          document.getElementById('outreachPendingCount').textContent = '—';
+          document.getElementById('outreachReviewStatus').textContent = 'Unavailable: ' + error.message;
+          document.getElementById('outreachReviewList').innerHTML = '';
+        })
+        .finally(function(){
+          card.setAttribute('aria-busy', 'false');
+          if (button) button.disabled = false;
+        });
+    }
+
+    function setOutreachRowBusy(handle, busy) {
+      var row = document.querySelector('[data-outreach-handle="' + handle.replace(/"/g, '') + '"]');
+      if (!row) return;
+      row.style.opacity = busy ? '0.55' : '';
+      row.querySelectorAll('button').forEach(function(button){ button.disabled = busy; });
+    }
+
+    function onOutreachAction(event) {
+      var accept = event.target.closest('[data-outreach-accept]');
+      var decline = event.target.closest('[data-outreach-decline]');
+      if (accept) return outreachDecide(accept.getAttribute('data-outreach-accept'), 'accept');
+      if (decline) return outreachDecide(decline.getAttribute('data-outreach-decline'), 'decline');
+    }
+
+    function outreachDecide(handle, decision) {
+      if (!handle) return;
+      var body = null;
+      if (decision === 'accept') {
+        if (!window.confirm('Send the outreach email for ' + handle + '?\n\nThis emails a real organization.')) return;
+      } else {
+        var reason = window.prompt(
+          'Decline ' + handle + '?\n\nThe store and its artwork are permanently deleted and nobody is emailed.\n\nReason (optional):',
+          ''
+        );
+        if (reason === null) return;
+        body = JSON.stringify({ reason: reason });
+      }
+
+      setOutreachRowBusy(handle, true);
+      var headers = railwayHeaders();
+      headers['Content-Type'] = 'application/json';
+      fetch(RAILWAY_URL + '/admin/outreach/' + encodeURIComponent(handle) + '/' + decision, {
+        method: 'POST',
+        headers: headers,
+        body: body
+      })
+        .then(function(response){
+          return response.json().catch(function(){ return {}; }).then(function(payload){
+            if (!response.ok || !payload.ok) throw new Error(payload.error || 'Request failed');
+            return payload;
+          });
+        })
+        .then(function(){
+          showToast(decision === 'accept' ? 'Email sent to ' + handle : handle + ' declined and deleted');
+          loadOutreachQueue();
+        })
+        .catch(function(error){
+          setOutreachRowBusy(handle, false);
+          showToast(error.message, true);
+        });
+    }
+
     function setStatus(id, text, color) {
       var el = document.getElementById(id);
       if (!el) return;
@@ -2192,6 +2398,10 @@
     document.getElementById('refreshMetricsBtn').addEventListener('click', function(){
       loadCommandCenterSummary(true);
     });
+    document.getElementById('outreachRefreshBtn').addEventListener('click', function(){
+      loadOutreachQueue();
+    });
+    document.getElementById('outreachReviewList').addEventListener('click', onOutreachAction);
 
     bindPriceOverride('btnUpdatePrice', 'targetTag', 'newPrice', 'priceStatus');
     bindPriceOverride('btnUpdatePrice_m', 'targetTag_m', 'newPrice_m', 'priceStatus_m');
@@ -2199,6 +2409,7 @@
     renderNewStoreBanner();
     applyStoreFilters();
     loadCommandCenterSummary(false);
+    loadOutreachQueue();
   </script>
 {% endif %}
 
