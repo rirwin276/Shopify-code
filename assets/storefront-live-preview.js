@@ -29,6 +29,13 @@
   function makeUrl(handle, view){
     var url = new URL('/collections/' + encodeURIComponent(handle), window.location.origin);
     url.searchParams.set('view', view || 'private-store');
+    /* The prospect customizer is rendered from an anonymous admin demo. Its
+       live collection snapshot must carry the same preview grant as the
+       visible storefront; otherwise the iframe faithfully snapshots the
+       private-store sign-in gate instead of the products being customized. */
+    if (window.SSAP && window.SSAP.isProspectDemo) {
+      url.searchParams.set('preview','1');
+    }
     return copyPreviewParams(url).toString();
   }
 
