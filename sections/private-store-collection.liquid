@@ -172,9 +172,17 @@
             </div>
           {% endif %}
 
+          {%- comment -%}
+            One word for one action. On an unclaimed store this link makes the
+            first person to use it the administrator, which is claiming, not
+            joining — and "Claim store" beside "Join this store" read as two
+            different offers when they were always the same link. Once the store
+            has an owner the same link really does only add a member, so the
+            label goes back to joining.
+          {%- endcomment -%}
           {% if is_preview %}
             <a class="ps-btn ps-btn-ghost" href="{{ join_link }}">
-              Join this store
+              {% if prospect_owner == 'unclaimed' %}Claim this store{% else %}Join this store{% endif %}
             </a>
           {% else %}
             <a class="ps-btn ps-btn-ghost" href="/pages/portal">
