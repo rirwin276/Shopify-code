@@ -81,6 +81,27 @@
   .ob-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: none; z-index: 60; background: var(--text); color: #fff; padding: 11px 16px; border-radius: 999px; font: 700 13px var(--font); max-width: min(560px, calc(100vw - 32px)); text-align: center; }
   .ob-log { margin: 10px 0 0; padding: 0; list-style: none; font-size: 12px; color: var(--gray); }
   .ob-log li { padding: 7px 0; border-top: 1px dashed var(--border); overflow-wrap: anywhere; }
+  .ob-funnel {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+    gap: 8px; margin: 0; padding: 0; list-style: none; counter-reset: none;
+  }
+  .ob-funnel li {
+    position: relative; background: rgba(0,0,0,.03); border-radius: 10px; padding: 11px 12px;
+  }
+  .ob-funnel li span {
+    display: block; font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--gray); margin-bottom: 3px;
+  }
+  .ob-funnel li strong { font-size: 21px; font-weight: 800; }
+  .ob-funnel-win { background: rgba(52,199,89,.13); }
+  .ob-funnel-win strong { color: #1a7f37; }
+  .ob-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+  .ob-chip {
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+    background: rgba(0,0,0,.05); color: var(--gray);
+  }
+  .ob-chip--yes { background: rgba(52,199,89,.16); color: #1a7f37; }
+  .ob-chip--due { background: rgba(255,159,10,.18); color: #7a4a00; }
   .ob-gate { max-width: 520px; margin: 80px auto; text-align: center; padding: 0 20px; }
 </style>
 </head>
@@ -97,6 +118,24 @@
   </header>
 
   <div class="ob-page">
+
+    <section class="ob-card ob-funnel-card" id="obFunnelCard" aria-busy="true">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">The loop</h2>
+          <p class="ob-muted">Everything outreach has done, from found to claimed.</p>
+        </div>
+      </div>
+      <ol class="ob-funnel" id="obFunnel">
+        <li><span>Found</span><strong data-funnel="found">—</strong></li>
+        <li><span>Built</span><strong data-funnel="built">—</strong></li>
+        <li><span>Emailed</span><strong data-funnel="emailed">—</strong></li>
+        <li><span>Visited</span><strong data-funnel="visited">—</strong></li>
+        <li><span>Tried admin</span><strong data-funnel="tried_admin">—</strong></li>
+        <li><span>Made a product</span><strong data-funnel="made_product">—</strong></li>
+        <li class="ob-funnel-win"><span>Claimed</span><strong data-funnel="claimed">—</strong></li>
+      </ol>
+    </section>
 
     <section class="ob-card" id="obDiscoveryCard" aria-busy="true">
       <div class="ob-card-head">
@@ -131,6 +170,46 @@
       </div>
       <div class="ob-warn" id="obEmailWarn" style="display:none;"></div>
       <div id="obReviewList"></div>
+    </section>
+
+    <section class="ob-card" id="obSentCard">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">Emailed <span class="ob-badge ob-badge--off" id="obSentCount">—</span></h2>
+          <p class="ob-muted">Waiting to hear back. What each one has done since.</p>
+        </div>
+      </div>
+      <div id="obSentList"><p class="ob-empty">Loading…</p></div>
+    </section>
+
+    <section class="ob-card" id="obClaimedCard">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">Claimed <span class="ob-badge ob-badge--off" id="obClaimedCount">—</span></h2>
+          <p class="ob-muted">Someone took ownership. These are the wins.</p>
+        </div>
+      </div>
+      <div id="obClaimedList"><p class="ob-empty">Loading…</p></div>
+    </section>
+
+    <section class="ob-card" id="obBuildingCard" style="display:none;">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">Building <span class="ob-badge ob-badge--off" id="obBuildingCount">—</span></h2>
+          <p class="ob-muted">Logo, store and products are being made. A few minutes each.</p>
+        </div>
+      </div>
+      <div id="obBuildingList"></div>
+    </section>
+
+    <section class="ob-card" id="obFailedCard" style="display:none;">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">Needs a look <span class="ob-badge ob-badge--off" id="obFailedCount">—</span></h2>
+          <p class="ob-muted">These stopped before finishing.</p>
+        </div>
+      </div>
+      <div id="obFailedList"></div>
     </section>
 
     <section class="ob-card">
@@ -194,7 +273,10 @@
       document.getElementById('obKpiRejected').textContent = (run.rejected || []).length;
 
       var html = '';
-      var buildable = (run.candidates || []).length;
+      // A run recorded before payloads were kept has candidates but nothing to
+      // build from, and offering a button that can only fail is worse than
+      // offering none.
+      var buildable = (run.candidates || []).filter(function(row){ return row.payload; }).length;
       if ((isDry || run.dry_run) && buildable) {
         // The button belongs here, beside the candidates it would build.
         // Sending someone back to Find & build means a second search that may
@@ -368,14 +450,82 @@
         + '</div></div>';
     }
 
+    function chip(label, on) {
+      return '<span class="ob-chip' + (on ? ' ob-chip--yes' : '') + '">'
+        + (on ? '✓ ' : '') + escapeHtml(label) + '</span>';
+    }
+
+    function sentRow(row) {
+      var a = row.activity || {};
+      return '<div class="ob-row"><div class="ob-row-main">'
+        + '<h3 class="ob-row-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
+        + '<p class="ob-row-meta">Emailed ' + escapeHtml(formatDate(row.sent_at))
+        + ' · <a href="' + escapeHtml(row.preview_url) + '" target="_blank" rel="noopener">Their store ↗</a>'
+        + '</p>'
+        + '<div class="ob-chips">'
+        + chip('Opened the store', a.opened_store)
+        + chip('Tried the admin', a.opened_admin)
+        + chip('Changed the look', a.changed_look)
+        + chip('Made a product', a.built_product)
+        + chip('Started a claim', a.started_claim)
+        + '</div>'
+        + (row.followup_sent_at
+            ? '<p class="ob-row-meta" style="margin-top:5px;">Follow-up sent ' + escapeHtml(formatDate(row.followup_sent_at)) + '</p>'
+            : (row.followup_due_at
+                ? '<div class="ob-chips"><span class="ob-chip ob-chip--due">Follow-up due ' + escapeHtml(formatDate(row.followup_due_at)) + '</span></div>'
+                : ''))
+        + '</div></div>';
+    }
+
+    function claimedRow(row) {
+      return '<div class="ob-row"><div class="ob-row-main">'
+        + '<h3 class="ob-row-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
+        + '<p class="ob-row-meta">Claimed ' + escapeHtml(formatDate(row.claimed_at))
+        + ' · emailed ' + escapeHtml(formatDate(row.sent_at))
+        + ' · <a href="/collections/' + escapeHtml(row.handle) + '" target="_blank" rel="noopener">Their store ↗</a>'
+        + '</p></div></div>';
+    }
+
+    function plainRow(row) {
+      return '<div class="ob-row"><div class="ob-row-main">'
+        + '<h3 class="ob-row-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
+        + '<p class="ob-row-meta">' + escapeHtml(row.status || row.stage)
+        + ' · built ' + escapeHtml(formatDate(row.built_at)) + '</p></div></div>';
+    }
+
+    function fillSection(listId, countId, cardId, rows, render, emptyText) {
+      var list = document.getElementById(listId);
+      var count = document.getElementById(countId);
+      var card = document.getElementById(cardId);
+      if (count) {
+        count.textContent = rows.length;
+        count.className = 'ob-badge ' + (rows.length ? 'ob-badge--on' : 'ob-badge--off');
+      }
+      if (card && (cardId === 'obBuildingCard' || cardId === 'obFailedCard')) {
+        card.style.display = rows.length ? '' : 'none';
+      }
+      if (list) {
+        list.innerHTML = rows.length
+          ? rows.map(render).join('')
+          : '<p class="ob-empty">' + escapeHtml(emptyText) + '</p>';
+      }
+    }
+
     function loadReviewQueue() {
       var card = document.getElementById('obReviewCard');
       var button = document.getElementById('obReviewRefreshBtn');
       card.setAttribute('aria-busy', 'true');
+      document.getElementById('obFunnelCard').setAttribute('aria-busy', 'true');
       if (button) button.disabled = true;
-      return fetch(RAILWAY_URL + '/admin/outreach/queue', { headers: headers(), cache: 'no-store' })
+      return fetch(RAILWAY_URL + '/admin/outreach/pipeline', { headers: headers(), cache: 'no-store' })
         .then(getJson)
         .then(function(body){
+          var totals = body.totals || {};
+          document.querySelectorAll('[data-funnel]').forEach(function(node){
+            var key = node.getAttribute('data-funnel');
+            node.textContent = totals[key] == null ? '0' : totals[key];
+          });
+
           var pending = body.pending || [];
           var count = document.getElementById('obPendingCount');
           count.textContent = pending.length;
@@ -386,6 +536,7 @@
             warn.style.display = 'block';
             warn.innerHTML = 'Email is not configured, so <strong>Accept</strong> will fail. '
               + 'Set SMTP_PASS in Railway. Decline still works.';
+            document.getElementById('obReviewStatus').textContent = 'Waiting on email setup.';
           } else {
             warn.style.display = 'none';
             document.getElementById('obReviewStatus').textContent =
@@ -395,6 +546,13 @@
           document.getElementById('obReviewList').innerHTML = pending.length
             ? pending.map(reviewRow).join('')
             : '<p class="ob-empty">Nothing waiting. Stores built by discovery show up here to accept or decline.</p>';
+
+          fillSection('obSentList', 'obSentCount', 'obSentCard', body.sent || [], sentRow,
+                      'Nobody has been emailed yet.');
+          fillSection('obClaimedList', 'obClaimedCount', 'obClaimedCard', body.claimed || [], claimedRow,
+                      'No claims yet. This fills up when a prospect takes their store.');
+          fillSection('obBuildingList', 'obBuildingCount', 'obBuildingCard', body.building || [], plainRow, '');
+          fillSection('obFailedList', 'obFailedCount', 'obFailedCard', body.failed || [], plainRow, '');
         })
         .catch(function(error){
           document.getElementById('obReviewStatus').textContent = 'Unavailable: ' + error.message;
@@ -402,6 +560,7 @@
         })
         .finally(function(){
           card.setAttribute('aria-busy', 'false');
+          document.getElementById('obFunnelCard').setAttribute('aria-busy', 'false');
           if (button) button.disabled = false;
         });
     }
