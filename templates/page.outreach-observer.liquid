@@ -76,6 +76,7 @@
   .ob-kpi { background: rgba(0,0,0,.03); border-radius: 10px; padding: 10px 12px; }
   .ob-kpi span { display: block; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gray); }
   .ob-kpi strong { font-size: 20px; font-weight: 800; }
+  .ob-model { width: 150px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 10px; font: 600 13px var(--font); }
   .ob-num { width: 62px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 10px; font: 700 13px var(--font); }
   .ob-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: none; z-index: 60; background: var(--text); color: #fff; padding: 11px 16px; border-radius: 999px; font: 700 13px var(--font); max-width: min(560px, calc(100vw - 32px)); text-align: center; }
   .ob-log { margin: 10px 0 0; padding: 0; list-style: none; font-size: 12px; color: var(--gray); }
@@ -104,6 +105,7 @@
           <p class="ob-muted" id="obDiscoveryStatus">Loading…</p>
         </div>
         <div class="ob-actions">
+          <input class="ob-model" id="obModel" type="text" placeholder="model" aria-label="Model to use for this run" spellcheck="false">
           <input class="ob-num" id="obLimit" type="number" min="1" max="10" value="5" aria-label="How many candidates to look for">
           <button type="button" class="ob-btn" id="obDryRunBtn">Test run</button>
           <button type="button" class="ob-btn ob-btn--gold" id="obRealRunBtn">Find &amp; build</button>
@@ -234,6 +236,8 @@
         status.textContent = 'Not configured.';
       } else {
         warn.style.display = 'none';
+        var modelBox = document.getElementById('obModel');
+        if (modelBox && !modelBox.value) modelBox.value = body.model || '';
         status.textContent = 'Model ' + (body.model || 'default')
           + ' · looks for ' + body.nightly_limit + ' a night'
           + (body.nightly_enabled ? '' : ' once nightly is switched on');
@@ -251,9 +255,13 @@
             return '<li>' + escapeHtml(formatDate(run.finished_at || run.started_at))
               + ' · <strong>failed</strong> — ' + escapeHtml(run.error) + '</li>';
           }
+          var tokens = (run.input_tokens || 0) + (run.output_tokens || 0);
           return '<li>' + escapeHtml(formatDate(run.finished_at || run.started_at))
             + ' · ' + escapeHtml(run.trigger || 'run') + (run.dry_run ? ' (test)' : '')
-            + ' · ' + (run.returned || 0) + ' found, ' + (run.queued || 0) + ' queued</li>';
+            + (run.model ? ' · ' + escapeHtml(run.model) : '')
+            + ' · ' + (run.returned || 0) + ' found, ' + (run.queued || 0) + ' queued'
+            + (tokens ? ' · ' + tokens.toLocaleString() + ' tokens' : '')
+            + (run.seconds ? ' · ' + run.seconds + 's' : '') + '</li>';
         }).join('');
       }
     }
@@ -283,7 +291,11 @@
 
       fetch(RAILWAY_URL + '/admin/outreach/discovery/run', {
         method: 'POST', headers: headers(),
-        body: JSON.stringify({ limit: limit, dry_run: !!dryRun })
+        body: JSON.stringify({
+          limit: limit,
+          dry_run: !!dryRun,
+          model: (document.getElementById('obModel').value || '').trim()
+        })
       })
         .then(getJson)
         .then(function(body){
