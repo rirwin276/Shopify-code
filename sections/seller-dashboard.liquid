@@ -332,6 +332,35 @@
                   </div>
                 {% endif %}
                 {% if is_god %}
+                  <!-- OUTREACH OBSERVER CARD — discovery and the morning review.
+                       Separate from Command Center on purpose: that answers how
+                       the stores are doing, this answers who the bot found and
+                       whether a stranger hears from us today. -->
+                  <div class="ss-store-card ss-clickrow ss-god-card" role="link" tabindex="0" data-href="/pages/outreach-observer" style="border-color: #b7a36a; box-shadow: 0 0 0 1px rgba(183,163,106,0.12), 0 10px 24px rgba(183,163,106,0.12);">
+                    <div class="ss-col-identity">
+                      <div class="ss-logo-frame" style="background:#fdf8ec; border-color:#f0e4c4;">
+                        <span style="font-size:24px;">🔭</span>
+                      </div>
+                      <div class="ss-identity-text">
+                        <h3 class="ss-card-title" style="color:#6b5a20;">Outreach Observer</h3>
+                        <span class="ss-card-subtitle" style="background:#f6ecd2; color:#6b5a20; border-color:#eaddb8;">Super Admin</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-engine">
+                      <div class="ss-status-finished" style="background:#fdf8ec; border-color:#eaddb8;">
+                        <span class="ss-dot-live" style="background:#b7a36a; box-shadow:0 0 0 3px rgba(183,163,106,0.22);"></span>
+                        <span class="ss-status-text" style="color:#6b5a20;">PROSPECTING</span>
+                      </div>
+                    </div>
+                    <div class="ss-col-controls">
+                      <a href="/pages/outreach-observer" class="ss-open-btn" style="background:#8a7335;">
+                        <span>Open Outreach Observer</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </a>
+                    </div>
+                  </div>
+                {% endif %}
+                {% if is_god %}
                   <!-- PRICE EDITOR CARD -->
                   <div class="ss-store-card ss-clickrow ss-pricing-card" role="link" tabindex="0" data-href="/pages/price-editor" style="border-color: #7c3aed; box-shadow: 0 0 0 1px rgba(124,58,237,0.15), 0 10px 24px rgba(124,58,237,0.08);">
                     <div class="ss-col-identity">

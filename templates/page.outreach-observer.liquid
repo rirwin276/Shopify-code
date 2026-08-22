@@ -1,0 +1,422 @@
+{% layout none %}
+{%- comment -%}
+  OUTREACH OBSERVER
+
+  Discovery and the morning review, on one page, separate from Command Center.
+  Command Center answers "how are my stores doing". This answers "who did the
+  bot find last night, and does a stranger hear from me today" — a different
+  question asked at a different time of day, so it gets its own surface.
+
+  Super-admin only. Accept emails a real organization and decline permanently
+  deletes a store; neither belongs behind a store-scoped admin tag.
+{%- endcomment -%}
+{% capture platform_access_value %}{% render 'platform-super-admin' %}{% endcapture %}
+{% assign platform_access_value = platform_access_value | strip %}
+{% assign is_super = false %}
+{% if platform_access_value == 'true' %}{% assign is_super = true %}{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stella &amp; Sage — Outreach Observer</title>
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --border: #d1d1d6;
+    --text: #1c1c1e;
+    --gray: #6e6e73;
+    --accent: #0071e3;
+    --danger: #ff3b30;
+    --warning: #ff9f0a;
+    --success: #34c759;
+    --gold: #b7a36a;
+    --radius: 14px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); padding: 0 0 90px; }
+  a { color: var(--accent); }
+  .ob-head {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(245,245,247,.86);
+    backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px;
+  }
+  .ob-head-inner { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .ob-title { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+  .ob-page { max-width: 1080px; margin: 0 auto; padding: 18px; display: grid; gap: 16px; }
+  .ob-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: 0 10px 34px rgba(17,16,14,.05); }
+  .ob-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .ob-section-title { margin: 0 0 3px; font-size: 16px; font-weight: 800; }
+  .ob-muted { margin: 0; color: var(--gray); font-size: 12px; line-height: 1.5; }
+  .ob-badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+  .ob-badge--on { background: rgba(52,199,89,.15); color: #1a7f37; }
+  .ob-badge--off { background: rgba(110,110,115,.15); color: var(--gray); }
+  .ob-btn {
+    appearance: none; border: 1px solid var(--border); background: #fff; color: var(--text);
+    font: 700 13px/1 var(--font); padding: 10px 14px; border-radius: 999px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .ob-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .ob-btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .ob-btn--gold { background: var(--gold); border-color: var(--gold); color: #17150f; }
+  .ob-btn--danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .ob-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .ob-warn { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(255,159,10,.12); border: 1px solid rgba(255,159,10,.35); color: #7a4a00; font-size: 13px; line-height: 1.45; }
+  .ob-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); }
+  .ob-row:first-child { border-top: 0; }
+  .ob-row-main { flex: 1 1 260px; min-width: 0; }
+  .ob-row-name { margin: 0 0 2px; font-size: 15px; font-weight: 700; }
+  .ob-row-meta { margin: 0; color: var(--gray); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+  .ob-empty { margin: 0; padding: 16px 0 4px; color: var(--gray); font-size: 13px; }
+  .ob-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 4px; }
+  .ob-kpi { background: rgba(0,0,0,.03); border-radius: 10px; padding: 10px 12px; }
+  .ob-kpi span { display: block; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--gray); }
+  .ob-kpi strong { font-size: 20px; font-weight: 800; }
+  .ob-num { width: 62px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 10px; font: 700 13px var(--font); }
+  .ob-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: none; z-index: 60; background: var(--text); color: #fff; padding: 11px 16px; border-radius: 999px; font: 700 13px var(--font); max-width: min(560px, calc(100vw - 32px)); text-align: center; }
+  .ob-log { margin: 10px 0 0; padding: 0; list-style: none; font-size: 12px; color: var(--gray); }
+  .ob-log li { padding: 7px 0; border-top: 1px dashed var(--border); overflow-wrap: anywhere; }
+  .ob-gate { max-width: 520px; margin: 80px auto; text-align: center; padding: 0 20px; }
+</style>
+</head>
+<body>
+
+{% if is_super %}
+  <header class="ob-head">
+    <div class="ob-head-inner">
+      <h1 class="ob-title">Outreach Observer</h1>
+      <div class="ob-actions">
+        <a class="ob-btn" href="/pages/super-admin">Command Center →</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="ob-page">
+
+    <section class="ob-card" id="obDiscoveryCard" aria-busy="true">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">Discovery <span class="ob-badge ob-badge--off" id="obNightly">—</span></h2>
+          <p class="ob-muted" id="obDiscoveryStatus">Loading…</p>
+        </div>
+        <div class="ob-actions">
+          <input class="ob-num" id="obLimit" type="number" min="1" max="10" value="5" aria-label="How many candidates to look for">
+          <button type="button" class="ob-btn" id="obDryRunBtn">Test run</button>
+          <button type="button" class="ob-btn ob-btn--gold" id="obRealRunBtn">Find &amp; build</button>
+        </div>
+      </div>
+      <div class="ob-warn" id="obDiscoveryWarn" style="display:none;"></div>
+      <div class="ob-kpis" id="obLastRunKpis" style="display:none;">
+        <div class="ob-kpi"><span>Returned</span><strong id="obKpiReturned">—</strong></div>
+        <div class="ob-kpi"><span>Passed screening</span><strong id="obKpiAccepted">—</strong></div>
+        <div class="ob-kpi"><span>Queued to build</span><strong id="obKpiQueued">—</strong></div>
+        <div class="ob-kpi"><span>Rejected</span><strong id="obKpiRejected">—</strong></div>
+      </div>
+      <div id="obLastRun"></div>
+    </section>
+
+    <section class="ob-card" id="obReviewCard" aria-busy="true">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">Waiting on you <span class="ob-badge ob-badge--off" id="obPendingCount">—</span></h2>
+          <p class="ob-muted" id="obReviewStatus">Loading tonight's batch…</p>
+        </div>
+        <button type="button" class="ob-btn" id="obReviewRefreshBtn">Refresh</button>
+      </div>
+      <div class="ob-warn" id="obEmailWarn" style="display:none;"></div>
+      <div id="obReviewList"></div>
+    </section>
+
+    <section class="ob-card">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">Recent runs</h2>
+          <p class="ob-muted">The last few discovery runs, newest first.</p>
+        </div>
+      </div>
+      <ul class="ob-log" id="obRunLog"><li>Loading…</li></ul>
+    </section>
+
+  </div>
+
+  <div class="ob-toast" id="obToast" role="status" aria-live="polite"></div>
+
+  <script>
+    const RAILWAY_URL = "/apps/ss/relay";
+
+    function headers() { return { 'Content-Type': 'application/json' }; }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function formatDate(value) {
+      if (!value) return '—';
+      var d = new Date(value);
+      return isNaN(d.getTime()) ? String(value) : d.toLocaleString();
+    }
+
+    function toast(message, isError) {
+      var el = document.getElementById('obToast');
+      el.textContent = message;
+      el.style.background = isError ? 'var(--danger)' : 'var(--text)';
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(function(){ el.style.display = 'none'; }, 4200);
+    }
+
+    function getJson(response) {
+      return response.json().catch(function(){ return {}; }).then(function(body){
+        if (!response.ok || !body.ok) throw new Error(body.error || 'Request failed');
+        return body;
+      });
+    }
+
+    // ---- Discovery -----------------------------------------------------
+
+    function renderRun(run, isDry) {
+      var target = document.getElementById('obLastRun');
+      var kpis = document.getElementById('obLastRunKpis');
+      if (!run) { target.innerHTML = ''; kpis.style.display = 'none'; return; }
+
+      kpis.style.display = '';
+      document.getElementById('obKpiReturned').textContent = run.returned == null ? '—' : run.returned;
+      document.getElementById('obKpiAccepted').textContent = run.accepted == null ? '—' : run.accepted;
+      document.getElementById('obKpiQueued').textContent = run.queued == null ? '—' : run.queued;
+      document.getElementById('obKpiRejected').textContent = (run.rejected || []).length;
+
+      var html = '';
+      if (isDry || run.dry_run) {
+        html += '<div class="ob-warn" style="margin-top:12px;">Test run — nothing was created. '
+              + 'Use <strong>Find &amp; build</strong> when the candidates look right.</div>';
+      }
+      (run.candidates || []).forEach(function(row){
+        html += '<div class="ob-row"><div class="ob-row-main">'
+          + '<h3 class="ob-row-name">' + escapeHtml(row.storefront_name || row.handle) + '</h3>'
+          + '<p class="ob-row-meta">' + escapeHtml(row.why_it_qualifies || '')
+          + '<br>Would email <strong>' + escapeHtml(row.contact_email || '—') + '</strong>'
+          + '<br><a href="' + escapeHtml(row.organization_url) + '" target="_blank" rel="noopener">Their site ↗</a>'
+          + ' · <a href="' + escapeHtml(row.logo_source_url) + '" target="_blank" rel="noopener">Logo file ↗</a>'
+          + (row.queued ? '<br><strong>Queued to build.</strong>' : '')
+          + '</p></div></div>';
+      });
+      if ((run.rejected || []).length) {
+        html += '<ul class="ob-log">';
+        (run.rejected || []).forEach(function(row){
+          html += '<li>Skipped ' + escapeHtml(row.handle || '(unnamed)') + ' — ' + escapeHtml(row.reason) + '</li>';
+        });
+        html += '</ul>';
+      }
+      if (!(run.candidates || []).length && !(run.rejected || []).length) {
+        html += '<p class="ob-empty">The search came back with nothing usable. That is a normal outcome — try again or widen the brief.</p>';
+      }
+      target.innerHTML = html;
+    }
+
+    function renderDiscovery(body) {
+      var badge = document.getElementById('obNightly');
+      var status = document.getElementById('obDiscoveryStatus');
+      var warn = document.getElementById('obDiscoveryWarn');
+
+      badge.textContent = body.nightly_enabled ? 'Nightly on' : 'Nightly off';
+      badge.className = 'ob-badge ' + (body.nightly_enabled ? 'ob-badge--on' : 'ob-badge--off');
+
+      if (!body.configured) {
+        warn.style.display = 'block';
+        warn.innerHTML = 'No OpenAI API key is set, so discovery cannot run. '
+          + 'Add <strong>OPENAI_API_KEY</strong> in Railway.';
+        status.textContent = 'Not configured.';
+      } else {
+        warn.style.display = 'none';
+        status.textContent = 'Model ' + (body.model || 'default')
+          + ' · looks for ' + body.nightly_limit + ' a night'
+          + (body.nightly_enabled ? '' : ' once nightly is switched on');
+      }
+
+      var runs = body.runs || [];
+      renderRun(runs[0]);
+
+      var log = document.getElementById('obRunLog');
+      if (!runs.length) {
+        log.innerHTML = '<li>No runs yet.</li>';
+      } else {
+        log.innerHTML = runs.map(function(run){
+          if (run.error) {
+            return '<li>' + escapeHtml(formatDate(run.finished_at || run.started_at))
+              + ' · <strong>failed</strong> — ' + escapeHtml(run.error) + '</li>';
+          }
+          return '<li>' + escapeHtml(formatDate(run.finished_at || run.started_at))
+            + ' · ' + escapeHtml(run.trigger || 'run') + (run.dry_run ? ' (test)' : '')
+            + ' · ' + (run.returned || 0) + ' found, ' + (run.queued || 0) + ' queued</li>';
+        }).join('');
+      }
+    }
+
+    function loadDiscovery() {
+      var card = document.getElementById('obDiscoveryCard');
+      card.setAttribute('aria-busy', 'true');
+      return fetch(RAILWAY_URL + '/admin/outreach/discovery/status', { headers: headers(), cache: 'no-store' })
+        .then(getJson)
+        .then(renderDiscovery)
+        .catch(function(error){
+          document.getElementById('obDiscoveryStatus').textContent = 'Unavailable: ' + error.message;
+        })
+        .finally(function(){ card.setAttribute('aria-busy', 'false'); });
+    }
+
+    function runDiscovery(dryRun) {
+      var limit = parseInt(document.getElementById('obLimit').value, 10) || 5;
+      if (!dryRun && !window.confirm(
+            'Find and build up to ' + limit + ' stores?\n\n'
+            + 'Real Shopify stores get created. Nobody is emailed until you accept them below.')) return;
+
+      var buttons = [document.getElementById('obDryRunBtn'), document.getElementById('obRealRunBtn')];
+      buttons.forEach(function(b){ b.disabled = true; });
+      document.getElementById('obDiscoveryStatus').textContent =
+        'Searching… this takes a couple of minutes.';
+
+      fetch(RAILWAY_URL + '/admin/outreach/discovery/run', {
+        method: 'POST', headers: headers(),
+        body: JSON.stringify({ limit: limit, dry_run: !!dryRun })
+      })
+        .then(getJson)
+        .then(function(body){
+          renderRun(body.run, dryRun);
+          toast(dryRun
+            ? 'Test run finished — nothing was created.'
+            : ((body.run || {}).queued || 0) + ' store(s) queued to build.');
+          return loadReviewQueue();
+        })
+        .catch(function(error){ toast(error.message, true); })
+        .finally(function(){
+          buttons.forEach(function(b){ b.disabled = false; });
+          loadDiscovery();
+        });
+    }
+
+    // ---- Review queue ---------------------------------------------------
+
+    function reviewRow(row) {
+      var bits = [];
+      if (row.type_of_store) bits.push(escapeHtml(row.type_of_store));
+      if (row.primary_color) bits.push(escapeHtml(row.primary_color));
+      if (row.source_agent) bits.push('via ' + escapeHtml(row.source_agent));
+      var meta = bits.join(' · ');
+      return '<div class="ob-row" data-review-handle="' + escapeHtml(row.handle) + '">'
+        + '<div class="ob-row-main">'
+        + '<h3 class="ob-row-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
+        + '<p class="ob-row-meta">' + meta + (meta ? '<br>' : '')
+        + 'Emailing <strong>' + escapeHtml(row.contact_email || '—') + '</strong>'
+        + '<br><a href="' + escapeHtml(row.preview_url) + '" target="_blank" rel="noopener">Open the store preview ↗</a>'
+        + (row.organization_url ? ' · <a href="' + escapeHtml(row.organization_url) + '" target="_blank" rel="noopener">Their site ↗</a>' : '')
+        + (row.contact_source_url ? ' · <a href="' + escapeHtml(row.contact_source_url) + '" target="_blank" rel="noopener">Where the email came from ↗</a>' : '')
+        + '<br>Built ' + escapeHtml(formatDate(row.built_at))
+        + '</p></div>'
+        + '<div class="ob-actions">'
+        + '<button type="button" class="ob-btn ob-btn--primary" data-review-accept="' + escapeHtml(row.handle) + '">Accept &amp; send</button>'
+        + '<button type="button" class="ob-btn ob-btn--danger" data-review-decline="' + escapeHtml(row.handle) + '">Decline</button>'
+        + '</div></div>';
+    }
+
+    function loadReviewQueue() {
+      var card = document.getElementById('obReviewCard');
+      var button = document.getElementById('obReviewRefreshBtn');
+      card.setAttribute('aria-busy', 'true');
+      if (button) button.disabled = true;
+      return fetch(RAILWAY_URL + '/admin/outreach/queue', { headers: headers(), cache: 'no-store' })
+        .then(getJson)
+        .then(function(body){
+          var pending = body.pending || [];
+          var count = document.getElementById('obPendingCount');
+          count.textContent = pending.length;
+          count.className = 'ob-badge ' + (pending.length ? 'ob-badge--on' : 'ob-badge--off');
+
+          var warn = document.getElementById('obEmailWarn');
+          if (body.email_configured === false) {
+            warn.style.display = 'block';
+            warn.innerHTML = 'Email is not configured, so <strong>Accept</strong> will fail. '
+              + 'Set SMTP_PASS in Railway. Decline still works.';
+          } else {
+            warn.style.display = 'none';
+            document.getElementById('obReviewStatus').textContent =
+              body.from ? 'Sending as ' + body.from : 'Ready to send.';
+          }
+
+          document.getElementById('obReviewList').innerHTML = pending.length
+            ? pending.map(reviewRow).join('')
+            : '<p class="ob-empty">Nothing waiting. Stores built by discovery show up here to accept or decline.</p>';
+        })
+        .catch(function(error){
+          document.getElementById('obReviewStatus').textContent = 'Unavailable: ' + error.message;
+          document.getElementById('obReviewList').innerHTML = '';
+        })
+        .finally(function(){
+          card.setAttribute('aria-busy', 'false');
+          if (button) button.disabled = false;
+        });
+    }
+
+    function setRowBusy(handle, busy) {
+      var row = document.querySelector('[data-review-handle="' + handle.replace(/"/g, '') + '"]');
+      if (!row) return;
+      row.style.opacity = busy ? '.55' : '';
+      row.querySelectorAll('button').forEach(function(b){ b.disabled = busy; });
+    }
+
+    function decide(handle, decision) {
+      if (!handle) return;
+      var body = null;
+      if (decision === 'accept') {
+        if (!window.confirm('Send the outreach email for ' + handle + '?\n\nThis emails a real organization.')) return;
+      } else {
+        var reason = window.prompt(
+          'Decline ' + handle + '?\n\nThe store and its artwork are permanently deleted and nobody is emailed.\n\nReason (optional):', '');
+        if (reason === null) return;
+        body = JSON.stringify({ reason: reason });
+      }
+      setRowBusy(handle, true);
+      fetch(RAILWAY_URL + '/admin/outreach/' + encodeURIComponent(handle) + '/' + decision, {
+        method: 'POST', headers: headers(), body: body
+      })
+        .then(getJson)
+        .then(function(){
+          toast(decision === 'accept' ? 'Email sent to ' + handle : handle + ' declined and deleted');
+          loadReviewQueue();
+        })
+        .catch(function(error){
+          setRowBusy(handle, false);
+          toast(error.message, true);
+        });
+    }
+
+    document.getElementById('obDryRunBtn').addEventListener('click', function(){ runDiscovery(true); });
+    document.getElementById('obRealRunBtn').addEventListener('click', function(){ runDiscovery(false); });
+    document.getElementById('obReviewRefreshBtn').addEventListener('click', loadReviewQueue);
+    document.getElementById('obReviewList').addEventListener('click', function(event){
+      var accept = event.target.closest('[data-review-accept]');
+      var decline = event.target.closest('[data-review-decline]');
+      if (accept) return decide(accept.getAttribute('data-review-accept'), 'accept');
+      if (decline) return decide(decline.getAttribute('data-review-decline'), 'decline');
+    });
+
+    loadDiscovery();
+    loadReviewQueue();
+  </script>
+{% else %}
+  <div class="ob-gate">
+    <h1 class="ob-title">Outreach Observer</h1>
+    <p class="ob-muted" style="font-size:14px;margin-top:10px;">
+      This page is limited to the platform owner.
+    </p>
+    <p style="margin-top:18px;"><a href="/pages/portal">← Back to your dashboard</a></p>
+  </div>
+{% endif %}
+
+</body>
+</html>
