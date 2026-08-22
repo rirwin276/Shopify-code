@@ -102,6 +102,25 @@
   }
   .ob-chip--yes { background: rgba(52,199,89,.16); color: #1a7f37; }
   .ob-chip--due { background: rgba(255,159,10,.18); color: #7a4a00; }
+  .ob-error {
+    margin: 7px 0 0; padding: 9px 11px; border-radius: 9px;
+    background: rgba(255,59,48,.09); border: 1px solid rgba(255,59,48,.28);
+    color: #8c1d16; font-size: 12px; font-weight: 700; line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .ob-steps { margin: 9px 0 0; padding: 0; list-style: none; }
+  .ob-steps li { font-size: 12px; line-height: 1.7; color: var(--gray); }
+  .ob-steps li span { display: inline-block; width: 15px; font-weight: 800; }
+  .ob-steps li.is-done { color: var(--text); }
+  .ob-steps li.is-done span { color: #1a7f37; }
+  .ob-steps li em { font-style: normal; color: var(--gray); }
+  .ob-details { margin-top: 9px; font-size: 12px; }
+  .ob-details summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+  .ob-pre {
+    margin: 7px 0 0; padding: 10px 11px; border-radius: 9px; background: #11100e;
+    color: #e8e4d8; font: 500 11px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow-x: auto; white-space: pre;
+  }
   .ob-gate { max-width: 520px; margin: 80px auto; text-align: center; padding: 0 20px; }
 </style>
 </head>
@@ -486,11 +505,31 @@
         + '</p></div></div>';
     }
 
+    function steps(row) {
+      if (!(row.steps || []).length) return '';
+      return '<ol class="ob-steps">' + row.steps.map(function(step){
+        return '<li class="' + (step.done ? 'is-done' : 'is-waiting') + '">'
+          + '<span>' + (step.done ? '✓' : '·') + '</span>'
+          + escapeHtml(step.label)
+          + (step.at ? ' <em>' + escapeHtml(formatDate(step.at)) + '</em>' : '')
+          + '</li>';
+      }).join('') + '</ol>';
+    }
+
     function plainRow(row) {
-      return '<div class="ob-row"><div class="ob-row-main">'
+      var html = '<div class="ob-row"><div class="ob-row-main">'
         + '<h3 class="ob-row-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
         + '<p class="ob-row-meta">' + escapeHtml(row.status || row.stage)
-        + ' · built ' + escapeHtml(formatDate(row.built_at)) + '</p></div></div>';
+        + ' · started ' + escapeHtml(formatDate(row.built_at)) + '</p>';
+      if (row.error) {
+        html += '<p class="ob-error">' + escapeHtml(row.error) + '</p>';
+      }
+      html += steps(row);
+      if ((row.log || []).length) {
+        html += '<details class="ob-details"><summary>Build log</summary>'
+          + '<pre class="ob-pre">' + escapeHtml(row.log.join('\n')) + '</pre></details>';
+      }
+      return html + '</div></div>';
     }
 
     function fillSection(listId, countId, cardId, rows, render, emptyText) {
