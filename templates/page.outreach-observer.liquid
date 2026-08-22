@@ -194,9 +194,18 @@
       document.getElementById('obKpiRejected').textContent = (run.rejected || []).length;
 
       var html = '';
-      if (isDry || run.dry_run) {
-        html += '<div class="ob-warn" style="margin-top:12px;">Test run — nothing was created. '
-              + 'Use <strong>Find &amp; build</strong> when the candidates look right.</div>';
+      var buildable = (run.candidates || []).length;
+      if ((isDry || run.dry_run) && buildable) {
+        // The button belongs here, beside the candidates it would build.
+        // Sending someone back to Find & build means a second search that may
+        // not return the organizations they just read.
+        html += '<div class="ob-warn" style="margin-top:12px;">'
+              + '<div>Test run — nothing was created yet.</div>'
+              + '<button type="button" class="ob-btn ob-btn--gold" id="obBuildTheseBtn" '
+              + 'style="margin-top:10px;">Build these ' + buildable + '</button>'
+              + '</div>';
+      } else if (isDry || run.dry_run) {
+        html += '<div class="ob-warn" style="margin-top:12px;">Test run — nothing was created.</div>';
       }
       (run.candidates || []).forEach(function(row){
         html += '<div class="ob-row"><div class="ob-row-main">'
@@ -312,6 +321,29 @@
         });
     }
 
+    function buildReviewed() {
+      var button = document.getElementById('obBuildTheseBtn');
+      if (!button) return;
+      if (!window.confirm('Build these stores?\n\n'
+            + 'Real Shopify stores get created. Nobody is emailed until you accept them below.')) return;
+      button.disabled = true;
+      button.textContent = 'Building…';
+      fetch(RAILWAY_URL + '/admin/outreach/discovery/build-last', { method: 'POST', headers: headers() })
+        .then(getJson)
+        .then(function(body){
+          var run = body.run || {};
+          toast((run.queued || 0) + ' store(s) queued to build.');
+          renderRun(run, false);
+          loadReviewQueue();
+          loadDiscovery();
+        })
+        .catch(function(error){
+          button.disabled = false;
+          button.textContent = 'Build these';
+          toast(error.message, true);
+        });
+    }
+
     // ---- Review queue ---------------------------------------------------
 
     function reviewRow(row) {
@@ -410,6 +442,10 @@
     document.getElementById('obDryRunBtn').addEventListener('click', function(){ runDiscovery(true); });
     document.getElementById('obRealRunBtn').addEventListener('click', function(){ runDiscovery(false); });
     document.getElementById('obReviewRefreshBtn').addEventListener('click', loadReviewQueue);
+    // Delegated: the button is re-rendered with each run.
+    document.getElementById('obLastRun').addEventListener('click', function(event){
+      if (event.target.closest('#obBuildTheseBtn')) buildReviewed();
+    });
     document.getElementById('obReviewList').addEventListener('click', function(event){
       var accept = event.target.closest('[data-review-accept]');
       var decline = event.target.closest('[data-review-decline]');
