@@ -69,15 +69,12 @@
           which is in here looking at the gear — not back on the card they
           clicked through a minute ago.
         {%- endcomment -%}
+        {%- comment -%}
+          Try the admin lives in the Store actions card under Shop products, not
+          here. Two gold pills in a thin strip read as an ad; one clear next step
+          reads as a store.
+        {%- endcomment -%}
         <a class="ps-preview-banner__cta" href="{{ join_link }}">Join this store</a>
-        {% if prospect_owner == 'unclaimed' %}
-          <a class="ps-preview-banner__cta ps-preview-banner__cta--demo"
-             href="/pages/admin-powers?shop={{ handle | url_encode }}&prospect_demo=1"
-             data-ss-prospect-demo-cta
-             data-shop-handle="{{ handle | escape }}"
-             data-claim-url="{{ join_link | escape }}"
-             hidden>Try the Admin</a>
-        {% endif %}
       </div>
     </div>
     <style>
@@ -98,7 +95,6 @@
         background: #fff; color: #17150f; text-decoration: none; font-weight: 700;
         padding: 9px 16px; border-radius: 999px; white-space: nowrap;
       }
-      .ps-preview-banner__cta--demo { background: #d7c17a; color: #17150f; }
     </style>
     {% render 'private-store-preview-links', handle: handle %}
     {% if prospect_owner == 'unclaimed' %}
@@ -151,6 +147,30 @@
           <a class="ps-btn ps-btn-solid ps-shop-anchor" href="#ProductGridContainer">
             Shop products ↓
           </a>
+
+          {%- comment -%}
+            Second only to shopping, because trying the admin is what turns a
+            visitor into a claim. Hidden until the relay confirms this really is
+            a live unclaimed prospect — ss-prospect-store-demo.js reveals it, so
+            a claimed store never offers a demo it would refuse.
+          {%- endcomment -%}
+          {% if is_preview and prospect_owner == 'unclaimed' %}
+            <div class="ps-demo-cta" data-ss-prospect-demo-wrap hidden>
+              <a class="ps-btn ps-btn-demo"
+                 href="/pages/admin-powers?shop={{ handle | url_encode }}&prospect_demo=1"
+                 data-ss-prospect-demo-cta
+                 data-shop-handle="{{ handle | escape }}"
+                 data-claim-url="{{ join_link | escape }}"
+                 aria-describedby="psDemoNote-{{ section.id }}">
+                Try the admin
+              </a>
+              <span class="ps-demo-note" id="psDemoNote-{{ section.id }}" role="tooltip">
+                Experience the admin before you claim the store — create a product
+                and change how the store looks. If you like it, claim the store and
+                you get the full set of tools.
+              </span>
+            </div>
+          {% endif %}
 
           {% if is_preview %}
             <a class="ps-btn ps-btn-ghost" href="{{ join_link }}">
@@ -529,6 +549,77 @@ document.addEventListener("DOMContentLoaded", function() {
 
   #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn {
     width: 100%;
+  }
+
+  /* Try the admin — gold, so it reads as the second thing to do, not a
+     third-tier link competing with Join. */
+  #ps-storefront-{{ section.id }} .ps-btn-demo {
+    color: #17150f;
+    background: #d7c17a;
+    border-color: rgba(183,163,106,.55);
+    box-shadow: 0 14px 34px rgba(183,163,106,.30);
+  }
+
+  #ps-storefront-{{ section.id }} .ps-demo-cta {
+    position: relative;
+    display: block;
+  }
+
+  /* This rule has to outrank the one above it. The `hidden` attribute is only
+     `display: none` from the UA stylesheet, which an id-scoped class selector
+     beats — without this the demo button flashes up on every preview before
+     the relay has said whether the store is actually an unclaimed prospect. */
+  #ps-storefront-{{ section.id }} .ps-demo-cta[hidden] {
+    display: none;
+  }
+
+  #ps-storefront-{{ section.id }} .ps-demo-note {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 6;
+    padding: 11px 13px;
+    border-radius: 12px;
+    background: #11100e;
+    color: #f3efe4;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
+    white-space: normal;
+    text-align: left;
+    box-shadow: 0 18px 44px rgba(17,16,14,.28);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity 160ms ease, transform 160ms ease, visibility 160ms;
+    pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    #ps-storefront-{{ section.id }} .ps-demo-cta:hover .ps-demo-note,
+    #ps-storefront-{{ section.id }} .ps-demo-cta:focus-within .ps-demo-note {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+  }
+
+  /* A touch screen has no hover, and this note is the whole reason someone
+     taps the button. Show it as permanent helper text instead of hiding the
+     explanation behind a gesture that does not exist. */
+  @media (hover: none) {
+    #ps-storefront-{{ section.id }} .ps-demo-note {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      padding: 7px 3px 0;
+      background: none;
+      color: rgba(17,16,14,.60);
+      box-shadow: none;
+      font-size: 12px;
+    }
   }
 
   #ps-storefront-{{ section.id }} .ps-admin-mobile-bar {
