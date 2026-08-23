@@ -121,6 +121,14 @@
     color: #e8e4d8; font: 500 11px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
     overflow-x: auto; white-space: pre;
   }
+  /* A reply is somebody's own words. Show them whole rather than summarised. */
+  .ob-quote {
+    margin: 8px 0 0; padding: 10px 12px; border-radius: 9px;
+    background: rgba(0,0,0,.035); border-left: 3px solid var(--accent);
+    font-size: 13px; line-height: 1.55; color: var(--text);
+    white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .ob-chip--ask { background: rgba(0,122,255,.14); color: #0a4a9e; }
   .ob-gate { max-width: 520px; margin: 80px auto; text-align: center; padding: 0 20px; }
 </style>
 </head>
@@ -189,6 +197,18 @@
       </div>
       <div class="ob-warn" id="obEmailWarn" style="display:none;"></div>
       <div id="obReviewList"></div>
+    </section>
+
+    <section class="ob-card" id="obRepliesCard" aria-busy="true">
+      <div class="ob-card-head">
+        <div>
+          <h2 class="ob-section-title">Replies <span class="ob-badge ob-badge--off" id="obRepliesCount">—</span></h2>
+          <p class="ob-muted" id="obRepliesStatus">Loading…</p>
+        </div>
+        <button type="button" class="ob-btn" id="obRepliesRefreshBtn">Refresh</button>
+      </div>
+      <div class="ob-warn" id="obRepliesWarn" style="display:none;"></div>
+      <div id="obRepliesList"></div>
     </section>
 
     <section class="ob-card" id="obSentCard">
@@ -637,6 +657,94 @@
         });
     }
 
+    // ---- Replies ---------------------------------------------------------
+
+    function replyRow(row) {
+      var subject = row.subject || '';
+      var reSubject = /^re:/i.test(subject) ? subject : 'Re: ' + subject;
+      var mailto = 'mailto:' + encodeURIComponent(row.from || '')
+        + '?subject=' + encodeURIComponent(reSubject);
+      var label = row.decision === 'question' ? 'Asked a question' : 'Not sure what they meant';
+      return '<div class="ob-row" data-reply-handle="' + escapeHtml(row.handle) + '">'
+        + '<div class="ob-row-main">'
+        + '<h3 class="ob-row-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
+        + '<div class="ob-chips"><span class="ob-chip ob-chip--ask">' + escapeHtml(label) + '</span></div>'
+        + '<p class="ob-row-meta">From <strong>' + escapeHtml(row.from || '—') + '</strong>'
+        + ' · ' + escapeHtml(formatDate(row.at))
+        + (subject ? '<br>' + escapeHtml(subject) : '')
+        + '</p>'
+        + '<div class="ob-quote">' + escapeHtml(row.body || '') + '</div>'
+        + '</div>'
+        + '<div class="ob-actions">'
+        + '<a class="ob-btn ob-btn--primary" href="' + escapeHtml(mailto) + '">Reply by email</a>'
+        + '<button type="button" class="ob-btn" data-reply-done="' + escapeHtml(row.handle) + '">Mark answered</button>'
+        + '</div></div>';
+    }
+
+    function loadReplies() {
+      var card = document.getElementById('obRepliesCard');
+      var button = document.getElementById('obRepliesRefreshBtn');
+      card.setAttribute('aria-busy', 'true');
+      if (button) button.disabled = true;
+      return fetch(RAILWAY_URL + '/admin/outreach/replies', { headers: headers(), cache: 'no-store' })
+        .then(getJson)
+        .then(function(body){
+          var pending = body.pending || [];
+          var count = document.getElementById('obRepliesCount');
+          count.textContent = pending.length;
+          count.className = 'ob-badge ' + (pending.length ? 'ob-badge--on' : 'ob-badge--off');
+
+          var warn = document.getElementById('obRepliesWarn');
+          if (body.inbound_configured === false) {
+            warn.style.display = 'block';
+            warn.innerHTML = 'Inbound replies are not switched on yet, so nothing will land here. '
+              + 'Set OUTREACH_INBOUND_SECRET in Railway and point the Resend inbound webhook at '
+              + '<code>/api/outreach/replies/inbound</code>.';
+          } else {
+            warn.style.display = 'none';
+          }
+          document.getElementById('obRepliesStatus').textContent = pending.length
+            ? 'Somebody wrote back and is waiting on you.'
+            : 'Nothing waiting. Replies that need an answer show up here.';
+
+          document.getElementById('obRepliesList').innerHTML = pending.length
+            ? pending.map(replyRow).join('')
+            : '<p class="ob-empty">No replies waiting. Anyone who asked to be left alone was handled automatically.</p>';
+        })
+        .catch(function(error){
+          document.getElementById('obRepliesStatus').textContent = 'Unavailable: ' + error.message;
+          document.getElementById('obRepliesList').innerHTML = '';
+        })
+        .finally(function(){
+          card.setAttribute('aria-busy', 'false');
+          if (button) button.disabled = false;
+        });
+    }
+
+    function markAnswered(handle) {
+      if (!handle) return;
+      var row = document.querySelector('[data-reply-handle="' + handle.replace(/"/g, '') + '"]');
+      if (row) {
+        row.style.opacity = '.55';
+        row.querySelectorAll('button').forEach(function(b){ b.disabled = true; });
+      }
+      fetch(RAILWAY_URL + '/admin/outreach/' + encodeURIComponent(handle) + '/replies/answered', {
+        method: 'POST', headers: headers()
+      })
+        .then(getJson)
+        .then(function(){
+          toast('Cleared ' + handle);
+          loadReplies();
+        })
+        .catch(function(error){
+          if (row) {
+            row.style.opacity = '';
+            row.querySelectorAll('button').forEach(function(b){ b.disabled = false; });
+          }
+          toast(error.message, true);
+        });
+    }
+
     document.getElementById('obDryRunBtn').addEventListener('click', function(){ runDiscovery(true); });
     document.getElementById('obRealRunBtn').addEventListener('click', function(){ runDiscovery(false); });
     document.getElementById('obReviewRefreshBtn').addEventListener('click', loadReviewQueue);
@@ -651,8 +759,15 @@
       if (decline) return decide(decline.getAttribute('data-review-decline'), 'decline');
     });
 
+    document.getElementById('obRepliesRefreshBtn').addEventListener('click', loadReplies);
+    document.getElementById('obRepliesList').addEventListener('click', function(event){
+      var done = event.target.closest('[data-reply-done]');
+      if (done) markAnswered(done.getAttribute('data-reply-done'));
+    });
+
     loadDiscovery();
     loadReviewQueue();
+    loadReplies();
   </script>
 {% else %}
   <div class="ob-gate">
