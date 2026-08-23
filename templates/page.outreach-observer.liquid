@@ -129,6 +129,7 @@
     white-space: pre-wrap; overflow-wrap: anywhere;
   }
   .ob-chip--ask { background: rgba(0,122,255,.14); color: #0a4a9e; }
+  .ob-chip--warn { background: rgba(255,159,10,.20); color: #7a4a00; }
   .ob-gate { max-width: 520px; margin: 80px auto; text-align: center; padding: 0 20px; }
 </style>
 </head>
@@ -473,9 +474,15 @@
       if (row.primary_color) bits.push(escapeHtml(row.primary_color));
       if (row.source_agent) bits.push('via ' + escapeHtml(row.source_agent));
       var meta = bits.join(' · ');
+      // Worth opening the preview for before emailing a stranger about it:
+      // the mark on those shirts is our drawing, not their file.
+      var redrawn = row.logo_recreated
+        ? '<div class="ob-chips"><span class="ob-chip ob-chip--warn">Logo redrawn — check the preview</span></div>'
+        : '';
       return '<div class="ob-row" data-review-handle="' + escapeHtml(row.handle) + '">'
         + '<div class="ob-row-main">'
         + '<h3 class="ob-row-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
+        + redrawn
         + '<p class="ob-row-meta">' + meta + (meta ? '<br>' : '')
         + 'Emailing <strong>' + escapeHtml(row.contact_email || '—') + '</strong>'
         + '<br><a href="' + escapeHtml(row.preview_url) + '" target="_blank" rel="noopener">Open the store preview ↗</a>'
