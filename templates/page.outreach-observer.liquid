@@ -544,19 +544,30 @@
     }
 
     function plainRow(row) {
-      var html = '<div class="ob-row"><div class="ob-row-main">'
+      var main = '<div class="ob-row-main">'
         + '<h3 class="ob-row-name">' + escapeHtml(row.organization || row.handle) + '</h3>'
         + '<p class="ob-row-meta">' + escapeHtml(row.status || row.stage)
         + ' · started ' + escapeHtml(formatDate(row.built_at)) + '</p>';
       if (row.error) {
-        html += '<p class="ob-error">' + escapeHtml(row.error) + '</p>';
+        main += '<p class="ob-error">' + escapeHtml(row.error) + '</p>';
       }
-      html += steps(row);
+      main += steps(row);
       if ((row.log || []).length) {
-        html += '<details class="ob-details"><summary>Build log</summary>'
+        main += '<details class="ob-details"><summary>Build log</summary>'
           + '<pre class="ob-pre">' + escapeHtml(row.log.join('\n')) + '</pre></details>';
       }
-      return html + '</div></div>';
+      main += '</div>';
+
+      // Without this a failure is permanent in both directions: the worker
+      // only picks up queued work, and discovery avoids every domain already
+      // in the ledger, so nothing would reach this organization again.
+      var actions = row.stage === 'failed'
+        ? '<div class="ob-actions"><button type="button" class="ob-btn" data-retry="'
+          + escapeHtml(row.handle) + '">Try again</button></div>'
+        : '';
+
+      return '<div class="ob-row" data-failed-handle="' + escapeHtml(row.handle) + '">'
+        + main + actions + '</div>';
     }
 
     function fillSection(listId, countId, cardId, rows, render, emptyText) {
@@ -764,6 +775,27 @@
       var decline = event.target.closest('[data-review-decline]');
       if (accept) return decide(accept.getAttribute('data-review-accept'), 'accept');
       if (decline) return decide(decline.getAttribute('data-review-decline'), 'decline');
+    });
+
+    document.getElementById('obFailedList').addEventListener('click', function(event){
+      var button = event.target.closest('[data-retry]');
+      if (!button) return;
+      var handle = button.getAttribute('data-retry');
+      button.disabled = true;
+      button.textContent = 'Queueing…';
+      fetch(RAILWAY_URL + '/admin/outreach/' + encodeURIComponent(handle) + '/retry', {
+        method: 'POST', headers: headers()
+      })
+        .then(getJson)
+        .then(function(){
+          toast(handle + ' is back in the queue');
+          loadReviewQueue();
+        })
+        .catch(function(error){
+          button.disabled = false;
+          button.textContent = 'Try again';
+          toast(error.message, true);
+        });
     });
 
     document.getElementById('obRepliesRefreshBtn').addEventListener('click', loadReplies);
