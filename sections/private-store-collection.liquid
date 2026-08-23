@@ -73,8 +73,14 @@
           Try the admin lives in the Store actions card under Shop products, not
           here. Two gold pills in a thin strip read as an ad; one clear next step
           reads as a store.
+
+          The label matches the one in Store actions exactly. It is the same
+          link, and calling it "Join" up here while calling it "Claim" down
+          there made one action look like two different offers.
         {%- endcomment -%}
-        <a class="ps-preview-banner__cta" href="{{ join_link }}">Join this store</a>
+        <a class="ps-preview-banner__cta" href="{{ join_link }}">
+          {% if prospect_owner == 'unclaimed' %}Claim this store{% else %}Join this store{% endif %}
+        </a>
       </div>
     </div>
     <style>
@@ -165,9 +171,8 @@
                 Try the admin
               </a>
               <span class="ps-demo-note" id="psDemoNote-{{ section.id }}" role="tooltip">
-                Experience the admin before you claim the store — create a product
-                and change how the store looks. If you like it, claim the store and
-                you get the full set of tools.
+                Look around the admin without signing in. Build a product and change
+                how the store looks.
               </span>
             </div>
           {% endif %}
@@ -613,20 +618,14 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  /* A touch screen has no hover, and this note is the whole reason someone
-     taps the button. Show it as permanent helper text instead of hiding the
-     explanation behind a gesture that does not exist. */
+  /* A touch screen has no hover, so this used to become permanent helper text
+     under the button. On a phone that turned a two-word action into a
+     paragraph, in the one place where space is tightest. The button says what
+     it does, and anyone who taps it finds out the rest by using it — so on
+     touch the note simply does not exist. */
   @media (hover: none) {
     #ps-storefront-{{ section.id }} .ps-demo-note {
-      position: static;
-      opacity: 1;
-      visibility: visible;
-      transform: none;
-      padding: 7px 3px 0;
-      background: none;
-      color: rgba(17,16,14,.60);
-      box-shadow: none;
-      font-size: 12px;
+      display: none;
     }
   }
 

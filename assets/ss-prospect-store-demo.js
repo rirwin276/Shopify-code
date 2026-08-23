@@ -42,8 +42,7 @@
         if (state.product_status !== 'completed') return;
         var note = cta.parentNode && cta.parentNode.querySelector('.ps-demo-note');
         if (note) {
-          note.textContent = 'Your product is live. Keep exploring the admin and open any builder you like — '
-            + 'claim the store when you want to publish another one.';
+          note.textContent = 'Your product is live. Keep exploring the admin and open any builder you like.';
         }
       });
       document.querySelectorAll('a[href*="/pages/join-store"]').forEach(function (link) {
