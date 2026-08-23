@@ -73,8 +73,14 @@
           Try the admin lives in the Store actions card under Shop products, not
           here. Two gold pills in a thin strip read as an ad; one clear next step
           reads as a store.
+
+          The label matches the one in Store actions exactly. It is the same
+          link, and calling it "Join" up here while calling it "Claim" down
+          there made one action look like two different offers.
         {%- endcomment -%}
-        <a class="ps-preview-banner__cta" href="{{ join_link }}">Join this store</a>
+        <a class="ps-preview-banner__cta" href="{{ join_link }}">
+          {% if prospect_owner == 'unclaimed' %}Claim this store{% else %}Join this store{% endif %}
+        </a>
       </div>
     </div>
     <style>
@@ -165,9 +171,8 @@
                 Try the admin
               </a>
               <span class="ps-demo-note" id="psDemoNote-{{ section.id }}" role="tooltip">
-                Experience the admin before you claim the store — create a product
-                and change how the store looks. If you like it, claim the store and
-                you get the full set of tools.
+                Look around the admin without signing in. Build a product and change
+                how the store looks.
               </span>
             </div>
           {% endif %}
