@@ -2843,3 +2843,215 @@
   @media (max-width: 900px) {
     .ap-editor-dialog { height: 100vh; height: 100dvh; }
   }
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT HERO — the admin header was the one dark slab on an
+   otherwise cream-and-gold page, and its text sat at 60-70% white
+   on near-black. That combination is where "some wording is hard
+   to see" came from. The palette above is already the site's; this
+   brings the hero into it.
+
+   The type and the logo tile come down with it. The heading was
+   clamped to a 38px floor and the logo to 110px, so on a phone the
+   store name and a picture of the logo filled the screen before
+   any control appeared.
+
+   Several rules this overrides are themselves !important, so these
+   are too. DELETE THIS BLOCK to restore the dark hero.
+   ═══════════════════════════════════════════════════════════════ */
+  .ap-hero {
+    background:
+      radial-gradient(circle at 8% 0%, rgba(183,163,106,0.16), transparent 42%),
+      linear-gradient(150deg, #fffdf9 0%, #fbf8f1 62%, #f7f2e7 100%) !important;
+    border: 1px solid rgba(183,163,106,0.30) !important;
+    box-shadow: 0 26px 80px rgba(17,16,14,0.09) !important;
+  }
+
+  /* This overlay existed to lift a dark gradient. On cream it only
+     muddies it. */
+  .ap-hero::before { background: none !important; }
+
+  .ap-hero .ap-hero-info h1,
+  .ap-hero h1 {
+    color: var(--ap-text) !important;
+    font-size: clamp(30px, 3.6vw, 52px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  .ap-hero .ap-hero-sub { color: rgba(17,16,14,0.60) !important; }
+
+  .ap-hero .ap-hero-badge {
+    background: rgba(183,163,106,0.16) !important;
+    border: 1px solid rgba(183,163,106,0.42) !important;
+    color: #6f5d28 !important;
+  }
+
+  .ap-hero .ap-hero-logo {
+    background: #fff !important;
+    border: 1px solid rgba(183,163,106,0.34) !important;
+    box-shadow: 0 14px 40px rgba(17,16,14,0.10) !important;
+  }
+
+  .ap-hero .ap-hero-pill {
+    color: rgba(17,16,14,0.68) !important;
+    background: rgba(255,255,255,0.86) !important;
+    border: 1px solid rgba(17,16,14,0.10) !important;
+  }
+
+  .ap-hero .ap-hero-pill--status {
+    color: #0f6b45 !important;
+    background: rgba(16,185,129,0.13) !important;
+    border-color: rgba(16,185,129,0.34) !important;
+  }
+
+  /* Glass was white-on-transparent, which is invisible on cream.
+     On a light hero these are the secondary actions, so they read
+     as outlines and Share becomes the one solid button. */
+  .ap-hero .ap-btn--glass {
+    background: rgba(255,255,255,0.92) !important;
+    border: 1px solid rgba(17,16,14,0.14) !important;
+    color: var(--ap-text) !important;
+    backdrop-filter: none !important;
+  }
+  .ap-hero .ap-btn--glass:hover {
+    background: #fff !important;
+    border-color: rgba(17,16,14,0.26) !important;
+    color: var(--ap-text) !important;
+  }
+
+  .ap-hero .ap-btn--share-primary {
+    background: var(--ap-accent) !important;
+    color: #fff !important;
+    border: 1px solid var(--ap-accent) !important;
+    box-shadow: 0 12px 30px rgba(17,16,14,0.18) !important;
+  }
+  .ap-hero .ap-btn--share-primary:hover {
+    background: #2a2721 !important;
+    color: #fff !important;
+  }
+
+  /* Sits on the cream hero, not on the green fundraiser card, so it
+     needs the same treatment as the other hero buttons. */
+  .ap-hero-actions .ap-fr-zone-empty .ap-btn--fr-details,
+  .ap-hero .ap-fr-zone-empty .ap-btn--fr-details {
+    background: rgba(255,255,255,0.92) !important;
+    border: 1px solid rgba(17,16,14,0.14) !important;
+    color: var(--ap-text) !important;
+  }
+
+  @media (max-width: 700px) {
+    .ap-hero {
+      padding: 18px 16px !important;
+      border-radius: 24px !important;
+      gap: 14px !important;
+      margin-bottom: 12px !important;
+    }
+
+    /* 38px was still a headline shouting on a 390px screen. */
+    .ap-hero .ap-hero-info h1,
+    .ap-hero h1 {
+      font-size: clamp(23px, 6.4vw, 31px) !important;
+      line-height: 1.06 !important;
+      letter-spacing: -0.03em !important;
+    }
+
+    /* 110px of logo above the fold, on top of the name, left no
+       room for the thing the page is for. */
+    .ap-hero .ap-hero-logo {
+      width: 62px !important;
+      height: 62px !important;
+      border-radius: 18px !important;
+    }
+    .ap-hero .ap-hero-logo span { font-size: 25px !important; }
+    .ap-hero .ap-hero-logo img { border-radius: 18px !important; }
+
+    .ap-hero .ap-hero-info { gap: 9px !important; }
+
+    .ap-hero .ap-hero-badge {
+      font-size: 9.5px !important;
+      letter-spacing: 0.09em !important;
+      padding: 5px 10px !important;
+    }
+
+    .ap-hero .ap-hero-sub { font-size: 12.5px !important; }
+
+    /* 10px uppercase at 66% opacity is the exact combination that
+       stops being readable on a phone in daylight. */
+    .ap-hero .ap-hero-pill {
+      min-height: 28px !important;
+      font-size: 10.5px !important;
+      letter-spacing: 0.04em !important;
+      color: rgba(17,16,14,0.74) !important;
+    }
+
+    .ap-hero .ap-btn { min-height: 46px !important; font-size: 14px !important; }
+  }
+
+  /* The name and the logo side by side is the one arrangement that
+     survives a narrow screen: the tile stays small, the name gets
+     the remaining width, and the controls start above the fold. */
+  @media (max-width: 560px) {
+    .ap-hero {
+      display: grid !important;
+      grid-template-columns: auto minmax(0, 1fr) !important;
+      align-items: center !important;
+      column-gap: 12px !important;
+      row-gap: 14px !important;
+    }
+    .ap-hero .ap-hero-logo { grid-column: 1; grid-row: 1; }
+    .ap-hero .ap-hero-info { grid-column: 2; grid-row: 1; }
+    .ap-hero .ap-hero-actions { grid-column: 1 / -1; grid-row: 2; }
+  }
+
+  /* The action buttons are a two-up grid on a phone, but they were
+     also `white-space: nowrap` with 1fr columns, so "← Dashboard"
+     set a minimum wider than its share and pushed the whole hero
+     past the edge of the screen. Columns that are allowed to
+     shrink, and labels that are allowed to wrap, keep it inside. */
+  @media (max-width: 560px) {
+    .ap-hero .ap-hero-actions {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    }
+    .ap-hero .ap-hero-actions .ap-btn {
+      white-space: normal !important;
+      min-width: 0 !important;
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+    }
+    /* Share is the primary action and the fundraiser is a block of
+       its own; both get the full width. */
+    .ap-hero .ap-hero-actions .ap-share-help,
+    .ap-hero .ap-hero-actions .ap-fr-zone {
+      grid-column: 1 / -1 !important;
+    }
+  }
+
+/* ═══════════════════════════════════════════════════════════════
+   READABLE TAB LABELS — the bar under the hero set its labels at
+   8px and 54% opacity on a phone. That is smaller than anything
+   else on the page and lighter than the body text, which is the
+   combination that makes a control look disabled rather than
+   simply unselected. 10.5px at 72% is still quiet next to the
+   selected tab and is actually legible.
+   ═══════════════════════════════════════════════════════════════ */
+  @media (max-width: 700px) {
+    .ap-main-tabs .ap-tab-label {
+      font-size: 10.5px !important;
+      line-height: 1.2 !important;
+      letter-spacing: 0.01em !important;
+      color: rgba(17,16,14,0.72) !important;
+    }
+    .ap-main-tabs .ap-main-tab-btn.active .ap-tab-label {
+      color: inherit !important;
+    }
+  }
+
+  /* The shortened "Add" has to move with them, or it is the one
+     label still set at 8px. */
+  @media (max-width: 480px) {
+    .ap-main-tab-btn[data-main-tab="apPanelAddProducts"] .ap-tab-label::after {
+      font-size: 10.5px !important;
+      line-height: 1.2 !important;
+    }
+  }

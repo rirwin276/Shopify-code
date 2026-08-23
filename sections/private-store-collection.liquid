@@ -618,20 +618,14 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  /* A touch screen has no hover, and this note is the whole reason someone
-     taps the button. Show it as permanent helper text instead of hiding the
-     explanation behind a gesture that does not exist. */
+  /* A touch screen has no hover, so this used to become permanent helper text
+     under the button. On a phone that turned a two-word action into a
+     paragraph, in the one place where space is tightest. The button says what
+     it does, and anyone who taps it finds out the rest by using it — so on
+     touch the note simply does not exist. */
   @media (hover: none) {
     #ps-storefront-{{ section.id }} .ps-demo-note {
-      position: static;
-      opacity: 1;
-      visibility: visible;
-      transform: none;
-      padding: 7px 3px 0;
-      background: none;
-      color: rgba(17,16,14,.60);
-      box-shadow: none;
-      font-size: 12px;
+      display: none;
     }
   }
 
