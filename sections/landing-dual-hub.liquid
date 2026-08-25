@@ -110,6 +110,14 @@
       </div>
     </section>
 
+    {%- comment -%}
+      Placement slots. Sections that live outside this one (approved reviews,
+      the public catalog) move themselves into these anchors at runtime, so the
+      order on screen is decided here rather than by whichever script wins the
+      race. See ss-home-catalog-controller.js and ss-featured-store-reviews.
+    {%- endcomment -%}
+    <div class="ss-home-slot" data-ss-home-slot="reviews"></div>
+
     <section class="ss-section ss-reveal">
       <div class="ss-wrap ss-wrap--narrow ss-center">
         <div class="ss-mini-kicker">CREATE ANOTHER STORE</div>
@@ -258,6 +266,13 @@
         </div>
       </div>
     </section>
+
+    {%- comment -%}
+      Placement slots — see the note in the logged-in branch above. Reviews sit
+      directly above the catalog: proof, then the products that proof sells.
+    {%- endcomment -%}
+    <div class="ss-home-slot" data-ss-home-slot="reviews"></div>
+    <div class="ss-home-slot" data-ss-home-slot="catalog"></div>
 
     <section class="ss-section ss-pain-section ss-reveal">
       <div class="ss-wrap">

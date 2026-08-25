@@ -36,10 +36,19 @@
 
       catalog.classList.add('ss-home-catalog');
 
-      const proofBar = document.querySelector('.ss-home .ss-proof-bar');
-      if (proofBar) {
-        proofBar.insertAdjacentElement('afterend', catalog);
+      // The catalog belongs inside the landing hub, under the approved reviews.
+      // Target the declared slot so placement does not depend on which script
+      // finishes first; fall back to the stats bar on an older landing section.
+      const slot = document.querySelector('.ss-home [data-ss-home-slot="catalog"]');
+      if (slot) {
+        slot.appendChild(catalog);
         if (originalShell && !originalShell.children.length) originalShell.remove();
+      } else {
+        const proofBar = document.querySelector('.ss-home .ss-proof-bar');
+        if (proofBar) {
+          proofBar.insertAdjacentElement('afterend', catalog);
+          if (originalShell && !originalShell.children.length) originalShell.remove();
+        }
       }
 
       const style = document.createElement('style');
