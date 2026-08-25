@@ -1795,12 +1795,15 @@
       if (decision === 'accept') {
         if (!window.confirm('Send the outreach email for ' + handle + '?\n\nThis emails a real organization.')) return;
       } else {
-        var reason = window.prompt(
-          'Decline ' + handle + '?\n\nThe store and its artwork are permanently deleted and nobody is emailed.\n\nReason (optional):',
-          ''
+        var reasonCode = window.prompt(
+          'Decline ' + handle + '?\n\nThe store and its artwork are permanently deleted and nobody is emailed.\n\n'
+          + 'Enter a reason code:\nexisting_merch\ntoo_large\nbad_logo\nnot_team\nwrong_contact\nduplicate\nother',
+          'existing_merch'
         );
+        if (reasonCode === null) return;
+        var reason = window.prompt('Optional note for future searches:', '');
         if (reason === null) return;
-        body = JSON.stringify({ reason: reason });
+        body = JSON.stringify({ reason_code: reasonCode, reason: reason });
       }
 
       setOutreachRowBusy(handle, true);

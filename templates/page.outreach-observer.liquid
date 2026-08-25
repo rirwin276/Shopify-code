@@ -131,6 +131,17 @@
   .ob-chip--ask { background: rgba(0,122,255,.14); color: #0a4a9e; }
   .ob-chip--warn { background: rgba(255,159,10,.20); color: #7a4a00; }
   .ob-gate { max-width: 520px; margin: 80px auto; text-align: center; padding: 0 20px; }
+  .ob-modal-backdrop {
+    position: fixed; inset: 0; z-index: 80; display: none; place-items: center;
+    padding: 20px; background: rgba(0,0,0,.42); backdrop-filter: blur(4px);
+  }
+  .ob-modal-backdrop.is-open { display: grid; }
+  .ob-modal { width: min(520px, 100%); background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 22px 70px rgba(0,0,0,.24); }
+  .ob-modal h2 { margin: 0 0 6px; font-size: 18px; }
+  .ob-modal label { display: block; margin-top: 14px; font-size: 12px; font-weight: 800; color: var(--gray); }
+  .ob-modal select, .ob-modal textarea { width: 100%; margin-top: 6px; padding: 11px; border: 1px solid var(--border); border-radius: 10px; font: 14px var(--font); background: #fff; }
+  .ob-modal textarea { min-height: 86px; resize: vertical; }
+  .ob-modal .ob-actions { justify-content: flex-end; margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -265,6 +276,28 @@
   </div>
 
   <div class="ob-toast" id="obToast" role="status" aria-live="polite"></div>
+  <div class="ob-modal-backdrop" id="obDeclineModal" role="dialog" aria-modal="true" aria-labelledby="obDeclineTitle">
+    <div class="ob-modal">
+      <h2 id="obDeclineTitle">Why are you declining this store?</h2>
+      <p class="ob-muted">This reason becomes feedback for future OpenAI searches.</p>
+      <label for="obDeclineReason">Reason</label>
+      <select id="obDeclineReason">
+        <option value="existing_merch">Already sells merchandise</option>
+        <option value="too_large">Organization is too large or established</option>
+        <option value="bad_logo">Logo or artwork is unusable/inaccurate</option>
+        <option value="not_team">Not a small active team or competition club</option>
+        <option value="wrong_contact">Wrong or unusable contact</option>
+        <option value="duplicate">Duplicate organization</option>
+        <option value="other">Other</option>
+      </select>
+      <label for="obDeclineNote">Optional note</label>
+      <textarea id="obDeclineNote" maxlength="300" placeholder="Anything specific the next search should avoid"></textarea>
+      <div class="ob-actions">
+        <button type="button" class="ob-btn" id="obDeclineCancel">Cancel</button>
+        <button type="button" class="ob-btn ob-btn--danger" id="obDeclineConfirm">Decline &amp; delete</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const RAILWAY_URL = "/apps/ss/relay";
@@ -313,6 +346,17 @@
       document.getElementById('obKpiRejected').textContent = (run.rejected || []).length;
 
       var html = '';
+      if (run.complete === false && run.shortfall) {
+        html += '<div class="ob-error" style="margin-top:12px;">Requested '
+          + escapeHtml(run.requested) + ', found ' + escapeHtml(run.accepted || 0)
+          + ' after ' + escapeHtml(run.search_rounds || 0) + ' search rounds. '
+          + escapeHtml(run.shortfall_reason || 'The remaining slots could not be safely filled.')
+          + '</div>';
+      } else if (run.search_rounds > 1) {
+        html += '<div class="ob-warn" style="margin-top:12px;">Filled all '
+          + escapeHtml(run.requested) + ' slots after ' + escapeHtml(run.search_rounds)
+          + ' search rounds.</div>';
+      }
       // A run recorded before payloads were kept has candidates but nothing to
       // build from, and offering a button that can only fail is worse than
       // offering none.
@@ -412,7 +456,8 @@
     function runDiscovery(dryRun) {
       var limit = parseInt(document.getElementById('obLimit').value, 10) || 5;
       if (!dryRun && !window.confirm(
-            'Find and build up to ' + limit + ' stores?\n\n'
+            'Find and build ' + limit + ' qualified stores?\n\n'
+            + 'Rejected prospects will be replaced with additional searches.\n\n'
             + 'Real Shopify stores get created. Nobody is emailed until you accept them below.')) return;
 
       var buttons = [document.getElementById('obDryRunBtn'), document.getElementById('obRealRunBtn')];
@@ -659,17 +704,10 @@
       row.querySelectorAll('button').forEach(function(b){ b.disabled = busy; });
     }
 
-    function decide(handle, decision) {
-      if (!handle) return;
-      var body = null;
-      if (decision === 'accept') {
-        if (!window.confirm('Send the outreach email for ' + handle + '?\n\nThis emails a real organization.')) return;
-      } else {
-        var reason = window.prompt(
-          'Decline ' + handle + '?\n\nThe store and its artwork are permanently deleted and nobody is emailed.\n\nReason (optional):', '');
-        if (reason === null) return;
-        body = JSON.stringify({ reason: reason });
-      }
+    var reasonAction = null;
+
+    function sendReviewAction(handle, decision, payload) {
+      var body = payload ? JSON.stringify(payload) : null;
       setRowBusy(handle, true);
       fetch(RAILWAY_URL + '/admin/outreach/' + encodeURIComponent(handle) + '/' + decision, {
         method: 'POST', headers: headers(), body: body
@@ -683,6 +721,32 @@
           setRowBusy(handle, false);
           toast(error.message, true);
         });
+    }
+
+    function openReasonModal(handle, action) {
+      reasonAction = { handle: handle, action: action };
+      document.getElementById('obDeclineTitle').textContent =
+        (action === 'remove' ? 'Why are you deleting ' : 'Why are you declining ') + handle + '?';
+      document.getElementById('obDeclineReason').value = 'existing_merch';
+      document.getElementById('obDeclineNote').value = '';
+      document.getElementById('obDeclineConfirm').textContent =
+        action === 'remove' ? 'Delete store' : 'Decline & delete';
+      document.getElementById('obDeclineModal').classList.add('is-open');
+      document.getElementById('obDeclineReason').focus();
+    }
+
+    function closeReasonModal() {
+      reasonAction = null;
+      document.getElementById('obDeclineModal').classList.remove('is-open');
+    }
+
+    function decide(handle, decision) {
+      if (!handle) return;
+      if (decision === 'accept') {
+        if (!window.confirm('Send the outreach email for ' + handle + '?\n\nThis emails a real organization.')) return;
+        return sendReviewAction(handle, decision, null);
+      }
+      openReasonModal(handle, 'decline');
     }
 
     // ---- Replies ---------------------------------------------------------
@@ -793,18 +857,23 @@
       if (!handle) return;
       if (!window.confirm('Delete ' + handle + '?\n\nThe store and its artwork are permanently deleted. '
           + 'This cannot be undone.')) return;
-      var reason = window.prompt('Why? (optional, kept in the ledger)', '') ;
-      if (reason === null) return;
-      fetch(RAILWAY_URL + '/admin/outreach/' + encodeURIComponent(handle) + '/remove', {
-        method: 'POST', headers: headers(), body: JSON.stringify({ reason: reason })
-      })
-        .then(getJson)
-        .then(function(){
-          toast(handle + ' deleted');
-          loadReviewQueue();
-        })
-        .catch(function(error){ toast(error.message, true); });
+      openReasonModal(handle, 'remove');
     }
+
+    document.getElementById('obDeclineCancel').addEventListener('click', closeReasonModal);
+    document.getElementById('obDeclineModal').addEventListener('click', function(event){
+      if (event.target === this) closeReasonModal();
+    });
+    document.getElementById('obDeclineConfirm').addEventListener('click', function(){
+      if (!reasonAction) return;
+      var action = reasonAction;
+      var payload = {
+        reason_code: document.getElementById('obDeclineReason').value,
+        reason: document.getElementById('obDeclineNote').value.trim()
+      };
+      closeReasonModal();
+      sendReviewAction(action.handle, action.action, payload);
+    });
 
     ['obReviewList', 'obSentList', 'obFailedList'].forEach(function(id){
       var list = document.getElementById(id);
