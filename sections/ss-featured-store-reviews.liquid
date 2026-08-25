@@ -10,31 +10,31 @@
   <div class="ss-proof__inner">
     <div class="ss-proof__heading">
       <p class="ss-proof__eyebrow">REAL GROUPS · REAL WORDS</p>
-      <h2>Built for real groups.</h2>
-      <p>Feedback from people who have used Stella &amp; Sage to make team gear simpler.</p>
+      <h2>Made to make group gear easier.</h2>
+      <p>What early Stella &amp; Sage groups have to say.</p>
     </div>
     <div class="ss-proof__grid" data-proof-grid></div>
   </div>
 </section>
 
 <style>
-  #ss-proof-{{ section.id }} { background:#fff; border-top:1px solid #eeece5; border-bottom:1px solid #eeece5; }
-  #ss-proof-{{ section.id }} .ss-proof__inner { max-width:1260px; margin:0 auto; padding:68px 26px 72px; }
-  #ss-proof-{{ section.id }} .ss-proof__heading { max-width:640px; margin:0 auto 30px; text-align:center; }
-  #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 12px; color:#b49b59; font-size:11px; font-weight:850; letter-spacing:.16em; }
-  #ss-proof-{{ section.id }} h2 { margin:0; color:#13130f; font-size:clamp(32px,4vw,52px); line-height:.98; letter-spacing:-.055em; }
-  #ss-proof-{{ section.id }} .ss-proof__heading > p:last-child { margin:15px 0 0; color:#6c6d67; font-size:16px; line-height:1.55; }
-  #ss-proof-{{ section.id }} .ss-proof__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(245px,1fr)); gap:14px; }
-  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; min-height:220px; display:flex; flex-direction:column; padding:22px; border:1px solid #e5e2d8; border-radius:18px; background:#fbfaf6; overflow:hidden; }
+  #ss-proof-{{ section.id }} { background:#f8f7f2; border-top:1px solid #eeece5; }
+  #ss-proof-{{ section.id }} .ss-proof__inner { max-width:1260px; margin:0 auto; padding:36px 26px 42px; display:grid; grid-template-columns:minmax(230px,.72fr) minmax(0,1.28fr); gap:34px; align-items:center; }
+  #ss-proof-{{ section.id }} .ss-proof__heading { max-width:360px; }
+  #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 10px; color:#b49b59; font-size:10px; font-weight:850; letter-spacing:.16em; }
+  #ss-proof-{{ section.id }} h2 { margin:0; color:#13130f; font-size:clamp(27px,3.2vw,42px); line-height:1; letter-spacing:-.055em; }
+  #ss-proof-{{ section.id }} .ss-proof__heading > p:last-child { margin:11px 0 0; color:#6c6d67; font-size:14px; line-height:1.5; }
+  #ss-proof-{{ section.id }} .ss-proof__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
+  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; min-height:164px; display:flex; flex-direction:column; padding:19px 20px; border:1px solid #e5e2d8; border-radius:16px; background:#fff; box-shadow:0 10px 28px rgba(41,35,22,.045); overflow:hidden; }
   #ss-proof-{{ section.id }} .ss-proof__stars { color:#b58d29; font-size:15px; letter-spacing:2px; }
-  #ss-proof-{{ section.id }} blockquote { margin:15px 0 18px; color:#24251f; font-size:15px; line-height:1.55; }
+  #ss-proof-{{ section.id }} blockquote { margin:11px 0 15px; color:#24251f; font-size:14px; line-height:1.52; }
   #ss-proof-{{ section.id }} .ss-proof__person { display:flex; align-items:center; gap:10px; margin-top:auto; min-width:0; }
   #ss-proof-{{ section.id }} .ss-proof__avatar, #ss-proof-{{ section.id }} .ss-proof__photo { flex:0 0 46px; width:46px; height:46px; border-radius:50%; }
   #ss-proof-{{ section.id }} .ss-proof__avatar { display:grid; place-items:center; background:#20211b; color:#fff; font-size:15px; font-weight:800; }
   #ss-proof-{{ section.id }} .ss-proof__photo { object-fit:cover; border:2px solid #fff; box-shadow:0 1px 6px rgba(0,0,0,.13); }
   #ss-proof-{{ section.id }} .ss-proof__name { color:#21221c; font-size:13px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #ss-proof-{{ section.id }} .ss-proof__meta { color:#74766f; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  @media (max-width:700px) { #ss-proof-{{ section.id }} .ss-proof__inner { padding:48px 18px 54px; } #ss-proof-{{ section.id }} .ss-proof__grid { grid-template-columns:1fr; } }
+  @media (max-width:700px) { #ss-proof-{{ section.id }} .ss-proof__inner { padding:34px 18px 40px; grid-template-columns:1fr; gap:20px; } #ss-proof-{{ section.id }} .ss-proof__heading { max-width:460px; } #ss-proof-{{ section.id }} .ss-proof__grid { grid-template-columns:1fr; } }
 </style>
 
 <script>
