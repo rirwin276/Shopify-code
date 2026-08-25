@@ -86,7 +86,7 @@
       "type": "ss-featured-store-reviews",
       "name": "Approved store reviews",
       "settings": {
-        "review_api": "https://social-engine-production-68da.up.railway.app"
+        "review_api": "https://social-engine-production-68da.up.railway.app/"
       }
     },
     "home_catalog_control": {
