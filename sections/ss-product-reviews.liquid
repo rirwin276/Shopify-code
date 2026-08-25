@@ -55,7 +55,7 @@
       summary.textContent = (data.average_rating || '') + ' / 5 from ' + count + ' ' + (count === 1 ? 'review' : 'reviews');
       reviews.forEach(review => {
         const card = el('article', 'ss-garment-reviews__card');
-        card.appendChild(el('div', 'ss-garment-reviews__stars', '★★★★★'.slice(0, Math.max(0, Math.min(5, Number(review.rating) || 0))));
+        card.appendChild(el('div', 'ss-garment-reviews__stars', '★★★★★'.slice(0, Math.max(0, Math.min(5, Number(review.rating) || 0)))));
         if (review.image_url) { const image = document.createElement('img'); image.className = 'ss-garment-reviews__photo'; image.src = review.image_url; image.alt = ''; image.loading = 'lazy'; card.appendChild(image); }
         card.appendChild(el('blockquote', '', '“' + String(review.body || '').trim() + '”'));
         card.appendChild(el('div', 'ss-garment-reviews__name', review.reviewer_name || 'Stella & Sage customer'));
