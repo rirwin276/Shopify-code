@@ -3,30 +3,38 @@
   The service returns only hand-featured, already-approved reviews (max five).
   No placeholder testimonials: the whole section stays hidden until real ones
   are available.
+
+  Placement: on the homepage the landing hub relocates itself around at runtime
+  (the catalog is moved up into it), so a top-level section left where the JSON
+  order puts it ends up below the entire landing hub. This section therefore
+  moves itself into the hub's `reviews` slot, which sits directly above the
+  catalog. Off the homepage, or on an older landing section with no slot, it
+  simply renders in place.
 {%- endcomment -%}
 {%- assign review_api = section.settings.review_api | default: 'https://social-engine-production-68da.up.railway.app' -%}
 
 <section class="ss-proof" id="ss-proof-{{ section.id }}" data-review-api="{{ review_api | escape }}" hidden>
   <div class="ss-proof__inner">
     <div class="ss-proof__heading">
-      <p class="ss-proof__eyebrow">REAL GROUPS · REAL WORDS</p>
-      <h2>Made to make group gear easier.</h2>
-      <p>What early Stella &amp; Sage groups have to say.</p>
+      <p class="ss-proof__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      <h2>{{ section.settings.heading | escape }}</h2>
+      <p>{{ section.settings.subheading | escape }}</p>
     </div>
     <div class="ss-proof__grid" data-proof-grid></div>
   </div>
 </section>
 
 <style>
-  #ss-proof-{{ section.id }} { background:#f8f7f2; border-top:1px solid #eeece5; }
-  #ss-proof-{{ section.id }} .ss-proof__inner { max-width:1260px; margin:0 auto; padding:36px 26px 42px; display:grid; grid-template-columns:minmax(230px,.72fr) minmax(0,1.28fr); gap:34px; align-items:center; }
+  #ss-proof-{{ section.id }} { padding:6px 0 46px; }
+  #ss-proof-{{ section.id }} .ss-proof__inner { width:min(1180px,calc(100% - 44px)); margin:0 auto; display:grid; grid-template-columns:minmax(230px,.7fr) minmax(0,1.3fr); gap:34px; align-items:center; padding:30px 30px 32px; border:1px solid rgba(17,16,14,.08); border-radius:28px; background:rgba(255,255,255,.68); box-shadow:0 24px 80px rgba(17,16,14,.08); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
   #ss-proof-{{ section.id }} .ss-proof__heading { max-width:360px; }
-  #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 10px; color:#b49b59; font-size:10px; font-weight:850; letter-spacing:.16em; }
-  #ss-proof-{{ section.id }} h2 { margin:0; color:#13130f; font-size:clamp(27px,3.2vw,42px); line-height:1; letter-spacing:-.055em; }
-  #ss-proof-{{ section.id }} .ss-proof__heading > p:last-child { margin:11px 0 0; color:#6c6d67; font-size:14px; line-height:1.5; }
-  #ss-proof-{{ section.id }} .ss-proof__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
-  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; min-height:164px; display:flex; flex-direction:column; padding:19px 20px; border:1px solid #e5e2d8; border-radius:16px; background:#fff; box-shadow:0 10px 28px rgba(41,35,22,.045); overflow:hidden; }
+  #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 10px; color:#9f8d5a; font-size:10px; font-weight:900; letter-spacing:.16em; }
+  #ss-proof-{{ section.id }} h2 { margin:0; color:#11100e; font-size:clamp(26px,3vw,38px); line-height:1.02; letter-spacing:-.055em; font-weight:950; }
+  #ss-proof-{{ section.id }} .ss-proof__heading > p:last-child { margin:11px 0 0; color:rgba(17,16,14,.56); font-size:14px; line-height:1.5; font-weight:600; }
+  #ss-proof-{{ section.id }} .ss-proof__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; min-height:164px; display:flex; flex-direction:column; padding:19px 20px; border:1px solid rgba(17,16,14,.075); border-radius:20px; background:#fff; box-shadow:0 6px 22px rgba(17,16,14,.05); overflow:hidden; }
   #ss-proof-{{ section.id }} .ss-proof__stars { color:#b58d29; font-size:15px; letter-spacing:2px; }
+  #ss-proof-{{ section.id }} .ss-proof__stars i { color:rgba(17,16,14,.18); font-style:normal; }
   #ss-proof-{{ section.id }} blockquote { margin:11px 0 15px; color:#24251f; font-size:14px; line-height:1.52; }
   #ss-proof-{{ section.id }} .ss-proof__person { display:flex; align-items:center; gap:10px; margin-top:auto; min-width:0; }
   #ss-proof-{{ section.id }} .ss-proof__avatar, #ss-proof-{{ section.id }} .ss-proof__photo { flex:0 0 46px; width:46px; height:46px; border-radius:50%; }
@@ -34,42 +42,126 @@
   #ss-proof-{{ section.id }} .ss-proof__photo { object-fit:cover; border:2px solid #fff; box-shadow:0 1px 6px rgba(0,0,0,.13); }
   #ss-proof-{{ section.id }} .ss-proof__name { color:#21221c; font-size:13px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #ss-proof-{{ section.id }} .ss-proof__meta { color:#74766f; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  @media (max-width:700px) { #ss-proof-{{ section.id }} .ss-proof__inner { padding:34px 18px 40px; grid-template-columns:1fr; gap:20px; } #ss-proof-{{ section.id }} .ss-proof__heading { max-width:460px; } #ss-proof-{{ section.id }} .ss-proof__grid { grid-template-columns:1fr; } }
+  @media (max-width:700px) {
+    #ss-proof-{{ section.id }} .ss-proof__inner { grid-template-columns:1fr; gap:20px; padding:26px 20px 28px; border-radius:24px; }
+    #ss-proof-{{ section.id }} .ss-proof__heading { max-width:460px; }
+    #ss-proof-{{ section.id }} .ss-proof__grid { grid-template-columns:1fr; }
+  }
 </style>
 
 <script>
 (() => {
-  const root = document.getElementById('ss-proof-{{ section.id }}');
-  if (!root) return;
-  const grid = root.querySelector('[data-proof-grid]');
-  const api = (root.dataset.reviewApi || '').replace(/\/$/, '');
-  const el = (name, className, value) => { const node = document.createElement(name); if (className) node.className = className; node.textContent = value || ''; return node; };
-  const initials = (name) => String(name || 'S').trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();
-  fetch(api + '/reviews/featured?limit=5', { headers:{'Accept':'application/json'} })
-    .then(response => response.ok ? response.json() : Promise.reject(new Error('reviews unavailable')))
-    .then(data => {
-      const reviews = Array.isArray(data.reviews) ? data.reviews : [];
-      if (!reviews.length) return;
-      reviews.forEach(review => {
-        const card = el('article', 'ss-proof__card');
-        const rating = Math.max(0, Math.min(5, Number(review.rating) || 0));
-        card.appendChild(el('div', 'ss-proof__stars', '★★★★★'.slice(0, rating)));
-        const quote = el('blockquote', '', '“' + String(review.body || '').trim() + '”');
-        card.appendChild(quote);
-        const person = el('div', 'ss-proof__person');
-        if (review.image_url) {
-          const photo = document.createElement('img'); photo.className = 'ss-proof__photo'; photo.src = review.image_url; photo.alt = ''; photo.loading = 'lazy'; person.appendChild(photo);
-        } else {
-          person.appendChild(el('div', 'ss-proof__avatar', initials(review.reviewer_name)));
-        }
-        const byline = el('div', '');
-        byline.appendChild(el('div', 'ss-proof__name', review.reviewer_name || 'Stella & Sage customer'));
-        byline.appendChild(el('div', 'ss-proof__meta', review.group_name || review.store_name || 'Store experience'));
-        person.appendChild(byline); card.appendChild(person); grid.appendChild(card);
-      });
-      root.hidden = false;
+  const SECTION_ID = '{{ section.id }}';
+
+  // Move into the landing hub's reviews slot when one is on the page, so the
+  // section lands above the catalog instead of below the whole hub.
+  const place = (root) => {
+    const slot = document.querySelector('.ss-home [data-ss-home-slot="reviews"]');
+    if (!slot || root.parentElement === slot) return;
+    // The emptied .shopify-section shell is left in place: it collapses to zero
+    // height and the theme editor can still target this section through it.
+    slot.appendChild(root);
+  };
+
+  const render = (root) => {
+    const grid = root.querySelector('[data-proof-grid]');
+    const api = (root.dataset.reviewApi || '').replace(/\/$/, '');
+    if (!grid || !api) return;
+
+    const el = (name, className, value) => {
+      const node = document.createElement(name);
+      if (className) node.className = className;
+      node.textContent = value || '';
+      return node;
+    };
+    const initials = (name) => String(name || 'S').trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase();
+    const stars = (value) => {
+      const rating = Math.max(0, Math.min(5, Math.round(Number(value) || 0)));
+      const node = el('div', 'ss-proof__stars', '★'.repeat(rating));
+      // Show the empty stars too, so a 4 does not read as a 4-out-of-4.
+      if (rating < 5) {
+        const rest = document.createElement('i');
+        rest.textContent = '★'.repeat(5 - rating);
+        node.appendChild(rest);
+      }
+      node.setAttribute('role', 'img');
+      node.setAttribute('aria-label', rating + ' out of 5 stars');
+      return node;
+    };
+
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = controller ? window.setTimeout(() => controller.abort(), 8000) : null;
+
+    fetch(api + '/reviews/featured?limit=5', {
+      headers: { 'Accept': 'application/json' },
+      signal: controller ? controller.signal : undefined
     })
-    .catch(() => {});
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('reviews unavailable')))
+      .then(data => {
+        const reviews = Array.isArray(data.reviews) ? data.reviews : [];
+        if (!reviews.length) return;
+
+        const cards = document.createDocumentFragment();
+        reviews.forEach(review => {
+          const body = String(review.body || '').trim();
+          if (!body) return;
+
+          const card = el('article', 'ss-proof__card');
+          card.appendChild(stars(review.rating));
+          card.appendChild(el('blockquote', '', '“' + body + '”'));
+
+          const person = el('div', 'ss-proof__person');
+          if (review.image_url) {
+            const photo = document.createElement('img');
+            photo.className = 'ss-proof__photo';
+            photo.src = review.image_url;
+            photo.alt = '';
+            photo.loading = 'lazy';
+            photo.decoding = 'async';
+            photo.width = 46;
+            photo.height = 46;
+            photo.addEventListener('error', () => {
+              photo.replaceWith(el('div', 'ss-proof__avatar', initials(review.reviewer_name)));
+            }, { once: true });
+            person.appendChild(photo);
+          } else {
+            person.appendChild(el('div', 'ss-proof__avatar', initials(review.reviewer_name)));
+          }
+
+          const byline = el('div', '');
+          byline.appendChild(el('div', 'ss-proof__name', review.reviewer_name || 'Stella & Sage customer'));
+          byline.appendChild(el('div', 'ss-proof__meta', review.group_name || review.store_name || 'Store experience'));
+          person.appendChild(byline);
+          card.appendChild(person);
+          cards.appendChild(card);
+        });
+
+        if (!cards.childNodes.length) return;
+        grid.replaceChildren(cards);
+        root.hidden = false;
+      })
+      .catch(() => {})
+      .then(() => { if (timer) window.clearTimeout(timer); });
+  };
+
+  const start = () => {
+    const root = document.getElementById('ss-proof-' + SECTION_ID);
+    if (!root || root.dataset.proofReady === '1') return;
+    root.dataset.proofReady = '1';
+    place(root);
+    render(root);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
+
+  // The theme editor re-renders the section into its original shell.
+  document.addEventListener('shopify:section:load', (event) => {
+    if (event.detail && event.detail.sectionId === SECTION_ID) start();
+  });
 })();
 </script>
 
@@ -77,7 +169,10 @@
 {
   "name": "Approved store reviews",
   "settings": [
-    { "type": "text", "id": "review_api", "label": "Review service URL", "default": "https://social-engine-production-68da.up.railway.app" }
+    { "type": "text", "id": "review_api", "label": "Review service URL", "default": "https://social-engine-production-68da.up.railway.app" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "REAL GROUPS · REAL WORDS" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Made to make group gear easier." },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "What early Stella & Sage groups have to say." }
   ],
   "presets": [{ "name": "Approved store reviews" }]
 }
