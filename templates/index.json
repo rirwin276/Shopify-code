@@ -82,6 +82,13 @@
         "second_store_cta": "Create another store"
       }
     },
+    "featured_store_reviews": {
+      "type": "ss-featured-store-reviews",
+      "name": "Approved store reviews",
+      "settings": {
+        "review_api": "https://social-engine-production-68da.up.railway.app"
+      }
+    },
     "home_catalog_control": {
       "type": "custom-liquid",
       "name": "Homepage catalog controller",
@@ -108,6 +115,7 @@
     "custom_liquid_kXiyBF",
     "home_catalog_control",
     "landing_dual_hub_rtcYFK",
+    "featured_store_reviews",
     "home_product_catalog"
   ]
 }

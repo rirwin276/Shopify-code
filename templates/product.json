@@ -288,10 +288,18 @@
         "padding-block-start": 0,
         "padding-block-end": 0
       }
+    },
+    "garment_reviews": {
+      "type": "ss-product-reviews",
+      "name": "Garment reviews",
+      "settings": {
+        "review_api": "https://social-engine-production-68da.up.railway.app"
+      }
     }
   },
   "order": [
     "custom_liquid_tzawyJ",
-    "main"
+    "main",
+    "garment_reviews"
   ]
 }
