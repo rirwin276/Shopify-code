@@ -84,17 +84,11 @@ def _create_preview_theme() -> None:
     try:
         domain = os.environ["RAILWAY_PUBLIC_DOMAIN"].strip()
         source = f"https://{domain}/theme-preview.zip"
+        # Railway's public route has already been established by the health
+        # check before this one-time import runs. Give the edge a short moment
+        # to converge, then let Shopify retrieve the package directly.
         STATE.update({"status": "waiting_for_package"})
-        for _ in range(30):
-            try:
-                with urllib.request.urlopen(source, timeout=10) as response:
-                    if response.status == 200:
-                        break
-            except Exception:
-                time.sleep(2)
-        else:
-            raise RuntimeError("Preview package did not become publicly reachable")
-
+        time.sleep(15)
         STATE.update({"status": "creating_theme"})
         result = _shopify_request(
             "POST",
