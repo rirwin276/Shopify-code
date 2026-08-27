@@ -34,6 +34,15 @@
       assign add_to_cart_text = 'products.product.unavailable' | t
     endif
   endif
+
+  capture ss_demo_lock_value
+    render 'ss-anonymous-demo-product-lock', product: product
+  endcapture
+  assign ss_demo_lock_value = ss_demo_lock_value | strip
+  if ss_demo_lock_value == 'true'
+    assign can_add_to_cart = false
+    assign add_to_cart_text = 'Claim this store to enable checkout'
+  endif
 %}
 
 <span
@@ -57,6 +66,12 @@
         aria-atomic="true"
         ref="liveRegion"
       ></div>
+      {%- if ss_demo_lock_value == 'true' -%}
+        <div class="ss-demo-checkout-lock" role="note">
+          <strong>Demo product preview</strong>
+          <span>Claim this store to turn on checkout and keep the product.</span>
+        </div>
+      {%- endif -%}
       {%- form 'product', product, id: product_form_id, data-type: 'add-to-cart-form' -%}
         <input
           type="hidden"
@@ -227,6 +242,13 @@
     </div>
   {%- endif -%}
 </span>
+
+{% if ss_demo_lock_value == 'true' %}
+  <style>
+    .ss-demo-checkout-lock{display:grid;gap:3px;margin:0 0 12px;padding:13px 14px;border:1px solid rgba(183,163,106,.42);border-radius:12px;background:#fffaf0;color:#4f4328;font-size:12px;line-height:1.4}
+    .ss-demo-checkout-lock strong{font-size:13px;color:#2f291d}
+  </style>
+{% endif %}
 
 {% if block_settings.show_pickup_availability %}
   <script
