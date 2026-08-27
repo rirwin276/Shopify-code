@@ -154,6 +154,15 @@
     // which is already on screen, so repeating it here was the same pitch
     // twice in one viewport.
     if (status === 'completed') {
+      if (state.demo_source === 'anonymous_demo' && !window.__ssAnonymousDemoProductReported) {
+        window.__ssAnonymousDemoProductReported = true;
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'anonymous_demo_product_created',
+          storefront_handle: handle,
+          product_handle: state.product_handle || ''
+        });
+      }
       banner.innerHTML = '<span class="ap-demo-complete__check">&#10003;</span>' +
         '<div><h2>Your product is live</h2><p>Keep opening the builders to try artwork, colors and placement.</p></div>' +
         '<div class="ap-demo-complete__actions"><a class="ap-demo-live" href="' + escapeHtml(productUrl) + '">View live product</a></div>';
