@@ -120,11 +120,13 @@ def _create_preview_theme() -> None:
                         ),
                     }
                 )
+                print(json.dumps({"preview_theme": STATE}, sort_keys=True), flush=True)
                 return
             time.sleep(4)
         raise RuntimeError("Shopify did not finish processing the preview theme")
     except Exception as exc:
         STATE.update({"status": "failed", "error": str(exc)[:1200]})
+        print(json.dumps({"preview_theme": STATE}, sort_keys=True), flush=True)
 
 
 def main() -> None:
