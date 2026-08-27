@@ -11,6 +11,9 @@
 
 {%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
 {%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
+{%- if section.settings.anonymous_demo_enabled -%}
+  {%- assign request_url = section.settings.anonymous_demo_entry_url | default: '/pages/start-team-store' -%}
+{%- endif -%}
 {%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
 {%- capture login_url -%}{{ routes.storefront_login_url }}?return_to={{ dashboard_url | url_encode }}{%- endcapture -%}
 
@@ -47,6 +50,15 @@
 {%- endif -%}
 
 <section class="ss-home" data-ss-home id="ss-home-{{ section.id }}">
+  {%- unless customer -%}
+    <div
+      data-ss-anonymous-demo-resume
+      data-api-base="{{ section.settings.anonymous_demo_api_base | default: 'https://studio-uploader-production.up.railway.app' | escape }}"
+      data-resume-path="{{ section.settings.anonymous_demo_entry_url | default: '/pages/start-team-store' | escape }}"
+      hidden
+    ></div>
+    <script src="{{ 'ss-anonymous-demo-resume.js' | asset_url }}" defer></script>
+  {%- endunless -%}
 
   {%- if customer -%}
 
@@ -674,6 +686,8 @@
 </section>
 
 <style>
+  .ss-demo-resume-card{display:grid;gap:2px;max-width:430px;margin:13px 0 0;padding:12px 15px;border:1px solid rgba(183,163,106,.48);border-radius:14px;background:rgba(255,250,240,.9);color:#332c1f;text-decoration:none;box-shadow:0 10px 30px rgba(71,54,18,.08)}
+  .ss-demo-resume-card strong{font-size:13px;line-height:1.35}.ss-demo-resume-card span{font-size:11px;color:#756b57}
   /* =========================
      STELLA & SAGE PREMIUM HOME
   ========================== */
@@ -2463,6 +2477,25 @@
       "id": "request_url",
       "label": "Primary CTA URL (request storefront)",
       "default": "/pages/private-storefronts"
+    },
+    {
+      "type": "checkbox",
+      "id": "anonymous_demo_enabled",
+      "label": "Send homepage CTAs to try-before-signup page",
+      "default": false,
+      "info": "Off keeps the existing account-first CTA unchanged. Enable only after the start-team-store page and backend feature flag are ready."
+    },
+    {
+      "type": "text",
+      "id": "anonymous_demo_entry_url",
+      "label": "Try-before-signup page URL",
+      "default": "/pages/start-team-store"
+    },
+    {
+      "type": "text",
+      "id": "anonymous_demo_api_base",
+      "label": "Anonymous demo API base",
+      "default": "https://studio-uploader-production.up.railway.app"
     },
     {
       "type": "text",
