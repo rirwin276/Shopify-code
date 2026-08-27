@@ -8,5 +8,5 @@ req=urllib.request.Request(
 )
 with urllib.request.urlopen(req, timeout=60) as response:
     themes=json.loads(response.read().decode("utf-8")).get("themes",[])
-matches=[{"id": str(t.get("id")), "name": t.get("name"), "role": t.get("role"), "processing": t.get("processing")} for t in themes if t.get("name")=="Anonymous Store Builder Preview"]
-print(json.dumps({"matches":matches}, sort_keys=True))
+themes_out=[{"id": str(t.get("id")), "name": t.get("name"), "role": t.get("role"), "processing": t.get("processing")} for t in themes]
+print(json.dumps({"themes":themes_out}, sort_keys=True))
