@@ -6,6 +6,7 @@
 {% assign studio_uploader_base_url = section.settings.studio_uploader_base_url | default: "https://studio-uploader-production.up.railway.app" %}
 {% assign admin_email = section.settings.admin_email | default: "ryan.irwin@stellaandsagecompany.com" %}
 {% assign portal_url = section.settings.portal_url | default: "/pages/portal" %}
+{% assign google_ads_send_to = section.settings.google_ads_send_to | default: "" | strip %}
 
 {% capture encoded_form_return %}{{ request.path | url_encode }}{% endcapture %}
 {% assign login_url = routes.account_login_url | append: '?return_url=' | append: encoded_form_return %}
@@ -215,6 +216,7 @@
   const SF_USER_EMAIL = ("{{ customer.email | escape }}").toLowerCase();
   const SF_IS_ADMIN = (SF_USER_EMAIL === SF_ADMIN_EMAIL);
   const SF_PORTAL_URL = "{{ portal_url | escape }}" || "/pages/portal";
+  const SF_GOOGLE_ADS_SEND_TO = "{{ google_ads_send_to | escape }}";
 
   let sfToastTimer = null;
   let sfProvisionTimer = null;
@@ -262,6 +264,31 @@
     const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
     const count = parseInt(localStorage.getItem(STORAGE_KEY) || 0);
     localStorage.setItem(STORAGE_KEY, count + 1);
+  }
+
+  function reportStorefrontRequestConversion(typeOfStore) {
+    if (window.__ssStorefrontRequestConversionReported) return;
+    window.__ssStorefrontRequestConversionReported = true;
+
+    const handle = (document.getElementById("HiddenHandle")?.value || "").trim();
+    const conversion = {
+      event: "storefront_request_submitted",
+      storefront_handle: handle,
+      storefront_type: (typeOfStore || "").trim()
+    };
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(conversion);
+    window.dispatchEvent(new CustomEvent("storefront-request:submitted", { detail: conversion }));
+
+    if (SF_GOOGLE_ADS_SEND_TO && typeof window.gtag === "function") {
+      window.gtag("event", "conversion", {
+        send_to: SF_GOOGLE_ADS_SEND_TO,
+        value: 1.0,
+        currency: "USD",
+        transaction_id: handle
+      });
+    }
   }
 
   function toggleConditionals() {
@@ -570,6 +597,7 @@
     try {
       const res = await fetch(endpoint, { method: "POST", body: formData });
       if (!res.ok) { const t = await res.text().catch(() => ""); throw new Error("Uploader returned " + res.status + (t ? (": " + t.slice(0, 240)) : "")); }
+      reportStorefrontRequestConversion(typeOfStore);
       if (!SF_IS_ADMIN) incrementRateLimit();
     } catch (err) {
       console.error(err);
@@ -720,6 +748,12 @@
       "id": "portal_url",
       "label": "Dashboard URL",
       "default": "/pages/portal"
+    },
+    {
+      "type": "text",
+      "id": "google_ads_send_to",
+      "label": "Google Ads conversion destination",
+      "info": "Paste the AW-ID/label value from the Google Ads conversion event snippet. Leave blank until Google provides it."
     }
   ],
   "presets": [
