@@ -1,194 +1,156 @@
 {% comment %}
-  Try-before-signup sidecar. The permanent account-first request form remains
-  untouched at /pages/request-storefront-form. This section can be disabled in
-  one setting without removing or migrating either existing flow.
+  Anonymous try-before-signup entry. This page intentionally looks and behaves
+  like the normal storefront request form. The only difference is ownership:
+  signed-out visitors get a temporary 48-hour demo; signed-in customers are
+  sent straight to the permanent account-owned request form.
 {% endcomment %}
 
 {% assign demo_enabled = section.settings.demo_enabled %}
 {% assign studio_base = section.settings.studio_uploader_base_url | default: 'https://studio-uploader-production.up.railway.app' | strip %}
 {% assign permanent_url = section.settings.permanent_request_url | default: '/pages/request-storefront-form' %}
 
-<section
-  class="ss-demo-start"
-  data-ss-demo-start
-  data-enabled="{{ demo_enabled }}"
-  data-api-base="{{ studio_base | escape }}"
-  data-permanent-url="{{ permanent_url | escape }}"
->
-  <div class="ss-demo-start__shell">
-    <a class="ss-demo-start__back" href="/">← Back to Stella &amp; Sage</a>
+{% if customer %}
+  <script>window.location.replace({{ permanent_url | json }});</script>
+  <div class="sf-container"><div class="sf-form-wrap"><p>Opening your store builder… <a href="{{ permanent_url }}">Continue</a></p></div></div>
+{% else %}
+<section class="sf-container ss-demo-start" data-ss-demo-start data-enabled="{{ demo_enabled }}" data-api-base="{{ studio_base | escape }}" data-permanent-url="{{ permanent_url | escape }}">
+  <div class="sf-header">
+    <h1 class="sf-h1">Request a Storefront</h1>
+    <p class="sf-sub">Upload your logo, pick a preferred shirt color, and we’ll build your private merch store.</p>
+  </div>
 
-    <header class="ss-demo-start__header">
-      <span class="ss-demo-start__kicker">YOUR STORE, YOUR WAY</span>
-      <h1>See it first—or own it from the start.</h1>
-      <p>Both paths use the same real Stella &amp; Sage store builder. The only difference is when you create your account.</p>
-    </header>
+  {% if demo_enabled %}
+    <div class="sf-form-wrap" data-demo-form-panel>
+      <div class="ss-demo-note">
+        <strong>Try it before creating an account.</strong>
+        <span>This store is temporary for 48 hours. Claim it anytime to keep it permanently.</span>
+      </div>
 
-    <div class="ss-demo-choice" data-demo-choice>
-      {% if demo_enabled %}
-        <article class="ss-demo-choice__card ss-demo-choice__card--featured">
-          <span class="ss-demo-choice__badge">Try before signing up</span>
-          <h2>Build a temporary demo</h2>
-          <p>Upload your logo, get a real private store, and build one product before deciding.</p>
-          <ul>
-            <li>No account required to start</li>
-            <li>One real product build included</li>
-            <li>48 hours to claim and keep it</li>
-          </ul>
-          <button class="ss-demo-button ss-demo-button--dark" type="button" data-open-demo-form>Try it first →</button>
-        </article>
-      {% endif %}
+      <div class="sf-error ss-demo-error" data-demo-error role="alert" hidden></div>
 
-      <article class="ss-demo-choice__card">
-        <span class="ss-demo-choice__badge ss-demo-choice__badge--quiet">Ready to keep it</span>
-        <h2>Create your permanent store</h2>
-        <p>Sign in first so the finished store is connected to your dashboard from the beginning.</p>
-        <ul>
-          <li>Your account owns it immediately</li>
-          <li>No 48-hour expiration</li>
-          <li>Current setup flow stays exactly the same</li>
-        </ul>
-        <a class="ss-demo-button ss-demo-button--light" href="{{ permanent_url }}">Sign in and create →</a>
-      </article>
+      <form id="sf-request-form" class="sf-form" data-demo-form novalidate>
+        <div class="ss-demo-honeypot" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <input type="hidden" name="main_session_id" id="SF_MAIN_SESSION" value="">
+        <input type="hidden" name="type_of_store" id="SF_TYPE_OF_STORE" value="">
+
+        <div class="sf-block">
+          <div class="sf-legend">Store Details</div>
+          <div class="sf-grid">
+            <div class="sf-field">
+              <label class="sf-label" for="StoreName">Storefront Name *</label>
+              <input type="text" id="StoreName" name="storefront_name" class="sf-input" maxlength="120" placeholder="e.g. Santee Soccer Club" required autocomplete="organization">
+            </div>
+
+            <div class="sf-field">
+              <label class="sf-label" for="OrgType">Store Type *</label>
+              <select id="OrgType" name="org_type" class="sf-select" required>
+                <option value="" disabled selected>Select store type...</option>
+                <option value="Sports Team">Sports Team</option>
+                <option value="Small Business">Small Business</option>
+                <option value="Military Unit">Military Unit</option>
+                <option value="School or PTO">School or PTO</option>
+                <option value="Club or Community Group">Club or Community Group</option>
+                <option value="Trip Reunion or Event">Trip, Reunion, or Event</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="sf-field sf-field--color">
+              <label class="sf-label">Preferred Default Shirt Color *</label>
+              <div class="sf-swatches" role="radiogroup" aria-label="Primary shirt color">
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Black" required><span class="sf-sw-dot" style="--sw:#151515"></span><span class="sf-sw-name">Black</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Charcoal"><span class="sf-sw-dot" style="--sw:#3e3d3d"></span><span class="sf-sw-name">Charcoal</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Gray"><span class="sf-sw-dot" style="--sw:#8b8d8e"></span><span class="sf-sw-name">Gray</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="White"><span class="sf-sw-dot sf-sw-dot--light" style="--sw:#f7f7f4"></span><span class="sf-sw-name">White</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Cream / Natural"><span class="sf-sw-dot sf-sw-dot--light" style="--sw:#ece5d5"></span><span class="sf-sw-name">Cream</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Tan / Khaki"><span class="sf-sw-dot" style="--sw:#c8b088"></span><span class="sf-sw-name">Tan</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Brown"><span class="sf-sw-dot" style="--sw:#6b4a33"></span><span class="sf-sw-name">Brown</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Olive / Military Green"><span class="sf-sw-dot" style="--sw:#5f5849"></span><span class="sf-sw-name">Olive</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Green"><span class="sf-sw-dot" style="--sw:#2f7d3b"></span><span class="sf-sw-name">Green</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Teal"><span class="sf-sw-dot" style="--sw:#128a8a"></span><span class="sf-sw-name">Teal</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Light Blue"><span class="sf-sw-dot" style="--sw:#a5c8e4"></span><span class="sf-sw-name">Lt. Blue</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Blue"><span class="sf-sw-dot" style="--sw:#1d4e9e"></span><span class="sf-sw-name">Blue</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Navy"><span class="sf-sw-dot" style="--sw:#1f2a44"></span><span class="sf-sw-name">Navy</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Purple"><span class="sf-sw-dot" style="--sw:#5d3a8e"></span><span class="sf-sw-name">Purple</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Pink"><span class="sf-sw-dot" style="--sw:#e56ca5"></span><span class="sf-sw-name">Pink</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Maroon"><span class="sf-sw-dot" style="--sw:#6e2639"></span><span class="sf-sw-name">Maroon</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Red"><span class="sf-sw-dot" style="--sw:#c8102e"></span><span class="sf-sw-name">Red</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Orange"><span class="sf-sw-dot" style="--sw:#e8722a"></span><span class="sf-sw-name">Orange</span></label>
+                <label class="sf-sw"><input type="radio" name="primary_color" value="Yellow"><span class="sf-sw-dot" style="--sw:#f2c744"></span><span class="sf-sw-name">Yellow</span></label>
+                <label class="sf-sw sf-sw--wide"><input type="radio" name="primary_color" value="Earthy / Neutral tones"><span class="sf-sw-dot sf-sw-dot--earthy"></span><span class="sf-sw-name">Earthy tones</span></label>
+                <label class="sf-sw sf-sw--wide"><input type="radio" name="primary_color" value="No preference"><span class="sf-sw-dot sf-sw-dot--any">?</span><span class="sf-sw-name">No preference</span></label>
+              </div>
+              <p class="sf-help">Pick the shirt color you want shown first in your store. You can still offer other colors later.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="sf-divider"></div>
+
+        <div class="sf-block">
+          <div class="sf-legend">Logo Upload</div>
+          <div class="sf-field">
+            <label class="sf-label">Main Logo / Store Image *</label>
+            <div class="sf-file-drop" id="MainLogoDrop" data-demo-open-uploader role="button" tabindex="0">
+              <span id="MainLogoText">Upload &amp; review logo</span>
+              <button type="button" class="ss-request-upload-button" data-demo-open-uploader>Choose Image</button>
+              <input type="file" id="MainLogo" name="storefront_logo_file" class="sf-file-input" accept="image/png,image/jpeg,image/webp" required data-demo-logo>
+            </div>
+            <div class="sf-preview-row sf-hidden" id="MainLogoPreviewRow">
+              <img id="MainLogoPreview" class="sf-preview-img" alt="Main logo preview" width="74" height="74">
+              <div class="sf-preview-meta">
+                <div class="sf-badge-row"><span class="sf-badge sf-badge--neutral" id="MainLogoBadge">Checking…</span></div>
+                <div class="sf-quality-sub" id="MainLogoQualitySub"></div>
+                <div class="sf-actions" id="MainLogoActions"><button type="button" class="sf-action-btn" data-demo-open-uploader>Edit</button><button type="button" class="sf-action-btn sf-action-btn--ghost" data-demo-clear-logo>Remove</button></div>
+              </div>
+            </div>
+            <div class="sf-mini-status sf-hidden" id="MainLogoPending">Saving your image… please wait.</div>
+          </div>
+
+          <div class="sf-field ss-demo-email">
+            <label class="sf-label" for="DemoEmail">Email me when it is ready <span class="ss-demo-optional">optional</span></label>
+            <input type="email" id="DemoEmail" name="email" class="sf-input" maxlength="254" placeholder="Leave blank to use only your private return link">
+          </div>
+
+          <label class="ss-demo-confirm"><input type="checkbox" required><span>I understand this temporary store is deleted 48 hours after it is ready unless I claim it.</span></label>
+
+          <div class="sf-submit-row"><button type="submit" id="sf-submit-btn" class="sf-btn sf-btn--solid" data-demo-submit>Submit Request</button></div>
+          <p class="sf-fineprint">No checkout is available until you claim the store. Your private return link is saved in this browser.</p>
+        </div>
+      </form>
+
+      <div id="sf-uploader-modal" class="sf-modal sf-hidden" aria-hidden="true">
+        <div class="sf-modal-backdrop" data-demo-close-uploader></div>
+        <div class="sf-modal-card" role="dialog" aria-modal="true" aria-label="Studio Uploader">
+          <div class="sf-modal-top"><div class="sf-modal-title">Studio Uploader <span class="sf-modal-chip">main</span></div><button type="button" class="sf-modal-x" data-demo-close-uploader aria-label="Close">✕</button></div>
+          <iframe id="sf-uploader-iframe" class="sf-modal-iframe" src="about:blank" title="Studio Uploader Editor" allow="clipboard-read; clipboard-write"></iframe>
+          <div class="sf-modal-help">Upload your image, do quick edits, then hit <b>Done</b>. This window will close automatically.</div>
+        </div>
+      </div>
     </div>
 
-    {% if demo_enabled %}
-      <div class="ss-demo-panel" data-demo-form-panel hidden>
-        <button class="ss-demo-panel__back" type="button" data-back-to-choice>← Compare both options</button>
-        <div class="ss-demo-panel__heading">
-          <span>Temporary demo</span>
-          <h2>Give us the basics. We’ll build the rest.</h2>
-          <p>No email is required. This browser saves your private return link automatically.</p>
-        </div>
-
-        <div class="ss-demo-error" data-demo-error role="alert" hidden></div>
-
-        <form class="ss-demo-form" data-demo-form>
-          <div class="ss-demo-honeypot" aria-hidden="true">
-            <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
-          </div>
-
-          <label class="ss-demo-field">
-            <span>Team or group name *</span>
-            <input type="text" name="storefront_name" maxlength="120" required placeholder="e.g. Raptors Baseball">
-          </label>
-
-          <div class="ss-demo-form__row">
-            <label class="ss-demo-field">
-              <span>Group type *</span>
-              <select name="type_of_store" required>
-                <option value="">Choose one…</option>
-                <option value="youth-sports">Youth sports team</option>
-                <option value="school-or-pto">Small school or PTO</option>
-                <option value="veteran-group">Veteran group</option>
-                <option value="club">Club or community group</option>
-                <option value="small-business">Small business</option>
-                <option value="event">Trip, reunion, or event</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
-
-            <label class="ss-demo-field">
-              <span>Main color *</span>
-              <select name="primary_color" required>
-                <option value="">Choose one…</option>
-                <option>Black</option><option>White</option><option>Gray</option>
-                <option>Navy</option><option>Blue</option><option>Light Blue</option>
-                <option>Red</option><option>Maroon</option><option>Orange</option>
-                <option>Yellow</option><option>Green</option><option>Olive / Military Green</option>
-                <option>Purple</option><option>Pink</option><option>No preference</option>
-              </select>
-            </label>
-          </div>
-
-          <label class="ss-demo-field ss-demo-field--file">
-            <span>Your logo *</span>
-            <input type="file" name="storefront_logo_file" accept="image/png,image/jpeg,image/webp" required data-demo-logo>
-            <span class="ss-demo-file-copy" data-demo-file-copy>PNG, JPG, or WebP · maximum 12 MB</span>
-          </label>
-
-          <label class="ss-demo-field">
-            <span>Email me when it is ready <em>optional</em></span>
-            <input type="email" name="email" maxlength="254" placeholder="Leave blank to use only your private return link">
-          </label>
-
-          <label class="ss-demo-confirm">
-            <input type="checkbox" required>
-            <span>I understand this temporary store is deleted 48 hours after it is ready unless I claim it.</span>
-          </label>
-
-          <button class="ss-demo-button ss-demo-button--dark" type="submit" data-demo-submit>Build my demo store →</button>
-          <p class="ss-demo-form__note">No checkout is available until you claim the store. You can close this page after saving your return link.</p>
-        </form>
-      </div>
-
-      <div class="ss-demo-panel ss-demo-wait" data-demo-wait hidden>
-        <div class="ss-demo-spinner" data-demo-spinner aria-hidden="true"></div>
-        <span class="ss-demo-wait__kicker" data-demo-phase-label>BUILDING YOUR STORE</span>
-        <h2 data-demo-status-title>Your store is in the build queue.</h2>
-        <p data-demo-status-copy>We’re setting up the private store, connecting your logo, and applying your colors.</p>
-
-        <div class="ss-demo-progress" data-demo-progress>
-          <span class="is-active">Request saved</span>
-          <span>Store built</span>
-          <span>Ready to customize</span>
-        </div>
-
-        <div class="ss-demo-return">
-          <strong>Save your way back</strong>
-          <p>This browser will remember automatically. Copy the private link if you may return on another device.</p>
-          <button class="ss-demo-button ss-demo-button--light" type="button" data-copy-return>Copy private return link</button>
-          <span data-copy-result aria-live="polite"></span>
-        </div>
-
-        <div class="ss-demo-ready-actions" data-demo-ready-actions hidden>
-          <a class="ss-demo-button ss-demo-button--dark" data-open-admin href="#">Customize &amp; build one product →</a>
-          <a class="ss-demo-button ss-demo-button--light" data-open-preview href="#">Preview the store</a>
-          <a class="ss-demo-claim-link" data-claim-store href="#">Sign in to claim and keep it</a>
-        </div>
-
-        <button class="ss-demo-start-over" type="button" data-demo-start-over>Start over on this browser</button>
-      </div>
-    {% else %}
-      <p class="ss-demo-disabled">The try-first option is not open right now. You can still create a permanent store using the normal sign-in flow above.</p>
-    {% endif %}
-  </div>
+    <div class="sf-form-wrap ss-demo-wait" data-demo-wait hidden>
+      <div class="ss-demo-spinner" data-demo-spinner aria-hidden="true"></div>
+      <div class="sf-legend" data-demo-phase-label>BUILDING YOUR STORE</div>
+      <h2 class="sf-auth-title" data-demo-status-title>Your store is in the build queue.</h2>
+      <p class="sf-auth-text" data-demo-status-copy>We’re setting up the private store, connecting your logo, and applying your colors.</p>
+      <div class="ss-demo-progress" data-demo-progress><span class="is-active">Request saved</span><span>Store built</span><span>Ready to customize</span></div>
+      <div class="ss-demo-return"><strong>Save your way back</strong><p>This browser remembers automatically. Copy this private link if you may return on another device.</p><button class="sf-btn sf-btn--outline" type="button" data-copy-return>Copy private return link</button><span data-copy-result aria-live="polite"></span></div>
+      <div class="ss-demo-ready-actions" data-demo-ready-actions hidden><a class="sf-btn sf-btn--solid" data-open-admin href="#">Customize &amp; build one product</a><a class="sf-btn sf-btn--outline" data-open-preview href="#">Preview the store</a><a class="ss-demo-claim-link" data-claim-store href="#">Sign in to claim and keep it</a></div>
+      <button class="ss-demo-start-over" type="button" data-demo-start-over>Start over on this browser</button>
+    </div>
+  {% else %}
+    <div class="sf-form-wrap"><p class="sf-auth-text">Try-before-signup is temporarily unavailable.</p><a class="sf-btn sf-btn--solid" href="{{ permanent_url }}">Sign in and create your store</a></div>
+  {% endif %}
 </section>
 
-{% if demo_enabled %}
-  <script src="{{ 'ss-anonymous-demo-start.js' | asset_url }}" defer></script>
+{% if demo_enabled %}<script src="{{ 'ss-anonymous-demo-start.js' | asset_url }}" defer></script>{% endif %}
 {% endif %}
 
 <style>
-  .ss-demo-start{--ink:#17150f;--muted:#68645c;--gold:#b7a36a;--paper:#fbfaf7;background:radial-gradient(circle at 12% 5%,rgba(183,163,106,.14),transparent 34%),var(--paper);min-height:75vh;color:var(--ink);padding:54px 20px 80px;font-family:var(--font-body--family,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif)}
-  .ss-demo-start *{box-sizing:border-box}.ss-demo-start__shell{max-width:1040px;margin:0 auto}.ss-demo-start__back,.ss-demo-panel__back,.ss-demo-start-over{color:var(--muted);font-size:13px;font-weight:700;text-decoration:none;background:none;border:0;cursor:pointer;padding:0}.ss-demo-start__header{text-align:center;max-width:760px;margin:34px auto 34px}.ss-demo-start__kicker,.ss-demo-panel__heading>span,.ss-demo-wait__kicker{display:block;color:#8a7745;font-size:11px;font-weight:850;letter-spacing:.13em;text-transform:uppercase}.ss-demo-start h1{font-size:clamp(36px,6vw,64px);line-height:.98;letter-spacing:-.055em;margin:12px 0 17px}.ss-demo-start__header p{font-size:17px;line-height:1.58;color:var(--muted);margin:0}.ss-demo-choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;max-width:900px;margin:0 auto}.ss-demo-choice__card{position:relative;background:#fff;border:1px solid rgba(23,21,15,.11);border-radius:24px;padding:30px;box-shadow:0 18px 55px rgba(23,21,15,.06)}.ss-demo-choice__card--featured{border-color:rgba(183,163,106,.65);box-shadow:0 18px 60px rgba(99,77,24,.11)}.ss-demo-choice__badge{display:inline-flex;border-radius:999px;background:#1c1a15;color:#fff;font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;padding:7px 10px}.ss-demo-choice__badge--quiet{background:#f0ede6;color:#5a5448}.ss-demo-choice h2{font-size:27px;letter-spacing:-.035em;margin:18px 0 9px}.ss-demo-choice p{min-height:51px;color:var(--muted);font-size:14px;line-height:1.55}.ss-demo-choice ul{list-style:none;padding:0;margin:20px 0 26px;display:grid;gap:10px;color:#403c34;font-size:13px}.ss-demo-choice li:before{content:"✓";color:#8b7745;font-weight:900;margin-right:9px}.ss-demo-button{display:inline-flex;align-items:center;justify-content:center;min-height:49px;border-radius:999px;padding:12px 20px;border:1px solid transparent;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;width:100%}.ss-demo-button--dark{background:#17150f;color:#fff}.ss-demo-button--light{background:#fff;color:#17150f;border-color:rgba(23,21,15,.18)}.ss-demo-button:disabled{opacity:.55;cursor:wait}.ss-demo-panel{max-width:760px;margin:0 auto;background:#fff;border:1px solid rgba(23,21,15,.1);border-radius:26px;padding:32px;box-shadow:0 20px 70px rgba(23,21,15,.07)}.ss-demo-panel__heading{text-align:center;margin:20px auto 28px}.ss-demo-panel__heading h2,.ss-demo-wait h2{font-size:30px;letter-spacing:-.04em;margin:8px 0 10px}.ss-demo-panel__heading p,.ss-demo-wait>p{color:var(--muted);font-size:14px;line-height:1.55}.ss-demo-form{display:grid;gap:17px}.ss-demo-form__row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.ss-demo-field{display:grid;gap:8px}.ss-demo-field>span:first-child{font-size:12px;font-weight:800}.ss-demo-field em{font-style:normal;color:#8b877e;font-weight:600}.ss-demo-field input,.ss-demo-field select{width:100%;min-height:49px;border:1px solid rgba(23,21,15,.17);border-radius:12px;background:#fbfaf7;padding:12px 13px;font:inherit;color:var(--ink)}.ss-demo-field--file{border:1.5px dashed rgba(23,21,15,.22);border-radius:15px;padding:17px;background:#fbfaf7}.ss-demo-field--file input{min-height:auto;border:0;padding:0;background:none}.ss-demo-file-copy{color:var(--muted);font-size:11px!important;font-weight:500!important}.ss-demo-confirm{display:flex;align-items:flex-start;gap:9px;color:var(--muted);font-size:12px;line-height:1.45}.ss-demo-confirm input{margin-top:2px}.ss-demo-form__note{margin:0;text-align:center;color:#8b877e;font-size:11px}.ss-demo-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}.ss-demo-error{background:#fff0f0;color:#962929;border:1px solid #f2c6c6;border-radius:12px;padding:12px 14px;font-size:13px;font-weight:700;margin-bottom:16px}.ss-demo-wait{text-align:center}.ss-demo-spinner{width:46px;height:46px;border:4px solid rgba(23,21,15,.1);border-top-color:var(--gold);border-radius:50%;animation:ssDemoSpin .9s linear infinite;margin:4px auto 18px}.ss-demo-spinner.is-done{animation:none;border-color:#74a97f;position:relative}.ss-demo-spinner.is-done:after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#27743b;font-weight:900;font-size:23px}.ss-demo-progress{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:26px 0}.ss-demo-progress span{border-radius:10px;background:#f2f0eb;color:#8b877e;padding:10px 6px;font-size:11px;font-weight:750}.ss-demo-progress span.is-active{background:#eee7d3;color:#594917}.ss-demo-progress span.is-done{background:#e5f3e8;color:#28703c}.ss-demo-return{border:1px solid rgba(23,21,15,.11);border-radius:16px;background:#fbfaf7;padding:18px;margin-top:20px}.ss-demo-return strong{font-size:14px}.ss-demo-return p{color:var(--muted);font-size:12px;line-height:1.5;margin:6px 0 13px}.ss-demo-return [data-copy-result]{display:block;min-height:18px;margin-top:7px;color:#28703c;font-size:11px;font-weight:750}.ss-demo-ready-actions{display:grid;gap:10px;margin-top:18px}.ss-demo-claim-link{color:#5b4d2a;font-size:13px;font-weight:800;text-underline-offset:3px}.ss-demo-start-over{margin-top:22px;text-decoration:underline;text-underline-offset:3px}.ss-demo-disabled{text-align:center;color:var(--muted);font-size:13px;margin:24px auto 0}.ss-demo-panel[hidden],.ss-demo-choice[hidden]{display:none!important}@keyframes ssDemoSpin{to{transform:rotate(360deg)}}
-  @media(max-width:720px){.ss-demo-start{padding:30px 14px 55px}.ss-demo-start__header{margin-top:25px}.ss-demo-choice{grid-template-columns:1fr}.ss-demo-choice__card{padding:24px}.ss-demo-choice p{min-height:0}.ss-demo-panel{padding:23px 17px;border-radius:20px}.ss-demo-form__row{grid-template-columns:1fr}.ss-demo-progress{grid-template-columns:1fr}.ss-demo-start h1{font-size:40px}}
+.sf-container{max-width:720px;margin:56px auto;padding:0 18px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}.sf-header{text-align:center;margin-bottom:24px}.sf-h1{font-size:30px;font-weight:900;margin-bottom:8px;color:#111;letter-spacing:-.02em}.sf-sub{font-size:15px;color:#666;margin:0}.sf-form-wrap{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:20px;padding:24px;box-shadow:0 10px 40px rgba(0,0,0,.04);position:relative}.sf-block{padding:4px 0}.sf-divider{height:1px;background:linear-gradient(90deg,rgba(183,163,106,.35),rgba(0,0,0,.06) 40%);margin:22px 0}.sf-legend{font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#8a7a4f;margin-bottom:14px;display:flex;align-items:center;gap:8px}.sf-legend:before{content:'';width:18px;height:2px;border-radius:2px;background:#b7a36a}.sf-grid,.sf-form{display:grid;gap:17px}.sf-field{display:grid;gap:8px}.sf-label{font-size:13px;font-weight:800;color:#222}.sf-input,.sf-select{width:100%;min-height:49px;border:1px solid rgba(0,0,0,.15);border-radius:12px;background:#fff;padding:12px 13px;font:inherit;color:#111}.sf-help,.sf-fineprint{font-size:12px;line-height:1.5;color:#777;margin:4px 0 0}.sf-swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px 6px}.sf-sw{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:7px 2px 6px;border-radius:12px;border:1.5px solid transparent}.sf-sw:hover{background:#f7f5f0}.sf-sw input{position:absolute;opacity:0;pointer-events:none}.sf-sw-dot{width:34px;height:34px;border-radius:50%;background:var(--sw);box-shadow:inset 0 -2px 5px rgba(0,0,0,.14)}.sf-sw-dot--light{border:1px solid #ddd}.sf-sw-dot--earthy{background:conic-gradient(#ece5d5 0 25%,#c8b088 0 50%,#8b8d8e 0 75%,#5f5849 0)}.sf-sw-dot--any{background:#fff;border:2px dashed #bbb;display:flex;align-items:center;justify-content:center}.sf-sw-name{font-size:10px;color:#555;text-align:center}.sf-sw:has(input:checked){background:#f5f2e8;border-color:#b7a36a}.sf-file-drop{border:1.5px dashed rgba(0,0,0,.22);border-radius:16px;padding:20px;min-height:110px;background:#fbfaf7;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;cursor:pointer}.sf-file-input{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}.ss-request-upload-button{appearance:none;border:0;border-radius:999px;padding:10px 16px;background:#17150f;color:#fff;font-weight:800;cursor:pointer}.sf-preview-row{display:flex;align-items:center;gap:14px;margin-top:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px}.sf-preview-img{width:74px;height:74px;object-fit:contain;border-radius:10px;background:#f7f7f5}.sf-preview-meta{min-width:0}.sf-badge{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800;background:#eee}.sf-badge--good,.sf-badge--excellent{background:#e5f3e8;color:#28703c}.sf-badge--risky{background:#fff4cf;color:#755c00}.sf-badge--bad{background:#fee9e7;color:#a22920}.sf-quality-sub{font-size:12px;color:#666;margin-top:5px}.sf-actions{display:flex;gap:8px;margin-top:8px}.sf-action-btn{border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;background:#fff;font-weight:700;cursor:pointer}.sf-action-btn--ghost{color:#777}.sf-mini-status{font-size:12px;color:#777;margin-top:8px}.sf-btn{display:inline-flex;align-items:center;justify-content:center;min-height:49px;border-radius:999px;padding:12px 20px;border:1px solid transparent;font-size:14px;font-weight:800;text-decoration:none;cursor:pointer;width:100%}.sf-btn--solid{background:#17150f;color:#fff}.sf-btn--outline{background:#fff;color:#17150f;border-color:rgba(23,21,15,.18)}.sf-submit-row{margin-top:20px}.sf-error{background:#fff0f0;color:#962929;border:1px solid #f2c6c6;border-radius:12px;padding:12px 14px;font-size:13px;font-weight:700;margin-bottom:16px}.sf-hidden,[hidden]{display:none!important}.ss-demo-note{border:1px solid rgba(183,163,106,.35);background:#fbf8ee;border-radius:14px;padding:13px 14px;margin-bottom:22px;display:grid;gap:3px}.ss-demo-note strong{font-size:13px}.ss-demo-note span{font-size:12px;color:#6b6558}.ss-demo-email{margin-top:18px}.ss-demo-optional{font-weight:600;color:#999}.ss-demo-confirm{display:flex;gap:9px;align-items:flex-start;color:#666;font-size:12px;line-height:1.5;margin-top:17px}.ss-demo-confirm input{margin-top:2px}.ss-demo-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}.sf-modal{position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:18px}.sf-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.62)}.sf-modal-card{position:relative;z-index:1;background:#fff;border-radius:18px;width:min(1000px,96vw);height:min(780px,90vh);display:flex;flex-direction:column;overflow:hidden}.sf-modal-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #eee}.sf-modal-title{font-weight:850}.sf-modal-chip{font-size:11px;color:#887546}.sf-modal-x{border:0;background:none;font-size:20px;cursor:pointer}.sf-modal-iframe{border:0;flex:1;width:100%}.sf-modal-help{padding:10px 16px;font-size:12px;color:#666;border-top:1px solid #eee}.ss-demo-wait{text-align:center}.ss-demo-spinner{width:46px;height:46px;border:4px solid rgba(23,21,15,.1);border-top-color:#b7a36a;border-radius:50%;animation:ssDemoSpin .9s linear infinite;margin:4px auto 18px}.ss-demo-spinner.is-done{animation:none;border-color:#74a97f}.ss-demo-progress{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:24px 0}.ss-demo-progress span{border-radius:10px;background:#f2f0eb;color:#8b877e;padding:10px 6px;font-size:11px;font-weight:750}.ss-demo-progress span.is-active{background:#eee7d3;color:#594917}.ss-demo-progress span.is-done{background:#e5f3e8;color:#28703c}.ss-demo-return{border:1px solid rgba(23,21,15,.11);border-radius:16px;background:#fbfaf7;padding:18px;margin-top:20px}.ss-demo-return p{color:#68645c;font-size:12px;line-height:1.5}.ss-demo-return [data-copy-result]{display:block;min-height:18px;margin-top:7px;color:#28703c;font-size:11px;font-weight:750}.ss-demo-ready-actions{display:grid;gap:10px;margin-top:18px}.ss-demo-claim-link{color:#5b4d2a;font-size:13px;font-weight:800;text-underline-offset:3px}.ss-demo-start-over{margin-top:22px;background:none;border:0;text-decoration:underline;cursor:pointer;color:#777}@keyframes ssDemoSpin{to{transform:rotate(360deg)}}@media(max-width:600px){.sf-container{margin:34px auto;padding:0 14px}.sf-form-wrap{padding:20px 16px}.sf-swatches{grid-template-columns:repeat(4,1fr)}.ss-demo-progress{grid-template-columns:1fr}}
 </style>
 
 {% schema %}
-{
-  "name": "Try-before-signup store",
-  "settings": [
-    {
-      "type": "checkbox",
-      "id": "demo_enabled",
-      "label": "Enable anonymous demo form",
-      "default": false,
-      "info": "Turn on only after ANONYMOUS_DEMO_ENABLED is enabled on Studio Uploader. Turning this off leaves the permanent store path available."
-    },
-    {
-      "type": "text",
-      "id": "studio_uploader_base_url",
-      "label": "Studio Uploader base URL",
-      "default": "https://studio-uploader-production.up.railway.app"
-    },
-    {
-      "type": "text",
-      "id": "permanent_request_url",
-      "label": "Permanent store request URL",
-      "default": "/pages/request-storefront-form"
-    }
-  ],
-  "presets": [{"name": "Try-before-signup store"}]
-}
+{"name":"Try-before-signup store","settings":[{"type":"checkbox","id":"demo_enabled","label":"Enable anonymous demo form","default":false,"info":"Turn on only after ANONYMOUS_DEMO_ENABLED is enabled on Studio Uploader."},{"type":"text","id":"studio_uploader_base_url","label":"Studio Uploader base URL","default":"https://studio-uploader-production.up.railway.app"},{"type":"text","id":"permanent_request_url","label":"Permanent store request URL","default":"/pages/request-storefront-form"}],"presets":[{"name":"Try-before-signup store"}]}
 {% endschema %}
