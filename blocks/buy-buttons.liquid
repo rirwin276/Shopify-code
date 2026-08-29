@@ -94,6 +94,12 @@
             data-bbox-top="{{ ss_pers.bbox_pct.top | default: 45.4 }}"
             data-bbox-width="{{ ss_pers.bbox_pct.width | default: 37.0 }}"
             data-bbox-height="{{ ss_pers.bbox_pct.height | default: 37.0 }}"
+            data-name-zone-pct="{{ ss_pers.name_zone_pct | default: 0.28 }}"
+            data-name2-zone-pct="{{ ss_pers.name2_zone_pct | default: 0.21 }}"
+            data-line-gap-pct="{{ ss_pers.line_gap_pct | default: 0.02 }}"
+            data-gap-pct="{{ ss_pers.gap_pct | default: 0.04 }}"
+            data-top-offset-pct="{{ ss_pers.top_offset_pct | default: 0.10 }}"
+            data-number-min-share="{{ ss_pers.number_min_share | default: 0.20 }}"
           >
             <span class="ss-pers-kicker">Personalize the Back</span>
             <p class="ss-pers-sub">Add your name and number — printed on the back in {{ ss_pers.font_label | default: 'our jersey style' }}.</p>
@@ -104,15 +110,49 @@
               <div class="ss-pers-fields">
                 <label class="ss-pers-label" for="PersName-{{ product.id }}">Name</label>
                 <input class="ss-pers-input" type="text" id="PersName-{{ product.id }}"
-                  name="properties[Name]" data-ss-pers-name required autocomplete="off"
+                  name="properties[Name]" data-ss-pers-name autocomplete="off"
                   maxlength="{{ ss_pers.max_name_len | default: 14 }}"
-                  pattern="[A-Za-z '\-]+" placeholder="e.g. Emma">
+                  pattern="[A-Za-z '.\-]+" placeholder="e.g. Emma">
+                {%- comment -%}
+                  Optional second name line. Hidden until asked for, so the
+                  block looks exactly as it always has for the buyers who
+                  only want one line. Adding it pushes the number down; it
+                  never shrinks the line above it out of proportion.
+                {%- endcomment -%}
+                <button type="button" class="ss-pers-addline" data-ss-pers-addline>+ Add a second line</button>
+                <div class="ss-pers-line2 ss-pers-hidden" data-ss-pers-line2-wrap>
+                  <label class="ss-pers-label" for="PersName2-{{ product.id }}">Second line</label>
+                  <input class="ss-pers-input" type="text" id="PersName2-{{ product.id }}"
+                    name="properties[Name Line 2]" data-ss-pers-name2 autocomplete="off"
+                    maxlength="{{ ss_pers.max_name_len | default: 14 }}"
+                    pattern="[A-Za-z '.\-]+" placeholder="e.g. Johnson">
+                  <button type="button" class="ss-pers-removeline" data-ss-pers-removeline>Remove second line</button>
+                </div>
                 <label class="ss-pers-label" for="PersNumber-{{ product.id }}">Number</label>
                 <input class="ss-pers-input ss-pers-input--number" type="text" id="PersNumber-{{ product.id }}"
-                  name="properties[Number]" data-ss-pers-number required autocomplete="off"
+                  name="properties[Number]" data-ss-pers-number autocomplete="off"
                   maxlength="{{ ss_pers.max_number_len | default: 3 }}"
                   pattern="[0-9]{1,3}|[0-9](?:/|-)[0-9]" placeholder="e.g. 7 or 2/9">
-                <p class="ss-pers-note">Up to three digits, or two joined by / or &ndash; if a shirt is shared (2/9). Both fields are required — this item is printed just for you.</p>
+                <p class="ss-pers-note">Up to three digits, or two joined by / or &ndash; if a shirt is shared (2/9). Leave the name or the number blank if you don't want it — the preview is exactly what gets printed.</p>
+              </div>
+            </div>
+          </div>
+          {%- comment -%}
+            Shown when a buyer leaves the name or the number blank. Leaving one
+            out can be exactly what they want, so this confirms rather than
+            blocks — the only hard stop is an entirely blank personalization,
+            which native validation catches.
+          {%- endcomment -%}
+          <div class="ss-pers-modal ss-pers-hidden" data-ss-pers-warn aria-hidden="true">
+            <div class="ss-pers-modal-backdrop" data-ss-pers-warn-cancel></div>
+            <div class="ss-pers-modal-card" role="alertdialog" aria-modal="true"
+              aria-labelledby="PersWarnTitle-{{ product.id }}" aria-describedby="PersWarnBody-{{ product.id }}">
+              <h2 class="ss-pers-modal-title" id="PersWarnTitle-{{ product.id }}" data-ss-pers-warn-title>Just checking</h2>
+              <p class="ss-pers-modal-body" id="PersWarnBody-{{ product.id }}" data-ss-pers-warn-body></p>
+              <p class="ss-pers-modal-note">However it looks in the preview is exactly how it gets made.</p>
+              <div class="ss-pers-modal-actions">
+                <button type="button" class="ss-pers-modal-btn ss-pers-modal-btn--go" data-ss-pers-warn-confirm>Yes, that's right</button>
+                <button type="button" class="ss-pers-modal-btn" data-ss-pers-warn-cancel>Let me change it</button>
               </div>
             </div>
           </div>
@@ -132,6 +172,27 @@
             .ss-pers-input:invalid { border-color: rgba(220,38,38,0.45); }
             .ss-pers-input--number { max-width: 110px; }
             .ss-pers-note { margin: 10px 0 0; font-size: 11.5px; color: rgba(17,16,14,0.5); }
+            .ss-pers-hidden { display: none !important; }
+            .ss-pers-addline, .ss-pers-removeline { align-self: flex-start; appearance: none; border: 0; background: none; padding: 6px 0 0; font-size: 12px; font-weight: 700; color: #8a7736; cursor: pointer; text-decoration: underline; }
+            .ss-pers-addline:hover, .ss-pers-removeline:hover { color: #6d5c26; }
+            .ss-pers-removeline { font-weight: 600; color: rgba(17,16,14,0.45); }
+            .ss-pers-line2 { display: flex; flex-direction: column; gap: 5px; }
+            /* Shop Pay and friends jump straight to checkout, so while a
+               confirmation is owed the accelerated buttons are held back —
+               otherwise the warning could be bypassed entirely. */
+            .ss-pers-accel-held { opacity: 0.4; pointer-events: none; filter: grayscale(1); }
+            .ss-pers-accel-note { margin: 8px 0 0; font-size: 12px; font-weight: 600; color: rgba(17,16,14,0.6); text-align: center; }
+            .ss-pers-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+            .ss-pers-modal-backdrop { position: absolute; inset: 0; background: rgba(17,16,14,0.45); }
+            .ss-pers-modal-card { position: relative; width: min(420px, 100%); background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 24px 70px rgba(0,0,0,0.22); text-align: center; }
+            .ss-pers-modal-title { margin: 0 0 10px; font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+            .ss-pers-modal-body { margin: 0 0 8px; font-size: 15px; line-height: 1.5; color: rgba(17,16,14,0.75); }
+            .ss-pers-modal-note { margin: 0 0 18px; font-size: 12.5px; color: rgba(17,16,14,0.5); }
+            .ss-pers-modal-actions { display: flex; flex-direction: column; gap: 8px; }
+            .ss-pers-modal-btn { appearance: none; border: 1px solid rgba(17,16,14,0.16); background: #fff; border-radius: 999px; padding: 13px 16px; font-size: 15px; font-weight: 700; cursor: pointer; }
+            .ss-pers-modal-btn--go { background: #11100e; border-color: #11100e; color: #fff; }
+            .ss-pers-modal-btn:hover { border-color: rgba(17,16,14,0.4); }
+            .ss-pers-modal-btn--go:hover { background: #000; }
           </style>
         {%- endif -%}
         {%- if block_settings.gift_card_form and product.gift_card? -%}
