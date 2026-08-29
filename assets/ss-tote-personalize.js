@@ -148,17 +148,23 @@
       var numberH = 0;
       var i;
 
+      // The gaps are derived from the box WIDTH, so on an extremely wide,
+      // short box they can exceed the available HEIGHT on their own. Cap them
+      // against the height before they are spent, or the bands below go
+      // negative and text lands outside the box.
+      lineGap = Math.min(lineGap, avail / Math.max(2, n));
+
       if (n && !hasNumber) {
         // Nothing below the names — let them grow, but capped so a two-letter
         // name doesn't swell to fill the whole shirt.
-        var grown = (avail - lineGap * (n - 1)) / n;
+        var grown = Math.max(0, (avail - lineGap * (n - 1)) / n);
         band = Math.min(grown, boxW * NAME_ZONE_PCT * 1.8);
         namesH = band * n + lineGap * Math.max(0, n - 1);
       } else if (hasNumber && !n) {
         namesH = 0;
         numberH = avail;
       } else if (n && hasNumber) {
-        gap = boxW * GAP_PCT;
+        gap = Math.min(boxW * GAP_PCT, avail * 0.5);
         // Containment: on a very wide, short print area the name bands alone
         // would push the number off the bottom edge. Scale the names down so
         // the number keeps its minimum share instead of letting ink escape.
@@ -275,12 +281,19 @@
     function line2Active() {
       return !!(line2Wrap && !line2Wrap.classList.contains('ss-pers-hidden'));
     }
+    // Punctuation on its own ("-", ".", "'") is not a name — it would print a
+    // stray mark. It counts as ABSENT, matching the print renderer exactly, so
+    // the preview shows what actually gets made and the buyer is warned that
+    // the shirt has no name rather than silently ordering a stray dash.
+    function hasName(value) {
+      return /[A-Za-z]/.test(value || '');
+    }
     function nameLines() {
       var out = [];
       var first = (nameInput && nameInput.value || '').trim();
       var second = (line2Active() && name2Input && name2Input.value || '').trim();
-      if (first) out.push(first);
-      if (second) out.push(second);
+      if (hasName(first)) out.push(first);
+      if (hasName(second)) out.push(second);
       return out;
     }
     function currentNumber() {
@@ -406,18 +419,20 @@
     }, true);
 
     // Backstop for any path that submits the form without a button click.
-    if (form) {
-      form.addEventListener('submit', function (e) {
-        if (confirmed) return;
-        var message = warningMessage();
-        if (!message) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        showWarn(message, function () {
-          if (form.requestSubmit) form.requestSubmit(); else form.submit();
-        });
-      }, true);
-    }
+    // Bound on the document in the capture phase, not on the form: the theme
+    // delegates submit from the document too, and a form-level listener is in
+    // the target phase, so it would always run after the cart add had already
+    // happened.
+    document.addEventListener('submit', function (e) {
+      if (confirmed || !form || e.target !== form) return;
+      var message = warningMessage();
+      if (!message) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      showWarn(message, function () {
+        if (form.requestSubmit) form.requestSubmit(); else form.submit();
+      });
+    }, true);
 
     // Shop Pay and the other accelerated buttons are rendered by Shopify and
     // go straight to checkout, so a click inside them cannot be intercepted.
@@ -425,18 +440,26 @@
     // only way the warning cannot be skipped.
     var accelNote = null;
     function updateAcceleratedButtons() {
-      var el = (form && form.querySelector('.accelerated-checkout-block'))
-        || document.querySelector('.accelerated-checkout-block');
+      // Scoped to THIS product's form. A page-wide lookup would let one
+      // personalized product dim a different product's Shop Pay button.
+      var el = form && form.querySelector('.accelerated-checkout-block');
       if (!el || !el.parentNode) return;
-      var held = !confirmed && !!warningMessage();
+      // Held for the soft warning AND for the hard stop. Shopify's accelerated
+      // buttons are not guaranteed to run native form validation, so holding
+      // them is the only thing keeping a personalization with nothing on it
+      // from reaching checkout and stalling at fulfilment.
+      var nothingToPrint = !nameLines().length && !currentNumber();
+      var held = nothingToPrint || (!confirmed && !!warningMessage());
       el.classList.toggle('ss-pers-accel-held', held);
       if (held) {
         el.setAttribute('aria-disabled', 'true');
         if (!accelNote) {
           accelNote = document.createElement('p');
           accelNote.className = 'ss-pers-accel-note';
-          accelNote.textContent = 'Use Add to cart to confirm your personalization first.';
         }
+        accelNote.textContent = nothingToPrint
+          ? 'Add a name or a number above to check out.'
+          : 'Use Add to cart to confirm your personalization first.';
         if (accelNote.nextSibling !== el) el.parentNode.insertBefore(accelNote, el);
       } else {
         el.removeAttribute('aria-disabled');
@@ -493,12 +516,46 @@
     });
   }
 
-  function boot() {
-    document.querySelectorAll('[data-ss-pers]').forEach(initWidget);
+  // Binding twice would double every listener, so each widget is claimed once.
+  function initOnce(root) {
+    if (!root || root.getAttribute('data-ss-pers-ready')) return;
+    root.setAttribute('data-ss-pers-ready', '1');
+    initWidget(root);
   }
+
+  function boot() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ss-pers]'), initOnce);
+  }
+
+  // Quick-add injects a product form into a dialog AFTER load, and injected
+  // <script> tags never execute — so a widget appearing there would be inert:
+  // no preview, no sanitiser, and (now that the fields are optional and no
+  // longer carry `required`) nothing stopping a blank or half-filled
+  // personalization from going into the cart. Claim widgets as they appear.
+  function watchForInjectedWidgets() {
+    if (typeof MutationObserver !== 'function') return;
+    new MutationObserver(function (records) {
+      for (var i = 0; i < records.length; i++) {
+        var added = records[i].addedNodes || [];
+        for (var j = 0; j < added.length; j++) {
+          var node = added[j];
+          if (!node || node.nodeType !== 1) continue;
+          if (node.matches && node.matches('[data-ss-pers]')) initOnce(node);
+          if (node.querySelectorAll) {
+            Array.prototype.forEach.call(node.querySelectorAll('[data-ss-pers]'), initOnce);
+          }
+        }
+      }
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
+    document.addEventListener('DOMContentLoaded', function () {
+      boot();
+      watchForInjectedWidgets();
+    }, { once: true });
   } else {
     boot();
+    watchForInjectedWidgets();
   }
 })();
