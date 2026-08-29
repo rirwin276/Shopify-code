@@ -88,7 +88,7 @@
             data-color-pattern="{{ ss_pers.color_pattern | escape }}"
             data-color-tile="{{ ss_pers.color_tile | escape }}"
             data-max-name="{{ ss_pers.max_name_len | default: 14 }}"
-            data-max-number="{{ ss_pers.max_number_len | default: 2 }}"
+            data-max-number="{{ ss_pers.max_number_len | default: 3 }}"
             data-mockups-url="https://printfulautomation-production.up.railway.app/editor/pro-shirt/{{ ss_pers_model }}/mockups-public"
             data-bbox-left="{{ ss_pers.bbox_pct.left | default: 31.6 }}"
             data-bbox-top="{{ ss_pers.bbox_pct.top | default: 45.4 }}"
@@ -110,9 +110,9 @@
                 <label class="ss-pers-label" for="PersNumber-{{ product.id }}">Number</label>
                 <input class="ss-pers-input ss-pers-input--number" type="text" id="PersNumber-{{ product.id }}"
                   name="properties[Number]" data-ss-pers-number required autocomplete="off"
-                  inputmode="numeric" maxlength="{{ ss_pers.max_number_len | default: 2 }}"
-                  pattern="[0-9]+" placeholder="e.g. 7">
-                <p class="ss-pers-note">Both fields are required — this item is printed just for you.</p>
+                  maxlength="{{ ss_pers.max_number_len | default: 3 }}"
+                  pattern="[0-9]{1,3}|[0-9](?:/|-)[0-9]" placeholder="e.g. 7 or 2/9">
+                <p class="ss-pers-note">Up to three digits, or two joined by / or &ndash; if a shirt is shared (2/9). Both fields are required — this item is printed just for you.</p>
               </div>
             </div>
           </div>

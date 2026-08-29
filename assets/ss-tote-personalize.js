@@ -38,7 +38,7 @@
     var fontWeight = root.getAttribute('data-font-weight') || '700';
     var colorHex = root.getAttribute('data-color-hex') || '#141414';
     var maxName = parseInt(root.getAttribute('data-max-name') || '14', 10);
-    var maxNumber = parseInt(root.getAttribute('data-max-number') || '2', 10);
+    var maxNumber = parseInt(root.getAttribute('data-max-number') || '3', 10);
     var fontCss = fontWeight + 'px \'' + fontFamily + '\', sans-serif';
 
     // The mockup-photo print-zone box for THIS product (EC8000 calibrated
@@ -199,7 +199,7 @@
     }
     if (numberInput) {
       numberInput.addEventListener('input', function () {
-        numberInput.value = numberInput.value.replace(/[^0-9]/g, '').slice(0, maxNumber);
+        numberInput.value = numberInput.value.replace(/[^0-9/-]/g, '').slice(0, maxNumber);
         draw();
       });
     }
