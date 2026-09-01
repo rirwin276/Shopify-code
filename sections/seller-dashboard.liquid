@@ -133,6 +133,8 @@
     {% assign bucket_admin = bucket_admin | append: needle %}
   {% else %}
     {% assign entry = shop.metaobjects.custom_shop[handle] %}
+    {%- comment -%} see ss-metaobject-identity {%- endcomment -%}
+    {%- if entry and entry.system.handle != handle -%}{%- assign entry = false -%}{%- endif -%}
     {% assign is_ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
     {% if is_ready == true or is_ready == 'true' %}
       {% assign bucket_live = bucket_live | append: needle %}
@@ -152,6 +154,8 @@
     {% assign handle = raw_handle | strip %}
     {% if handle != blank %}
       {% assign entry = shop.metaobjects.custom_shop[handle] %}
+      {%- comment -%} see ss-metaobject-identity {%- endcomment -%}
+      {%- if entry and entry.system.handle != handle -%}{%- assign entry = false -%}{%- endif -%}
       {% assign collection_handle = handle %}
       {% if entry %}
         {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
@@ -173,6 +177,8 @@
       {% assign handle = raw_handle | strip %}
       {% if handle != blank %}
         {% assign entry = shop.metaobjects.custom_shop[handle] %}
+        {%- comment -%} see ss-metaobject-identity {%- endcomment -%}
+        {%- if entry and entry.system.handle != handle -%}{%- assign entry = false -%}{%- endif -%}
         {% assign n = entry.name.value | default: entry.name | default: handle %}
         { handle: {{ handle | json }}, name: {{ n | json }} },
       {% endif %}
@@ -521,6 +527,7 @@
                   {%- assign h = raw_handle | strip -%}
                   {%- if h != blank -%}
                     {%- assign e = shop.metaobjects.custom_shop[h] -%}
+                    {%- if e and e.system.handle != h -%}{%- assign e = false -%}{%- endif -%}
                     {%- if e -%}
                       {%- assign u = e.logo_clean_url.value | default: e.logo_clean_url -%}
                       {%- if u == blank -%}{%- assign u = e.logo_clean.value | default: e.logo_clean -%}{%- endif -%}
@@ -540,11 +547,30 @@
                 {%- endcomment -%}
                 {%- assign all_clean_urls = all_clean_urls | append: '|' -%}
 
+                {%- comment -%}
+                  ss-metaobject-identity
+
+                  Every shop.metaobjects.custom_shop[handle] lookup is checked
+                  against the handle that was asked for, and thrown away if it
+                  does not match.
+
+                  A card that cannot resolve its store should say so by falling
+                  back to its handle. What it must never do is wear another
+                  store's name, logo and product count — all three come from
+                  `entry`, so one wrong lookup makes a card that is confidently,
+                  consistently somebody else. That is what the dashboard was
+                  doing to the stores furthest down the list, and it is
+                  indistinguishable from a real store until you click it.
+
+                  Cheap, and it holds whatever the underlying reason is.
+                {%- endcomment -%}
                 {% for raw_handle in handles_array %}
                   {% assign handle = raw_handle | strip %}
                   {% if handle != blank %}
 
                     {% assign entry = shop.metaobjects.custom_shop[handle] %}
+                    {%- comment -%} see ss-metaobject-identity {%- endcomment -%}
+                    {%- if entry and entry.system.handle != handle -%}{%- assign entry = false -%}{%- endif -%}
                     {% assign tile_logo_clean = blank %}
                     {% assign tile_logo_file = blank %}
                     {% assign tile_onboarding_image = blank %}
@@ -622,6 +648,21 @@
                       {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
                       {% if ch != blank %}{% assign collection_handle = ch | strip %}{% endif %}
                     {% endif %}
+
+                    {%- comment -%}
+                      When the metaobject cannot be trusted, the store's own
+                      collection still can: collections[handle] is a different
+                      lookup with none of the metaobject limits, and its title
+                      is the store's name. Falling back to it means an
+                      unresolvable card shows the right name rather than a
+                      prettified handle — and never another store's.
+                    {%- endcomment -%}
+                    {%- unless entry -%}
+                      {%- assign fallback_collection = collections[collection_handle] -%}
+                      {%- if fallback_collection.title != blank -%}
+                        {%- assign tile_name = fallback_collection.title -%}
+                      {%- endif -%}
+                    {%- endunless -%}
 
                     {% assign tile_url = routes.collections_url | append: '/' | append: collection_handle %}
                     {% capture admin_url %}/pages/admin-powers?shop={{ handle | url_encode }}{% endcapture %}
