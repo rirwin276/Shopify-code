@@ -175,16 +175,36 @@ function composite(fg, bg) {
   return [0, 1, 2].map((i) => fg[i] * a + bg[i] * (1 - a));
 }
 
-/** Read the declared colour for a selector out of the shipped CSS. */
+/** Last value declared for a custom property, so var() can be followed.
+ *  The theme defines its palette as --ap-* tokens; a check that cannot read
+ *  through them would skip exactly the rules it exists to verify. */
+function customProperty(css, name) {
+  const re = new RegExp('(^|[;{\\s])' + name.replace(/[-]/g, '\\-') + '\\s*:\\s*([^;!}]+)', 'g');
+  let m, last = null;
+  while ((m = re.exec(css))) last = m[2].trim();
+  return last;
+}
+function resolveVars(css, value, depth) {
+  depth = depth || 0;
+  const m = /^var\(\s*(--[A-Za-z0-9_-]+)\s*(?:,\s*([^)]+))?\)$/.exec(String(value).trim());
+  if (!m) return value;
+  if (depth > 5) return null;                       // cycle guard
+  const v = customProperty(css, m[1]);
+  return v !== null ? resolveVars(css, v, depth + 1) : (m[2] ? resolveVars(css, m[2], depth + 1) : null);
+}
+
+/** Read the declared colour for a selector out of the shipped CSS. A selector
+ *  may appear in a comma list; the LAST matching rule wins, as in the cascade. */
 function declaredColor(css, selector) {
   const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(esc + '\\s*(?:,[^{]*)?\\{([^}]*)\\}', 'g');
+  // Match the selector as a whole token in a selector list, followed by its block.
+  const re = new RegExp('(?:^|[,\\s{}])' + esc + '(?=\\s*[,{])[^{]*\\{([^}]*)\\}', 'g');
   let m, last = null;
   while ((m = re.exec(css))) {
     const c = /(?:^|[;\s])color\s*:\s*([^;!}]+)/.exec(m[1]);
-    if (c) last = c[1].trim();   // last declaration wins
+    if (c) last = c[1].trim();
   }
-  return last;
+  return last === null ? null : resolveVars(css, last);
 }
 
 const CREAM = [251, 248, 241];   // --ap-bg #fbf8f1
@@ -281,10 +301,12 @@ check(
 // 6. Contrast, but only once the page is actually light.
 if (darkOff) {
   for (const [selector, bg, min] of CONTRAST_TARGETS) {
+    // A contrast target that cannot be evaluated is a FAILURE, not a note. The
+    // one thing this check must never do is go green by not looking.
     const decl = declaredColor(cssSource, selector);
-    if (!decl) { notes.push(`no color declared for ${selector} — skipped`); continue; }
+    if (!decl) { check(`${selector} has a resolvable colour`, false, 'no color declaration found'); continue; }
     const parsed = parseColor(decl);
-    if (!parsed) { notes.push(`could not parse "${decl}" for ${selector} — skipped`); continue; }
+    if (!parsed) { check(`${selector} has a resolvable colour`, false, `could not evaluate "${decl}"`); continue; }
     const r = ratio(composite(parsed, bg), bg);
     check(`${selector} reaches ${min}:1`, r >= min,
       `${decl} on rgb(${bg.join(',')}) is ${r.toFixed(2)}:1`);

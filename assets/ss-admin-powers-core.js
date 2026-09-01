@@ -1384,6 +1384,14 @@
         row.appendChild(includesEl);
       }
 
+      // Explicit status pill. Before this, whether a product was live was
+      // conveyed only by the toggle reading "Hide" vs "Show" — a button label
+      // is an action, not a state. The pill is what the toggle flips.
+      var statusEl = document.createElement('span');
+      statusEl.className = 'ap-badge ap-badge--status ' + (isHidden ? 'ap-badge--hidden' : 'ap-badge--visible');
+      statusEl.textContent = isHidden ? 'Hidden' : 'Live';
+      row.appendChild(statusEl);
+
       row.appendChild(imgEl);
       row.appendChild(titleEl);
       row.appendChild(actionsEl);
@@ -1475,7 +1483,15 @@
       btn.textContent = newHidden ? 'Show' : 'Hide';
       btn.dataset.hidden = newHidden ? '1' : '0';
       var rowEl = btn.closest('.ap-product-row');
-      if (rowEl) rowEl.dataset.hidden = newHidden ? 'true' : 'false';
+      if (rowEl) {
+        rowEl.dataset.hidden = newHidden ? 'true' : 'false';
+        var pill = rowEl.querySelector('.ap-badge--status');
+        if (pill) {
+          pill.classList.toggle('ap-badge--hidden', newHidden);
+          pill.classList.toggle('ap-badge--visible', !newHidden);
+          pill.textContent = newHidden ? 'Hidden' : 'Live';
+        }
+      }
       apProductsStatus('✅ Visibility updated.', 'ok');
     } catch(e){
       apProductsStatus('❌ Could not update visibility: ' + (e.message || 'unknown error'), 'err');

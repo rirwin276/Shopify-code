@@ -2,7 +2,7 @@
   ADMIN POWERS — V14 PREMIUM CONTROL CENTER (SECTION FILE)
   - Self-contained section (no Custom Liquid block needed).
   - V12: Mobile-first single-dashboard redesign with tab navigation.
-    Single card with tabs (Overview | Members | Products | Danger).
+    Single card with tabs (Products | Add Products | Members | Settings | Danger).
     Product thumbnails (52×52px) pulled from featured_image / image / images[0].src
     with 🖼️ placeholder. Products lazy-load when tab is clicked.
   - V11: Route all calls to Railway (remove Mechanic URL). Remove credentials:include from fetches.
@@ -653,39 +653,6 @@
       </div>
     </div>
 
-    <!-- MEMBERS PANEL -->
-    <div id="apPanelMembers" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnMembers">
-      <div class="ap-panel-head">
-        <div>
-          <span class="ap-panel-kicker">Access</span>
-          <h2>Members</h2>
-          <p>Add shoppers or admins. Members can buy from the store; admins can help manage it.</p>
-        </div>
-      </div>
-
-      <div class="ap-form-group">
-        <label class="ap-label">Member Emails</label>
-        <textarea id="apInputEmails" class="ap-textarea" placeholder="alice@example.com, bob@example.com..."></textarea>
-        <p class="ap-helper">Separate multiple emails with commas.</p>
-      </div>
-
-      <div class="ap-form-group">
-        <label class="ap-label">Access Level</label>
-        <select id="apInputRole" class="ap-select">
-          <option value="member" selected>Member (Can Shop)</option>
-          <option value="admin">Admin (Can Edit Settings)</option>
-          <option value="remove-admin">Remove Admin Role (Keep as Member)</option>
-        </select>
-      </div>
-
-      <div class="ap-btn-row">
-        <button id="apBtnAdd" class="ap-btn ap-btn--primary">+ Add Members</button>
-        <button id="apBtnRemove" class="ap-btn ap-btn--danger">Remove</button>
-        <button id="apBtnRemoveAdmin" class="ap-btn">Remove Admin Role</button>
-      </div>
-      <div id="apStatusMembers" class="ap-status"></div>
-    </div><!-- /apPanelMembers -->
-
     <!-- PRODUCTS PANEL -->
     <div id="apPanelProducts" class="ap-main-panel active" role="tabpanel" aria-labelledby="apTabBtnProducts">
 
@@ -737,6 +704,39 @@
 
       <div id="apStatusAddProducts" class="ap-status"></div>
     </div><!-- /apPanelAddProducts -->
+
+    <!-- MEMBERS PANEL -->
+    <div id="apPanelMembers" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnMembers">
+      <div class="ap-panel-head">
+        <div>
+          <span class="ap-panel-kicker">Access</span>
+          <h2>Members</h2>
+          <p>Add shoppers or admins. Members can buy from the store; admins can help manage it.</p>
+        </div>
+      </div>
+
+      <div class="ap-form-group">
+        <label class="ap-label">Member Emails</label>
+        <textarea id="apInputEmails" class="ap-textarea" placeholder="alice@example.com, bob@example.com..."></textarea>
+        <p class="ap-helper">Separate multiple emails with commas.</p>
+      </div>
+
+      <div class="ap-form-group">
+        <label class="ap-label">Access Level</label>
+        <select id="apInputRole" class="ap-select">
+          <option value="member" selected>Member (Can Shop)</option>
+          <option value="admin">Admin (Can Edit Settings)</option>
+          <option value="remove-admin">Remove Admin Role (Keep as Member)</option>
+        </select>
+      </div>
+
+      <div class="ap-btn-row">
+        <button id="apBtnAdd" class="ap-btn ap-btn--primary">+ Add Members</button>
+        <button id="apBtnRemove" class="ap-btn ap-btn--danger">Remove</button>
+        <button id="apBtnRemoveAdmin" class="ap-btn">Remove Admin Role</button>
+      </div>
+      <div id="apStatusMembers" class="ap-status"></div>
+    </div><!-- /apPanelMembers -->
 
     <!-- SETTINGS PANEL -->
     <div id="apPanelSettings" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnSettings">

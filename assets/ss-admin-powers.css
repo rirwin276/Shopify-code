@@ -51,7 +51,6 @@
     background: radial-gradient(circle at 80% 20%, rgba(99,102,241,0.3) 0%, transparent 60%);
     border-radius: inherit; pointer-events: none;
   }
-  .ap-hero-left { position: relative; z-index: 1; }
   .ap-hero-badge {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
@@ -75,7 +74,6 @@
     margin: 0 0 6px; font-size: clamp(26px, 4vw, 38px); font-weight: 900;
     color: #fff; letter-spacing: -0.03em; line-height: 1.1;
   }
-  .ap-hero-sub { color: rgba(255,255,255,0.6); font-size: 14px; margin: 0; }
   .ap-hero-actions { display: flex; gap: 10px; position: relative; z-index: 1; flex-wrap: wrap; }
 
   /* ── BUTTONS ───────────────────────────────────────────── */
@@ -241,12 +239,6 @@
   }
   .ap-badge--visible { background: #ecfdf5; color: #065f46; }
   .ap-badge--hidden { background: #f1f5f9; color: #64748b; }
-  .ap-btn--icon {
-    padding: 7px 10px; min-width: unset; font-size: 14px;
-    background: #f8fafc; border: 1px solid var(--ap-border); color: var(--ap-text);
-    border-radius: 8px; cursor: pointer; transition: background 0.15s;
-  }
-  .ap-btn--icon:hover { background: #e2e8f0; }
   .ap-products-spinner { text-align: center; padding: 32px; color: var(--ap-gray); font-size: 14px; }
   .ap-products-empty { text-align: center; padding: 48px 20px; color: var(--ap-gray); font-size: 15px; }
   @media (max-width: 600px) {
@@ -482,7 +474,6 @@
     /* Hero */
     .ap-hero { padding: 22px 18px; margin-bottom: 18px; }
     .ap-hero h1 { font-size: 22px; }
-    .ap-hero-sub { font-size: 12px; }
     .ap-hero-actions { width: 100%; flex-direction: column; }
     .ap-hero-actions .ap-btn { width: 100%; justify-content: center; }
     /* Tabs — all 5 fit on screen, no scroll */
@@ -924,14 +915,6 @@
     z-index: 1;
   }
 
-  .ap-hero-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 28px;
-    min-width: min(720px, 100%);
-  }
-
   .ap-hero-title-row {
     display: flex;
     align-items: center;
@@ -989,15 +972,6 @@
     line-height: 0.90;
     letter-spacing: -0.075em;
     font-weight: 950;
-  }
-
-  .ap-hero-sub {
-    max-width: 680px;
-    margin: 16px 0 0;
-    color: rgba(255,255,255,0.62);
-    font-size: clamp(15px, 1.4vw, 18px);
-    line-height: 1.5;
-    font-weight: 520;
   }
 
   .ap-hero-meta {
@@ -1476,11 +1450,6 @@
       border-radius: 32px;
     }
 
-    .ap-hero-left {
-      gap: 20px;
-      width: 100%;
-    }
-
     .ap-hero-title-row {
       align-items: flex-start;
       gap: 14px;
@@ -1495,12 +1464,6 @@
     .ap-hero h1 {
       font-size: clamp(38px, 12vw, 56px);
       line-height: 0.92;
-    }
-
-    .ap-hero-sub {
-      margin-top: 10px;
-      font-size: 13px;
-      line-height: 1.42;
     }
 
     .ap-hero-meta {
@@ -1761,10 +1724,6 @@
     align-items: center !important;
   }
 
-  .ap-hero-left {
-    gap: 18px !important;
-  }
-
   .ap-hero-title-row {
     gap: 18px !important;
   }
@@ -1778,11 +1737,6 @@
   .ap-hero h1 {
     font-size: clamp(42px, 5vw, 76px) !important;
     line-height: .92 !important;
-  }
-
-  .ap-hero-sub {
-    margin-top: 10px !important;
-    font-size: clamp(14px, 1.1vw, 16px) !important;
   }
 
   .ap-hero-meta {
@@ -1865,10 +1819,6 @@
     .ap-hero h1 {
       font-size: clamp(31px, 10vw, 44px) !important;
       line-height: .94 !important;
-    }
-
-    .ap-hero-sub {
-      display: none !important;
     }
 
     .ap-hero-badge {
@@ -2035,14 +1985,6 @@
 
   /* Tab nav (for Learn More / Legal) */
   .ap-frw-tabs { display: flex; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; background: #fff; }
-  .ap-frw-tab {
-    padding: 13px 20px; font-size: 13px; font-weight: 700; color: #94a3b8;
-    background: none; border: none; border-bottom: 2px solid transparent;
-    cursor: pointer; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s;
-  }
-  .ap-frw-tab.active { color: #0f172a; border-bottom-color: #16a34a; }
-  .ap-frw-tab-panel { display: none; }
-  .ap-frw-tab-panel.active { display: block; }
 
   /* Step visibility — hide all steps by default; JS adds .ap-frw-active to the current one */
   .ap-frw-step-content { display: none; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
@@ -2104,7 +2046,6 @@
   }
   .ap-frw-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
   .ap-frw-input-row { display: flex; gap: 8px; align-items: center; }
-  .ap-frw-input-prefix { font-size: 18px; font-weight: 700; color: #94a3b8; }
   .ap-frw-input--amount { width: 80px !important; text-align: center; font-size: 20px; font-weight: 800; }
   .ap-frw-helper { font-size: 12px; color: #94a3b8; margin-top: 5px; }
   .ap-frw-calc-row {
@@ -2879,8 +2820,6 @@
     letter-spacing: -0.045em !important;
   }
 
-  .ap-hero .ap-hero-sub { color: rgba(17,16,14,0.60) !important; }
-
   .ap-hero .ap-hero-badge {
     background: rgba(183,163,106,0.16) !important;
     border: 1px solid rgba(183,163,106,0.42) !important;
@@ -2974,8 +2913,6 @@
       padding: 5px 10px !important;
     }
 
-    .ap-hero .ap-hero-sub { font-size: 12.5px !important; }
-
     /* 10px uppercase at 66% opacity is the exact combination that
        stops being readable on a phone in daylight. */
     .ap-hero .ap-hero-pill {
@@ -3054,4 +2991,166 @@
       font-size: 10.5px !important;
       line-height: 1.2 !important;
     }
+  }
+
+/* ═══════════════════════════════════════════════════════════════
+   READABLE INK — the muted ramp finally clears WCAG AA.
+   The dark "Command Center" overlay has been removed, so this cream
+   theme is what actually renders again. Its quiet text was tuned by
+   eye and sat at 0.46–0.55 ink alpha, i.e. 3.1–4.2:1 on white —
+   below the 4.5:1 that small text needs. The two slate greys
+   (#94a3b8, #64748b) were worse still. This wave lifts the whole
+   ramp to 0.62–0.68 and retires the greys; it is deliberately the
+   last thing in the file so it wins the cascade without anyone
+   having to find and edit the earlier waves.
+   Verified by tests/js_harness/admin_powers_integrity.js, which
+   computes these ratios from the shipped CSS.
+   ═══════════════════════════════════════════════════════════════ */
+  :root {
+    --ap-muted: rgba(17,16,14,0.64);        /* helpers, sub-copy, inactive tabs */
+    --ap-muted-strong: rgba(17,16,14,0.68); /* tiny uppercase labels need more */
+    --ap-border-strong: rgba(17,16,14,0.16);
+  }
+
+  /* Tiny uppercase labels — the smallest type on the page. */
+  .ap-panel-kicker,
+  .ap-label,
+  .ap-frw-legal-intro,
+  .ap-frd-row-label,
+  .ap-frd-stat-cell-lbl {
+    color: var(--ap-muted-strong) !important;
+  }
+
+  /* Helper and secondary copy. */
+  .ap-helper,
+  .ap-frw-helper,
+  .ap-product-box-sub,
+  .ap-custom-builders-sub,
+  .ap-frw-stripe-test-note,
+  .ap-frw-label,
+  .ap-frw-toggle-copy p,
+  .ap-frw-stripe-card p,
+  .ap-rebuild-sub,
+  #apSettingsLogoStatus {
+    color: var(--ap-muted) !important;
+  }
+
+  /* Unselected tabs sit on cream, which is a touch darker than white. */
+  .ap-main-tab-btn { color: var(--ap-muted) !important; }
+  .ap-main-tab-btn.active { color: var(--ap-text) !important; }
+
+  /* Placeholders had no rule at all, so the UA default rendered. */
+  .ap-input::placeholder,
+  .ap-textarea::placeholder,
+  .ap-frw-input::placeholder,
+  .ap-nuke-input::placeholder,
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(17,16,14,0.55);
+    opacity: 1;
+  }
+
+  /* The ✕ on the Share modal used var(--ap-text) on a hardcoded white,
+     which the dark overlay had turned white-on-white. Pin the ink. */
+  .ap-share-close { color: #11100e !important; background: #fff !important; }
+
+  /* Disabled controls: a muted surface, not half-opacity, so the label
+     stays readable and the state is still obviously "off". */
+  .ap-btn:disabled,
+  .ap-btn[disabled] {
+    opacity: 1 !important;
+    background: rgba(17,16,14,0.06) !important;
+    border-color: rgba(17,16,14,0.12) !important;
+    color: rgba(17,16,14,0.45) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+  }
+  /* This rule lost to .ap-edit-placement-btn on source order before; being
+     last, it now actually renders. */
+  .ap-edit-placement-btn--disabled,
+  .ap-edit-placement-btn--disabled:hover {
+    background: rgba(17,16,14,0.08) !important;
+    border-color: rgba(17,16,14,0.14) !important;
+    color: rgba(17,16,14,0.45) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+  }
+
+  /* Green fundraiser CTAs: white text needs a darker green than #22c55e. */
+  .ap-btn--fr-start,
+  .ap-btn--fr-edit-wizard,
+  #apFrLaunchBtn {
+    background: linear-gradient(135deg, #15803d 0%, #166534 100%) !important;
+  }
+  .ap-btn--fr-start:hover,
+  .ap-btn--fr-edit-wizard:hover,
+  #apFrLaunchBtn:hover {
+    background: linear-gradient(135deg, #166534 0%, #14532d 100%) !important;
+  }
+  /* "Edit / End →" on the pale green settings row. */
+  .ap-fr-active-edit { color: #14532d !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TIDY — small things the light theme never finished.
+   ═══════════════════════════════════════════════════════════════ */
+
+  /* Product status pill (Live / Hidden). The old --visible/--hidden rules
+     used slate greys from the first draft; bring them into the cream/gold
+     palette and let the pill replace the "— Hidden" suffix on the title. */
+  .ap-badge--status {
+    font-size: 10px; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px; border: 1px solid transparent; line-height: 1.2;
+  }
+  .ap-badge--visible { background: rgba(16,185,129,0.12) !important; color: #065f46 !important; border-color: rgba(16,185,129,0.28) !important; }
+  .ap-badge--hidden  { background: rgba(17,16,14,0.06) !important;  color: rgba(17,16,14,0.62) !important; border-color: rgba(17,16,14,0.14) !important; }
+  .ap-product-row[data-hidden="true"] .ap-product-title::after { content: none !important; }
+
+  /* Five fundraiser-wizard classes had no CSS in any file and rendered as
+     bare text. Same card vocabulary as the rest of the wizard. */
+  .ap-frw-stripe-intro {
+    padding: 16px 18px; border-radius: 16px;
+    background: rgba(255,255,255,0.72); border: 1px solid var(--ap-border);
+    margin-bottom: 14px;
+  }
+  .ap-frw-stripe-intro-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .ap-frw-stripe-intro-icon {
+    width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center;
+    border-radius: 12px; background: rgba(183,163,106,0.14); font-size: 20px;
+  }
+  .ap-frw-stripe-intro-title { font-weight: 900; font-size: 15px; color: var(--ap-text); letter-spacing: -0.01em; }
+  .ap-frw-stripe-intro-sub { font-size: 12.5px; color: var(--ap-muted); margin-top: 2px; }
+  .ap-frw-stripe-intro-body { font-size: 13.5px; line-height: 1.55; color: rgba(17,16,14,0.78); }
+
+  .ap-frw-info-card {
+    padding: 16px 18px; border-radius: 16px; margin-bottom: 14px;
+    background: rgba(183,163,106,0.07); border: 1px solid rgba(183,163,106,0.26);
+  }
+  .ap-frw-info-card-label {
+    display: block; font-size: 11px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ap-muted-strong); margin-bottom: 10px;
+  }
+  .ap-frw-info-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; line-height: 1.5; color: rgba(17,16,14,0.8); padding: 5px 0; }
+  .ap-frw-info-row strong { color: var(--ap-text); }
+  .ap-frw-info-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 999px; background: #a9955d; margin-top: 7px; }
+  .ap-frw-info-card-note { display: block; margin-top: 10px; font-size: 12.5px; color: var(--ap-muted); line-height: 1.5; }
+
+  .ap-frw-info-callout {
+    padding: 14px 16px; border-radius: 14px; font-size: 13.5px; line-height: 1.55;
+    background: rgba(255,255,255,0.72); border-left: 3px solid #a9955d; color: rgba(17,16,14,0.8);
+  }
+  .ap-frw-info-callout strong { color: var(--ap-text); }
+
+  /* Hero action buttons overflowed their column by exactly their padding +
+     border: they are width:100% but content-box, so 218px track + 10+10
+     padding + 2 border rendered 240px. The dark overlay used to hide this
+     behind forced heights and ellipsis clipping. Size them to the box. */
+  .ap-hero .ap-hero-actions .ap-btn,
+  .ap-hero .ap-btn--glass {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  @media (max-width: 700px) {
+    .ap-hero .ap-hero-actions .ap-btn,
+    .ap-hero .ap-btn--glass { white-space: normal !important; overflow-wrap: anywhere; }
   }
