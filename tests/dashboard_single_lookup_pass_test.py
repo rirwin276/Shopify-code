@@ -234,9 +234,11 @@ check("a resolved store keeps its metaobject name", raptors["name"] == "Raptors 
 check("and its own collection handle", raptors["collection"] == "raptors-collection")
 check("and that collection's product count", raptors["products"] == "11")
 check("and is marked ready", raptors["ready"] == "1")
-check("and carries both logo sizes",
-      raptors["logo"] == "cdn/raptors.png?width=512" and raptors["logo_big"] == "cdn/raptors.png?width=1200",
-      "got %r / %r" % (raptors["logo"], raptors["logo_big"]))
+check("a resolved store carries a logo url", raptors["logo"] == "cdn/raptors.png?width=512")
+check("and resolves the image exactly once",
+      raptors["logo_big"] == raptors["logo"],
+      "got %r for the onboarding size — that is a second resolution per store, "
+      "on a page that renders every store the seller has" % raptors["logo_big"])
 
 # The leak this section has been patched for twice. Liquid has no block scope,
 # so a `for` body shares one variable space across iterations: any field not
@@ -309,8 +311,8 @@ check("the card reads back readiness", r["ready"] == "true")
 check("the card reads back the collection", r["coll"] == "raptors-collection")
 check("the card reads back the product count", r["products"] == "11")
 check("the card reads back the logo url", r["logo"] == "cdn/raptors.png?width=512")
-check("the onboarding image is the large size, not the card size",
-      r["onboarding"] == "cdn/raptors.png?width=1200")
+check("the onboarding image reuses the already-resolved url",
+      r["onboarding"] == "cdn/raptors.png?width=512")
 
 t = read_back("twinned-a-3978")
 check("a logo URL two stores share is dropped by the card",
@@ -327,6 +329,11 @@ check("an unresolvable card shows its collection title, not its handle",
 # ---------------------------------------------------------------------------
 # The section must not have grown a second lookup back.
 # ---------------------------------------------------------------------------
+resolutions = re.findall(r"\|\s*image_url:", SECTION)
+check("the section resolves a store's logo image exactly once",
+      len(resolutions) == 1,
+      "found %d — every one of these runs for every store the seller has" % len(resolutions))
+
 lookups = re.findall(r"\{%\s*assign \w+ = shop\.metaobjects\.custom_shop\[", SECTION)
 check("the section reads a store's metaobject in exactly one place",
       len(lookups) == 1,

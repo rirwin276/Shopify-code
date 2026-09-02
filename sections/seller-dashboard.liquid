@@ -231,10 +231,17 @@
       it cannot render. Asking for a property only a real image has is the
       difference between "there is a field here" and "there is a picture here".
 
-      Resolved to URLs now, while the media object is in hand, because a record
-      is a string and cannot carry the object itself. Both sizes the card needs
-      are taken in the same breath: 512 for the frame, 1200 for the onboarding
-      image.
+      Resolved to a URL now, while the media object is in hand, because a
+      record is a string and cannot carry the object itself.
+
+      ONE size, not two. This used to resolve 512 for the card frame and 1200
+      for the onboarding image, which is two image resolutions per store on a
+      page that renders every store the seller has. Both readers of the
+      onboarding attribute (the onboarding modal here, and
+      logo-source-report.liquid) already fall back to the card's own <img src>
+      when it is empty, so the second size bought a slightly larger picture in
+      one modal at the cost of doubling the per-store image work on every load.
+      512 covers the largest frame at 3x and is plenty for the modal.
     {%- endcomment -%}
     {%- comment -%}
       preview_image.width as well as width.
@@ -253,7 +260,7 @@
     {% assign lf = entry.logo.value | default: entry.logo %}
     {% if lf.width or lf.preview_image.width %}
       {% assign r_logo = lf | image_url: width: 512 %}
-      {% assign r_logo_big = lf | image_url: width: 1200 %}
+      {% assign r_logo_big = r_logo %}
     {% endif %}
   {% endif %}
 
