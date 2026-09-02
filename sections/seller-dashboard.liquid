@@ -117,10 +117,51 @@
 {% assign is_god = false %}
 {% if platform_access_value == 'true' %}{% assign is_god = true %}{% endif %}
 
-{% comment %} SMART SORTING LOGIC {% endcomment %}
+{%- comment -%}
+  ss-one-lookup
+
+  One shop.metaobjects.custom_shop[handle] per store, for the whole page.
+
+  This section used to look each store up four separate times — once to sort
+  it, once to add up product counts, once to gather logo URLs for the duplicate
+  check, and once to draw its card; five for a super admin. Shopify caps how
+  many metaobjects one request may read, so a dashboard with enough stores
+  spends that budget partway down its own list and every lookup after it comes
+  back empty.
+
+  That is the whole family of bugs this section has been patched for. A card
+  with no metaobject has no is_fully_ready, so it renders as "building" — which
+  set the ready-poll reloading the page every ten seconds, forever, on exactly
+  the accounts with more than ten stores. It has no name either, which is why
+  cards showed a prettified handle, and why the identity check that was meant
+  to stop them showing a NEIGHBOUR's name could not help: nothing was returned
+  to check.
+
+  So every store is read once, here, into a record; everything downstream reads
+  the record. Same output, a quarter of the budget, and the identity check now
+  lives in one place instead of five.
+
+  The records are built into the same three buckets the handles are sorted
+  into, so concatenating them yields records already in display order and the
+  card loop walks them directly instead of re-deriving anything.
+{%- endcomment -%}
+
+{%- comment -%}
+  Field and record separators. Chosen so that neither contains the other:
+  splitting a record on '~;~' cannot bite into a '~;;~' boundary. The one
+  free-text field, the store's name, has both stripped out of it at capture.
+{%- endcomment -%}
+{%- assign ss_fs = '~;~' -%}
+{%- assign ss_rs = '~;;~' -%}
+
 {% assign bucket_admin = '' %}
 {% assign bucket_live = '' %}
 {% assign bucket_building = '' %}
+{% assign rec_admin = '' %}
+{% assign rec_live = '' %}
+{% assign rec_building = '' %}
+{% assign all_clean_urls = '' %}
+{% assign total_products_all = 0 %}
 
 {% assign raw_handles = member_handles_blob | split: '||' %}
 
@@ -129,58 +170,135 @@
   {% if handle == blank %}{% continue %}{% endif %}
   {% capture needle %}||{{ handle }}||{% endcapture %}
 
+  {% assign entry = shop.metaobjects.custom_shop[handle] %}
+  {%- comment -%}
+    ss-metaobject-identity
+
+    The one lookup is checked against the handle it was asked for, and thrown
+    away only when it is POSITIVELY a different store. A card that cannot
+    resolve its store should fall back to its own collection; what it must
+    never do is wear another store's name, logo and product count, which all
+    come from `entry`.
+
+    An earlier version compared the two raw and discarded on any difference,
+    including one it could not see: when system.handle reads back blank,
+    blank != handle, so every store was discarded and the whole dashboard
+    rendered as "building". Discarding needs evidence; the absence of evidence
+    keeps the entry.
+  {%- endcomment -%}
+  {%- if entry -%}{%- assign ss_got = entry.system.handle | default: '' | strip | downcase -%}{%- assign ss_want = handle | downcase -%}{%- if ss_got != blank and ss_got != ss_want -%}{%- assign entry = false -%}{%- endif -%}{%- endif -%}
+
+  {%- comment -%}
+    Reset every field before it is read. Liquid has no block scope — one `for`
+    body shares a single variable space across iterations — so a path that
+    reads a field without first writing it reads the PREVIOUS store's value.
+    That is the exact shape of the logo bug this section was patched for twice:
+    a run of consecutive cards wearing the mark of the last store above them
+    that had one.
+  {%- endcomment -%}
+  {% assign r_ready = '0' %}
+  {% assign r_collection = handle %}
+  {% assign r_status = '' %}
+  {% assign r_clean = '' %}
+  {% assign r_logo = '' %}
+  {% assign r_logo_big = '' %}
+  {% assign r_name = '' %}
+
+  {% if entry %}
+    {% assign is_ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
+    {% if is_ready == true or is_ready == 'true' %}{% assign r_ready = '1' %}{% endif %}
+
+    {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
+    {% if ch != blank %}{% assign r_collection = ch | strip %}{% endif %}
+
+    {% assign r_status = entry.status.value | default: entry.status | default: '' | strip | downcase %}
+
+    {% assign n = entry.name.value | default: entry.name %}
+    {% if n != blank %}{% assign r_name = n | replace: ss_rs, ' ' | replace: ss_fs, ' ' | strip %}{% endif %}
+
+    {% assign lcu = entry.logo_clean_url.value | default: entry.logo_clean_url %}
+    {% if lcu == blank %}{% assign lcu = entry.logo_clean.value | default: entry.logo_clean %}{% endif %}
+    {% if lcu == blank %}{% assign lcu = entry.logo_clean_url_.value | default: entry.logo_clean_url_ %}{% endif %}
+    {% if lcu != blank %}
+      {% assign r_clean = lcu | strip %}
+      {% assign all_clean_urls = all_clean_urls | append: '|' | append: r_clean %}
+    {% endif %}
+
+    {%- comment -%}
+      `.width` rather than `!= blank`. A metaobject file field that exists but
+      holds nothing still returns an object, and an object is never blank, so
+      `!= blank` passes for a store with no logo and hands image_url something
+      it cannot render. Asking for a property only a real image has is the
+      difference between "there is a field here" and "there is a picture here".
+
+      Resolved to URLs now, while the media object is in hand, because a record
+      is a string and cannot carry the object itself. Both sizes the card needs
+      are taken in the same breath: 512 for the frame, 1200 for the onboarding
+      image.
+    {%- endcomment -%}
+    {% assign lf = entry.logo.value | default: entry.logo %}
+    {% if lf.width %}
+      {% assign r_logo = lf | image_url: width: 512 %}
+      {% assign r_logo_big = lf | image_url: width: 1200 %}
+    {% endif %}
+  {% endif %}
+
+  {%- comment -%}
+    The store's own collection, read once for both the product count and the
+    name fallback. collections[] is a separate lookup from the metaobject one
+    and its title is the store's name, so a card whose metaobject did not
+    resolve still shows what the store is actually called rather than a
+    prettified handle — and never another store's name.
+  {%- endcomment -%}
+  {% assign c = collections[r_collection] %}
+  {% assign r_products = c.products_count | default: 0 %}
+  {% assign total_products_all = total_products_all | plus: r_products %}
+  {% if r_name == blank and c.title != blank %}{% assign r_name = c.title | replace: ss_rs, ' ' | replace: ss_fs, ' ' | strip %}{% endif %}
+
+  {%- comment -%}
+    A constant last field. Liquid's split drops trailing empty segments, so a
+    store with no name would otherwise come back one field short and every
+    read past it would slide by one.
+  {%- endcomment -%}
+  {%- capture record -%}{{ handle }}{{ ss_fs }}{{ r_ready }}{{ ss_fs }}{{ r_collection }}{{ ss_fs }}{{ r_products }}{{ ss_fs }}{{ r_status }}{{ ss_fs }}{{ r_clean }}{{ ss_fs }}{{ r_logo }}{{ ss_fs }}{{ r_logo_big }}{{ ss_fs }}{{ r_name }}{{ ss_fs }}end{{ ss_rs }}{%- endcapture -%}
+
   {% if admin_handles_blob contains needle %}
     {% assign bucket_admin = bucket_admin | append: needle %}
+    {% assign rec_admin = rec_admin | append: record %}
+  {% elsif r_ready == '1' %}
+    {% assign bucket_live = bucket_live | append: needle %}
+    {% assign rec_live = rec_live | append: record %}
   {% else %}
-    {% assign entry = shop.metaobjects.custom_shop[handle] %}
-    {%- comment -%} see ss-metaobject-identity {%- endcomment -%}
-    {%- if entry -%}{%- assign ss_got = entry.system.handle | default: '' | strip | downcase -%}{%- assign ss_want = handle | strip | downcase -%}{%- if ss_got != blank and ss_got != ss_want -%}{%- assign entry = false -%}{%- endif -%}{%- endif -%}
-    {% assign is_ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
-    {% if is_ready == true or is_ready == 'true' %}
-      {% assign bucket_live = bucket_live | append: needle %}
-    {% else %}
-      {% assign bucket_building = bucket_building | append: needle %}
-    {% endif %}
+    {% assign bucket_building = bucket_building | append: needle %}
+    {% assign rec_building = rec_building | append: record %}
   {% endif %}
 {% endfor %}
 
 {% assign sorted_blob = bucket_admin | append: bucket_live | append: bucket_building %}
 {% assign handles_array = sorted_blob | split: '||' %}
+{% assign store_records = rec_admin | append: rec_live | append: rec_building | split: ss_rs %}
 
-{% comment %} --- CALCULATE TOTAL PRODUCTS --- {% endcomment %}
-{% assign total_products_all = 0 %}
-{% if customer and has_storefront %}
-  {% for raw_handle in handles_array %}
-    {% assign handle = raw_handle | strip %}
-    {% if handle != blank %}
-      {% assign entry = shop.metaobjects.custom_shop[handle] %}
-      {%- comment -%} see ss-metaobject-identity {%- endcomment -%}
-      {%- if entry -%}{%- assign ss_got = entry.system.handle | default: '' | strip | downcase -%}{%- assign ss_want = handle | strip | downcase -%}{%- if ss_got != blank and ss_got != ss_want -%}{%- assign entry = false -%}{%- endif -%}{%- endif -%}
-      {% assign collection_handle = handle %}
-      {% if entry %}
-        {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
-        {% if ch != blank %}{% assign collection_handle = ch | strip %}{% endif %}
-      {% endif %}
-      {% assign c = collections[collection_handle] %}
-      {% if c %}
-        {% assign pc = c.products_count | default: 0 %}
-        {% assign total_products_all = total_products_all | plus: pc %}
-      {% endif %}
-    {% endif %}
-  {% endfor %}
-{% endif %}
+{%- comment -%}
+  Trailing separator so the last URL is never at the very end of the string:
+  Liquid's split drops trailing empty segments, so without it a duplicate whose
+  second occurrence is last counts as unique — and the final store keeps the
+  wrong logo, which is exactly the store that had it.
+{%- endcomment -%}
+{% assign all_clean_urls = all_clean_urls | append: '|' %}
 
 {% if is_god %}
 <script>
   window.SS_GOD_STORES = [
-    {% for raw_handle in handles_array %}
-      {% assign handle = raw_handle | strip %}
-      {% if handle != blank %}
-        {% assign entry = shop.metaobjects.custom_shop[handle] %}
-        {%- comment -%} see ss-metaobject-identity {%- endcomment -%}
-        {%- if entry -%}{%- assign ss_got = entry.system.handle | default: '' | strip | downcase -%}{%- assign ss_want = handle | strip | downcase -%}{%- if ss_got != blank and ss_got != ss_want -%}{%- assign entry = false -%}{%- endif -%}{%- endif -%}
-        {% assign n = entry.name.value | default: entry.name | default: handle %}
-        { handle: {{ handle | json }}, name: {{ n | json }} },
+    {%- comment -%} From the records built above: see ss-one-lookup. {%- endcomment -%}
+    {% for rec in store_records %}
+      {% if rec != blank %}
+        {% assign f = rec | split: ss_fs %}
+        {% assign g_handle = f[0] %}
+        {% if g_handle != blank %}
+          {% assign g_name = f[8] | default: g_handle %}
+          {% if g_name == blank %}{% assign g_name = g_handle %}{% endif %}
+          { handle: {{ g_handle | json }}, name: {{ g_name | json }} },
+        {% endif %}
       {% endif %}
     {% endfor %}
   ];
@@ -532,71 +650,20 @@
                 {% endif %}
 
                 {%- comment -%}
-                  Find any "clean" logo URL that more than one store resolves
-                  to, so it can be ignored.
+                  A "clean" logo URL that more than one store resolves to is
+                  ignored — see ss-one-lookup, which collects them in the same
+                  single pass that reads everything else.
 
                   The dashboard prefers logo_clean_url (a background-removed
                   copy) over the store's own logo media. When that field is
                   stale or was written wrong, a run of stores all render the
-                  same picture — which is what happened here: four stores in a
-                  row showing one logo on the dashboard while each store page,
-                  which reads entry.logo, showed the correct one.
-
-                  A clean URL shared by two stores is not a store's logo by
-                  definition, so those fall back to entry.logo. Stores whose
-                  clean URL is unique keep it, and nothing has to be migrated
-                  for the dashboard to stop lying.
+                  same picture: four in a row showed one logo on the dashboard
+                  while each store page, which reads entry.logo, showed the
+                  correct one. A clean URL shared by two stores is not a
+                  store's logo by definition, so those fall back to the logo
+                  media and nothing has to be migrated.
                 {%- endcomment -%}
-                {%- assign all_clean_urls = '' -%}
-                {%- for raw_handle in handles_array -%}
-                  {%- assign h = raw_handle | strip -%}
-                  {%- if h != blank -%}
-                    {%- assign e = shop.metaobjects.custom_shop[h] -%}
-                    {%- if e -%}{%- assign ss_got = e.system.handle | default: '' | strip | downcase -%}{%- assign ss_want = h | strip | downcase -%}{%- if ss_got != blank and ss_got != ss_want -%}{%- assign e = false -%}{%- endif -%}{%- endif -%}
-                    {%- if e -%}
-                      {%- assign u = e.logo_clean_url.value | default: e.logo_clean_url -%}
-                      {%- if u == blank -%}{%- assign u = e.logo_clean.value | default: e.logo_clean -%}{%- endif -%}
-                      {%- if u == blank -%}{%- assign u = e.logo_clean_url_.value | default: e.logo_clean_url_ -%}{%- endif -%}
-                      {%- if u != blank -%}
-                        {%- assign all_clean_urls = all_clean_urls | append: '|' | append: u | strip -%}
-                      {%- endif -%}
-                    {%- endif -%}
-                  {%- endif -%}
-                {%- endfor -%}
-                {%- comment -%}
-                  Trailing separator so the last URL is never at the very end
-                  of the string. Liquid's split drops trailing empty segments,
-                  so without this a duplicate whose second occurrence is last
-                  counts as unique — and the final store keeps the wrong logo,
-                  which is exactly the store that had it.
-                {%- endcomment -%}
-                {%- assign all_clean_urls = all_clean_urls | append: '|' -%}
 
-                {%- comment -%}
-                  ss-metaobject-identity
-
-                  Every shop.metaobjects.custom_shop[handle] lookup is checked
-                  against the handle that was asked for, and thrown away only
-                  when it is POSITIVELY a different store.
-
-                  A card that cannot resolve its store should say so by falling
-                  back to its handle. What it must never do is wear another
-                  store's name, logo and product count — all three come from
-                  `entry`, so one wrong lookup makes a card that is confidently,
-                  consistently somebody else.
-
-                  The first version of this check compared the two handles raw
-                  and discarded on any difference, including a difference it
-                  could not actually see: if system.handle reads back blank,
-                  blank != handle, so every store on the dashboard was thrown
-                  away. Every card then rendered as "building", and every card
-                  fell through to the collection lookup below — turning a
-                  narrow correctness fix into a whole-page regression.
-
-                  So the comparison is normalised, and an unreadable handle is
-                  treated as "cannot tell" rather than as "wrong". Discarding
-                  requires evidence; the absence of evidence keeps the entry.
-                {%- endcomment -%}
                 {%- comment -%}
                   Counted here rather than taken from forloop.index0, because
                   sorted_blob is "||a||||b||" and splitting it yields empty
@@ -604,121 +671,68 @@
                   stores past the first page and show fewer than ten.
                 {%- endcomment -%}
                 {%- assign ss_rendered = 0 -%}
-                {% for raw_handle in handles_array %}
-                  {% assign handle = raw_handle | strip %}
-                  {% if handle != blank %}
+                {% for rec in store_records %}
+                    {%- comment -%}
+                      Everything this card needs was read once, at the top:
+                      see ss-one-lookup. Fields, in order — handle, ready,
+                      collection handle, product count, status, clean logo url,
+                      logo url, large logo url, name, and a constant terminator
+                      so a blank name is never the last field.
+                    {%- endcomment -%}
+                    {% assign f = rec | split: ss_fs %}
+                    {% assign handle = f[0] | default: '' | strip %}
+                    {% if handle != blank %}
 
-                    {% assign entry = shop.metaobjects.custom_shop[handle] %}
-                    {%- comment -%} see ss-metaobject-identity {%- endcomment -%}
-                    {%- if entry -%}{%- assign ss_got = entry.system.handle | default: '' | strip | downcase -%}{%- assign ss_want = handle | strip | downcase -%}{%- if ss_got != blank and ss_got != ss_want -%}{%- assign entry = false -%}{%- endif -%}{%- endif -%}
-                    {% assign tile_logo_clean = blank %}
-                    {% assign tile_logo_file = blank %}
-                    {% assign tile_onboarding_image = blank %}
-                    {% assign tile_name = handle | replace: '-', ' ' | capitalize %}
                     {% assign is_fully_ready = false %}
-                    {% assign collection_handle = handle %}
+                    {% if f[1] == '1' %}{% assign is_fully_ready = true %}{% endif %}
 
-                    {% if entry %}
-                      {% assign n = entry.name.value | default: entry.name %}
-                      {% if n != blank %}{% assign tile_name = n %}{% endif %}
+                    {% assign collection_handle = f[2] %}
+                    {% if collection_handle == blank %}{% assign collection_handle = handle %}{% endif %}
 
-                      {% assign ready = entry.is_fully_ready.value | default: entry.is_fully_ready %}
-                      {% if ready == true or ready == 'true' %}{% assign is_fully_ready = true %}{% endif %}
+                    {% assign product_count = f[3] | plus: 0 %}
+                    {% assign tile_status = f[4] | default: '' %}
 
-                      {%- comment -%}
-                        Reset before use, every iteration.
-
-                        tile_logo_clean and tile_logo_file are cleared at the
-                        top of the loop, but the scratch variables they are
-                        derived from — lcu and lf — were not. Liquid has no
-                        block scope: a `for` body shares one variable space
-                        with every other iteration, so any path that reads one
-                        of these without overwriting it first reads the
-                        PREVIOUS store's value. That is precisely the shape of
-                        the bug: a run of consecutive cards all wearing the
-                        logo of the last store above them that had one.
-                      {%- endcomment -%}
-                      {% assign lcu = '' %}
-                      {% assign lf = '' %}
-
-                      {% assign lcu = entry.logo_clean_url.value | default: entry.logo_clean_url %}
-                      {% if lcu == blank %}{% assign lcu = entry.logo_clean.value | default: entry.logo_clean %}{% endif %}
-                      {% if lcu == blank %}{% assign lcu = entry.logo_clean_url_.value | default: entry.logo_clean_url_ %}{% endif %}
-                      {% if lcu != blank %}
-                        {% assign lcu = lcu | strip %}
-                        {% assign clean_uses = all_clean_urls | split: lcu | size | minus: 1 %}
-                        {% if clean_uses <= 1 %}
-                          {% assign tile_logo_clean = lcu %}
-                        {% endif %}
-                      {% endif %}
-
-                      {%- comment -%}
-                        `.width` rather than `!= blank`.
-
-                        A metaobject file field that exists but holds nothing
-                        still returns an object, and an object is never blank —
-                        so `lf != blank` passes for a store with no logo and
-                        hands image_url something it cannot render. Asking for
-                        a property only a real image has is the difference
-                        between "there is a field here" and "there is a picture
-                        here".
-                      {%- endcomment -%}
-                      {% assign lf = entry.logo.value | default: entry.logo %}
-                      {% if lf.width %}{% assign tile_logo_file = lf %}{% endif %}
-                      {%- comment -%}
-                        entry.logo wins over logo_clean_url.
-
-                        The store page renders entry.logo and has always shown
-                        the right mark; the dashboard preferred the
-                        background-removed copy, which is a second field that
-                        can drift out of sync with the first and did. One
-                        source for both surfaces means a correct store page can
-                        no longer sit beside a wrong dashboard card.
-
-                        The clean copy stays as the fallback for stores that
-                        only ever had one.
-                      {%- endcomment -%}
-                      {% if tile_logo_file != blank %}
-                        {% assign tile_logo_clean = blank %}
-                        {% assign tile_onboarding_image = tile_logo_file | image_url: width: 1200 %}
-                      {% elsif tile_logo_clean != blank %}
-                        {% assign tile_onboarding_image = tile_logo_clean %}
-                      {% endif %}
-
-                      {% assign ch = entry.collection_handle.value | default: entry.collection_handle %}
-                      {% if ch != blank %}{% assign collection_handle = ch | strip %}{% endif %}
+                    {%- comment -%}
+                      A clean URL two stores share is not either store's logo,
+                      so it is dropped and the logo media takes over.
+                    {%- endcomment -%}
+                    {% assign tile_logo_clean = blank %}
+                    {% assign lcu = f[5] | default: '' %}
+                    {% if lcu != blank %}
+                      {% assign clean_uses = all_clean_urls | split: lcu | size | minus: 1 %}
+                      {% if clean_uses <= 1 %}{% assign tile_logo_clean = lcu %}{% endif %}
                     {% endif %}
 
                     {%- comment -%}
-                      When the metaobject cannot be trusted, the store's own
-                      collection still can: collections[handle] is a different
-                      lookup with none of the metaobject limits, and its title
-                      is the store's name. Falling back to it means an
-                      unresolvable card shows the right name rather than a
-                      prettified handle — and never another store's.
+                      The logo media wins over the background-removed copy.
+                      The store page renders entry.logo and has always shown
+                      the right mark; the dashboard preferred the clean copy,
+                      which is a second field that can drift out of sync with
+                      the first and did. One source for both surfaces means a
+                      correct store page can no longer sit beside a wrong card.
+                      The clean copy stays as the fallback for stores that only
+                      ever had one.
                     {%- endcomment -%}
-                    {%- unless entry -%}
-                      {%- assign fallback_collection = collections[collection_handle] -%}
-                      {%- if fallback_collection.title != blank -%}
-                        {%- assign tile_name = fallback_collection.title -%}
-                      {%- endif -%}
-                    {%- endunless -%}
+                    {% assign tile_logo_file = f[6] | default: '' %}
+                    {% assign tile_onboarding_image = blank %}
+                    {% if tile_logo_file != blank %}
+                      {% assign tile_logo_clean = blank %}
+                      {% assign tile_onboarding_image = f[7] | default: '' %}
+                    {% elsif tile_logo_clean != blank %}
+                      {% assign tile_onboarding_image = tile_logo_clean %}
+                    {% endif %}
+
+                    {% assign tile_name = f[8] | default: '' %}
+                    {% if tile_name == blank %}{% assign tile_name = handle | replace: '-', ' ' | capitalize %}{% endif %}
 
                     {% assign tile_url = routes.collections_url | append: '/' | append: collection_handle %}
                     {% capture admin_url %}/pages/admin-powers?shop={{ handle | url_encode }}{% endcapture %}
-
-                    {% assign collection = collections[collection_handle] %}
-                    {% assign product_count = collection.products_count | default: 0 %}
 
                     {% capture admin_needle2 %}||{{ handle }}||{% endcapture %}
                     {% assign tile_is_admin = false %}
                     {% if admin_handles_blob contains admin_needle2 %}{% assign tile_is_admin = true %}{% endif %}
 
-                    {%- comment %} Read sleep/waking status from metaobject {%- endcomment -%}
-                    {%- assign tile_status = '' -%}
-                    {%- if entry -%}
-                      {%- assign tile_status = entry.status.value | default: entry.status | default: '' | strip | downcase -%}
-                    {%- endif -%}
+                    {%- comment %} Sleep/waking status, from the record. {%- endcomment -%}
                     {%- assign tile_is_sleeping = false -%}
                     {%- assign tile_is_waking = false -%}
                     {%- if tile_status == 'sleeping' -%}{%- assign tile_is_sleeping = true -%}{%- endif -%}
@@ -778,7 +792,7 @@
                         {%- if ss_paging_on and tile_position >= ss_page_size -%}{%- assign tile_loading = 'lazy' -%}{%- else -%}{%- assign tile_loading = 'eager' -%}{%- endif -%}
                         <div class="ss-logo-frame"
                              data-ss-logo-for="{{ handle | escape }}"
-                             data-ss-logo-kind="{% if tile_logo_clean != blank %}clean{% elsif tile_logo_file %}file{% else %}none{% endif %}">
+                             data-ss-logo-kind="{% if tile_logo_clean != blank %}clean{% elsif tile_logo_file != blank %}file{% else %}none{% endif %}">
                           {% if tile_logo_clean != blank %}
                             <img
                               src="{{ tile_logo_clean | escape }}"
@@ -822,14 +836,20 @@
                               device pixel ratio with room to spare, since
                               there is no srcset to pick a sharper candidate.
                             {%- endcomment -%}
-                            {{ tile_logo_file
-                              | image_url: width: 512
-                              | image_tag:
-                                  loading: tile_loading,
-                                  decoding: 'async',
-                                  alt: tile_name,
-                                  width: 72,
-                                  height: 72 }}
+                            {%- comment -%}
+                              Written out rather than run through image_tag,
+                              because the record carries a URL and image_tag
+                              needs the media object. image_tag was only ever
+                              being asked for one src with no srcset, so the
+                              markup below is what it emitted anyway.
+                            {%- endcomment -%}
+                            <img
+                              src="{{ tile_logo_file | escape }}"
+                              loading="{{ tile_loading }}"
+                              decoding="async"
+                              alt="{{ tile_name | escape }}"
+                              width="72"
+                              height="72">
                           {% else %}
                             <span class="ss-logo-fallback">{{ tile_name | slice: 0, 2 | upcase }}</span>
                           {% endif %}

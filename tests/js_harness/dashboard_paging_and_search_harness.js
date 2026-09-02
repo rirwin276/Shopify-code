@@ -91,18 +91,9 @@ function buildPage(css, js) {
     (section.match(/ss_paging_on and tile_position >= ss_page_size/g) || []).length === 2,
     'the hidden cards and the pager could disagree about whether paging is on');
 
-  // The regression that started this: a raw handle comparison discarded every
-  // metaobject whose system handle read back blank, so every card rendered as
-  // "building" and every card fell through to the collection lookup.
-  const identityChecks = section.match(/assign ss_got = [^\n]*system\.handle/g) || [];
-  check('every metaobject lookup is identity-checked', identityChecks.length === 5,
-    'found ' + identityChecks.length + ', expected 5');
-  check('an unreadable handle is treated as "cannot tell", not as "wrong"',
-    (section.match(/ss_got != blank and ss_got != ss_want/g) || []).length === 5,
-    'a blank system handle would discard every store on the dashboard');
-  check('the handles are compared normalised',
-    (section.match(/system\.handle \| default: '' \| strip \| downcase/g) || []).length === 5,
-    'casing or whitespace alone would throw a store away');
+  // The metaobject lookup and its identity check moved to a single pass and
+  // are now executed rather than pattern-matched — see
+  // tests/dashboard_single_lookup_pass_test.py, which runs the real Liquid.
 
   check('a no-JS browser still gets every card',
     /<noscript>[\s\S]*\.ss-card-paged-out \{ display: flex !important; \}[\s\S]*<\/noscript>/.test(section),
