@@ -1,0 +1,4 @@
+
+# Python bytecode from the Liquid test oracle
+__pycache__/
+*.pyc
