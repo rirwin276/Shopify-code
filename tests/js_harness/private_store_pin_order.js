@@ -29,7 +29,13 @@ function check(name, ok, detail) {
 }
 
 const section = read('sections/private-store-collection-catalog.liquid');
-const tuneCss = read('assets/storefront-final-tune.css');
+
+// The rule MUST live in the section's own {% stylesheet %} block. It was once
+// in assets/storefront-final-tune.css, which is loaded by a section no
+// template renders — so it never shipped, the pin silently did nothing on the
+// storefront, and this harness still passed because it only checked that the
+// rule existed in *a* file. Read it out of the block that actually ships.
+const styleBlock = (/\{%\s*stylesheet\s*%\}([\s\S]*?)\{%\s*endstylesheet\s*%\}/.exec(section) || [, ''])[1];
 
 // --- the section must still stamp the flag the CSS sorts on -----------------
 
@@ -47,9 +53,25 @@ check('the store paginates large enough for the pin to be global',
     ? `paginating by ${perPage[1]} — a pinned product past that page cannot reach the top`
     : 'products_per_page assignment not found');
 
-check('the ordering rule targets that attribute',
-  /\[data-ss-pinned="true"\][^}]*order:\s*-1/.test(tuneCss.replace(/\s+/g, ' ')),
-  'assets/storefront-final-tune.css must sort pinned items first');
+check('the ordering rule ships with the section that stamps the flag',
+  /\[data-ss-pinned=['"]true['"]\][^}]*order:\s*-1/.test(styleBlock.replace(/\s+/g, ' ')),
+  'the rule must be inside the section\'s {% stylesheet %} block, or it is never delivered');
+
+// Belt and braces: a rule sitting in a stylesheet no template loads is the
+// exact bug this file exists to prevent recurring.
+const orphanedCss = ['assets/storefront-final-tune.css'];
+for (const file of orphanedCss) {
+  const loadedBy = fs.readdirSync(path.join(ROOT, 'sections'))
+    .filter((f) => read('sections/' + f).includes(path.basename(file)));
+  const rendered = loadedBy.filter((sectionFile) => {
+    const type = sectionFile.replace(/\.liquid$/, '');
+    return fs.readdirSync(path.join(ROOT, 'templates'))
+      .some((t) => t.endsWith('.json') && read('templates/' + t).includes('"' + type + '"'));
+  });
+  check(`${file} is not where ordering rules should live`,
+    !read(file).includes('data-ss-pinned'),
+    rendered.length ? '' : `nothing renders the section that loads ${file}`);
+}
 
 // --- and the rule must actually reorder a real grid --------------------------
 
@@ -57,7 +79,7 @@ const GRID_CSS = `
   .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .product-grid__item { padding: 6px; }
 `;
-const PAGE = `<!doctype html><meta charset="utf-8"><style>${GRID_CSS}${tuneCss}</style>
+const PAGE = `<!doctype html><meta charset="utf-8"><style>${GRID_CSS}${styleBlock}</style>
 <div class="ss-private-catalog">
   <ul class="product-grid">
     <li class="product-grid__item" data-product-id="1" data-ss-categories="hoodies">A</li>

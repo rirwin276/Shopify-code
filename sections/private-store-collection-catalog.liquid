@@ -288,6 +288,24 @@
     box on hover.
   */
 
+  /*
+    A pinned product sorts to the front of the grid.
+
+    This rule lives in the same file that stamps data-ss-pinned, and that is
+    deliberate. It was first written into assets/storefront-final-tune.css,
+    which is loaded only by sections/private-store-unified-polish.liquid — a
+    section no template renders. The rule was therefore never delivered and
+    the pin did nothing on the storefront, while the admin list reordered
+    correctly and made it look like it worked. A section's own stylesheet
+    block ships with the section, so the flag and the rule cannot drift apart.
+
+    `order` rather than a Liquid sort: the grid is a CSS grid, and the category
+    filter below only toggles `hidden`, so ordering survives filtering for free.
+  */
+  .ss-private-catalog .product-grid__item[data-ss-pinned='true'] {
+    order: -1;
+  }
+
 {% endstylesheet %}
 
 {% render 'product-tile-transparency' %}
