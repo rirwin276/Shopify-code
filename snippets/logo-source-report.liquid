@@ -247,13 +247,19 @@
         // a position is a per-request budget running out, while 'shared' and
         // 'missing' scattered by store is a provisioning problem. Those two
         // want opposite fixes, and nothing else on the page distinguishes them.
-        var lines = ['# | handle | why | src | currentSrc | flags'];
+        var lines = ['# | handle | entry | why | src | currentSrc | flags'];
         var summary = {};
         for (var i = 0; i < frames.length; i++) {
           var img = frames[i].querySelector('img');
           var src = img ? (img.getAttribute('src') || '') : '';
           var live = img ? (img.currentSrc || '') : '';
           var why = frames[i].getAttribute('data-ss-logo-why') || '?';
+          // entry=1 means the store's metaobject came back; entry=0 means it
+          // did not. A run of why=missing with entry=1 is the logo reference
+          // being rationed, and a text URL fixes it. The same run with entry=0
+          // is the METAOBJECT being rationed — there is nothing to read a text
+          // field out of, and the fix has to be fewer stores per request.
+          var entry = frames[i].getAttribute('data-ss-entry') || '?';
           summary[why] = (summary[why] || 0) + 1;
           var flags = [];
           if (img && img.getAttribute('srcset')) flags.push('HAS SRCSET');
@@ -261,7 +267,7 @@
           lines.push(
             (i + 1) + ' | ' +
             (frames[i].getAttribute('data-ss-logo-for') || '') + ' | ' +
-            why + ' | ' +
+            entry + ' | ' + why + ' | ' +
             src + ' | ' + live + ' | ' + flags.join(' ')
           );
         }
@@ -277,6 +283,16 @@
           if (w === 'missing' || w === 'shared') { firstBad = j + 1; break; }
         }
         lines.push('first card without a logo: ' + (firstBad === -1 ? 'none' : '#' + firstBad));
+
+        var firstUnresolved = -1;
+        for (var k = 0; k < frames.length; k++) {
+          if (frames[k].getAttribute('data-ss-entry') === '0') { firstUnresolved = k + 1; break; }
+        }
+        lines.push('first card whose metaobject did not resolve: ' +
+          (firstUnresolved === -1 ? 'none' : '#' + firstUnresolved));
+        lines.push(firstUnresolved === -1
+          ? 'VERDICT: every metaobject resolved, so a missing logo is the FILE REFERENCE being rationed.'
+          : 'VERDICT: metaobjects stop resolving at #' + firstUnresolved + ', so the METAOBJECT itself is what runs out.');
         return lines.join('\n');
       }
 

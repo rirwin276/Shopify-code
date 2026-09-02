@@ -135,7 +135,7 @@ def run_pass(handles, entries, collections, admin=()):
 
 
 FIELDS = ["handle", "ready", "collection", "products", "status",
-          "clean", "logo", "logo_big", "name", "terminator"]
+          "clean", "logo", "logo_big", "name", "resolved", "terminator"]
 
 
 def as_dict(rec):
@@ -208,7 +208,7 @@ by_handle = {r[0]: as_dict(r) for r in records}
 check("every store produces exactly one record", len(records) == len(HANDLES),
       "got %d for %d stores" % (len(records), len(HANDLES)))
 
-check("every record has all ten fields", all(len(r) == 10 for r in records),
+check("every record has all eleven fields", all(len(r) == 11 for r in records),
       "widths " + str(sorted({len(r) for r in records})))
 
 check("the terminator is intact on every record",
@@ -223,6 +223,11 @@ check("the unresolvable store sorts with the building ones",
 # The store with no metaobject at all.
 missing = by_handle["no-meta-3978"]
 check("a store with no metaobject still gets a record", missing["handle"] == "no-meta-3978")
+check("and is recorded as unresolved",
+      missing["resolved"] == "0",
+      "nothing would distinguish a lookup that failed from a logo that failed")
+check("a store whose lookup came back is recorded as resolved",
+      by_handle["raptors-3978"]["resolved"] == "1")
 check("and is not claimed to be ready", missing["ready"] == "0")
 check("and takes its name from its own collection",
       missing["name"] == "North Coast Paddling Club",

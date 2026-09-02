@@ -196,6 +196,20 @@
     a run of consecutive cards wearing the mark of the last store above them
     that had one.
   {%- endcomment -%}
+  {%- comment -%}
+    Whether the lookup came back at all, kept as its own field.
+
+    Two different ceilings produce an identical-looking card, and they want
+    opposite fixes. If Shopify stopped resolving the logo FILE reference, the
+    metaobject is here and a text URL fixes it. If Shopify stopped returning
+    the METAOBJECT, there is nothing to read a text field out of and the fix
+    has to be fewer stores per request instead. From the outside both give a
+    card with no logo, a name (from the collection), and a count (also from
+    the collection) — so nothing visible separates them. This does.
+  {%- endcomment -%}
+  {% assign r_resolved = '0' %}
+  {% if entry %}{% assign r_resolved = '1' %}{% endif %}
+
   {% assign r_ready = '0' %}
   {% assign r_collection = handle %}
   {% assign r_status = '' %}
@@ -312,7 +326,7 @@
     store with no name would otherwise come back one field short and every
     read past it would slide by one.
   {%- endcomment -%}
-  {%- capture record -%}{{ handle }}{{ ss_fs }}{{ r_ready }}{{ ss_fs }}{{ r_collection }}{{ ss_fs }}{{ r_products }}{{ ss_fs }}{{ r_status }}{{ ss_fs }}{{ r_clean }}{{ ss_fs }}{{ r_logo }}{{ ss_fs }}{{ r_logo_big }}{{ ss_fs }}{{ r_name }}{{ ss_fs }}end{{ ss_rs }}{%- endcapture -%}
+  {%- capture record -%}{{ handle }}{{ ss_fs }}{{ r_ready }}{{ ss_fs }}{{ r_collection }}{{ ss_fs }}{{ r_products }}{{ ss_fs }}{{ r_status }}{{ ss_fs }}{{ r_clean }}{{ ss_fs }}{{ r_logo }}{{ ss_fs }}{{ r_logo_big }}{{ ss_fs }}{{ r_name }}{{ ss_fs }}{{ r_resolved }}{{ ss_fs }}end{{ ss_rs }}{%- endcapture -%}
 
   {% if admin_handles_blob contains needle %}
     {% assign bucket_admin = bucket_admin | append: needle %}
@@ -851,6 +865,7 @@
                           spent arguing about where a wrong logo came from; one
                           attribute settles it, and it costs nothing.
                         {%- endcomment -%}
+                        {%- assign tile_resolved = f[9] | default: '0' -%}
                         {%- assign tile_logo_why = 'clean' -%}
                         {%- if tile_logo_file != blank -%}{%- assign tile_logo_why = 'file' -%}
                         {%- elsif tile_logo_clean == blank -%}
@@ -860,6 +875,7 @@
                         <div class="ss-logo-frame"
                              data-ss-logo-for="{{ handle | escape }}"
                              data-ss-logo-why="{{ tile_logo_why }}"
+                             data-ss-entry="{{ tile_resolved }}"
                              data-ss-logo-kind="{% if tile_logo_clean != blank %}clean{% elsif tile_logo_file != blank %}file{% else %}none{% endif %}">
                           {% if tile_logo_clean != blank %}
                             <img
