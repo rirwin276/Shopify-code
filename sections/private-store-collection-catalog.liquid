@@ -136,8 +136,15 @@
                 the same string the admin writes. {%- endcomment -%}
             {% assign ss_pin_tag = 'pinned--' | append: private_handle | downcase %}
             {% assign ss_is_pinned = false %}
+            {%- comment -%}
+              Shopify Liquid does not allow filters inside a condition — the
+              tag has to be normalised into its own variable first. Written
+              inline the comparison never became true, so the flag was never
+              stamped and the pin silently did nothing on the storefront.
+            {%- endcomment -%}
             {% for ss_tag in product.tags %}
-              {% if ss_tag | downcase | strip == ss_pin_tag %}
+              {% assign ss_tag_norm = ss_tag | downcase | strip %}
+              {% if ss_tag_norm == ss_pin_tag %}
                 {% assign ss_is_pinned = true %}
                 {% break %}
               {% endif %}
