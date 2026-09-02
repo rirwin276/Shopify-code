@@ -38,6 +38,15 @@ check('the section builds the pin tag from the store handle',
   'the storefront must derive the same tag the admin writes');
 check('the section stamps data-ss-pinned on the grid item',
   /data-ss-pinned="true"/.test(section));
+// The pin can only sort within a rendered page, so the page has to be big
+// enough to hold the whole store. 50 is Shopify's paginate ceiling.
+const perPage = /assign products_per_page = (\d+)/.exec(section);
+check('the store paginates large enough for the pin to be global',
+  !!perPage && Number(perPage[1]) >= 50,
+  perPage
+    ? `paginating by ${perPage[1]} — a pinned product past that page cannot reach the top`
+    : 'products_per_page assignment not found');
+
 check('the ordering rule targets that attribute',
   /\[data-ss-pinned="true"\][^}]*order:\s*-1/.test(tuneCss.replace(/\s+/g, ' ')),
   'assets/storefront-final-tune.css must sort pinned items first');

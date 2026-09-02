@@ -54,7 +54,22 @@
         results_size: collection.products_count
       %}
 
-      {% assign products_per_page = 24 %}
+      {%- comment -%}
+        50 is Shopify's per-page ceiling for pagination, and is set deliberately.
+        A pinned product is sorted to the front with CSS `order`, which can only
+        reorder within the page that is currently rendered — so a pin on page 2
+        would not reach the top of page 1. At 50 a whole private store fits on
+        one page in every realistic case (these carry roughly a dozen products),
+        which makes the pin globally correct rather than page-local.
+
+        Past 50 products the pin is page-local again: with auto-load on, the
+        pinned card jumps to the front as soon as its page loads, because the
+        appended cards join the same grid. Fixing that properly needs the sort
+        to happen before pagination, which Liquid cannot express over a smart
+        collection — it would need the order stored somewhere Shopify can sort
+        on, and a smart collection cannot hold a manual product order at all.
+      {%- endcomment -%}
+      {% assign products_per_page = 50 %}
       {% if section.settings.enable_infinite_scroll == false %}
         {% assign products_per_page = section.settings.products_per_page %}
       {% endif %}
