@@ -216,7 +216,32 @@
     {% assign n = entry.name.value | default: entry.name %}
     {% if n != blank %}{% assign r_name = n | replace: ss_rs, ' ' | replace: ss_fs, ' ' | strip %}{% endif %}
 
-    {% assign lcu = entry.logo_clean_url.value | default: entry.logo_clean_url %}
+    {%- comment -%}
+      ss-logo-budget
+
+      A text field first, because resolving the logo FILE reference is
+      rationed and reading a string is not.
+
+      Shopify resolves at most twenty metaobject file references per request.
+      Measured on a real dashboard: cards 1-20 drew their logo, cards 21-36
+      drew nothing at all, on one page, with the break falling between two
+      alphabetically adjacent stores. Nothing in this section can raise that
+      ceiling — every card that resolves entry.logo spends one of the twenty,
+      and a seller with more than twenty stores runs out.
+
+      logo_url holds the same picture's CDN URL as plain text, written at
+      provisioning where the URL is already in hand. Reading it costs nothing,
+      so a store that has it never spends from the budget — which leaves the
+      twenty for the stores that do not, instead of the first twenty in
+      alphabetical order.
+
+      logo_clean_url is the older background-removed copy and stays as a last
+      resort. Both go through the duplicate check below: a URL two stores share
+      is not either store's logo, and trusting a shared one blindly is what put
+      one club's blue logo on every trailing card.
+    {%- endcomment -%}
+    {% assign lcu = entry.logo_url.value | default: entry.logo_url %}
+    {% if lcu == blank %}{% assign lcu = entry.logo_clean_url.value | default: entry.logo_clean_url %}{% endif %}
     {% if lcu == blank %}{% assign lcu = entry.logo_clean.value | default: entry.logo_clean %}{% endif %}
     {% if lcu == blank %}{% assign lcu = entry.logo_clean_url_.value | default: entry.logo_clean_url_ %}{% endif %}
     {% if lcu != blank %}
@@ -257,10 +282,16 @@
 
       Both are accepted, so whichever shape the field resolves to is found.
     {%- endcomment -%}
-    {% assign lf = entry.logo.value | default: entry.logo %}
-    {% if lf.width or lf.preview_image.width %}
-      {% assign r_logo = lf | image_url: width: 512 %}
-      {% assign r_logo_big = r_logo %}
+    {%- comment -%}
+      Only when no text URL was found — see ss-logo-budget. This is the
+      rationed one, so it is spent on the stores that have nothing else.
+    {%- endcomment -%}
+    {% if r_clean == blank %}
+      {% assign lf = entry.logo.value | default: entry.logo %}
+      {% if lf.width or lf.preview_image.width %}
+        {% assign r_logo = lf | image_url: width: 512 %}
+        {% assign r_logo_big = r_logo %}
+      {% endif %}
     {% endif %}
   {% endif %}
 

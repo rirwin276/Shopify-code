@@ -73,7 +73,7 @@ env.add_filter("image_url", image_url)
 
 
 def metaobject(handle, *, name=None, ready=False, collection=None, status="",
-               clean_url=None, logo_src=None, system_handle="__same__"):
+               clean_url=None, logo_src=None, logo_url=None, system_handle="__same__"):
     """A stubbed custom_shop entry.
 
     Fields are modelled as plain values rather than objects with a .value,
@@ -91,6 +91,9 @@ def metaobject(handle, *, name=None, ready=False, collection=None, status="",
         "status": status,
         "name": name or "",
         "collection_handle": collection or "",
+        # Plain text, and therefore free: reading it costs nothing against the
+        # twenty file references Shopify will resolve per request.
+        "logo_url": logo_url or "",
         "logo_clean_url": clean_url or "",
         "logo_clean": "",
         "logo_clean_url_": "",
@@ -148,7 +151,7 @@ def as_dict(rec):
 # and its own logo, and "no-meta" — which resolves to no metaobject at all —
 # follows the one store that is asleep.
 HANDLES = ["raptors-3978", "twinned-a-3978", "twinned-b-3978",
-           "sleeper-3978", "no-meta-3978", "media-logo-3978",
+           "sleeper-3978", "no-meta-3978", "media-logo-3978", "text-url-3978",
            "admin-store-3978", "impostor-3978"]
 
 ENTRIES = {
@@ -175,6 +178,12 @@ ENTRIES = {
         "logo_clean_url_": "",
         "logo": {"preview_image": {"width": 900}, "src": "cdn/media-logo.png"},
     },
+    # Has BOTH a text URL and a logo file. The text URL must win, and the file
+    # must not be resolved at all — that resolution is the rationed one, and
+    # spending it here is what leaves a later store with no logo.
+    "text-url-3978": metaobject("text-url-3978", name="Text Url Club", ready=True,
+                                logo_url="cdn/from-text.png",
+                                logo_src="cdn/should-not-be-resolved.png"),
     "admin-store-3978": metaobject("admin-store-3978", name="Admin Store", ready=False),
     # Returns a DIFFERENT store's metaobject: must be discarded.
     "impostor-3978": metaobject("impostor-3978", name="Somebody Else", ready=True,
@@ -190,6 +199,7 @@ COLLECTIONS = {
     "admin-store-3978": {"products_count": 2, "title": "Admin Store"},
     "impostor-3978": {"products_count": 6, "title": "Real Impostor Store"},
     "media-logo-3978": {"products_count": 9, "title": "Media Logo Club"},
+    "text-url-3978": {"products_count": 1, "title": "Text Url Club"},
 }
 
 records, total, clean_blob = run_pass(HANDLES, ENTRIES, COLLECTIONS, admin=["admin-store-3978"])
@@ -269,8 +279,18 @@ check("a logo held as a MediaImage is found, not skipped",
       "got %r — a store with a real logo would show its initials"
       % by_handle["media-logo-3978"]["logo"])
 
+# The budget rule: a store carrying a text URL must not spend a file
+# resolution, so the twenty go to the stores that have nothing else.
+text_url = by_handle["text-url-3978"]
+check("a text logo url is used as-is", text_url["clean"] == "cdn/from-text.png")
+check("and the file reference is not resolved when one exists",
+      text_url["logo"] == "",
+      "got %r — that is a rationed resolution spent on a store that did not "
+      "need it, which is what leaves store 21 onward with no logo at all"
+      % text_url["logo"])
+
 check("product counts total across every store",
-      total == 11 + 7 + 3 + 4 + 5 + 2 + 6 + 9,
+      total == 11 + 7 + 3 + 4 + 5 + 2 + 6 + 9 + 1,
       "got %d" % total)
 
 # The shared-clean-URL check the card loop runs against this blob.
