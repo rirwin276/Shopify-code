@@ -42,6 +42,10 @@ const pagerScript = scripts.find((s) => s.includes('data-ss-show-more'));
 // out from under a passing test.
 const cssMatch = section.match(/\.ss-card-paged-out,\s*\n\s*\.ss-card-filtered \{[^}]*\}/);
 
+// The pager's own display rule and the [hidden] override that has to beat it.
+const pagerCss = section.match(/\.ss-pager \{[^}]*\}/);
+const hiddenCss = section.match(/\.ss-pager\[hidden\],[\s\S]*?\{[^}]*\}/);
+
 const STORE_COUNT = 23;
 
 function buildPage(css, js) {
@@ -59,7 +63,7 @@ function buildPage(css, js) {
       ' data-ss-position="' + i + '">' + name + '</div>'
     );
   }
-  return '<!doctype html><html><head><style>' + css +
+  return '<!doctype html><html><head><style>' + css + (pagerCss ? pagerCss[0] : '') + (hiddenCss ? hiddenCss[0] : '') +
     '\n.ss-store-card{display:flex;height:20px;}</style></head><body>' +
     '<div class="ss-store-search"><input data-ss-search type="search">' +
     '<span data-ss-search-count hidden></span></div>' +
@@ -119,6 +123,18 @@ function buildPage(css, js) {
   check('ten stores on first load', (await visible()).length === 10);
   check('the pager offers the next ten', (await buttonText()) === 'Show 10 more stores');
   check('the pager is showing', (await pagerHidden()) === false);
+
+  // Before the script's first render the pager carries [hidden]. If an author
+  // display rule overrides that, the button is on screen with no handler bound
+  // and the first click silently does nothing.
+  check('a [hidden] pager is actually invisible',
+    await page.$eval('[data-ss-pager]', (el) => {
+      el.hidden = true;
+      const gone = getComputedStyle(el).display === 'none';
+      el.hidden = false;
+      return gone;
+    }),
+    'the button shows before its handler exists, so the first click does nothing');
 
   // A tool card is not a store and must not be swept up by either control.
   const godVisible = await page.$eval('.ss-god-card', (e) => e.offsetParent !== null);

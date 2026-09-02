@@ -94,6 +94,9 @@ def metaobject(handle, *, name=None, ready=False, collection=None, status="",
         "logo_clean_url": clean_url or "",
         "logo_clean": "",
         "logo_clean_url_": "",
+        # A file reference resolves to a MediaImage, whose dimensions live on
+        # preview_image — a plain .width belongs to an image object, not a
+        # media one. Both shapes are exercised: see media_logo below.
         "logo": {"width": 900, "src": logo_src} if logo_src else "",
     }
     return entry
@@ -145,7 +148,8 @@ def as_dict(rec):
 # and its own logo, and "no-meta" — which resolves to no metaobject at all —
 # follows the one store that is asleep.
 HANDLES = ["raptors-3978", "twinned-a-3978", "twinned-b-3978",
-           "sleeper-3978", "no-meta-3978", "admin-store-3978", "impostor-3978"]
+           "sleeper-3978", "no-meta-3978", "media-logo-3978",
+           "admin-store-3978", "impostor-3978"]
 
 ENTRIES = {
     "raptors-3978": metaobject("raptors-3978", name="Raptors Football", ready=True,
@@ -156,6 +160,21 @@ ENTRIES = {
     "twinned-b-3978": metaobject("twinned-b-3978", name="Twin B", ready=True,
                                  clean_url="cdn/shared-clean.png"),
     "sleeper-3978": metaobject("sleeper-3978", name="Sleeper", ready=True, status="Sleeping"),
+    # Logo as a MediaImage: no top-level width, dimensions on preview_image.
+    # Testing only `.width` says "no picture here" for every store shaped this
+    # way, which is how a store with a perfectly good logo ended up showing its
+    # initials.
+    "media-logo-3978": {
+        "system": {"handle": "media-logo-3978"},
+        "is_fully_ready": True,
+        "status": "",
+        "name": "Media Logo Club",
+        "collection_handle": "",
+        "logo_clean_url": "",
+        "logo_clean": "",
+        "logo_clean_url_": "",
+        "logo": {"preview_image": {"width": 900}, "src": "cdn/media-logo.png"},
+    },
     "admin-store-3978": metaobject("admin-store-3978", name="Admin Store", ready=False),
     # Returns a DIFFERENT store's metaobject: must be discarded.
     "impostor-3978": metaobject("impostor-3978", name="Somebody Else", ready=True,
@@ -170,6 +189,7 @@ COLLECTIONS = {
     "sleeper-3978": {"products_count": 5, "title": "Sleeper"},
     "admin-store-3978": {"products_count": 2, "title": "Admin Store"},
     "impostor-3978": {"products_count": 6, "title": "Real Impostor Store"},
+    "media-logo-3978": {"products_count": 9, "title": "Media Logo Club"},
 }
 
 records, total, clean_blob = run_pass(HANDLES, ENTRIES, COLLECTIONS, admin=["admin-store-3978"])
@@ -242,8 +262,13 @@ check("status is normalised for the sleep check",
       by_handle["sleeper-3978"]["status"] == "sleeping",
       "got %r — 'Sleeping' would never match" % by_handle["sleeper-3978"]["status"])
 
+check("a logo held as a MediaImage is found, not skipped",
+      by_handle["media-logo-3978"]["logo"] == "cdn/media-logo.png?width=512",
+      "got %r — a store with a real logo would show its initials"
+      % by_handle["media-logo-3978"]["logo"])
+
 check("product counts total across every store",
-      total == 11 + 7 + 3 + 4 + 5 + 2 + 6,
+      total == 11 + 7 + 3 + 4 + 5 + 2 + 6 + 9,
       "got %d" % total)
 
 # The shared-clean-URL check the card loop runs against this blob.

@@ -236,8 +236,22 @@
       are taken in the same breath: 512 for the frame, 1200 for the onboarding
       image.
     {%- endcomment -%}
+    {%- comment -%}
+      preview_image.width as well as width.
+
+      A metaobject file reference resolves to a MediaImage, and a MediaImage
+      keeps its dimensions on preview_image — plain .width is an image object's
+      property, not a media object's. Testing only .width therefore says "no
+      picture here" for every store whose logo is a file reference, which left
+      the clean URL as the only logo the dashboard could ever draw. When that
+      URL was shared between stores the duplicate check correctly dropped it,
+      and the card fell through to its initials with a perfectly good logo
+      sitting unused on the metaobject.
+
+      Both are accepted, so whichever shape the field resolves to is found.
+    {%- endcomment -%}
     {% assign lf = entry.logo.value | default: entry.logo %}
-    {% if lf.width %}
+    {% if lf.width or lf.preview_image.width %}
       {% assign r_logo = lf | image_url: width: 512 %}
       {% assign r_logo_big = lf | image_url: width: 1200 %}
     {% endif %}
@@ -790,8 +804,24 @@
                           which one it is.
                         {%- endcomment -%}
                         {%- if ss_paging_on and tile_position >= ss_page_size -%}{%- assign tile_loading = 'lazy' -%}{%- else -%}{%- assign tile_loading = 'eager' -%}{%- endif -%}
+                        {%- comment -%}
+                          Why a card has no logo, stamped where it can be read
+                          off the page: 'shared' means a clean URL was found
+                          but another store had the same one, so it was dropped
+                          as not being either store's; 'missing' means the
+                          metaobject offered nothing at all. Three rounds were
+                          spent arguing about where a wrong logo came from; one
+                          attribute settles it, and it costs nothing.
+                        {%- endcomment -%}
+                        {%- assign tile_logo_why = 'clean' -%}
+                        {%- if tile_logo_file != blank -%}{%- assign tile_logo_why = 'file' -%}
+                        {%- elsif tile_logo_clean == blank -%}
+                          {%- if lcu != blank -%}{%- assign tile_logo_why = 'shared' -%}
+                          {%- else -%}{%- assign tile_logo_why = 'missing' -%}{%- endif -%}
+                        {%- endif -%}
                         <div class="ss-logo-frame"
                              data-ss-logo-for="{{ handle | escape }}"
+                             data-ss-logo-why="{{ tile_logo_why }}"
                              data-ss-logo-kind="{% if tile_logo_clean != blank %}clean{% elsif tile_logo_file != blank %}file{% else %}none{% endif %}">
                           {% if tile_logo_clean != blank %}
                             <img
@@ -2108,6 +2138,15 @@
   }
 
   .ss-pager { display: flex; justify-content: center; margin: 14px 0 2px; }
+  /* [hidden] is a UA rule, and ANY author rule setting display beats it —
+     specificity does not enter into it. Without this the pager stays on screen
+     until the script's first render, so the very first click lands on a button
+     that has no handler yet and appears to do nothing. Which is exactly what it
+     did. The same applies to anything else here toggled via .hidden. */
+  .ss-pager[hidden],
+  .ss-store-search[hidden],
+  .ss-store-search-count[hidden],
+  .ss-search-empty[hidden] { display: none !important; }
   .ss-pager-btn {
     font: inherit;
     font-size: 13px;
