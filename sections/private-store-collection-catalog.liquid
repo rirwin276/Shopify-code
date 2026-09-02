@@ -107,12 +107,34 @@
               {% assign ss_categories = ss_categories | append: ' personalized' %}
             {% endif %}
 
+            {%- comment -%}
+              A store admin can pin a product to show first. It is a tag
+              (pinned--<shop handle>) rather than a collection position because
+              each store's collection is a SMART collection, which Shopify
+              cannot hold a manual product order for. The order is applied here
+              with CSS `order`, so it costs no extra Liquid work and survives
+              the category filter below, which only toggles `hidden`.
+            {%- endcomment -%}
+            {%- comment -%} private_handle is collection.handle, and provisioning sets the
+                collection handle, the membership tag and the shop handle to the
+                same value (shopify_provision.py: tag_value = handle), so this is
+                the same string the admin writes. {%- endcomment -%}
+            {% assign ss_pin_tag = 'pinned--' | append: private_handle | downcase %}
+            {% assign ss_is_pinned = false %}
+            {% for ss_tag in product.tags %}
+              {% if ss_tag | downcase | strip == ss_pin_tag %}
+                {% assign ss_is_pinned = true %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
             <li
               id="{{ section.id }}-{{ product.id }}"
-              class="product-grid__item product-grid__item--{{ forloop.index0 }}"
+              class="product-grid__item product-grid__item--{{ forloop.index0 }}{% if ss_is_pinned %} ss-pinned{% endif %}"
               data-page="{{ paginate.current_page }}"
               data-product-id="{{ product.id }}"
               data-ss-categories="{{ ss_categories | strip | escape }}"
+              {% if ss_is_pinned %}data-ss-pinned="true"{% endif %}
               ref="cards[]"
             >
               {%- comment -%}

@@ -72,9 +72,11 @@ const PRODUCTS = [
   { id: 'gid://shopify/Product/2', handle: 'hoodie-plain', title: 'Unisex Premium Pullover Hoodie',
     status: 'ACTIVE', hidden: false, featured_image: 'https://example.invalid/b.png',
     tags: ['store', 'custom-build', 'pro-shirt-m2580', 'model--M2580'] },
+  // Pinned, and deliberately LAST in the payload: the admin list must still
+  // show it first, which is the whole point of the pin.
   { id: 'gid://shopify/Product/3', handle: 'crew-fb', title: 'Crewneck Sweatshirt',
     status: 'ACTIVE', hidden: false, featured_image: 'https://example.invalid/c.png',
-    tags: ['store', 'bc3413_front_back'] },
+    tags: ['store', 'bc3413_front_back', 'pinned--store'] },
   { id: 'gid://shopify/Product/4', handle: 'tank-hidden', title: 'Unisex Tank Top',
     status: 'DRAFT', hidden: true, featured_image: 'https://example.invalid/d.png',
     tags: ['store'] },
@@ -166,6 +168,18 @@ const WIDTHS = [390, 414, 480, 700, 1180, 1440];
         }
       }
 
+      // Pinning: the tagged product must sort first and its button must read
+      // as set. The pin is a tag, so this also proves the state survives a
+      // full re-render — which the 60s silent refresh performs.
+      const firstRow = rows[0];
+      const pinnedFirst = !!(firstRow && firstRow.querySelector('.ap-btn--pin-sm.is-pinned'));
+      const pinButtons = rows.length ? rows.map((r) => {
+        const b = r.querySelector('.ap-btn--pin-sm');
+        return b ? { pinned: b.dataset.pinned === '1', pressed: b.getAttribute('aria-pressed') } : null;
+      }) : [];
+      const pinCount = pinButtons.filter((b) => b && b.pinned).length;
+      const pressedMatches = pinButtons.every((b) => !b || b.pressed === String(b.pinned));
+
       const vw = document.documentElement.clientWidth;
       const hero = document.querySelector('.ap-hero');
       const heroOverflow = hero ? hero.scrollWidth - hero.clientWidth : -1;
@@ -191,6 +205,7 @@ const WIDTHS = [390, 414, 480, 700, 1180, 1440];
 
       return {
         rows: rows.length, overlaps, coveredPills, heroOverflow, btnOver, clearance,
+        pinnedFirst, pinCount, pressedMatches, pinButtonCount: pinButtons.filter(Boolean).length,
         h1Lum: h1 ? lum(getComputedStyle(h1).color) : null,
         heroImage: heroCs ? heroCs.backgroundImage.slice(0, 60) : '',
         // Liquid-gated branches all render at once in this fixture; the
@@ -222,6 +237,13 @@ const WIDTHS = [390, 414, 480, 700, 1180, 1440];
       check(`${w} the sticky tab bar does not cover the panel heading`, r.clearance >= 0,
         `heading starts ${r.clearance}px above the bar's bottom edge`);
     }
+    check(`${w} every product row offers a pin control`,
+      r.pinButtonCount === r.rows, `${r.pinButtonCount} controls for ${r.rows} rows`);
+    check(`${w} the pinned product sorts first`, r.pinnedFirst,
+      'the pinned product is last in the API payload and must still lead the list');
+    check(`${w} exactly the tagged product reads as pinned`, r.pinCount === 1, `${r.pinCount} pinned`);
+    check(`${w} the pin control reports its state to assistive tech`, r.pressedMatches,
+      'aria-pressed disagrees with the button state');
     check(`${w} the hero band renders dark with light type`,
       r.h1Lum !== null && r.h1Lum > 0.5 && /gradient/.test(r.heroImage),
       `h1 luminance ${r.h1Lum === null ? 'n/a' : r.h1Lum.toFixed(2)}, hero background "${r.heroImage}"`);

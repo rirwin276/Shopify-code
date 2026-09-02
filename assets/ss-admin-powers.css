@@ -3299,3 +3299,35 @@
   .ap-wrap *,
   .ap-wrap *::before,
   .ap-wrap *::after { box-sizing: border-box; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PIN — the admin's one lever over what shoppers see first.
+   Gold when set, quiet when not, so a shelf of pinned products
+   reads at a glance without shouting over the Hide/Delete pair.
+   ═══════════════════════════════════════════════════════════════ */
+  .ap-btn--pin-sm {
+    appearance: none; cursor: pointer;
+    padding: 7px 12px; border-radius: 999px;
+    font-family: var(--ap-font); font-size: 12px; font-weight: 850;
+    letter-spacing: 0.01em; line-height: 1; white-space: nowrap;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(17,16,14,0.16);
+    color: var(--ap-muted);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .ap-btn--pin-sm:hover {
+    border-color: rgba(183,163,106,0.55);
+    color: #6d5c26;
+  }
+  .ap-btn--pin-sm.is-pinned {
+    background: rgba(183,163,106,0.16);
+    border-color: rgba(183,163,106,0.55);
+    color: #6d5c26;
+  }
+  .ap-btn--pin-sm:disabled { opacity: 0.55; cursor: progress; }
+
+  /* A pinned row gets a gold edge so the shelf is obvious in the list. */
+  .ap-product-row:has(.ap-btn--pin-sm.is-pinned) {
+    border-color: rgba(183,163,106,0.42);
+    box-shadow: 0 14px 34px rgba(183,163,106,0.14);
+  }

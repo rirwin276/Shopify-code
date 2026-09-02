@@ -265,3 +265,10 @@ html.ss-store-custom.ss-style-dark.ss-pattern-grid results-list .product-grid__i
     color: #f2f7fb !important;
   }
 }
+
+/* A pinned product sorts to the front of the private-store grid.
+   `order` rather than a Liquid sort: the grid is a CSS grid, the category
+   filter below only toggles `hidden`, and this costs no extra Liquid work.
+   It reorders within the rendered page — with 24 products per page and these
+   stores carrying ~11, a pin lands on page 1 in practice. */
+.ss-private-catalog .product-grid__item[data-ss-pinned="true"] { order: -1; }

@@ -850,6 +850,7 @@
     var apBuilderCount = 0;
     // Collect into two buckets so custom/pro products render first in the
     // single unified list (no visible section split — just ordering).
+    var pinnedRows = [];
     var customRows = [];
     var mainRows = [];
     if(!products || products.length === 0){
@@ -879,6 +880,10 @@
       // (custom-build/pro-shirt tags) AND legacy-built products (model-- tags,
       // e.g. the tanks).
       var _pbTagsRaw = Array.isArray(product.tags) ? product.tags : String(product.tags || '').split(',');
+      // The pin is a tag, so it survives the 60s silent refresh for free —
+      // there is no client-side state to lose.
+      var _pinTag = ('pinned--' + (SSAP.shopHandle || '')).toLowerCase();
+      var isPinned = _pbTagsRaw.some(function(t){ return String(t || '').trim().toLowerCase() === _pinTag; });
       var _pbBuilderMade = isCustom || _pbTagsRaw.some(function(t){
         return String(t || '').toLowerCase().trim().indexOf('model--') === 0;
       });
@@ -912,8 +917,22 @@
       deleteBtn.className = 'ap-btn--danger-sm';
       deleteBtn.textContent = 'Delete';
 
+      // Pin: the only way an admin can influence what shoppers see first.
+      // A store's collection is a SMART collection, so Shopify itself cannot
+      // hold a manual order for it — the pin is a tag and the storefront
+      // sorts on it.
+      var pinBtn = document.createElement('button');
+      pinBtn.className = 'ap-btn--pin-sm' + (isPinned ? ' is-pinned' : '');
+      pinBtn.textContent = isPinned ? '★ Pinned' : '☆ Pin';
+      pinBtn.dataset.pinned = isPinned ? '1' : '0';
+      pinBtn.title = isPinned
+        ? 'Showing first in your store — click to unpin'
+        : 'Pin to show this first in your store';
+      pinBtn.setAttribute('aria-pressed', isPinned ? 'true' : 'false');
+
       var actionsEl = document.createElement('div');
       actionsEl.className = 'ap-product-row__actions';
+      actionsEl.appendChild(pinBtn);
       actionsEl.appendChild(toggleBtn);
       actionsEl.appendChild(deleteBtn);
 
@@ -1414,8 +1433,16 @@
       deleteBtn.addEventListener('click', function(){
         apDeleteProduct(product.id, product.title || product.id, row);
       });
+      pinBtn.addEventListener('click', function(){
+        apTogglePin(product.id, pinBtn.dataset.pinned === '1', pinBtn);
+      });
 
-      if(isCustom){
+      // Pinned first, then the existing custom-before-standard order within
+      // the rest. The admin list mirrors what a shopper will see.
+      if(isPinned){
+        if(isCustom) apCustomCount++; else apMainCount++;
+        pinnedRows.push(row);
+      } else if(isCustom){
         apCustomCount++;
         customRows.push(row);
       } else {
@@ -1426,6 +1453,7 @@
 
     // Render custom/pro products first, then standard — one unified grid.
     if(apProductsAllContainer){
+      pinnedRows.forEach(function(r){ apProductsAllContainer.appendChild(r); });
       customRows.forEach(function(r){ apProductsAllContainer.appendChild(r); });
       mainRows.forEach(function(r){ apProductsAllContainer.appendChild(r); });
     }
@@ -1506,6 +1534,42 @@
       apProductsStatus('✅ Visibility updated.', 'ok');
     } catch(e){
       apProductsStatus('❌ Could not update visibility: ' + (e.message || 'unknown error'), 'err');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // Mirrors apToggleProductVisibility: optimistic label flip on success,
+  // status line either way, button re-enabled in finally. The row is NOT
+  // moved here — a row jumping out from under the finger that just tapped it
+  // is worse than waiting for the next refresh, which reorders anyway.
+  async function apTogglePin(productId, currentPinned, btn){
+    btn.disabled = true;
+    apProductsStatus(currentPinned ? 'Unpinning…' : 'Pinning…', '');
+    try {
+      var res = await fetch(
+        AP_PROXY_URL + '/relay/store/' + encodeURIComponent(SSAP.shopHandle || '') + '/products/' + encodeURIComponent(productId) + '/pin',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pinned: !currentPinned }),
+          cache: 'no-store'
+        }
+      );
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      var nowPinned = !currentPinned;
+      btn.dataset.pinned = nowPinned ? '1' : '0';
+      btn.textContent = nowPinned ? '★ Pinned' : '☆ Pin';
+      btn.classList.toggle('is-pinned', nowPinned);
+      btn.setAttribute('aria-pressed', nowPinned ? 'true' : 'false');
+      btn.title = nowPinned
+        ? 'Showing first in your store — click to unpin'
+        : 'Pin to show this first in your store';
+      apProductsStatus(nowPinned
+        ? '✅ Pinned — this shows first in your store.'
+        : '✅ Unpinned.', 'ok');
+    } catch(e){
+      apProductsStatus('❌ Could not update the pin: ' + (e.message || 'unknown error'), 'err');
     } finally {
       btn.disabled = false;
     }
