@@ -1,17 +1,18 @@
 /*
 Proves the dashboard cannot reload itself forever.
 
-A card the server rendered as "building" polls the backend, and when the
-backend answers "ready" it reloads the page so Liquid can re-render the card
-with its real product count and logo. That is fine exactly once. It stops being
-fine when the server keeps rendering the same card as building — the reload
-lands on an identical page, the poll fires again ten seconds later, and with
-several such cards every reload restarts every poll. The dashboard reloads for
-as long as you leave it open, which is what was reported.
+A card the server rendered as "building" polls the backend, and when the backend
+answers "ready" it used to reload the page so Liquid could re-render that card.
 
-The guard is that a store gets one reload per session and is then upgraded in
-place. This drives the real functions out of the section: run once (a reload is
-allowed), then run them again as a reloaded page would (no second reload).
+Guarding that to one reload per store was still wrong: a dashboard with several
+cards rendered as building reloads several times, one per store, as their polls
+come back — including the moment "show more" reveals a card and starts its poll.
+So nothing reloads any more; a finished store is upgraded in place, which is the
+same call a card the server rendered as ready already makes.
+
+That is what this checks, by driving the real poll out of the section: however
+many times it runs, and whatever the backend says, the page must never reload
+and the card must end up live.
 
 Exit code 0 and "ALL OK" on stdout means every scenario passed.
 */
@@ -35,7 +36,7 @@ const section = read('sections', 'seller-dashboard.liquid');
 
 // The two real functions, sliced out of the section so this cannot pass
 // against a copy that has drifted from what ships.
-const START = section.indexOf('var RELOADED_PREFIX');
+const START = section.indexOf('// --- Poll backend every 10 s until ready = true ---');
 const END = section.indexOf('// --- Initialise each store card ---');
 const poller = START !== -1 && END !== -1 ? section.slice(START, END) : '';
 
@@ -69,10 +70,9 @@ function page(extraSetup) {
 }
 
 (async () => {
-  check('the reload guard is present in the section', poller.includes('reloadOnceFor'));
-  check('the poll routes its reload through the guard',
-    /reloadOnceFor\(handle, card\);/.test(poller) && !/setTimeout\(function\(\)\{ window\.location\.reload\(\); \}, 800\);\s*\}\s*\}\)/.test(poller),
-    'the poll can still reload directly, bypassing the guard');
+  check('the poll upgrades the card instead of reloading',
+    /setLiveUI\(card\);/.test(poller) && !/location\.reload/.test(poller),
+    'the poll can still reload, which is one reload per building card');
   if (!poller) { console.error('\nFAILED'); process.exit(1); }
 
   const launchOptions = process.env.PW_CHROMIUM_PATH
@@ -107,49 +107,51 @@ function page(extraSetup) {
     (await p.evaluate(() => window.__fetched.every((u) => u.indexOf('team-b') === -1))),
     'every card in the account fires a request every ten seconds');
 
-  check('a finished store reloads the page once',
-    (await p.evaluate(() => window.__reloads)) === 1);
-  check('and is not upgraded in place on that first pass',
-    (await p.evaluate(() => window.__live.length)) === 0);
+  check('a finished store does not reload the page',
+    (await p.evaluate(() => window.__reloads)) === 0,
+    'got ' + (await p.evaluate(() => window.__reloads)) + ' — scroll position and every "show more" click are lost');
+  check('it is upgraded in place instead',
+    (await p.evaluate(() => window.__live)).indexOf('team-a-3978') !== -1);
 
   // The page "reloads": same session storage, same server output, so the card
   // still says building. This is the loop.
   await p.evaluate(() => { window.__fetched = []; window.__run(); });
   await p.waitForTimeout(1200);
 
-  check('the reloaded page does NOT reload again',
-    (await p.evaluate(() => window.__reloads)) === 1,
-    'got ' + (await p.evaluate(() => window.__reloads)) + ' reloads — this is the infinite loop');
-  check('it upgrades the card in place instead',
-    (await p.evaluate(() => window.__live)).indexOf('team-a-3978') !== -1);
+  check('running again still does not reload',
+    (await p.evaluate(() => window.__reloads)) === 0,
+    'got ' + (await p.evaluate(() => window.__reloads)) + ' reloads — this is the loop');
 
   // A third pass, in case the guard only survives one round.
   await p.evaluate(() => window.__run());
   await p.waitForTimeout(1200);
   check('and still does not reload on a third pass',
-    (await p.evaluate(() => window.__reloads)) === 1);
+    (await p.evaluate(() => window.__reloads)) === 0);
 
-  // A store that legitimately finishes later gets its reload back.
+  // Several cards finishing at once is the case that produced a burst of
+  // reloads, one per store: a per-store guard does not help when the problem
+  // is how many stores there are.
   await p.evaluate(() => {
-    var card = document.querySelector('[data-ss-handle="team-a-3978"]');
-    card.setAttribute('data-ss-ready', '1');
-    try { sessionStorage.removeItem('ss-dash-reloaded:team-a-3978'); } catch (e) {}
+    document.querySelectorAll('.ss-store-card').forEach((c) => { c.style.display = ''; });
+    window.__live = [];
     window.__run();
   });
   await p.waitForTimeout(1200);
-  check('a store rebuilt later in the same session may reload again',
-    (await p.evaluate(() => window.__reloads)) === 2,
-    'the guard would permanently block a legitimate refresh');
+  check('several finished stores at once still reload nothing',
+    (await p.evaluate(() => window.__reloads)) === 0,
+    'got ' + (await p.evaluate(() => window.__reloads)) + ' — one per building card');
+  check('and every one of them is upgraded in place',
+    (await p.evaluate(() => window.__live)).length >= 2,
+    'revealing a hidden card starts its poll, which is when this fired');
 
-  // No session storage at all: nothing can be remembered, so nothing may reload.
+  // Site data blocked must change nothing, since nothing is remembered now.
   const blocked = await browser.newPage();
   await blocked.goto(origin + '/blocked');
   await blocked.evaluate(() => window.__run());
   await blocked.waitForTimeout(1200);
-  check('with site data blocked it never reloads',
-    (await blocked.evaluate(() => window.__reloads)) === 0,
-    'a reload that cannot be remembered is an infinite one');
-  check('and upgrades in place instead',
+  check('with site data blocked it still never reloads',
+    (await blocked.evaluate(() => window.__reloads)) === 0);
+  check('and still upgrades in place',
     (await blocked.evaluate(() => window.__live.length)) > 0);
 
   await browser.close();

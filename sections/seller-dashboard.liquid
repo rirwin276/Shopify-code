@@ -1617,41 +1617,25 @@
       }, 20000);
     }
 
-    // --- Reloading once, instead of forever ---
+    // --- Never reload the page out from under the seller ---
     //
-    // The poll below reloads the page when the backend reports a store
-    // finished, so Liquid can re-render the card with its real product count
-    // and logo. That is worth doing once.
+    // The poll below used to reload when the backend reported a store
+    // finished, so Liquid could re-render that card. Guarding it to one reload
+    // per store was still wrong: a dashboard where several cards are rendered
+    // as building is a dashboard that reloads several times, one per store,
+    // whenever their polls come back — including the moment "show more"
+    // reveals a card and starts its poll. Which is what it did.
     //
-    // But the reason it reloads is that the SERVER rendered the card as
-    // building while the backend says ready — and if the two disagree
-    // permanently, the reload lands on an identical page and the poll fires
-    // again ten seconds later. Forever. With several such cards, every reload
-    // restarts every poll, which is the dashboard reloading over and over
-    // with nothing changing.
+    // The reload was buying almost nothing anyway. A card's product count
+    // comes from the store's COLLECTION, not from its metaobject, so a store
+    // whose metaobject still says "building" is already showing the right
+    // number. The only thing actually stale is the LIVE badge, and setLiveUI
+    // fixes that in place — it is the same call a card the server rendered as
+    // ready already makes.
     //
-    // So a store gets one reload per session. If it comes back still building,
-    // that is proof the disagreement will not resolve by reloading, and the
-    // card is upgraded in place instead — which is exactly what a card that
-    // rendered as ready already does.
-    var RELOADED_PREFIX = 'ss-dash-reloaded:';
-
-    function reloadOnceFor(handle, card){
-      try {
-        if(sessionStorage.getItem(RELOADED_PREFIX + handle) === '1'){
-          setLiveUI(card);
-          return;
-        }
-        sessionStorage.setItem(RELOADED_PREFIX + handle, '1');
-      } catch(e) {
-        // No session storage (private window, blocked site data) means no way
-        // to remember a reload happened, and a reload we cannot remember is an
-        // infinite one. Upgrade in place and never reload.
-        setLiveUI(card);
-        return;
-      }
-      setTimeout(function(){ window.location.reload(); }, 800);
-    }
+    // Against that: a reload throws away the seller's scroll position and
+    // every "show more" they have clicked. So nothing here reloads. A logo
+    // that appeared since the page loaded waits for the next visit.
 
     // --- Poll backend every 10 s until ready = true ---
     function startPollingReady(card){
@@ -1672,7 +1656,7 @@
               clearInterval(intervalId);
               var bar = card.querySelector('.ss-progress-bar');
               if(bar) bar.style.width = '100%';
-              reloadOnceFor(handle, card);
+              setLiveUI(card);
             }
           })
           .catch(function(err){ console.error('[ss-poll] ready-status error for ' + handle + ':', err); /* keep polling */ });
@@ -1694,10 +1678,6 @@
     // Ready cards: Liquid already rendered LIVE — call setLiveUI to ensure JS state is consistent
     document.querySelectorAll('.ss-store-card[data-ss-ready="1"]').forEach(function(card){
       setLiveUI(card);
-      // The server and the backend agree about this store, so forget any
-      // earlier reload. A store that is rebuilt later in the same session is
-      // then allowed its one reload again.
-      try { sessionStorage.removeItem(RELOADED_PREFIX + (card.getAttribute('data-ss-handle') || '')); } catch(e) {}
     });
 
     // --- Leave Store ---
