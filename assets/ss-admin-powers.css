@@ -3154,3 +3154,148 @@
     .ap-hero .ap-hero-actions .ap-btn,
     .ap-hero .ap-btn--glass { white-space: normal !important; overflow-wrap: anywhere; }
   }
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO BAND + BADGE CLUSTER
+   Two things the owner caught on a phone.
+
+   1. The LIVE pill was being covered. Three badges were placed
+      independently — CUSTOM absolute-left, NAME & NUMBER
+      absolute-right, the status pill in flow — so on a narrow card
+      the right-anchored pill crossed the left-anchored one and both
+      landed on the status strip. They are one wrapping flex row now
+      (see apRenderProducts), so they cannot overlap at any width.
+
+   2. "More dark accents, but don't go full dark — it looks
+      intimidating." So exactly one surface carries the ink: the
+      hero. Not flat black, which is the intimidating part — ink
+      with a gold lift, matching .ss-btn--dark on the storefront.
+      Everything below the hero stays cream.
+
+   These override the LIGHT HERO block above, which is !important
+   throughout, so these are too. Later source order, same weight.
+   ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Badge cluster ─────────────────────────────────────────── */
+  .ap-product-badges {
+    position: absolute; top: 10px; left: 10px; right: 10px; z-index: 2;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    pointer-events: none;
+  }
+  /* Inside the cluster the badges are flex items, never positioned. */
+  .ap-product-badges .ap-product-badge,
+  .ap-product-badges .ap-badge--status {
+    position: static !important;
+    top: auto !important; left: auto !important; right: auto !important;
+  }
+  .ap-product-badges .ap-product-badge--includes { right: auto !important; }
+
+  /* One set of metrics so state and type read as siblings. */
+  .ap-badge--status {
+    font-size: 9.5px !important; font-weight: 800 !important;
+    letter-spacing: 0.06em !important; text-transform: uppercase !important;
+    padding: 4px 9px !important; border-radius: 999px !important;
+    line-height: 1.2 !important; border: 1px solid transparent !important;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .ap-badge--visible {
+    background: rgba(16,185,129,0.16) !important; color: #05513b !important;
+    border-color: rgba(16,185,129,0.34) !important;
+  }
+  .ap-badge--hidden {
+    background: rgba(17,16,14,0.72) !important; color: #f4f1ea !important;
+    border-color: rgba(255,255,255,0.16) !important;
+  }
+
+  /* ── The hero band ─────────────────────────────────────────── */
+  .ap-hero {
+    background:
+      radial-gradient(circle at 85% 0%, rgba(183,163,106,0.20), transparent 45%),
+      linear-gradient(160deg, #1c1915 0%, #11100e 62%) !important;
+    border: 1px solid rgba(183,163,106,0.30) !important;
+    box-shadow: 0 22px 60px rgba(17,16,14,0.22) !important;
+  }
+  .ap-hero .ap-hero-logo {
+    background: #fbf8f1 !important;
+    border: 1px solid rgba(183,163,106,0.45) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28) !important;
+  }
+  .ap-hero .ap-hero-logo span { color: #11100e !important; }
+
+  .ap-hero .ap-hero-badge {
+    background: rgba(183,163,106,0.15) !important;
+    border: 1px solid rgba(183,163,106,0.32) !important;
+    color: #ddcb95 !important;
+  }
+  .ap-hero .ap-hero-badge .dot { background: #c9b47a !important; }
+
+  .ap-hero h1,
+  .ap-hero .ap-hero-info h1 { color: #fbf8f1 !important; }
+
+  /* Beats the ≤700px light-hero rule that painted these near-black. */
+  .ap-hero .ap-hero-pill {
+    background: rgba(255,255,255,0.09) !important;
+    border: 1px solid rgba(255,255,255,0.17) !important;
+    color: rgba(255,255,255,0.86) !important;
+  }
+  .ap-hero .ap-hero-pill--status {
+    background: rgba(66,216,155,0.13) !important;
+    border-color: rgba(66,216,155,0.32) !important;
+    color: #b7f4d7 !important;
+  }
+
+  /* The primary CTA inverts to cream so it is the brightest thing here. */
+  .ap-hero .ap-btn--share-primary {
+    background: #fbf8f1 !important; color: #11100e !important;
+    border: 1px solid rgba(183,163,106,0.45) !important;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.30) !important;
+  }
+  .ap-hero .ap-btn--share-primary:hover {
+    background: #fff !important; color: #11100e !important;
+  }
+
+  /* Secondary actions become real glass, now that there is dark behind. */
+  .ap-hero .ap-btn--glass,
+  .ap-hero .ap-fr-zone-empty .ap-btn--fr-details {
+    background: rgba(255,255,255,0.10) !important;
+    border: 1px solid rgba(255,255,255,0.20) !important;
+    color: #fbf8f1 !important;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .ap-hero .ap-btn--glass:hover,
+  .ap-hero .ap-fr-zone-empty .ap-btn--fr-details:hover {
+    background: rgba(255,255,255,0.17) !important;
+    border-color: rgba(255,255,255,0.30) !important;
+    color: #fff !important;
+  }
+
+  /* The tooltip is a light card on a dark band — keep its own ink. */
+  .ap-hero .ap-share-help-bubble,
+  .ap-hero .ap-share-help-bubble strong { color: #11100e !important; }
+
+  /* ── The shelf under the band ──────────────────────────────── */
+  /* The sticky cream tab bar now meets ink, so it needs to read as a
+     deliberate ledge rather than a seam. */
+  .ap-main-tabs-wrap { padding-bottom: 4px; }
+  .ap-main-tabs {
+    box-shadow: 0 10px 30px rgba(17,16,14,0.10), 0 1px 0 rgba(17,16,14,0.05) inset !important;
+  }
+
+  /* The first kicker in a panel was sliding under the sticky bar. */
+  @media (max-width: 700px) {
+    .ap-main-panel > .ap-panel-head:first-child,
+    .ap-main-panel > .ap-product-box:first-child { padding-top: 14px !important; }
+  }
+
+  /* The page scrolled sideways on every phone. .ap-wrap is content-box, so
+     `width:100%` plus its side padding rendered 16px wider than the viewport
+     (406px inside 390px); the product row repeated the same mistake one level
+     down, pushing its title and buttons 5px off-screen. The whole page is
+     written as though padding is inside the box — the hero buttons needed the
+     same fix — so state that once, scoped to the admin page, rather than
+     patching each element as it surfaces. No !important: a specific rule that
+     genuinely wants content-box can still say so. */
+  .ap-wrap,
+  .ap-wrap *,
+  .ap-wrap *::before,
+  .ap-wrap *::after { box-sizing: border-box; }

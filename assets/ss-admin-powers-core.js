@@ -1352,13 +1352,31 @@
         }
       }
 
-      // Subtle "Custom" badge on pro-built products so they're distinguishable
+      // Every badge lives in ONE wrapping cluster in the card's top-left.
+      // They used to be three independently placed elements — CUSTOM pinned
+      // absolute-left, NAME & NUMBER pinned absolute-right, and the status
+      // pill in normal flow. On a phone-width card the right-anchored pill ran
+      // straight through the left-anchored one and both sat on top of the
+      // status strip. A single flex row that wraps cannot collide with itself.
+      var badgesEl = document.createElement('div');
+      badgesEl.className = 'ap-product-badges';
+
+      // State leads: whether a product is live is what an admin scans for.
+      // Before this pill it was conveyed only by the toggle reading "Hide" vs
+      // "Show" — a button label is an action, not a state. The pill is the
+      // state, and the toggle flips it.
+      var statusEl = document.createElement('span');
+      statusEl.className = 'ap-badge ap-badge--status ' + (isHidden ? 'ap-badge--hidden' : 'ap-badge--visible');
+      statusEl.textContent = isHidden ? 'Hidden' : 'Live';
+      badgesEl.appendChild(statusEl);
+
+      // Then type: "Custom" on pro-built products so they're distinguishable
       // without needing a separate section header.
       if(isCustom){
         var badgeEl = document.createElement('span');
         badgeEl.className = 'ap-product-badge';
         badgeEl.textContent = 'Custom';
-        row.appendChild(badgeEl);
+        badgesEl.appendChild(badgeEl);
       }
 
       // What the listing includes, matching the storefront card.
@@ -1381,17 +1399,10 @@
         var includesEl = document.createElement('span');
         includesEl.className = 'ap-product-badge ap-product-badge--includes';
         includesEl.textContent = includesLabel;
-        row.appendChild(includesEl);
+        badgesEl.appendChild(includesEl);
       }
 
-      // Explicit status pill. Before this, whether a product was live was
-      // conveyed only by the toggle reading "Hide" vs "Show" — a button label
-      // is an action, not a state. The pill is what the toggle flips.
-      var statusEl = document.createElement('span');
-      statusEl.className = 'ap-badge ap-badge--status ' + (isHidden ? 'ap-badge--hidden' : 'ap-badge--visible');
-      statusEl.textContent = isHidden ? 'Hidden' : 'Live';
-      row.appendChild(statusEl);
-
+      row.appendChild(badgesEl);
       row.appendChild(imgEl);
       row.appendChild(titleEl);
       row.appendChild(actionsEl);

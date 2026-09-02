@@ -209,6 +209,7 @@ function declaredColor(css, selector) {
 
 const CREAM = [251, 248, 241];   // --ap-bg #fbf8f1
 const CARD = [255, 255, 255];    // --ap-card over cream, effectively white
+const INK = [17, 16, 14];        // the hero band, #11100e under its gold lift
 
 // Selectors the redesign is required to fix, with the surface each sits on.
 const CONTRAST_TARGETS = [
@@ -222,6 +223,12 @@ const CONTRAST_TARGETS = [
   ['.ap-product-box-sub', CARD, 4.5],
   ['.ap-custom-builders-sub', CARD, 4.5],
   ['.ap-main-tab-btn', CREAM, 4.5],
+  // The hero is the one dark surface on the page, so its type is measured
+  // against ink rather than cream. h1 is large and bold, hence 3:1.
+  ['.ap-hero h1', INK, 3.0],
+  ['.ap-hero .ap-hero-pill', INK, 4.5],
+  ['.ap-hero .ap-hero-badge', INK, 4.5],
+  ['.ap-hero .ap-btn--glass', INK, 4.5],
 ];
 
 // --- run --------------------------------------------------------------------
