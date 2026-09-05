@@ -56,28 +56,28 @@ def opt(name, values):
 
 
 check("an adult run reads smallest to largest",
-      size_range([opt("Size", ["XS", "S", "M", "L", "XL", "2XL", "3XL"])]) == "XS–3XL")
+      size_range([opt("Size", ["XS", "S", "M", "L", "XL", "2XL", "3XL"])]) == "XS&ndash;3XL")
 
 check("a youth run reads as youth",
-      size_range([opt("Size", ["S", "M", "L"])]) == "S–L")
+      size_range([opt("Size", ["S", "M", "L"])]) == "S&ndash;L")
 
 check("the range follows the option's order, not the alphabet",
-      size_range([opt("Size", ["XS", "S", "M", "L", "XL"])]) == "XS–XL",
-      "sorting size names gives 'XL–XS', which is how this goes wrong quietly")
+      size_range([opt("Size", ["XS", "S", "M", "L", "XL"])]) == "XS&ndash;XL",
+      "sorting size names gives 'XL-XS', which is how this goes wrong quietly")
 
 check("a colour option is not mistaken for sizes",
       size_range([opt("Color", ["Black", "White"])]) == "",
-      "the card would print 'Black–White' where the sizes go")
+      "the card would print 'Black-White' where the sizes go")
 
 check("Size is found whatever position it is in",
-      size_range([opt("Color", ["Black"]), opt("Size", ["S", "M", "L"])]) == "S–L")
+      size_range([opt("Color", ["Black"]), opt("Size", ["S", "M", "L"])]) == "S&ndash;L")
 
 check("the option name is matched case-insensitively",
-      size_range([opt("SIZE", ["S", "M", "L"])]) == "S–L")
+      size_range([opt("SIZE", ["S", "M", "L"])]) == "S&ndash;L")
 
 check("a one-size product says nothing",
       size_range([opt("Size", ["One Size"])]) == "",
-      "'One Size–One Size' is worse than no line at all")
+      "'One Size-One Size' is worse than no line at all")
 
 check("a product with no size option says nothing",
       size_range([opt("Color", ["Black", "Grey"])]) == "")
@@ -87,7 +87,7 @@ check("a product with no options at all says nothing",
 
 # Newer Shopify hands option values as objects rather than strings.
 check("option values given as objects still work",
-      size_range([opt("Size", [{"name": "XS"}, {"name": "M"}, {"name": "3XL"}])]) == "XS–3XL",
+      size_range([opt("Size", [{"name": "XS"}, {"name": "M"}, {"name": "3XL"}])]) == "XS&ndash;3XL",
       "the card would print the object instead of the size")
 
 

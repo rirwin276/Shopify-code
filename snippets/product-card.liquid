@@ -204,7 +204,7 @@
           {%- assign _first = _first.name | default: _first | strip -%}
           {%- assign _last = _last.name | default: _last | strip -%}
           {%- if _first != blank and _last != blank and _first != _last -%}
-            {%- capture ss_size_range -%}{{ _first }}–{{ _last }}{%- endcapture -%}
+            {%- capture ss_size_range -%}{{ _first }}&ndash;{{ _last }}{%- endcapture -%}
           {%- endif -%}
           {%- break -%}
         {%- endif -%}
@@ -231,10 +231,28 @@
     border: 1px solid rgba(0,0,0,0.06);
     height: 100%;
     position: relative;
-    /* Hardware acceleration for smooth mobile animation */
-    transform: translateZ(0); 
-    -webkit-transform: translateZ(0);
   }
+
+  /* WHY translateZ(0) IS GONE
+     It was here as a "hardware acceleration" hint, which browsers have not
+     needed for years. What it still does is force the card onto its own
+     compositor layer, and on that layer `overflow: hidden` is applied by the
+     compositor rather than during layout — which on iOS Safari is a known way
+     for the bottom of a clipped box to stop being painted while everything
+     above it renders normally. That is the reported symptom exactly: images
+     and title fine, the price row at the bottom missing, phone only.
+
+     Said plainly: this is a hypothesis, not a diagnosis. The card was rendered
+     at 390px with the theme's real stylesheet and grid, in both grid views,
+     and the price measured visible and inside the box every time — see
+     tests/js_harness/product_card_mobile_harness.js. Headless Chromium on
+     Linux is not iOS Safari, and this compositor behaviour is one of the
+     things it does not reproduce.
+
+     Removing it costs nothing: no animation here depends on it, and the hover
+     transitions are desktop-only. If the price is still missing on a phone
+     after this, the cause is elsewhere and the harness is where to add the
+     case that catches it. */
 
   /* --- DESKTOP INTERACTION (Mouse Only) --- */
   @media (hover: hover) {
