@@ -63,6 +63,12 @@
     // name higher on the back. Supplied by the same config that fixes the
     // print file, so the shopper's preview and what gets printed cannot drift.
     var LIFT_PCT = parseFloat(root.getAttribute('data-lift-pct') || '0') || 0;
+    // Whether a name with NO number is centred in the print box or pinned to
+    // the top. Off for garments — a name belongs across the shoulder blades
+    // whether or not a number follows it — and on for the tote, which has no
+    // shoulders and a square print area. Supplied by the same config that
+    // fixes the print file so the preview cannot disagree with what prints.
+    var CENTER_ALONE = root.getAttribute('data-center-alone') === '1';
     var NAME_ZONE_PCT = parseFloat(root.getAttribute('data-name-zone-pct') || '0.28');
     var NAME2_ZONE_PCT = parseFloat(root.getAttribute('data-name2-zone-pct') || '0.21');
     var LINE_GAP_PCT = parseFloat(root.getAttribute('data-line-gap-pct') || '0.02');
@@ -187,8 +193,16 @@
       // a lone name pinned under the collar with an empty shirt beneath looks
       // like a mistake. Centre the block in that case. Never when a name AND a
       // number are present: that layout fills the box already and must not move.
+      // A lone name starts where a name always starts and grows downward into
+      // the room the missing number left behind. Centred, a single "COACH"
+      // sat in the middle of the wearer's back with empty fabric above and
+      // below it; keeping the start line also means a name-only listing and a
+      // name-and-number listing line up on the same garment.
+      //
+      // Only ever reached by a name with no number: a number with no name is
+      // already given the whole box, so `used` equals `avail`.
       var used = namesH + gap + numberH;
-      if (!(n && hasNumber) && used < avail) {
+      if (CENTER_ALONE && !(n && hasNumber) && used < avail) {
         topOffset += (avail - used) / 2;
       }
 

@@ -107,6 +107,7 @@
               does not lift, which is all of them but the hoodies.
             {%- endcomment -%}
             data-lift-pct="{{ ss_pers.lift_pct | default: 0 }}"
+            data-center-alone="{% if ss_pers.center_alone %}1{% else %}0{% endif %}"
             data-number-min-share="{{ ss_pers.number_min_share | default: 0.20 }}"
           >
             <span class="ss-pers-kicker">Personalize the Back</span>
