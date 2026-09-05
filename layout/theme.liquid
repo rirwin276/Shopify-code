@@ -84,32 +84,33 @@
 
     {%- comment -%}
       STELLA & SAGE ANTI-FLASH GUARD
-      Prevents custom/internal pages from briefly showing old/default theme
-      content before the route-specific CSS/JS finishes applying. It activates
-      only on known custom routes and has a hard timeout fallback.
+
+      Thirty-two of this theme's sections emit their markup BEFORE their own
+      <style> block — seller-dashboard puts 82KB of HTML ahead of its CSS,
+      landing-dual-hub 18KB. A browser paints what it has, so those pages show
+      raw unstyled markup for a moment and then snap into place. It does not
+      read as loading; it reads as a broken site.
+
+      So the page is held at opacity 0 until its styles are in, and revealed
+      once. Every page, with no list of routes.
+
+      There WAS a list here, naming collections, products and eight or so
+      /pages/ paths. The home page was not on it, and neither was anything
+      added since — which is why this came back looking worse than before. The
+      list was also duplicated between the two scripts below, so covering a new
+      page meant remembering both. Guarding everything costs a few frames on
+      pages that never flashed and cannot silently miss one that does.
+
+      Two independent safety nets, because a page stuck at opacity 0 is far
+      worse than a flash:
+        - the hard timeout below reveals the page even if the release script
+          never runs, and it is registered in the SAME block that hides it, so
+          no failure can hide without also scheduling the reveal;
+        - with JavaScript off, nothing adds the class in the first place, and
+          the noscript rule makes that explicit rather than incidental.
     {%- endcomment -%}
     <script>
       (function () {
-        var path = window.location.pathname || '';
-        var templateName = {{ template.name | json }};
-        var isGuardedRoute =
-          templateName === 'collection' ||
-          templateName === 'product' ||
-          path.indexOf('/collections/') === 0 ||
-          path.indexOf('/products/') === 0 ||
-          path.indexOf('/pages/portal') === 0 ||
-          path.indexOf('/pages/admin-powers') === 0 ||
-          path.indexOf('/pages/price-editor') === 0 ||
-          path.indexOf('/pages/resources') === 0 ||
-          path.indexOf('/pages/resource') === 0 ||
-          path.indexOf('/pages/how') === 0 ||
-          path.indexOf('/pages/request') === 0 ||
-          path.indexOf('/pages/private-storefronts') === 0 ||
-          path.indexOf('/pages/storefront') === 0 ||
-          path.indexOf('/pages/join-store') === 0;
-
-        if (!isGuardedRoute) return;
-
         document.documentElement.className += ' ss-internal-booting ss-route-booting';
         window.setTimeout(function () {
           document.documentElement.className = document.documentElement.className
@@ -131,6 +132,12 @@
         transition: opacity .16s ease-out;
       }
     </style>
+    <noscript>
+      <style>
+        html.ss-internal-booting main.content-for-layout,
+        html.ss-route-booting main.content-for-layout { opacity: 1 !important; }
+      </style>
+    </noscript>
 
     {%- if settings.favicon != blank -%}
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
@@ -299,26 +306,6 @@
 
     <script>
       (function () {
-        var path = window.location.pathname || '';
-        var templateName = {{ template.name | json }};
-        var isGuardedRoute =
-          templateName === 'collection' ||
-          templateName === 'product' ||
-          path.indexOf('/collections/') === 0 ||
-          path.indexOf('/products/') === 0 ||
-          path.indexOf('/pages/portal') === 0 ||
-          path.indexOf('/pages/admin-powers') === 0 ||
-          path.indexOf('/pages/price-editor') === 0 ||
-          path.indexOf('/pages/resources') === 0 ||
-          path.indexOf('/pages/resource') === 0 ||
-          path.indexOf('/pages/how') === 0 ||
-          path.indexOf('/pages/request') === 0 ||
-          path.indexOf('/pages/private-storefronts') === 0 ||
-          path.indexOf('/pages/storefront') === 0 ||
-          path.indexOf('/pages/join-store') === 0;
-
-        if (!isGuardedRoute) return;
-
         function ready() {
           document.documentElement.className = document.documentElement.className
             .replace(/\bss-internal-booting\b/g, '')
