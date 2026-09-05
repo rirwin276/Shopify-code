@@ -418,21 +418,24 @@
      It is now the strongest line in the deck after the title. */
   /* WHY THE COLOUR AND OPACITY ARE PINNED
 
-     The price has now been reported washed out twice — once on a phone, once
-     on the desktop storefront — and on neither occasion could anything in
-     this theme be found that recolours it. The rule is a direct one on the
-     element, so it already beats anything inherited from the card or the
-     grid; what is left that can override it is another !important or an
-     inline style written at runtime.
-
      Blunt on purpose. These are the price and the size range: what a shopper
      reads to decide what something costs and whether it comes in their size.
      Losing them to a stylesheet nobody has found is worse than the cost of a
      specificity war nobody else is fighting.
 
-     If they are STILL faint after this, the cause is not colour — it is an
-     ancestor carrying an opacity, a filter or a mask, which !important on a
-     descendant cannot reach. */
+     The stylesheet has since been found, and !important here was not what
+     beat it. storefront-fixed-layouts.css repaints every span inside a
+     product tile for the spray and pro designs — near-white, because on
+     those designs the THEME's card goes dark inside. Ours does not: it keeps
+     this white deck, so it took the near-white ink and nothing else. That is
+     why one store read black and every other read white. The difference was
+     never the store; it was which design its organiser had picked.
+
+     That rule is !important too, at an id plus :has() no bare class can
+     outrank, so it is answered where it can be — at the end of that same
+     stylesheet, which hands this card its palette back under all six designs.
+     These stay pinned regardless: they are what the restore is written to
+     agree with, and they still stop anything that arrives without an id. */
   .ss-price {
     font-size: 16px;
     color: #111111 !important;
