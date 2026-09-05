@@ -116,16 +116,18 @@ badge = re.search(r"\.ss-includes-badge \{(.*?)\}", CARD, re.S)
 check("the badge rule exists", bool(badge))
 if badge:
     body = badge.group(1)
-    check("the badge is no longer a near-black pill",
-          "rgba(17, 16, 14, 0.82)" not in body,
-          "invisible on the dark garments that most need the label")
-    check("the badge is light",
-          "rgba(255, 255, 255" in body,
-          "it sits on the photo and has to read on a black hoodie")
-    check("the badge has dark ink", "#16150f" in body)
-    check("the badge separates itself from a pale stage",
-          "border" in body and "box-shadow" in body,
-          "a white pill on a white stage needs an edge")
+    # The badge sits on the image stage's near-white padding, not on the
+    # garment: 20px of #f8f9fa with the mockup centred inside it. A light pill
+    # there is white on white, which is what shipped and what got reported.
+    check("the badge is dark against the pale image stage",
+          "rgba(17, 16, 14, 0.86)" in body,
+          "a light pill on a near-white stage cannot be seen")
+    check("the badge has white ink", "#ffffff" in body)
+    check("the badge keeps an edge for the rare card that reaches the corner",
+          "border" in body and "box-shadow" in body)
+    check("the badge colour cannot be overridden",
+          "!important" in body,
+          "this washed out once already with nothing in the theme to explain it")
 
 if FAILURES:
     print("\nFAILED: " + ", ".join(FAILURES), file=sys.stderr)
