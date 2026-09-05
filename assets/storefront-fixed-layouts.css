@@ -1187,3 +1187,48 @@
     width: 100% !important;
   }
 }
+
+/* ---------- THE PRODUCT CARD IS BLACK LETTERING, IN EVERY DESIGN ----------
+
+   Three of the six designs repaint the text inside a product tile:
+
+     gradient  #111318   (dark, for a pale tile)
+     spray     #f6f8fb   (near-white, for a dark tile)
+     pro       #f5f8fb   (near-white, for a dark tile)
+
+   Those rules were written for the theme's own card, whose interior really
+   does turn dark on those designs — the sibling rules above hand
+   .card__content / .card__information / .card-information a #101923 or
+   #0e1722 background, so near-white text sits on near-black.
+
+   Our card is not that card. .ss-card-shell paints its own opaque white
+   shell and a white .ss-info-deck, and it carries none of those class
+   names, so it never got the dark interior — only the near-white text. The
+   result was a white price and a white size range on a white deck: present,
+   correct, and impossible to read. It looked like one store had been fixed
+   and the rest had not, because the designs that read correctly happened to
+   agree with the card and spray and pro did not.
+
+   Every one of those selectors is `span` with !important, and .ss-price,
+   .ss-sizes and .ss-includes-badge are spans, so nothing the card declares
+   about itself could win — !important beats !important on specificity, and
+   a bare class never outranks an id plus :has().
+
+   So the card gets its palette back here, where it can outrank them: same
+   shape as those rules plus .ss-card-shell, which is one class more
+   specific. [data-layout] rather than a design name because the answer is
+   the same for all six, and is meant to stay that way: white surfaces,
+   black lettering. The title, the price, the size range and the inclusion
+   badge are one colour, and the badge's pill is white so its letters are
+   that same colour whatever the mockup behind it does. Nothing here depends
+   on which design an organiser picked or which garment is in the photo. */
+#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell :is(a, p, span, strong, small, .price, .price-item, .card__heading),
+#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell :is(.ss-title, .ss-price, .ss-sizes, .ss-includes-badge) {
+  color: #111111 !important;
+}
+
+/* The pill is white so the rule above holds on it too: black letters on
+   white, on the pale stage and on a black hoodie alike. */
+#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell .ss-includes-badge {
+  background: #ffffff !important;
+}

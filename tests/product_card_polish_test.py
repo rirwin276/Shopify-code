@@ -116,16 +116,67 @@ badge = re.search(r"\.ss-includes-badge \{(.*?)\}", CARD, re.S)
 check("the badge rule exists", bool(badge))
 if badge:
     body = badge.group(1)
-    check("the badge is no longer a near-black pill",
-          "rgba(17, 16, 14, 0.82)" not in body,
-          "invisible on the dark garments that most need the label")
-    check("the badge is light",
-          "rgba(255, 255, 255" in body,
-          "it sits on the photo and has to read on a black hoodie")
-    check("the badge has dark ink", "#16150f" in body)
-    check("the badge separates itself from a pale stage",
-          "border" in body and "box-shadow" in body,
-          "a white pill on a white stage needs an edge")
+    # The badge sits on the image stage's near-white padding, not on the
+    # garment: 20px of #f8f9fa with the mockup centred inside it. A light pill
+    # there is white on white, which is what shipped and what got reported.
+    # It has been dark-on-white and white-on-dark, and each time the argument
+    # was about which background it lands on. An opaque white pill with the
+    # same black letters as the price does not have that argument: it reads on
+    # the stage's near-white padding and on a black hoodie alike.
+    check("the badge pill is white",
+          "background: #ffffff !important" in body,
+          "the pill has to be opaque, or the mockup decides how it reads")
+    check("the badge has black ink, the same black as the price",
+          "color: #111111 !important" in body)
+    check("the badge keeps an edge for the rare card that reaches the corner",
+          "border" in body and "box-shadow" in body)
+    check("the badge colour cannot be overridden",
+          "!important" in body,
+          "this washed out once already with nothing in the theme to explain it")
+
+
+# --- the store designs cannot repaint the card's text ------------------------
+#
+# The report that broke this open: one store showed a black price, every other
+# store showed white. It is not a per-store setting, it is the store DESIGN.
+# storefront-fixed-layouts.css repaints every span inside a product tile for
+# the gradient, spray and pro designs, and two of those three paint near-white
+# — correct for the theme's own card, whose interior goes dark under them, and
+# ruinous for ours, which keeps an opaque white deck under every design.
+#
+# Nothing the snippet declares about itself can win that: the design rules
+# carry !important at an id-plus-:has() specificity a bare class cannot reach.
+# So the card's palette is restored in that stylesheet instead, and this is the
+# guard that it stays there. The measured version of this is
+# tests/js_harness/store_design_card_contrast_harness.js, which renders the
+# card under all six designs and fails at 1.06:1 without it.
+LAYOUTS = (ROOT / "assets" / "storefront-fixed-layouts.css").read_text(encoding="utf-8")
+
+restore = '#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell'
+check("the designs hand the card back its own colours",
+      restore in LAYOUTS,
+      "without this, spray and pro paint the price near-white on a white deck")
+# One black for the whole card, stated once. Anything that reintroduces a
+# per-element colour here is how the designs got to disagree in the first place.
+restore_idx = LAYOUTS.find(restore)
+restored = LAYOUTS[restore_idx:restore_idx + 700] if restore_idx != -1 else ""
+for sel in (".ss-title", ".ss-price", ".ss-sizes", ".ss-includes-badge"):
+    check("the restore covers " + sel, sel in restored)
+check("the restore is one black for all of them",
+      "color: #111111 !important" in restored
+      and "#44546b" not in restored and "#1a1a1a" not in restored,
+      "one colour is the point; a second one is a second thing to get wrong")
+check("the restore keeps the badge pill white",
+      "background: #ffffff !important" in restored,
+      "black letters need the pill to be opaque white, not the mockup")
+
+# One standard for every store, which is what was actually asked for: no design
+# name may appear in the restoring selectors, or a seventh design added later
+# silently goes back to being unreadable.
+for design in ("classic", "split", "gradient", "spray", "pro", "heritage"):
+    check("the restore does not single out the " + design + " design",
+          restore.replace("[data-layout]", '[data-layout="%s"]' % design) not in LAYOUTS)
+
 
 if FAILURES:
     print("\nFAILED: " + ", ".join(FAILURES), file=sys.stderr)

@@ -285,21 +285,20 @@
      mistakes an inclusion for a promotion is worse off than one who missed it.
      Sits above .ss-zone-box (z-index 10) and .ss-logo-wrapper (11) so the
      admin logo overlay cannot cover it. */
-  /* Legible on a white stage AND on a black hoodie.
+  /* ONE RULE FOR THE WHOLE CARD: black lettering, on white.
 
-     It used to be a near-black pill, which is invisible on exactly the
-     products that most need the label: the dark garments a team orders. It
-     sits on the photo, so it has to survive both extremes rather than
-     whichever one the first mockup happened to be.
+     This pill has now been dark-on-white and white-on-dark, and each time the
+     argument was about which background it happens to land on. It does not
+     need to be an argument. The pill is opaque white and the letters are the
+     same black as the price, so it reads the same on the stage's near-white
+     padding and on a black hoodie that reaches the corner — there is no case
+     left where it depends on the mockup.
 
-     A light pill with dark ink does that. On the pale stage the ring and
-     shadow give it an edge; on a black hoodie it is the brightest thing in
-     the corner. The backdrop blur keeps it readable over a busy print.
+     Pure white on a #f8f9fa stage has no edge of its own, so the ring and the
+     shadow are what make it read as a chip rather than as loose text. They
+     are load-bearing here, not decoration.
 
-     The store's own colours cannot help here. The only per-store colour on
-     the metaobject is primary_color, which is a NAME ("Navy") describing a
-     requested GARMENT, not a brand colour and not a hex — so any attempt to
-     tint this from it would be both unreliable and wrong. */
+     Colour and opacity are pinned for the same reason as the price below. */
   .ss-includes-badge {
     position: absolute;
     top: 8px;
@@ -308,12 +307,11 @@
     display: inline-block;
     padding: 5px 10px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.94);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(17, 16, 14, 0.12);
-    box-shadow: 0 1px 4px rgba(17, 16, 14, 0.18);
-    color: #16150f;
+    background: #ffffff !important;
+    border: 1px solid rgba(17, 16, 14, 0.20);
+    box-shadow: 0 1px 5px rgba(17, 16, 14, 0.20);
+    color: #111111 !important;
+    opacity: 1 !important;
     font-size: 11px;
     font-weight: 700;
     line-height: 1.2;
@@ -409,7 +407,7 @@
     font-weight: 600;
     font-size: 15px;
     margin: 0 0 8px 0;
-    color: #1a1a1a;
+    color: #111111 !important;
     line-height: 1.4;
     letter-spacing: -0.01em;
   }
@@ -418,9 +416,30 @@
      faintest thing on the card: 14px, weight 500, mid-grey. Against a white
      deck on a phone held at arm's length that reads as almost not there.
      It is now the strongest line in the deck after the title. */
+  /* WHY THE COLOUR AND OPACITY ARE PINNED
+
+     Blunt on purpose. These are the price and the size range: what a shopper
+     reads to decide what something costs and whether it comes in their size.
+     Losing them to a stylesheet nobody has found is worse than the cost of a
+     specificity war nobody else is fighting.
+
+     The stylesheet has since been found, and !important here was not what
+     beat it. storefront-fixed-layouts.css repaints every span inside a
+     product tile for the spray and pro designs — near-white, because on
+     those designs the THEME's card goes dark inside. Ours does not: it keeps
+     this white deck, so it took the near-white ink and nothing else. That is
+     why one store read black and every other read white. The difference was
+     never the store; it was which design its organiser had picked.
+
+     That rule is !important too, at an id plus :has() no bare class can
+     outrank, so it is answered where it can be — at the end of that same
+     stylesheet, which hands this card its palette back under all six designs.
+     These stay pinned regardless: they are what the restore is written to
+     agree with, and they still stop anything that arrives without an id. */
   .ss-price {
     font-size: 16px;
-    color: #111111;
+    color: #111111 !important;
+    opacity: 1 !important;
     font-weight: 700;
     letter-spacing: -0.01em;
   }
@@ -436,7 +455,8 @@
   .ss-sizes {
     font-size: 12px;
     font-weight: 600;
-    color: #5b6b82;
+    color: #111111 !important;
+    opacity: 1 !important;
     white-space: nowrap;
   }
 
