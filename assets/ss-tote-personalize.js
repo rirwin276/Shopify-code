@@ -58,6 +58,11 @@
     // (Printful_Automation personalization.py :: nn_layout). Products built
     // before these rode in the metafield fall back to the same constants.
     var TOP_OFFSET_PCT = parseFloat(root.getAttribute('data-top-offset-pct') || '0.10');
+    // How far this product moves the whole name/number block up, as a fraction
+    // of the print box. Zero for everything but the hoodies, which sit their
+    // name higher on the back. Supplied by the same config that fixes the
+    // print file, so the shopper's preview and what gets printed cannot drift.
+    var LIFT_PCT = parseFloat(root.getAttribute('data-lift-pct') || '0') || 0;
     var NAME_ZONE_PCT = parseFloat(root.getAttribute('data-name-zone-pct') || '0.28');
     var NAME2_ZONE_PCT = parseFloat(root.getAttribute('data-name2-zone-pct') || '0.21');
     var LINE_GAP_PCT = parseFloat(root.getAttribute('data-line-gap-pct') || '0.02');
@@ -187,6 +192,13 @@
         topOffset += (avail - used) / 2;
       }
 
+      // The lift, applied last and to the offset alone, so every band keeps
+      // the size it was given and the whole stack moves as one piece. Applying
+      // it earlier would grow `avail`, and the number would swell into the
+      // space the lift freed — taller instead of higher. Clamped at the top of
+      // the box: past that the name is off the printable area.
+      if (LIFT_PCT) topOffset = Math.max(0, topOffset - boxH * LIFT_PCT);
+
       var bands = [];
       for (i = 0; i < n; i++) bands.push(band);
       return {
@@ -266,7 +278,11 @@
         // Start line sits below the name block — or at the top offset when
         // there is no name, so a number on its own owns the whole box.
         var numberTop = lines.length ? cursor + lay.gap : boxTop + lay.topOffset;
-        var numberAvailH = Math.max(0, (boxTop + boxH) - numberTop);
+        // The height the layout allocated, not the distance to the box floor.
+        // Identical for an unlifted product; on a lifted one, measuring to the
+        // floor gives the number back the space the lift freed and it grows to
+        // meet the risen name. Same rule as the print renderer.
+        var numberAvailH = Math.max(0, lay.numberH);
         var numFloor = Math.min(24, Math.max(4, numberAvailH * 0.9));
         var numSize = fitSize(number, fitW, numberAvailH, numFloor);
         var numInk = inkMetrics(number, numSize);
