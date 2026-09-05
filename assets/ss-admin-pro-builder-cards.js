@@ -2,7 +2,7 @@
 (function () {
   'use strict';
 
-  var VERSION = 'catalog-v11-g3719-pullover-hoodie';
+  var VERSION = 'catalog-v12-category-tabs';
   var RAILWAY = 'https://printfulautomation-production.up.railway.app';
   var CDN = 'https://cdn.shopify.com/s/files/1/0798/2055/4490/files/';
 
@@ -279,6 +279,44 @@
     }
   ];
 
+  // Keep the Admin Powers catalog on the same taxonomy as the storefront.
+  // Products may belong to more than one group (for example, Youth + Shirts,
+  // or Shirts + Personalized), so filtering never makes a useful item vanish.
+  var CATEGORY_ORDER = [
+    { id: 'all', label: 'All gear' },
+    { id: 'shirts', label: 'Shirts' },
+    { id: 'youth', label: 'Youth' },
+    { id: 'hoodies', label: 'Hoodies' },
+    { id: 'tanks', label: 'Tanks' },
+    { id: 'hats', label: 'Hats' },
+    { id: 'personalized', label: 'Personalized' },
+    { id: 'accessories', label: 'Accessories' },
+    { id: 'more', label: 'More' }
+  ];
+  var BUILDER_CATEGORIES = {
+    bc3413: ['shirts', 'personalized'],
+    bc3001y: ['shirts', 'youth', 'personalized'],
+    bc3001: ['shirts', 'personalized'],
+    cc1467y: ['youth', 'hoodies', 'personalized'],
+    m2580: ['hoodies', 'personalized'],
+    g3719: ['hoodies', 'personalized'],
+    m2480: ['more', 'personalized'],
+    ls14003: ['hoodies'],
+    cc1717: ['shirts', 'personalized'],
+    nl6733: ['tanks'],
+    mc1790: ['tanks'],
+    ec8000: ['accessories', 'personalized'],
+    hat39165: ['hats']
+  };
+  var activeCategory = 'all';
+
+  function builderCategories(builder) {
+    var raw = builder && (builder.categories || builder.category);
+    if (Array.isArray(raw) && raw.length) return raw.map(function (item) { return String(item).toLowerCase(); });
+    if (raw) return [String(raw).toLowerCase()];
+    return BUILDER_CATEGORIES[builder.id] || ['more'];
+  }
+
   /* ─── Live pricing ──────────────────────────────────────────────────────── */
   // Maps each builder to its global_pricing keys so the catalog reflects the
   // exact prices set in the Price Editor (/pages/price-editor). Falls back to
@@ -376,6 +414,7 @@
       if (!p || !p.id || BUILDERS.some(function (b) { return b.id === p.id; })) return;
       BUILDERS.push({
         id: p.id,
+        categories: p.categories || p.category || null,
         badge: p.badge || 'Custom Product',
         name: p.name || p.id,
         from: p.from || '',
@@ -499,6 +538,14 @@
 
   /* ─── Styles ────────────────────────────────────────────────────────────── */
   var CSS = [
+    /* Storefront-style category filters */
+    '.ss-builder-category-nav{display:flex;gap:9px;overflow-x:auto;padding:2px 1px 16px;margin:0 -1px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}',
+    '.ss-builder-category-nav::-webkit-scrollbar{display:none;}',
+    '.ss-builder-category-tab{appearance:none;flex:0 0 auto;border:1.5px solid rgba(17,16,14,.14);background:#fff;color:#27231c;border-radius:999px;padding:10px 15px;font:800 12px/1 inherit;letter-spacing:.01em;cursor:pointer;transition:background .16s,border-color .16s,color .16s,box-shadow .16s;}',
+    '.ss-builder-category-tab:hover{border-color:rgba(183,163,106,.7);}',
+    '.ss-builder-category-tab.is-active{background:#17150f;color:#fff;border-color:#17150f;box-shadow:0 5px 14px rgba(17,16,14,.16);}',
+    '.ss-cat[hidden]{display:none!important;}',
+    '@media(max-width:520px){.ss-builder-category-nav{gap:8px;padding-bottom:14px;}.ss-builder-category-tab{padding:9px 13px;font-size:11.5px;}}',
     /* Grid */
     '#apCustomBuildersContainer{',
       'display:grid!important;',
@@ -915,6 +962,7 @@
     var card = document.createElement('div');
     card.className = 'ss-cat';
     card.setAttribute('data-ss-builder-id', b.id);
+    card.setAttribute('data-ss-builder-categories', builderCategories(b).join(' '));
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
     card.setAttribute('aria-label', 'Preview ' + b.name);
@@ -962,6 +1010,56 @@
     return card;
   }
 
+  function availableCategories() {
+    var present = {};
+    BUILDERS.forEach(function (builder) {
+      builderCategories(builder).forEach(function (category) { present[category] = true; });
+    });
+    return CATEGORY_ORDER.filter(function (category) {
+      return category.id === 'all' || present[category.id];
+    });
+  }
+
+  function applyCategoryFilter() {
+    var container = $('#apCustomBuildersContainer');
+    if (!container) return;
+    container.querySelectorAll('.ss-cat').forEach(function (card) {
+      var categories = (card.getAttribute('data-ss-builder-categories') || '').split(/\s+/);
+      card.hidden = activeCategory !== 'all' && categories.indexOf(activeCategory) === -1;
+    });
+    var nav = $('#apBuilderCategoryNav');
+    if (nav) nav.querySelectorAll('.ss-builder-category-tab').forEach(function (button) {
+      var selected = button.getAttribute('data-category') === activeCategory;
+      button.classList.toggle('is-active', selected);
+      button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+  }
+
+  function renderCategoryNav() {
+    var container = $('#apCustomBuildersContainer');
+    if (!container) return;
+    var existing = $('#apBuilderCategoryNav');
+    if (existing) existing.remove();
+    var nav = document.createElement('div');
+    nav.id = 'apBuilderCategoryNav';
+    nav.className = 'ss-builder-category-nav';
+    nav.setAttribute('aria-label', 'Filter product builders');
+    availableCategories().forEach(function (category) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'ss-builder-category-tab' + (category.id === activeCategory ? ' is-active' : '');
+      button.setAttribute('data-category', category.id);
+      button.setAttribute('aria-pressed', category.id === activeCategory ? 'true' : 'false');
+      button.textContent = category.label;
+      button.addEventListener('click', function () {
+        activeCategory = category.id;
+        applyCategoryFilter();
+      });
+      nav.appendChild(button);
+    });
+    container.parentNode.insertBefore(nav, container);
+  }
+
   /* ─── Styles injection ──────────────────────────────────────────────────── */
   function injectStyles() {
     if ($('#ss-catalog-css')) return;
@@ -984,6 +1082,8 @@
     injectStyles();
     container.innerHTML = '';
     BUILDERS.forEach(function (b) { container.appendChild(makeCard(b)); });
+    renderCategoryNav();
+    applyCategoryFilter();
     container.setAttribute('data-ss-v', VERSION);
 
     if (section) section.style.display = 'block';
