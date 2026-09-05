@@ -285,18 +285,18 @@
      mistakes an inclusion for a promotion is worse off than one who missed it.
      Sits above .ss-zone-box (z-index 10) and .ss-logo-wrapper (11) so the
      admin logo overlay cannot cover it. */
-  /* A dark pill with white text.
+  /* ONE RULE FOR THE WHOLE CARD: black lettering, on white.
 
-     This was changed to a light pill on the reasoning that the badge sits on
-     the product photo and would vanish on a black hoodie. It does not sit on
-     the garment: the image stage carries 20px of near-white padding and the
-     mockup is centred inside it, so the badge lands on that pale background
-     almost every time. A 94%-white pill on a near-white stage is white on
-     white, which is what shipped and what got reported.
+     This pill has now been dark-on-white and white-on-dark, and each time the
+     argument was about which background it happens to land on. It does not
+     need to be an argument. The pill is opaque white and the letters are the
+     same black as the price, so it reads the same on the stage's near-white
+     padding and on a black hoodie that reaches the corner — there is no case
+     left where it depends on the mockup.
 
-     Dark on pale is the pairing that actually occurs here, and it is what was
-     working before. The ring and shadow stay, so on the rare card whose
-     mockup does reach the corner the pill still has an edge.
+     Pure white on a #f8f9fa stage has no edge of its own, so the ring and the
+     shadow are what make it read as a chip rather than as loose text. They
+     are load-bearing here, not decoration.
 
      Colour and opacity are pinned for the same reason as the price below. */
   .ss-includes-badge {
@@ -307,10 +307,10 @@
     display: inline-block;
     padding: 5px 10px;
     border-radius: 999px;
-    background: rgba(17, 16, 14, 0.86) !important;
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 1px 4px rgba(17, 16, 14, 0.25);
-    color: #ffffff !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(17, 16, 14, 0.20);
+    box-shadow: 0 1px 5px rgba(17, 16, 14, 0.20);
+    color: #111111 !important;
     opacity: 1 !important;
     font-size: 11px;
     font-weight: 700;
@@ -407,7 +407,7 @@
     font-weight: 600;
     font-size: 15px;
     margin: 0 0 8px 0;
-    color: #1a1a1a;
+    color: #111111 !important;
     line-height: 1.4;
     letter-spacing: -0.01em;
   }
@@ -455,7 +455,7 @@
   .ss-sizes {
     font-size: 12px;
     font-weight: 600;
-    color: #44546b !important;
+    color: #111111 !important;
     opacity: 1 !important;
     white-space: nowrap;
   }

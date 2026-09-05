@@ -200,12 +200,22 @@ async function measure(pg) {
     await ctx.close();
   }
 
-  // The user asked for one standard across every store, so also assert the
-  // answer does not depend on which design an organiser picked.
+  // One standard across every store, so also assert the answer does not
+  // depend on which design an organiser picked.
   ['.ss-price', '.ss-sizes', '.ss-title', '.ss-includes-badge'].forEach((sel) => {
     const seen = Array.from(new Set(rows.filter((r) => r.sel === sel).map((r) => r.color)));
     check(sel + ' is the same colour in every design', seen.length === 1, seen.join(' / '));
   });
+
+  // And the standard is black lettering on white — every line of type on the
+  // card, the badge included, is the one colour. That is the whole rule.
+  const inks = Array.from(new Set(rows.map((r) => r.color)));
+  check('the whole card is one black', inks.length === 1 && inks[0] === 'rgb(17, 17, 17)',
+    inks.join(' / '));
+  const pills = Array.from(new Set(
+    rows.filter((r) => r.sel === '.ss-includes-badge').map((r) => r.behind)));
+  check('the badge pill is white in every design',
+    pills.length === 1 && pills[0] === 'rgb(255, 255, 255)', pills.join(' / '));
 
   console.table(rows.filter((r) => r.vw === 390).map((r) => ({
     design: r.design, el: r.sel, color: r.color, behind: r.behind, contrast: r.contrast,

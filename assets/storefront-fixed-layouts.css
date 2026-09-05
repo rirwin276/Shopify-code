@@ -1188,7 +1188,7 @@
   }
 }
 
-/* ---------- THE PRODUCT CARD KEEPS ITS OWN COLOURS IN EVERY DESIGN ----------
+/* ---------- THE PRODUCT CARD IS BLACK LETTERING, IN EVERY DESIGN ----------
 
    Three of the six designs repaint the text inside a product tile:
 
@@ -1206,9 +1206,8 @@
    names, so it never got the dark interior — only the near-white text. The
    result was a white price and a white size range on a white deck: present,
    correct, and impossible to read. It looked like one store had been fixed
-   and the rest had not, because the two designs that read correctly
-   (classic, split, heritage don't repaint at all; gradient repaints dark)
-   happened to agree with the card, and spray and pro did not.
+   and the rest had not, because the designs that read correctly happened to
+   agree with the card and spray and pro did not.
 
    Every one of those selectors is `span` with !important, and .ss-price,
    .ss-sizes and .ss-includes-badge are spans, so nothing the card declares
@@ -1218,29 +1217,18 @@
    So the card gets its palette back here, where it can outrank them: same
    shape as those rules plus .ss-card-shell, which is one class more
    specific. [data-layout] rather than a design name because the answer is
-   the same for all six — the deck is white on every design, so the text on
-   it is dark on every design. That is the standard the storefronts should
-   hold to: the price reads the same in every team's store.
-
-   The badge is the one exception, and it is not an exception to the rule so
-   much as to the surface: it is white on a near-black pill, not on the
-   deck. */
-#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell :is(a, p, span, strong, small, .price, .price-item, .card__heading) {
-  color: #11100e !important;
-}
-
-#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell .ss-title {
-  color: #1a1a1a !important;
-}
-
-#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell .ss-price {
+   the same for all six, and is meant to stay that way: white surfaces,
+   black lettering. The title, the price, the size range and the inclusion
+   badge are one colour, and the badge's pill is white so its letters are
+   that same colour whatever the mockup behind it does. Nothing here depends
+   on which design an organiser picked or which garment is in the photo. */
+#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell :is(a, p, span, strong, small, .price, .price-item, .card__heading),
+#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell :is(.ss-title, .ss-price, .ss-sizes, .ss-includes-badge) {
   color: #111111 !important;
 }
 
-#MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell .ss-sizes {
-  color: #44546b !important;
-}
-
+/* The pill is white so the rule above holds on it too: black letters on
+   white, on the pale stage and on a black hoodie alike. */
 #MainContent:has(#ss-private-store-state[data-layout]) .product-grid__item .ss-card-shell .ss-includes-badge {
-  color: #ffffff !important;
+  background: #ffffff !important;
 }

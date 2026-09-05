@@ -119,10 +119,15 @@ if badge:
     # The badge sits on the image stage's near-white padding, not on the
     # garment: 20px of #f8f9fa with the mockup centred inside it. A light pill
     # there is white on white, which is what shipped and what got reported.
-    check("the badge is dark against the pale image stage",
-          "rgba(17, 16, 14, 0.86)" in body,
-          "a light pill on a near-white stage cannot be seen")
-    check("the badge has white ink", "#ffffff" in body)
+    # It has been dark-on-white and white-on-dark, and each time the argument
+    # was about which background it lands on. An opaque white pill with the
+    # same black letters as the price does not have that argument: it reads on
+    # the stage's near-white padding and on a black hoodie alike.
+    check("the badge pill is white",
+          "background: #ffffff !important" in body,
+          "the pill has to be opaque, or the mockup decides how it reads")
+    check("the badge has black ink, the same black as the price",
+          "color: #111111 !important" in body)
     check("the badge keeps an edge for the rare card that reaches the corner",
           "border" in body and "box-shadow" in body)
     check("the badge colour cannot be overridden",
@@ -151,15 +156,19 @@ restore = '#MainContent:has(#ss-private-store-state[data-layout]) .product-grid_
 check("the designs hand the card back its own colours",
       restore in LAYOUTS,
       "without this, spray and pro paint the price near-white on a white deck")
-for sel, colour in ((".ss-price", "#111111"), (".ss-sizes", "#44546b"),
-                    (".ss-includes-badge", "#ffffff"), (".ss-title", "#1a1a1a")):
-    rule = restore + " " + sel + " {"
-    idx = LAYOUTS.find(rule)
-    check("the designs restore " + sel, idx != -1)
-    if idx != -1:
-        check(sel + " is restored to the card's own colour",
-              colour in LAYOUTS[idx:idx + 200],
-              "it has to match what the snippet declares, or stores disagree")
+# One black for the whole card, stated once. Anything that reintroduces a
+# per-element colour here is how the designs got to disagree in the first place.
+restore_idx = LAYOUTS.find(restore)
+restored = LAYOUTS[restore_idx:restore_idx + 700] if restore_idx != -1 else ""
+for sel in (".ss-title", ".ss-price", ".ss-sizes", ".ss-includes-badge"):
+    check("the restore covers " + sel, sel in restored)
+check("the restore is one black for all of them",
+      "color: #111111 !important" in restored
+      and "#44546b" not in restored and "#1a1a1a" not in restored,
+      "one colour is the point; a second one is a second thing to get wrong")
+check("the restore keeps the badge pill white",
+      "background: #ffffff !important" in restored,
+      "black letters need the pill to be opaque white, not the mockup")
 
 # One standard for every store, which is what was actually asked for: no design
 # name may appear in the restoring selectors, or a seventh design added later
