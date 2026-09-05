@@ -173,8 +173,48 @@
         </div>
       {%- endif -%}
 
+      {%- comment -%}
+        ss-card-sizes
+
+        What sizes it comes in, opposite the price.
+
+        The deck is title, swatches, price — and on a product with one colour
+        the swatch row is absent, so the card ends in a band of empty white
+        with a small price floating in it. That space is worth something: the
+        question a parent outfitting a kid asks second, right after the price,
+        is whether it comes in their size. Answering it on the card saves
+        opening every product to find out which ones run youth.
+
+        Read off the product's own Size option, so it is the real range and
+        never a guess. Shopify keeps option values in the order they were
+        created and our builders write them smallest-first, which is why the
+        ends of that list are the ends of the range — sorting them would give
+        "3XL - XS", since size names do not sort alphabetically.
+
+        Nothing is shown for a product with one size or no size option: "S - S"
+        is noise, and a card that says nothing is better than a card that says
+        something empty.
+      {%- endcomment -%}
+      {%- assign ss_size_range = '' -%}
+      {%- for opt in p.options_with_values -%}
+        {%- assign opt_name = opt.name | downcase | strip -%}
+        {%- if opt_name == 'size' and opt.values.size > 1 -%}
+          {%- assign _first = opt.values | first -%}
+          {%- assign _last = opt.values | last -%}
+          {%- assign _first = _first.name | default: _first | strip -%}
+          {%- assign _last = _last.name | default: _last | strip -%}
+          {%- if _first != blank and _last != blank and _first != _last -%}
+            {%- capture ss_size_range -%}{{ _first }}–{{ _last }}{%- endcapture -%}
+          {%- endif -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+
       <div class="ss-meta-row">
         <span class="ss-price">{{ p.price | money_without_trailing_zeros }}</span>
+        {%- if ss_size_range != blank -%}
+          <span class="ss-sizes">{{ ss_size_range }}</span>
+        {%- endif -%}
       </div>
     </div>
   </a>
@@ -227,18 +267,37 @@
      mistakes an inclusion for a promotion is worse off than one who missed it.
      Sits above .ss-zone-box (z-index 10) and .ss-logo-wrapper (11) so the
      admin logo overlay cannot cover it. */
+  /* Legible on a white stage AND on a black hoodie.
+
+     It used to be a near-black pill, which is invisible on exactly the
+     products that most need the label: the dark garments a team orders. It
+     sits on the photo, so it has to survive both extremes rather than
+     whichever one the first mockup happened to be.
+
+     A light pill with dark ink does that. On the pale stage the ring and
+     shadow give it an edge; on a black hoodie it is the brightest thing in
+     the corner. The backdrop blur keeps it readable over a busy print.
+
+     The store's own colours cannot help here. The only per-store colour on
+     the metaobject is primary_color, which is a NAME ("Navy") describing a
+     requested GARMENT, not a brand colour and not a hex — so any attempt to
+     tint this from it would be both unreliable and wrong. */
   .ss-includes-badge {
     position: absolute;
     top: 8px;
     left: 8px;
     z-index: 12;
     display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: rgba(17, 16, 14, 0.82);
-    color: #fff;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.94);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(17, 16, 14, 0.12);
+    box-shadow: 0 1px 4px rgba(17, 16, 14, 0.18);
+    color: #16150f;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.2;
     letter-spacing: 0.02em;
     pointer-events: none;
@@ -337,10 +396,30 @@
     letter-spacing: -0.01em;
   }
 
+  /* The price is what a shopper is actually looking for, and it was the
+     faintest thing on the card: 14px, weight 500, mid-grey. Against a white
+     deck on a phone held at arm's length that reads as almost not there.
+     It is now the strongest line in the deck after the title. */
   .ss-price {
-    font-size: 14px;
-    color: #555555;
-    font-weight: 500;
+    font-size: 16px;
+    color: #111111;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* --- WHAT SIZES IT COMES IN --- */
+  .ss-meta-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .ss-sizes {
+    font-size: 12px;
+    font-weight: 600;
+    color: #5b6b82;
+    white-space: nowrap;
   }
 
   /* --- MOBILE SPECIFIC OVERRIDES (Screens smaller than 768px) --- */
@@ -356,6 +435,17 @@
     }
     .ss-card-shell {
       border-radius: 8px; /* Slightly tighter corners on small screens */
+    }
+    /* Said again for phones rather than left to inherit. The price reading as
+       near-invisible on mobile is what prompted this, and whatever washed it
+       out, an explicit rule at the breakpoint cannot be washed out quietly. */
+    .ss-price {
+      font-size: 16px;
+      color: #111111;
+      font-weight: 700;
+    }
+    .ss-sizes {
+      font-size: 11px;
     }
   }
 </style>
