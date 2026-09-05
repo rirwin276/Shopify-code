@@ -27,6 +27,22 @@
   var BUILDERS = [
     {
       id: 'bc3413',
+      // personalize — whether this blank offers Name & Number, which draws
+      // the chip on the card and the note in its modal.
+      //
+      // Stated on EVERY card, true or false. It used to be written only where
+      // it was true, so a blank that gained Name & Number and was never
+      // revisited here looked identical to one that never offered it — which
+      // is exactly what happened to this tee and the Bella + Canvas hoodie:
+      // both could do it, neither said so, and nothing failed to point it out.
+      //
+      // The truth lives in the builder's config.py (SUPPORTS_PERSONALIZATION)
+      // in the other repository, so this cannot be derived here — there is no
+      // endpoint that reports it, and adding a runtime fetch would mean the
+      // chip disappearing whenever the app was slow. Writing it out is the
+      // honest option; the test that goes with this file at least makes
+      // leaving it out impossible rather than invisible.
+      personalize: true,
       badge: 'Unisex Tee',
       name: 'Bella + Canvas BC3413',
       from: '$24',
@@ -121,6 +137,7 @@
     },
     {
       id: 'g3719',
+      personalize: true,
       badge: 'Pullover Hoodie',
       name: 'Bella + Canvas 3719',
       from: '$42',
@@ -156,6 +173,7 @@
     },
     {
       id: 'ls14003',
+      personalize: false,
       badge: 'Full-Zip Hoodie',
       name: 'Lane Seven LS14003',
       from: '$37',
@@ -191,6 +209,7 @@
     },
     {
       id: 'nl6733',
+      personalize: false,
       badge: "Women's Racerback Tank",
       name: 'Next Level NL6733',
       from: '$22',
@@ -207,6 +226,7 @@
     },
     {
       id: 'mc1790',
+      personalize: false,
       badge: "Men's Tank",
       name: 'Cotton Heritage MC1790',
       from: '$22',
@@ -242,6 +262,7 @@
     },
     {
       id: 'hat39165',
+      personalize: false,
       badge: 'Foam Trucker Hat',
       name: 'Otto Cap 39-165 Foam Trucker Hat',
       from: '$19',
