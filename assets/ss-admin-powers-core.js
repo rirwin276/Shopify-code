@@ -1341,15 +1341,27 @@
       var _proBuilderOrigin = '';
       try { _proBuilderOrigin = new URL(SSAP.editorBaseUrl || SSAP.editorProShirtBc3413BaseUrl || '').origin; } catch(_e){ _proBuilderOrigin = ''; }
       if(isProEditorBuild && SSAP.editorSecret && _proBuilderOrigin){
+        // The product names its own builder, so the key is read out of the tag
+        // rather than matched against a list kept here.
+        //
+        // The list is why three products could be made and then never edited.
+        // Adding the Bella+Canvas hoodie and the two long sleeves to the
+        // automatic build gave them everything else — tags, metafields, a
+        // working /editor/pro-shirt/<key>/edit route — and they still had no
+        // Edit button, because nobody knew this array existed. A shop owner
+        // was left with a product they could not change.
+        //
+        // There is nothing to keep in sync now: every builder registers
+        // /editor/pro-shirt/<key>/edit, standard_routes.py for most of them and
+        // tank_front_common.py for the tanks, so a tag naming a builder always
+        // has a route behind it.
         var _proTags = _tagListForProCheck;
-        function _hasProTag(model){
-          return _proTags.some(function(t){ return t === 'pro-shirt-' + model || t === 'pro-builder-' + model; });
-        }
-        var _proEditPath  = null;
-        // Every pro-built model with a /edit route gets an Edit button.
-        ['cc1717', 'm2580', 'ls14003', 'm2480', 'bc3413', 'bc3001y', 'bc3001', 'cc1467y', 'nl6733', 'mc1790', 'ec8000', 'hat39165'].some(function(model){
-          if(_hasProTag(model)){ _proEditPath = '/editor/pro-shirt/' + model + '/edit'; return true; }
-          return false;
+        var _proEditPath = null;
+        _proTags.some(function(t){
+          var _m = /^pro-(?:shirt|builder)-([a-z0-9]+)$/.exec(t);
+          if(!_m) return false;
+          _proEditPath = '/editor/pro-shirt/' + _m[1] + '/edit';
+          return true;
         });
         if(_proEditPath){
           var _returnUrl = (window.location.origin + window.location.pathname + window.location.search);
