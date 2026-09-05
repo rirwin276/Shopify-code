@@ -99,6 +99,14 @@
             data-line-gap-pct="{{ ss_pers.line_gap_pct | default: 0.02 }}"
             data-gap-pct="{{ ss_pers.gap_pct | default: 0.04 }}"
             data-top-offset-pct="{{ ss_pers.top_offset_pct | default: 0.10 }}"
+            {%- comment -%}
+              How far this product moves the whole name/number block up. It
+              comes from the same resolved config that fixes the print file, so
+              the preview a shopper personalises against and the file that
+              actually prints cannot drift apart. Absent for every product that
+              does not lift, which is all of them but the hoodies.
+            {%- endcomment -%}
+            data-lift-pct="{{ ss_pers.lift_pct | default: 0 }}"
             data-number-min-share="{{ ss_pers.number_min_share | default: 0.20 }}"
           >
             <span class="ss-pers-kicker">Personalize the Back</span>
