@@ -276,6 +276,33 @@
       pricing: [
         { label: 'Front print', note: 'Logo or design on front DTFlex patch area', price: '$19' }
       ]
+    },
+    {
+      id: 'underarmour',
+      // No back print: this listing sells the left chest only, so it has
+      // nothing to put a name and number on.
+      personalize: false,
+      badge: 'Performance Polo',
+      name: 'Under Armour 1370399 Performance Polo',
+      from: '$55',
+      hint: 'Adult sizes \u00b7 Left chest DTF print',
+      // Served from the builder's own mockup library rather than a CDN URL
+      // typed in here, which is how the adult staple tee once advertised a
+      // youth shirt.
+      gallery: [RAILWAY + '/editor/pro-shirt/underarmour/card-image'],
+      route: '/editor/pro-shirt/underarmour',
+      desc: 'The Under Armour 1370399 Performance Polo is a coaching-staff and ' +
+        'sideline polo: light, breathable polyester with anti-odor sweat-wicking ' +
+        'fabric and a relaxed fit. Prints on the left chest, which is where a team ' +
+        'or company mark belongs on a polo. Creates its own separate listing in your store.',
+      // Straight from Printful's own spec for this blank.
+      specs: ['100% polyester \u00b7 5.29 oz/yd\u00b2', 'Anti-odor, sweat-wicking, textured breathable fabric',
+              'Relaxed fit \u00b7 3-button placket \u00b7 self-fabric collar'],
+      sizes: 'S \u00b7 M \u00b7 L \u00b7 XL \u00b7 2XL',
+      colors: 'Choose up to 3 polo colors per listing',
+      pricing: [
+        { label: 'Left chest print', note: 'Logo or design on the left chest', price: '$55' }
+      ]
     }
   ];
 

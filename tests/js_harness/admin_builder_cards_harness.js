@@ -37,7 +37,7 @@ while ((m = re.exec(src)) !== null) {
   cards.push({ id: m[1], flag: m[3] || null });
 }
 
-check('the cards were found', cards.length >= 13, 'found ' + cards.length);
+check('the cards were found', cards.length >= 14, 'found ' + cards.length);
 
 const missing = cards.filter((c) => c.flag === null).map((c) => c.id);
 check('every card states whether it offers Name & Number',
@@ -59,7 +59,7 @@ check('every card states whether it offers Name & Number',
 });
 
 // A blank with no back print must not claim it.
-['hat39165'].forEach((id) => {
+['hat39165', 'underarmour'].forEach((id) => {
   const card = cards.find((c) => c.id === id);
   check(id + ' does not claim Name & Number', !!card && card.flag === 'false');
 });
