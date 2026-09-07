@@ -180,6 +180,12 @@
   }
   .pe-btn:hover { background: #1e293b; transform: translateY(-1px); }
   .pe-btn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+  .pe-btn--secondary {
+    background: #fff;
+    color: var(--ap-text);
+    border: 1.5px solid var(--ap-border);
+  }
+  .pe-btn--secondary:hover { background: #f8fafc; }
   .pe-status {
     min-height: 20px;
     font-size: 13px;
@@ -568,6 +574,7 @@
 
     <div class="pe-actions" id="peActions">
       <button id="peSaveBtn" class="pe-btn" type="button">💾 Save Prices</button>
+      <button id="peReapplyBtn" class="pe-btn pe-btn--secondary" type="button">↻ Reapply Saved Prices to Existing Products</button>
       <div id="peStatus" class="pe-status"></div>
       <div id="peJobStatus" class="pe-job"></div>
     </div>
@@ -653,6 +660,16 @@
       }
     });
     return changed;
+  }
+
+  function collectAllPrices() {
+    var prices = {};
+    document.querySelectorAll('.ap-price-input').forEach(function(inp) {
+      var key = inp.getAttribute('data-module');
+      var val = parseFloat(inp.value);
+      if (key && Number.isFinite(val) && val > 0) prices[key] = val;
+    });
+    return prices;
   }
 
   function loadPrices() {
@@ -741,9 +758,10 @@
     tick();
   }
 
-  function savePrices(applyExisting, scheduledTime) {
+  function savePrices(applyExisting, scheduledTime, pricesOverride) {
     var btn = document.getElementById('peSaveBtn');
-    var changedPrices = collectChangedPrices();
+    var reapplyBtn = document.getElementById('peReapplyBtn');
+    var changedPrices = pricesOverride || collectChangedPrices();
 
     if (Object.keys(changedPrices).length === 0) {
       setStatus('⚠️ No price changes detected.', 'err');
@@ -761,6 +779,7 @@
     }
 
     btn.disabled = true;
+    reapplyBtn.disabled = true;
     if (scheduledTime) {
       setStatus('⏳ Saving prices and scheduling repricing for ' + scheduledTime + '…');
     } else if (applyExisting) {
@@ -803,6 +822,7 @@
       })
       .finally(function() {
         btn.disabled = false;
+        reapplyBtn.disabled = false;
       });
   }
 
@@ -823,6 +843,15 @@
       return;
     }
     openModal();
+  });
+
+  document.getElementById('peReapplyBtn').addEventListener('click', function() {
+    var prices = collectAllPrices();
+    if (Object.keys(prices).length === 0) {
+      setStatus('⚠️ No saved prices are available to reapply.', 'err');
+      return;
+    }
+    savePrices(true, null, prices);
   });
 
   document.getElementById('peModalApplyNow').addEventListener('click', function() {
