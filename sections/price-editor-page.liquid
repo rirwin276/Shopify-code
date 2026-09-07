@@ -698,10 +698,24 @@
           countText = ' • ' + job.processed + '/' + job.total;
         }
 
-        setJobStatus('⏳ Repricing job ' + state + (progress !== '' ? ' • ' + progress + '%' : '') + countText, true);
+        var progressText = '';
+        if (progress !== '') {
+          progressText = typeof progress === 'number' ? progress + '%' : String(progress);
+        }
+        setJobStatus('⏳ Repricing job ' + state + (progressText ? ' • ' + progressText : '') + countText, true);
 
-        if (state === 'completed' || state === 'complete' || state === 'success') {
-          setJobStatus('✅ Repricing complete.', true);
+        if (state === 'completed' || state === 'complete' || state === 'success' || state === 'succeeded') {
+          var summary = job.summary || {};
+          var updated = summary.updated != null ? summary.updated : job.updated;
+          var variants = summary.variant_updates != null ? summary.variant_updates : job.variant_updates;
+          var already = summary.already_correct != null ? summary.already_correct : job.already_correct;
+          var errors = summary.errors || job.errors || [];
+          var result = '✅ Repricing complete.';
+          if (updated != null) result += ' ' + updated + ' product' + (updated === 1 ? '' : 's') + ' updated.';
+          if (variants) result += ' ' + variants + ' variant price' + (variants === 1 ? '' : 's') + ' changed.';
+          if (!updated && already) result += ' Existing variants were already at that price.';
+          if (errors.length) result += ' ⚠️ ' + errors.length + ' product' + (errors.length === 1 ? '' : 's') + ' need attention.';
+          setJobStatus(result, true);
           return;
         }
         if (state === 'failed' || state === 'error' || state === 'cancelled') {
@@ -715,7 +729,12 @@
         }
       })
       .catch(function(err) {
-        setJobStatus('⚠️ Job status unavailable: ' + err.message, true);
+        if (attempts < maxAttempts) {
+          setJobStatus('⏳ Repricing is still running; reconnecting…', true);
+          setTimeout(tick, 2500);
+        } else {
+          setJobStatus('⚠️ Job status unavailable: ' + err.message, true);
+        }
       });
     }
 
