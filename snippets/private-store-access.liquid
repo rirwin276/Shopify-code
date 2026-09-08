@@ -3,23 +3,28 @@
 
   Values: "admin", "member", "preview", or empty.
 
-  Three sections independently decided who may see a private store — the
-  collection hero, the product grid, and the product page — each with its own
-  copy of the same tag loop. A rule written three times drifts, and a preview
-  that unlocks the grid but not the product page is worse than no preview at
-  all: a prospect clicks the first shirt and hits a sign-in wall.
+  MEMBER / ADMIN
+  --------------
+  Signed-in customers keep the existing tag-based access rules. Super admins
+  are treated as admins everywhere.
 
   PREVIEW
   -------
-  A link carrying ?preview=<the store's join_code> opens the store read-only
-  for someone with no account. That is what a cold outreach email needs: the
-  recipient sees their own logo on real garments in a couple of seconds
-  instead of being bounced to Shopify account creation before seeing anything.
+  Preview is intentionally much narrower than member access. It exists only
+  for prospect stores that were provisioned with owner_customer_id="unclaimed".
+  Those are the stores Stella & Sage built for someone before that person has
+  claimed ownership.
 
-  join_code is already the per-store shared secret behind the join link, so no
-  new field is needed and access is revoked by rotating it. Preview is not a
-  weaker member tag — callers must decide separately what a previewer may do,
-  and none of them may let one check out.
+  Once a real owner exists, ?preview=... can never open the store. This matters
+  because normal team members should not be able to browse all the way into a
+  product and only then discover they cannot purchase. They must join the
+  private store first.
+
+  For an unclaimed store, join_code remains the preferred preview token. Older
+  unclaimed builds without a join_code may still use any nonblank preview value
+  (the join page uses ?preview=1). Explicitly requiring the "unclaimed" owner
+  sentinel prevents a malformed or already-owned store from becoming previewable
+  just because it lacks a join_code.
 
   @param {string} handle - The store handle (collection handle).
 
@@ -49,20 +54,10 @@
   endif
 
   if ps_level == blank and ps_handle != blank
-    # Read ?preview from the page URL inside content_for_header.
-    #
-    # Shopify Liquid has no request.params — the object exposes host, origin,
-    # path, page_type, locale and design_mode, and nothing else. Reading
-    # request.params.preview therefore always produced nil, so every preview
-    # link landed on the sign-in card no matter what token it carried.
-    #
-    # This is the same parser the join-store page already carries as its
-    # "Backup URL Parser", for exactly this reason.
     assign ps_supplied = ''
     assign ps_page_url = content_for_header | split: '"pageurl":"' | last | split: '"' | first
-    # content_for_header is JSON, so the ampersands arrive escaped. Without
-    # this the whole query string stays one unsplittable token.
     assign ps_page_url = ps_page_url | replace: '\u0026', '&'
+
     if ps_page_url contains '?'
       assign ps_pairs = ps_page_url | split: '?' | last | split: '&'
       for ps_pair in ps_pairs
@@ -76,23 +71,18 @@
     if ps_supplied != blank
       assign ps_entry = shop.metaobjects.custom_shop[ps_handle]
       if ps_entry
-        assign ps_code = ps_entry.join_code.value | default: ps_entry.join_code | default: '' | strip
-        if ps_code != blank
-          # The store has a secret. Preview must present it.
-          if ps_supplied == ps_code
+        assign ps_owner = ps_entry.owner_customer_id.value | default: ps_entry.owner_customer_id | default: '' | strip | downcase
+
+        # Critical rule: only explicitly-unclaimed prospect stores may preview.
+        if ps_owner == 'unclaimed'
+          assign ps_code = ps_entry.join_code.value | default: ps_entry.join_code | default: '' | strip
+          if ps_code != blank
+            if ps_supplied == ps_code
+              assign ps_level = 'preview'
+            endif
+          else
             assign ps_level = 'preview'
           endif
-        else
-          # No join_code means this store's join link is just ?shop=<handle> —
-          # anyone holding it can already JOIN and become a member. Letting the
-          # same person merely look is strictly less access than the store
-          # already grants, so any ?preview value opens it.
-          #
-          # This branch exists because gating preview on a code that most
-          # stores do not have is how the button silently failed to appear at
-          # all: the card rendered, the option did not, and the visitor was
-          # left with nothing but a sign-in.
-          assign ps_level = 'preview'
         endif
       endif
     endif
