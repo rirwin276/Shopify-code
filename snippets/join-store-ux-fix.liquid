@@ -1,0 +1,143 @@
+{%- doc -%}
+  JOIN STORE UX HARDENING
+
+  This snippet is rendered only on /pages/join-store by logo-frame-contrast.
+  The page itself currently lives inside a Shopify-generated JSON template, so
+  keeping the behavior here avoids replacing that whole generated template for
+  a small, targeted change.
+
+  Goals:
+  - Claimed/owned stores never advertise preview to ordinary guests.
+  - Explain WHY a buyer signs in before entering a private team store.
+  - Use Shopify's customer authentication endpoint with one clean return_to.
+  - Keep Preview + Claim intact for explicitly-unclaimed prospect stores.
+  - Make the signed-in second step obvious: join the store, then shop.
+
+  Security does not depend on this JavaScript. private-store-access.liquid is
+  the server-rendered authority and independently refuses preview for any store
+  whose owner_customer_id is not exactly "unclaimed".
+{%- enddoc -%}
+
+<script>
+(function () {
+  'use strict';
+
+  function onReady(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn, { once: true });
+    } else {
+      fn();
+    }
+  }
+
+  function text(el) {
+    return el ? String(el.textContent || '').trim().toLowerCase() : '';
+  }
+
+  function isClaimableStore() {
+    var badge = document.querySelector('.sf-badge');
+    var joinButton = document.getElementById('btnJoin');
+    var loginTitle = document.querySelector('.sf-btn--shop .sf-btn__title');
+    return text(badge).indexOf('ready to claim') !== -1 ||
+      text(joinButton).indexOf('claim store') !== -1 ||
+      text(loginTitle).indexOf('claim store') !== -1;
+  }
+
+  function setCleanLoginReturn() {
+    var loginLink = document.querySelector('a.sf-btn--shop');
+    if (!loginLink) return;
+
+    // Return to this exact join invitation after Shopify authentication.
+    // Use one explicit return_to instead of appending another ?return_to onto
+    // routes.storefront_login_url, which may already contain a query string.
+    var returnPath = window.location.pathname + window.location.search;
+    loginLink.setAttribute(
+      'href',
+      '/customer_authentication/login?return_to=' + encodeURIComponent(returnPath)
+    );
+  }
+
+  function ensureWhySignin(afterEl) {
+    if (!afterEl || document.querySelector('.sf-why-signin')) return;
+
+    var box = document.createElement('div');
+    box.className = 'sf-why-signin';
+    box.innerHTML =
+      '<strong>Why sign in?</strong>' +
+      '<p>This keeps your team store private and saves it to your dashboard, ' +
+      'so you can shop now, track your orders, and come back anytime.</p>';
+
+    afterEl.insertAdjacentElement('afterend', box);
+  }
+
+  function improveGuestClaimedStore() {
+    var badge = document.querySelector('.sf-badge');
+    var sub = document.querySelector('.sf-sub');
+    var loginTitle = document.querySelector('.sf-btn--shop .sf-btn__title');
+    var loginMeta = document.querySelector('.sf-btn--shop .sf-btn__meta');
+    var stack = document.querySelector('.sf-btn-stack');
+    var preview = document.querySelector('.sf-btn--preview');
+
+    if (preview) preview.remove();
+    if (badge) badge.textContent = 'Private team store';
+    if (sub) {
+      sub.textContent =
+        'Sign in once to join this private store. No password is required — ' +
+        'continue securely with Shop or use the one-time code sent to your email.';
+    }
+    if (loginTitle) loginTitle.textContent = 'Sign in & Join Store';
+    if (loginMeta) loginMeta.textContent = 'Continue with Shop or email';
+
+    ensureWhySignin(stack);
+  }
+
+  function improveSignedInClaimedStore() {
+    var badge = document.querySelector('.sf-badge');
+    var sub = document.querySelector('.sf-sub');
+    var joinButton = document.getElementById('btnJoin');
+
+    if (!joinButton) return;
+    if (badge) badge.textContent = 'You’re signed in';
+    if (sub) {
+      sub.textContent =
+        'One last step: join this private team store. This saves it to your dashboard and unlocks shopping.';
+    }
+    joinButton.textContent = 'Join Team Store';
+  }
+
+  onReady(function () {
+    setCleanLoginReturn();
+
+    // Claimable prospect stores intentionally retain their Preview + Claim UX.
+    if (isClaimableStore()) return;
+
+    var loginLink = document.querySelector('a.sf-btn--shop');
+    if (loginLink) {
+      improveGuestClaimedStore();
+    } else {
+      improveSignedInClaimedStore();
+    }
+  });
+})();
+</script>
+
+<style>
+  .sf-why-signin {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.035);
+    text-align: left;
+    line-height: 1.45;
+  }
+  .sf-why-signin strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+  }
+  .sf-why-signin p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.78;
+  }
+</style>
