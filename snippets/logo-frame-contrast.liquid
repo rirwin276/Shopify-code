@@ -205,3 +205,7 @@
     padding: 8px;
   }
 </style>
+
+{%- if request.path == '/pages/join-store' -%}
+  {% render 'join-store-ux-fix' %}
+{%- endif -%}
