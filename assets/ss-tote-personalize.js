@@ -41,6 +41,11 @@
     var fontFamily = root.getAttribute('data-font-family') || 'Big Shoulders';
     var fontWeight = root.getAttribute('data-font-weight') || '700';
     var colorHex = root.getAttribute('data-color-hex') || '#141414';
+    var outlineHex = root.getAttribute('data-outline-color-hex') || '';
+    var outlineRatio = outlineHex ? parseFloat(root.getAttribute('data-outline-ratio') || '0.035') : 0;
+    if (!isFinite(outlineRatio) || outlineRatio < 0 || outlineRatio > 0.1) outlineRatio = 0;
+    function outlineRadius(size) { return outlineHex ? size * outlineRatio : 0; }
+
     var maxName = parseInt(root.getAttribute('data-max-name') || '14', 10);
     var maxNumber = parseInt(root.getAttribute('data-max-number') || '3', 10);
     var fontCss = fontWeight + 'px \'' + fontFamily + '\', sans-serif';
@@ -138,10 +143,24 @@
         var h = (m.actualBoundingBoxAscent !== undefined)
           ? m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
           : size * 0.74;
-        if (m.width <= maxW && h <= maxH) return size;
+        var radius = outlineRadius(size);
+        var width = outlineHex && m.actualBoundingBoxLeft !== undefined
+          ? m.actualBoundingBoxLeft + m.actualBoundingBoxRight : m.width;
+        if (width + 2 * radius <= maxW && h + 2 * radius <= maxH) return size;
         size -= 2;
       }
       return floor;
+    }
+
+    function paintOutlined(text, size, boxLeft, boxW, top) {
+      setFont(size);
+      var m = ctx.measureText(text), radius = outlineRadius(size);
+      var left = m.actualBoundingBoxLeft || 0;
+      var width = m.actualBoundingBoxRight !== undefined ? left + m.actualBoundingBoxRight : m.width;
+      var x = boxLeft + (boxW - width) / 2 + left;
+      var y = top + (m.actualBoundingBoxAscent || size * 0.74) + radius;
+      ctx.lineJoin = 'round'; ctx.strokeStyle = outlineHex; ctx.lineWidth = radius * 2;
+      ctx.strokeText(text, x, y); ctx.fillText(text, x, y);
     }
 
     // Mirror of personalization.py :: nn_layout. Allocates the vertical bands
@@ -283,7 +302,8 @@
         setFont(lineSize);
         var lw = ctx.measureText(lines[i]).width;
         // Ink top pinned to the top of this line's band.
-        ctx.fillText(lines[i], boxLeft + (boxW - lw) / 2, cursor + lineInk.ascent);
+        if (outlineHex) paintOutlined(lines[i], lineSize, boxLeft, boxW, cursor);
+        else ctx.fillText(lines[i], boxLeft + (boxW - lw) / 2, cursor + lineInk.ascent);
         cursor += bandH + lay.lineGap;
       }
       if (lines.length) cursor -= lay.lineGap; // no trailing gap after the last line
@@ -302,7 +322,8 @@
         var numInk = inkMetrics(number, numSize);
         setFont(numSize);
         var mw = ctx.measureText(number).width;
-        ctx.fillText(number, boxLeft + (boxW - mw) / 2, numberTop + numInk.ascent);
+        if (outlineHex) paintOutlined(number, numSize, boxLeft, boxW, numberTop);
+        else ctx.fillText(number, boxLeft + (boxW - mw) / 2, numberTop + numInk.ascent);
       }
     }
 
@@ -589,3 +610,4 @@
     watchForInjectedWidgets();
   }
 })();
+
