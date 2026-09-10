@@ -11,20 +11,27 @@
 (function () {
   'use strict';
 
-  function loadFont(family, weight, cb) {
-    var id = 'ss-pers-font-' + family.replace(/\W+/g, '-');
-    if (!document.getElementById(id)) {
-      var link = document.createElement('link');
+  function loadFont(family, weight, cb, fontStyle) {
+    var id = 'ss-pers-font-' + family.replace(/\W+/g, '-') + '-' + weight + '-' + (fontStyle || 'normal');
+    var link = document.getElementById(id);
+    function ready() {
+      if (document.fonts && document.fonts.load) {
+        document.fonts.load((fontStyle || 'normal') + ' ' + weight + ' 100px "' + family + '"').then(cb).catch(cb);
+      } else { setTimeout(cb, 300); }
+    }
+    if (!link) {
+      link = document.createElement('link');
       link.id = id;
       link.rel = 'stylesheet';
       link.href = 'https://fonts.googleapis.com/css2?family='
-        + family.replace(/ /g, '+') + ':wght@' + weight + '&display=swap';
+        + family.replace(/ /g, '+') + (fontStyle === 'italic' ? ':ital,wght@1,' : ':wght@') + weight + '&display=swap';
+      link.addEventListener('load', ready, { once: true });
+      link.addEventListener('error', cb, { once: true });
       document.head.appendChild(link);
-    }
-    if (document.fonts && document.fonts.load) {
-      document.fonts.load(weight + ' 100px "' + family + '"').then(cb).catch(cb);
-    } else {
-      setTimeout(cb, 300);
+    } else if (link.sheet) { ready(); }
+    else {
+      link.addEventListener('load', ready, { once: true });
+      link.addEventListener('error', cb, { once: true });
     }
   }
 
@@ -40,11 +47,23 @@
 
     var fontFamily = root.getAttribute('data-font-family') || 'Big Shoulders';
     var fontWeight = root.getAttribute('data-font-weight') || '700';
+    var fontStyle = root.getAttribute('data-font-style') || 'normal';
+    var inkFit = root.getAttribute('data-ink-fit') === 'true';
+    var inkStrokeRatio = parseFloat(root.getAttribute('data-ink-stroke-ratio') || '0');
+    var nameStrokeMin = parseFloat(root.getAttribute('data-name-stroke-min') || '0');
+    var nameStrokeCap = parseFloat(root.getAttribute('data-name-stroke-cap') || '0');
     var colorHex = root.getAttribute('data-color-hex') || '#141414';
     var outlineHex = root.getAttribute('data-outline-color-hex') || '';
     var outlineRatio = outlineHex ? parseFloat(root.getAttribute('data-outline-ratio') || '0.035') : 0;
     if (!isFinite(outlineRatio) || outlineRatio < 0 || outlineRatio > 0.1) outlineRatio = 0;
-    function outlineRadius(size) { return outlineHex ? size * outlineRatio : 0; }
+    function outlineRadius(size, metrics, bandH, isName) {
+      if (!outlineHex) return 0;
+      if (!inkFit) return size * outlineRatio;
+      var h = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+      var r = h * inkStrokeRatio;
+      if (isName) r = Math.max(r, Math.min(bandH * nameStrokeMin, h * nameStrokeCap));
+      return r;
+    }
 
     var maxName = parseInt(root.getAttribute('data-max-name') || '14', 10);
     var maxNumber = parseInt(root.getAttribute('data-max-number') || '3', 10);
@@ -120,7 +139,7 @@
     var bgImg = null;
 
     function setFont(size) {
-      ctx.font = fontWeight + ' ' + size + 'px \'' + fontFamily + '\', sans-serif';
+      ctx.font = fontStyle + ' ' + fontWeight + ' ' + size + 'px \'' + fontFamily + '\', sans-serif';
     }
 
     // Ink-based measurement, mirroring the server's adaptive two-pass fit
@@ -135,7 +154,18 @@
       return { h: size * 0.74, ascent: size * 0.74 };
     }
 
-    function fitSize(text, maxW, maxH, floor) {
+    function fitSize(text, maxW, maxH, floor, isName) {
+      if (inkFit) {
+        var lo = 0.1, hi = Math.max(0.1, maxH * 3);
+        for (var j = 0; j < 18; j++) {
+          var mid = (lo + hi) / 2;
+          setFont(mid);
+          var m = ctx.measureText(text), r = outlineRadius(mid, m, maxH, isName);
+          if (m.actualBoundingBoxLeft + m.actualBoundingBoxRight + 2*r <= maxW && m.actualBoundingBoxAscent + m.actualBoundingBoxDescent + 2*r <= maxH) lo = mid;
+          else hi = mid;
+        }
+        return lo;
+      }
       var size = Math.max(Math.floor(maxH), floor);
       while (size > floor) {
         setFont(size);
@@ -152,15 +182,15 @@
       return floor;
     }
 
-    function paintOutlined(text, size, boxLeft, boxW, top) {
+    function paintOutlined(text, size, boxLeft, boxW, top, bandH, isName) {
       setFont(size);
-      var m = ctx.measureText(text), radius = outlineRadius(size);
+      var m = ctx.measureText(text), radius = outlineRadius(size, m, bandH, isName);
       var left = m.actualBoundingBoxLeft || 0;
       var width = m.actualBoundingBoxRight !== undefined ? left + m.actualBoundingBoxRight : m.width;
       var x = boxLeft + (boxW - width) / 2 + left;
       var y = top + (m.actualBoundingBoxAscent || size * 0.74) + radius;
       ctx.lineJoin = 'round'; ctx.strokeStyle = outlineHex; ctx.lineWidth = radius * 2;
-      ctx.strokeText(text, x, y); ctx.fillText(text, x, y);
+      if (radius) ctx.strokeText(text, x, y); ctx.fillText(text, x, y);
     }
 
     // Mirror of personalization.py :: nn_layout. Allocates the vertical bands
@@ -297,12 +327,12 @@
         // The floor tracks the band, so a band narrowed by the containment
         // rule can never be overrun by a minimum font size.
         var lineFloor = Math.min(12, Math.max(4, bandH * 0.9));
-        var lineSize = fitSize(lines[i], fitW, bandH, lineFloor);
+        var lineSize = fitSize(lines[i], fitW, bandH, lineFloor, true);
         var lineInk = inkMetrics(lines[i], lineSize);
         setFont(lineSize);
         var lw = ctx.measureText(lines[i]).width;
         // Ink top pinned to the top of this line's band.
-        if (outlineHex) paintOutlined(lines[i], lineSize, boxLeft, boxW, cursor);
+        if (outlineHex || inkFit) paintOutlined(lines[i], lineSize, boxLeft, boxW, cursor, bandH, true);
         else ctx.fillText(lines[i], boxLeft + (boxW - lw) / 2, cursor + lineInk.ascent);
         cursor += bandH + lay.lineGap;
       }
@@ -322,7 +352,7 @@
         var numInk = inkMetrics(number, numSize);
         setFont(numSize);
         var mw = ctx.measureText(number).width;
-        if (outlineHex) paintOutlined(number, numSize, boxLeft, boxW, numberTop);
+        if (outlineHex || inkFit) paintOutlined(number, numSize, boxLeft, boxW, numberTop, numberAvailH, false);
         else ctx.fillText(number, boxLeft + (boxW - mw) / 2, numberTop + numInk.ascent);
       }
     }
@@ -564,7 +594,7 @@
       } else {
         draw();
       }
-    });
+    }, fontStyle);
   }
 
   // Binding twice would double every listener, so each widget is claimed once.

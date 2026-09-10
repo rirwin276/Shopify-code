@@ -83,6 +83,11 @@
             data-ss-pers
             data-initial-color="{{ product.selected_or_first_available_variant.option1 | escape }}"
             data-font-family="{{ ss_pers.font_family | escape }}"
+            data-font-style="{{ ss_pers.style | default: 'normal' | escape }}"
+            data-ink-fit="{{ ss_pers.ink_fit | default: false }}"
+            data-ink-stroke-ratio="{{ ss_pers.ink_stroke_ratio | default: 0 }}"
+            data-name-stroke-min="{{ ss_pers.name_stroke_min | default: 0 }}"
+            data-name-stroke-cap="{{ ss_pers.name_stroke_cap | default: 0 }}"
             data-font-weight="{{ ss_pers.font_weight | default: 700 }}"
             data-color-hex="{{ ss_pers.color_hex | default: '#141414' | escape }}"
             data-outline-color-hex="{{ ss_pers.outline_color_hex | escape }}"
