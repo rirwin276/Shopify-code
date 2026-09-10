@@ -1,0 +1,19 @@
+name: Personalization preview tests
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/ss-tote-personalize.js'
+      - 'blocks/buy-buttons.liquid'
+      - 'tests/js_harness/personalization_outline_harness.js'
+      - '.github/workflows/personalization-preview-tests.yml'
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --check assets/ss-tote-personalize.js
+      - run: node tests/js_harness/personalization_outline_harness.js
