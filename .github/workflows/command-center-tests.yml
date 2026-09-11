@@ -1,0 +1,24 @@
+name: Command Center and session tracker tests
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/ss-command-center.js'
+      - 'assets/ss-session-tracker.js'
+      - 'templates/page.super-admin.liquid'
+      - 'tests/command-center.test.cjs'
+      - 'tests/session-tracker.test.cjs'
+      - '.github/workflows/command-center-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  interface:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-save jsdom@30.0.1
+      - run: node --test tests/command-center.test.cjs tests/session-tracker.test.cjs
