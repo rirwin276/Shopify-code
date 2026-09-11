@@ -537,7 +537,7 @@
     const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
     if (!SF_IS_ADMIN && parseInt(localStorage.getItem(STORAGE_KEY) || 0) >= 3) { sfToastShow("Daily limit reached."); return; }
     generateHandle();
-    if (!validateBeforeSubmit()) { updateSubmitEnabled(); return; }
+    if (!validateBeforeSubmit()) { window.ssJourneyEvent?.('create_validation_failed'); updateSubmitEnabled(); return; }
     if (!SF_UPLOADER_BASE) { alert("Studio Uploader URL not configured in section settings."); return; }
 
     const btn = document.getElementById('sf-submit-btn');
@@ -568,10 +568,13 @@
     formData.delete("storefront_logo_secondary");
 
     try {
+      window.ssJourneyEvent?.('create_submitted');
       const res = await fetch(endpoint, { method: "POST", body: formData });
       if (!res.ok) { const t = await res.text().catch(() => ""); throw new Error("Uploader returned " + res.status + (t ? (": " + t.slice(0, 240)) : "")); }
+      window.ssJourneyEvent?.('create_accepted');
       if (!SF_IS_ADMIN) incrementRateLimit();
     } catch (err) {
+      window.ssJourneyEvent?.('create_failed');
       console.error(err);
       stopProvisioning();
       if (btn) { btn.disabled = false; btn.style.opacity = "1"; }

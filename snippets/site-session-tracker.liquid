@@ -1,0 +1,9 @@
+{%- unless request.design_mode -%}
+  {% capture ss_tracking_owner %}{% render 'platform-super-admin' %}{% endcapture %}
+  <script>
+    window.SS_SESSION_OWNER = {{ ss_tracking_owner | strip | json }} === 'true';
+    window.ssJourneyQueue = window.ssJourneyQueue || [];
+    window.ssJourneyEvent = window.ssJourneyEvent || function(name) { window.ssJourneyQueue.push(name); };
+  </script>
+  <script src="{{ 'ss-session-tracker.js' | asset_url }}" defer></script>
+{%- endunless -%}
