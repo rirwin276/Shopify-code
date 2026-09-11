@@ -373,6 +373,104 @@
   }
 
   /* Overnight outreach review */
+  /* The product-building switch. Colour is the whole point: during an outage
+     the founder should be able to tell the platform's state from across the
+     room, without reading a word. */
+  .gm-switch-card { border-left: 4px solid var(--success); transition: border-color .2s ease; }
+  .gm-switch-card[data-state="degraded"] { border-left-color: var(--warning); }
+  .gm-switch-card[data-state="paused"] { border-left-color: var(--danger); }
+  .gm-switch-card[data-state="unknown"] { border-left-color: var(--border); }
+
+  .gm-switch-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .01em;
+  }
+  .gm-switch-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--gray);
+    flex: 0 0 auto;
+  }
+  .gm-switch-card[data-state="ok"] .gm-switch-dot { background: var(--success); }
+  .gm-switch-card[data-state="ok"] .gm-switch-state { color: #1c7a34; }
+  .gm-switch-card[data-state="degraded"] .gm-switch-dot { background: var(--warning); }
+  .gm-switch-card[data-state="degraded"] .gm-switch-state { color: #8a5300; }
+  .gm-switch-card[data-state="paused"] .gm-switch-dot { background: var(--danger); }
+  .gm-switch-card[data-state="paused"] .gm-switch-state { color: #b3241c; }
+
+  .gm-switch-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 0;
+  }
+  .gm-switch-choice {
+    flex: 1 1 150px;
+    text-align: left;
+    padding: 11px 13px;
+    border-radius: 11px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1.3;
+  }
+  .gm-switch-choice small {
+    display: block;
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--gray);
+  }
+  .gm-switch-choice[aria-pressed="true"] { border-color: var(--text); background: rgba(0,0,0,.04); }
+  .gm-switch-choice[data-set-state="ok"][aria-pressed="true"] { border-color: var(--success); }
+  .gm-switch-choice[data-set-state="degraded"][aria-pressed="true"] { border-color: var(--warning); }
+  .gm-switch-choice[data-set-state="paused"][aria-pressed="true"] { border-color: var(--danger); }
+  .gm-switch-choice[disabled] { opacity: .55; cursor: progress; }
+
+  .gm-switch-message {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    line-height: 1.45;
+    resize: vertical;
+    min-height: 62px;
+  }
+
+  .gm-switch-note {
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--gray);
+  }
+  .gm-switch-note strong { color: var(--text); }
+
+  .gm-probe-result {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.45;
+    border: 1px solid var(--border);
+    background: rgba(0,0,0,.03);
+  }
+  .gm-probe-result.is-good { border-color: rgba(52,199,89,.4); background: rgba(52,199,89,.1); color: #1c5e2e; }
+  .gm-probe-result.is-bad { border-color: rgba(255,59,48,.35); background: rgba(255,59,48,.09); color: #8c1d18; }
+
   .gm-outreach-warning {
     margin-bottom: 12px;
     padding: 10px 12px;
@@ -859,6 +957,51 @@
       <div class="gm-banner-list" id="newStoreList"></div>
       <button type="button" class="gm-btn gm-btn-primary" id="markAllSeenBtn">Mark all seen ✓</button>
     </div>
+
+    {%- comment -%}
+      The product-building switch. Above the overnight batch because this is
+      the only control on the page that changes what customers can do RIGHT
+      NOW: flipping it to Paused stops every product build across the
+      platform and puts a notice in front of anyone who tries to open a
+      builder. Orders, checkout and the storefronts are untouched.
+    {%- endcomment -%}
+    <section class="gm-card gm-switch-card" id="serviceSwitchCard" data-state="unknown" aria-busy="true">
+      <div class="gm-section-head">
+        <div>
+          <h2 class="gm-section-title">Product building</h2>
+          <p class="gm-switch-state" id="switchStateLabel">
+            <span class="gm-switch-dot"></span><span id="switchStateText">Checking…</span>
+          </p>
+        </div>
+        <button type="button" class="gm-btn" id="switchRefreshBtn">Refresh</button>
+      </div>
+
+      <div class="gm-switch-choices" id="switchChoices">
+        <button type="button" class="gm-switch-choice" data-set-state="ok" aria-pressed="false">
+          Running
+          <small>Everyone can build products.</small>
+        </button>
+        <button type="button" class="gm-switch-choice" data-set-state="degraded" aria-pressed="false">
+          Slow
+          <small>Still allowed. Warns people it is running behind.</small>
+        </button>
+        <button type="button" class="gm-switch-choice" data-set-state="paused" aria-pressed="false">
+          Paused
+          <small>Blocks every new product and store build.</small>
+        </button>
+      </div>
+
+      <textarea class="gm-switch-message" id="switchMessage" rows="3"
+                placeholder="What people see. Leave blank for the standard outage notice."></textarea>
+
+      <p class="gm-switch-note" id="switchNote">Orders, checkout and every live storefront keep working either way.</p>
+
+      <div class="gm-section-head" style="margin-top:14px;">
+        <p class="gm-switch-note" style="margin:0;">Not sure if the print partner has recovered? Ask its renderer, not its status page.</p>
+        <button type="button" class="gm-btn" id="probeBtn">Test the renderer</button>
+      </div>
+      <div class="gm-probe-result" id="probeResult" style="display:none;"></div>
+    </section>
 
     {%- comment -%}
       The overnight batch. First card on the page because it is the one thing
@@ -1847,6 +1990,181 @@
       el._t = setTimeout(function(){ el.style.display = 'none'; }, 3200);
     }
 
+    // ------------------------------------------------------------------
+    // The product-building switch.
+    //
+    // Three positions, one source of truth: a Shopify metaobject the build
+    // service reads before it will create anything. Nothing here is cached in
+    // the page — every read comes back from the service, so two admins on two
+    // phones always see the same position.
+    // ------------------------------------------------------------------
+
+    var SWITCH_STATES = ['ok', 'degraded', 'paused'];
+    var SWITCH_WORDS = { ok: 'Running', degraded: 'Running slow', paused: 'Paused' };
+    var SWITCH_DEFAULT_MESSAGE = '';
+    var switchBusy = false;
+
+    function switchEls() {
+      return {
+        card: document.getElementById('serviceSwitchCard'),
+        text: document.getElementById('switchStateText'),
+        note: document.getElementById('switchNote'),
+        message: document.getElementById('switchMessage'),
+        choices: document.getElementById('switchChoices')
+      };
+    }
+
+    function setSwitchBusy(busy) {
+      switchBusy = busy;
+      var el = switchEls();
+      if (el.card) el.card.setAttribute('aria-busy', busy ? 'true' : 'false');
+      if (!el.choices) return;
+      el.choices.querySelectorAll('.gm-switch-choice').forEach(function (btn) {
+        btn.disabled = !!busy;
+      });
+    }
+
+    function renderSwitch(data) {
+      var el = switchEls();
+      if (!el.card) return;
+      var state = String((data && data.state) || '').toLowerCase();
+      if (SWITCH_STATES.indexOf(state) === -1) state = 'unknown';
+
+      el.card.setAttribute('data-state', state);
+      if (el.text) {
+        el.text.textContent = state === 'unknown'
+          ? 'Could not read the switch'
+          : SWITCH_WORDS[state] + ' · since ' + formatDate(data && data.updated_at);
+      }
+
+      if (el.choices) {
+        el.choices.querySelectorAll('.gm-switch-choice').forEach(function (btn) {
+          var mine = btn.getAttribute('data-set-state') === state;
+          btn.setAttribute('aria-pressed', mine ? 'true' : 'false');
+        });
+      }
+
+      // Only overwrite what the founder is typing when the box is not theirs
+      // to lose — an in-flight edit outranks a refresh.
+      if (el.message && document.activeElement !== el.message) {
+        el.message.value = (data && data.message) || '';
+      }
+      if (data && data.default_message) {
+        SWITCH_DEFAULT_MESSAGE = data.default_message;
+        if (el.message) {
+          el.message.placeholder = 'What people see. Leave blank for: “' + data.default_message + '”';
+        }
+      }
+
+      if (el.note) {
+        var streak = Number((data && data.mockup_timeout_streak) || 0);
+        var note = 'Orders, checkout and every live storefront keep working either way.';
+        if (state === 'paused') {
+          note = '<strong>Nobody can create a product right now.</strong> Anyone who opens a '
+               + 'builder sees your notice instead. Orders, checkout and every live storefront '
+               + 'are unaffected.';
+        } else if (state === 'degraded') {
+          note = '<strong>Builds still run.</strong> People are warned that product building is '
+               + 'behind, but nothing is blocked.';
+        }
+        if (streak > 0) {
+          note += ' The last ' + streak + ' mockup render' + (streak === 1 ? '' : 's')
+                + ' timed out — three in a row pauses this automatically.';
+        }
+        el.note.innerHTML = note;
+      }
+    }
+
+    function loadServiceSwitch() {
+      return fetch(RAILWAY_URL + '/admin/service-status', {
+        method: 'GET', headers: railwayHeaders(), cache: 'no-store'
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data || data.ok === false) throw new Error((data && data.error) || 'unavailable');
+          renderSwitch(data);
+        })
+        .catch(function () {
+          renderSwitch({ state: 'unknown' });
+        });
+    }
+
+    function setServiceSwitch(nextState) {
+      if (switchBusy) return;
+      var el = switchEls();
+      var current = el.card ? el.card.getAttribute('data-state') : '';
+      if (nextState === current) return;
+
+      if (nextState === 'paused' &&
+          !confirm('Pause product building for the whole platform?\n\nNo new stores or products can be created until you turn it back on. Orders and checkout keep working.')) {
+        return;
+      }
+      if (current === 'paused' && nextState === 'ok' &&
+          !confirm('Turn product building back on?\n\nOnly do this once the renderer is actually working — test it below if you are not sure.')) {
+        return;
+      }
+
+      setSwitchBusy(true);
+      fetch(RAILWAY_URL + '/admin/service-status', {
+        method: 'POST',
+        headers: railwayHeaders(),
+        body: JSON.stringify({
+          state: nextState,
+          message: (el.message && el.message.value.trim()) || ''
+        })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data || data.ok === false) throw new Error((data && data.error) || 'could not save');
+          renderSwitch(data);
+          showToast('Product building: ' + (SWITCH_WORDS[data.state] || data.state));
+        })
+        .catch(function (err) {
+          showToast('Could not move the switch — ' + err.message, true);
+          loadServiceSwitch();
+        })
+        .then(function () { setSwitchBusy(false); });
+    }
+
+    function runPrintfulProbe() {
+      var box = document.getElementById('probeResult');
+      var btn = document.getElementById('probeBtn');
+      if (!box) return;
+      box.style.display = 'block';
+      box.className = 'gm-probe-result';
+      box.textContent = 'Submitting a real render and timing it. This takes up to a minute…';
+      if (btn) { btn.disabled = true; btn.textContent = 'Testing…'; }
+
+      fetch(RAILWAY_URL + '/admin/printful-probe?seconds=45', {
+        method: 'GET', headers: railwayHeaders(), cache: 'no-store'
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var verdict = String((data && data.verdict) || '');
+          if (verdict === 'rendering') {
+            box.className = 'gm-probe-result is-good';
+            box.textContent = 'Rendering normally — finished in ' + data.rendered_in_s
+              + 's. Safe to set product building back to Running.';
+          } else if (verdict === 'stalled') {
+            box.className = 'gm-probe-result is-bad';
+            box.textContent = 'Accepted instantly, then never rendered (' + data.waited_s
+              + 's). That is the outage signature: the API is healthy, the renderer is not. '
+              + 'Leave product building paused.';
+          } else {
+            box.className = 'gm-probe-result is-bad';
+            box.textContent = 'Could not complete the test — '
+              + ((data && (data.error || data.note)) || 'no answer from the print partner.');
+          }
+        })
+        .catch(function (err) {
+          box.className = 'gm-probe-result is-bad';
+          box.textContent = 'Could not run the test — ' + err.message;
+        })
+        .then(function () {
+          if (btn) { btn.disabled = false; btn.textContent = 'Test the renderer'; }
+        });
+    }
+
     function getSeenStores() {
       return (localStorage.getItem('gm-seen-stores') || '').split(',').map(function(v){ return v.trim(); }).filter(Boolean);
     }
@@ -2406,6 +2724,13 @@
     });
     document.getElementById('outreachReviewList').addEventListener('click', onOutreachAction);
 
+    document.getElementById('switchRefreshBtn').addEventListener('click', loadServiceSwitch);
+    document.getElementById('probeBtn').addEventListener('click', runPrintfulProbe);
+    document.getElementById('switchChoices').addEventListener('click', function (event) {
+      var btn = event.target.closest('[data-set-state]');
+      if (btn) setServiceSwitch(btn.getAttribute('data-set-state'));
+    });
+
     bindPriceOverride('btnUpdatePrice', 'targetTag', 'newPrice', 'priceStatus');
     bindPriceOverride('btnUpdatePrice_m', 'targetTag_m', 'newPrice_m', 'priceStatus_m');
 
@@ -2413,6 +2738,11 @@
     applyStoreFilters();
     loadCommandCenterSummary(false);
     loadOutreachQueue();
+    loadServiceSwitch();
+    // An outage can start while this page is open. Re-read the switch on a
+    // slow interval so a second admin flipping it, or the automatic pause,
+    // shows up here without a reload.
+    setInterval(loadServiceSwitch, 60000);
   </script>
 {% endif %}
 

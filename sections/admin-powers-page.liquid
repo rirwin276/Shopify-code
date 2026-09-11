@@ -227,6 +227,13 @@
     </div>
   {%- endif -%}
 
+  {%- comment -%}
+    The product-building outage notice. Every "Add product" and "Open builder"
+    control on this page leads into the build service, so an admin should see
+    the state of that service before they click one, not after.
+  {%- endcomment -%}
+  {% render 'service-status-banner' %}
+
   <!-- HERO HEADER -->
   <div class="ap-hero">
     {% render 'logo-frame-contrast' %}

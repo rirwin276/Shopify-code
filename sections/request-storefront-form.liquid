@@ -47,6 +47,14 @@
 
       <div id="sf-error-inline" class="sf-error sf-hidden"></div>
 
+      {%- comment -%}
+        When product building is paused this shows the outage notice and turns
+        the submit button off. A store requested during an outage is a store
+        that comes out with no product photos, which is worse for this customer
+        than being asked to come back.
+      {%- endcomment -%}
+      {% render 'service-status-banner' %}
+
       <form id="sf-request-form" class="sf-form" onsubmit="submitToStudioUploader(event)" novalidate>
         <input type="hidden" name="customer_id" id="SF_CUST_ID" value="{{ customer.id }}">
         <input type="hidden" name="customer_email" id="SF_CUST_EMAIL" value="{{ customer.email }}">
@@ -478,7 +486,7 @@
     const hasHandle = !!(document.getElementById("HiddenHandle")?.value || "").trim();
     const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
     const limited = (!SF_IS_ADMIN && parseInt(localStorage.getItem(STORAGE_KEY) || 0) >= 3);
-    const enabled = !limited && isMainReady && hasHandle;
+    const enabled = !limited && isMainReady && hasHandle && !window.ssProductBuildingPaused;
     btn.disabled = !enabled;
     btn.style.opacity = enabled ? "1" : "0.6";
   }
@@ -536,6 +544,11 @@
     e.preventDefault();
     const STORAGE_KEY = 'sf_submissions_' + new Date().toISOString().slice(0, 10);
     if (!SF_IS_ADMIN && parseInt(localStorage.getItem(STORAGE_KEY) || 0) >= 3) { sfToastShow("Daily limit reached."); return; }
+    if (window.ssProductBuildingPaused) {
+      sfToastShow("Store building is paused right now — please try again shortly.");
+      updateSubmitEnabled();
+      return;
+    }
     generateHandle();
     if (!validateBeforeSubmit()) { updateSubmitEnabled(); return; }
     if (!SF_UPLOADER_BASE) { alert("Studio Uploader URL not configured in section settings."); return; }
