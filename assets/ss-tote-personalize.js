@@ -134,6 +134,7 @@
       }
       return colorHex;
     }
+    var directMockup = root.getAttribute('data-mockup-image-url') || '';
     var currentColor = root.getAttribute('data-initial-color') || '';
     var backMap = {};
     var bgImg = null;
@@ -276,7 +277,7 @@
     }
 
     function loadBg(colorName) {
-      var url = backMap[colorName] || backMap[Object.keys(backMap)[0]] || '';
+      var url = directMockup || backMap[colorName] || backMap[Object.keys(backMap)[0]] || '';
       if (!url) { bgImg = null; draw(); return; }
       var img = new Image();
       img.crossOrigin = 'anonymous';
@@ -570,6 +571,38 @@
     syncValidity();
     updateAcceleratedButtons();
 
+    // Design controls are available only in the homepage demo, never in a
+    // product form: real buyers use the organizer's saved print settings.
+    if (!form && root.getAttribute('data-ss-pers-demo') === 'true') {
+      var demoFont = root.querySelector('[data-ss-pers-demo-font]');
+      var demoFill = root.querySelector('[data-ss-pers-demo-fill]');
+      var demoOutline = root.querySelector('[data-ss-pers-demo-outline]');
+      var demoFonts = {
+        varsity: { family: 'Graduate', weight: '400', stroke: 0.045 },
+        courtside: { family: 'Teko', weight: '700', stroke: 0.04 },
+        ironclad: { family: 'Russo One', weight: '400', stroke: 0.037 }
+      };
+      var fontRevision = 0;
+      if (demoFont) demoFont.addEventListener('change', function () {
+        var preset = demoFonts[demoFont.value];
+        if (!preset) return;
+        var revision = ++fontRevision;
+        loadFont(preset.family, preset.weight, function () {
+          if (revision !== fontRevision) return;
+          fontFamily = preset.family; fontWeight = preset.weight;
+          inkFit = true; inkStrokeRatio = preset.stroke;
+          nameStrokeMin = 0.06; nameStrokeCap = 0.12;
+          draw();
+        }, 'normal');
+      });
+      if (demoFill) demoFill.addEventListener('change', function () {
+        colorHex = demoFill.value; draw();
+      });
+      if (demoOutline) demoOutline.addEventListener('change', function () {
+        outlineHex = demoOutline.value; draw();
+      });
+    }
+
     // Follow garment color changes (theme's native variant-change event).
     document.addEventListener('variant:update', function (e) {
       try {
@@ -583,7 +616,9 @@
     });
 
     loadFont(fontFamily, fontWeight, function () {
-      if (mockupsUrl) {
+      if (directMockup) {
+        loadBg(currentColor);
+      } else if (mockupsUrl) {
         fetch(mockupsUrl)
           .then(function (r) { return r.json(); })
           .then(function (data) {
