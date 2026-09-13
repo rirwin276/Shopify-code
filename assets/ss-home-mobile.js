@@ -18,31 +18,6 @@
         panel.hidden = panel.dataset.adDemoPanel !== button.dataset.adDemo;
       });
     }));
-    // Illustrative local preview. No personal values are stored or transmitted.
-    const nameInput = root.querySelector('[data-ad-name]');
-    const numberInput = root.querySelector('[data-ad-number]');
-    const printName = root.querySelector('[data-ad-print-name]');
-    const printNumber = root.querySelector('[data-ad-print-number]');
-    const printOverlay = root.querySelector('.ad-print-overlay');
-    if (nameInput && numberInput && printName && printNumber && printOverlay) {
-      const syncPrint = () => {
-        const name = nameInput.value.slice(0, 12).toUpperCase();
-        const number = numberInput.value.replace(/[^0-9]/g, '').slice(0, 3);
-        numberInput.value = number;
-        printName.textContent = name;
-        printNumber.textContent = number;
-        printName.style.setProperty('--ad-name-size', Math.min(8, 48 / Math.max(name.length, 1)) + 'cqw');
-        root.querySelector('[data-ad-personal-status]').textContent = [name, number].filter(Boolean).join(' · ') || 'Add a name or number to try it.';
-      };
-      nameInput.addEventListener('input', syncPrint);
-      numberInput.addEventListener('input', syncPrint);
-      const inkButtons = root.querySelectorAll('[data-ad-ink]');
-      inkButtons.forEach(button => button.addEventListener('click', () => {
-        inkButtons.forEach(b => b.setAttribute('aria-pressed', String(b === button)));
-        printOverlay.style.color = button.dataset.adInk;
-      }));
-      syncPrint();
-    }
     const builderImage = root.querySelector('[data-ad-builder-image]');
     if (builderImage) {
       let product = 'tee';

@@ -187,20 +187,30 @@
               <button type="button" data-ad-demo="personalize" aria-pressed="true">Name &amp; number</button>
               <button type="button" data-ad-demo="builder" aria-pressed="false">Pro Builder</button>
             </div>
-            <div data-ad-demo-panel="personalize" class="ad-demo-layout">
+            {%- comment -%}BC3413 calibration and Varsity Prime settings from Pro Builder. Use the product-page renderer so this demo follows its sizing and outlines.{%- endcomment -%}
+            <div data-ad-demo-panel="personalize" class="ad-demo-layout" data-ss-pers
+              data-initial-color="Athletic Grey Triblend"
+              data-font-family="Graduate" data-font-weight="400" data-font-style="normal"
+              data-ink-fit="true" data-ink-stroke-ratio="0.045" data-name-stroke-min="0.06" data-name-stroke-cap="0.12"
+              data-color-hex="#ffffff" data-outline-color-hex="#1e2a4a" data-outline-ratio="0.035"
+              data-max-name="14" data-max-number="3"
+              data-bbox-left="29.7" data-bbox-top="8.1" data-bbox-width="41.1" data-bbox-height="54.6"
+              data-top-offset-pct="0.10" data-lift-pct="0" data-center-alone="0"
+              data-name-zone-pct="0.28" data-name2-zone-pct="0.21" data-line-gap-pct="0.02" data-gap-pct="0.04" data-number-min-share="0.20"
+              data-mockups-url="https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3413/mockups-public">
               <div class="ad-print-stage">
-                <img src="{{ 'ss-demo-back-blank.webp' | asset_url }}" width="700" height="700" alt="Back of a gray hoodie with your sample name and number" loading="lazy">
-                <div class="ad-print-overlay" aria-hidden="true"><span data-ad-print-name>ADILYN</span><strong data-ad-print-number>7</strong></div>
-                <span class="ad-demo-badge">Live preview · Try it below</span>
+                <canvas data-ss-pers-canvas width="640" height="640" role="img" aria-label="Live back preview of an athletic grey tri-blend shirt with your name and number in white with a navy outline">Try your name and number on a tri-blend shirt.</canvas>
+                <span class="ad-demo-badge">Tri-blend tee · Live back preview</span>
               </div>
               <div class="ad-demo-controls">
-                <p class="ad-demo-eyebrow">For everyone ordering</p>
-                <h3>Their name. Their number.</h3>
-                <p>Each buyer adds their own at checkout. You don't collect a roster.</p>
-                <div class="ad-personal-fields"><label>Name<input type="text" data-ad-name value="ADILYN" maxlength="12" autocomplete="off" spellcheck="false" aria-label="Try a name on the hoodie"></label><label>Number<input type="text" data-ad-number value="7" maxlength="3" inputmode="numeric" autocomplete="off" aria-label="Try a number on the hoodie"></label></div>
-                <div class="ad-ink-choices" role="group" aria-label="Preview print color"><span>Print color</span><button type="button" data-ad-ink="#162b46" aria-pressed="true">Navy</button><button type="button" data-ad-ink="#d8762c" aria-pressed="false">Orange</button></div>
-                <p class="ad-demo-fine" data-ad-personal-status aria-live="polite">ADILYN · 7</p>
-                <p class="ad-demo-fine">Example preview. Personalization is available on select products; your store admin sets the print style.</p>
+                <p class="ad-demo-eyebrow">You choose the design. Parents do the rest.</p>
+                <h3>One team look.<br>Every name their own.</h3>
+                <p>In Pro Builder, pick the name &amp; number design, font, inside color and outline color. Add the shirt to your team store and share the link.</p>
+                <p>Parents choose their size, enter their own name and number on the product page, preview it, then check out. No roster or individual orders for you to manage.</p>
+                <p class="ad-demo-fine"><strong>Try it as a parent:</strong> type a name and number below.</p>
+                <div class="ad-personal-fields"><label>Name<input type="text" data-ss-pers-name value="ADILYN" maxlength="14" autocomplete="off" spellcheck="false" aria-label="Try a name on the tri-blend shirt"></label><label>Number<input type="text" data-ss-pers-number value="7" maxlength="3" inputmode="numeric" autocomplete="off" aria-label="Try a number on the tri-blend shirt"></label></div>
+                <div class="ad-print-style"><strong>Varsity Prime</strong><span><i class="ad-print-swatch ad-print-swatch-white" aria-hidden="true"></i>White inside</span><span><i class="ad-print-swatch ad-print-swatch-navy" aria-hidden="true"></i>Navy outline</span></div>
+                <p class="ad-demo-fine">Same preview used on our product pages. This example shows the design selected by the store organizer; parents personalize the name and number.</p>
               </div>
             </div>
             <div data-ad-demo-panel="builder" class="ad-demo-layout" hidden>
@@ -1932,6 +1942,7 @@
 {% unless customer %}
   {{ 'ss-home-mobile.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'ss-home-mobile.js' | asset_url }}" defer></script>
+  <script src="{{ 'ss-tote-personalize.js' | asset_url }}" defer></script>
 {% endunless %}
 
 {% schema %}
