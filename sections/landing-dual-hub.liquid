@@ -133,15 +133,15 @@
       <section class="ad-hero">
         <div class="ad-wrap ad-hero-grid">
           <div>
-            <p class="ad-kicker">Small veteran-owned company. Big team spirit.</p>
-            <h1>Your team.<br>Your <em>free store.</em></h1>
-            <p class="ad-intro">Upload your logo. Your store builds automatically. Everyone orders their own gear, shipped straight to their door.</p>
+            <p class="ad-kicker">Custom team apparel. Your own online store.</p>
+            <h1>Team merch.<br><em>Off your plate.</em></h1>
+            <p class="ad-intro"><strong>A free online apparel store for your team.</strong> We put your logo on the gear. Parents choose their size, personalize, and pay online. We make it and ship it to them.</p>
             <a class="ad-start" data-ad-hero-cta href="{{ request_url | escape }}">Build my free team store <span aria-hidden="true">→</span></a>
             <p class="ad-micro">2-minute form · Store built in about 15 minutes</p>
-            <p class="ad-signin">Secure sign-in keeps your store on your dashboard.</p><a class="ad-try-link" href="#ad-try-{{ section.id }}">Try the name &amp; number preview ↓</a>
+            <a class="ad-secondary" href="#ad-store-{{ section.id }}">Explore a demo store <span aria-hidden="true">↗</span></a><p class="ad-signin">Always free to create. You only pay for gear you order.</p>
           </div>
           <div class="ad-stage" aria-label="Team gear examples">
-            <div class="ad-stage-top"><span>Made for their team</span><span>Imagine yours here</span></div>
+            <div class="ad-stage-top"><span>YOUR LOGO. THEIR FAVORITE GEAR.</span><span>Real team stores</span></div>
             <figure class="ad-gallery-panel" data-ad-panel="cashmere">
               <img src="{{ 'ss-home-cashmere-showcase.webp' | asset_url }}" alt="Cashmere Youth Football gray hoodie and white coaches polo, shown as 3D product mockups" width="1200" height="800" loading="eager" fetchpriority="high">
               <figcaption class="ad-gallery-caption">Cashmere Youth Football<small>Youth hoodies to coaches polos. One team store.</small></figcaption>
@@ -160,57 +160,60 @@
           </div>
         </div>
       </section>
-      <div class="ad-benefits"><div class="ad-wrap ad-benefit-row"><span>No setup fees</span><span>No minimums</span><span>No deadlines</span></div></div>
-      <section class="ad-section ad-gear-section">
+      <div class="ad-benefits"><div class="ad-wrap ad-benefit-row"><span>No setup fees</span><span>No minimums</span><span>No deadlines</span><span>Made &amp; shipped for you</span></div></div>
+      <section class="ad-section ad-store-section" id="ad-store-{{ section.id }}" data-ad-store data-catalog-url="{{ 'ss-raptors-demo.json' | asset_url }}">
         <div class="ad-wrap">
-          <p class="ad-kicker">For the whole sideline</p>
-          <h2>One team.<br>So many ways to wear it.</h2>
-          <div class="ad-gear-grid">
-            <figure><img src="{{ 'ss-demo-youth.webp' | asset_url }}" alt="Cashmere Youth Football gray youth T-shirt" width="600" height="600" loading="lazy"><figcaption>Youth tees</figcaption></figure>
-            <figure><img src="{{ 'ss-home-sapphire-hoodie.webp' | asset_url }}" alt="Sapphire Shooters navy hoodie" width="800" height="800" loading="lazy"><figcaption>Team hoodies</figcaption></figure>
-            <figure><img src="{{ 'ss-demo-polo.webp' | asset_url }}" alt="Cashmere Youth Football white Under Armour polo" width="600" height="600" loading="lazy"><figcaption>Coaches polos</figcaption></figure>
-            <figure><img src="{{ 'ss-home-sapphire-tee.webp' | asset_url }}" alt="Sapphire Shooters navy adult T-shirt" width="800" height="800" loading="lazy"><figcaption>Everyday tees</figcaption></figure>
-            <figure><img src="{{ 'ss-demo-hat.webp' | asset_url }}" alt="Sapphire Shooters navy and white team hat" width="600" height="600" loading="lazy"><figcaption>Team hats</figcaption></figure>
-            <figure><img src="{{ 'ss-demo-tote.webp' | asset_url }}" alt="Sapphire Shooters black tote bag" width="600" height="600" loading="lazy"><figcaption>Grab-and-go totes</figcaption></figure>
+          <div class="ad-section-heading"><div><p class="ad-kicker">Don't picture it. Step inside.</p><h2>This could be<br>your team's store.</h2></div><p class="ad-section-intro">Browse the Raptors gear. Open a product. Try the colors. This is how easy shopping your team store can feel.</p></div>
+          <div class="ad-store-window">
+            <div class="ad-store-chrome"><span class="ad-window-dots" aria-hidden="true">● ● ●</span><span>YOUR TEAM STORE</span><span class="ad-demo-tag">Demo · Browse only</span></div>
+            <div class="ad-store-banner"><div><p>THE TEAM. THE FAMILIES. THE FANS.</p><h3>RAPTORS<br><span>GEAR UP.</span></h3></div><div class="ad-store-banner-note">A whole team look.<br>Zero group orders.</div></div>
+            <div class="ad-store-toolbar"><strong>The team shop</strong><div role="group" aria-label="Filter demo products"><button type="button" data-store-filter="all" aria-pressed="true">All gear</button><button type="button" data-store-filter="adult" aria-pressed="false">Adults</button><button type="button" data-store-filter="youth" aria-pressed="false">Kids</button><button type="button" data-store-filter="extras" aria-pressed="false">Extras</button></div></div>
+            <div class="ad-store-grid" data-store-grid><p>Loading the Raptors gear…</p></div>
+            <p class="ad-store-footnote">Real Raptors product photos. A demo you can explore freely—no sign-in, cart, or checkout.</p>
           </div>
-          <p class="ad-gear-note">Gear shown from Cashmere Youth Football &amp; Sapphire Shooters.</p>
+          <div class="ad-store-after"><p><strong>Your logo goes here next.</strong> Create your store, choose your gear, and share one link.</p><a class="ad-start" href="{{ request_url | escape }}">Create my free store <span aria-hidden="true">→</span></a></div>
         </div>
+        <dialog class="ad-product-dialog" data-store-dialog aria-label="Demo product details"><button class="ad-dialog-close" type="button" data-store-close aria-label="Close product preview">×</button><div data-store-detail></div></dialog>
       </section>
       <div class="ss-home-slot" data-ss-home-slot="reviews"></div>
       <section class="ad-section ad-play-section" id="ad-try-{{ section.id }}">
         <div class="ad-wrap">
-          <p class="ad-kicker">Go ahead. Make it yours.</p>
-          <h2>This is the fun part.</h2>
-          <p class="ad-section-intro">Try a name and number. Then explore how you can choose the gear and colors in your own store.</p>
+          <p class="ad-kicker">One design. Every player. Every proud parent.</p>
+          <h2>Their name.<br>Their number. Their shirt.</h2>
+          <p class="ad-section-intro">Pick a look, then try your own name. Add a second line or leave the number blank. Everyone gets to make it theirs.</p>
           <div class="ad-experience">
             <div class="ad-experience-tabs" role="group" aria-label="Choose a feature to try">
               <button type="button" data-ad-demo="personalize" aria-pressed="true">Name &amp; number</button>
-              <button type="button" data-ad-demo="builder" aria-pressed="false">Pro Builder</button>
+              <button type="button" data-ad-demo="builder" aria-pressed="false">Choose your gear</button>
             </div>
-            {%- comment -%}BC3413 calibration and Varsity Prime settings from Pro Builder. Use the product-page renderer so this demo follows its sizing and outlines.{%- endcomment -%}
-            <div data-ad-demo-panel="personalize" class="ad-demo-layout" data-ss-pers
+            {%- comment -%}Original Printful BC3413 ghost photo. The ghost print zone follows the finished NAME/00 product mockup; shared name/number layout and font presets come from the product renderer.{%- endcomment -%}
+            <div data-ad-demo-panel="personalize" class="ad-demo-layout" data-ss-pers data-ss-pers-demo="true"
               data-initial-color="Athletic Grey Triblend"
               data-font-family="Graduate" data-font-weight="400" data-font-style="normal"
               data-ink-fit="true" data-ink-stroke-ratio="0.045" data-name-stroke-min="0.06" data-name-stroke-cap="0.12"
-              data-color-hex="#ffffff" data-outline-color-hex="#1e2a4a" data-outline-ratio="0.035"
+              data-color-hex="#ffffff" data-outline-color-hex="#0d9488" data-outline-ratio="0.035"
               data-max-name="14" data-max-number="3"
-              data-bbox-left="29.7" data-bbox-top="8.1" data-bbox-width="41.1" data-bbox-height="54.6"
+              data-bbox-left="34" data-bbox-top="10" data-bbox-width="32" data-bbox-height="42.67"
               data-top-offset-pct="0.10" data-lift-pct="0" data-center-alone="0"
               data-name-zone-pct="0.28" data-name2-zone-pct="0.21" data-line-gap-pct="0.02" data-gap-pct="0.04" data-number-min-share="0.20"
-              data-mockups-url="https://printfulautomation-production.up.railway.app/editor/pro-shirt/bc3413/mockups-public">
+              data-mockup-image-url="{{ 'ss-triblend-ghost.png' | asset_url }}">
               <div class="ad-print-stage">
-                <canvas data-ss-pers-canvas width="640" height="640" role="img" aria-label="Live back preview of an athletic grey tri-blend shirt with your name and number in white with a navy outline">Try your name and number on a tri-blend shirt.</canvas>
+                <canvas data-ss-pers-canvas width="640" height="640" role="img" aria-label="Live back preview of an athletic grey tri-blend shirt with your name and number in white with a teal outline">Try your name and number on a tri-blend shirt.</canvas>
                 <span class="ad-demo-badge">Tri-blend tee · Live back preview</span>
               </div>
               <div class="ad-demo-controls">
-                <p class="ad-demo-eyebrow">You choose the design. Parents do the rest.</p>
-                <h3>One team look.<br>Every name their own.</h3>
-                <p>In Pro Builder, pick the name &amp; number design, font, inside color and outline color. Add the shirt to your team store and share the link.</p>
-                <p>Parents choose their size, enter their own name and number on the product page, preview it, then check out. No roster or individual orders for you to manage.</p>
-                <p class="ad-demo-fine"><strong>Try it as a parent:</strong> type a name and number below.</p>
-                <div class="ad-personal-fields"><label>Name<input type="text" data-ss-pers-name value="ADILYN" maxlength="14" autocomplete="off" spellcheck="false" aria-label="Try a name on the tri-blend shirt"></label><label>Number<input type="text" data-ss-pers-number value="7" maxlength="3" inputmode="numeric" autocomplete="off" aria-label="Try a number on the tri-blend shirt"></label></div>
-                <div class="ad-print-style"><strong>Varsity Prime</strong><span><i class="ad-print-swatch ad-print-swatch-white" aria-hidden="true"></i>White inside</span><span><i class="ad-print-swatch ad-print-swatch-navy" aria-hidden="true"></i>Navy outline</span></div>
-                <p class="ad-demo-fine">Same preview used on our product pages. This example shows the design selected by the store organizer; parents personalize the name and number.</p>
+                <p class="ad-demo-eyebrow">Try the name &amp; number experience</p>
+                <h3>Make it personal.</h3>
+                <div class="ad-style-controls"><label>Font<select data-ss-pers-demo-font aria-label="Demo lettering font"><option value="varsity">Varsity Prime</option><option value="courtside">Courtside</option><option value="ironclad">Ironclad</option></select></label><label>Inside color<select data-ss-pers-demo-fill aria-label="Demo inside color"><option value="#ffffff">White</option><option value="#b7a36a">Gold</option><option value="#38a9e0">Sky blue</option></select></label><label>Outline color<select data-ss-pers-demo-outline aria-label="Demo outline color"><option value="#0d9488">Teal</option><option value="#b7a36a">Gold</option><option value="#1e2a4a">Navy</option></select></label></div>
+                <div class="ad-personal-fields ad-personal-fields-full">
+                  <label>Name<input type="text" data-ss-pers-name value="ADILYN" maxlength="14" autocomplete="off" spellcheck="false" placeholder="e.g. Emma"></label>
+                  <button type="button" class="ad-line-button" data-ss-pers-addline>+ Add a second line</button>
+                  <div class="ss-pers-hidden" data-ss-pers-line2-wrap><label>Second line<input type="text" data-ss-pers-name2 maxlength="14" autocomplete="off" spellcheck="false" placeholder="e.g. Johnson"></label><button type="button" class="ad-line-button" data-ss-pers-removeline>Remove second line</button></div>
+                  <label class="ad-number-label">Number <span>Optional</span><input type="text" data-ss-pers-number value="7" maxlength="3" inputmode="text" autocomplete="off" placeholder="7 or 2/9"></label>
+                </div>
+                <p class="ad-demo-fine" data-ad-preview-status aria-live="polite">Leave the number blank for names only. Shared number? Try 2/9.</p>
+                <div class="ad-who-does-what"><p><strong>You set the team look.</strong> In Pro Builder, choose the shirt and name &amp; number design, then pick the font, inside color and outline color.</p><p><strong>Parents make it theirs.</strong> On the product page, they enter their own name, optional second line and number, check the live preview, then check out. You don't collect a roster.</p></div>
+
               </div>
             </div>
             <div data-ad-demo-panel="builder" class="ad-demo-layout" hidden>
@@ -227,7 +230,7 @@
                 <div class="ad-builder-products" role="group" aria-label="Preview a product"><button type="button" data-ad-product="tee" aria-pressed="true">T-shirt</button><button type="button" data-ad-product="hoodie" aria-pressed="false">Hoodie</button></div>
                 <div class="ad-builder-colors" role="group" aria-label="Preview garment color"><button type="button" data-ad-color="navy" aria-pressed="true"><span class="ad-color-dot ad-color-dot-navy" aria-hidden="true"></span>Navy</button><button type="button" data-ad-color="white" aria-pressed="false"><span class="ad-color-dot ad-color-dot-white" aria-hidden="true"></span>White</button><button type="button" data-ad-color="gray" aria-pressed="false"><span class="ad-color-dot ad-color-dot-gray" aria-hidden="true"></span>Gray</button></div>
                 <p class="ad-demo-fine" data-ad-builder-status aria-live="polite">T-shirt · Navy</p>
-                <p class="ad-demo-fine">A quick Pro Builder demo. Your store's full builder also lets you add artwork and adjust placement.</p>
+                <p class="ad-demo-fine">A sample of the gear you can offer. In Pro Builder, add your artwork, choose garment colors, and set up name &amp; number personalization.</p>
               </div>
             </div>
           </div>
@@ -263,7 +266,7 @@
       <section class="ad-final" data-ad-final>
         <div class="ad-wrap"><h2>Your logo.<br>Their new favorite gear.</h2><p>A free team store. A whole lot less work.</p><a class="ad-start" href="{{ request_url | escape }}">Build my free team store <span aria-hidden="true">→</span></a><p class="ad-veteran">Stella &amp; Sage · Veteran owned and operated</p></div>
       </section>
-      <div class="ad-sticky" data-ad-sticky hidden><div class="ad-sticky-label"><strong>Your team store</strong>Always free to create</div><a class="ad-start" href="{{ request_url | escape }}">Start my free store <span aria-hidden="true">→</span></a></div>
+      <div class="ad-sticky" data-ad-sticky hidden><div class="ad-sticky-label"><strong>Free team merch store</strong>Parents order. We ship.</div><a class="ad-start" href="{{ request_url | escape }}">Start my free store <span aria-hidden="true">→</span></a></div>
     </div>
 
   {%- endif -%}
