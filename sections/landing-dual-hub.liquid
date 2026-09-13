@@ -135,10 +135,10 @@
           <div>
             <p class="ad-kicker">Small veteran-owned company. Big team spirit.</p>
             <h1>Your team.<br>Your <em>free store.</em></h1>
-            <p class="ad-intro">Custom gear for your team. Parents order their own. We print and ship it straight to their door.</p>
-            <a class="ad-start" data-ad-hero-cta href="{{ request_url | escape }}">Create my free team store <span aria-hidden="true">→</span></a>
+            <p class="ad-intro">Upload your logo. Your store builds automatically. Everyone orders their own gear, shipped straight to their door.</p>
+            <a class="ad-start" data-ad-hero-cta href="{{ request_url | escape }}">Build my free team store <span aria-hidden="true">→</span></a>
             <p class="ad-micro">2-minute form · Store built in about 15 minutes</p>
-            <p class="ad-signin">Secure sign-in keeps your store on your dashboard.</p>
+            <p class="ad-signin">Secure sign-in keeps your store on your dashboard.</p><a class="ad-try-link" href="#ad-try-{{ section.id }}">Try the name &amp; number preview ↓</a>
           </div>
           <div class="ad-stage" aria-label="Team gear examples">
             <div class="ad-stage-top"><span>Made for their team</span><span>Imagine yours here</span></div>
@@ -161,27 +161,82 @@
         </div>
       </section>
       <div class="ad-benefits"><div class="ad-wrap ad-benefit-row"><span>No setup fees</span><span>No minimums</span><span>No deadlines</span></div></div>
+      <section class="ad-section ad-gear-section">
+        <div class="ad-wrap">
+          <p class="ad-kicker">For the whole sideline</p>
+          <h2>One team.<br>So many ways to wear it.</h2>
+          <div class="ad-gear-grid">
+            <figure><img src="{{ 'ss-demo-youth.webp' | asset_url }}" alt="Cashmere Youth Football gray youth T-shirt" width="600" height="600" loading="lazy"><figcaption>Youth tees</figcaption></figure>
+            <figure><img src="{{ 'ss-home-sapphire-hoodie.webp' | asset_url }}" alt="Sapphire Shooters navy hoodie" width="800" height="800" loading="lazy"><figcaption>Team hoodies</figcaption></figure>
+            <figure><img src="{{ 'ss-demo-polo.webp' | asset_url }}" alt="Cashmere Youth Football white Under Armour polo" width="600" height="600" loading="lazy"><figcaption>Coaches polos</figcaption></figure>
+            <figure><img src="{{ 'ss-home-sapphire-tee.webp' | asset_url }}" alt="Sapphire Shooters navy adult T-shirt" width="800" height="800" loading="lazy"><figcaption>Everyday tees</figcaption></figure>
+            <figure><img src="{{ 'ss-demo-hat.webp' | asset_url }}" alt="Sapphire Shooters navy and white team hat" width="600" height="600" loading="lazy"><figcaption>Team hats</figcaption></figure>
+            <figure><img src="{{ 'ss-demo-tote.webp' | asset_url }}" alt="Sapphire Shooters black tote bag" width="600" height="600" loading="lazy"><figcaption>Grab-and-go totes</figcaption></figure>
+          </div>
+          <p class="ad-gear-note">Gear shown from Cashmere Youth Football &amp; Sapphire Shooters.</p>
+        </div>
+      </section>
       <div class="ss-home-slot" data-ss-home-slot="reviews"></div>
+      <section class="ad-section ad-play-section" id="ad-try-{{ section.id }}">
+        <div class="ad-wrap">
+          <p class="ad-kicker">Go ahead. Make it yours.</p>
+          <h2>This is the fun part.</h2>
+          <p class="ad-section-intro">Try a name and number. Then explore how you can choose the gear and colors in your own store.</p>
+          <div class="ad-experience">
+            <div class="ad-experience-tabs" role="group" aria-label="Choose a feature to try">
+              <button type="button" data-ad-demo="personalize" aria-pressed="true">Name &amp; number</button>
+              <button type="button" data-ad-demo="builder" aria-pressed="false">Pro Builder</button>
+            </div>
+            <div data-ad-demo-panel="personalize" class="ad-demo-layout">
+              <div class="ad-print-stage">
+                <img src="{{ 'ss-demo-back-blank.webp' | asset_url }}" width="700" height="700" alt="Back of a gray hoodie with your sample name and number" loading="lazy">
+                <div class="ad-print-overlay" aria-hidden="true"><span data-ad-print-name>ADILYN</span><strong data-ad-print-number>7</strong></div>
+                <span class="ad-demo-badge">Live preview · Try it below</span>
+              </div>
+              <div class="ad-demo-controls">
+                <p class="ad-demo-eyebrow">For everyone ordering</p>
+                <h3>Their name. Their number.</h3>
+                <p>Each buyer adds their own at checkout. You don't collect a roster.</p>
+                <div class="ad-personal-fields"><label>Name<input type="text" data-ad-name value="ADILYN" maxlength="12" autocomplete="off" spellcheck="false" aria-label="Try a name on the hoodie"></label><label>Number<input type="text" data-ad-number value="7" maxlength="3" inputmode="numeric" autocomplete="off" aria-label="Try a number on the hoodie"></label></div>
+                <div class="ad-ink-choices" role="group" aria-label="Preview print color"><span>Print color</span><button type="button" data-ad-ink="#162b46" aria-pressed="true">Navy</button><button type="button" data-ad-ink="#d8762c" aria-pressed="false">Orange</button></div>
+                <p class="ad-demo-fine" data-ad-personal-status aria-live="polite">ADILYN · 7</p>
+                <p class="ad-demo-fine">Example preview. Personalization is available on select products; your store admin sets the print style.</p>
+              </div>
+            </div>
+            <div data-ad-demo-panel="builder" class="ad-demo-layout" hidden>
+              <div class="ad-builder-stage">
+                <img data-ad-builder-image src="{{ 'ss-home-sapphire-tee.webp' | asset_url }}" width="800" height="800" alt="Sapphire Shooters navy T-shirt" loading="lazy"
+                  data-tee-navy="{{ 'ss-home-sapphire-tee.webp' | asset_url }}" data-tee-white="{{ 'ss-demo-tee-white.webp' | asset_url }}" data-tee-gray="{{ 'ss-demo-tee-gray.webp' | asset_url }}"
+                  data-hoodie-navy="{{ 'ss-home-sapphire-hoodie.webp' | asset_url }}" data-hoodie-white="{{ 'ss-demo-hoodie-white.webp' | asset_url }}" data-hoodie-gray="{{ 'ss-demo-hoodie-gray.webp' | asset_url }}">
+                <span class="ad-demo-badge">Sapphire Shooters · Example store</span>
+              </div>
+              <div class="ad-demo-controls">
+                <p class="ad-demo-eyebrow">For the person running the store</p>
+                <h3>You're the creative director.</h3>
+                <p>Pick the gear. Choose the colors. Keep adding products whenever you want.</p>
+                <div class="ad-builder-products" role="group" aria-label="Preview a product"><button type="button" data-ad-product="tee" aria-pressed="true">T-shirt</button><button type="button" data-ad-product="hoodie" aria-pressed="false">Hoodie</button></div>
+                <div class="ad-builder-colors" role="group" aria-label="Preview garment color"><button type="button" data-ad-color="navy" aria-pressed="true"><span class="ad-color-dot ad-color-dot-navy" aria-hidden="true"></span>Navy</button><button type="button" data-ad-color="white" aria-pressed="false"><span class="ad-color-dot ad-color-dot-white" aria-hidden="true"></span>White</button><button type="button" data-ad-color="gray" aria-pressed="false"><span class="ad-color-dot ad-color-dot-gray" aria-hidden="true"></span>Gray</button></div>
+                <p class="ad-demo-fine" data-ad-builder-status aria-live="polite">T-shirt · Navy</p>
+                <p class="ad-demo-fine">A quick Pro Builder demo. Your store's full builder also lets you add artwork and adjust placement.</p>
+              </div>
+            </div>
+          </div>
+          <p class="ad-play-close">You control the gear. Everyone handles their own order.</p>
+          <a class="ad-start ad-play-cta" href="{{ request_url | escape }}">Build my free team store <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+
       <section class="ad-section">
         <div class="ad-wrap">
-          <p class="ad-kicker">Your only job? Share the link.</p>
+          <p class="ad-kicker">Self-service. Start to finish.</p>
           <h2>From team logo<br>to team store.</h2>
           <p class="ad-section-intro">No website to design. No boxes of shirts to buy. Just a simpler way to get your team geared up.</p>
           <ol class="ad-steps">
-            <li><span class="ad-step-num">01</span><h3>Tell us about your team</h3><p>Sign in, add your team name, upload your logo, and choose your colors. About 2 minutes.</p></li>
-            <li><span class="ad-step-num">02</span><h3>We build your store</h3><p>Your logo goes on your gear and your private store is built in about 15 minutes. Free setup.</p></li>
-            <li><span class="ad-step-num">03</span><h3>Share it. They shop.</h3><p>Parents pick their own size and color, pay online, and get their order shipped directly to them.</p></li>
+            <li><span class="ad-step-num">01</span><h3>Add your logo &amp; colors</h3><p>Sign in, add your team name, upload your logo, and choose your colors. About 2 minutes.</p></li>
+            <li><span class="ad-step-num">02</span><h3>Your store builds automatically</h3><p>Your logo goes on your gear. Your private store is ready in about 15 minutes, with no setup fee.</p></li>
+            <li><span class="ad-step-num">03</span><h3>Make it yours. Share the link.</h3><p>Parents pick their own size and color, pay online, and get their order shipped directly to them.</p></li>
           </ol>
-        </div>
-      </section>
-      <section class="ad-section ad-relief">
-        <div class="ad-wrap ad-relief-grid">
-          <div><p class="ad-kicker">Give yourself your evenings back</p><h2>Fire yourself as the team merch manager.</h2><p class="ad-section-intro">You have a team to cheer for. You shouldn't need a spreadsheet to get everyone a hoodie.</p><a class="ad-small-cta" href="{{ request_url | escape }}">Let's build your free store →</a></div>
-          <ul class="ad-list">
-            <li><span class="ad-check" aria-hidden="true">✓</span><div><b>They order. We handle the rest.</b>No collecting sizes, chasing payments, or handing out bags.</div></li>
-            <li><span class="ad-check" aria-hidden="true">✓</span><div><b>Make it personal.</b>Buyers can add their own name and number on select products.</div></li>
-            <li><span class="ad-check" aria-hidden="true">✓</span><div><b>Keep the store. Skip the deadlines.</b>Add gear, share your link, and reorder when your team needs it.</div></li>
-          </ul>
         </div>
       </section>
       <div class="ss-home-slot" data-ss-home-slot="catalog"></div>
@@ -196,7 +251,7 @@
         </div>
       </section>
       <section class="ad-final" data-ad-final>
-        <div class="ad-wrap"><h2>Your logo.<br>Their new favorite gear.</h2><p>A free team store. A whole lot less work.</p><a class="ad-start" href="{{ request_url | escape }}">Create my free team store <span aria-hidden="true">→</span></a><p class="ad-veteran">Stella &amp; Sage · Veteran owned and operated</p></div>
+        <div class="ad-wrap"><h2>Your logo.<br>Their new favorite gear.</h2><p>A free team store. A whole lot less work.</p><a class="ad-start" href="{{ request_url | escape }}">Build my free team store <span aria-hidden="true">→</span></a><p class="ad-veteran">Stella &amp; Sage · Veteran owned and operated</p></div>
       </section>
       <div class="ad-sticky" data-ad-sticky hidden><div class="ad-sticky-label"><strong>Your team store</strong>Always free to create</div><a class="ad-start" href="{{ request_url | escape }}">Start my free store <span aria-hidden="true">→</span></a></div>
     </div>
@@ -2112,7 +2167,7 @@
       "type": "text",
       "id": "stat1_label",
       "label": "Stat 1 label",
-      "default": "Tell us about your team"
+      "default": "Add your logo &amp; colors"
     },
     {
       "type": "text",
@@ -2152,7 +2207,7 @@
       "type": "text",
       "id": "step1_title",
       "label": "Step 1 title",
-      "default": "Tell us about your team"
+      "default": "Add your logo &amp; colors"
     },
     {
       "type": "textarea",
