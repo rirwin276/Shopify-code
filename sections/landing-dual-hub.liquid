@@ -129,15 +129,30 @@
 
   {%- else -%}
 
+    {%- comment -%}
+      One label for one action. This page had five calls to action under four
+      different names — "Build my free team store", "Create my free store",
+      "Start my free store" — which reads as three offers and makes it
+      impossible to tell which placement is doing the work.
+    {%- endcomment -%}
+    {%- assign cta_label = section.settings.cta_label | default: 'Build my free team store' -%}
     <div class="ss-ad" data-ss-ad>
       <section class="ad-hero">
         <div class="ad-wrap ad-hero-grid">
           <div>
-            <p class="ad-kicker">Custom team apparel. Your own online store.</p>
-            <h1>Team merch.<br><em>Off your plate.</em></h1>
-            <p class="ad-intro"><strong>A free online apparel store for your team.</strong> We put your logo on the gear. Parents choose their size, personalize, and pay online. We make it and ship it to them.</p>
-            <a class="ad-start" data-ad-hero-cta href="{{ request_url | escape }}">Build my free team store <span aria-hidden="true">→</span></a>
-            <p class="ad-micro">2-minute form · Store built in about 15 minutes</p>
+            <p class="ad-kicker">{{ section.settings.hero_kicker | escape }}</p>
+            <h1>{{ section.settings.hero_headline | escape }}<br><em>{{ section.settings.hero_headline_em | escape }}</em></h1>
+            <p class="ad-intro">{{ section.settings.hero_intro }}</p>
+            {%- comment -%}
+              The price line. "Free" appears a dozen times on this page and the
+              question it leaves unanswered is "free store, but what does a
+              hoodie cost?" — twelve frees with no number starts to read like a
+              catch. These come from the same catalogue the product section
+              further down renders, so the page cannot quote two prices.
+            {%- endcomment -%}
+            <p class="ad-pricenote">{{ section.settings.hero_price_line | escape }}</p>
+            <a class="ad-start" data-ad-hero-cta href="{{ request_url | escape }}">{{ cta_label | escape }} <span aria-hidden="true">→</span></a>
+            <p class="ad-micro">{{ section.settings.hero_micro | escape }}</p>
             <a class="ad-secondary" href="#ad-store-{{ section.id }}">Explore a demo store <span aria-hidden="true">↗</span></a><p class="ad-signin">Always free to create. You only pay for gear you order.</p>
           </div>
           <div class="ad-stage" aria-label="Team gear examples">
@@ -160,86 +175,20 @@
           </div>
         </div>
       </section>
-      <div class="ad-benefits"><div class="ad-wrap ad-benefit-row"><span>No setup fees</span><span>No minimums</span><span>No deadlines</span><span>Made &amp; shipped for you</span></div></div>
-      <section class="ad-section ad-store-section" id="ad-store-{{ section.id }}" data-ad-store data-catalog-url="{{ 'ss-raptors-demo.json' | asset_url }}">
-        <div class="ad-wrap">
-          <div class="ad-section-heading"><div><p class="ad-kicker">Don't picture it. Step inside.</p><h2>This could be<br>your team's store.</h2></div><p class="ad-section-intro">Browse the Raptors gear. Open a product. Try the colors. This is how easy shopping your team store can feel.</p></div>
-          <div class="ad-store-window">
-            <div class="ad-store-chrome"><span class="ad-window-dots" aria-hidden="true">● ● ●</span><span>YOUR TEAM STORE</span><span class="ad-demo-tag">Demo · Browse only</span></div>
-            <div class="ad-store-banner"><div><p>THE TEAM. THE FAMILIES. THE FANS.</p><h3>RAPTORS<br><span>GEAR UP.</span></h3></div><div class="ad-store-banner-note">A whole team look.<br>Zero group orders.</div></div>
-            <div class="ad-store-toolbar"><strong>The team shop</strong><div role="group" aria-label="Filter demo products"><button type="button" data-store-filter="all" aria-pressed="true">All gear</button><button type="button" data-store-filter="adult" aria-pressed="false">Adults</button><button type="button" data-store-filter="youth" aria-pressed="false">Kids</button><button type="button" data-store-filter="extras" aria-pressed="false">Extras</button></div></div>
-            <div class="ad-store-grid" data-store-grid><p>Loading the Raptors gear…</p></div>
-            <p class="ad-store-footnote">Real Raptors product photos. A demo you can explore freely—no sign-in, cart, or checkout.</p>
-          </div>
-          <div class="ad-store-after"><p><strong>Your logo goes here next.</strong> Create your store, choose your gear, and share one link.</p><a class="ad-start" href="{{ request_url | escape }}">Create my free store <span aria-hidden="true">→</span></a></div>
-        </div>
-        <dialog class="ad-product-dialog" data-store-dialog aria-label="Demo product details"><button class="ad-dialog-close" type="button" data-store-close aria-label="Close product preview">×</button><div data-store-detail></div></dialog>
-      </section>
-      <div class="ss-home-slot" data-ss-home-slot="reviews"></div>
-      <section class="ad-section ad-play-section" id="ad-try-{{ section.id }}">
-        <div class="ad-wrap">
-          <p class="ad-kicker">One design. Every player. Every proud parent.</p>
-          <h2>Their name.<br>Their number. Their shirt.</h2>
-          <p class="ad-section-intro">Pick a look, then try your own name. Add a second line or leave the number blank. Everyone gets to make it theirs.</p>
-          <div class="ad-experience">
-            <div class="ad-experience-tabs" role="group" aria-label="Choose a feature to try">
-              <button type="button" data-ad-demo="personalize" aria-pressed="true">Name &amp; number</button>
-              <button type="button" data-ad-demo="builder" aria-pressed="false">Choose your gear</button>
-            </div>
-            {%- comment -%}Original Printful BC3413 ghost photo. The ghost print zone follows the finished NAME/00 product mockup; shared name/number layout and font presets come from the product renderer.{%- endcomment -%}
-            <div data-ad-demo-panel="personalize" class="ad-demo-layout" data-ss-pers data-ss-pers-demo="true"
-              data-initial-color="Athletic Grey Triblend"
-              data-font-family="Graduate" data-font-weight="400" data-font-style="normal"
-              data-ink-fit="true" data-ink-stroke-ratio="0.045" data-name-stroke-min="0.06" data-name-stroke-cap="0.12"
-              data-color-hex="#ffffff" data-outline-color-hex="#0d9488" data-outline-ratio="0.035"
-              data-max-name="14" data-max-number="3"
-              data-bbox-left="34" data-bbox-top="10" data-bbox-width="32" data-bbox-height="42.67"
-              data-top-offset-pct="0.10" data-lift-pct="0" data-center-alone="0"
-              data-name-zone-pct="0.28" data-name2-zone-pct="0.21" data-line-gap-pct="0.02" data-gap-pct="0.04" data-number-min-share="0.20"
-              data-mockup-image-url="{{ 'ss-triblend-ghost.png' | asset_url }}">
-              <div class="ad-print-stage">
-                <canvas data-ss-pers-canvas width="640" height="640" role="img" aria-label="Live back preview of an athletic grey tri-blend shirt with your name and number in white with a teal outline">Try your name and number on a tri-blend shirt.</canvas>
-                <span class="ad-demo-badge">Tri-blend tee · Live back preview</span>
-              </div>
-              <div class="ad-demo-controls">
-                <p class="ad-demo-eyebrow">Try the name &amp; number experience</p>
-                <h3>Make it personal.</h3>
-                <div class="ad-style-controls"><label>Font<select data-ss-pers-demo-font aria-label="Demo lettering font"><option value="varsity">Varsity Prime</option><option value="courtside">Courtside</option><option value="ironclad">Ironclad</option></select></label><label>Inside color<select data-ss-pers-demo-fill aria-label="Demo inside color"><option value="#ffffff">White</option><option value="#b7a36a">Gold</option><option value="#38a9e0">Sky blue</option></select></label><label>Outline color<select data-ss-pers-demo-outline aria-label="Demo outline color"><option value="#0d9488">Teal</option><option value="#b7a36a">Gold</option><option value="#1e2a4a">Navy</option></select></label></div>
-                <div class="ad-personal-fields ad-personal-fields-full">
-                  <label>Name<input type="text" data-ss-pers-name value="ADILYN" maxlength="14" autocomplete="off" spellcheck="false" placeholder="e.g. Emma"></label>
-                  <button type="button" class="ad-line-button" data-ss-pers-addline>+ Add a second line</button>
-                  <div class="ss-pers-hidden" data-ss-pers-line2-wrap><label>Second line<input type="text" data-ss-pers-name2 maxlength="14" autocomplete="off" spellcheck="false" placeholder="e.g. Johnson"></label><button type="button" class="ad-line-button" data-ss-pers-removeline>Remove second line</button></div>
-                  <label class="ad-number-label">Number <span>Optional</span><input type="text" data-ss-pers-number value="7" maxlength="3" inputmode="text" autocomplete="off" placeholder="7 or 2/9"></label>
-                </div>
-                <p class="ad-demo-fine" data-ad-preview-status aria-live="polite">Leave the number blank for names only. Shared number? Try 2/9.</p>
-                <div class="ad-who-does-what"><p><strong>You set the team look.</strong> In Pro Builder, choose the shirt and name &amp; number design, then pick the font, inside color and outline color.</p><p><strong>Parents make it theirs.</strong> On the product page, they enter their own name, optional second line and number, check the live preview, then check out. You don't collect a roster.</p></div>
-
-              </div>
-            </div>
-            <div data-ad-demo-panel="builder" class="ad-demo-layout" hidden>
-              <div class="ad-builder-stage">
-                <img data-ad-builder-image src="{{ 'ss-home-sapphire-tee.webp' | asset_url }}" width="800" height="800" alt="Sapphire Shooters navy T-shirt" loading="lazy"
-                  data-tee-navy="{{ 'ss-home-sapphire-tee.webp' | asset_url }}" data-tee-white="{{ 'ss-demo-tee-white.webp' | asset_url }}" data-tee-gray="{{ 'ss-demo-tee-gray.webp' | asset_url }}"
-                  data-hoodie-navy="{{ 'ss-home-sapphire-hoodie.webp' | asset_url }}" data-hoodie-white="{{ 'ss-demo-hoodie-white.webp' | asset_url }}" data-hoodie-gray="{{ 'ss-demo-hoodie-gray.webp' | asset_url }}">
-                <span class="ad-demo-badge">Sapphire Shooters · Example store</span>
-              </div>
-              <div class="ad-demo-controls">
-                <p class="ad-demo-eyebrow">For the person running the store</p>
-                <h3>You're the creative director.</h3>
-                <p>Pick the gear. Choose the colors. Keep adding products whenever you want.</p>
-                <div class="ad-builder-products" role="group" aria-label="Preview a product"><button type="button" data-ad-product="tee" aria-pressed="true">T-shirt</button><button type="button" data-ad-product="hoodie" aria-pressed="false">Hoodie</button></div>
-                <div class="ad-builder-colors" role="group" aria-label="Preview garment color"><button type="button" data-ad-color="navy" aria-pressed="true"><span class="ad-color-dot ad-color-dot-navy" aria-hidden="true"></span>Navy</button><button type="button" data-ad-color="white" aria-pressed="false"><span class="ad-color-dot ad-color-dot-white" aria-hidden="true"></span>White</button><button type="button" data-ad-color="gray" aria-pressed="false"><span class="ad-color-dot ad-color-dot-gray" aria-hidden="true"></span>Gray</button></div>
-                <p class="ad-demo-fine" data-ad-builder-status aria-live="polite">T-shirt · Navy</p>
-                <p class="ad-demo-fine">A sample of the gear you can offer. In Pro Builder, add your artwork, choose garment colors, and set up name &amp; number personalization.</p>
-              </div>
-            </div>
-          </div>
-          <p class="ad-play-close">You control the gear. Everyone handles their own order.</p>
-          <a class="ad-start ad-play-cta" href="{{ request_url | escape }}">Build my free team store <span aria-hidden="true">→</span></a>
-        </div>
-      </section>
-
-
+      {%- comment -%}
+        Veteran owned sits here rather than in 11px grey at the bottom of the
+        page. Three of the four audiences this store serves — units, stations,
+        and San Diego youth sports — read it as a reason to trust the company,
+        which makes it a headline fact, not a footer credit.
+      {%- endcomment -%}
+      <div class="ad-benefits"><div class="ad-wrap ad-benefit-row"><span class="ad-benefit-vet">★ Veteran owned &amp; operated</span><span>No setup fees</span><span>No minimums</span><span>No deadlines</span><span>Made &amp; shipped for you</span></div></div>
+      {%- comment -%}
+        How it works, before the demos rather than after them. A coach who has
+        never heard of us needs the mechanism first: two of these interactive
+        demos used to land before anyone had said what actually happens, and
+        the demo hits much harder once you already know your store is fifteen
+        minutes away.
+      {%- endcomment -%}
       <section class="ad-section">
         <div class="ad-wrap">
           <p class="ad-kicker">Self-service. Start to finish.</p>
@@ -252,6 +201,88 @@
           </ol>
         </div>
       </section>
+
+      <section class="ad-section ad-store-section" id="ad-store-{{ section.id }}" data-ad-store data-catalog-url="{{ 'ss-raptors-demo.json' | asset_url }}">
+        <div class="ad-wrap">
+          <div class="ad-section-heading"><div><p class="ad-kicker">Don't picture it. Step inside.</p><h2>This could be<br>your team's store.</h2></div><p class="ad-section-intro">Browse the Raptors gear. Open a product. Try the colors. This is how easy shopping your team store can feel.</p></div>
+          <div class="ad-store-window">
+            <div class="ad-store-chrome"><span class="ad-window-dots" aria-hidden="true">● ● ●</span><span>YOUR TEAM STORE</span><span class="ad-demo-tag">Demo · Browse only</span></div>
+            <div class="ad-store-banner"><div><p>THE TEAM. THE FAMILIES. THE FANS.</p><h3>RAPTORS<br><span>GEAR UP.</span></h3></div><div class="ad-store-banner-note">A whole team look.<br>Zero group orders.</div></div>
+            <div class="ad-store-toolbar"><strong>The team shop</strong><div role="group" aria-label="Filter demo products"><button type="button" data-store-filter="all" aria-pressed="true">All gear</button><button type="button" data-store-filter="adult" aria-pressed="false">Adults</button><button type="button" data-store-filter="youth" aria-pressed="false">Kids</button><button type="button" data-store-filter="extras" aria-pressed="false">Extras</button></div></div>
+            <div class="ad-store-grid" data-store-grid><p>Loading the Raptors gear…</p></div>
+            <p class="ad-store-footnote">Real Raptors product photos. A demo you can explore freely—no sign-in, cart, or checkout.</p>
+          </div>
+          <div class="ad-store-after"><p><strong>Your logo goes here next.</strong> Create your store, choose your gear, and share one link.</p><a class="ad-start" href="{{ request_url | escape }}">{{ cta_label | escape }} <span aria-hidden="true">→</span></a></div>
+        </div>
+        <dialog class="ad-product-dialog" data-store-dialog aria-label="Demo product details"><button class="ad-dialog-close" type="button" data-store-close aria-label="Close product preview">×</button><div data-store-detail></div></dialog>
+      </section>
+      <div class="ss-home-slot" data-ss-home-slot="reviews"></div>
+      {%- comment -%}
+        The six lettering faces the Pro Builder actually offers, so each picker
+        button previews in the face it selects instead of naming it. Loaded
+        non-render-blocking: the buttons show a fallback for a moment rather
+        than holding up the page for six display fonts.
+      {%- endcomment -%}
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link rel="stylesheet" media="print" onload="this.media='all'"
+            href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,900&family=Changa+One:ital@1&family=Graduate&family=Russo+One&family=Saira+Stencil+One&family=Teko:wght@700&display=swap">
+      <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,900&family=Changa+One:ital@1&family=Graduate&family=Russo+One&family=Saira+Stencil+One&family=Teko:wght@700&display=swap"></noscript>
+      <section class="ad-section ad-play-section" id="ad-try-{{ section.id }}">
+        <div class="ad-wrap">
+          <p class="ad-kicker">One design. Every player. Every proud parent.</p>
+          <h2>Their name.<br>Their number. Their shirt.</h2>
+          <p class="ad-section-intro">Pick a look, then try your own name. Add a second line or leave the number blank. Everyone gets to make it theirs.</p>
+          <div class="ad-experience">
+            {%- comment -%}Original Printful BC3413 ghost photo. The ghost print zone follows the finished NAME/00 product mockup; shared name/number layout and font presets come from the product renderer.{%- endcomment -%}
+            <div data-ad-demo-panel="personalize" class="ad-demo-layout" data-ss-pers data-ss-pers-demo="true"
+              data-initial-color="Athletic Grey Triblend"
+              data-font-family="Graduate" data-font-weight="400" data-font-style="normal"
+              data-ink-fit="true" data-ink-stroke-ratio="0.045" data-name-stroke-min="0.06" data-name-stroke-cap="0.12"
+              data-color-hex="#ffffff" data-outline-color-hex="#0d9488" data-outline-ratio="0.035"
+              data-max-name="14" data-max-number="3"
+              data-bbox-left="34" data-bbox-top="10" data-bbox-width="32" data-bbox-height="42.67"
+              data-top-offset-pct="0.10" data-lift-pct="0" data-center-alone="0"
+              data-name-zone-pct="0.28" data-name2-zone-pct="0.21" data-line-gap-pct="0.02" data-gap-pct="0.04" data-number-min-share="0.20"
+              data-mockup-image-url="{{ 'ss-triblend-ghost.webp' | asset_url }}">
+              <div class="ad-print-stage">
+                <canvas data-ss-pers-canvas width="640" height="640" role="img" aria-label="Live back preview of an athletic grey tri-blend shirt with your name and number in white with a teal outline">Try your name and number on a tri-blend shirt.</canvas>
+                <span class="ad-demo-badge">Tri-blend tee · Live back preview</span>
+              </div>
+              <div class="ad-demo-controls">
+                <p class="ad-demo-eyebrow">Try the name &amp; number experience</p>
+                <h3>Make it personal.</h3>
+                <div class="ad-style-controls">
+                  <div class="ad-pickgroup">
+                    <span class="ad-picklabel" id="ad-font-label-{{ section.id }}">Lettering</span>
+                    <div class="ad-fontrow" role="group" aria-labelledby="ad-font-label-{{ section.id }}"><button type="button" class="ad-fontpick ad-font-varsity_prime" data-ss-pers-demo-font="varsity_prime" aria-pressed="true">Varsity Prime</button><button type="button" class="ad-fontpick ad-font-courtside" data-ss-pers-demo-font="courtside" aria-pressed="false">Courtside</button><button type="button" class="ad-fontpick ad-font-afterburner" data-ss-pers-demo-font="afterburner" aria-pressed="false">Afterburner</button><button type="button" class="ad-fontpick ad-font-battalion" data-ss-pers-demo-font="battalion" aria-pressed="false">Battalion</button><button type="button" class="ad-fontpick ad-font-ironclad" data-ss-pers-demo-font="ironclad" aria-pressed="false">Ironclad</button><button type="button" class="ad-fontpick ad-font-rally" data-ss-pers-demo-font="rally" aria-pressed="false">Rally</button></div>
+                  </div>
+                  <div class="ad-pickgroup">
+                    <span class="ad-picklabel" id="ad-fill-label-{{ section.id }}">Inside color</span>
+                    <div class="ad-inkrow" role="group" aria-labelledby="ad-fill-label-{{ section.id }}"><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#ffffff" aria-pressed="true" title="White"><span class="ad-ink-dot" style="--ink:#ffffff" aria-hidden="true"></span><span class="ad-ink-name">White</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#141414" aria-pressed="false" title="Black"><span class="ad-ink-dot" style="--ink:#141414" aria-hidden="true"></span><span class="ad-ink-name">Black</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#b7a36a" aria-pressed="false" title="Gold"><span class="ad-ink-dot" style="--ink:#b7a36a" aria-hidden="true"></span><span class="ad-ink-name">Gold</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#1e2a4a" aria-pressed="false" title="Navy"><span class="ad-ink-dot" style="--ink:#1e2a4a" aria-hidden="true"></span><span class="ad-ink-name">Navy</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#2456c4" aria-pressed="false" title="Royal Blue"><span class="ad-ink-dot" style="--ink:#2456c4" aria-hidden="true"></span><span class="ad-ink-name">Royal Blue</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#c8102e" aria-pressed="false" title="Red"><span class="ad-ink-dot" style="--ink:#c8102e" aria-hidden="true"></span><span class="ad-ink-name">Red</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#14532d" aria-pressed="false" title="Forest"><span class="ad-ink-dot" style="--ink:#14532d" aria-hidden="true"></span><span class="ad-ink-name">Forest</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#e56ca5" aria-pressed="false" title="Pink"><span class="ad-ink-dot" style="--ink:#e56ca5" aria-hidden="true"></span><span class="ad-ink-name">Pink</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#ea6a1e" aria-pressed="false" title="Orange"><span class="ad-ink-dot" style="--ink:#ea6a1e" aria-hidden="true"></span><span class="ad-ink-name">Orange</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#6d28d9" aria-pressed="false" title="Purple"><span class="ad-ink-dot" style="--ink:#6d28d9" aria-hidden="true"></span><span class="ad-ink-name">Purple</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#0d9488" aria-pressed="false" title="Teal"><span class="ad-ink-dot" style="--ink:#0d9488" aria-hidden="true"></span><span class="ad-ink-name">Teal</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#7a1f2b" aria-pressed="false" title="Maroon"><span class="ad-ink-dot" style="--ink:#7a1f2b" aria-hidden="true"></span><span class="ad-ink-name">Maroon</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#38a9e0" aria-pressed="false" title="Sky Blue"><span class="ad-ink-dot" style="--ink:#38a9e0" aria-hidden="true"></span><span class="ad-ink-name">Sky Blue</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#5d6b3c" data-tile="{{ 'ss-camo-regular.webp' | asset_url }}" aria-pressed="false" title="Camo"><span class="ad-ink-dot ad-ink-dot-camo" style="--ink:#5d6b3c" data-camo="regular" aria-hidden="true"></span><span class="ad-ink-name">Camo</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#f2aec4" data-tile="{{ 'ss-camo-pink.webp' | asset_url }}" aria-pressed="false" title="Pink Camo"><span class="ad-ink-dot ad-ink-dot-camo" style="--ink:#f2aec4" data-camo="pink" aria-hidden="true"></span><span class="ad-ink-name">Pink Camo</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#6d8fc7" data-tile="{{ 'ss-camo-blue.webp' | asset_url }}" aria-pressed="false" title="Blue Camo"><span class="ad-ink-dot ad-ink-dot-camo" style="--ink:#6d8fc7" data-camo="blue" aria-hidden="true"></span><span class="ad-ink-name">Blue Camo</span></button><button type="button" class="ad-ink" data-ss-pers-demo-fill data-hex="#e4e4e6" data-tile="{{ 'ss-camo-snow.webp' | asset_url }}" aria-pressed="false" title="Snow Camo"><span class="ad-ink-dot ad-ink-dot-camo" style="--ink:#e4e4e6" data-camo="snow" aria-hidden="true"></span><span class="ad-ink-name">Snow Camo</span></button></div>
+                  </div>
+                  <div class="ad-pickgroup">
+                    <span class="ad-picklabel" id="ad-out-label-{{ section.id }}">Outline color</span>
+                    <div class="ad-inkrow" role="group" aria-labelledby="ad-out-label-{{ section.id }}"><button type="button" class="ad-ink ad-ink-none" data-ss-pers-demo-outline data-hex="" aria-pressed="false" title="No outline"><span class="ad-ink-dot ad-ink-dot-none" aria-hidden="true"></span><span class="ad-ink-name">None</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#ffffff" aria-pressed="false" title="White"><span class="ad-ink-dot" style="--ink:#ffffff" aria-hidden="true"></span><span class="ad-ink-name">White</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#141414" aria-pressed="false" title="Black"><span class="ad-ink-dot" style="--ink:#141414" aria-hidden="true"></span><span class="ad-ink-name">Black</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#b7a36a" aria-pressed="false" title="Gold"><span class="ad-ink-dot" style="--ink:#b7a36a" aria-hidden="true"></span><span class="ad-ink-name">Gold</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#1e2a4a" aria-pressed="false" title="Navy"><span class="ad-ink-dot" style="--ink:#1e2a4a" aria-hidden="true"></span><span class="ad-ink-name">Navy</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#2456c4" aria-pressed="false" title="Royal Blue"><span class="ad-ink-dot" style="--ink:#2456c4" aria-hidden="true"></span><span class="ad-ink-name">Royal Blue</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#c8102e" aria-pressed="false" title="Red"><span class="ad-ink-dot" style="--ink:#c8102e" aria-hidden="true"></span><span class="ad-ink-name">Red</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#14532d" aria-pressed="false" title="Forest"><span class="ad-ink-dot" style="--ink:#14532d" aria-hidden="true"></span><span class="ad-ink-name">Forest</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#e56ca5" aria-pressed="false" title="Pink"><span class="ad-ink-dot" style="--ink:#e56ca5" aria-hidden="true"></span><span class="ad-ink-name">Pink</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#ea6a1e" aria-pressed="false" title="Orange"><span class="ad-ink-dot" style="--ink:#ea6a1e" aria-hidden="true"></span><span class="ad-ink-name">Orange</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#6d28d9" aria-pressed="false" title="Purple"><span class="ad-ink-dot" style="--ink:#6d28d9" aria-hidden="true"></span><span class="ad-ink-name">Purple</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#0d9488" aria-pressed="true" title="Teal"><span class="ad-ink-dot" style="--ink:#0d9488" aria-hidden="true"></span><span class="ad-ink-name">Teal</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#7a1f2b" aria-pressed="false" title="Maroon"><span class="ad-ink-dot" style="--ink:#7a1f2b" aria-hidden="true"></span><span class="ad-ink-name">Maroon</span></button><button type="button" class="ad-ink" data-ss-pers-demo-outline data-hex="#38a9e0" aria-pressed="false" title="Sky Blue"><span class="ad-ink-dot" style="--ink:#38a9e0" aria-hidden="true"></span><span class="ad-ink-name">Sky Blue</span></button></div>
+                  </div>
+                </div>
+                <div class="ad-personal-fields ad-personal-fields-full">
+                  <label>Name<input type="text" data-ss-pers-name value="ADILYN" maxlength="14" autocomplete="off" spellcheck="false" placeholder="e.g. Emma"></label>
+                  <button type="button" class="ad-line-button" data-ss-pers-addline>+ Add a second line</button>
+                  <div class="ss-pers-hidden" data-ss-pers-line2-wrap><label>Second line<input type="text" data-ss-pers-name2 maxlength="14" autocomplete="off" spellcheck="false" placeholder="e.g. Johnson"></label><button type="button" class="ad-line-button" data-ss-pers-removeline>Remove second line</button></div>
+                  <label class="ad-number-label">Number <span>Optional</span><input type="text" data-ss-pers-number value="7" maxlength="3" inputmode="text" autocomplete="off" placeholder="7 or 2/9"></label>
+                </div>
+                <p class="ad-demo-fine" data-ad-preview-status aria-live="polite">Leave the number blank for names only. Shared number? Try 2/9.</p>
+                <div class="ad-who-does-what"><p><strong>You set the team look.</strong> In Pro Builder, choose the shirt and name &amp; number design, then pick the font, inside color and outline color.</p><p><strong>Parents make it theirs.</strong> On the product page, they enter their own name, optional second line and number, check the live preview, then check out. You don't collect a roster.</p></div>
+
+              </div>
+            </div>
+          </div>
+          <p class="ad-play-close">You control the gear. Everyone handles their own order.</p>
+          <a class="ad-start ad-play-cta" href="{{ request_url | escape }}">{{ cta_label | escape }} <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+
       <div class="ss-home-slot" data-ss-home-slot="catalog"></div>
       <section class="ad-section">
         <div class="ad-wrap ad-faq-wrap">
@@ -264,9 +295,9 @@
         </div>
       </section>
       <section class="ad-final" data-ad-final>
-        <div class="ad-wrap"><h2>Your logo.<br>Their new favorite gear.</h2><p>A free team store. A whole lot less work.</p><a class="ad-start" href="{{ request_url | escape }}">Build my free team store <span aria-hidden="true">→</span></a><p class="ad-veteran">Stella &amp; Sage · Veteran owned and operated</p></div>
+        <div class="ad-wrap"><h2>{{ section.settings.final_headline | escape }}</h2><p>{{ section.settings.final_sub | escape }}</p><a class="ad-start" href="{{ request_url | escape }}">{{ cta_label | escape }} <span aria-hidden="true">→</span></a><p class="ad-veteran">Stella &amp; Sage · Veteran owned and operated · San Diego, California</p></div>
       </section>
-      <div class="ad-sticky" data-ad-sticky hidden><div class="ad-sticky-label"><strong>Free team merch store</strong>Parents order. We ship.</div><a class="ad-start" href="{{ request_url | escape }}">Start my free store <span aria-hidden="true">→</span></a></div>
+      <div class="ad-sticky" data-ad-sticky hidden><div class="ad-sticky-label"><strong>Free team merch store</strong>Parents order. We ship.</div><a class="ad-start" href="{{ request_url | escape }}">{{ cta_label | escape }} <span aria-hidden="true">→</span></a></div>
     </div>
 
   {%- endif -%}
@@ -1954,154 +1985,76 @@
   "settings": [
     {
       "type": "header",
-      "content": "— Original settings (preserved) —"
+      "content": "— Hero —"
     },
     {
       "type": "text",
-      "id": "kicker",
-      "label": "Badge / eyebrow text",
-      "default": "TEAM STORES"
+      "id": "hero_kicker",
+      "label": "Hero eyebrow",
+      "default": "Custom team apparel. Your own online store."
     },
     {
       "type": "text",
-      "id": "primary_title",
-      "label": "Legacy headline (unused — see Hero section below)",
-      "default": "Your team store."
-    },
-    {
-      "type": "textarea",
-      "id": "primary_desc",
-      "label": "Legacy subheadline (unused — see Hero section below)",
-      "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done—forever."
+      "id": "hero_headline",
+      "label": "Hero headline (first line)",
+      "default": "Team merch."
     },
     {
       "type": "text",
-      "id": "btn_login_label",
-      "label": "Legacy login button label (unused)",
-      "default": "Log in to Studio"
+      "id": "hero_headline_em",
+      "label": "Hero headline (second line, italic)",
+      "default": "Off your plate."
+    },
+    {
+      "type": "richtext",
+      "id": "hero_intro",
+      "label": "Hero paragraph",
+      "default": "<p><strong>A free online apparel store for your team.</strong> We put your logo on the gear. Parents choose their size, personalize, and pay online. We make it and ship it to them.</p>"
     },
     {
       "type": "text",
-      "id": "btn_request_label",
-      "label": "Legacy request button label (unused)",
-      "default": "Request a storefront"
+      "id": "hero_price_line",
+      "label": "Hero price line",
+      "info": "Keep these in step with the product catalog section.",
+      "default": "Tees from $18 · Hoodies from $32 · Hats from $19"
     },
     {
       "type": "text",
-      "id": "cta_micro_login",
-      "label": "Legacy microcopy – logged out (unused)",
-      "default": "Already have access? Sign in"
-    },
-    {
-      "type": "text",
-      "id": "cta_micro_request",
-      "label": "Legacy microcopy – request (unused)",
-      "default": "Start your private store"
-    },
-    {
-      "type": "text",
-      "id": "primary_note",
-      "label": "Legacy fineprint (unused — see Hero caption below)",
-      "default": "No minimums · No meetings · No middleman"
+      "id": "hero_micro",
+      "label": "Hero fine print",
+      "default": "2-minute form · Store built in about 15 minutes"
     },
     {
       "type": "header",
-      "content": "Images — Hero & Dashboard"
+      "content": "— Calls to action —"
     },
     {
-      "type": "image_picker",
-      "id": "hero_image",
-      "label": "Hero image (replaces the mock dashboard in the device frame)"
+      "type": "text",
+      "id": "cta_label",
+      "label": "Call-to-action label",
+      "info": "Used by every button on the page, including the sticky mobile bar.",
+      "default": "Build my free team store"
     },
     {
-      "type": "image_picker",
-      "id": "panel_image",
-      "label": "Dashboard section image (replaces the mock admin panel)"
+      "type": "text",
+      "id": "final_headline",
+      "label": "Closing headline",
+      "default": "Your logo. Their new favorite gear."
+    },
+    {
+      "type": "text",
+      "id": "final_sub",
+      "label": "Closing subheadline",
+      "default": "A free team store. A whole lot less work."
     },
     {
       "type": "header",
-      "content": "Images & text — Example cards"
-    },
-    {
-      "type": "image_picker",
-      "id": "example1_image",
-      "label": "Card 1 image"
-    },
-    {
-      "type": "text",
-      "id": "example1_title",
-      "label": "Card 1 title",
-      "default": "Youth sports teams"
-    },
-    {
-      "type": "textarea",
-      "id": "example1_desc",
-      "label": "Card 1 description",
-      "default": "Perfect for team moms, coaches, travel ball, football, baseball, soccer, cheer, wrestling, and hockey."
-    },
-    {
-      "type": "image_picker",
-      "id": "example2_image",
-      "label": "Card 2 image"
-    },
-    {
-      "type": "text",
-      "id": "example2_title",
-      "label": "Card 2 title",
-      "default": "Military & first responders"
-    },
-    {
-      "type": "textarea",
-      "id": "example2_desc",
-      "label": "Card 2 description",
-      "default": "Private storefronts for units, stations, departments, classes, teams, and special events."
-    },
-    {
-      "type": "image_picker",
-      "id": "example3_image",
-      "label": "Card 3 image"
-    },
-    {
-      "type": "text",
-      "id": "example3_title",
-      "label": "Card 3 title",
-      "default": "Trips, parties & reunions"
-    },
-    {
-      "type": "textarea",
-      "id": "example3_desc",
-      "label": "Card 3 description",
-      "default": "Bachelor trips, family reunions, vacations, fantasy leagues, school groups, and one-off events."
-    },
-    {
-      "type": "image_picker",
-      "id": "example4_image",
-      "label": "Card 4 image"
-    },
-    {
-      "type": "text",
-      "id": "example4_title",
-      "label": "Card 4 title",
-      "default": "Small businesses & fundraisers"
-    },
-    {
-      "type": "textarea",
-      "id": "example4_desc",
-      "label": "Card 4 description",
-      "default": "Simple merch stores without buying boxes of shirts or managing orders by hand."
-    },
-    {
-      "type": "header",
-      "content": "Media (legacy dashboard image)"
+      "content": "— Links —"
     },
     {
       "type": "image_picker",
       "id": "dashboard_image",
       "label": "Dashboard image (hidden on live site — re-enable via CSS)"
-    },
-    {
-      "type": "header",
-      "content": "Links"
     },
     {
       "type": "text",
@@ -2123,161 +2076,7 @@
     },
     {
       "type": "header",
-      "content": "Hero (logged-out)"
-    },
-    {
-      "type": "textarea",
-      "id": "hero_headline",
-      "label": "Headline (use line breaks for multi-line)",
-      "default": "Your team store.\nDone before your coffee."
-    },
-    {
-      "type": "textarea",
-      "id": "hero_sub",
-      "label": "Subheadline",
-      "default": "Fill out a 2-minute form. We build your private store in about 15 minutes. Share the link. You're done — forever."
-    },
-    {
-      "type": "text",
-      "id": "hero_cta_label",
-      "label": "CTA button label",
-      "default": "Start my team's store →"
-    },
-    {
-      "type": "text",
-      "id": "hero_signin_label",
-      "label": "Sign in button label",
-      "default": "Sign in"
-    },
-    {
-      "type": "text",
-      "id": "hero_caption",
-      "label": "Caption below CTA",
-      "default": "No minimums · No meetings · No middleman"
-    },
-    {
-      "type": "header",
-      "content": "Speed proof"
-    },
-    {
-      "type": "text",
-      "id": "speed_headline",
-      "label": "Headline",
-      "default": "Two minutes to fill. About fifteen to build."
-    },
-    {
-      "type": "text",
-      "id": "speed_sub",
-      "label": "Sub",
-      "default": "That's it. That's the whole setup."
-    },
-    {
-      "type": "text",
-      "id": "stat1_num",
-      "label": "Stat 1 number",
-      "default": "2 min"
-    },
-    {
-      "type": "text",
-      "id": "stat1_label",
-      "label": "Stat 1 label",
-      "default": "Add your logo &amp; colors"
-    },
-    {
-      "type": "text",
-      "id": "stat2_num",
-      "label": "Stat 2 number",
-      "default": "~15 min"
-    },
-    {
-      "type": "text",
-      "id": "stat2_label",
-      "label": "Stat 2 label",
-      "default": "Automation builds your store"
-    },
-    {
-      "type": "text",
-      "id": "stat3_num",
-      "label": "Stat 3 number",
-      "default": "∞"
-    },
-    {
-      "type": "text",
-      "id": "stat3_label",
-      "label": "Stat 3 label",
-      "default": "Reorder whenever"
-    },
-    {
-      "type": "header",
-      "content": "How it works"
-    },
-    {
-      "type": "text",
-      "id": "steps_headline",
-      "label": "Headline",
-      "default": "Three steps. No middleman."
-    },
-    {
-      "type": "text",
-      "id": "step1_title",
-      "label": "Step 1 title",
-      "default": "Add your logo &amp; colors"
-    },
-    {
-      "type": "textarea",
-      "id": "step1_desc",
-      "label": "Step 1 description",
-      "default": "Tell us your team name, logo, and colors. About 2 minutes."
-    },
-    {
-      "type": "text",
-      "id": "step2_title",
-      "label": "Step 2 title",
-      "default": "We build it"
-    },
-    {
-      "type": "textarea",
-      "id": "step2_desc",
-      "label": "Step 2 description",
-      "default": "Automation sets up your private store with your logo on every product. About 15 minutes."
-    },
-    {
-      "type": "text",
-      "id": "step3_title",
-      "label": "Step 3 title",
-      "default": "Share the link"
-    },
-    {
-      "type": "textarea",
-      "id": "step3_desc",
-      "label": "Step 3 description",
-      "default": "Your teammates order direct. You never handle another request."
-    },
-    {
-      "type": "header",
-      "content": "Final CTA (logged-out)"
-    },
-    {
-      "type": "text",
-      "id": "final_headline",
-      "label": "Headline",
-      "default": "One link. Every teammate. Every reorder. Forever."
-    },
-    {
-      "type": "text",
-      "id": "final_sub",
-      "label": "Sub",
-      "default": "Your team store is about 15 minutes away."
-    },
-    {
-      "type": "text",
-      "id": "final_cta_label",
-      "label": "CTA button label",
-      "default": "Start my team's store"
-    },
-    {
-      "type": "header",
-      "content": "Logged-in welcome"
+      "content": "— Signed-in member view —"
     },
     {
       "type": "text",
@@ -2302,10 +2101,6 @@
       "id": "orders_label",
       "label": "Orders button label",
       "default": "My Orders"
-    },
-    {
-      "type": "header",
-      "content": "Second store CTA (logged-in)"
     },
     {
       "type": "text",

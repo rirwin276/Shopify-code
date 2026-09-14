@@ -20,7 +20,15 @@
       <h2>{{ section.settings.heading | escape }}</h2>
       <p>{{ section.settings.subheading | escape }}</p>
     </div>
-    <div class="ss-proof__grid" data-proof-grid></div>
+    <div class="ss-proof__viewport">
+      <div class="ss-proof__track" data-proof-grid tabindex="0" role="region"
+           aria-label="Customer reviews, scrollable"></div>
+      <div class="ss-proof__nav" data-proof-nav hidden>
+        <button type="button" class="ss-proof__arrow" data-proof-prev aria-label="Previous reviews">‹</button>
+        <span class="ss-proof__count" data-proof-count></span>
+        <button type="button" class="ss-proof__arrow" data-proof-next aria-label="More reviews">›</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -31,8 +39,23 @@
   #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 10px; color:#9f8d5a; font-size:10px; font-weight:900; letter-spacing:.16em; }
   #ss-proof-{{ section.id }} h2 { margin:0; color:#11100e; font-size:clamp(26px,3vw,38px); line-height:1.02; letter-spacing:-.055em; font-weight:950; }
   #ss-proof-{{ section.id }} .ss-proof__heading > p:last-child { margin:11px 0 0; color:rgba(17,16,14,.56); font-size:14px; line-height:1.5; font-weight:600; }
-  #ss-proof-{{ section.id }} .ss-proof__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
-  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; min-height:164px; display:flex; flex-direction:column; padding:19px 20px; border:1px solid rgba(17,16,14,.075); border-radius:20px; background:#fff; box-shadow:0 6px 22px rgba(17,16,14,.05); overflow:hidden; }
+  /* A carousel rather than a grid: this fills up over time and a grid of
+     thirty reviews is a wall nobody reads. Native scroll-snap does the work —
+     it drags on a phone, wheels on a trackpad, and keeps working with the
+     arrows hidden or JS not yet run. */
+  #ss-proof-{{ section.id }} .ss-proof__viewport { position:relative; min-width:0; }
+  #ss-proof-{{ section.id }} .ss-proof__track { display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; scroll-padding-left:2px; padding:2px 2px 12px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  #ss-proof-{{ section.id }} .ss-proof__track::-webkit-scrollbar { display:none; }
+  #ss-proof-{{ section.id }} .ss-proof__track:focus-visible { outline:2px solid #9f8d5a; outline-offset:3px; border-radius:20px; }
+  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; flex:0 0 clamp(232px,74vw,268px); scroll-snap-align:start; min-height:164px; display:flex; flex-direction:column; padding:19px 20px; border:1px solid rgba(17,16,14,.075); border-radius:20px; background:#fff; box-shadow:0 6px 22px rgba(17,16,14,.05); overflow:hidden; }
+  #ss-proof-{{ section.id }} .ss-proof__nav { display:flex; align-items:center; gap:10px; margin-top:2px; }
+  #ss-proof-{{ section.id }} .ss-proof__nav[hidden] { display:none; }
+  #ss-proof-{{ section.id }} .ss-proof__arrow { width:38px; height:38px; display:grid; place-items:center; padding:0; border:1px solid rgba(17,16,14,.14); border-radius:50%; background:#fff; color:#11100e; font:inherit; font-size:21px; line-height:1; cursor:pointer; }
+  #ss-proof-{{ section.id }} .ss-proof__arrow:disabled { opacity:.32; cursor:default; }
+  #ss-proof-{{ section.id }} .ss-proof__count { color:rgba(17,16,14,.5); font-size:12px; font-weight:700; letter-spacing:.02em; }
+  @media (prefers-reduced-motion: reduce) {
+    #ss-proof-{{ section.id }} .ss-proof__track { scroll-behavior:auto; }
+  }
   #ss-proof-{{ section.id }} .ss-proof__stars { color:#b58d29; font-size:15px; letter-spacing:2px; }
   #ss-proof-{{ section.id }} .ss-proof__stars i { color:rgba(17,16,14,.18); font-style:normal; }
   #ss-proof-{{ section.id }} blockquote { margin:11px 0 15px; color:#24251f; font-size:14px; line-height:1.52; }
@@ -45,7 +68,7 @@
   @media (max-width:700px) {
     #ss-proof-{{ section.id }} .ss-proof__inner { grid-template-columns:1fr; gap:20px; padding:26px 20px 28px; border-radius:24px; }
     #ss-proof-{{ section.id }} .ss-proof__heading { max-width:460px; }
-    #ss-proof-{{ section.id }} .ss-proof__grid { grid-template-columns:1fr; }
+    #ss-proof-{{ section.id }} .ss-proof__card { flex-basis:clamp(232px,80vw,300px); }
   }
 </style>
 
@@ -92,7 +115,7 @@
     const controller = typeof AbortController === 'function' ? new AbortController() : null;
     const timer = controller ? window.setTimeout(() => controller.abort(), 8000) : null;
 
-    fetch(api + '/reviews/featured?limit=5', {
+    fetch(api + '/reviews/featured?limit=40', {
       headers: { 'Accept': 'application/json' },
       signal: controller ? controller.signal : undefined
     })
@@ -139,9 +162,80 @@
         if (!cards.childNodes.length) return;
         grid.replaceChildren(cards);
         root.hidden = false;
+        wireCarousel(root, grid);
       })
       .catch(() => {})
       .then(() => { if (timer) window.clearTimeout(timer); });
+  };
+
+  // Arrows and a position readout. The track scrolls perfectly well without
+  // any of this — that is the point of using native scroll-snap — so nothing
+  // here is load-bearing, and the nav stays hidden when every review already
+  // fits on screen.
+  const wireCarousel = (root, track) => {
+    const nav = root.querySelector('[data-proof-nav]');
+    const prev = root.querySelector('[data-proof-prev]');
+    const next = root.querySelector('[data-proof-next]');
+    const count = root.querySelector('[data-proof-count]');
+    if (!nav || !prev || !next) return;
+
+    const total = track.children.length;
+    const step = () => {
+      const card = track.firstElementChild;
+      if (!card) return track.clientWidth;
+      const gap = parseFloat(getComputedStyle(track).columnGap || '12') || 12;
+      // Move by whole cards, and never by more than a screenful.
+      const perView = Math.max(1, Math.floor(track.clientWidth / (card.offsetWidth + gap)));
+      return (card.offsetWidth + gap) * perView;
+    };
+
+    const sync = () => {
+      // A one-pixel tolerance: fractional scroll widths otherwise leave the
+      // last arrow enabled forever on some zoom levels.
+      const max = track.scrollWidth - track.clientWidth;
+      const overflowing = max > 1;
+      nav.hidden = !overflowing;
+      prev.disabled = track.scrollLeft <= 1;
+      next.disabled = track.scrollLeft >= max - 1;
+      if (count && overflowing) {
+        const card = track.firstElementChild;
+        const gap = parseFloat(getComputedStyle(track).columnGap || '12') || 12;
+        const first = Math.round(track.scrollLeft / (card.offsetWidth + gap)) + 1;
+        const perView = Math.max(1, Math.round(track.clientWidth / (card.offsetWidth + gap)));
+        const last = Math.min(total, first + perView - 1);
+        count.textContent = (first === last ? first : first + '–' + last) + ' of ' + total;
+      }
+    };
+
+    prev.addEventListener('click', () => track.scrollBy({ left: -step() }));
+    next.addEventListener('click', () => track.scrollBy({ left: step() }));
+    track.addEventListener('scroll', () => {
+      window.clearTimeout(track._proofTick);
+      track._proofTick = window.setTimeout(sync, 90);
+    }, { passive: true });
+
+    // Arrow keys move the track when it has focus, so the carousel is usable
+    // without a mouse. Home/End jump to the ends.
+    track.addEventListener('keydown', (event) => {
+      const moves = { ArrowRight: 1, ArrowLeft: -1 };
+      if (event.key in moves) {
+        event.preventDefault();
+        track.scrollBy({ left: step() * moves[event.key] });
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        track.scrollTo({ left: 0 });
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        track.scrollTo({ left: track.scrollWidth });
+      }
+    });
+
+    if (typeof ResizeObserver === 'function') {
+      new ResizeObserver(sync).observe(track);
+    } else {
+      window.addEventListener('resize', sync);
+    }
+    sync();
   };
 
   const start = () => {

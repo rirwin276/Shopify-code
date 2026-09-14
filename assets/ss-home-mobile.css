@@ -17,6 +17,8 @@
 .ss-ad .ad-start{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:54px;padding:15px 24px;border:1px solid var(--ink);border-radius:9px;background:var(--ink);color:#fff;text-decoration:none;font-weight:700;font-size:15px;line-height:1.3;cursor:pointer;transition:background .18s}
 .ss-ad .ad-start:hover{background:#263b55}
 .ss-ad .ad-start span{font-size:22px;font-weight:400;line-height:1}
+/* The number "free" was never followed by. */
+.ss-ad .ad-pricenote{display:inline-block;margin:0 0 18px;padding:7px 13px;border-radius:999px;background:#eef4ea;color:#33452f;font-size:13px;font-weight:750;line-height:1.4}
 .ss-ad .ad-micro{font-size:12px;line-height:1.55;color:var(--muted);margin:12px 0 0;max-width:420px}
 .ss-ad .ad-signin{font-size:11px;line-height:1.5;color:var(--muted);margin:6px 0 0;max-width:420px}
 .ss-ad .ad-stage{background:#101f33;border-radius:18px;overflow:hidden;position:relative;color:#fff}
@@ -34,6 +36,8 @@
 .ss-ad .ad-benefits{border-top:1px solid #dfdfd7;border-bottom:1px solid #dfdfd7;padding:19px 0}
 .ss-ad .ad-benefit-row{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;font-size:13px;font-weight:650;line-height:1.4}
 .ss-ad .ad-benefit-row span:before{content:"✓";color:#657653;margin-right:9px}
+.ss-ad .ad-benefit-vet{color:#33452f;font-weight:800}
+.ss-ad .ad-benefit-vet:before{content:none!important}
 .ss-ad .ad-section{padding:64px 0}
 .ss-ad h2{font-size:clamp(30px,3.2vw,43px);line-height:1.13;font-weight:750;letter-spacing:-.035em;margin:0 0 18px;color:var(--ink)}
 .ss-ad .ad-section-intro{font-size:15px;line-height:1.65;color:var(--muted);max-width:540px;margin:0}
@@ -72,6 +76,7 @@
  .ss-ad h1 em:after{height:4px;bottom:-4px}
  .ss-ad .ad-intro{font-size:15px;line-height:1.55;margin-bottom:20px;max-width:400px}
  .ss-ad .ad-start{width:100%;font-size:14px;justify-content:space-between;min-height:52px;padding:14px 18px}
+ .ss-ad .ad-pricenote{display:block;text-align:center;font-size:12px;margin:0 auto 16px}
  .ss-ad .ad-micro{font-size:11px;text-align:center;max-width:none;margin-top:10px}
  .ss-ad .ad-signin{font-size:10px;text-align:center;max-width:none}
  .ss-ad .ad-stage{border-radius:12px}
@@ -115,9 +120,6 @@
 .ss-ad .ad-gear-note{font-size:11px;line-height:1.5;color:#6d746f;margin:20px 0 0}
 .ss-ad .ad-play-section{background:#e9eee8;border-block:1px solid #dce3d9;scroll-margin-top:20px}
 .ss-ad .ad-experience{margin-top:25px;border:1px solid #cfd7cb;border-radius:15px;overflow:hidden;background:#fff;box-shadow:0 12px 28px #13263808}
-.ss-ad .ad-experience-tabs{display:flex;gap:5px;background:#142238;padding:8px}
-.ss-ad .ad-experience-tabs button{min-width:0;flex:1;border:0;background:transparent;color:#c9d5df;border-radius:8px;min-height:44px;padding:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
-.ss-ad .ad-experience-tabs button[aria-pressed=true]{background:#ecddbf;color:#142238}
 .ss-ad .ad-demo-layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:center;min-width:0}
 .ss-ad .ad-print-stage,.ss-ad .ad-builder-stage{position:relative;background:#fff;container-type:inline-size;margin:0;min-width:0}
 .ss-ad .ad-print-stage>img,.ss-ad .ad-builder-stage>img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain}
@@ -204,15 +206,64 @@
 .ss-ad .ad-detail-info{padding:46px 28px 28px}
 .ss-ad .ad-detail-info h3{font-size:27px;margin:10px 0}
 .ss-ad .ad-detail-info p{font-size:13px;line-height:1.6;color:var(--muted)}
+/* Card flags. "Front + back" and "Name & number" are the two things the demo
+   used to hide entirely — the back photos were already in the data and never
+   shown, and personalization was only mentioned two sections further down. */
+.ss-ad .ad-card-flags{position:absolute;top:9px;left:9px;display:flex;flex-wrap:wrap;gap:5px;max-width:calc(100% - 18px)}
+.ss-ad .ad-card-flag{padding:4px 8px;border-radius:999px;background:#ffffffee;color:#2c3a2c;font-size:10px;font-weight:800;letter-spacing:.03em;line-height:1.3;box-shadow:0 1px 4px #1422381f}
+.ss-ad .ad-card-flag-pers{background:#213c31f0;color:#fff}
+
+/* Front/back switch, over the photo it changes. Hidden entirely when the
+   colour has no back, rather than shown disabled. */
+.ss-ad .ad-detail-photo{position:relative}
+.ss-ad .ad-detail-sides{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:3px;padding:3px;border-radius:999px;background:#ffffffee;box-shadow:0 2px 10px #14223824}
+.ss-ad .ad-detail-sides[hidden]{display:none}
+.ss-ad .ad-detail-sides button{font:inherit;font-size:12px;font-weight:700;min-height:34px;padding:6px 15px;border:0;border-radius:999px;background:none;color:#4b574a;cursor:pointer}
+.ss-ad .ad-detail-sides button[aria-pressed=true]{background:#213c31;color:#fff}
+
+.ss-ad .ad-detail-price{margin:2px 0 10px;font-size:14px;font-weight:800;color:var(--ink)}
+.ss-ad .ad-detail-pers{margin:0 0 14px;padding:10px 12px;border-radius:10px;background:#eef4ea;color:#33452f;font-size:12.5px;line-height:1.55}
+.ss-ad .ad-pers-jump{display:inline;padding:0;border:0;background:none;color:#2f6b45;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .ss-ad .ad-detail-options{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 18px}
 .ss-ad .ad-detail-options button{font:inherit;font-size:12px;color:var(--ink);background:#fff;border:1px solid #d8ddd3;border-radius:7px;min-height:42px;padding:8px 12px;cursor:pointer}
 .ss-ad .ad-detail-options button[aria-pressed=true]{background:#213c31;border-color:#213c31;color:#fff}
 .ss-ad .ad-detail-info label{font-size:12px;font-weight:700}
 .ss-ad .ad-detail-note{background:#f0f4ea;border-radius:10px;padding:12px}
-.ss-ad .ad-style-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
-.ss-ad .ad-style-controls label:first-child{grid-column:1/-1}
-.ss-ad .ad-style-controls label,.ss-ad .ad-personal-fields label{font-size:12px;font-weight:600;color:#4d594a}
-.ss-ad .ad-style-controls select{display:block;width:100%;margin-top:6px;min-height:44px;background:#f7f8f4;border:1px solid #cad1c5;color:var(--ink);border-radius:7px;padding:10px;font:inherit;font-size:14px}
+/* The name & number picker. Same six fonts and same ink colours the Pro
+   Builder offers, shown as swatches rather than dropdowns — a dropdown hides
+   the one thing a buyer is choosing on, which is what it looks like. */
+.ss-ad .ad-style-controls{display:grid;gap:15px;margin:18px 0}
+.ss-ad .ad-personal-fields label{font-size:12px;font-weight:600;color:#4d594a}
+.ss-ad .ad-pickgroup{min-width:0}
+.ss-ad .ad-picklabel{display:block;margin-bottom:7px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#6b7566}
+
+.ss-ad .ad-fontrow{display:flex;flex-wrap:wrap;gap:7px}
+.ss-ad .ad-fontpick{padding:9px 13px;min-height:42px;border:1.5px solid #cad1c5;border-radius:8px;background:#f7f8f4;color:var(--ink);font-size:15px;line-height:1.1;cursor:pointer;white-space:nowrap}
+.ss-ad .ad-fontpick[aria-pressed="true"]{border-color:var(--ink);background:#fff;box-shadow:0 0 0 1px var(--ink) inset}
+/* Each button previews in the face it selects. */
+.ss-ad .ad-font-varsity_prime{font-family:'Graduate',serif;font-weight:400}
+.ss-ad .ad-font-courtside{font-family:'Teko',sans-serif;font-weight:700;font-size:18px}
+.ss-ad .ad-font-afterburner{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-style:italic;font-size:17px}
+.ss-ad .ad-font-battalion{font-family:'Saira Stencil One',sans-serif;font-weight:400}
+.ss-ad .ad-font-ironclad{font-family:'Russo One',sans-serif;font-weight:400}
+.ss-ad .ad-font-rally{font-family:'Changa One',sans-serif;font-weight:400;font-style:italic}
+
+.ss-ad .ad-inkrow{display:flex;flex-wrap:wrap;gap:6px}
+.ss-ad .ad-ink{display:inline-flex;align-items:center;gap:6px;padding:6px 10px 6px 7px;min-height:38px;border:1.5px solid #d7dcd3;border-radius:999px;background:#fff;color:#43503f;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.ss-ad .ad-ink[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
+.ss-ad .ad-ink-dot{width:17px;height:17px;border-radius:50%;background:var(--ink);border:1px solid rgba(20,34,56,.22);flex:0 0 auto}
+.ss-ad .ad-ink-dot-camo[data-camo]{background-size:200% 200%;background-position:center}
+.ss-ad .ad-ink-dot-camo[data-camo="regular"]{background-image:url('ss-camo-regular.webp')}
+.ss-ad .ad-ink-dot-camo[data-camo="pink"]{background-image:url('ss-camo-pink.webp')}
+.ss-ad .ad-ink-dot-camo[data-camo="blue"]{background-image:url('ss-camo-blue.webp')}
+.ss-ad .ad-ink-dot-camo[data-camo="snow"]{background-image:url('ss-camo-snow.webp')}
+/* "No outline" reads as a diagonal cut, not an eighteenth white swatch. */
+.ss-ad .ad-ink-dot-none{width:17px;height:17px;border-radius:50%;flex:0 0 auto;border:1px solid #c3cabe;background:linear-gradient(135deg,#fff 45%,#c3cabe 45%,#c3cabe 55%,#fff 55%)}
+@media (max-width:700px){
+  .ss-ad .ad-inkrow{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+  .ss-ad .ad-inkrow::-webkit-scrollbar{display:none}
+  .ss-ad .ad-ink{scroll-snap-align:start}
+}
 .ss-ad .ad-personal-fields-full{grid-template-columns:1fr;gap:8px}
 .ss-ad .ad-personal-fields-full .ss-pers-hidden{display:none!important}
 .ss-ad .ad-line-button{justify-self:start;background:none;color:#536b40;border:0;padding:8px 0;font:inherit;font-size:12px;font-weight:600;min-height:36px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
