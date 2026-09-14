@@ -21,7 +21,7 @@
   {%- if request.path contains '/account/login' or request.path contains '/account/register' or request.path contains '/account/reset' or request.path contains '/account/activate' -%}
     {%- assign ss_is_auth_page = true -%}
   {%- endif -%}
-  {%- if (template.name == 'account' or template.name == 'order' or request.path contains '/account') and ss_is_auth_page == false -%}
+  {%- if template.name == 'account' or template.name == 'order' or request.path contains '/account' and ss_is_auth_page == false -%}
     <script>
       (function () {
         var portal = "{{ pages['portal'].url | default: '/pages/portal' }}";
@@ -460,3 +460,15 @@
     {% endif %}
   </body>
 </html>
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "{%- if (template.name == 'account' or template.name == 'order' or request.path
+    contains '/account') and ss_is_auth_page == false -%}"
+  to: "{%- if template.name == 'account' or template.name == 'order' or request.path
+    contains '/account' and ss_is_auth_page == false -%}"
+  position: 1135..1265
+{% endcomment %}
