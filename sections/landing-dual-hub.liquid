@@ -150,7 +150,7 @@
               catch. These come from the same catalogue the product section
               further down renders, so the page cannot quote two prices.
             {%- endcomment -%}
-            <p class="ad-pricenote">{{ section.settings.hero_price_line | escape }}</p>
+            <p class="ad-pricenote">{{ section.settings.hero_price_line | escape }}<span class="ad-pricenote-ship">Free US shipping</span></p>
             <a class="ad-start" data-ad-hero-cta href="{{ request_url | escape }}">{{ cta_label | escape }} <span aria-hidden="true">→</span></a>
             <p class="ad-micro">{{ section.settings.hero_micro | escape }}</p>
             <a class="ad-secondary" href="#ad-store-{{ section.id }}">Explore a demo store <span aria-hidden="true">↗</span></a><p class="ad-signin">Always free to create. You only pay for gear you order.</p>
@@ -181,7 +181,7 @@
         and San Diego youth sports — read it as a reason to trust the company,
         which makes it a headline fact, not a footer credit.
       {%- endcomment -%}
-      <div class="ad-benefits"><div class="ad-wrap ad-benefit-row"><span class="ad-benefit-vet">★ Veteran owned &amp; operated</span><span>No setup fees</span><span>No minimums</span><span>No deadlines</span><span>Made &amp; shipped for you</span></div></div>
+      <div class="ad-benefits"><div class="ad-wrap ad-benefit-row"><span class="ad-benefit-vet">★ Veteran owned &amp; operated</span><span>Free US shipping</span><span>No setup fees</span><span>No minimums</span><span>No deadlines</span><span>Made &amp; shipped for you</span></div></div>
       {%- comment -%}
         How it works, before the demos rather than after them. A coach who has
         never heard of us needs the mechanism first: two of these interactive
@@ -202,6 +202,14 @@
         </div>
       </section>
 
+      {%- comment -%}
+        Proof sits between "here is how it works" and "here, try it". A coach
+        who has just read the three steps is asking whether it actually works
+        for people like them; that question is better answered before the demo
+        than after it. Renders nothing until there are approved reviews.
+      {%- endcomment -%}
+      <div class="ss-home-slot" data-ss-home-slot="reviews"></div>
+
       <section class="ad-section ad-store-section" id="ad-store-{{ section.id }}" data-ad-store data-catalog-url="{{ 'ss-raptors-demo.json' | asset_url }}">
         <div class="ad-wrap">
           <div class="ad-section-heading"><div><p class="ad-kicker">Don't picture it. Step inside.</p><h2>This could be<br>your team's store.</h2></div><p class="ad-section-intro">Browse the Raptors gear. Open a product. Try the colors. This is how easy shopping your team store can feel.</p></div>
@@ -216,7 +224,6 @@
         </div>
         <dialog class="ad-product-dialog" data-store-dialog aria-label="Demo product details"><button class="ad-dialog-close" type="button" data-store-close aria-label="Close product preview">×</button><div data-store-detail></div></dialog>
       </section>
-      <div class="ss-home-slot" data-ss-home-slot="reviews"></div>
       {%- comment -%}
         The six lettering faces the Pro Builder actually offers, so each picker
         button previews in the face it selects instead of naming it. Loaded
@@ -290,6 +297,7 @@
           <details><summary>Is the team store really free?</summary><p>Yes. Creating your store is free, with no setup fee or upfront inventory purchase. Your members pay for the gear they choose to order.</p></details>
           <details><summary>Why do I need to sign in?</summary><p>Secure Shopify sign-in connects your store to your dashboard so you can manage it and return later. After signing in, you come back to the short setup form.</p></details>
           <details><summary>Do I have to collect sizes or payments?</summary><p>No. Share your store's join link. Each person signs in, chooses their own size and color, and pays for their own order. We ship directly to them.</p></details>
+          <details><summary>What does shipping cost?</summary><p>Nothing. Shipping is always free within the United States — the price on the product is the price your members pay.</p></details>
           <details><summary>Can I change the gear later?</summary><p>Yes. Your store dashboard lets you add products, choose colors, adjust logo placement, and hide items. Your store can grow with your team.</p></details>
           <details><summary>Is this just for sports teams?</summary><p>Sports teams, clubs, military units, small businesses, and family groups can all create a store. The same simple setup works for each.</p></details>
         </div>

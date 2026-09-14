@@ -83,6 +83,24 @@ check('the benefit bar still follows the hero', hero < benefits && benefits < st
 check('the FAQ and the closing CTA stay at the end',
   personalize < faq && faq < final);
 
+// Proof belongs between "here is how it works" and "here, try it": the coach
+// who has just read the steps is asking whether it works for people like them.
+const reviews = at('data-ss-home-slot="reviews"');
+check('the reviews slot is on the page', reviews > -1);
+check('reviews come after how it works', steps < reviews);
+check('and before the demo store', reviews < demoStore,
+  'proof after two interactive demos is proof nobody reached');
+
+// Free US shipping is the answer to the question that decides an order. It has
+// to be somewhere a visitor meets before the FAQ, not only inside it.
+const shipEarly = at('Free US shipping');
+check('free US shipping is stated above the FAQ', shipEarly > -1 && shipEarly < faq,
+  'shipping cost only answered three screens down');
+check('and again where the prices are quoted',
+  signedOut.indexOf('ad-pricenote-ship') > -1);
+check('the FAQ answers it too',
+  /shipping is always free within the United States/i.test(signedOut));
+
 // --- The claims the page makes ---------------------------------------------
 check('a price appears above the demo store',
   at('ad-pricenote') > -1 && at('ad-pricenote') < demoStore,

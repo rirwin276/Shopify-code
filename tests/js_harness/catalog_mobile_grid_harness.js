@@ -77,10 +77,17 @@ function buildPage(products) {
   let page;
   const errors = [];
 
+  const PIXEL = Buffer.from(
+    'R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==', 'base64');
+
   async function load(products, width) {
     if (page) await page.close();
     page = await browser.newPage({ viewport: { width, height: 900 } });
     page.on('pageerror', (e) => errors.push(String(e)));
+    // A real server, so a dead photo fails the way a dead photo fails.
+    await page.route('**/good.png', (r) => r.fulfill({ contentType: 'image/gif', body: PIXEL }));
+    await page.route('**/dead.png', (r) => r.fulfill({ status: 404, body: '' }));
+    await page.route('**/alsodead.png', (r) => r.fulfill({ status: 404, body: '' }));
     await page.setContent(buildPage(products));
     await page.waitForTimeout(450);
   }
@@ -154,6 +161,64 @@ function buildPage(products) {
   await page.waitForTimeout(250);
   check('opening it does not put a broken image in the modal',
     (await page.$('.ss-public-catalog__nophoto--modal')) !== null);
+
+  // --- Badges must not sit on the garment at phone width -------------------
+  await load([product(1, { personalizable: true }), product(2)], 390);
+  check('the category badge is off the photo on a phone',
+    (await page.$eval('.ss-public-catalog__badge', (e) => getComputedStyle(e).display)) === 'none',
+    'the pill still covers the shoulder of a 170px-wide garment');
+  check('the name & number marker is still shown',
+    (await page.$eval('.ss-public-catalog__personalized', (e) => e.offsetParent !== null)) === true,
+    'that one is real information, not a repeat of the name');
+  check('and it sits in the text, not over the photo',
+    (await page.$eval('.ss-public-catalog__personalized', (e) => getComputedStyle(e).position)) === 'static');
+  const markerOverlaps = await page.$eval('.ss-public-catalog__card', (card) => {
+    const marker = card.querySelector('.ss-public-catalog__personalized');
+    const photo = card.querySelector('.ss-public-catalog__media');
+    const m = marker.getBoundingClientRect(), p = photo.getBoundingClientRect();
+    return !(m.top >= p.bottom - 1 || m.bottom <= p.top + 1);
+  });
+  check('nothing is drawn over the product photo', markerOverlaps === false);
+
+  // --- Wide screens keep the badges where they were ------------------------
+  await load([product(1, { personalizable: true })], 1280);
+  check('the badge is back on the photo on a desktop',
+    (await page.$eval('.ss-public-catalog__badge', (e) => getComputedStyle(e).display)) !== 'none');
+  check('and so is the marker',
+    (await page.$eval('.ss-public-catalog__personalized', (e) => getComputedStyle(e).position)) === 'absolute');
+  const onPhoto = await page.$eval('.ss-public-catalog__card', (card) => {
+    const m = card.querySelector('.ss-public-catalog__personalized').getBoundingClientRect();
+    const p = card.querySelector('.ss-public-catalog__media').getBoundingClientRect();
+    return m.top >= p.top - 1 && m.bottom <= p.bottom + 1;
+  });
+  check('the marker sits over the photo on a desktop, as before', onPhoto === true);
+
+  // --- A photo that will not load --------------------------------------------
+  await load([product(1, { image: 'https://img.test/dead.png', image_fallback: 'https://img.test/good.png', badge: 'Youth Long Sleeve Tee' })], 1280);
+  await page.waitForTimeout(400);
+  // Read it without assuming the img survived: dropping the fallback hop
+  // replaces it with a tile, and that has to report as a failed check rather
+  // than crash the run.
+  const cardSrc = await page.$eval('.ss-public-catalog__media',
+    (m) => (m.querySelector('img') || {}).currentSrc || (m.querySelector('img') || {}).src || 'replaced by tile');
+  check('a dead photo falls back to the second source',
+    cardSrc === 'https://img.test/good.png',
+    'the card gave up instead of trying the fallback (' + cardSrc + ')');
+  check('and no tile is shown when the fallback works',
+    (await page.$('.ss-public-catalog__nophoto')) === null);
+
+  await load([product(1, { image: 'https://img.test/dead.png', image_fallback: 'https://img.test/alsodead.png', badge: 'Youth Long Sleeve Tee' })], 1280);
+  await page.waitForTimeout(500);
+  check('both sources dead falls back to the named tile',
+    (await page.$('.ss-public-catalog__nophoto')) !== null,
+    'a broken-image icon on the page that answers "what can my store sell?"');
+  check('the tile still names the product',
+    /Youth Long Sleeve Tee/i.test(await page.$eval('.ss-public-catalog__nophoto', (e) => e.textContent)));
+
+  await load([product(1, { image: 'https://img.test/dead.png', image_fallback: '' })], 1280);
+  await page.waitForTimeout(500);
+  check('a dead photo with no fallback goes straight to the tile',
+    (await page.$('.ss-public-catalog__nophoto')) !== null);
 
   check('nothing threw', errors.length === 0, errors[0]);
 

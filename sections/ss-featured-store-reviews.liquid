@@ -19,6 +19,11 @@
       <p class="ss-proof__eyebrow">{{ section.settings.eyebrow | escape }}</p>
       <h2>{{ section.settings.heading | escape }}</h2>
       <p>{{ section.settings.subheading | escape }}</p>
+      <div class="ss-proof__summary" data-proof-summary hidden>
+        <span class="ss-proof__avg" data-proof-avg></span>
+        <span class="ss-proof__avgstars" data-proof-avgstars aria-hidden="true"></span>
+        <span class="ss-proof__total" data-proof-total></span>
+      </div>
     </div>
     <div class="ss-proof__viewport">
       <div class="ss-proof__track" data-proof-grid tabindex="0" role="region"
@@ -33,11 +38,23 @@
 </section>
 
 <style>
-  #ss-proof-{{ section.id }} { padding:6px 0 46px; }
-  #ss-proof-{{ section.id }} .ss-proof__inner { width:min(1180px,calc(100% - 44px)); margin:0 auto; display:grid; grid-template-columns:minmax(230px,.7fr) minmax(0,1.3fr); gap:34px; align-items:center; padding:30px 30px 32px; border:1px solid rgba(17,16,14,.08); border-radius:28px; background:rgba(255,255,255,.68); box-shadow:0 24px 80px rgba(17,16,14,.08); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
-  #ss-proof-{{ section.id }} .ss-proof__heading { max-width:360px; }
-  #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 10px; color:#9f8d5a; font-size:10px; font-weight:900; letter-spacing:.16em; }
-  #ss-proof-{{ section.id }} h2 { margin:0; color:#11100e; font-size:clamp(26px,3vw,38px); line-height:1.02; letter-spacing:-.055em; font-weight:950; }
+  /* This is the only place on the page where somebody other than us is
+     talking, so it gets its own ground and its own weight rather than sitting
+     in the same flat cream as everything above it. */
+  #ss-proof-{{ section.id }} { padding:52px 0 58px; background:linear-gradient(180deg,#f6f1e6 0%,#fbf9f4 68%,#faf9f5 100%); border-top:1px solid rgba(183,163,106,.3); border-bottom:1px solid rgba(183,163,106,.22); }
+  #ss-proof-{{ section.id }} .ss-proof__inner { width:min(1180px,calc(100% - 44px)); margin:0 auto; display:grid; grid-template-columns:minmax(240px,.72fr) minmax(0,1.28fr); gap:38px; align-items:center; padding:34px 34px 36px; border:1px solid rgba(183,163,106,.32); border-radius:28px; background:#fff; box-shadow:0 26px 70px rgba(17,16,14,.09); }
+  #ss-proof-{{ section.id }} .ss-proof__heading { max-width:380px; }
+  #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 11px; color:#8a6a1c; font-size:10px; font-weight:900; letter-spacing:.16em; }
+  #ss-proof-{{ section.id }} h2 { margin:0; color:#11100e; font-size:clamp(29px,3.3vw,42px); line-height:1.02; letter-spacing:-.055em; font-weight:950; }
+
+  /* The one number a stranger is scanning for. Computed from the reviews the
+     service actually returned — never shown when there are too few to mean
+     anything. */
+  #ss-proof-{{ section.id }} .ss-proof__summary { display:flex; align-items:center; gap:9px; margin-top:15px; flex-wrap:wrap; }
+  #ss-proof-{{ section.id }} .ss-proof__summary[hidden] { display:none; }
+  #ss-proof-{{ section.id }} .ss-proof__avg { color:#11100e; font-size:31px; font-weight:950; letter-spacing:-.04em; line-height:1; }
+  #ss-proof-{{ section.id }} .ss-proof__avgstars { color:#b98c16; font-size:17px; letter-spacing:1.5px; }
+  #ss-proof-{{ section.id }} .ss-proof__total { width:100%; color:rgba(17,16,14,.56); font-size:12.5px; font-weight:700; }
   #ss-proof-{{ section.id }} .ss-proof__heading > p:last-child { margin:11px 0 0; color:rgba(17,16,14,.56); font-size:14px; line-height:1.5; font-weight:600; }
   /* A carousel rather than a grid: this fills up over time and a grid of
      thirty reviews is a wall nobody reads. Native scroll-snap does the work —
@@ -47,7 +64,7 @@
   #ss-proof-{{ section.id }} .ss-proof__track { display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; scroll-padding-left:2px; padding:2px 2px 12px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   #ss-proof-{{ section.id }} .ss-proof__track::-webkit-scrollbar { display:none; }
   #ss-proof-{{ section.id }} .ss-proof__track:focus-visible { outline:2px solid #9f8d5a; outline-offset:3px; border-radius:20px; }
-  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; flex:0 0 clamp(232px,74vw,268px); scroll-snap-align:start; min-height:164px; display:flex; flex-direction:column; padding:19px 20px; border:1px solid rgba(17,16,14,.075); border-radius:20px; background:#fff; box-shadow:0 6px 22px rgba(17,16,14,.05); overflow:hidden; }
+  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; flex:0 0 clamp(240px,76vw,284px); scroll-snap-align:start; min-height:178px; display:flex; flex-direction:column; padding:21px 22px; border:1px solid rgba(183,163,106,.34); border-radius:20px; background:linear-gradient(180deg,#fffdf8 0%,#fff 42%); box-shadow:0 8px 26px rgba(17,16,14,.07); overflow:hidden; }
   #ss-proof-{{ section.id }} .ss-proof__nav { display:flex; align-items:center; gap:10px; margin-top:2px; }
   #ss-proof-{{ section.id }} .ss-proof__nav[hidden] { display:none; }
   #ss-proof-{{ section.id }} .ss-proof__arrow { width:38px; height:38px; display:grid; place-items:center; padding:0; border:1px solid rgba(17,16,14,.14); border-radius:50%; background:#fff; color:#11100e; font:inherit; font-size:21px; line-height:1; cursor:pointer; }
@@ -56,9 +73,11 @@
   @media (prefers-reduced-motion: reduce) {
     #ss-proof-{{ section.id }} .ss-proof__track { scroll-behavior:auto; }
   }
-  #ss-proof-{{ section.id }} .ss-proof__stars { color:#b58d29; font-size:15px; letter-spacing:2px; }
-  #ss-proof-{{ section.id }} .ss-proof__stars i { color:rgba(17,16,14,.18); font-style:normal; }
-  #ss-proof-{{ section.id }} blockquote { margin:11px 0 15px; color:#24251f; font-size:14px; line-height:1.52; }
+  #ss-proof-{{ section.id }} .ss-proof__stars { color:#b98c16; font-size:16px; letter-spacing:2.5px; }
+  #ss-proof-{{ section.id }} .ss-proof__stars i { color:rgba(17,16,14,.16); font-style:normal; }
+  /* A real pull quote, not a caption. */
+  #ss-proof-{{ section.id }} blockquote { position:relative; z-index:1; margin:12px 0 16px; color:#1d1e19; font-size:15.5px; line-height:1.5; font-weight:500; letter-spacing:-.008em; }
+  #ss-proof-{{ section.id }} .ss-proof__card:before { content:"\201C"; position:absolute; top:-22px; right:8px; color:rgba(183,163,106,.22); font-family:Georgia,"Times New Roman",serif; font-size:118px; line-height:1; pointer-events:none; }
   #ss-proof-{{ section.id }} .ss-proof__person { display:flex; align-items:center; gap:10px; margin-top:auto; min-width:0; }
   #ss-proof-{{ section.id }} .ss-proof__avatar, #ss-proof-{{ section.id }} .ss-proof__photo { flex:0 0 46px; width:46px; height:46px; border-radius:50%; }
   #ss-proof-{{ section.id }} .ss-proof__avatar { display:grid; place-items:center; background:#20211b; color:#fff; font-size:15px; font-weight:800; }
@@ -161,6 +180,27 @@
 
         if (!cards.childNodes.length) return;
         grid.replaceChildren(cards);
+
+        // The average, from the reviews that were actually returned. Held back
+        // below three: an average of one is not an average, and a big "5.0"
+        // over a single card reads as a thinner claim than the card itself.
+        const rated = reviews
+          .map((review) => Number(review.rating))
+          .filter((value) => Number.isFinite(value) && value > 0);
+        const summary = root.querySelector('[data-proof-summary]');
+        if (summary && rated.length >= 3) {
+          const average = rated.reduce((a, b) => a + b, 0) / rated.length;
+          const rounded = Math.round(average * 10) / 10;
+          root.querySelector('[data-proof-avg]').textContent = rounded.toFixed(1);
+          root.querySelector('[data-proof-avgstars]').textContent =
+            '★'.repeat(Math.round(average)) + '☆'.repeat(5 - Math.round(average));
+          root.querySelector('[data-proof-total]').textContent =
+            'from ' + rated.length + ' store ' + (rated.length === 1 ? 'review' : 'reviews');
+          summary.hidden = false;
+          summary.setAttribute('aria-label',
+            rounded.toFixed(1) + ' out of 5, from ' + rated.length + ' reviews');
+        }
+
         root.hidden = false;
         wireCarousel(root, grid);
       })

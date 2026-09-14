@@ -190,6 +190,31 @@ function buildPage(payload, width) {
   check('the page itself does not scroll sideways', bodyScrolls === false,
     'the carousel pushed the page wider than the phone');
 
+  // --- The rating summary --------------------------------------------------
+  await load({ reviews: [
+    review(1, { rating: 5 }), review(2, { rating: 5 }), review(3, { rating: 4 }), review(4, { rating: 5 }),
+  ] });
+  const summaryShown = () => page.$eval('[data-proof-summary]', (e) => !e.hidden);
+  check('the average is shown once there are enough reviews', (await summaryShown()) === true);
+  check('and it is the real average',
+    (await page.$eval('[data-proof-avg]', (e) => e.textContent)) === '4.8',
+    await page.$eval('[data-proof-avg]', (e) => e.textContent));
+  check('the count is the real count',
+    /4 store reviews/.test(await page.$eval('[data-proof-total]', (e) => e.textContent)),
+    await page.$eval('[data-proof-total]', (e) => e.textContent));
+  check('the stars match the average',
+    (await page.$eval('[data-proof-avgstars]', (e) => e.textContent)) === '★★★★★');
+  check('screen readers get the number, not just the stars',
+    /4\.8 out of 5/.test(await page.$eval('[data-proof-summary]', (e) => e.getAttribute('aria-label') || '')));
+
+  await load({ reviews: [review(1, { rating: 5 }), review(2, { rating: 5 })] });
+  check('two reviews show no average',
+    (await summaryShown()) === false,
+    'an average of two is not an average, and a big 5.0 over two cards reads thinner than the cards');
+
+  await load({ reviews: [review(1, { rating: 0 }), review(2, { rating: 0 }), review(3, { rating: 0 })] });
+  check('unrated reviews produce no invented average', (await summaryShown()) === false);
+
   // --- Partly-filled reviews ----------------------------------------------
   await load({ reviews: [
     { rating: 5, body: 'No photo and no group on this one.', reviewer_name: 'Dana R.' },
