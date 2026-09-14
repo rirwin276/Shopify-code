@@ -1,11 +1,9 @@
-{%- if request.path == '/policies/shipping-policy' or request.path == '/pages/shipping' or request.path == '/pages/shipping-policy' -%}
-  <div class="section section--page-width" style="padding:60px 20px;text-align:center">
-    <h1>Shipping &amp; delivery</h1>
-    <p>Allow 3–5 business days for fulfillment, followed by up to one week for shipping.</p>
-    <p><a href="/pages/support#shipping">View shipping details in Support</a></p>
-  </div>
-  <script>window.location.replace('/pages/support#shipping');</script>
-{%- else -%}
+<script>
+  // Shopify can normalize request.path on missing pages; use the browser URL here.
+  if (['/policies/shipping-policy', '/pages/shipping', '/pages/shipping-policy'].includes(window.location.pathname.replace(/\/$/, ''))) {
+    window.location.replace('/pages/support#shipping');
+  }
+</script>
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div
   class="
@@ -31,8 +29,6 @@
     </div>
   </div>
 </div>
-
-{%- endif -%}
 
 {% schema %}
 {
