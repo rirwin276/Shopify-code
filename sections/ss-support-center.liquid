@@ -143,7 +143,7 @@
         <p><strong>Event dates:</strong> Production and delivery estimates are not guaranteed arrival dates. Order early when purchasing for a tournament, trip, ceremony, or other fixed event.</p>
         <div class="ss-help__policy-links">
           <a href="/policies/refund-policy">Refund policy</a>
-          <a href="/policies/shipping-policy">Shipping policy</a>
+          <a href="/pages/support#shipping">Shipping policy</a>
           <a href="{{ tracking_url }}">Track an order</a>
         </div>
       </div>
@@ -156,6 +156,13 @@
       </div>
 
       <div class="ss-help__faq-list">
+        <details id="shipping" class="ss-help__shipping">
+          <summary>Shipping &amp; delivery: when will my order arrive?</summary>
+          <p>Every item is made to order. Please allow <strong>3–5 business days for fulfillment</strong>, followed by <strong>up to one week for shipping</strong>. Shipping time begins after your order has been fulfilled; it is additional to fulfillment time.</p>
+          <p>Business days exclude weekends and holidays. Shipping within the United States is free. View your orders for fulfillment and tracking updates.</p>
+          <p>These are estimates, not guaranteed arrival dates. Please order early for games, tournaments, and other events.</p>
+          <p><a href="{{ tracking_url }}">View my orders</a></p>
+        </details>
         <details>
           <summary>My tracking has not updated. What should I do?</summary>
           <p>Carrier scans can pause between facilities. Check the tracking link first. If the estimated delivery date has passed or the package appears stalled, submit an order-problem request above.</p>
@@ -186,6 +193,9 @@
 </section>
 
 <style>
+  #ss-help-{{ section.id }} .ss-help__shipping{scroll-margin-top:110px}
+  #ss-help-{{ section.id }} .ss-help__shipping:target{border-color:#b7a36a}
+
   #ss-help-{{ section.id }}{
     --ss-ink:#11100e;
     --ss-muted:#68645c;
@@ -264,6 +274,26 @@
   const root = document.getElementById('ss-help-{{ section.id }}');
   if (!root || root.dataset.ready === '1') return;
   root.dataset.ready = '1';
+
+  // Open the shipping answer on arrival and when a same-page link is followed.
+  const openShipping = () => {
+    if (window.location.hash !== '#shipping') return;
+    const shipping = root.querySelector('#shipping');
+    if (!shipping) return;
+    shipping.open = true;
+    shipping.scrollIntoView({ behavior: 'auto', block: 'start' });
+  };
+  openShipping();
+  window.addEventListener('hashchange', openShipping);
+  root.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+    if (!link) return;
+    const url = new URL(link.href, window.location.href);
+    if (url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash === '#shipping') {
+      const shipping = root.querySelector('#shipping');
+      if (shipping) shipping.open = true;
+    }
+  });
 
   const panel = root.querySelector('[data-ss-case-panel]');
   const form = root.querySelector('[data-ss-case-form]');
