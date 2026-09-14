@@ -11,7 +11,7 @@
       "XL",
       "2XL"
     ],
-    "personalizable": false,
+    "personalizable": true,
     "colors": [
       {
         "name": "Charcoal-Black Triblend",
@@ -89,7 +89,7 @@
     "title": "Youth team tee",
     "brandTitle": "Bella Canvas Youth Staple Tee",
     "category": "youth",
-    "price": "$18",
+    "price": "$20",
     "sizes": [
       "S",
       "M",
@@ -111,7 +111,7 @@
         "front": "https://cdn.shopify.com/s/files/1/0798/2055/4490/files/raptors-3978__BC3001Y_front__natural__front_mockup_46460c7d-7c53-4a74-8455-dd659a018fa0.jpg?v=1780436806"
       }
     ],
-    "priceBack": "$24"
+    "priceBack": "$25"
   },
   {
     "title": "Cropped hoodie",

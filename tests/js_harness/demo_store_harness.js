@@ -85,14 +85,45 @@ catalog.forEach(p => p.colors.forEach(c => {
 check('no back photo is paired with the wrong colour', mismatched.length === 0,
   mismatched.join('; '));
 
-// A price the demo quotes that the public catalog contradicts would have the
-// page arguing with itself on one scroll.
-const PUBLIC = read('..', 'Printful_Automation', 'support_api.py');
-const publicPrices = new Set([...PUBLIC.matchAll(/"from":\s*"(\$\d+)"/g)].map(m => m[1]));
-check('demo prices are drawn from the real catalog, not invented',
-  catalog.every(p => publicPrices.has(p.price) || ['$39', '$16'].includes(p.price)),
-  catalog.filter(p => !publicPrices.has(p.price) && !['$39', '$16'].includes(p.price))
-    .map(p => `${p.title} ${p.price}`).join(', '));
+// The demo store, the public catalog and the builder all quote the same
+// product on one scroll. Check the demo against the BUILDER — the config that
+// actually sets the Shopify price — rather than against the catalog, so the
+// three cannot drift together into being wrong in the same way.
+const BUILDER_FOR = {
+  'Tri-blend team tee': 'bc3413', 'Premium team hoodie': 'm2580',
+  'Youth team hoodie': 'cc1467y', 'Youth team tee': 'bc3001y',
+  'Cropped hoodie': 'bc7502', 'Comfort Colors tee': 'cc1717',
+  'Toddler team tee': 'g3321', 'Team tote': 'ec8000', 'Trucker hat': 'hat39165',
+};
+const builderPrice = (key) => {
+  const cfg = read('..', 'Printful_Automation', 'pro_builders', key, 'config.py');
+  const front = cfg.match(/^FRONT_ONLY_PRICE_CENTS\s*=\s*(\d+)/m);
+  const back = cfg.match(/^FRONT_BACK_PRICE_CENTS\s*=\s*(\d+)/m);
+  const pers = cfg.match(/^SUPPORTS_PERSONALIZATION\s*=\s*(True|False)/m);
+  return {
+    front: front ? '$' + Math.floor(Number(front[1]) / 100) : null,
+    back: back ? '$' + Math.floor(Number(back[1]) / 100) : null,
+    pers: pers ? pers[1] === 'True' : null,
+  };
+};
+const priceDrift = [];
+const persDrift = [];
+catalog.forEach((p) => {
+  const key = BUILDER_FOR[p.title];
+  if (!key) { priceDrift.push(`${p.title}: no builder mapped`); return; }
+  const b = builderPrice(key);
+  if (b.front && b.front !== p.price) priceDrift.push(`${p.title}: demo ${p.price} vs builder ${b.front}`);
+  if (b.back && b.back !== b.front && b.back !== p.priceBack) {
+    priceDrift.push(`${p.title}: demo back ${p.priceBack} vs builder ${b.back}`);
+  }
+  if (b.pers !== null && b.pers !== !!p.personalizable) {
+    persDrift.push(`${p.title}: demo ${p.personalizable} vs builder ${b.pers}`);
+  }
+});
+check('demo prices match the builder that actually charges them',
+  priceDrift.length === 0, priceDrift.join('; '));
+check('the name & number flag matches the builder',
+  persDrift.length === 0, persDrift.join('; '));
 
 function buildPage() {
   return `<!doctype html><meta charset="utf-8">
