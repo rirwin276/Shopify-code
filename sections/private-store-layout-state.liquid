@@ -188,6 +188,13 @@
     overflow: hidden !important;
     border: 0 !important;
   }
+
+  /* Gradient Glow keeps inclusion badges high-contrast, matching the
+     dark/white treatment used on the dark storefront designs. */
+  #MainContent:has(#ss-private-store-state[data-layout="gradient"]) .product-badges__badge--pro-extra {
+    background: rgb(17 16 14 / 0.88) !important;
+    color: #ffffff !important;
+  }
 </style>
 
 <script>
