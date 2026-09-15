@@ -76,10 +76,19 @@
   #ss-catalog-{{ section.id }} .ss-public-catalog__media{aspect-ratio:1/1;background:var(--paper);position:relative;overflow:hidden}
   #ss-catalog-{{ section.id }} .ss-public-catalog__media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
   #ss-catalog-{{ section.id }} .ss-public-catalog__card:hover img{transform:scale(1.035)}
+  /* The card is the positioning context so the "Name + number" marker can sit
+     over the photo on a wide screen while living in the info block in the
+     markup — which is where it needs to be on a phone. */
+  #ss-catalog-{{ section.id }} .ss-public-catalog__card{position:relative}
   #ss-catalog-{{ section.id }} .ss-public-catalog__badge,
   #ss-catalog-{{ section.id }} .ss-public-catalog__personalized{position:absolute;top:10px;border-radius:999px;padding:5px 9px;font-size:9px;letter-spacing:.06em;text-transform:uppercase;font-weight:900}
   #ss-catalog-{{ section.id }} .ss-public-catalog__badge{left:10px;background:rgba(17,16,14,.72);color:#fff}
   #ss-catalog-{{ section.id }} .ss-public-catalog__personalized{right:10px;background:linear-gradient(135deg,#b7a36a,#dbc78d);color:#17150f}
+  /* A blank without a catalog photo yet. Better a named tile than a broken
+     image icon, and better than dropping the product off a list of what the
+     store can sell. */
+  #ss-catalog-{{ section.id }} .ss-public-catalog__nophoto{position:absolute;inset:0;display:grid;place-items:center;padding:18px;text-align:center;background:repeating-linear-gradient(135deg,#f3f1ec,#f3f1ec 9px,#eeebe4 9px,#eeebe4 18px);color:#716a5b;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;line-height:1.4}
+  #ss-catalog-{{ section.id }} .ss-public-catalog__nophoto--modal{position:static;width:100%;aspect-ratio:1;border-radius:18px;font-size:13px}
   #ss-catalog-{{ section.id }} .ss-public-catalog__info{padding:14px 15px 17px}
   #ss-catalog-{{ section.id }} .ss-public-catalog__name{font-size:14px;font-weight:900;line-height:1.2;letter-spacing:-.02em}
   #ss-catalog-{{ section.id }} .ss-public-catalog__price{font-size:13px;font-weight:900;color:#9c874e;margin-top:7px}
@@ -133,8 +142,32 @@
     #ss-catalog-{{ section.id }} .ss-public-catalog__modal-copy{padding:28px 20px 30px}
     #ss-catalog-{{ section.id }} .ss-public-catalog__dialog{overflow-y:auto}
   }
+  /* Two cards across leaves a photo about 170px wide, and a pill sitting on
+     top of it covers the shoulder of the garment — the one thing the card is
+     there to show. The category badge goes entirely: it repeats the product
+     name directly underneath it ("UNISEX LONG SLEEVE TEE" over "Bella + Canvas
+     Adult Long Sleeve Tee"). The name & number marker is real information, so
+     it moves off the photo and into the text instead. */
+  @media(max-width:760px){
+    #ss-catalog-{{ section.id }} .ss-public-catalog__badge{display:none}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__personalized{position:static;display:inline-block;margin-bottom:6px;background:none;padding:0;color:#8a7434;font-size:9.5px;letter-spacing:.07em}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__personalized:before{content:"★ "}
+  }
+  /* Two across on a phone, never one. Collapsed, this section shows four
+     products; one per row made that four full-height cards to scroll past
+     before reaching anything else on the page. Two-up makes it two rows, and
+     the card shrinks to suit — a phone-width card does not need a 15px hint
+     line or a 21px radius. */
   @media(max-width:460px){
-    #ss-catalog-{{ section.id }} .ss-public-catalog__grid{grid-template-columns:1fr}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__card{border-radius:16px}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__info{padding:10px 11px 13px}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__name{font-size:12.5px}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__price{font-size:12px;margin-top:5px}
+    /* The hint is a second sentence about a product you can tap to read in
+       full. At this width it is what turns two tidy rows into four. */
+    #ss-catalog-{{ section.id }} .ss-public-catalog__hint{display:none}
+    #ss-catalog-{{ section.id }} .ss-public-catalog__personalized{font-size:9px}
   }
 </style>
 
@@ -178,17 +211,43 @@
     grid.innerHTML = visible.map((product) => `
       <button class="ss-public-catalog__card" type="button" data-product-id="${escapeHtml(product.id)}" aria-label="View ${escapeHtml(product.name)} details">
         <div class="ss-public-catalog__media">
-          <img src="${escapeHtml(product.image)}" alt="" loading="lazy">
+          ${product.image
+            ? `<img src="${escapeHtml(product.image)}" alt="" loading="lazy" data-fallback="${escapeHtml(product.image_fallback || '')}">`
+            : `<span class="ss-public-catalog__nophoto">${escapeHtml(product.badge || 'Photo coming soon')}</span>`}
           <span class="ss-public-catalog__badge">${escapeHtml(product.badge)}</span>
-          ${product.personalizable ? '<span class="ss-public-catalog__personalized">Name + number</span>' : ''}
         </div>
         <div class="ss-public-catalog__info">
+          ${product.personalizable ? '<span class="ss-public-catalog__personalized">Name + number</span>' : ''}
           <div class="ss-public-catalog__name">${escapeHtml(product.name)}</div>
           <div class="ss-public-catalog__price">From ${escapeHtml(product.from)}</div>
           <div class="ss-public-catalog__hint">${escapeHtml(product.hint)}</div>
         </div>
       </button>
     `).join('');
+
+    // A photo that will not load becomes the next source, then a named tile.
+    // The alternative is a broken-image icon on the page that answers "what
+    // can my store sell?", which reads as the product not existing.
+    grid.querySelectorAll('.ss-public-catalog__media img').forEach((img) => {
+      const onFail = () => {
+        const next = img.getAttribute('data-fallback');
+        if (next) {
+          img.removeAttribute('data-fallback');
+          img.src = next;
+          return;
+        }
+        const tile = document.createElement('span');
+        tile.className = 'ss-public-catalog__nophoto';
+        tile.textContent = img.closest('.ss-public-catalog__card')
+          ?.querySelector('.ss-public-catalog__badge')?.textContent || 'Photo coming soon';
+        img.replaceWith(tile);
+      };
+      img.addEventListener('error', onFail);
+      // innerHTML starts the fetch immediately, so a photo that 404s fast can
+      // fire its error before this listener exists. A finished image with no
+      // width is one that already failed.
+      if (img.complete && img.naturalWidth === 0) onFail();
+    });
 
     grid.querySelectorAll('[data-product-id]').forEach((card) => {
       card.addEventListener('click', () => {
@@ -206,7 +265,9 @@
     dialogBody.innerHTML = `
       <div class="ss-public-catalog__modal-grid">
         <div class="ss-public-catalog__modal-media">
-          <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
+          ${product.image
+            ? `<img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" data-fallback="${escapeHtml(product.image_fallback || '')}">`
+            : `<span class="ss-public-catalog__nophoto ss-public-catalog__nophoto--modal">${escapeHtml(product.badge || 'Photo coming soon')}</span>`}
         </div>
         <div class="ss-public-catalog__modal-copy">
           <div class="ss-public-catalog__modal-chips">
@@ -261,6 +322,26 @@
         </div>
       </div>
     `;
+
+    // Same chain as the cards: a dead photo must not become a broken icon
+    // inside the product view either.
+    const modalImg = dialogBody.querySelector('.ss-public-catalog__modal-media img');
+    if (modalImg) {
+      const onModalFail = () => {
+        const next = modalImg.getAttribute('data-fallback');
+        if (next) {
+          modalImg.removeAttribute('data-fallback');
+          modalImg.src = next;
+          return;
+        }
+        const tile = document.createElement('span');
+        tile.className = 'ss-public-catalog__nophoto ss-public-catalog__nophoto--modal';
+        tile.textContent = product.badge || 'Photo coming soon';
+        modalImg.replaceWith(tile);
+      };
+      modalImg.addEventListener('error', onModalFail);
+      if (modalImg.complete && modalImg.naturalWidth === 0) onModalFail();
+    }
 
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');

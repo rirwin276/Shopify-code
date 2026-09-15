@@ -77,6 +77,7 @@
   .ap-inputs-group {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
     align-items: flex-end;
   }
   .ap-input-col {
@@ -336,238 +337,328 @@
       <span id="peSpinnerText">Loading latest prices…</span>
     </div>
 
+    <p>Front + Back is the total item price, not an extra charge. Sleeve prices are add-ons. Prices marked “builder default” have no saved global override.</p>
     <div id="peTable">
-      <!-- BC3413 Classic Tee — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          BC3413 Classic Tee
-        </div>
+        <div class="ap-price-label">Bella + Canvas Tri-Blend Tee<span>BC3413</span></div>
         <div class="ap-inputs-group">
-          <div class="ap-input-col">
-            <span class="ap-col-label">Front or Back</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3413_front" value="">
-            </div>
-          </div>
-          <div class="ap-input-col">
-            <span class="ap-col-label">Two Images</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3413_front_back" value="">
-            </div>
-          </div>
-          <!--
-            Sleeve prints are an ADD-ON to whichever of the two above applies,
-            not a tier of their own: Printful bills the placement on top of the
-            garment, so a sleeve costs the same whether it joins a front print
-            or a front and back. Both sleeves is priced as a pair rather than
-            twice one, so the second sleeve can carry a smaller step.
-          -->
-          <div class="ap-input-col">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Tri-Blend Tee — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="BC3413_front" data-default="24" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Tri-Blend Tee — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="BC3413_front_back" data-default="29" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
             <span class="ap-col-label">+ One Sleeve</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="0" max="999" step="0.01" data-module="BC3413_sleeve" value="">
-            </div>
-          </div>
-          <div class="ap-input-col">
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Tri-Blend Tee — + One Sleeve" type="number" min="0.01" max="999" step="0.01" data-module="BC3413_sleeve" data-default="4" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
             <span class="ap-col-label">+ Both Sleeves</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="0" max="999" step="0.01" data-module="BC3413_sleeves_both" value="">
-            </div>
-          </div>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Tri-Blend Tee — + Both Sleeves" type="number" min="0.01" max="999" step="0.01" data-module="BC3413_sleeves_both" data-default="7" value="">
+            </span>
+          </label>
         </div>
       </div>
-
-      <!-- BC3001Y Youth T-Shirt — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          BC3001Y Youth T-Shirt
-        </div>
+        <div class="ap-price-label">Bella + Canvas Adult Staple Tee<span>BC3001</span></div>
         <div class="ap-inputs-group">
-          <div class="ap-input-col">
-            <span class="ap-col-label">Front or Back</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3001Y_front" value="">
-            </div>
-          </div>
-          <div class="ap-input-col">
-            <span class="ap-col-label">Two Images</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3001Y_front_back" value="">
-            </div>
-          </div>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Adult Staple Tee — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="BC3001_front" data-default="20" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Adult Staple Tee — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="BC3001_front_back" data-default="25" value="">
+            </span>
+          </label>
         </div>
       </div>
-
-      <!-- G3719 Hoodie — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          B+C 3719 Pullover Hoodie
-        </div>
+        <div class="ap-price-label">Bella + Canvas Youth Staple Tee<span>BC3001Y</span></div>
         <div class="ap-inputs-group">
-          <div class="ap-input-col">
-            <span class="ap-col-label">Front or Back</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="G3719_front" value="">
-            </div>
-          </div>
-          <div class="ap-input-col">
-            <span class="ap-col-label">Two Images</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="G3719_front_back" value="">
-            </div>
-          </div>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Youth Staple Tee — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="BC3001Y_front" data-default="20" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Youth Staple Tee — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="BC3001Y_front_back" data-default="25" value="">
+            </span>
+          </label>
         </div>
       </div>
-
-      <!-- M2580 Hoodie — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          M2580 Hoodie
-        </div>
+        <div class="ap-price-label">Comfort Colors Youth Hoodie<span>CC1467Y</span></div>
         <div class="ap-inputs-group">
-          <div class="ap-input-col">
-            <span class="ap-col-label">Front or Back</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="M2580_front" value="">
-            </div>
-          </div>
-          <div class="ap-input-col">
-            <span class="ap-col-label">Two Images</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="M2580_front_back" value="">
-            </div>
-          </div>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Comfort Colors Youth Hoodie — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="CC1467Y_front" data-default="32" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Comfort Colors Youth Hoodie — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="CC1467Y_front_back" data-default="37" value="">
+            </span>
+          </label>
         </div>
       </div>
-
-      <!-- M2480 Crewneck Sweatshirt — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          M2480 Crewneck Sweatshirt
-        </div>
+        <div class="ap-price-label">Cotton Heritage Pullover Hoodie<span>M2580</span></div>
         <div class="ap-inputs-group">
-          <div class="ap-input-col">
-            <span class="ap-col-label">Front or Back</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="M2480_front" value="">
-            </div>
-          </div>
-          <div class="ap-input-col">
-            <span class="ap-col-label">Two Images</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="M2480_front_back" value="">
-            </div>
-          </div>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Cotton Heritage Pullover Hoodie — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="M2580_front" data-default="34" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Cotton Heritage Pullover Hoodie — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="M2580_front_back" data-default="39" value="">
+            </span>
+          </label>
         </div>
       </div>
-
-      <!-- LS14003 Full-Zip Hoodie — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          LS14003 Full-Zip Hoodie
-        </div>
+        <div class="ap-price-label">Cotton Heritage Crewneck<span>M2480</span></div>
         <div class="ap-inputs-group">
-          <div class="ap-input-col">
-            <span class="ap-col-label">Front or Back</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="LS14003_front" value="">
-            </div>
-          </div>
-          <div class="ap-input-col">
-            <span class="ap-col-label">Two Images</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="LS14003_front_back" value="">
-            </div>
-          </div>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Cotton Heritage Crewneck — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="M2480_front" data-default="39" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Cotton Heritage Crewneck — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="M2480_front_back" data-default="44" value="">
+            </span>
+          </label>
         </div>
       </div>
-
-      <!-- CC1717 Heavyweight Tee — grouped: Front or Back + Two Images -->
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          CC1717 Heavyweight Tee
-        </div>
+        <div class="ap-price-label">Lane Seven Full-Zip Hoodie<span>LS14003</span></div>
         <div class="ap-inputs-group">
-          <div class="ap-input-col">
-            <span class="ap-col-label">Front or Back</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="CC1717_front" value="">
-            </div>
-          </div>
-          <div class="ap-input-col">
-            <span class="ap-col-label">Two Images</span>
-            <div class="ap-input-wrap">
-              <span class="ap-dollar">$</span>
-              <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="CC1717_front_back" value="">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Single-input rows -->
-      <div class="ap-price-row">
-        <div class="ap-price-label">
-          BC3001 Adult Tee
-          <span>Front or Back</span>
-        </div>
-        <div class="ap-input-wrap">
-          <span class="ap-dollar">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="BC3001_front" value="">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Lane Seven Full-Zip Hoodie — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="LS14003_front" data-default="37" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Lane Seven Full-Zip Hoodie — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="LS14003_front_back" data-default="43" value="">
+            </span>
+          </label>
         </div>
       </div>
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          NL6733 Tank Top
-          <span>Front print</span>
-        </div>
-        <div class="ap-input-wrap">
-          <span class="ap-dollar">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="NL6733_front" value="">
-        </div>
-      </div>
-      <div class="ap-price-row">
-        <div class="ap-price-label">
-          CC1467Y Youth Hoodie
-          <span>Front print</span>
-        </div>
-        <div class="ap-input-wrap">
-          <span class="ap-dollar">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="CC1467Y_front" value="">
+        <div class="ap-price-label">Comfort Colors Heavyweight Tee<span>CC1717</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Comfort Colors Heavyweight Tee — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="CC1717_front" data-default="30" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Comfort Colors Heavyweight Tee — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="CC1717_front_back" data-default="35" value="">
+            </span>
+          </label>
         </div>
       </div>
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          MC1790 Tank Top
-          <span>Front print</span>
-        </div>
-        <div class="ap-input-wrap">
-          <span class="ap-dollar">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="MC1790_front" value="">
+        <div class="ap-price-label">Next Level Women's Racerback Tank<span>NL6733</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Next Level Women's Racerback Tank — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="NL6733_front" data-default="22" value="">
+            </span>
+          </label>
         </div>
       </div>
       <div class="ap-price-row">
-        <div class="ap-price-label">
-          Otto 39-165 Hat
-          <span>Front print</span>
+        <div class="ap-price-label">Cotton Heritage Men's Tank<span>MC1790</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Cotton Heritage Men's Tank — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="MC1790_front" data-default="22" value="">
+            </span>
+          </label>
         </div>
-        <div class="ap-input-wrap">
-          <span class="ap-dollar">$</span>
-          <input class="ap-price-input" type="number" min="1" max="999" step="0.01" data-module="39165_front" value="">
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Econscious Eco Tote<span>EC8000</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Econscious Eco Tote — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="EC8000_front" data-default="22" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Econscious Eco Tote — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="EC8000_front_back" data-default="27" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Otto Foam Trucker Hat<span>39165</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Otto Foam Trucker Hat — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="39165_front" data-default="19" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Bella + Canvas Adult Long Sleeve<span>BC3501</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Adult Long Sleeve — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="BC3501_front" data-default="26" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Adult Long Sleeve — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="BC3501_front_back" data-default="31" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Bella + Canvas Youth Long Sleeve<span>BC3501Y</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Youth Long Sleeve — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="BC3501Y_front" data-default="24" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Youth Long Sleeve — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="BC3501Y_front_back" data-default="29" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Rabbit Skins Toddler Tee<span>G3321</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Rabbit Skins Toddler Tee — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="G3321_front" data-default="16" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Rabbit Skins Toddler Tee — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="G3321_front_back" data-default="21" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Bella + Canvas Women's Cropped Hoodie<span>BC7502</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Women's Cropped Hoodie — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="BC7502_front" data-default="39" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Women's Cropped Hoodie — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="BC7502_front_back" data-default="44" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Bella + Canvas Pullover Hoodie<span>G3719</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Pullover Hoodie — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="G3719_front" data-default="42" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Bella + Canvas Pullover Hoodie — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="G3719_front_back" data-default="47" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Comfort Colors Sling Bag<span>CCSB0</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Comfort Colors Sling Bag — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="CCSB0_front" data-default="27" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Under Armour Performance Polo<span>UNDERARMOUR</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Under Armour Performance Polo — Front Only" type="number" min="0.01" max="999" step="0.01" data-module="UNDERARMOUR_front" data-default="55" value="">
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="ap-price-row">
+        <div class="ap-price-label">Independent Lightweight Windbreaker<span>WINDBREAKER</span></div>
+        <div class="ap-inputs-group">
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front or Back Only</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Independent Lightweight Windbreaker — Front or Back Only" type="number" min="0.01" max="999" step="0.01" data-module="WINDBREAKER_front" data-default="58" value="">
+            </span>
+          </label>
+          <label class="ap-input-col">
+            <span class="ap-col-label">Front + Back</span>
+            <span class="ap-input-wrap"><span class="ap-dollar">$</span>
+              <input class="ap-price-input" aria-label="Independent Lightweight Windbreaker — Front + Back" type="number" min="0.01" max="999" step="0.01" data-module="WINDBREAKER_front_back" data-default="64" value="">
+            </span>
+          </label>
         </div>
       </div>
     </div>
@@ -639,6 +730,8 @@
       var key = input.getAttribute('data-module');
       var rawValue = prices && prices[key] != null ? Number(prices[key]) : NaN;
       input.value = Number.isFinite(rawValue) ? String(rawValue) : '';
+      input.placeholder = 'Default ' + input.getAttribute('data-default');
+      input.title = Number.isFinite(rawValue) ? 'Saved global price' : 'Builder default: $' + input.getAttribute('data-default') + '. Enter a value to override it.';
     });
     // snapshot the loaded values so we can diff later
     originalPrices = {};

@@ -386,6 +386,12 @@
   <div class="ss-bg">
     <div class="ss-wrap">
 
+      {%- comment -%}
+        Shown here because this page is where "Create a New Storefront" is
+        clicked from. Renders nothing while product building is running.
+      {%- endcomment -%}
+      {% render 'service-status-banner' %}
+
       <header class="ss-header">
         <div class="ss-header-text">
           <h1 class="ss-h1">

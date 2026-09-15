@@ -111,15 +111,44 @@
     var colorPattern = root.getAttribute('data-color-pattern') || '';
     var colorTilePath = root.getAttribute('data-color-tile') || '';
     var camoTileImg = null;
-    if (colorPattern && colorTilePath && mockupsUrl) {
-      try {
-        var tileUrl = new URL(colorTilePath, new URL(mockupsUrl).origin).href;
-        var t = new Image();
-        t.crossOrigin = 'anonymous';
-        t.onload = function () { camoTileImg = t; draw(); };
-        t.src = tileUrl;
-      } catch (_e) { /* fallback to solid hex */ }
+    var camoRevision = 0;
+
+    // A tile path can arrive two ways. A product page gets a server-relative
+    // path that has to be resolved against the automation origin. The homepage
+    // demo passes a theme asset URL, which is already absolute and same-origin
+    // — and must NOT require a mockups URL it does not have, or camo would
+    // silently fall back to a flat colour and look like a broken feature.
+    function resolveTileUrl(path) {
+      if (!path) return '';
+      if (/^(https?:)?\/\//.test(path)) return path;
+      if (!mockupsUrl) return path;
+      try { return new URL(path, new URL(mockupsUrl).origin).href; }
+      catch (_e) { return path; }
     }
+
+    function setCamoTile(path) {
+      var revision = ++camoRevision;
+      if (!path) { camoTileImg = null; draw(); return; }
+      var t = new Image();
+      // Same-origin theme assets do not need this, and asking for it on a
+      // host that sends no CORS header fails the load outright.
+      if (/^(https?:)?\/\//.test(resolveTileUrl(path))) t.crossOrigin = 'anonymous';
+      t.onload = function () {
+        if (revision !== camoRevision) return;
+        camoTileImg = t;
+        draw();
+      };
+      t.onerror = function () {
+        // The representative hex is already set, so the ink stays the right
+        // colour family instead of vanishing.
+        if (revision !== camoRevision) return;
+        camoTileImg = null;
+        draw();
+      };
+      t.src = resolveTileUrl(path);
+    }
+
+    if (colorPattern && colorTilePath) setCamoTile(colorTilePath);
 
     function textPaint(boxW) {
       if (camoTileImg) {
@@ -134,6 +163,7 @@
       }
       return colorHex;
     }
+    var directMockup = root.getAttribute('data-mockup-image-url') || '';
     var currentColor = root.getAttribute('data-initial-color') || '';
     var backMap = {};
     var bgImg = null;
@@ -276,7 +306,7 @@
     }
 
     function loadBg(colorName) {
-      var url = backMap[colorName] || backMap[Object.keys(backMap)[0]] || '';
+      var url = directMockup || backMap[colorName] || backMap[Object.keys(backMap)[0]] || '';
       if (!url) { bgImg = null; draw(); return; }
       var img = new Image();
       img.crossOrigin = 'anonymous';
@@ -570,6 +600,80 @@
     syncValidity();
     updateAcceleratedButtons();
 
+    // Design controls are available only in the homepage demo, never in a
+    // product form: real buyers use the organizer's saved print settings.
+    if (!form && root.getAttribute('data-ss-pers-demo') === 'true') {
+      // These mirror SIGNATURE_FONTS in pro_builders/common/personalization.py.
+      // Same labels, same families, same weights, same stroke ratios — the
+      // homepage should show the fonts a buyer will actually get, not a
+      // three-item sample of them. If that registry gains a font, add it here.
+      var demoFonts = {
+        varsity_prime: { family: 'Graduate',          weight: '400', style: 'normal', stroke: 0.045, min: 0.06,  cap: 0.12 },
+        courtside:     { family: 'Teko',              weight: '700', style: 'normal', stroke: 0.04,  min: 0.06,  cap: 0.12 },
+        afterburner:   { family: 'Barlow Condensed',  weight: '900', style: 'italic', stroke: 0.042, min: 0.06,  cap: 0.12 },
+        battalion:     { family: 'Saira Stencil One', weight: '400', style: 'normal', stroke: 0.027, min: 0.025, cap: 0.04 },
+        ironclad:      { family: 'Russo One',         weight: '400', style: 'normal', stroke: 0.037, min: 0.06,  cap: 0.12 },
+        rally:         { family: 'Changa One',        weight: '400', style: 'italic', stroke: 0.038, min: 0.06,  cap: 0.12 }
+      };
+
+      var fontRevision = 0;
+      function applyFont(key, button, group) {
+        var preset = demoFonts[key];
+        if (!preset) return;
+        var revision = ++fontRevision;
+        if (group) group.forEach(function (b) {
+          b.setAttribute('aria-pressed', String(b === button));
+        });
+        loadFont(preset.family, preset.weight, function () {
+          if (revision !== fontRevision) return;
+          fontFamily = preset.family;
+          fontWeight = preset.weight;
+          fontStyle = preset.style;
+          inkFit = true;
+          inkStrokeRatio = preset.stroke;
+          nameStrokeMin = preset.min;
+          nameStrokeCap = preset.cap;
+          draw();
+        }, preset.style);
+      }
+
+      var fontButtons = [].slice.call(root.querySelectorAll('[data-ss-pers-demo-font]'));
+      fontButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          applyFont(button.getAttribute('data-ss-pers-demo-font'), button, fontButtons);
+        });
+      });
+
+      // Ink swatches. A camo swatch carries a tile; a flat one does not, and
+      // clearing the tile is what returns the ink to a solid colour.
+      function bindSwatches(selector, onPick) {
+        var group = [].slice.call(root.querySelectorAll(selector));
+        group.forEach(function (button) {
+          button.addEventListener('click', function () {
+            group.forEach(function (b) {
+              b.setAttribute('aria-pressed', String(b === button));
+            });
+            onPick(button);
+            draw();
+          });
+        });
+        return group;
+      }
+
+      bindSwatches('[data-ss-pers-demo-fill]', function (button) {
+        colorHex = button.getAttribute('data-hex') || colorHex;
+        setCamoTile(button.getAttribute('data-tile') || '');
+      });
+
+      bindSwatches('[data-ss-pers-demo-outline]', function (button) {
+        // "None" is a real choice: plenty of team looks are a single flat ink.
+        outlineHex = button.getAttribute('data-hex') || '';
+        outlineRatio = outlineHex
+          ? (parseFloat(root.getAttribute('data-outline-ratio') || '0.035') || 0.035)
+          : 0;
+      });
+    }
+
     // Follow garment color changes (theme's native variant-change event).
     document.addEventListener('variant:update', function (e) {
       try {
@@ -583,7 +687,9 @@
     });
 
     loadFont(fontFamily, fontWeight, function () {
-      if (mockupsUrl) {
+      if (directMockup) {
+        loadBg(currentColor);
+      } else if (mockupsUrl) {
         fetch(mockupsUrl)
           .then(function (r) { return r.json(); })
           .then(function (data) {

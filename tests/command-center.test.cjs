@@ -27,7 +27,7 @@ test('initial load requests only directory; detail/session/performance/outreach 
   const dom=new JSDOM(fixture(),{url:'https://fixture.example/pages/super-admin',runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){
     w.fetch=async url=>{
       requests.push(url);
-      let data={ok:true};
+      let data={ok:true,state:'ok',message:''};
       if(url.includes('/index')) data={ok:true,stores:[a,b],metrics_ready:true,generated_at:'2026-09-11T00:00:00Z'};
       else if(url.includes('/store/')) { await pause(url.endsWith('older-team')?80:10); data={ok:true,store:url.endsWith('older-team')?a:b}; }
       else if(url.includes('/sessions/')) data={ok:true,session:{pages:[{path:'/pages/private-storefronts',events:['create_started']}],active_seconds:20}};
@@ -41,8 +41,9 @@ test('initial load requests only directory; detail/session/performance/outreach 
     await pause(30);
     const d=dom.window.document;
     assert.deepEqual(errors,[]);
-    assert.equal(requests.length,1);
-    assert.match(requests[0],/\/index$/);
+    assert.equal(requests.filter(u=>u.includes('/command-center/')).length,1);
+    assert(requests.some(u=>u.endsWith('/index')));
+    assert(requests.some(u=>u.endsWith('/admin/service-status')));
     assert.equal(d.querySelectorAll('.gm-store-card').length,2);
     assert.equal(d.querySelector('#activeStoreGrid .gm-store-card').dataset.handle,'recent-team');
     d.querySelector('[data-handle="older-team"] [data-open-manage]').click();

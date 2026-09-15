@@ -131,6 +131,7 @@
     const note = document.createElement('div');
     note.className = 'ss-purchase-note';
     note.innerHTML = `
+      <p class="ss-purchase-note__copy" style="margin-bottom:10px"><strong>Made to order:</strong> Allow 3–5 business days for fulfillment, followed by up to one week for shipping.</p>
       <p class="ss-purchase-note__title">Custom made to order — all sales are final</p>
       <p class="ss-purchase-note__copy">
         Review the size chart, garment color, design, spelling, name, number, shipping
@@ -139,6 +140,7 @@
         missing items, or packages confirmed lost in transit.
       </p>
       <div class="ss-purchase-note__links">
+        <a href="/pages/support#shipping">Shipping &amp; delivery</a>
         <a href="/policies/refund-policy">Refund policy</a>
         <a href="/pages/support?report=1#report-order-problem">Report an order problem</a>
       </div>
@@ -163,8 +165,9 @@
       <strong>Final review before checkout</strong>
       Every item is custom made to order and all sales are final except verified
       production or delivery errors. Check size, color, spelling, name, number,
-      shipping address, and event timing carefully. Delivery estimates are not
-      guaranteed arrival dates.
+      shipping address, and event timing carefully. Allow <b>3–5 business days for fulfillment,
+      followed by up to one week for shipping.</b> Delivery estimates are not
+      guaranteed arrival dates. <a href="/pages/support#shipping">Shipping &amp; delivery</a>
     `;
 
     checkout.parentElement?.insertBefore(note, checkout);
@@ -184,7 +187,7 @@
         <p><strong>Event dates:</strong> Production and delivery estimates are not guaranteed arrival dates. Missing a tournament, trip, ceremony, or other event date does not by itself make an otherwise correctly produced order refundable.</p>
         <div class="ss-help__policy-links">
           <a href="/policies/refund-policy">Full refund policy</a>
-          <a href="/policies/shipping-policy">Shipping policy</a>
+          <a href="/pages/support#shipping">Shipping policy</a>
           <a href="/pages/online-tracking">Track an order</a>
         </div>
       `;

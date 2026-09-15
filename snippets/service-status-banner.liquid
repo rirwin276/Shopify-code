@@ -1,0 +1,138 @@
+{%- comment -%}
+  The product-building outage notice.
+
+  One snippet, dropped into every page that can start a build, so there is no
+  hand-maintained list of places to remember. The state it reads is the same
+  Shopify metaobject the build service itself checks before creating anything
+  — so the banner can never say "all good" while the service is refusing, or
+  the other way round.
+
+  Renders nothing at all when everything is running. When product building is
+  PAUSED it also disables anything marked data-blocked-when-paused, which is
+  how the storefront request form stops taking submissions it cannot fulfil.
+
+  Usage:
+    {% render 'service-status-banner' %}
+{%- endcomment -%}
+
+<div class="ss-status-banner" id="ssStatusBanner" hidden role="status" aria-live="polite">
+  <span class="ss-status-banner__dot" aria-hidden="true"></span>
+  <p class="ss-status-banner__text" id="ssStatusBannerText"></p>
+</div>
+
+<style>
+  .ss-status-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 18px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 159, 10, .38);
+    background: rgba(255, 159, 10, .11);
+    color: #7a4a00;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .ss-status-banner[data-state="paused"] {
+    border-color: rgba(255, 59, 48, .35);
+    background: rgba(255, 59, 48, .09);
+    color: #8c1d18;
+  }
+  .ss-status-banner__dot {
+    width: 9px;
+    height: 9px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: #ff9f0a;
+    flex: 0 0 auto;
+  }
+  .ss-status-banner[data-state="paused"] .ss-status-banner__dot { background: #ff3b30; }
+  .ss-status-banner__text { margin: 0; }
+  .ss-status-banner[hidden] { display: none; }
+  .ss-paused-control { opacity: .5; cursor: not-allowed; pointer-events: auto; }
+</style>
+
+<script>
+  (function () {
+    if (window.__ssStatusBannerLoaded) return;
+    window.__ssStatusBannerLoaded = true;
+
+    var BANNER_URL = '/apps/ss/relay/service-status';
+
+    function apply(banner) {
+      var el = document.getElementById('ssStatusBanner');
+      var text = document.getElementById('ssStatusBannerText');
+      var paused = !!(banner && banner.blocking);
+
+      if (!banner) {
+        if (el) el.hidden = true;
+      } else if (el && text) {
+        el.setAttribute('data-state', banner.state || 'degraded');
+        text.textContent = banner.message || '';
+        el.hidden = false;
+      }
+
+      // Anything that would start a build is turned off while paused, and
+      // turned back on when it clears — including on a page left open through
+      // the whole outage. Links get aria-disabled and a click guard, because
+      // the disabled property does nothing at all on an anchor.
+      document.querySelectorAll('[data-blocked-when-paused]').forEach(function (node) {
+        if ('disabled' in node) node.disabled = paused;
+        // Relabel only when asked to. Rewriting textContent unasked would
+        // strip the icons that live inside several of these buttons.
+        var label = node.getAttribute('data-paused-label');
+        if (paused) {
+          if (label) {
+            if (!node.hasAttribute('data-paused-original-label')) {
+              node.setAttribute('data-paused-original-label', node.textContent);
+            }
+            node.textContent = label;
+          }
+          node.setAttribute('aria-disabled', 'true');
+          node.classList.add('ss-paused-control');
+        } else {
+          var original = node.getAttribute('data-paused-original-label');
+          if (label && original !== null) node.textContent = original;
+          node.removeAttribute('aria-disabled');
+          node.classList.remove('ss-paused-control');
+        }
+      });
+
+      window.ssProductBuildingPaused = paused;
+    }
+
+    function check() {
+      fetch(BANNER_URL, { cache: 'no-store', credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          // A status lookup that fails is not an outage. Leave the page alone
+          // rather than blocking a customer over a hiccup reading the switch.
+          if (!data || data.ok === false) return;
+          apply(data.banner || null);
+        })
+        .catch(function () { /* same reasoning */ });
+    }
+
+    window.ssRefreshServiceStatus = check;
+
+    // One capture-phase guard for the whole page: a link marked
+    // data-blocked-when-paused cannot be followed while the switch is off,
+    // however it was reached.
+    document.addEventListener('click', function (event) {
+      var node = event.target.closest && event.target.closest('[data-blocked-when-paused]');
+      if (!node || node.getAttribute('aria-disabled') !== 'true') return;
+      event.preventDefault();
+      event.stopPropagation();
+      var el = document.getElementById('ssStatusBanner');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, true);
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', check);
+    } else {
+      check();
+    }
+    setInterval(check, 60000);
+  })();
+</script>

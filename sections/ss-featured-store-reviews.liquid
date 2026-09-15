@@ -19,23 +19,65 @@
       <p class="ss-proof__eyebrow">{{ section.settings.eyebrow | escape }}</p>
       <h2>{{ section.settings.heading | escape }}</h2>
       <p>{{ section.settings.subheading | escape }}</p>
+      <div class="ss-proof__summary" data-proof-summary hidden>
+        <span class="ss-proof__avg" data-proof-avg></span>
+        <span class="ss-proof__avgstars" data-proof-avgstars aria-hidden="true"></span>
+        <span class="ss-proof__total" data-proof-total></span>
+      </div>
     </div>
-    <div class="ss-proof__grid" data-proof-grid></div>
+    <div class="ss-proof__viewport">
+      <div class="ss-proof__track" data-proof-grid tabindex="0" role="region"
+           aria-label="Customer reviews, scrollable"></div>
+      <div class="ss-proof__nav" data-proof-nav hidden>
+        <button type="button" class="ss-proof__arrow" data-proof-prev aria-label="Previous reviews">‹</button>
+        <span class="ss-proof__count" data-proof-count></span>
+        <button type="button" class="ss-proof__arrow" data-proof-next aria-label="More reviews">›</button>
+      </div>
+    </div>
   </div>
 </section>
 
 <style>
-  #ss-proof-{{ section.id }} { padding:6px 0 46px; }
-  #ss-proof-{{ section.id }} .ss-proof__inner { width:min(1180px,calc(100% - 44px)); margin:0 auto; display:grid; grid-template-columns:minmax(230px,.7fr) minmax(0,1.3fr); gap:34px; align-items:center; padding:30px 30px 32px; border:1px solid rgba(17,16,14,.08); border-radius:28px; background:rgba(255,255,255,.68); box-shadow:0 24px 80px rgba(17,16,14,.08); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
-  #ss-proof-{{ section.id }} .ss-proof__heading { max-width:360px; }
-  #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 10px; color:#9f8d5a; font-size:10px; font-weight:900; letter-spacing:.16em; }
-  #ss-proof-{{ section.id }} h2 { margin:0; color:#11100e; font-size:clamp(26px,3vw,38px); line-height:1.02; letter-spacing:-.055em; font-weight:950; }
+  /* This is the only place on the page where somebody other than us is
+     talking, so it gets its own ground and its own weight rather than sitting
+     in the same flat cream as everything above it. */
+  #ss-proof-{{ section.id }} { padding:52px 0 58px; background:linear-gradient(180deg,#f6f1e6 0%,#fbf9f4 68%,#faf9f5 100%); border-top:1px solid rgba(183,163,106,.3); border-bottom:1px solid rgba(183,163,106,.22); }
+  #ss-proof-{{ section.id }} .ss-proof__inner { width:min(1180px,calc(100% - 44px)); margin:0 auto; display:grid; grid-template-columns:minmax(240px,.72fr) minmax(0,1.28fr); gap:38px; align-items:center; padding:34px 34px 36px; border:1px solid rgba(183,163,106,.32); border-radius:28px; background:#fff; box-shadow:0 26px 70px rgba(17,16,14,.09); }
+  #ss-proof-{{ section.id }} .ss-proof__heading { max-width:380px; }
+  #ss-proof-{{ section.id }} .ss-proof__eyebrow { margin:0 0 11px; color:#8a6a1c; font-size:10px; font-weight:900; letter-spacing:.16em; }
+  #ss-proof-{{ section.id }} h2 { margin:0; color:#11100e; font-size:clamp(29px,3.3vw,42px); line-height:1.02; letter-spacing:-.055em; font-weight:950; }
+
+  /* The one number a stranger is scanning for. Computed from the reviews the
+     service actually returned — never shown when there are too few to mean
+     anything. */
+  #ss-proof-{{ section.id }} .ss-proof__summary { display:flex; align-items:center; gap:9px; margin-top:15px; flex-wrap:wrap; }
+  #ss-proof-{{ section.id }} .ss-proof__summary[hidden] { display:none; }
+  #ss-proof-{{ section.id }} .ss-proof__avg { color:#11100e; font-size:31px; font-weight:950; letter-spacing:-.04em; line-height:1; }
+  #ss-proof-{{ section.id }} .ss-proof__avgstars { color:#b98c16; font-size:17px; letter-spacing:1.5px; }
+  #ss-proof-{{ section.id }} .ss-proof__total { width:100%; color:rgba(17,16,14,.56); font-size:12.5px; font-weight:700; }
   #ss-proof-{{ section.id }} .ss-proof__heading > p:last-child { margin:11px 0 0; color:rgba(17,16,14,.56); font-size:14px; line-height:1.5; font-weight:600; }
-  #ss-proof-{{ section.id }} .ss-proof__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
-  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; min-height:164px; display:flex; flex-direction:column; padding:19px 20px; border:1px solid rgba(17,16,14,.075); border-radius:20px; background:#fff; box-shadow:0 6px 22px rgba(17,16,14,.05); overflow:hidden; }
-  #ss-proof-{{ section.id }} .ss-proof__stars { color:#b58d29; font-size:15px; letter-spacing:2px; }
-  #ss-proof-{{ section.id }} .ss-proof__stars i { color:rgba(17,16,14,.18); font-style:normal; }
-  #ss-proof-{{ section.id }} blockquote { margin:11px 0 15px; color:#24251f; font-size:14px; line-height:1.52; }
+  /* A carousel rather than a grid: this fills up over time and a grid of
+     thirty reviews is a wall nobody reads. Native scroll-snap does the work —
+     it drags on a phone, wheels on a trackpad, and keeps working with the
+     arrows hidden or JS not yet run. */
+  #ss-proof-{{ section.id }} .ss-proof__viewport { position:relative; min-width:0; }
+  #ss-proof-{{ section.id }} .ss-proof__track { display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth; scroll-padding-left:2px; padding:2px 2px 12px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  #ss-proof-{{ section.id }} .ss-proof__track::-webkit-scrollbar { display:none; }
+  #ss-proof-{{ section.id }} .ss-proof__track:focus-visible { outline:2px solid #9f8d5a; outline-offset:3px; border-radius:20px; }
+  #ss-proof-{{ section.id }} .ss-proof__card { position:relative; flex:0 0 clamp(240px,76vw,284px); scroll-snap-align:start; min-height:178px; display:flex; flex-direction:column; padding:21px 22px; border:1px solid rgba(183,163,106,.34); border-radius:20px; background:linear-gradient(180deg,#fffdf8 0%,#fff 42%); box-shadow:0 8px 26px rgba(17,16,14,.07); overflow:hidden; }
+  #ss-proof-{{ section.id }} .ss-proof__nav { display:flex; align-items:center; gap:10px; margin-top:2px; }
+  #ss-proof-{{ section.id }} .ss-proof__nav[hidden] { display:none; }
+  #ss-proof-{{ section.id }} .ss-proof__arrow { width:38px; height:38px; display:grid; place-items:center; padding:0; border:1px solid rgba(17,16,14,.14); border-radius:50%; background:#fff; color:#11100e; font:inherit; font-size:21px; line-height:1; cursor:pointer; }
+  #ss-proof-{{ section.id }} .ss-proof__arrow:disabled { opacity:.32; cursor:default; }
+  #ss-proof-{{ section.id }} .ss-proof__count { color:rgba(17,16,14,.5); font-size:12px; font-weight:700; letter-spacing:.02em; }
+  @media (prefers-reduced-motion: reduce) {
+    #ss-proof-{{ section.id }} .ss-proof__track { scroll-behavior:auto; }
+  }
+  #ss-proof-{{ section.id }} .ss-proof__stars { color:#b98c16; font-size:16px; letter-spacing:2.5px; }
+  #ss-proof-{{ section.id }} .ss-proof__stars i { color:rgba(17,16,14,.16); font-style:normal; }
+  /* A real pull quote, not a caption. */
+  #ss-proof-{{ section.id }} blockquote { position:relative; z-index:1; margin:12px 0 16px; color:#1d1e19; font-size:15.5px; line-height:1.5; font-weight:500; letter-spacing:-.008em; }
+  #ss-proof-{{ section.id }} .ss-proof__card:before { content:"\201C"; position:absolute; top:-22px; right:8px; color:rgba(183,163,106,.22); font-family:Georgia,"Times New Roman",serif; font-size:118px; line-height:1; pointer-events:none; }
   #ss-proof-{{ section.id }} .ss-proof__person { display:flex; align-items:center; gap:10px; margin-top:auto; min-width:0; }
   #ss-proof-{{ section.id }} .ss-proof__avatar, #ss-proof-{{ section.id }} .ss-proof__photo { flex:0 0 46px; width:46px; height:46px; border-radius:50%; }
   #ss-proof-{{ section.id }} .ss-proof__avatar { display:grid; place-items:center; background:#20211b; color:#fff; font-size:15px; font-weight:800; }
@@ -45,7 +87,7 @@
   @media (max-width:700px) {
     #ss-proof-{{ section.id }} .ss-proof__inner { grid-template-columns:1fr; gap:20px; padding:26px 20px 28px; border-radius:24px; }
     #ss-proof-{{ section.id }} .ss-proof__heading { max-width:460px; }
-    #ss-proof-{{ section.id }} .ss-proof__grid { grid-template-columns:1fr; }
+    #ss-proof-{{ section.id }} .ss-proof__card { flex-basis:clamp(232px,80vw,300px); }
   }
 </style>
 
@@ -92,7 +134,7 @@
     const controller = typeof AbortController === 'function' ? new AbortController() : null;
     const timer = controller ? window.setTimeout(() => controller.abort(), 8000) : null;
 
-    fetch(api + '/reviews/featured?limit=5', {
+    fetch(api + '/reviews/featured?limit=40', {
       headers: { 'Accept': 'application/json' },
       signal: controller ? controller.signal : undefined
     })
@@ -138,10 +180,102 @@
 
         if (!cards.childNodes.length) return;
         grid.replaceChildren(cards);
+
+        // The average, from the reviews that were actually returned. Held back
+        // below three: an average of one is not an average, and a big "5.0"
+        // over a single card reads as a thinner claim than the card itself.
+        const rated = reviews
+          .map((review) => Number(review.rating))
+          .filter((value) => Number.isFinite(value) && value > 0);
+        const summary = root.querySelector('[data-proof-summary]');
+        if (summary && rated.length >= 3) {
+          const average = rated.reduce((a, b) => a + b, 0) / rated.length;
+          const rounded = Math.round(average * 10) / 10;
+          root.querySelector('[data-proof-avg]').textContent = rounded.toFixed(1);
+          root.querySelector('[data-proof-avgstars]').textContent =
+            '★'.repeat(Math.round(average)) + '☆'.repeat(5 - Math.round(average));
+          root.querySelector('[data-proof-total]').textContent =
+            'from ' + rated.length + ' store ' + (rated.length === 1 ? 'review' : 'reviews');
+          summary.hidden = false;
+          summary.setAttribute('aria-label',
+            rounded.toFixed(1) + ' out of 5, from ' + rated.length + ' reviews');
+        }
+
         root.hidden = false;
+        wireCarousel(root, grid);
       })
       .catch(() => {})
       .then(() => { if (timer) window.clearTimeout(timer); });
+  };
+
+  // Arrows and a position readout. The track scrolls perfectly well without
+  // any of this — that is the point of using native scroll-snap — so nothing
+  // here is load-bearing, and the nav stays hidden when every review already
+  // fits on screen.
+  const wireCarousel = (root, track) => {
+    const nav = root.querySelector('[data-proof-nav]');
+    const prev = root.querySelector('[data-proof-prev]');
+    const next = root.querySelector('[data-proof-next]');
+    const count = root.querySelector('[data-proof-count]');
+    if (!nav || !prev || !next) return;
+
+    const total = track.children.length;
+    const step = () => {
+      const card = track.firstElementChild;
+      if (!card) return track.clientWidth;
+      const gap = parseFloat(getComputedStyle(track).columnGap || '12') || 12;
+      // Move by whole cards, and never by more than a screenful.
+      const perView = Math.max(1, Math.floor(track.clientWidth / (card.offsetWidth + gap)));
+      return (card.offsetWidth + gap) * perView;
+    };
+
+    const sync = () => {
+      // A one-pixel tolerance: fractional scroll widths otherwise leave the
+      // last arrow enabled forever on some zoom levels.
+      const max = track.scrollWidth - track.clientWidth;
+      const overflowing = max > 1;
+      nav.hidden = !overflowing;
+      prev.disabled = track.scrollLeft <= 1;
+      next.disabled = track.scrollLeft >= max - 1;
+      if (count && overflowing) {
+        const card = track.firstElementChild;
+        const gap = parseFloat(getComputedStyle(track).columnGap || '12') || 12;
+        const first = Math.round(track.scrollLeft / (card.offsetWidth + gap)) + 1;
+        const perView = Math.max(1, Math.round(track.clientWidth / (card.offsetWidth + gap)));
+        const last = Math.min(total, first + perView - 1);
+        count.textContent = (first === last ? first : first + '–' + last) + ' of ' + total;
+      }
+    };
+
+    prev.addEventListener('click', () => track.scrollBy({ left: -step() }));
+    next.addEventListener('click', () => track.scrollBy({ left: step() }));
+    track.addEventListener('scroll', () => {
+      window.clearTimeout(track._proofTick);
+      track._proofTick = window.setTimeout(sync, 90);
+    }, { passive: true });
+
+    // Arrow keys move the track when it has focus, so the carousel is usable
+    // without a mouse. Home/End jump to the ends.
+    track.addEventListener('keydown', (event) => {
+      const moves = { ArrowRight: 1, ArrowLeft: -1 };
+      if (event.key in moves) {
+        event.preventDefault();
+        track.scrollBy({ left: step() * moves[event.key] });
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        track.scrollTo({ left: 0 });
+      } else if (event.key === 'End') {
+        event.preventDefault();
+        track.scrollTo({ left: track.scrollWidth });
+      }
+    });
+
+    if (typeof ResizeObserver === 'function') {
+      new ResizeObserver(sync).observe(track);
+    } else {
+      window.addEventListener('resize', sync);
+    }
+    sync();
   };
 
   const start = () => {

@@ -1,3 +1,9 @@
+<script>
+  // Shopify can normalize request.path on missing pages; use the browser URL here.
+  if (['/policies/shipping-policy', '/pages/shipping', '/pages/shipping-policy'].includes(window.location.pathname.replace(/\/$/, ''))) {
+    window.location.replace('/pages/support#shipping');
+  }
+</script>
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div
   class="
