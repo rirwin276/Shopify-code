@@ -354,6 +354,7 @@
       data-template="{{ template }}"
     >
       {{ content_for_layout }}
+      {% render 'site-session-tracker' %}
     </main>
 
     {% sections 'footer-group' %}
