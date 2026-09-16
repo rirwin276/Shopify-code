@@ -196,7 +196,7 @@
           <div id="sf-provision-status" class="sf-status">Securing request…</div>
           <div class="sf-provision-clock"><div><span>Usual build time</span><strong>10:00 minutes</strong></div><div><span>Time waiting</span><strong id="sf-provision-elapsed">00:00</strong></div></div>
           {% unless customer %}<p class="sf-provision-expiry">Your unclaimed store will be removed after 48 hours during overnight cleanup.</p>{% endunless %}
-          {% if customer %}<div class="sf-provision-actions"><button type="button" class="sf-btn sf-btn--outline" onclick="sfCancelProvisioning()">Back</button></div>{% endif %}
+          <div class="sf-provision-actions"><button type="button" class="sf-btn sf-btn--outline" onclick="sfCancelProvisioning()">Back</button></div>
         </div>
       </div>
 

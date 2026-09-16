@@ -22,7 +22,17 @@
   var badge = document.getElementById('MainLogoBadge');
   var quality = document.getElementById('MainLogoQualitySub');
   var error = document.getElementById('sf-error-inline');
+  var provision = document.getElementById('sf-provision');
+  var bar = document.getElementById('sf-progress-bar');
   var objectUrl = '';
+  var waitClock = null;
+
+  function startWaitClock() {
+    var started = Date.now(), output = document.getElementById('sf-provision-elapsed');
+    clearInterval(waitClock);
+    function tick() { var seconds = Math.max(0, Math.floor((Date.now() - started) / 1000)); if (output) output.textContent = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0'); }
+    tick(); waitClock = setInterval(tick, 1000);
+  }
 
   function showError(message) {
     if (!error) return;
@@ -90,15 +100,22 @@
     var hidden = document.getElementById('HiddenHandle'); if (hidden) hidden.value = handle; update();
   };
   window.sfToastHide = function () {};
+  window.sfCancelProvisioning = function () {
+    clearInterval(waitClock); waitClock = null;
+    if (provision) provision.classList.add('sf-hidden'); form.classList.remove('sf-hidden');
+    var header = document.querySelector('.sf-header'); if (header) header.classList.remove('sf-hidden');
+    if (submit) { delete submit.dataset.busy; submit.textContent = 'Build my free preview'; update(); }
+  };
   window.submitAnonymousPreview = async function (event) {
     event.preventDefault(); clearError(); generateHandle();
     if (!valid()) { showError('Choose a store type and shirt color, enter the storefront name, and add your logo.'); return; }
     var file = input.files[0];
     if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 12 * 1024 * 1024) { showError('Choose a PNG, JPG or WebP image smaller than 12 MB.'); return; }
     if (!api.startsWith('https://')) { showError('The private preview service is unavailable right now.'); return; }
-    var startedAt = Date.now();
-    submit.dataset.busy = '1'; submit.disabled = true; submit.textContent = 'Opening your waiting room…';
-    form.setAttribute('aria-busy', 'true');
+    submit.dataset.busy = '1'; submit.disabled = true; submit.textContent = 'Saving your logo…';
+    var header = document.querySelector('.sf-header'); if (header) header.classList.add('sf-hidden');
+    form.classList.add('sf-hidden'); if (provision) provision.classList.remove('sf-hidden'); if (bar) bar.style.width = '38%';
+    startWaitClock();
     try {
       var logoThumb = await imageThumb(file), body = new FormData();
       body.set('storefront_name', document.getElementById('StoreName').value.trim());
@@ -107,11 +124,13 @@
       var response = await fetch(api + '/api/demo/storefront-request', {method:'POST', body:body});
       var data = await response.json().catch(function () { return {}; });
       if (!response.ok || !data.resume_token) throw new Error(data.error || 'We could not start your preview. Please try again.');
-      localStorage.setItem('ss_anonymous_demo_v1', JSON.stringify({token:data.resume_token, handle:data.storefront_handle, storeName:document.getElementById('StoreName').value.trim(), createdAt:startedAt, readyReported:false, logoThumb:logoThumb, apiBase:api, startUrl:waitingRoom}));
+      if (bar) bar.style.width = '100%';
+      localStorage.setItem('ss_anonymous_demo_v1', JSON.stringify({token:data.resume_token, handle:data.storefront_handle, storeName:document.getElementById('StoreName').value.trim(), createdAt:Date.now(), readyReported:false, logoThumb:logoThumb, apiBase:api, startUrl:waitingRoom}));
       if (typeof window.__ssAnonymousNavigate === 'function') window.__ssAnonymousNavigate(waitingRoom);
-      else window.location.replace(waitingRoom);
+      else window.location.assign(waitingRoom);
     } catch (problem) {
-      form.removeAttribute('aria-busy');
+      clearInterval(waitClock); waitClock = null;
+      form.classList.remove('sf-hidden'); if (header) header.classList.remove('sf-hidden'); if (provision) provision.classList.add('sf-hidden');
       delete submit.dataset.busy; submit.textContent = 'Build my free preview'; update(); showError(problem.message);
     }
   };
