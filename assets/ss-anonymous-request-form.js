@@ -3,6 +3,15 @@
   'use strict';
   var form = document.getElementById('sf-request-form');
   if (!form || form.dataset.signedIn !== 'false') return;
+  var waitingRoom = '/pages/request-storefront-form?view=start-team-store';
+  try {
+    var existing = JSON.parse(localStorage.getItem('ss_anonymous_demo_v1') || 'null');
+    if (existing && existing.token) {
+      if (typeof window.__ssAnonymousNavigate === 'function') window.__ssAnonymousNavigate(waitingRoom);
+      else window.location.replace(waitingRoom);
+      return;
+    }
+  } catch (_) {}
   var api = String(form.dataset.anonymousApi || '').replace(/\/+$/, '');
   var submit = document.getElementById('sf-submit-btn');
   var input = document.getElementById('MainLogo');
@@ -106,7 +115,6 @@
       var data = await response.json().catch(function () { return {}; });
       if (!response.ok || !data.resume_token) throw new Error(data.error || 'We could not start your preview. Please try again.');
       if (bar) bar.style.width = '100%';
-      var waitingRoom = '/pages/request-storefront-form?view=start-team-store';
       localStorage.setItem('ss_anonymous_demo_v1', JSON.stringify({token:data.resume_token, handle:data.storefront_handle, storeName:document.getElementById('StoreName').value.trim(), createdAt:Date.now(), readyReported:false, logoThumb:logoThumb, apiBase:api, startUrl:waitingRoom}));
       if (typeof window.__ssAnonymousNavigate === 'function') window.__ssAnonymousNavigate(waitingRoom);
       else window.location.assign(waitingRoom);

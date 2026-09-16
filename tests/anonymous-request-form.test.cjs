@@ -41,3 +41,13 @@ test('the customer form remains the single shared form in Liquid', () => {
   assert.match(liquid,/submitAnonymousPreview\(event\)/);
   assert.match(liquid,/Sign in or create account/);
 });
+
+test('an existing guest build resumes in the public waiting room', () => {
+  const dom = new JSDOM(page(), {url:'https://stellasageco.com/pages/request-storefront-form',runScripts:'outside-only'});
+  const w = dom.window; let destination='';
+  w.localStorage.setItem('ss_anonymous_demo_v1', JSON.stringify({token:'saved-private-token',startUrl:'/pages/storefront?view=start-team-store'}));
+  w.__ssAnonymousNavigate=(url)=>{destination=url};
+  w.eval(script);
+  assert.equal(destination,'/pages/request-storefront-form?view=start-team-store');
+  dom.window.close();
+});
