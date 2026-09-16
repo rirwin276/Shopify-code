@@ -343,6 +343,10 @@
       {% sections 'header-group' %}
     </div>
 
+    {%- if request.page_type == 'index' -%}
+      {% render 'ss-anonymous-home-return' %}
+    {%- endif -%}
+
     <script src="{{ 'critical.js' | asset_url }}" type="module" async blocking="render"></script>
 
     <main
