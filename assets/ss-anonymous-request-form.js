@@ -106,9 +106,10 @@
       var data = await response.json().catch(function () { return {}; });
       if (!response.ok || !data.resume_token) throw new Error(data.error || 'We could not start your preview. Please try again.');
       if (bar) bar.style.width = '100%';
-      localStorage.setItem('ss_anonymous_demo_v1', JSON.stringify({token:data.resume_token, handle:data.storefront_handle, storeName:document.getElementById('StoreName').value.trim(), createdAt:Date.now(), readyReported:false, logoThumb:logoThumb, apiBase:api, startUrl:'/pages/storefront?view=start-team-store'}));
-      if (typeof window.__ssAnonymousNavigate === 'function') window.__ssAnonymousNavigate('/pages/storefront?view=start-team-store');
-      else window.location.assign('/pages/storefront?view=start-team-store');
+      var waitingRoom = '/pages/request-storefront-form?view=start-team-store';
+      localStorage.setItem('ss_anonymous_demo_v1', JSON.stringify({token:data.resume_token, handle:data.storefront_handle, storeName:document.getElementById('StoreName').value.trim(), createdAt:Date.now(), readyReported:false, logoThumb:logoThumb, apiBase:api, startUrl:waitingRoom}));
+      if (typeof window.__ssAnonymousNavigate === 'function') window.__ssAnonymousNavigate(waitingRoom);
+      else window.location.assign(waitingRoom);
     } catch (problem) {
       form.classList.remove('sf-hidden'); if (header) header.classList.remove('sf-hidden'); if (provision) provision.classList.add('sf-hidden');
       delete submit.dataset.busy; submit.textContent = 'Build my free preview'; update(); showError(problem.message);
