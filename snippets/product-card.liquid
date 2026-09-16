@@ -129,49 +129,7 @@
       {%- endcapture -%}
       <h3 class="ss-title">{{ ss_card_title | strip }}</h3>
 
-      {%- comment -%}
-        Which colours this garment comes in.
-
-        A team store is browsed by someone outfitting a roster, and their first
-        question about any garment is whether it comes in their colours. The
-        card shows one mockup in whichever colour happened to be first, so
-        until now the answer meant opening all fifteen products.
-
-        The swatches come from custom.color_swatches — the exact hex Printful
-        gave us, written at publish time — rather than from Shopify's native
-        swatches, which would mean hand-configuring every colour of every blank
-        in Settings and would show a blank circle for each one missed.
-
-        Purely visual: this card is one big anchor, so an interactive swatch
-        here would be a link inside a link.
-      {%- endcomment -%}
-      {%- assign swatches = p.metafields.custom.color_swatches.value -%}
-      {%- if swatches and swatches.size > 1 -%}
-        {%- assign swatch_limit = 6 -%}
-        <div class="ss-swatch-row" aria-label="Available in {{ swatches.size }} colors">
-          {%- comment -%}
-            Skip anything without a hex rather than emitting an empty
-            background. If the metafield ever arrives as a raw string instead
-            of a parsed array — no definition, a hand-edited value — iterating
-            it yields entries whose .hex is nil, and "background: ;" renders as
-            a row of invisible circles that is harder to diagnose than nothing
-            at all.
-          {%- endcomment -%}
-          {%- for swatch in swatches limit: swatch_limit -%}
-            {%- if swatch.hex != blank -%}
-              <span
-                class="ss-swatch"
-                style="background: {{ swatch.hex }};"
-                title="{{ swatch.name | escape }}"
-              ></span>
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if swatches.size > swatch_limit -%}
-            {%- assign more = swatches.size | minus: swatch_limit -%}
-            <span class="ss-swatch-more">+{{ more }}</span>
-          {%- endif -%}
-        </div>
-      {%- endif -%}
+      {%- render 'ss-product-card-swatches', product: p -%}
 
       {%- comment -%}
         ss-card-sizes

@@ -9,6 +9,7 @@
   var root = document.querySelector('.ap-wrap--prospect-demo');
   var claimUrl = cfg.joinLink || ('/pages/join-store?shop=' + encodeURIComponent(handle));
   var apiBase = '/apps/ss/relay/prospect/' + encodeURIComponent(handle);
+  var previewQuery = '?preview=' + encodeURIComponent(cfg.previewToken || '1');
   var buildWatchActive = false;
   var demo = window.SSProspectDemo = {
     ready: false,
@@ -150,8 +151,8 @@
     }
 
     var productUrl = state.product_handle
-      ? '/products/' + encodeURIComponent(state.product_handle) + '?preview=1&demo_product=1'
-      : '/collections/' + encodeURIComponent(handle) + '?preview=1';
+      ? '/products/' + encodeURIComponent(state.product_handle) + previewQuery + '&demo_product=1'
+      : '/collections/' + encodeURIComponent(handle) + previewQuery;
     var banner = existing || document.createElement('div');
     banner.setAttribute('data-demo-product-state', '');
     banner.className = 'ap-demo-complete';
@@ -242,7 +243,7 @@
     if (buildWatchActive) return;
     buildWatchActive = true;
     activateTab('apTabBtnAddProducts', 'apPanelAddProducts');
-    showProductState({product_status: 'reserved'});
+    showProductState(Object.assign({}, demo.state || {}, {product_status: 'reserved', last_product_status: 'reserved'}));
     var startedAt = Date.now();
     var timer = window.setInterval(function () {
       if (Date.now() - startedAt > 10 * 60 * 1000) {
@@ -261,8 +262,8 @@
             window.clearInterval(timer);
             buildWatchActive = false;
             var destination = state.product_handle
-              ? '/products/' + encodeURIComponent(state.product_handle) + '?preview=1&demo_product=1'
-              : '/collections/' + encodeURIComponent(handle) + '?preview=1&demo_product=1';
+              ? '/products/' + encodeURIComponent(state.product_handle) + previewQuery + '&demo_product=1'
+              : '/collections/' + encodeURIComponent(handle) + previewQuery + '&demo_product=1';
             window.setTimeout(function () { window.location.href = destination; }, 900);
           } else if (state.product_status === 'available') {
             window.clearInterval(timer);

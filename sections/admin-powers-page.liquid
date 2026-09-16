@@ -174,7 +174,8 @@
 {%- endif -%}
 {%- assign ap_live_store_url = '/collections/' | append: collection_handle -%}
 {%- if is_prospect_demo_candidate -%}
-  {%- assign ap_live_store_url = ap_live_store_url | append: '?preview=1' -%}
+  {%- assign ap_preview_token = join_code | default: '1' | url_encode -%}
+  {%- assign ap_live_store_url = ap_live_store_url | append: '?preview=' | append: ap_preview_token -%}
 {%- endif -%}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -217,6 +218,7 @@
     SSAP.dashboardUrl = {{ dashboard_url | json }};
     SSAP.storeName = {{ store_name | json }};
     SSAP.liveStoreUrl = {{ ap_live_store_url | json }};
+    SSAP.previewToken = {{ join_code | default: '1' | json }};
   </script>
 
   {%- if is_prospect_demo_candidate -%}

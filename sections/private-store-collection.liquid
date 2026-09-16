@@ -48,6 +48,8 @@
   {% assign join_link = join_link | append: '&code=' | append: join_code %}
 {% endif %}
 
+<span hidden data-ss-store-access="{{ ps_access | escape }}" data-ss-store-handle="{{ handle | escape }}"></span>
+
 {% if allowed %}
 
   {% render 'storefront-activity-tracker', handle: handle %}

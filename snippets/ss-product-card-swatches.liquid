@@ -1,0 +1,41 @@
+{%- comment -%}One row, using saved Printful colors when present; starter builds fall back to their real Color option.{%- endcomment -%}
+{%- assign saved_colors = product.metafields.custom.color_swatches.value -%}
+{%- assign color_option = nil -%}
+{%- for option in product.options_with_values -%}
+  {%- assign option_name = option.name | downcase | strip -%}
+  {%- if option_name == 'color' or option_name == 'colour' -%}
+    {%- assign color_option = option -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- assign color_count = color_option.values.size | default: 0 -%}
+{%- if color_count > 0 -%}
+  <div class="ss-swatch-row" aria-label="Available colors">
+    {%- for value in color_option.values limit: 6 -%}
+      {%- assign color_name = value.name | default: value -%}
+      {%- assign normalized_name = color_name | downcase | strip -%}
+      {%- assign color_hex = '' -%}
+      {%- for saved in saved_colors -%}
+        {%- assign saved_name = saved.name | downcase | strip -%}
+        {%- if saved_name == normalized_name and saved.hex != blank -%}
+          {%- assign color_hex = saved.hex -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if color_hex == blank and value.swatch.color -%}
+        {%- assign color_hex = value.swatch.color -%}
+      {%- endif -%}
+      {%- if color_hex == blank -%}
+        {%- capture color_hex -%}{%- render 'ss-fallback-color', name: normalized_name -%}{%- endcapture -%}
+        {%- assign color_hex = color_hex | strip -%}
+      {%- endif -%}
+      {%- if color_hex != blank -%}
+        <span class="ss-swatch" style="background: {{ color_hex | escape }};" title="{{ color_name | escape }}" role="img" aria-label="{{ color_name | escape }}"></span>
+      {%- else -%}
+        {%- comment -%}Unknown specialty colors stay named rather than displaying a misleading color.{%- endcomment -%}
+        <span class="ss-swatch-more" title="{{ color_name | escape }}">{{ color_name | escape }}</span>
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if color_count > 6 -%}<span class="ss-swatch-more">+{{ color_count | minus: 6 }}</span>{%- endif -%}
+  </div>
+{%- endif -%}
