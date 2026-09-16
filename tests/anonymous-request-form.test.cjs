@@ -42,6 +42,14 @@ test('the customer form remains the single shared form in Liquid', () => {
   assert.match(liquid,/Sign in or create account/);
 });
 
+test('the legacy auth bridge does not intercept the explicit guest trial form', () => {
+  const layout=fs.readFileSync('layout/theme.liquid','utf8');
+  const marker=layout.indexOf("form.dataset && form.dataset.signedIn === 'false'");
+  const redirect=layout.indexOf("window.location.href = loginBase", marker);
+  assert.ok(marker > -1);
+  assert.ok(redirect > marker);
+});
+
 test('an existing guest build resumes in the public waiting room', () => {
   const dom = new JSDOM(page(), {url:'https://stellasageco.com/pages/request-storefront-form',runScripts:'outside-only'});
   const w = dom.window; let destination='';

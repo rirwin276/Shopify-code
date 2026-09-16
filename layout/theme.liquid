@@ -436,6 +436,11 @@
           document.addEventListener('submit', function (event) {
             var form = event.target;
             if (!form || form.id !== 'sf-request-form') return;
+            // The anonymous trial form owns its own private build flow. Let its
+            // submit handler save the request and open the public waiting room.
+            // Legacy signed-out request forms without this explicit marker
+            // still use the account-first bridge below.
+            if (form.dataset && form.dataset.signedIn === 'false') return;
 
             if (typeof window.generateHandle === 'function') window.generateHandle();
             if (typeof window.validateBeforeSubmit === 'function' && !window.validateBeforeSubmit()) {
