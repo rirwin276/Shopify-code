@@ -92,7 +92,7 @@
         if (destination.origin === location.origin) location.assign(destination.href);
         return;
       }
-      render(); error('');
+      render();
     } catch (e) { error(e.message); $('[data-loading]').hidden = true; }
     finally { busy = false; clearTimeout(timer); timer = setTimeout(refresh, document.hidden ? 30000 : 12000); }
   }
@@ -118,7 +118,7 @@
       $('[data-catalog]').close();
       $('[data-editor] iframe').src = url.href;
       $('[data-editor]').showModal();
-    } catch(e) { error(e.message); }
+    } catch(e) { $('[data-catalog]').close(); error(e.message); $('[data-error]').scrollIntoView({block:'center'}); }
   }
   $('[data-add]').onclick = async function () {
     this.disabled = true; error('');
@@ -129,6 +129,11 @@
     } catch(e) { error(e.message); } finally { this.disabled = false; }
   };
   $('[data-editor-close]').onclick = function () { $('[data-editor]').close(); $('[data-editor] iframe').removeAttribute('src'); showTab('admin'); $('[data-build-note]').textContent = 'If you saved a design, its finished mockups will appear here when the build completes.'; refresh(); };
+  window.addEventListener('message', function (event) {
+    var frame = $('[data-editor] iframe');
+    if (!frame.src || event.source !== frame.contentWindow || event.origin !== new URL(frame.src).origin) return;
+    if (event.data && event.data.type === 'ss-anonymous-editor-close') $('[data-editor-close]').click();
+  });
   $('[data-delete-confirm]').onclick = async function () { this.disabled = true; try { await call('/api/demo/product', {id:pendingDelete,action:'delete'}); $('[data-delete]').close(); await refresh(); } catch(e) { error(e.message); } finally { this.disabled = false; } };
   $('[data-appearance]').oninput = function () { root.style.setProperty('--team', this.elements.primary_color.value); root.style.setProperty('--accent', this.elements.secondary_color.value); $('[data-store-name]').textContent = this.elements.name.value; $('[data-welcome]').textContent = this.elements.welcome_message.value; };
   $('[data-appearance]').onsubmit = async function (e) { e.preventDefault(); var b = this.querySelector('[type=submit]'); b.disabled = true; try { await call('/api/demo/appearance', Object.fromEntries(new FormData(this))); $('[data-style-status]').textContent = 'Saved. These changes stay with your store.'; await refresh(); } catch(err) { error(err.message); } finally { b.disabled = false; } };
