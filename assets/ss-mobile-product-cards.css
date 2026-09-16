@@ -1,0 +1,22 @@
+/* Keep real garment imagery, colors, prices and sizes; tidy phone spacing. */
+/* Access notices must remain legible under every custom store palette. */
+#MainContent .ps-hero--auth .ps-auth-card {background:#fff!important;color:#142238!important;border-radius:20px;}
+#MainContent .ps-hero--auth .ps-auth-card .ps-title {color:#142238!important;}
+#MainContent .ps-hero--auth .ps-auth-card .ps-sub {color:#5b6470!important;}
+#MainContent .ps-hero--auth .ps-actions {display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:20px;}
+#MainContent .ps-hero--auth .ps-actions .ps-btn {display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:12px 18px;border:1px solid #d9d8d0;border-radius:10px;text-decoration:none;font-weight:700;}
+#MainContent .ps-hero--auth .ps-actions .ps-btn-solid {background:#142238!important;color:#fff!important;}
+#MainContent .ps-hero--auth .ps-actions .ps-btn-ghost {background:#faf9f5!important;color:#142238!important;}
+@media(max-width:767px) {
+  #MainContent:has(#ss-private-store-state) .product-grid__item {min-width:0!important;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell {border-radius:16px!important;border:1px solid #e2e2df!important;box-shadow:0 3px 12px rgba(20,34,56,.04)!important;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-image-stage {padding:8px!important;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-info-deck {padding:12px!important;gap:8px;justify-content:flex-start;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-title {margin:0!important;font-size:14px!important;line-height:1.35!important;font-weight:650!important;letter-spacing:-.015em!important;overflow-wrap:anywhere;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-swatch-row {margin:0!important;gap:6px;min-height:16px;flex-wrap:wrap;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-swatch {width:15px;height:15px;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-meta-row {margin-top:auto;padding-top:3px;gap:6px;flex-wrap:wrap;align-items:baseline;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-price {font-size:18px!important;font-weight:750!important;line-height:1.2;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-sizes {font-size:11px!important;line-height:1.3;}
+  #MainContent:has(#ss-private-store-state) .product-grid__item .ss-card-shell .ss-includes-badge {max-width:calc(100% - 16px);font-size:9px!important;line-height:1.3;white-space:normal;}
+}

@@ -1,0 +1,40 @@
+/* Presentation only: preserve the dashboard's existing controls and state. */
+.ss-portal {
+  --ss-premium-ink:#142238;
+  --ss-premium-muted:#5b6470;
+  --ss-premium-gold:#ddc18c;
+  --ss-premium-card:#fff;
+  --ss-premium-card-strong:#fff;
+  --ss-premium-shadow:0 8px 24px rgba(20,34,56,.05);
+  --ss-premium-shadow-strong:0 12px 30px rgba(20,34,56,.09);
+  background:#faf9f5;
+  color:#142238;
+}
+.ss-portal .ss-bg {background:#faf9f5!important;}
+.ss-portal .ss-bg::before,.ss-portal .ss-bg::after,.ss-portal .ss-store-card::before {display:none!important;}
+.ss-portal .ss-h1 {color:#142238!important;font-weight:800!important;line-height:1.04!important;letter-spacing:-.055em!important;}
+.ss-portal .ss-sub {color:#5b6470!important;line-height:1.6!important;}
+.ss-portal :is(.ss-card,.ss-store-card,.ss-user-pill) {background:#fff!important;border:1px solid #e2dfd5!important;box-shadow:0 8px 24px rgba(20,34,56,.05)!important;backdrop-filter:none!important;}
+.ss-portal :is(.ss-card,.ss-store-card) {border-radius:18px!important;}
+.ss-portal .ss-logo-frame {background:#faf9f5!important;border:1px solid #e2dfd5!important;border-radius:14px!important;box-shadow:none!important;}
+.ss-portal .ss-card-title {color:#142238!important;letter-spacing:-.025em!important;font-weight:750!important;}
+.ss-portal .ss-card-subtitle {background:#f7f2e7!important;border-color:#e9dfc9!important;color:#715926!important;}
+.ss-portal :is(.ss-btn-primary,.ss-open-btn,.ss-btn-seller) {background:#142238!important;color:#fff!important;border:1px solid #142238!important;border-radius:10px!important;box-shadow:none!important;font-weight:750!important;}
+.ss-portal :is(.ss-btn-secondary,.ss-admin-btn,.ss-pill-btn) {background:#fff!important;color:#142238!important;border:1px solid #d9d8d0!important;border-radius:10px!important;box-shadow:none!important;font-weight:700!important;}
+.ss-portal .ss-admin-btn {background:#eddec2!important;border-color:#ddc18c!important;}
+.ss-portal :is(.ss-open-btn,.ss-admin-btn).ss-disabled {background:#eeede8!important;color:#73767c!important;border-color:#e2dfd5!important;}
+.ss-portal .ss-btn-cta::after {display:none;}
+.ss-portal :is(a,button,input):focus-visible {outline:3px solid #947337!important;outline-offset:3px;}
+.ss-portal .ss-store-card.ss-clickrow:hover {box-shadow:0 12px 30px rgba(20,34,56,.09)!important;border-color:#c8b68f!important;}
+@media(max-width:900px) {
+  .ss-portal .ss-header {gap:16px;}
+  .ss-portal .ss-store-card {padding:16px!important;grid-template-columns:72px minmax(0,1fr)!important;gap:12px!important;}
+  .ss-portal .ss-logo-frame {width:72px!important;height:72px!important;}
+  .ss-portal .ss-card-title {white-space:normal!important;overflow-wrap:anywhere;font-size:17px!important;line-height:1.25!important;}
+  .ss-portal .ss-col-controls {grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;}
+  .ss-portal .ss-col-controls>:only-child {grid-column:1/-1;}
+  .ss-portal .ss-col-controls .ss-leave-btn {grid-column:1/-1;min-height:40px!important;}
+  .ss-portal .ss-col-controls :is(.ss-admin-btn,.ss-open-btn) {min-height:46px!important;}
+  .ss-portal .ss-h1 {font-size:clamp(34px,9vw,44px)!important;}
+}
+@media(prefers-reduced-motion:reduce) {.ss-portal .ss-store-card {transform:none!important;}}

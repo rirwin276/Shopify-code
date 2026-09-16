@@ -1,0 +1,68 @@
+      <div class="ss-demo-wait" data-demo-wait hidden>
+        <header class="ss-wait-welcome"><span class="ss-wait-brand">STELLA &amp; SAGE</span><span class="ss-wait-live"><i aria-hidden="true"></i><span data-demo-save-label>Your build is saved</span></span></header>
+        <div class="ss-wait-status" role="region" aria-label="Your store build">
+          <div class="ss-wait-identity"><div class="ss-wait-logo"><img data-demo-team-logo alt="Your team logo" hidden width="88" height="88"><span data-demo-team-initials aria-hidden="true">SS</span></div><div><span class="ss-demo-wait__kicker">A STORE OF YOUR OWN</span><p data-demo-team-name>Your team</p></div></div>
+          <div class="ss-demo-spinner" data-demo-spinner aria-hidden="true"></div>
+          <div class="ss-wait-status__text" role="status" aria-live="polite" aria-atomic="true">
+            <span class="ss-demo-wait__kicker" data-demo-phase-label>YOUR LOGO IS IN. WE’LL TAKE IT FROM HERE.</span>
+            <h2 data-demo-status-title>Your always-free store is building.</h2>
+            <p data-demo-status-copy>This page will update as soon as your real team store is ready to try.</p>
+          </div>
+          <ol class="ss-demo-progress" data-demo-progress aria-label="Build stages">
+            <li data-step="saved">Request saved</li><li data-step="store">Create your store</li><li data-step="products">Build your gear</li><li data-step="ready">Ready to explore</li>
+          </ol>
+          <div class="ss-wait-clock" aria-label="Store build timing">
+            <div><span>Usual build time</span><strong>10:00 minutes</strong></div>
+            <div><span>Time waiting</span><strong data-demo-elapsed>00:00</strong></div>
+          </div>
+          <p class="ss-wait-reassurance" data-demo-timing>You can leave this page open or come back with your private return link.</p>
+          <div class="ss-demo-ready-actions" data-demo-ready-actions hidden>
+            <a class="ss-demo-button ss-demo-button--dark" data-open-preview href="#">Explore my store →</a>
+            <a class="ss-demo-button ss-demo-button--light" data-open-admin href="#">Open Admin Powers</a>
+            <a class="ss-demo-claim-link" data-claim-store href="#">Activate my free store</a>
+          </div>
+          <div data-demo-recovery hidden><button class="ss-demo-button ss-demo-button--light" data-demo-retry type="button">Check again</button><a href="/pages/support">Get help</a></div>
+          <p class="ss-wait-expiry" data-demo-expiry hidden></p>
+        </div>
+
+        <div class="ss-demo-return">
+          <strong>Your progress is saved in this browser.</strong>
+          <p data-demo-return-copy>You can close this page and return here to continue.</p>
+          <label for="ss-demo-private-link">Your private return link</label>
+          <div class="ss-demo-return__copy"><input id="ss-demo-private-link" data-demo-private-link readonly aria-label="Private return link"><button type="button" data-demo-copy-link>Copy link</button></div>
+          <span data-demo-copy-result role="status"></span>
+          <small>Save this link, but don’t share it. Anyone with it can preview the store, and the first person to sign in can claim it as administrator.</small>
+        </div>
+
+        <nav class="ss-wait-nav" aria-label="While you wait"><strong>While we build</strong><a href="#ss-wait-gear">Meet the gear</a><a href="#ss-wait-quick-tour">What’s next</a><a href="#ss-wait-faq-title">Quick answers</a></nav>
+        <div class="ss-wait-content" data-demo-wait-content>
+          <article class="ss-wait-hero" id="ss-wait-gear">
+            <img src="{{ 'ss-home-cashmere-showcase.webp' | asset_url }}" alt="Cashmere Youth Football hoodie and coaches polo product mockups" width="1200" height="800" loading="lazy">
+            <div><span class="ss-demo-wait__kicker">LESS ORGANIZING. MORE CHEERING.</span><h3>Gear they’ll wear beyond game day.</h3><p>Explore tees, hoodies and more. Open each product for its fabric details, available colors and size chart.</p><p class="ss-wait-caption">Cashmere Youth Football · product mockups</p></div>
+          </article>
+
+          <div class="ss-wait-next" id="ss-wait-quick-tour">
+            <div><span>UP NEXT · 01</span><h3>Step into your store</h3><p>See your team’s logo on your gear. Browse the products and check colors, fabric details and sizing.</p></div>
+            <div><span>TRY IT · 02</span><h3>You’re in the design seat</h3><p>Open the design tools. Try another logo, adjust your colors and explore name-and-number previews.</p></div>
+            <div><span>WHEN YOU’RE READY · 03</span><h3>Keep it. Share it. Done.</h3><p>Activate this same store free when you like what you see. Then parents can order for themselves, with delivery straight to their door.</p></div>
+          </div>
+
+          {% if how_to_video != blank %}
+            <section class="ss-wait-video" aria-label="Quick store tour"><h3>A quick tour before you dive in</h3>{{ how_to_video | video_tag: controls: true, autoplay: false, preload: 'none', image_size: '900x' }}</section>
+          {% endif %}
+
+          <div data-ss-home-slot="reviews"></div>
+
+          <section class="ss-wait-faq" aria-labelledby="ss-wait-faq-title">
+            <span class="ss-demo-wait__kicker">GET TO KNOW YOUR NEW STORE</span><h3 id="ss-wait-faq-title">A little know-how while you wait.</h3>
+            <details open><summary>What happens when the build finishes?</summary><p>The progress card above will change to “Ready to explore.” Open your store or jump into the design tools. You can try it all before signing in, and your saved changes stay with this store.</p></details>
+            <details><summary>What can I try before signing in?</summary><p>Explore your store and try the product design tools, including artwork, colors and personalization previews. Ordering, sharing and inviting members unlock when you sign in and activate your store.</p></details>
+            <details><summary>Will I lose my designs when I sign in?</summary><p>No. You activate this same store, with your products and saved changes. You won’t need to start over.</p></details>
+            <details><summary>Do I collect sizes, names or payments?</summary><p>No. After activation, each parent selects their own size and color and enters their name and number on supported products. They check their preview and pay for their own order.</p></details>
+            <details><summary>How do I choose the right gear?</summary><p>Check each product’s fabric details and size chart. Print appearance varies by fabric and color. DTG prints have a soft feel, and some color softening after washing is normal. Follow the garment’s care instructions.</p></details>
+            <details><summary>When will orders arrive?</summary><p>Items are made to order. Allow 3–5 business days for fulfillment, followed by up to one week for shipping. These are estimates, so leave extra time before an event.</p></details>
+            <details><summary>Can I come back later?</summary><p>Yes, on this browser. Your preview stays available for at least 48 hours after it’s ready. Unclaimed previews are then removed during overnight cleanup. Activate yours to keep it.</p></details>
+          </section>
+        </div>
+        <details class="ss-wait-other"><summary>Need a different store?</summary><button class="ss-demo-start-over" type="button" data-demo-start-over>Start a different store</button></details>
+      </div>

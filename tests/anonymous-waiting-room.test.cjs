@@ -8,8 +8,9 @@ const root = path.resolve(__dirname,'..');
 const script = fs.readFileSync(path.join(root,'assets/ss-anonymous-demo-start.js'),'utf8');
 function fixture(){
  let html = fs.readFileSync(path.join(root,'sections/ss-anonymous-demo-start.liquid'),'utf8');
+ html=html.replace(/{% render 'ss-demo-wait-content'[^%]*%}/,fs.readFileSync(path.join(root,'snippets/ss-demo-wait-content.liquid'),'utf8'));
  html=html.replace(/{% comment %}[\s\S]*?{% endcomment %}/g,'').replace(/{% schema %}[\s\S]*?{% endschema %}/g,'');
- html=html.replace(/{% if section.settings.how_to_video != blank %}[\s\S]*?{% endif %}/g,'');
+ html=html.replace(/{% if how_to_video != blank %}[\s\S]*?{% endif %}/g,'');
  html=html.replace(/{{ demo_enabled }}/g,'true').replace(/{%[\s\S]*?%}/g,'').replace(/{{[\s\S]*?}}/g,'');
  return html;
 }

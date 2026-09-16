@@ -22,7 +22,7 @@
 
   {% unless customer %}
     <div class="sf-entry-choice ss-reveal" role="note">
-      <div><strong>Want it connected from the start?</strong><span>Sign in first and this form works exactly as it always has.</span></div>
+      <div><strong>Ready to create your store?</strong><span>Sign in to build it directly in your account. Or try a preview below without signing in.</span></div>
       <a href="{{ login_url }}">Sign in or create account</a>
     </div>
   {% endunless %}
@@ -616,6 +616,11 @@
 </script>
 
 {% unless customer %}
+  {{ 'ss-demo-waiting-room.css' | asset_url | stylesheet_tag }}
+  <section class="ss-demo-start" data-ss-demo-start data-embedded="true" data-enabled="true" data-api-base="{{ anonymous_preview_api_base_url | escape }}" data-permanent-url="/pages/request-storefront-form" hidden>
+    <div class="ss-demo-start__shell">{% render 'ss-demo-wait-content' %}</div>
+  </section>
+  <script src="{{ 'ss-anonymous-demo-start.js' | asset_url }}" defer></script>
   <script src="{{ 'ss-anonymous-request-form.js' | asset_url }}" defer></script>
 {% endunless %}
 

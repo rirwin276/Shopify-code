@@ -49,6 +49,7 @@
 {% endif %}
 
 <span hidden data-ss-store-access="{{ ps_access | escape }}" data-ss-store-handle="{{ handle | escape }}"></span>
+{{ 'ss-mobile-product-cards.css' | asset_url | stylesheet_tag }}
 
 {% if allowed %}
 
@@ -260,6 +261,8 @@
 
 {% elsif customer %}
 
+  {% if prospect_owner == 'unclaimed' %}{% render 'private-store-preview-resume', handle: handle %}{% endif %}
+
   <section class="ps-hero ps-hero--auth">
     <div class="ps-wrap ps-center">
       <div class="ps-auth-card">
@@ -267,7 +270,7 @@
         <h1 class="ps-title">Access required</h1>
         <p class="ps-sub">You do not currently have access to this private store.</p>
         <div class="ps-actions">
-          <a class="ps-btn ps-btn-solid" href="/pages/portal">Request access</a>
+          <a class="ps-btn ps-btn-solid" href="{{ join_link }}">Request access</a>
           <a class="ps-btn ps-btn-ghost" href="/pages/portal">Back to Dashboard</a>
         </div>
       </div>

@@ -76,7 +76,9 @@
       if (!actions) return;
       var links = actions.querySelectorAll('a.ap-btn');
       if (links[0] && window.SSAP && SSAP.collectionHandle) {
-        links[0].setAttribute('href', '/collections/' + encodeURIComponent(SSAP.collectionHandle));
+        // The server supplies the preview code when this is an unclaimed store.
+        // Rebuilding this URL from only the handle silently removes that access.
+        links[0].setAttribute('href', SSAP.liveStoreUrl || ('/collections/' + encodeURIComponent(SSAP.collectionHandle)));
       }
       if (links[1]) links[1].setAttribute('href', (window.SSAP && SSAP.dashboardUrl) || '/pages/portal');
     }

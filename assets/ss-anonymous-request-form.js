@@ -23,61 +23,20 @@
   var quality = document.getElementById('MainLogoQualitySub');
   var error = document.getElementById('sf-error-inline');
   var objectUrl = '';
-  var handoffTimer = null;
-  var handoffStartedAt = 0;
-
-  function formatElapsed(ms) {
-    var seconds = Math.max(0, Math.floor(ms / 1000));
-    return String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
-  }
-  function showHandoff() {
-    var provision = document.getElementById('sf-provision');
-    var header = document.querySelector('.sf-header');
-    var entry = document.querySelector('.sf-entry-choice');
-    var bar = document.getElementById('sf-progress-bar');
-    var status = document.getElementById('sf-provision-status');
-    var elapsed = document.getElementById('sf-provision-elapsed');
-    if (header) header.classList.add('sf-hidden');
-    if (entry) entry.classList.add('sf-hidden');
-    form.classList.add('sf-hidden');
-    if (provision) provision.classList.remove('sf-hidden');
-    if (bar) bar.style.width = '12%';
-    if (status) status.textContent = 'Uploading your logo securely…';
-    handoffStartedAt = Date.now();
-    clearInterval(handoffTimer);
-    handoffTimer = setInterval(function () {
-      var elapsedMs = Date.now() - handoffStartedAt;
-      if (elapsed) elapsed.textContent = formatElapsed(elapsedMs);
-      if (elapsedMs > 8000) {
-        if (status) status.textContent = 'Opening your private waiting room…';
-        if (bar) bar.style.width = '86%';
-      } else if (elapsedMs > 4000) {
-        if (status) status.textContent = 'Preparing your private store build…';
-        if (bar) bar.style.width = '62%';
-      } else if (elapsedMs > 1600) {
-        if (status) status.textContent = 'Securing your preview link…';
-        if (bar) bar.style.width = '38%';
-      }
-    }, 250);
-    if (provision) provision.scrollIntoView({behavior:'smooth', block:'start'});
-  }
-  function finishHandoff() {
-    clearInterval(handoffTimer); handoffTimer = null;
-    var bar = document.getElementById('sf-progress-bar');
-    var status = document.getElementById('sf-provision-status');
-    if (bar) bar.style.width = '100%';
-    if (status) status.textContent = 'Request saved. Opening your waiting room…';
+  var requestPending = false;
+  var container = document.querySelector('[data-storefront-request-form]');
+  function showHandoff(details) {
+    container.hidden = true;
+    window.SSPreviewWaitingRoom.begin(details);
   }
   function restoreForm() {
-    clearInterval(handoffTimer); handoffTimer = null;
-    var provision = document.getElementById('sf-provision');
-    var header = document.querySelector('.sf-header');
-    var entry = document.querySelector('.sf-entry-choice');
-    if (provision) provision.classList.add('sf-hidden');
-    if (header) header.classList.remove('sf-hidden');
-    if (entry) entry.classList.remove('sf-hidden');
-    form.classList.remove('sf-hidden');
+    window.SSPreviewWaitingRoom.cancel();
+    container.hidden = false;
   }
+  window.addEventListener('beforeunload', function (event) {
+    if (!requestPending) return;
+    event.preventDefault(); event.returnValue = '';
+  });
 
   function showError(message) {
     if (!error) return;
@@ -146,28 +105,33 @@
   };
   window.sfToastHide = function () {};
   window.submitAnonymousPreview = async function (event) {
-    event.preventDefault(); clearError(); generateHandle();
+    event.preventDefault();
+    if (requestPending || submit.dataset.busy) return;
+    clearError(); generateHandle();
     if (!valid()) { showError('Choose a store type and shirt color, enter the storefront name, and add your logo.'); return; }
     var file = input.files[0];
     if (!/^image\/(png|jpeg|webp)$/.test(file.type) || file.size > 12 * 1024 * 1024) { showError('Choose a PNG, JPG or WebP image smaller than 12 MB.'); return; }
     if (!api.startsWith('https://')) { showError('The private preview service is unavailable right now.'); return; }
+    if (!window.SSPreviewWaitingRoom) { showError('The waiting room is still loading. Please try again in a moment.'); return; }
     var startedAt = Date.now();
     submit.dataset.busy = '1'; submit.disabled = true; submit.textContent = 'Opening your waiting room…';
     form.setAttribute('aria-busy', 'true');
-    showHandoff();
+    requestPending = true;
+    showHandoff({storeName:document.getElementById('StoreName').value.trim(), createdAt:startedAt});
     try {
-      var logoThumb = await imageThumb(file), body = new FormData();
+      var logoThumb = '', body = new FormData();
+      // Thumbnail work must never delay the request or the waiting room.
+      imageThumb(file).then(function (thumb) { logoThumb = thumb; });
       body.set('storefront_name', document.getElementById('StoreName').value.trim());
       body.set('type_of_store', typeOfStore()); body.set('primary_color', selectedColor());
       body.set('storefront_logo_file', file); body.set('website', '');
       var response = await fetch(api + '/api/demo/storefront-request', {method:'POST', body:body});
       var data = await response.json().catch(function () { return {}; });
       if (!response.ok || !data.resume_token) throw new Error(data.error || 'We could not start your preview. Please try again.');
-      localStorage.setItem('ss_anonymous_demo_v1', JSON.stringify({token:data.resume_token, handle:data.storefront_handle, storeName:document.getElementById('StoreName').value.trim(), createdAt:startedAt, readyReported:false, logoThumb:logoThumb, apiBase:api, startUrl:waitingRoom}));
-      finishHandoff();
-      if (typeof window.__ssAnonymousNavigate === 'function') window.__ssAnonymousNavigate(waitingRoom);
-      else window.location.replace(waitingRoom);
+      requestPending = false;
+      window.SSPreviewWaitingRoom.accepted({token:data.resume_token, handle:data.storefront_handle, storeName:document.getElementById('StoreName').value.trim(), createdAt:startedAt, readyReported:false, logoThumb:logoThumb, apiBase:api, startUrl:waitingRoom});
     } catch (problem) {
+      requestPending = false;
       restoreForm();
       form.removeAttribute('aria-busy');
       delete submit.dataset.busy; submit.textContent = 'Build my free preview'; update(); showError(problem.message);

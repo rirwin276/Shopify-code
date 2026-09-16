@@ -8,6 +8,7 @@
   var $ = function (s) { return root.querySelector(s); };
   var choice = $('[data-demo-choice]'), formPanel = $('[data-demo-form-panel]'), waitPanel = $('[data-demo-wait]');
   var form = $('[data-demo-form]'), submit = $('[data-demo-submit]');
+  var embedded = root.getAttribute('data-embedded') === 'true';
   var current = null, timer = null, clockTimer = null, controller = null, generation = 0, checking = false, storageWorks = true;
   var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function visible(node, yes) { if (node) node.hidden = !yes; }
@@ -52,6 +53,9 @@
   }
   function status(state) {
     var phase = String(state.phase || 'building');
+    text('[data-demo-save-label]', 'Your build is saved');
+    visible(root.querySelector('.ss-demo-return'), true);
+    visible(root.querySelector('.ss-wait-other'), true);
     visible($('[data-demo-ready-actions]'), false);
     visible($('[data-demo-recovery]'), false);
     var spinner = $('[data-demo-spinner]');
@@ -147,7 +151,7 @@
       img.src = url;
     });
   }
-  form.addEventListener('submit', async function (e) {
+  if (form) form.addEventListener('submit', async function (e) {
     e.preventDefault(); error(''); if (!form.reportValidity() || submit.disabled) return;
     var logo = form.elements.storefront_logo_file.files[0];
     if (!logo || logo.size > 12 * 1024 * 1024) { error('Please choose a PNG, JPG or WebP smaller than 12 MB.'); return; }
@@ -163,7 +167,7 @@
     } catch (err) { error(err.message); } finally { submit.disabled = false; submit.textContent = 'Build my free store →'; }
   });
   root.querySelectorAll('[data-open-demo-form]').forEach(function (button) { button.addEventListener('click', function () { panel(formPanel); }); });
-  $('[data-back-to-choice]').addEventListener('click', function () { panel(choice); });
+  if ($('[data-back-to-choice]')) $('[data-back-to-choice]').addEventListener('click', function () { panel(choice); });
   $('[data-demo-retry]').addEventListener('click', function () { stop(); poll(); });
   $('[data-demo-start-over]').addEventListener('click', function () {
     if (current && !window.confirm('Start a different store? Your current unclaimed preview will still expire on schedule.')) return;
@@ -174,10 +178,36 @@
     try { await navigator.clipboard.writeText(input.value); text('[data-demo-copy-result]', 'Private link copied.'); }
     catch (_) { input.focus(); input.select(); text('[data-demo-copy-result]', 'Link selected. Tap Copy in your browser.'); }
   });
-  $('[data-demo-logo]').addEventListener('change', function (e) { text('[data-demo-file-copy]', e.target.files[0] ? e.target.files[0].name : 'PNG, JPG, or WebP · maximum 12 MB'); });
+  if ($('[data-demo-logo]')) $('[data-demo-logo]').addEventListener('change', function (e) { text('[data-demo-file-copy]', e.target.files[0] ? e.target.files[0].name : 'PNG, JPG, or WebP · maximum 12 MB'); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden && current) poll(); });
   window.addEventListener('pagehide', stop);
   window.addEventListener('pageshow', function (e) { if (e.persisted && current) poll(); });
+  if (embedded) {
+    // The form and the return URL use this same room. No intermediate screen
+    // and no second page load while the upload request is being accepted.
+    window.SSPreviewWaitingRoom = {
+      begin: function (details) {
+        stop(); current = details; visible(root, true); panel(waitPanel); stage(0); startClock();
+        text('[data-demo-team-name]', details.storeName || 'Your team');
+        text('[data-demo-save-label]', 'Saving your request');
+        text('[data-demo-phase-label]', 'WELCOME TO YOUR WAITING ROOM');
+        text('[data-demo-status-title]', 'Let’s get your store started.');
+        text('[data-demo-status-copy]', 'We’re securely saving your logo and team details. Your build will begin as soon as they’re received.');
+        text('[data-demo-timing]', 'Keep this page open while we save your request. You can explore the tips below.');
+        visible(root.querySelector('.ss-demo-return'), false);
+        visible(root.querySelector('.ss-wait-other'), false);
+        visible($('[data-demo-ready-actions]'), false);
+      },
+      accepted: function (details) {
+        stop(); save(details);
+        history.replaceState(null, '', '/pages/request-storefront-form?view=start-team-store');
+        text('[data-demo-timing]', 'Your request is saved. You can explore the site and return using the link at the top of the homepage.');
+        status({phase:'queued', build_stage:'saved'}); poll();
+      },
+      cancel: function () { stop(); current = null; visible(root, false); }
+    };
+    return;
+  }
   var saved = null; try { saved = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) {}
   if (!saved || !saved.token) {
     try {

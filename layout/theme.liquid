@@ -343,10 +343,6 @@
       {% sections 'header-group' %}
     </div>
 
-    {%- if request.page_type == 'index' -%}
-      {% render 'ss-anonymous-home-return' %}
-    {%- endif -%}
-
     <script src="{{ 'critical.js' | asset_url }}" type="module" async blocking="render"></script>
 
     <main
@@ -357,6 +353,9 @@
       data-product-transition="{{ settings.transition_to_main_product }}"
       data-template="{{ template }}"
     >
+      {%- if request.page_type == 'index' -%}
+        {% render 'ss-anonymous-home-return' %}
+      {%- endif -%}
       {{ content_for_layout }}
       {% render 'site-session-tracker' %}
     </main>
