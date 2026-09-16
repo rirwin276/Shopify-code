@@ -7,7 +7,7 @@ const section = fs.readFileSync('sections/ss-anonymous-preview.liquid','utf8').s
   .replace(/data-signed-in="[^"]*"/, 'data-signed-in="false"');
 const script = fs.readFileSync('assets/ss-anonymous-preview.js','utf8');
 async function mount(handle='team-demo-abc123') {
-  const dom = new JSDOM(section,{url:'https://stellasageco.com/pages/storefront?view=anonymous-preview&shop=team-demo-abc123',runScripts:'outside-only'});
+  const dom = new JSDOM(section,{url:'https://stellasageco.com/pages/request-storefront-form?view=anonymous-preview&shop=team-demo-abc123',runScripts:'outside-only'});
   const w=dom.window,calls=[];
   w.localStorage.setItem('ss_anonymous_demo_v1',JSON.stringify({handle,token:'test-bearer'}));
   w.setTimeout=()=>0;w.clearTimeout=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};

@@ -65,9 +65,10 @@
       text('[data-demo-status-title]', name + (phase === 'ready' ? ' is ready to explore.' : ' is yours.'));
       text('[data-demo-status-copy]', phase === 'ready' ? 'Explore your gear and try the design tools. Activate your free store whenever you’re ready to keep it.' : 'Your products and saved changes are connected to your account.');
       text('[data-demo-timing]', phase === 'ready' ? 'Purchasing, sharing and inviting members unlock after activation.' : 'You can manage your store from your dashboard.');
-      safeLink('[data-open-preview]', state.preview_url, '/pages/start-team-store');
-      safeLink('[data-open-admin]', state.admin_url, '/pages/start-team-store');
-      safeLink('[data-claim-store]', state.claim_url, '/pages/start-team-store');
+      var waitingRoom = '/pages/request-storefront-form?view=start-team-store';
+      safeLink('[data-open-preview]', state.preview_url, waitingRoom);
+      safeLink('[data-open-admin]', state.admin_url, waitingRoom);
+      safeLink('[data-claim-store]', state.claim_url, waitingRoom);
       visible($('[data-demo-ready-actions]'), true);
       if (phase === 'claimed') {
         text('[data-open-admin]', 'Open my dashboard'); $('[data-open-admin]').href = root.getAttribute('data-dashboard-url') || '/pages/portal';

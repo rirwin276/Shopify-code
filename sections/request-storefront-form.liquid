@@ -151,7 +151,7 @@
           <div class="sf-legend">Logo</div>
           <div class="sf-field">
             <label class="sf-label">Main Logo / Store Image *</label>
-            <div class="sf-file-drop" id="MainLogoDrop"{% if customer %} onclick="return openUploaderModal();"{% endif %}>
+            <div class="sf-file-drop" id="MainLogoDrop" onclick="return openUploaderModal();">
               <span id="MainLogoText">🪄 Add &amp; edit logo</span>
               <input type="file" id="MainLogo" name="storefront_logo_file" class="sf-file-input" accept="image/png, image/jpeg, image/webp" aria-label="Choose logo image" required>
             </div>
@@ -166,7 +166,7 @@
                     <button type="button" class="sf-action-btn" onclick="return openUploaderModal();">Edit</button>
                     <button type="button" class="sf-action-btn sf-action-btn--ghost" onclick="return clearEdited();">Remove</button>
                   {% else %}
-                    <label class="sf-action-btn" for="MainLogo">Change</label>
+                    <button type="button" class="sf-action-btn" onclick="return openUploaderModal();">Change</button>
                     <button type="button" class="sf-action-btn sf-action-btn--ghost" onclick="return clearAnonymousLogo();">Remove</button>
                   {% endif %}
                 </div>
@@ -197,7 +197,7 @@
         </div>
       </div>
 
-      {% if customer %}<div id="sf-uploader-modal" class="sf-modal sf-hidden" aria-hidden="true">
+      <div id="sf-uploader-modal" class="sf-modal sf-hidden" aria-hidden="true">
         <div class="sf-modal-backdrop" onclick="closeUploaderModal()"></div>
         <div class="sf-modal-card" role="dialog" aria-modal="true" aria-label="Studio Uploader">
           <div class="sf-modal-top">
@@ -207,11 +207,10 @@
           <iframe id="sf-uploader-iframe" class="sf-modal-iframe" src="about:blank" title="Studio Uploader Editor" allow="clipboard-read; clipboard-write"></iframe>
           <div class="sf-modal-help">Upload your image, do quick edits, then hit <b>Done</b>. This window will close automatically.</div>
         </div>
-      </div>{% endif %}
+      </div>
     </div>
 </div>
 
-{% if customer %}
 <script>
   const SF_UPLOADER_BASE = "{{ studio_uploader_base_url | escape }}".replace(/\/+$/,'');
   const SF_ADMIN_EMAIL = "{{ admin_email | escape }}".toLowerCase();
@@ -604,7 +603,6 @@
   function setText(id, text) { const el = document.getElementById(id); if (el) el.innerText = text || ""; }
   function setBadge(id, tier, text) { const el = document.getElementById(id); if (el) { el.className = "sf-badge sf-badge--" + tier; el.innerText = text; } }
 </script>
-{% endif %}
 
 {% unless customer %}
   <script src="{{ 'ss-anonymous-request-form.js' | asset_url }}" defer></script>
@@ -663,19 +661,6 @@
   .sf-file-drop { border: 2px dashed #ddd; border-radius: 14px; padding: 22px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafa; position: relative; font-weight: 900; }
   .sf-file-drop:hover { border-color: #999; background: #f0f0f0; }
   .sf-file-input { display: none; }
-  /* iOS Safari can ignore input.click() when the file input is display:none.
-     Signed-out previews use the real native input as an invisible layer over
-     the upload card, so tapping anywhere on the card opens the photo picker. */
-  #sf-request-form[data-signed-in="false"] #MainLogo.sf-file-input {
-    display: block !important;
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    z-index: 5 !important;
-  }
   .sf-preview-row { margin-top: 12px; display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid #eee; border-radius: 14px; background: #fafafa; }
   .sf-preview-img { width: 74px; height: 74px; border-radius: 14px; object-fit: contain; background: #fff; border: 1px solid #e6e6e6; }
   .sf-preview-meta { flex: 1; }
