@@ -23,6 +23,61 @@
   var quality = document.getElementById('MainLogoQualitySub');
   var error = document.getElementById('sf-error-inline');
   var objectUrl = '';
+  var handoffTimer = null;
+  var handoffStartedAt = 0;
+
+  function formatElapsed(ms) {
+    var seconds = Math.max(0, Math.floor(ms / 1000));
+    return String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
+  }
+  function showHandoff() {
+    var provision = document.getElementById('sf-provision');
+    var header = document.querySelector('.sf-header');
+    var entry = document.querySelector('.sf-entry-choice');
+    var bar = document.getElementById('sf-progress-bar');
+    var status = document.getElementById('sf-provision-status');
+    var elapsed = document.getElementById('sf-provision-elapsed');
+    if (header) header.classList.add('sf-hidden');
+    if (entry) entry.classList.add('sf-hidden');
+    form.classList.add('sf-hidden');
+    if (provision) provision.classList.remove('sf-hidden');
+    if (bar) bar.style.width = '12%';
+    if (status) status.textContent = 'Uploading your logo securely…';
+    handoffStartedAt = Date.now();
+    clearInterval(handoffTimer);
+    handoffTimer = setInterval(function () {
+      var elapsedMs = Date.now() - handoffStartedAt;
+      if (elapsed) elapsed.textContent = formatElapsed(elapsedMs);
+      if (elapsedMs > 8000) {
+        if (status) status.textContent = 'Opening your private waiting room…';
+        if (bar) bar.style.width = '86%';
+      } else if (elapsedMs > 4000) {
+        if (status) status.textContent = 'Preparing your private store build…';
+        if (bar) bar.style.width = '62%';
+      } else if (elapsedMs > 1600) {
+        if (status) status.textContent = 'Securing your preview link…';
+        if (bar) bar.style.width = '38%';
+      }
+    }, 250);
+    if (provision) provision.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function finishHandoff() {
+    clearInterval(handoffTimer); handoffTimer = null;
+    var bar = document.getElementById('sf-progress-bar');
+    var status = document.getElementById('sf-provision-status');
+    if (bar) bar.style.width = '100%';
+    if (status) status.textContent = 'Request saved. Opening your waiting room…';
+  }
+  function restoreForm() {
+    clearInterval(handoffTimer); handoffTimer = null;
+    var provision = document.getElementById('sf-provision');
+    var header = document.querySelector('.sf-header');
+    var entry = document.querySelector('.sf-entry-choice');
+    if (provision) provision.classList.add('sf-hidden');
+    if (header) header.classList.remove('sf-hidden');
+    if (entry) entry.classList.remove('sf-hidden');
+    form.classList.remove('sf-hidden');
+  }
 
   function showError(message) {
     if (!error) return;
@@ -99,6 +154,7 @@
     var startedAt = Date.now();
     submit.dataset.busy = '1'; submit.disabled = true; submit.textContent = 'Opening your waiting room…';
     form.setAttribute('aria-busy', 'true');
+    showHandoff();
     try {
       var logoThumb = await imageThumb(file), body = new FormData();
       body.set('storefront_name', document.getElementById('StoreName').value.trim());
@@ -108,9 +164,11 @@
       var data = await response.json().catch(function () { return {}; });
       if (!response.ok || !data.resume_token) throw new Error(data.error || 'We could not start your preview. Please try again.');
       localStorage.setItem('ss_anonymous_demo_v1', JSON.stringify({token:data.resume_token, handle:data.storefront_handle, storeName:document.getElementById('StoreName').value.trim(), createdAt:startedAt, readyReported:false, logoThumb:logoThumb, apiBase:api, startUrl:waitingRoom}));
+      finishHandoff();
       if (typeof window.__ssAnonymousNavigate === 'function') window.__ssAnonymousNavigate(waitingRoom);
       else window.location.replace(waitingRoom);
     } catch (problem) {
+      restoreForm();
       form.removeAttribute('aria-busy');
       delete submit.dataset.busy; submit.textContent = 'Build my free preview'; update(); showError(problem.message);
     }

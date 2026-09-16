@@ -138,8 +138,13 @@
     if (!panel) return;
     panel.classList.remove('ap-demo-products--waiting');
     var status = String(state.last_product_status || state.product_status || 'available');
+    var productLimit = Number(state.product_limit || 1);
+    var productsCreated = Number(state.products_created || 0);
+    var productsRemaining = Math.max(0, productLimit - productsCreated);
+    demo.state = state;
     var existing = panel.querySelector('[data-demo-product-state]');
-    if (status === 'available') {
+    panel.classList.toggle('ap-demo-products--capped', productsRemaining === 0);
+    if (status === 'available' && productsCreated === 0) {
       if (existing) existing.remove();
       return;
     }
@@ -163,9 +168,14 @@
           product_handle: state.product_handle || ''
         });
       }
+      var completeTitle = productsRemaining > 0 ? 'Your first preview product is live' : 'Both preview products are live';
+      var completeCopy = productsRemaining > 0
+        ? 'You have one preview product left. Pick another builder whenever you’re ready.'
+        : 'You’ve tried the full two-product preview. Claim this store to keep both products and build without limits.';
       banner.innerHTML = '<span class="ap-demo-complete__check">&#10003;</span>' +
-        '<div><h2>Your product is live</h2><p>Keep opening the builders to try artwork, colors and placement.</p></div>' +
-        '<div class="ap-demo-complete__actions"><a class="ap-demo-live" href="' + escapeHtml(productUrl) + '">View live product</a></div>';
+        '<div><h2>' + completeTitle + '</h2><p>' + completeCopy + '</p></div>' +
+        '<div class="ap-demo-complete__actions"><a class="ap-demo-live" href="' + escapeHtml(productUrl) + '">View product</a>' +
+        (productsRemaining === 0 ? claimLink('Claim to keep building', 'ap-demo-claim') : '') + '</div>';
     } else {
       banner.innerHTML = '<span class="ap-demo-complete__check ap-demo-complete__check--working">&#8230;</span>' +
         '<div><h2>Your product is building</h2><p>This takes a few minutes. You can keep exploring the other builders while it finishes.</p></div>' +
@@ -258,7 +268,7 @@
             window.clearInterval(timer);
             buildWatchActive = false;
             if (state.product_status === 'available') {
-              showDemoMessage('The product build did not finish. Your one demo build is available to try again.');
+              showDemoMessage('The product build did not finish. Your preview build is available to try again.');
             }
           }
         })
@@ -298,7 +308,8 @@
       'body.ap-demo-has-bar{padding-bottom:96px}' +
       '.ap-demo-claim,.ap-demo-live{display:inline-flex;align-items:center;justify-content:center;padding:11px 18px;border-radius:999px;background:#11100e;color:#fff!important;text-decoration:none;font-weight:750;border:0;cursor:pointer}' +
       '.ap-demo-live{background:#d7c17a;color:#17150f!important}.ap-demo-settings-intro{margin-bottom:18px}.ap-demo-settings-intro>span{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8a7335}.ap-demo-settings-intro h2{margin:5px 0}.ap-demo-settings-intro p{margin:0;color:#68645c}' +
-      '.ap-demo-products--waiting #apCustomBuildersContainer,.ap-demo-products--waiting .ss-cat{pointer-events:none;opacity:.48}.ap-demo-products--waiting:after{content:"Securing your one-product preview…";display:block;text-align:center;padding:14px;color:#68645c;font-weight:700}' +
+      '.ap-demo-products--waiting #apCustomBuildersContainer,.ap-demo-products--waiting .ss-cat{pointer-events:none;opacity:.48}.ap-demo-products--waiting:after{content:"Securing your two-product preview…";display:block;text-align:center;padding:14px;color:#68645c;font-weight:700}' +
+      '.ap-demo-products--capped #apCustomBuildersContainer{pointer-events:none;opacity:.42;filter:grayscale(.35)}' +
       '.ap-demo-complete{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;text-align:left;margin:0 0 18px;padding:18px;border:1px solid rgba(183,163,106,.34);border-radius:18px;background:#fffaf0}.ap-demo-complete__check{display:inline-flex;width:46px;height:46px;border-radius:50%;align-items:center;justify-content:center;background:#daf5e5;color:#14753b;font-size:25px;font-weight:900}.ap-demo-complete__check--working{background:#f4e7b8;color:#594917}.ap-demo-complete h2{margin:0 0 5px;font-size:18px}.ap-demo-complete p{max-width:680px;margin:0;color:#68645c;line-height:1.5}.ap-demo-complete__actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}' +
       '@media(max-width:700px){.ap-demo-lock{padding:28px 16px}.ap-demo-complete{grid-template-columns:1fr;text-align:center;padding:22px 14px}.ap-demo-complete__check{margin:0 auto}.ap-demo-complete__actions{justify-content:center}.ap-demo-complete__actions>*{width:100%}' +
       '.ap-demo-bar{gap:9px;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}.ap-demo-bar p{font-size:12px;flex:1 1 100%}.ap-demo-bar .ap-demo-claim{width:100%}body.ap-demo-has-bar{padding-bottom:132px}}';

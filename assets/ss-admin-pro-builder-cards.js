@@ -540,6 +540,10 @@
       showDemoMessage('Your secure product preview is still loading. Please try again in a moment.');
       return;
     }
+    if (demo.state && Number(demo.state.products_remaining) <= 0) {
+      showDemoMessage('You created both preview products. Claim this store to keep building without limits.');
+      return;
+    }
     fetch('/apps/ss/relay/prospect/' + encodeURIComponent(s.shopHandle || '') + '/builder-session', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},

@@ -156,19 +156,19 @@
 
           {%- comment -%}
             Second only to shopping, because trying the admin is what turns a
-            visitor into a claim. Hidden until the relay confirms this really is
-            a live unclaimed prospect — ss-prospect-store-demo.js reveals it, so
-            a claimed store never offers a demo it would refuse.
+            visitor into a claim. Liquid only renders it for a preview of a live
+            unclaimed store, so it is present immediately instead of appearing
+            late after a relay request.
           {%- endcomment -%}
           {% if is_preview and prospect_owner == 'unclaimed' %}
-            <div class="ps-demo-cta" data-ss-prospect-demo-wrap hidden>
+            <div class="ps-demo-cta" data-ss-prospect-demo-wrap>
               <a class="ps-btn ps-btn-demo"
                  href="/pages/admin-powers?shop={{ handle | url_encode }}&prospect_demo=1"
                  data-ss-prospect-demo-cta
                  data-shop-handle="{{ handle | escape }}"
                  data-claim-url="{{ join_link | escape }}"
                  aria-describedby="psDemoNote-{{ section.id }}">
-                Try the admin
+                Admin Powers
               </a>
               <span class="ps-demo-note" id="psDemoNote-{{ section.id }}" role="tooltip">
                 Look around the admin without signing in. Build a product and change

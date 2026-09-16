@@ -361,7 +361,11 @@
       injectMainLogoFile(file, sessionId);
       await applyEditedPreview(file);
       closeUploaderModal();
-      sfToastShow("Logo saved. Your form is ready when you are.");
+      // The completed preview directly below already confirms the upload.
+      // A second floating success box is especially distracting on mobile.
+      if (document.getElementById('sf-request-form')?.dataset.signedIn === 'true') {
+        sfToastShow("Logo saved. Your form is ready when you are.");
+      }
     } catch (err) {
       console.error(err);
       sfToastShow("Could not save that image. Please try again.");

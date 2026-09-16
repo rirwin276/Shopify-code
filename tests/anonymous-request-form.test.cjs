@@ -31,8 +31,8 @@ test('the live-looking guest form starts a private build and saves its browser s
   assert.equal(saved.startUrl,'/pages/request-storefront-form?view=start-team-store');
   assert.equal(saved.handle,'raptors-demo-a1b2c3'); assert.equal(saved.token,'private-token');
   assert.equal(request.options.body.get('type_of_store'),'Sports Team'); assert.equal(request.options.body.get('primary_color'),'Navy');
-  assert.equal(w.document.getElementById('sf-provision').classList.contains('sf-hidden'),true);
-  assert.equal(w.document.getElementById('sf-request-form').classList.contains('sf-hidden'),false);
+  assert.equal(w.document.getElementById('sf-provision').classList.contains('sf-hidden'),false);
+  assert.equal(w.document.getElementById('sf-request-form').classList.contains('sf-hidden'),true);
   dom.window.close();
 });
 
