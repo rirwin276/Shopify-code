@@ -18,7 +18,7 @@ async function setup(response){
  const dom=new JSDOM(fixture(),{url:'https://stellasageco.com/pages/request-storefront-form?view=start-team-store',runScripts:'outside-only'});
  const w=dom.window; w.HTMLElement.prototype.scrollIntoView=function(){};
  w.matchMedia=()=>({matches:true});w.confirm=()=>true;
- w.localStorage.setItem('ss_anonymous_demo_v1',JSON.stringify({token:'test',storeName:'Test Team'}));
+ w.localStorage.setItem('ss_anonymous_demo_v1',JSON.stringify({token:'test',storeName:'Test Team',createdAt:Date.now()-65000}));
  let count=0; w.fetch=async()=>{count++; if(response instanceof Error)throw response;return {ok:true,status:200,json:async()=>response};};
  w.eval(script);await pause();return {dom,w,count:()=>count};
 }
@@ -50,10 +50,19 @@ test('expired clears stale session and keeps the recovery room visible',async()=
  assert.equal(w.document.querySelector('[data-demo-form-panel]').hidden,true);dom.window.close();
 });
 test('claimed removes expiration and points to the dashboard',async()=>{
- const {dom,w}=await setup({phase:'claimed'});
- assert.equal(w.document.querySelector('[data-open-admin]').pathname,'/pages/portal');
- assert.equal(w.document.querySelector('[data-claim-store]').hidden,true);
+ const {dom,w}=await setup({phase:'claimed',preview_url:'/collections/test-team'});
+ assert.equal(w.document.querySelector('[data-open-preview]').pathname,'/collections/test-team');
+ assert.equal(w.document.querySelector('[data-open-admin]').hidden,true);
+  assert.equal(w.document.querySelector('[data-claim-store]').hidden,true);
  assert.equal(w.localStorage.getItem('ss_anonymous_demo_v1'),null);dom.window.close();
+});
+
+test('waiting room shows elapsed time and a private resumable return link',async()=>{
+ const {dom,w}=await setup({phase:'building',build_stage:'products'});
+ assert.match(w.document.querySelector('[data-demo-elapsed]').textContent,/01:0[5-9]/);
+ assert.equal(w.document.querySelector('[data-demo-private-link]').value,'https://stellasageco.com/pages/request-storefront-form?view=start-team-store#resume=test');
+ assert.match(w.document.querySelector('.ss-demo-return small').textContent,/first person to sign in/i);
+ dom.window.close();
 });
 test('network failure retains request and shows automatic reconnect',async()=>{
  const {dom,w}=await setup(new Error('offline'));

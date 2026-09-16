@@ -189,10 +189,13 @@
       <div id="sf-provision" class="sf-hidden sf-provision">
         <div class="sf-provision-card">
           <div class="sf-spinner sf-spinner--big"></div>
-          <div class="sf-provision-title">Creating your storefront…</div>
-          <div class="sf-provision-sub">{% if customer %}This usually takes about a minute. Your full product build will continue on your dashboard.{% else %}Your logo is saved. Opening the build room now…{% endif %}</div>
+          <div class="sf-provision-kicker">YOUR BUILD HAS STARTED</div>
+          <div class="sf-provision-title">Your always-free store is building.</div>
+          <div class="sf-provision-sub">{% if customer %}Your request is connected to your account. We’re opening the normal build flow now.{% else %}This will update with your real store to try. If you like it, sign in to claim it.{% endif %}</div>
           <div class="sf-progress"><div id="sf-progress-bar" class="sf-progress-bar"></div></div>
           <div id="sf-provision-status" class="sf-status">Securing request…</div>
+          <div class="sf-provision-clock"><div><span>Usual build time</span><strong>10:00 minutes</strong></div><div><span>Time waiting</span><strong id="sf-provision-elapsed">00:00</strong></div></div>
+          {% unless customer %}<p class="sf-provision-expiry">Your unclaimed store will be removed after 48 hours during overnight cleanup.</p>{% endunless %}
           <div class="sf-provision-actions"><button type="button" class="sf-btn sf-btn--outline" onclick="sfCancelProvisioning()">Back</button></div>
         </div>
       </div>
@@ -514,7 +517,11 @@
     const total = 90000;
     if (sfProvisionTimer) clearInterval(sfProvisionTimer);
     sfProvisionTimer = setInterval(() => {
-      const pct = Math.min(100, ((Date.now() - sfProvisionStart) / total) * 100);
+      const elapsedMs = Date.now() - sfProvisionStart;
+      const pct = Math.min(100, (elapsedMs / total) * 100);
+      const elapsedSeconds = Math.max(0, Math.floor(elapsedMs / 1000));
+      const elapsedEl = document.getElementById('sf-provision-elapsed');
+      if (elapsedEl) elapsedEl.textContent = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0') + ':' + String(elapsedSeconds % 60).padStart(2, '0');
       if (bar) bar.style.width = pct.toFixed(2) + '%';
       if (pct >= 100) { clearInterval(sfProvisionTimer); window.location.href = buildDashboardRedirectUrl(); }
     }, 180);
@@ -696,6 +703,7 @@
   .sf-provision { padding: 10px 0 0; }
   .sf-provision-card { background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 24px; padding: 36px 22px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; }
   .sf-provision-title { font-size: 18px; font-weight: 900; color: #0f172a; margin: 6px 0 6px; letter-spacing: -0.01em; }
+  .sf-provision-kicker { color:#8a7745; font-size:10px; font-weight:900; letter-spacing:.13em; margin:4px 0 7px; }
   .sf-provision-sub { font-size: 13px; color: #64748b; margin-bottom: 18px; }
   .sf-progress { width: 100%; height: 8px; border-radius: 999px; background: #eef2f7; overflow: hidden; margin: 18px 0 14px; }
   .sf-progress-bar { width: 0%; height: 100%; background: #0f172a; border-radius: 999px; transition: width .18s linear; }
@@ -705,6 +713,11 @@
   .sf-spinner--big { width: 44px; height: 44px; border-width: 4px; margin: 0 auto 14px; display: block; }
   @keyframes sfspin { to { transform: rotate(360deg); } }
   .sf-provision-actions { margin-top: 16px; display: flex; justify-content: center; }
+  .sf-provision-clock { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:15px auto 0; max-width:430px; }
+  .sf-provision-clock>div { display:grid; gap:3px; padding:11px; border:1px solid #e5dfd0; border-radius:12px; background:#fbf8ef; }
+  .sf-provision-clock span { color:#81765d; font-size:9px; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+  .sf-provision-clock strong { color:#17150f; font-size:16px; font-variant-numeric:tabular-nums; }
+  .sf-provision-expiry { margin:12px auto 0; color:#7b7468; font-size:11px; line-height:1.45; }
   .sf-modal { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; }
   .sf-modal-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,0.45); backdrop-filter: blur(6px); }
   .sf-modal-card { position: relative; width: min(1100px, calc(100% - 24px)); height: min(680px, calc(100vh - 24px)); margin: 12px auto; background: #0b1220; border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; overflow: hidden; box-shadow: 0 25px 90px rgba(0,0,0,0.40); display: flex; flex-direction: column; }

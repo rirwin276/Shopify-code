@@ -25,6 +25,14 @@
   var provision = document.getElementById('sf-provision');
   var bar = document.getElementById('sf-progress-bar');
   var objectUrl = '';
+  var waitClock = null;
+
+  function startWaitClock() {
+    var started = Date.now(), output = document.getElementById('sf-provision-elapsed');
+    clearInterval(waitClock);
+    function tick() { var seconds = Math.max(0, Math.floor((Date.now() - started) / 1000)); if (output) output.textContent = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0'); }
+    tick(); waitClock = setInterval(tick, 1000);
+  }
 
   function showError(message) {
     if (!error) return;
@@ -93,6 +101,7 @@
   };
   window.sfToastHide = function () {};
   window.sfCancelProvisioning = function () {
+    clearInterval(waitClock); waitClock = null;
     if (provision) provision.classList.add('sf-hidden'); form.classList.remove('sf-hidden');
     var header = document.querySelector('.sf-header'); if (header) header.classList.remove('sf-hidden');
     if (submit) { delete submit.dataset.busy; submit.textContent = 'Build my free preview'; update(); }
@@ -106,6 +115,7 @@
     submit.dataset.busy = '1'; submit.disabled = true; submit.textContent = 'Saving your logo…';
     var header = document.querySelector('.sf-header'); if (header) header.classList.add('sf-hidden');
     form.classList.add('sf-hidden'); if (provision) provision.classList.remove('sf-hidden'); if (bar) bar.style.width = '38%';
+    startWaitClock();
     try {
       var logoThumb = await imageThumb(file), body = new FormData();
       body.set('storefront_name', document.getElementById('StoreName').value.trim());
@@ -119,6 +129,7 @@
       if (typeof window.__ssAnonymousNavigate === 'function') window.__ssAnonymousNavigate(waitingRoom);
       else window.location.assign(waitingRoom);
     } catch (problem) {
+      clearInterval(waitClock); waitClock = null;
       form.classList.remove('sf-hidden'); if (header) header.classList.remove('sf-hidden'); if (provision) provision.classList.add('sf-hidden');
       delete submit.dataset.busy; submit.textContent = 'Build my free preview'; update(); showError(problem.message);
     }

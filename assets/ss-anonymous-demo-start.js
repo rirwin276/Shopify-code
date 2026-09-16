@@ -8,7 +8,7 @@
   var $ = function (s) { return root.querySelector(s); };
   var choice = $('[data-demo-choice]'), formPanel = $('[data-demo-form-panel]'), waitPanel = $('[data-demo-wait]');
   var form = $('[data-demo-form]'), submit = $('[data-demo-submit]');
-  var current = null, timer = null, controller = null, generation = 0, checking = false, storageWorks = true;
+  var current = null, timer = null, clockTimer = null, controller = null, generation = 0, checking = false, storageWorks = true;
   var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function visible(node, yes) { if (node) node.hidden = !yes; }
   function text(selector, value) { var node = $(selector); if (node && node.textContent !== value) node.textContent = value; }
@@ -19,10 +19,20 @@
   function save(value) {
     current = value;
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) { storageWorks = false; }
-    text('[data-demo-return-copy]', storageWorks ? 'You can close this page and return here in this browser to continue.' : 'Keep this tab open. Your browser is not allowing us to save your progress between visits.');
+    try { if (value && value.token) document.cookie = 'ss_anonymous_demo_resume=' + encodeURIComponent(value.token) + '; Max-Age=172800; Path=/; SameSite=Lax; Secure'; } catch (_) {}
+    updatePrivateLink();
+    text('[data-demo-return-copy]', storageWorks ? 'You can close this page and return here in this browser to continue.' : 'Keep this private link somewhere safe so you can return to this build.');
   }
-  function clear() { current = null; try { localStorage.removeItem(key); } catch (_) {} }
-  function stop() { generation++; clearTimeout(timer); if (controller) controller.abort(); controller = null; checking = false; }
+  function clear() { current = null; try { localStorage.removeItem(key); } catch (_) {} try { document.cookie = 'ss_anonymous_demo_resume=; Max-Age=0; Path=/; SameSite=Lax; Secure'; } catch (_) {} }
+  function stop() { generation++; clearTimeout(timer); clearInterval(clockTimer); clockTimer = null; if (controller) controller.abort(); controller = null; checking = false; }
+  function returnUrl(token) { return location.origin + '/pages/request-storefront-form?view=start-team-store#resume=' + encodeURIComponent(token || ''); }
+  function updatePrivateLink() { var input = $('[data-demo-private-link]'); if (input && current && current.token) input.value = returnUrl(current.token); }
+  function formatElapsed(ms) { var seconds = Math.max(0, Math.floor(ms / 1000)), minutes = Math.floor(seconds / 60); return String(minutes).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0'); }
+  function startClock() {
+    clearInterval(clockTimer);
+    function tick() { var started = Number(current && current.createdAt) || Date.now(); text('[data-demo-elapsed]', formatElapsed(Date.now() - started)); }
+    tick(); clockTimer = setInterval(tick, 1000);
+  }
   function panel(node) {
     [choice, formPanel, waitPanel].forEach(function (p) { visible(p, p === node); });
     visible(root.querySelector('.ss-demo-start__header'), node !== waitPanel);
@@ -60,19 +70,20 @@
       finishing:['CHECKING YOUR STORE', 'A few finishing touches.', 'We’re checking your preview before you step inside.', 2]
     };
     if (phase === 'ready' || phase === 'claimed') {
+      clearInterval(clockTimer); clockTimer = null;
       stage(4);
       text('[data-demo-phase-label]', phase === 'ready' ? 'READY WHEN YOU ARE' : 'YOUR STORE IS ACTIVATED');
       text('[data-demo-status-title]', name + (phase === 'ready' ? ' is ready to explore.' : ' is yours.'));
-      text('[data-demo-status-copy]', phase === 'ready' ? 'Explore your gear and try the design tools. Activate your free store whenever you’re ready to keep it.' : 'Your products and saved changes are connected to your account.');
-      text('[data-demo-timing]', phase === 'ready' ? 'Purchasing, sharing and inviting members unlock after activation.' : 'You can manage your store from your dashboard.');
+      text('[data-demo-status-copy]', phase === 'ready' ? 'Your real store is ready. Explore the products and normal admin tools, then sign in to claim it if you like it.' : 'Your products and saved changes are connected to your account.');
+      text('[data-demo-timing]', phase === 'ready' ? 'Purchasing, sharing and inviting members unlock after you claim the store.' : 'Opening your real store now.');
       var waitingRoom = '/pages/request-storefront-form?view=start-team-store';
       safeLink('[data-open-preview]', state.preview_url, waitingRoom);
       safeLink('[data-open-admin]', state.admin_url, waitingRoom);
       safeLink('[data-claim-store]', state.claim_url, waitingRoom);
       visible($('[data-demo-ready-actions]'), true);
       if (phase === 'claimed') {
-        text('[data-open-admin]', 'Open my dashboard'); $('[data-open-admin]').href = root.getAttribute('data-dashboard-url') || '/pages/portal';
-        visible($('[data-claim-store]'), false); visible($('[data-demo-expiry]'), false);
+        text('[data-open-preview]', 'Open my store →');
+        visible($('[data-open-admin]'), false); visible($('[data-claim-store]'), false); visible($('[data-demo-expiry]'), false);
         clear(); history.replaceState(null, '', location.pathname + location.search); return;
       }
       var expires = new Date(state.delete_due_at || state.expires_at || '');
@@ -95,9 +106,10 @@
     }
     var entry = labels[state.build_stage] || labels.store;
     text('[data-demo-phase-label]', entry[0]); text('[data-demo-status-title]', entry[1]); text('[data-demo-status-copy]', entry[2]); stage(entry[3]);
-    if (current.createdAt && Date.now() - current.createdAt > 12 * 60 * 1000) {
+    if (current.createdAt && Date.now() - current.createdAt > 10 * 60 * 1000) {
       text('[data-demo-timing]', 'Still working on your gear. You can leave this tab and return here in this browser.');
     }
+    if (!clockTimer) startClock();
     timer = setTimeout(poll, document.hidden ? 20000 : 5000);
   }
   async function poll() {
@@ -157,13 +169,24 @@
     if (current && !window.confirm('Start a different store? Your current unclaimed preview will still expire on schedule.')) return;
     stop(); clear(); window.location.assign(root.getAttribute('data-permanent-url') || '/pages/request-storefront-form');
   });
+  $('[data-demo-copy-link]').addEventListener('click', async function () {
+    var input = $('[data-demo-private-link]'); if (!input || !input.value) return;
+    try { await navigator.clipboard.writeText(input.value); text('[data-demo-copy-result]', 'Private link copied.'); }
+    catch (_) { input.focus(); input.select(); text('[data-demo-copy-result]', 'Link selected. Tap Copy in your browser.'); }
+  });
   $('[data-demo-logo]').addEventListener('change', function (e) { text('[data-demo-file-copy]', e.target.files[0] ? e.target.files[0].name : 'PNG, JPG, or WebP · maximum 12 MB'); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden && current) poll(); });
   window.addEventListener('pagehide', stop);
   window.addEventListener('pageshow', function (e) { if (e.persisted && current) poll(); });
   var saved = null; try { saved = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) {}
+  if (!saved || !saved.token) {
+    try {
+      var cookie = document.cookie.split('; ').find(function (part) { return part.indexOf('ss_anonymous_demo_resume=') === 0; });
+      if (cookie) saved = {token:decodeURIComponent(cookie.split('=').slice(1).join('=')),createdAt:Date.now()};
+    } catch (_) {}
+  }
   var oldToken = new URLSearchParams(location.hash.slice(1)).get('resume');
-  if (oldToken) { saved = {token:oldToken}; history.replaceState(null, '', location.pathname + location.search); }
-  if (saved && saved.token) { save(saved); panel(waitPanel); poll(); }
+  if (oldToken) { saved = {token:oldToken,createdAt:Date.now(),startUrl:location.pathname+location.search}; history.replaceState(null, '', location.pathname + location.search); }
+  if (saved && saved.token) { if (!saved.createdAt) saved.createdAt = Date.now(); save(saved); panel(waitPanel); startClock(); poll(); }
   else window.location.replace(root.getAttribute('data-permanent-url') || '/pages/request-storefront-form');
 })();
