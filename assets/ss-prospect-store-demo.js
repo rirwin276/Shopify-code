@@ -39,7 +39,7 @@
       // separate button below it, so both are reachable at once.
       ctas.forEach(function (cta) {
         reveal(cta);
-        if (state.product_status !== 'completed') return;
+        if ((state.last_product_status || state.product_status) !== 'completed') return;
         var note = cta.parentNode && cta.parentNode.querySelector('.ps-demo-note');
         if (note) {
           note.textContent = 'Your product is live. Keep exploring the admin and open any builder you like.';
