@@ -20,14 +20,15 @@ test('the live-looking guest form starts a private build and saves its browser s
   w.Image = class { set src(_) { this.width=100; this.height=100; setImmediate(()=>this.onload()); } };
   w.HTMLCanvasElement.prototype.getContext=()=>({drawImage(){}}); w.HTMLCanvasElement.prototype.toDataURL=()=> 'data:image/png;base64,dGVzdA==';
   w.fetch=async(url,options)=>{request={url,options};return {ok:true,json:async()=>({resume_token:'private-token',storefront_handle:'raptors-demo-a1b2c3'})};};
-  let completed=false; w.__ssAnonymousNavigate=()=>{completed=true};
+  let destination=''; w.__ssAnonymousNavigate=(url)=>{destination=url};
   w.eval(script);
   const file=new w.File(['logo'],'raptors.png',{type:'image/png'}); Object.defineProperty(w.document.getElementById('MainLogo'),'files',{value:[file]});
   w.document.getElementById('MainLogo').dispatchEvent(new w.Event('change')); await new Promise(r=>setImmediate(r));
   await w.submitAnonymousPreview(new w.Event('submit'));
   const saved=JSON.parse(w.localStorage.getItem('ss_anonymous_demo_v1'));
   assert.equal(request.url,'https://preview.example/api/demo/storefront-request');
-  assert.equal(completed,true);
+  assert.equal(destination,'/pages/request-storefront-form?view=start-team-store');
+  assert.equal(saved.startUrl,'/pages/request-storefront-form?view=start-team-store');
   assert.equal(saved.handle,'raptors-demo-a1b2c3'); assert.equal(saved.token,'private-token');
   assert.equal(request.options.body.get('type_of_store'),'Sports Team'); assert.equal(request.options.body.get('primary_color'),'Navy');
   dom.window.close();

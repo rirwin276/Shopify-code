@@ -15,7 +15,7 @@ function fixture(){
 }
 const pause=()=>new Promise(r=>setTimeout(r,15));
 async function setup(response){
- const dom=new JSDOM(fixture(),{url:'https://stellasageco.com/pages/start-team-store',runScripts:'outside-only'});
+ const dom=new JSDOM(fixture(),{url:'https://stellasageco.com/pages/request-storefront-form?view=start-team-store',runScripts:'outside-only'});
  const w=dom.window; w.HTMLElement.prototype.scrollIntoView=function(){};
  w.matchMedia=()=>({matches:true});w.confirm=()=>true;
  w.localStorage.setItem('ss_anonymous_demo_v1',JSON.stringify({token:'test',storeName:'Test Team'}));
@@ -32,7 +32,8 @@ test('ready offers store and tools without forced navigation or losing saved wor
  const {dom,w}=await setup({phase:'ready',storefront_name:'Team <script>',preview_url:'/collections/test?preview=1',admin_url:'/pages/admin-powers?shop=test',claim_url:'/pages/join-store?shop=test',delete_due_at:'2026-09-19T10:00:00Z'});
  assert.equal(w.document.querySelector('[data-demo-ready-actions]').hidden,false);
  assert.match(w.document.querySelector('[data-demo-expiry]').textContent,/3:00 AM PDT/);
- assert.equal(w.location.pathname,'/pages/start-team-store');
+ assert.equal(w.location.pathname,'/pages/request-storefront-form');
+ assert.equal(w.location.search,'?view=start-team-store');
  assert.match(w.document.querySelector('[data-demo-status-title]').textContent,/Team <script>/);
  assert.equal(w.document.querySelector('[data-demo-status-title] script'),null);
  assert.equal(JSON.parse(w.localStorage.getItem('ss_anonymous_demo_v1')).readyReported,true);dom.window.close();
