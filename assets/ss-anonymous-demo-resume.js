@@ -16,7 +16,7 @@
       var card = document.createElement('a');
       card.setAttribute('data-ss-demo-resume-card','');
       card.className = 'ss-demo-resume-card';
-      card.href = (cfg.getAttribute('data-resume-path') || '/pages/start-team-store') + '#resume=' + encodeURIComponent(saved.token);
+      card.href = cfg.getAttribute('data-resume-path') || saved.startUrl || '/pages/start-team-store';
       var title = document.createElement('strong');
       title.textContent = state.phase === 'ready' ? 'Your demo store is ready →' : 'Your demo store is building →';
       var detail = document.createElement('span');

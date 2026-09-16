@@ -5,7 +5,9 @@
   var saved;
   try { saved = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_e) { return; }
   if (!saved || !saved.token) return;
-  var api = 'https://studio-uploader-production.up.railway.app';
+  var allowed = ['https://studio-uploader-production.up.railway.app','https://anonymous-demo-preview-production.up.railway.app'];
+  var api = allowed.indexOf(saved.apiBase) !== -1 ? saved.apiBase : allowed[0];
+  try { var previous = JSON.parse(localStorage.getItem('ss_anonymous_demo_claimed_v1') || 'null'); if (previous && previous.handle === saved.handle) return; } catch (_) {}
   fetch(api + '/api/demo/status', {cache:'no-store', headers:{'Authorization':'Bearer ' + saved.token, 'Accept':'application/json'}})
     .then(function (response) { return response.ok ? response.json() : null; })
     .then(function (state) {
@@ -21,9 +23,10 @@
             handle:state.storefront_handle || saved.handle || '',
             claimedAt:Date.now()
           }));
-          localStorage.removeItem(key);
+          saved.claimedAt = Date.now();
+          localStorage.setItem(key, JSON.stringify(saved));
         } catch (_e) {}
-      } else if (state.phase === 'expired' || state.phase === 'failed') {
+      } else if (state.phase === 'expired') {
         try { localStorage.removeItem(key); } catch (_e) {}
       }
     }).catch(function () {});

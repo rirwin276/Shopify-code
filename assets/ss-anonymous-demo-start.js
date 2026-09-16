@@ -144,7 +144,7 @@
       var response = await fetch(api + '/api/demo/storefront-request', {method:'POST', body:new FormData(form)});
       var data = await response.json().catch(function () { return {}; });
       if (!response.ok || !data.resume_token) throw new Error(data.error || 'Unable to save your request. Please try again.');
-      stop(); save({token:data.resume_token,handle:data.storefront_handle,storeName:form.elements.storefront_name.value,createdAt:Date.now(),readyReported:false,logoThumb:logoThumb});
+      stop(); save({token:data.resume_token,handle:data.storefront_handle,storeName:form.elements.storefront_name.value,createdAt:Date.now(),readyReported:false,logoThumb:logoThumb,apiBase:api,startUrl:location.pathname+location.search});
       history.replaceState(null, '', location.pathname + location.search); panel(waitPanel); status({phase:'queued',build_stage:'saved'}); poll();
       event('anonymous_demo_started', {storefront_handle:data.storefront_handle});
     } catch (err) { error(err.message); } finally { submit.disabled = false; submit.textContent = 'Build my free store →'; }
@@ -163,5 +163,5 @@
   var saved = null; try { saved = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) {}
   var oldToken = new URLSearchParams(location.hash.slice(1)).get('resume');
   if (oldToken) { saved = {token:oldToken}; history.replaceState(null, '', location.pathname + location.search); }
-  if (saved && saved.token) { save(saved); panel(waitPanel); poll(); } else panel(choice);
+  if (saved && saved.token) { save(saved); panel(waitPanel); poll(); } else panel(formPanel);
 })();
