@@ -3,8 +3,8 @@
     "main": {
       "type": "ss-anonymous-demo-start",
       "settings": {
-        "demo_enabled": false,
-        "studio_uploader_base_url": "https://studio-uploader-production.up.railway.app",
+        "demo_enabled": true,
+        "studio_uploader_base_url": "https://anonymous-demo-preview-production.up.railway.app",
         "permanent_request_url": "/pages/request-storefront-form"
       }
     },

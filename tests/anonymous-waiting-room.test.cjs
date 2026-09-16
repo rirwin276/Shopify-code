@@ -42,12 +42,11 @@ test('failed build offers retry and retains recovery session',async()=>{
  assert.equal(w.document.querySelector('[data-demo-recovery]').hidden,false);
  assert.ok(w.localStorage.getItem('ss_anonymous_demo_v1'));dom.window.close();
 });
-test('expired clears stale session and offers a fresh form',async()=>{
+test('expired clears stale session and keeps the recovery room visible',async()=>{
  const {dom,w}=await setup({phase:'expired'});
  assert.equal(w.localStorage.getItem('ss_anonymous_demo_v1'),null);
- w.document.querySelector('[data-demo-start-over]').click();
- assert.equal(w.document.querySelector('[data-demo-form-panel]').hidden,false);
- assert.equal(w.document.querySelector('[data-demo-submit]').disabled,false);dom.window.close();
+ assert.match(w.document.querySelector('[data-demo-status-title]').textContent,/fresh start/i);
+ assert.equal(w.document.querySelector('[data-demo-form-panel]').hidden,true);dom.window.close();
 });
 test('claimed removes expiration and points to the dashboard',async()=>{
  const {dom,w}=await setup({phase:'claimed'});

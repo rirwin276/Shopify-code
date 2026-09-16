@@ -154,7 +154,7 @@
   $('[data-demo-retry]').addEventListener('click', function () { stop(); poll(); });
   $('[data-demo-start-over]').addEventListener('click', function () {
     if (current && !window.confirm('Start a different store? Your current unclaimed preview will still expire on schedule.')) return;
-    stop(); clear(); history.replaceState(null, '', location.pathname + location.search); form.reset(); error(''); submit.disabled = false; panel(formPanel);
+    stop(); clear(); window.location.assign(root.getAttribute('data-permanent-url') || '/pages/request-storefront-form');
   });
   $('[data-demo-logo]').addEventListener('change', function (e) { text('[data-demo-file-copy]', e.target.files[0] ? e.target.files[0].name : 'PNG, JPG, or WebP · maximum 12 MB'); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden && current) poll(); });
@@ -163,5 +163,6 @@
   var saved = null; try { saved = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) {}
   var oldToken = new URLSearchParams(location.hash.slice(1)).get('resume');
   if (oldToken) { saved = {token:oldToken}; history.replaceState(null, '', location.pathname + location.search); }
-  if (saved && saved.token) { save(saved); panel(waitPanel); poll(); } else panel(formPanel);
+  if (saved && saved.token) { save(saved); panel(waitPanel); poll(); }
+  else window.location.replace(root.getAttribute('data-permanent-url') || '/pages/request-storefront-form');
 })();
