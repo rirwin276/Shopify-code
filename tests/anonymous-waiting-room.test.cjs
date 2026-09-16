@@ -64,6 +64,13 @@ test('waiting room shows elapsed time and a private resumable return link',async
  assert.match(w.document.querySelector('.ss-demo-return small').textContent,/first person to sign in/i);
  dom.window.close();
 });
+test('active waiting room has no page-level back link or option screen',async()=>{
+ const {dom,w}=await setup({phase:'building',build_stage:'store'});
+ assert.equal(w.document.querySelector('.ss-demo-start__back'),null);
+ assert.equal(w.document.querySelector('[data-demo-choice]').hidden,true);
+ assert.equal(w.document.querySelector('[data-demo-wait]').hidden,false);
+ dom.window.close();
+});
 test('network failure retains request and shows automatic reconnect',async()=>{
  const {dom,w}=await setup(new Error('offline'));
  assert.match(w.document.querySelector('[data-demo-status-copy]').textContent,/reconnect/);
