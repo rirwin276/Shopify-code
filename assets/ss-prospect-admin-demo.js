@@ -137,7 +137,7 @@
     var panel = document.getElementById('apPanelAddProducts');
     if (!panel) return;
     panel.classList.remove('ap-demo-products--waiting');
-    var status = String(state.product_status || 'available');
+    var status = String(state.last_product_status || state.product_status || 'available');
     var existing = panel.querySelector('[data-demo-product-state]');
     if (status === 'available') {
       if (existing) existing.remove();
@@ -154,6 +154,15 @@
     // which is already on screen, so repeating it here was the same pitch
     // twice in one viewport.
     if (status === 'completed') {
+      if (state.demo_source === 'anonymous_demo' && !window.__ssAnonymousDemoProductReported) {
+        window.__ssAnonymousDemoProductReported = true;
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'anonymous_demo_product_created',
+          storefront_handle: handle,
+          product_handle: state.product_handle || ''
+        });
+      }
       banner.innerHTML = '<span class="ap-demo-complete__check">&#10003;</span>' +
         '<div><h2>Your product is live</h2><p>Keep opening the builders to try artwork, colors and placement.</p></div>' +
         '<div class="ap-demo-complete__actions"><a class="ap-demo-live" href="' + escapeHtml(productUrl) + '">View live product</a></div>';
@@ -238,7 +247,7 @@
           if (state.demo_token) demo.token = String(state.demo_token);
           demo.state = state;
           showProductState(state);
-          if (state.product_status === 'completed') {
+          if ((state.last_product_status || state.product_status) === 'completed') {
             window.clearInterval(timer);
             buildWatchActive = false;
             var destination = state.product_handle
