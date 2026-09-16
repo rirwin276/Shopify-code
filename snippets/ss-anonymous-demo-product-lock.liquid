@@ -1,0 +1,24 @@
+{%- comment -%}
+  Emits the literal string "true" only for products belonging to an unclaimed
+  website demo. The marker alone is insufficient: after claim, Shopify's owner
+  field immediately unlocks the same product without a migration or rebuild.
+{%- endcomment -%}
+{%- liquid
+  assign ss_demo_locked = false
+  if product and product.tags contains 'ss-anonymous-demo'
+    for raw_tag in product.tags
+      assign possible_handle = raw_tag | strip | downcase
+      unless possible_handle == 'ss-anonymous-demo'
+        assign possible_store = shop.metaobjects.custom_shop[possible_handle]
+        if possible_store
+          assign possible_owner = possible_store.owner_customer_id.value | default: possible_store.owner_customer_id | default: '' | strip | downcase
+          if possible_owner == 'unclaimed'
+            assign ss_demo_locked = true
+            break
+          endif
+        endif
+      endunless
+    endfor
+  endif
+-%}
+{{- ss_demo_locked -}}
