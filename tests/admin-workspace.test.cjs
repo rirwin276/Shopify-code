@@ -81,3 +81,22 @@ test('quick add delegates to existing tab and keyboard navigation works',()=>{
   assert.equal(clicked,2);assert.equal(d.activeElement.id,'apTabBtnAddProducts');
  }finally{w.close();}
 });
+test('catalog popup names itself, restores focus and becomes inert after close',async()=>{
+ const dom=new JSDOM('<div id="apCustomBuildersSection"><div id="apCustomBuildersContainer"></div></div>',{url:'https://example.com/pages/admin-powers',runScripts:'outside-only'});
+ const w=dom.window,d=w.document;
+ const observers=[],Observer=w.MutationObserver;
+ w.MutationObserver=class extends Observer{constructor(callback){super(callback);observers.push(this);}};
+ try{
+  w.fetch=async()=>({ok:false});
+  w.eval(fs.readFileSync('assets/ss-admin-pro-builder-cards.js','utf8'));
+  await new Promise(resolve=>setTimeout(resolve,180));
+  const card=d.querySelector('.ss-cat');assert.ok(card);card.click();
+  const overlay=d.querySelector('.ss-overlay');
+  assert.equal(overlay.getAttribute('aria-hidden'),'false');assert.equal(overlay.inert,false);
+  assert.equal(d.querySelector('.ss-modal').getAttribute('aria-labelledby'),'ssBuilderModalTitle');
+  assert.equal(d.activeElement,d.querySelector('.ss-modal__x'));
+  d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape'}));
+  assert.equal(overlay.inert,true);assert.equal(overlay.getAttribute('aria-hidden'),'true');
+  assert.equal(d.activeElement,card);assert.equal(d.body.style.overflow,'');
+ }finally{observers.forEach(observer=>observer.disconnect());w.close();}
+});

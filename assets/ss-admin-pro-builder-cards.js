@@ -853,6 +853,8 @@
   function buildModal() {
     overlay = document.createElement('div');
     overlay.className = 'ss-overlay';
+    overlay.inert = true;
+    overlay.setAttribute('aria-hidden', 'true');
     overlay.addEventListener('click', function (e) {
       if (e.target === overlay) closeModal();
     });
@@ -861,6 +863,7 @@
     modal.className = 'ss-modal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'ssBuilderModalTitle');
     modal.addEventListener('click', function (e) { e.stopPropagation(); });
 
     closeBtn = document.createElement('button');
@@ -962,7 +965,7 @@
       '<div class="ss-modal__scroll">' +
         '<span class="ss-modal__chip">' + esc(b.badge) + '</span>' +
         (b.personalize ? '<span class="ss-modal__chip ss-modal__chip--pers">\u2726 Name & Number available</span>' : '') +
-        '<div class="ss-modal__title">' + esc(b.name) + '</div>' +
+        '<div class="ss-modal__title" id="ssBuilderModalTitle">' + esc(b.name) + '</div>' +
         '<p class="ss-modal__desc">' + esc(b.desc) + '</p>' +
         (b.personalize ? '<p class="ss-modal__pers-note">\u2726 <strong>Name &amp; Number:</strong> flip one switch in the builder and every buyer can add their own name and number to the back \u2014 printed just for them, no extra work for you.</p>' : '') +
         '<div class="ss-modal__specs">' + specChips + '</div>' +
@@ -989,6 +992,8 @@
     modalOpener = document.activeElement;
     previousOverflow = document.body.style.overflow;
     populateModal(b);
+    overlay.inert = false;
+    overlay.setAttribute('aria-hidden', 'false');
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
     closeBtn.focus();
@@ -999,6 +1004,8 @@
     overlay.classList.remove('open');
     document.body.style.overflow = previousOverflow;
     if (modalOpener && modalOpener.isConnected) modalOpener.focus();
+    overlay.inert = true;
+    overlay.setAttribute('aria-hidden', 'true');
   }
 
   /* ─── Card factory ──────────────────────────────────────────────────────── */
