@@ -51,6 +51,13 @@
     try { var u = new URL(value || fallback, location.origin); node.href = u.origin === location.origin ? u.href : fallback; }
     catch (_) { node.href = fallback; }
   }
+  function safeLogo(value) {
+    if (/^data:image\/(png|jpeg|webp);base64,/.test(String(value || ''))) return String(value);
+    try {
+      var resolved = new URL(value || '', api + '/');
+      return resolved.origin === new URL(api).origin && resolved.protocol === 'https:' ? resolved.href : '';
+    } catch (_) { return ''; }
+  }
   function status(state) {
     var phase = String(state.phase || 'building');
     text('[data-demo-save-label]', 'Your build is saved');
@@ -61,11 +68,18 @@
     var spinner = $('[data-demo-spinner]');
     if (spinner) { spinner.hidden = false; spinner.classList.toggle('is-done', phase === 'ready' || phase === 'claimed'); }
     var name = state.storefront_name || current.storeName || 'Your team store';
+    var serverStarted = Date.parse(state.created_at || '');
+    if (Number.isFinite(serverStarted) && serverStarted > 0 && current.createdAt !== serverStarted) {
+      current.createdAt = serverStarted;
+      save(current);
+      text('[data-demo-elapsed]', formatElapsed(Date.now() - serverStarted));
+    }
     text('[data-demo-team-name]', name);
     text('[data-demo-team-initials]', name.split(/\s+/).slice(0,2).map(function (part) { return part.charAt(0); }).join('').toUpperCase());
     var logoNode = $('[data-demo-team-logo]');
-    if (logoNode && current.logoThumb && /^data:image\/(png|jpeg|webp);base64,/.test(current.logoThumb)) {
-      logoNode.src = current.logoThumb; visible(logoNode, true); visible($('[data-demo-team-initials]'), false);
+    var logoSource = safeLogo(current.logoThumb || state.logo_url || '');
+    if (logoNode && logoSource) {
+      logoNode.src = logoSource; visible(logoNode, true); visible($('[data-demo-team-initials]'), false);
     }
     var labels = {
       saved:['REQUEST SAVED', 'Your team store is on its way.', 'Your logo and team name are saved. We’re getting your store started.', 1],
@@ -206,6 +220,14 @@
       },
       cancel: function () { stop(); current = null; visible(root, false); }
     };
+    window.SSPreviewWaitingRoom.logo = function (thumb) {
+      var safe = safeLogo(thumb);
+      if (!safe || !current) return;
+      current.logoThumb = safe;
+      if (current.token) save(current);
+      var logoNode = $('[data-demo-team-logo]');
+      if (logoNode) { logoNode.src = safe; visible(logoNode, true); visible($('[data-demo-team-initials]'), false); }
+    };
     return;
   }
   var saved = null; try { saved = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) {}
@@ -216,7 +238,12 @@
     } catch (_) {}
   }
   var oldToken = new URLSearchParams(location.hash.slice(1)).get('resume');
-  if (oldToken) { saved = {token:oldToken,createdAt:Date.now(),startUrl:location.pathname+location.search}; history.replaceState(null, '', location.pathname + location.search); }
+  if (oldToken) {
+    saved = saved && saved.token === oldToken
+      ? Object.assign({}, saved, {startUrl:location.pathname+location.search})
+      : {token:oldToken,createdAt:0,startUrl:location.pathname+location.search};
+    history.replaceState(null, '', location.pathname + location.search);
+  }
   if (saved && saved.token) { if (!saved.createdAt) saved.createdAt = Date.now(); save(saved); panel(waitPanel); startClock(); poll(); }
   else window.location.replace(root.getAttribute('data-permanent-url') || '/pages/request-storefront-form');
 })();

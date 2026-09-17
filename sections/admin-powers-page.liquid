@@ -219,6 +219,22 @@
     SSAP.storeName = {{ store_name | json }};
     SSAP.liveStoreUrl = {{ ap_live_store_url | json }};
     SSAP.previewToken = {{ join_code | default: '1' | json }};
+    {%- if is_prospect_demo_candidate -%}
+      {%- assign ap_preview_collection = collections[collection_handle] -%}
+      SSAP.previewProducts = [
+        {%- for product in ap_preview_collection.products limit: 50 -%}
+          {%- assign ap_preview_hidden = false -%}
+          {%- if product.tags contains 'ss-preview-hidden' -%}{%- assign ap_preview_hidden = true -%}{%- endif -%}
+          {
+            "id": {{ product.id | json }},
+            "title": {{ product.title | json }},
+            "handle": {{ product.handle | json }},
+            "featured_image": {% if product.featured_image %}{{ product.featured_image | image_url: width: 320 | json }}{% else %}null{% endif %},
+            "hidden": {{ ap_preview_hidden | json }}
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ];
+    {%- endif -%}
   </script>
 
   {%- if is_prospect_demo_candidate -%}

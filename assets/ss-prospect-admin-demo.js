@@ -70,13 +70,85 @@
     if (panel) panel.innerHTML = locked(title, copy);
   }
 
+  function previewActionMessage(action, title) {
+    var status = document.getElementById('apStatusProducts');
+    if (!status) return;
+    status.textContent = 'Claim this store to ' + action.toLowerCase() + ' “' + (title || 'this product') + '.”';
+    status.className = 'ap-status info';
+  }
+
+  function renderProductPreview() {
+    var panel = document.getElementById('apPanelProducts');
+    var tab = document.getElementById('apTabBtnProducts');
+    var container = document.getElementById('apProductsAllContainer');
+    var empty = document.getElementById('apProductsEmpty');
+    var count = document.getElementById('apAllProductCount');
+    if (!panel || !container) return;
+
+    if (tab) {
+      tab.classList.remove('ap-demo-tab--locked');
+      tab.removeAttribute('data-prospect-locked');
+      tab.removeAttribute('aria-label');
+      var label = tab.querySelector('.ap-tab-label');
+      if (label) label.textContent = 'Products';
+    }
+
+    var products = Array.isArray(cfg.previewProducts) ? cfg.previewProducts : [];
+    var intro = document.createElement('div');
+    intro.className = 'ap-demo-product-intro';
+    intro.innerHTML = '<strong>Your product manager</strong><span>See every product and the controls you get after activation. Claim the store to edit artwork and colors, pin, hide, or delete products.</span>';
+    var head = panel.querySelector('.ap-panel-head');
+    if (head) head.insertAdjacentElement('afterend', intro);
+
+    container.innerHTML = '';
+    products.forEach(function (product) {
+      var row = document.createElement('div');
+      row.className = 'ap-product-row ap-demo-product-row';
+
+      var image = product.featured_image ? document.createElement('img') : document.createElement('div');
+      if (product.featured_image) {
+        image.className = 'ap-product-thumb';
+        image.src = product.featured_image;
+        image.alt = product.title || '';
+        image.loading = 'lazy';
+        image.decoding = 'async';
+      } else {
+        image.className = 'ap-product-thumb-empty';
+        image.textContent = '🖼️';
+      }
+
+      var title = document.createElement('span');
+      title.className = 'ap-product-title';
+      title.textContent = product.title || 'Store product';
+
+      var actions = document.createElement('div');
+      actions.className = 'ap-product-row__actions ap-demo-product-actions';
+      [['✏️ Edit', 'Edit'], ['☆ Pin', 'Pin'], [product.hidden ? 'Show' : 'Hide', product.hidden ? 'Show' : 'Hide'], ['Delete', 'Delete']].forEach(function (definition, index) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = index === 3 ? 'ap-btn--danger-sm' : (index === 1 ? 'ap-btn--pin-sm' : index === 0 ? 'ap-edit-placement-btn' : 'ap-btn--outline-sm');
+        button.textContent = definition[0];
+        button.setAttribute('aria-label', definition[1] + ' ' + (product.title || 'product') + ' — available after claim');
+        button.addEventListener('click', function () { previewActionMessage(definition[1], product.title); });
+        actions.appendChild(button);
+      });
+
+      row.appendChild(image); row.appendChild(title); row.appendChild(actions);
+      container.appendChild(row);
+    });
+    if (count) count.textContent = String(products.length);
+    if (empty) {
+      empty.textContent = 'Your products are still finishing. They will appear here as soon as the store is ready.';
+      empty.style.display = products.length ? 'none' : 'block';
+    }
+  }
+
   function prepareShell() {
     if (root) root.classList.add('ap-prospect-demo--loading');
 
-    // Each says what is behind it and stops. The reason they are locked is on
-    // the bar, once, instead of on all four of these.
-    lockPanel('apTabBtnProducts', 'apPanelProducts', 'Existing products',
-      'Editing, hiding and deleting products are part of the full admin.');
+    // Products remain visible as a read-only preview. Sensitive member and
+    // store-level controls stay locked until the visitor claims the store.
+    renderProductPreview();
     lockPanel('apTabBtnMembers', 'apPanelMembers', 'Members',
       'Inviting members and adding administrators are part of the full admin.');
     lockPanel('apTabBtnDanger', 'apPanelDanger', 'Store controls',
@@ -311,6 +383,7 @@
       '.ap-demo-live{background:#d7c17a;color:#17150f!important}.ap-demo-settings-intro{margin-bottom:18px}.ap-demo-settings-intro>span{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8a7335}.ap-demo-settings-intro h2{margin:5px 0}.ap-demo-settings-intro p{margin:0;color:#68645c}' +
       '.ap-demo-products--waiting #apCustomBuildersContainer,.ap-demo-products--waiting .ss-cat{pointer-events:none;opacity:.48}.ap-demo-products--waiting:after{content:"Securing your two-product preview…";display:block;text-align:center;padding:14px;color:#68645c;font-weight:700}' +
       '.ap-demo-products--capped #apCustomBuildersContainer{pointer-events:none;opacity:.42;filter:grayscale(.35)}' +
+      '.ap-demo-product-intro{display:flex;gap:8px 18px;align-items:baseline;flex-wrap:wrap;margin:0 0 16px;padding:13px 16px;border:1px solid rgba(183,163,106,.34);border-radius:14px;background:#fffaf0}.ap-demo-product-intro strong{font-size:14px}.ap-demo-product-intro span{color:#68645c;font-size:13px;line-height:1.45}.ap-demo-product-row .ap-product-title{flex:1;min-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ap-demo-product-actions button{cursor:pointer}' +
       '.ap-demo-complete{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;text-align:left;margin:0 0 18px;padding:18px;border:1px solid rgba(183,163,106,.34);border-radius:18px;background:#fffaf0}.ap-demo-complete__check{display:inline-flex;width:46px;height:46px;border-radius:50%;align-items:center;justify-content:center;background:#daf5e5;color:#14753b;font-size:25px;font-weight:900}.ap-demo-complete__check--working{background:#f4e7b8;color:#594917}.ap-demo-complete h2{margin:0 0 5px;font-size:18px}.ap-demo-complete p{max-width:680px;margin:0;color:#68645c;line-height:1.5}.ap-demo-complete__actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}' +
       '@media(max-width:700px){.ap-demo-lock{padding:28px 16px}.ap-demo-complete{grid-template-columns:1fr;text-align:center;padding:22px 14px}.ap-demo-complete__check{margin:0 auto}.ap-demo-complete__actions{justify-content:center}.ap-demo-complete__actions>*{width:100%}' +
       '.ap-demo-bar{gap:9px;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}.ap-demo-bar p{font-size:12px;flex:1 1 100%}.ap-demo-bar .ap-demo-claim{width:100%}body.ap-demo-has-bar{padding-bottom:132px}}';
