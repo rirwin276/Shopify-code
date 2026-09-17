@@ -121,7 +121,12 @@
     try {
       var logoThumb = '', body = new FormData();
       // Thumbnail work must never delay the request or the waiting room.
-      imageThumb(file).then(function (thumb) { logoThumb = thumb; });
+      imageThumb(file).then(function (thumb) {
+        logoThumb = thumb;
+        if (thumb && window.SSPreviewWaitingRoom && typeof window.SSPreviewWaitingRoom.logo === 'function') {
+          window.SSPreviewWaitingRoom.logo(thumb);
+        }
+      });
       body.set('storefront_name', document.getElementById('StoreName').value.trim());
       body.set('type_of_store', typeOfStore()); body.set('primary_color', selectedColor());
       body.set('storefront_logo_file', file); body.set('website', '');
