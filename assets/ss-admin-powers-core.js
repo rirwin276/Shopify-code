@@ -161,6 +161,43 @@
   var _apEditorKeydown = null;
 
   var _apEditorSrcOrigin = '';
+  var _apEditorOpenId = '';
+  var _apEditorWaitsForReady = false;
+  var _apEditorSlowTimer = null;
+  var _apEditorSequence = 0;
+  var _apEditorLaunchUrl = '';
+  var apEditorLoading = null;
+
+  function apRevealEditor() {
+    clearTimeout(_apEditorSlowTimer);
+    apEditorOverlay.classList.remove('ap-editor-loading');
+    apEditorIframe.removeAttribute('inert');
+  }
+
+  function apEnsureEditorLoading() {
+    if (apEditorLoading) return;
+    apEditorLoading = document.createElement('div');
+    apEditorLoading.className = 'ap-editor-loading-screen';
+    apEditorLoading.setAttribute('role', 'status');
+    apEditorLoading.setAttribute('aria-live', 'polite');
+    apEditorLoading.innerHTML = '<div class="ap-editor-loading-copy"><div class="ap-editor-spinner"></div>' +
+      '<strong>Opening your product</strong><span>Loading artwork and restoring your design…</span>' +
+      '<button type="button" hidden>Retry opening</button></div>';
+    apEditorOverlay.querySelector('.ap-editor-dialog').appendChild(apEditorLoading);
+    apEditorLoading.querySelector('button').addEventListener('click', function() { apOpenEditorModal(_apEditorLaunchUrl); });
+  }
+
+  if (apEditorIframe) apEditorIframe.addEventListener('load', function() {
+    // Older placement editors and the logo uploader do not send readiness.
+    if (!_apEditorWaitsForReady && _apEditorOpenId) apRevealEditor();
+  });
+
+  window.addEventListener('message', function(event) {
+    var data = event.data;
+    if (!data || data.type !== 'pb:editor-state' || !_apEditorOpenId) return;
+    if (event.source !== apEditorIframe.contentWindow || event.origin !== _apEditorSrcOrigin || data.openId !== _apEditorOpenId) return;
+    if (data.state === 'ready' || data.state === 'problem') apRevealEditor();
+  });
 
   function apOpenEditorModal(url) {
     if (!apEditorOverlay || !apEditorIframe) {
@@ -168,18 +205,43 @@
       window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
-    try { _apEditorSrcOrigin = new URL(url, window.location.href).origin; }
+    _apEditorLaunchUrl = url;
+    _apEditorOpenId = Date.now().toString(36) + '-' + (++_apEditorSequence);
+    try {
+      var editorUrl = new URL(url, window.location.href);
+      _apEditorSrcOrigin = editorUrl.origin;
+      _apEditorWaitsForReady = /^\/editor\/pro-shirt\/[a-z0-9_]+(?:\/edit)?\/?$/.test(editorUrl.pathname);
+      if (_apEditorWaitsForReady) editorUrl.searchParams.set('pb_open_id', _apEditorOpenId);
+      url = editorUrl.href;
+    }
     catch (_e) { _apEditorSrcOrigin = ''; }
-    apEditorIframe.src = url;
+    clearTimeout(_apEditorSlowTimer);
+    if (_apEditorKeydown) document.removeEventListener('keydown', _apEditorKeydown);
+    apEnsureEditorLoading();
+    apEditorLoading.querySelector('span').textContent = 'Loading artwork and restoring your design…';
+    apEditorLoading.querySelector('button').hidden = true;
+    apEditorOverlay.classList.add('ap-editor-loading');
+    apEditorIframe.setAttribute('inert', '');
     apEditorOverlay.classList.add('open');
     apEditorOverlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('ap-editor-open');
+    apEditorIframe.src = url;
+    _apEditorSlowTimer = setTimeout(function() {
+      if (!apEditorOverlay.classList.contains('ap-editor-loading')) return;
+      apEditorLoading.querySelector('span').textContent = 'This is taking longer than usual. You can retry or close the editor.';
+      apEditorLoading.querySelector('button').hidden = false;
+    }, 15000);
+    if (apEditorClose) apEditorClose.focus();
     _apEditorKeydown = function(e){ if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); apCloseEditorModal(); } };
     document.addEventListener('keydown', _apEditorKeydown);
   }
 
   function apCloseEditorModal() {
     if (!apEditorOverlay || !apEditorIframe) return;
+    clearTimeout(_apEditorSlowTimer);
+    _apEditorOpenId = '';
+    _apEditorWaitsForReady = false;
+    apEditorOverlay.classList.remove('ap-editor-loading');
     apEditorOverlay.classList.remove('open');
     apEditorOverlay.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('ap-editor-open');

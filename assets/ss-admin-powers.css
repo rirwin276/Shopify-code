@@ -709,7 +709,7 @@
     width: 100%;
     border: 0;
     display: block;
-    background: #1a1a1a;
+    background: #faf9f5;
     min-height: 640px;
   }
   @media (max-width: 900px) {
@@ -2755,25 +2755,35 @@
     pointer-events: none;
   }
   #apEditorTitle { display: none !important; }  /* kept in DOM for aria-labelledby */
-  /* v3: the ✕ now lives INSIDE every editor page itself (the shared helper
-     bundle renders it in the canvas-topbar corner and posts the generic
-     '<model>_close' message this admin already listens for). Two X's stacked
-     in the same corner read as a glitch, so the modal's own is retired — the
-     kept fallbacks are backdrop-click and the editor's in-page ✕. DELETE the
-     display:none line to restore the modal-owned ✕. */
+  /* The host owns one exit throughout loading and editing. Embedded pro
+     editors receive pb_open_id and suppress their duplicate exit control. */
   .ap-editor-close {
-    display: none !important;
+    display: flex !important;
     pointer-events: auto;
-    width: 38px !important;
-    height: 38px !important;
+    width: 44px !important;
+    height: 44px !important;
     border-radius: 50% !important;
-    background: rgba(0,0,0,0.55) !important;
-    border: 1px solid rgba(255,255,255,0.22) !important;
+    background: #fff !important;
+    color: #142238 !important;
+    -webkit-text-fill-color: #142238 !important;
+    border: 1px solid #cbd0d7 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.14);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    font-size: 15px !important;
+    font-size: 20px !important;
   }
-  .ap-editor-close:hover { background: rgba(0,0,0,0.75) !important; }
+  .ap-editor-close:hover { background: #eddec2 !important; }
+  .ap-editor-close:focus-visible { outline:3px solid #947337; outline-offset:3px; }
+  .ap-editor-loading-screen { display:none;position:absolute;inset:0;z-index:5;align-items:center;justify-content:center;padding:24px;background:#faf9f5;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  .ap-editor-loading .ap-editor-loading-screen { display:flex; }
+  .ap-editor-loading .ap-editor-iframe { visibility:hidden; }
+  .ap-editor-loading-copy { width:min(360px,100%); }
+  .ap-editor-loading-copy strong { display:block;color:#142238;font-size:18px;font-weight:700;line-height:1.3;letter-spacing:0;margin:0; }
+  .ap-editor-loading-copy span { display:block;margin-top:8px;font-size:13px;font-weight:400;line-height:1.5;color:#5b6470; }
+  .ap-editor-spinner { width:30px;height:30px;box-sizing:border-box;margin:0 auto 16px;border:3px solid #e2dfd5;border-top-color:#142238;border-radius:50%;animation:apEditorSpin .8s linear infinite; }
+  .ap-editor-loading-copy button { margin-top:16px;padding:10px 18px;background:#142238;color:#fff;border:0;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer; }
+  .ap-editor-loading-copy button[hidden] { display:none; }
+  @keyframes apEditorSpin { to { transform:rotate(360deg); } }
   /* The dialog's height used to come from the iframe's min-height:640px.
      Give the dialog an explicit height so the iframe can simply fill it. */
   .ap-editor-dialog {
