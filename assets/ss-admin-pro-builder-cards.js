@@ -848,6 +848,7 @@
   /* ─── Modal DOM (single, reused) ────────────────────────────────────────── */
   var overlay, modal, heroImg, thumbsEl, detailEl, closeBtn;
   var currentGallery = [], currentIdx = 0;
+  var modalOpener = null, previousOverflow = '';
 
   function buildModal() {
     overlay = document.createElement('div');
@@ -892,6 +893,13 @@
     document.body.appendChild(overlay);
 
     document.addEventListener('keydown', function (e) {
+      if (!overlay.classList.contains('open')) return;
+      if (e.key === 'Tab') {
+        var focusable = Array.from(modal.querySelectorAll('button:not([disabled]),a[href],[tabindex="0"]')).filter(function (node) { return node.getClientRects().length; });
+        var first = focusable[0], last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
       if (e.key === 'Escape') closeModal();
       if (e.key === 'ArrowLeft' && overlay.classList.contains('open')) setGalleryIdx(currentIdx - 1);
       if (e.key === 'ArrowRight' && overlay.classList.contains('open')) setGalleryIdx(currentIdx + 1);
@@ -917,7 +925,9 @@
     thumbsEl.innerHTML = '';
     if (currentGallery.length > 1) {
       currentGallery.forEach(function (url, i) {
-        var th = document.createElement('div');
+        var th = document.createElement('button');
+        th.type = 'button';
+        th.setAttribute('aria-label', 'View product image ' + (i + 1));
         th.className = 'ss-modal__thumb' + (i === 0 ? ' on' : '');
         var tImg = document.createElement('img');
         tImg.src = url;
@@ -965,7 +975,7 @@
         '<div class="ss-modal__meta-val">' + esc(b.colors) + '</div>' +
       '</div>' +
       '<div class="ss-modal__foot">' +
-        '<button class="ss-modal__cta" data-builder-id="' + esc(b.id) + '">✨ Add to Store</button>' +
+        '<button class="ss-modal__cta" data-builder-id="' + esc(b.id) + '">Customize this product →</button>' +
       '</div>';
 
     detailEl.querySelector('.ss-modal__cta').addEventListener('click', function () {
@@ -976,6 +986,8 @@
 
   function openModal(b) {
     if (!overlay) buildModal();
+    modalOpener = document.activeElement;
+    previousOverflow = document.body.style.overflow;
     populateModal(b);
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -983,9 +995,10 @@
   }
 
   function closeModal() {
-    if (!overlay) return;
+    if (!overlay || !overlay.classList.contains('open')) return;
     overlay.classList.remove('open');
-    document.body.style.overflow = '';
+    document.body.style.overflow = previousOverflow;
+    if (modalOpener && modalOpener.isConnected) modalOpener.focus();
   }
 
   /* ─── Card factory ──────────────────────────────────────────────────────── */
@@ -1032,7 +1045,7 @@
     card.appendChild(media);
     card.appendChild(info);
 
-    function activate() { openModal(b); }
+    function activate() { card.focus(); openModal(b); }
     card.addEventListener('click', activate);
     card.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
