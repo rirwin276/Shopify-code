@@ -104,6 +104,8 @@
     products.forEach(function (product) {
       var row = document.createElement('div');
       row.className = 'ap-product-row ap-demo-product-row';
+      row.dataset.productHandle = product.handle || '';
+      row.dataset.hidden = product.hidden ? 'true' : 'false';
 
       var image = product.featured_image ? document.createElement('img') : document.createElement('div');
       if (product.featured_image) {

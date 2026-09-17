@@ -74,6 +74,7 @@
 {%- endif -%}
 
 {{ 'ss-admin-powers.css' | asset_url | stylesheet_tag }}
+{{ 'ss-admin-workspace.css' | asset_url | stylesheet_tag }}
 
 
 {%- if customer == nil and is_prospect_demo_candidate == false -%}
@@ -180,13 +181,14 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<div class="ap-wrap{% if is_prospect_demo_candidate %} ap-wrap--prospect-demo{% endif %}">
+<div class="ap-wrap ap-workspace{% if is_prospect_demo_candidate %} ap-wrap--prospect-demo{% endif %}">
 
   <script>
     window.SSAP = window.SSAP || {};
     SSAP.collectionHandle = {{ collection_handle | json }};
     SSAP.shopHandle = {{ shop_handle | json }};
     SSAP.isSuperAdmin = {{ is_super_admin | json }};
+    document.body.classList.add('ap-workspace-page');
     SSAP.isProspectDemo = {{ is_prospect_demo_candidate | json }};
   </script>
 
@@ -266,9 +268,10 @@
     <div class="ap-hero-info">
       <div class="ap-hero-badge">
         <span class="dot"></span>
-        {% if is_prospect_demo_candidate %}Prospect Admin Preview{% elsif is_super_admin %}Founder Control Center{% else %}Store Admin{% endif %}
+        {% if is_prospect_demo_candidate %}Admin preview{% elsif is_super_admin %}Founder workspace{% else %}Store workspace{% endif %}
       </div>
       <h1>{{ store_name | capitalize }}</h1>
+      <p class="ap-hero-description">Your store, thoughtfully managed.</p>
       <div class="ap-hero-meta" aria-label="Store details">
         <span class="ap-hero-pill">{{ shop_handle }}</span>
         <span class="ap-hero-pill ap-hero-pill--status">{{ ap_store_status | capitalize }}</span>
@@ -283,7 +286,7 @@
           type="button"
           class="ap-btn ap-btn--share-primary"
           aria-describedby="apShareHelpBubble"
-        >🔗 Share Store</button>
+        >Share store</button>
         <span class="ap-share-help-bubble" id="apShareHelpBubble" role="tooltip">
           <strong>Share member access</strong>
           Send this link to parents, players, or group members. They will sign in or create an account, then this store will appear on their dashboard. They can shop, but they cannot manage products, members, or settings.
@@ -297,7 +300,7 @@
       <div class="ap-fr-zone" id="apFrZone">
         <!-- Empty state — visible by default; JS hides it when an active fundraiser is running -->
         <div class="ap-fr-zone-empty" id="apFrZoneEmpty">
-          <button id="apFrLaunchBtn" type="button" class="ap-btn ap-btn--fr-start">💚 Start a Fundraiser</button>
+          <button id="apFrLaunchBtn" type="button" class="ap-btn ap-btn--fr-start">Start a fundraiser</button>
         </div>
         <!-- Active state (shown when fundraiser is running) -->
         <div class="ap-fr-zone-active" id="apFrZoneActive" style="display:none;">
@@ -669,12 +672,13 @@
 
     <!-- MAIN PANEL TABS -->
     <div class="ap-main-tabs-wrap">
+      <span class="ap-nav-caption">MANAGE YOUR STORE</span>
       <div class="ap-main-tabs" role="tablist">
         <button class="ap-main-tab-btn active" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="true" aria-controls="apPanelProducts"><span class="ap-tab-icon">📦</span><span class="ap-tab-label">Products</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnAddProducts" data-main-tab="apPanelAddProducts" role="tab" aria-selected="false" aria-controls="apPanelAddProducts"><span class="ap-tab-icon">✨</span><span class="ap-tab-label">Add Products</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers"><span class="ap-tab-icon">👥</span><span class="ap-tab-label">Members</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings"><span class="ap-tab-icon">⚙️</span><span class="ap-tab-label">Settings</span></button>
-        <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger"><span class="ap-tab-icon">☠️</span><span class="ap-tab-label">Danger</span></button>
+        <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger"><span class="ap-tab-icon">⚙</span><span class="ap-tab-label">Store controls</span></button>
       </div>
     </div>
 
@@ -683,16 +687,27 @@
 
       <div class="ap-panel-head ap-panel-head--products">
         <div>
-          <span class="ap-panel-kicker">Store build</span>
+          <span class="ap-panel-kicker">Your collection</span>
           <h2>Products</h2>
-          <p>Review your live products. Edit artwork and colors, hide items, or remove products you no longer need.</p>
+          <p>A clear view of your gear. Edit a design, choose what’s visible, or pin your favorites.</p>
         </div>
         <div class="ap-panel-head-right">
           <span class="ap-product-count" id="apAllProductCount">0</span>
-          <a class="ap-panel-mini-link" href="{{ ap_live_store_url }}">View live store ↗</a>
+          <button class="ap-btn ap-btn--primary" type="button" data-ap-open-tab="apTabBtnAddProducts">+ Add product</button>
         </div>
       </div>
 
+      <div class="ap-product-toolbar">
+        <label class="ap-product-search" for="apProductSearch"><span>Find a product</span><input id="apProductSearch" type="search" placeholder="Search your products…" autocomplete="off"></label>
+        <div class="ap-product-filters" role="group" aria-label="Filter products">
+          <button type="button" data-ap-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-ap-filter="live" aria-pressed="false">Live</button>
+          <button type="button" data-ap-filter="hidden" aria-pressed="false">Hidden</button>
+          <button type="button" data-ap-filter="pinned" aria-pressed="false">Pinned</button>
+        </div>
+      </div>
+      <div class="ap-product-results" id="apProductResults" role="status" aria-live="polite"></div>
+      <div class="ap-filter-empty" id="apFilterEmpty" hidden>No matching products. Try another name or filter.</div>
       <div id="apProductsSpinner" class="ap-products-spinner" style="display:none;">⏳ Loading products…</div>
       <div id="apProductsEmpty" class="ap-products-empty" style="display:none;">No products found for this store.</div>
 
@@ -709,15 +724,15 @@
         <div>
           <span class="ap-panel-kicker">Build more</span>
           <h2>Add Products</h2>
-          <p>Create premium custom products without scrolling through the current catalog. These build as separate products inside this store.</p>
+          <p>Choose your next piece. Preview the details and pricing, then make it your own.</p>
         </div>
       </div>
 
       <section class="ap-product-box ap-product-box--builder">
         <div class="ap-product-box-head">
           <div>
-            <h3 class="ap-product-box-title">Pro Builders</h3>
-            <p class="ap-product-box-sub">Start with a product type, choose images/colors, then add it to the storefront.</p>
+            <h3 class="ap-product-box-title">The product studio</h3>
+            <p class="ap-product-box-sub">Choose a style → add your artwork → publish to your store.</p>
           </div>
           <span class="ap-product-count" id="apBuilderProductCount">0</span>
         </div>
@@ -741,13 +756,13 @@
       </div>
 
       <div class="ap-form-group">
-        <label class="ap-label">Member Emails</label>
+        <label class="ap-label" for="apInputEmails">Member emails</label>
         <textarea id="apInputEmails" class="ap-textarea" placeholder="alice@example.com, bob@example.com..."></textarea>
         <p class="ap-helper">Separate multiple emails with commas.</p>
       </div>
 
       <div class="ap-form-group">
-        <label class="ap-label">Access Level</label>
+        <label class="ap-label" for="apInputRole">Access level</label>
         <select id="apInputRole" class="ap-select">
           <option value="member" selected>Member (Can Shop)</option>
           <option value="admin">Admin (Can Edit Settings)</option>
@@ -820,9 +835,9 @@
 
       <div class="ap-panel-head ap-panel-head--danger">
         <div>
-          <span class="ap-panel-kicker">Careful zone</span>
-          <h2>Sleep & Delete</h2>
-          <p>Use sleep mode when a store is inactive. Use nuke only when the store should be permanently removed.</p>
+          <span class="ap-panel-kicker">Store lifecycle</span>
+          <h2>Store controls</h2>
+          <p>Pause an inactive store or permanently remove it. Review these actions carefully before continuing.</p>
         </div>
       </div>
 
@@ -917,6 +932,7 @@
   <script src="{{ 'ss-prospect-admin-demo.js' | asset_url }}" defer></script>
 {%- endif -%}
 <script src="{{ 'ss-admin-powers-core.js' | asset_url }}" defer></script>
+<script src="{{ 'ss-admin-workspace.js' | asset_url }}" defer></script>
 {%- unless is_prospect_demo_candidate -%}
   <script src="{{ 'ss-admin-fundraiser.js' | asset_url }}" defer></script>
 {%- endunless -%}
