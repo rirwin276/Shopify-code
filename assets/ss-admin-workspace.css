@@ -158,6 +158,12 @@ body.ap-workspace-page .ss-modal__thumb { background:#fff; border-radius:8px; pa
 .ap-workspace .sfs-open-builder { background:#142238!important; color:#fff!important; border-radius:10px!important; box-shadow:none!important; }
 .ap-workspace :is(.ap-frw-hero,.ap-frd-header) { background:#f7f2e7!important; color:#142238!important; border-bottom:1px solid #e9dfc9; }
 .ap-workspace :is(.ap-frw-hero,.ap-frd-header) :is(h2,h3,p) { color:#142238!important; }
+.ap-workspace :is(.ap-frw-close,.ap-frd-close) { color:#142238!important; background:#fff!important; border:1px solid #ded8c9!important; }
+.ap-workspace .ap-frw-step-pills { padding-right:34px; }
+.ap-workspace .ap-frw-pill { background:#e2d8c3!important; }
+.ap-workspace .ap-frw-pill.active { background:#142238!important; }
+.ap-workspace .ap-frw-pill.done { background:#246148!important; }
+.ap-workspace .ap-frd-header-badge { background:#edf5ef!important; color:#246148!important; }
 .ap-workspace :is(.ap-share-head h3,.ap-rebuild-title,.ap-frw-title) { color:#142238!important; letter-spacing:-.03em; }
 .ap-workspace :is(.ap-frw-next-btn,.ap-share-copy,.ap-share-action-primary) { background:#142238!important; color:#fff!important; border-radius:10px!important; box-shadow:none!important; }
 .ap-detail-dialog { padding:0; width:min(800px,calc(100% - 32px)); max-height:calc(100dvh - 32px); border:1px solid #e2dfd5; border-radius:18px; color:#142238; background:#fff; box-shadow:0 24px 80px #14223840; font-family:var(--ap-font); }
