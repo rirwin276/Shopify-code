@@ -5,6 +5,13 @@ const {JSDOM} = require('jsdom');
 const source = fs.readFileSync('assets/ss-admin-powers-core.js', 'utf8');
 const modal = source.slice(source.indexOf('  var apEditorOverlay ='), source.indexOf('  // postMessage listener'));
 
+test('the loading cover leaves the iframe rendering so animation frames can run',()=>{
+  const css=fs.readFileSync('assets/ss-admin-powers.css','utf8');
+  const rule=css.match(/\.ap-editor-loading \.ap-editor-iframe\s*\{([^}]+)\}/)[1];
+  assert(!/visibility\s*:\s*hidden|display\s*:\s*none/.test(rule));
+  assert.match(rule,/pointer-events\s*:\s*none/);
+});
+
 function setup() {
   const dom = new JSDOM('<div id="apEditorOverlay"><div class="ap-editor-dialog"><button id="apEditorClose">×</button><iframe id="apEditorIframe"></iframe></div></div>', {url:'https://stellasageco.com/pages/admin-powers',runScripts:'outside-only'});
   const w=dom.window, timers=new Map();let seq=0;
