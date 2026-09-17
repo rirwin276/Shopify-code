@@ -50,6 +50,8 @@
 
   {%- if customer -%}
 
+    {{ 'ss-member-home.css' | asset_url | stylesheet_tag }}
+
     {%- comment -%} =========================
       LOGGED-IN VIEW
     ========================== {%- endcomment -%}
