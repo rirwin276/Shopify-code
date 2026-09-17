@@ -248,18 +248,21 @@
 
     const openContact = () => {
       if (casePanel) casePanel.hidden = true;
+      root.querySelector('[data-ss-open-case]')?.setAttribute('aria-expanded', 'false');
       contactPanel.hidden = false;
       contactPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
       window.setTimeout(() => contactPanel.querySelector('input[name="contact_name"]')?.focus(), 350);
     };
 
-    actions[3]?.addEventListener('click', (event) => {
+    root.addEventListener('click', (event) => {
+      if (!event.target.closest('a[href="#contact-support"]')) return;
       event.preventDefault();
       openContact();
     });
 
     contactPanel.querySelector('.ss-contact-panel__close')?.addEventListener('click', () => {
       contactPanel.hidden = true;
+      actions[3]?.focus();
     });
 
     if (window.location.hash === '#contact-support') openContact();

@@ -27,7 +27,7 @@
         </span>
       </a>
 
-      <button class="ss-help__action" type="button" data-ss-open-case>
+      <button class="ss-help__action" type="button" data-ss-open-case aria-expanded="false" aria-controls="report-order-problem">
         <span class="ss-help__icon" aria-hidden="true">!</span>
         <span>
           <strong>Report an order problem</strong>
@@ -52,7 +52,7 @@
       </a>
     </div>
 
-    <div class="ss-help__case" data-ss-case-panel hidden>
+    <div class="ss-help__case" id="report-order-problem" data-ss-case-panel hidden>
       <div class="ss-help__case-head">
         <div>
           <p class="ss-help__eyebrow">ORDER HELP</p>
@@ -131,28 +131,30 @@
       </form>
     </div>
 
-    <div class="ss-help__policy">
-      <div>
-        <p class="ss-help__eyebrow">MADE-TO-ORDER POLICY</p>
-        <h2>Clear answers before you order</h2>
-      </div>
-      <div class="ss-help__policy-copy">
-        <p><strong>Production problems:</strong> If an item arrives damaged, defective, misprinted, missing, or different from what was ordered, report it with clear photos. Approved cases may receive a replacement or refund.</p>
-        <p><strong>Personalized items:</strong> Products made with a buyer-entered name or number are normally final sale unless they were produced incorrectly or arrived damaged.</p>
-        <p><strong>Size, color, or change of mind:</strong> Because each item is made to order, these requests are not normally eligible for a free replacement. Contact us and we will review the options.</p>
-        <p><strong>Event dates:</strong> Production and delivery estimates are not guaranteed arrival dates. Order early when purchasing for a tournament, trip, ceremony, or other fixed event.</p>
-        <div class="ss-help__policy-links">
-          <a href="/policies/refund-policy">Refund policy</a>
-          <a href="/pages/support#shipping">Shipping policy</a>
-          <a href="{{ tracking_url }}">Track an order</a>
+    <section class="ss-help__overview" aria-label="Useful information">
+      <div class="ss-help__delivery">
+        <p class="ss-help__eyebrow">PLANNING AHEAD</p>
+        <h2>From your order to your door.</h2>
+        <div class="ss-help__timeline">
+          <div><span>01 · FULFILLMENT</span><strong>3–5 business days</strong><p>Your items are made to order.</p></div>
+          <div><span>02 · SHIPPING</span><strong>Up to one week</strong><p>Delivery time follows fulfillment.</p></div>
         </div>
+        <p class="ss-help__estimate">These are estimates. Please order early for an event.</p>
+        <a href="#shipping">Read shipping &amp; delivery details <span aria-hidden="true">→</span></a>
       </div>
-    </div>
+      <aside class="ss-help__store">
+        <p class="ss-help__eyebrow">STORE &amp; ACCOUNT HELP</p>
+        <h2>Here for your group, too.</h2>
+        <p>Need help joining a store, updating a design, or getting your group started?</p>
+        <a href="/pages/private-storefronts">See how stores work <span aria-hidden="true">→</span></a>
+        <a href="#contact-support">Ask us a question <span aria-hidden="true">→</span></a>
+      </aside>
+    </section>
 
-    <div class="ss-help__faq">
+    <div class="ss-help__faq" id="support-questions">
       <div class="ss-help__faq-head">
         <p class="ss-help__eyebrow">COMMON QUESTIONS</p>
-        <h2>Shipping, returns, personalization, and store help</h2>
+        <h2>Find a quick answer.</h2><p>Shipping, returns, personalization, and managing your store.</p>
       </div>
 
       <div class="ss-help__faq-list">
@@ -189,6 +191,24 @@
         </details>
       </div>
     </div>
+    <div class="ss-help__policy">
+      <div>
+        <p class="ss-help__eyebrow">MADE-TO-ORDER POLICY</p>
+        <h2>Clear answers before you order</h2>
+      </div>
+      <div class="ss-help__policy-copy">
+        <p><strong>Production problems:</strong> If an item arrives damaged, defective, misprinted, missing, or different from what was ordered, report it with clear photos. Approved cases may receive a replacement or refund.</p>
+        <p><strong>Personalized items:</strong> Products made with a buyer-entered name or number are normally final sale unless they were produced incorrectly or arrived damaged.</p>
+        <p><strong>Size, color, or change of mind:</strong> Because each item is made to order, these requests are not normally eligible for a free replacement. Contact us and we will review the options.</p>
+        <p><strong>Event dates:</strong> Production and delivery estimates are not guaranteed arrival dates. Order early when purchasing for a tournament, trip, ceremony, or other fixed event.</p>
+        <div class="ss-help__policy-links">
+          <a href="/policies/refund-policy">Refund policy</a>
+          <a href="/pages/support#shipping">Shipping policy</a>
+          <a href="{{ tracking_url }}">Track an order</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -197,12 +217,12 @@
   #ss-help-{{ section.id }} .ss-help__shipping:target{border-color:#b7a36a}
 
   #ss-help-{{ section.id }}{
-    --ss-ink:#11100e;
-    --ss-muted:#68645c;
-    --ss-gold:#b7a36a;
+    --ss-ink:#142238;
+    --ss-muted:#5b6470;
+    --ss-gold:#806331;
     --ss-paper:#f7f4ed;
     color:var(--ss-ink);
-    background:#fff;
+    background:#faf9f5;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   #ss-help-{{ section.id }} *{box-sizing:border-box}
@@ -267,6 +287,79 @@
     #ss-help-{{ section.id }} .ss-help__submit-row{align-items:stretch;flex-direction:column}
     #ss-help-{{ section.id }} .ss-help__policy{padding:28px 22px}
   }
+
+  /* Match the dashboard without changing support form contracts or policies. */
+  #ss-help-{{ section.id }} .ss-help__wrap{padding:44px 24px 60px}
+  #ss-help-{{ section.id }} .ss-help__hero{max-width:740px;margin-bottom:28px}
+  #ss-help-{{ section.id }} h1{color:var(--ss-ink);font-size:clamp(36px,5vw,54px);line-height:1.08;letter-spacing:-.045em;font-weight:800;margin-bottom:16px}
+  #ss-help-{{ section.id }} h2{color:var(--ss-ink);font-size:28px;line-height:1.16;font-weight:750;letter-spacing:-.035em}
+  #ss-help-{{ section.id }} a:not(.ss-help__action){color:var(--ss-ink);text-underline-offset:4px}
+  #ss-help-{{ section.id }} .ss-help__action{border-color:#e2dfd5;border-radius:14px;padding:22px 18px;box-shadow:0 4px 16px #14223805;gap:12px}
+  #ss-help-{{ section.id }} .ss-help__action:hover{transform:none;border-color:#947337;box-shadow:0 5px 18px #1422380d}
+  #ss-help-{{ section.id }} .ss-help__action strong{font-weight:750;line-height:1.3}
+  #ss-help-{{ section.id }} .ss-help__action small{font-size:13px;line-height:1.55}
+  #ss-help-{{ section.id }} .ss-help__icon{background:#eddec2;color:#715926;width:34px;height:34px;font-size:19px;border-radius:9px}
+  #ss-help-{{ section.id }} .ss-help__case,
+  #ss-help-{{ section.id }} .ss-contact-panel{border:1px solid #d8c8a6;background:#fff;border-radius:16px;padding:28px;margin:24px 0 32px;scroll-margin-top:110px}
+  #ss-help-{{ section.id }} .ss-help__close,
+  #ss-help-{{ section.id }} .ss-contact-panel__close{border:1px solid #e2dfd5;background:#f7f4ed;color:#142238;min-width:44px;width:44px;height:44px;flex-shrink:0;font-weight:500}
+  #ss-help-{{ section.id }} input,
+  #ss-help-{{ section.id }} select,
+  #ss-help-{{ section.id }} textarea{border-color:#d5d7da;border-radius:9px;font-size:16px;min-height:46px}
+  #ss-help-{{ section.id }} .ss-support-checkbox input{min-height:0}
+  #ss-help-{{ section.id }} .ss-help__submit,
+  #ss-help-{{ section.id }} .ss-contact-panel__submit button{background:#142238;color:#fff;border-radius:10px;min-height:48px;font-size:14px;font-weight:750}
+  #ss-help-{{ section.id }} .ss-contact-panel__head p:last-child,
+  #ss-help-{{ section.id }} .ss-contact-panel__note{color:#5b6470}
+  #ss-help-{{ section.id }} .ss-help__overview{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;margin:32px 0 44px}
+  #ss-help-{{ section.id }} .ss-help__delivery,
+  #ss-help-{{ section.id }} .ss-help__store{padding:28px;background:#fff;border:1px solid #e2dfd5;border-radius:16px}
+  #ss-help-{{ section.id }} .ss-help__store{background:#f5f0e5;border-color:#e5dac5}
+  #ss-help-{{ section.id }} .ss-help__overview h2{font-size:25px}
+  #ss-help-{{ section.id }} .ss-help__timeline{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0 16px}
+  #ss-help-{{ section.id }} .ss-help__timeline>div+div{border-left:1px solid #e2dfd5;padding-left:20px}
+  #ss-help-{{ section.id }} .ss-help__timeline span{display:block;font-size:10px;color:#806331;letter-spacing:.08em;font-weight:750;margin-bottom:8px}
+  #ss-help-{{ section.id }} .ss-help__timeline strong{display:block;font-size:18px;font-weight:750;line-height:1.4}
+  #ss-help-{{ section.id }} .ss-help__timeline p,
+  #ss-help-{{ section.id }} .ss-help__estimate{font-size:12px;line-height:1.6;color:#5b6470;margin:6px 0 0}
+  #ss-help-{{ section.id }} .ss-help__store>p:not(.ss-help__eyebrow){font-size:14px;line-height:1.65;color:#5b6470}
+  #ss-help-{{ section.id }} .ss-help__overview a{display:block;width:fit-content;font-size:13px;font-weight:750;line-height:1.5;margin-top:16px}
+  #ss-help-{{ section.id }} .ss-help__faq{padding-top:0;gap:40px;scroll-margin-top:110px}
+  #ss-help-{{ section.id }} .ss-help__faq-head p:last-child{font-size:14px}
+  #ss-help-{{ section.id }} details{background:#fff;border:1px solid #e2dfd5;border-radius:12px;margin-bottom:10px;padding:0}
+  #ss-help-{{ section.id }} details:last-child{border:1px solid #e2dfd5}
+  #ss-help-{{ section.id }} summary{position:relative;list-style:none;padding:18px 44px 18px 20px;font-weight:700;line-height:1.45}
+  #ss-help-{{ section.id }} summary::-webkit-details-marker{display:none}
+  #ss-help-{{ section.id }} summary:after{content:"+";position:absolute;right:18px;top:17px;color:#806331;font-size:20px}
+  #ss-help-{{ section.id }} details[open] summary:after{content:"−"}
+  #ss-help-{{ section.id }} details p{margin:0 20px 16px;font-size:14px}
+  #ss-help-{{ section.id }} .ss-help__policy{background:#f5f0e5;color:#142238;border:1px solid #e5dac5;border-radius:16px;padding:32px;gap:36px;margin:40px 0 0}
+  #ss-help-{{ section.id }} .ss-help__policy-copy p{color:#5b6470}
+  #ss-help-{{ section.id }} .ss-help__policy-copy strong{color:#142238}
+  #ss-help-{{ section.id }} .ss-help__policy-links a{border-bottom-color:#baa476}
+  #ss-help-{{ section.id }} :is(a,button,summary,input,select,textarea):focus-visible{outline:3px solid #947337;outline-offset:3px}
+  @media(max-width:850px){
+    #ss-help-{{ section.id }} .ss-help__overview{grid-template-columns:1fr}
+    #ss-help-{{ section.id }} .ss-help__faq{gap:16px}
+  }
+  @media(max-width:600px){
+    #ss-help-{{ section.id }} .ss-help__wrap{padding:28px 16px 36px}
+    #ss-help-{{ section.id }} .ss-help__hero>p:last-child{font-size:15px}
+    #ss-help-{{ section.id }} .ss-help__actions{gap:10px}
+    #ss-help-{{ section.id }} .ss-help__action{padding:18px;align-items:center}
+    #ss-help-{{ section.id }} .ss-help__action strong{margin-bottom:4px}
+    #ss-help-{{ section.id }} .ss-help__delivery,
+    #ss-help-{{ section.id }} .ss-help__store,
+    #ss-help-{{ section.id }} .ss-help__policy,
+    #ss-help-{{ section.id }} .ss-help__case,
+    #ss-help-{{ section.id }} .ss-contact-panel{padding:22px 20px}
+    #ss-help-{{ section.id }} .ss-help__timeline{gap:12px}
+    #ss-help-{{ section.id }} .ss-help__timeline>div+div{padding-left:12px}
+    #ss-help-{{ section.id }} .ss-help__timeline strong{font-size:16px}
+    #ss-help-{{ section.id }} .ss-help__case-head,
+    #ss-help-{{ section.id }} .ss-contact-panel__head{gap:12px}
+  }
+  @media(prefers-reduced-motion:reduce){#ss-help-{{ section.id }} .ss-help__action{transition:none}}
 </style>
 
 <script>
@@ -302,6 +395,9 @@
 
   const openPanel = () => {
     panel.hidden = false;
+    root.querySelector('[data-ss-open-case]')?.setAttribute('aria-expanded', 'true');
+    const contact = root.querySelector('#contact-support');
+    if (contact) contact.hidden = true;
     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.setTimeout(() => panel.querySelector('input[name="order_number"]')?.focus(), 350);
   };
@@ -309,6 +405,9 @@
   root.querySelector('[data-ss-open-case]')?.addEventListener('click', openPanel);
   root.querySelector('[data-ss-close-case]')?.addEventListener('click', () => {
     panel.hidden = true;
+    const trigger = root.querySelector('[data-ss-open-case]');
+    trigger?.setAttribute('aria-expanded', 'false');
+    trigger?.focus();
   });
 
   const params = new URLSearchParams(window.location.search);

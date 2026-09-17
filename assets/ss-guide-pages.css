@@ -1,0 +1,83 @@
+/* Shared information-page theme: cream, navy, and muted gold. */
+.ss-guide{background:#faf9f5;color:#142238;padding:40px 0 64px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.ss-guide *{box-sizing:border-box}
+.ss-guide__wrap{width:min(1120px,calc(100% - 48px));margin:auto}
+.ss-guide h1,.ss-guide h2,.ss-guide h3{color:#142238;font-weight:750;letter-spacing:-.035em;text-wrap:balance}
+.ss-guide h1{font-size:clamp(36px,4.5vw,58px);line-height:1.07;margin:0 0 20px;font-weight:800;letter-spacing:-.05em}
+.ss-guide h2{font-size:clamp(26px,3vw,36px);line-height:1.13;margin:0 0 14px}
+.ss-guide h3{font-size:18px;line-height:1.3;margin:0 0 10px}
+.ss-guide p{font-size:15px;line-height:1.7;color:#5b6470;margin:0 0 14px}
+.ss-guide .ss-guide__eyebrow{color:#806331;font-size:10px;font-weight:800;letter-spacing:.14em;line-height:1.5;margin:0 0 12px}
+.ss-guide__hero{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:50px;padding:18px 0 32px}
+.ss-guide .ss-guide__lead{font-size:17px;max-width:600px}
+.ss-guide__actions{display:flex;gap:12px;flex-wrap:wrap;margin:25px 0 22px}
+.ss-guide__button{display:inline-flex;align-items:center;justify-content:center;gap:18px;min-height:48px;padding:13px 19px;border:1px solid #142238;border-radius:10px;background:#142238;color:#fff;font-size:14px;font-weight:750;line-height:1.4;text-decoration:none;transition:background .15s}
+.ss-guide__button:hover{background:#253b57}
+.ss-guide__button--secondary{background:#fff;color:#142238;border-color:#d8d6cf}
+.ss-guide__button--secondary:hover{background:#f2eee5}
+.ss-guide__benefits{display:flex;flex-wrap:wrap;gap:10px 18px;margin:0;padding:0;list-style:none;color:#5b6470;font-size:12px}
+.ss-guide__benefits li::before{content:"✓";margin-right:7px;color:#806331;font-weight:750}
+.ss-guide__photo{margin:0;overflow:hidden;border:1px solid #e2dfd5;border-radius:18px;background:#fff;box-shadow:0 8px 24px #1422380d}
+.ss-guide__photo img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}
+.ss-guide__photo figcaption{border-top:1px solid #e2dfd5;padding:22px 24px}
+.ss-guide__photo figcaption span{display:block;font-size:9px;font-weight:800;color:#806331;letter-spacing:.13em;margin-bottom:8px}
+.ss-guide__photo figcaption strong{display:block;font-size:18px;line-height:1.35;font-weight:750}
+.ss-guide__photo figcaption p{font-size:13px;margin:8px 0 0}
+.ss-guide__nav{display:flex;flex-wrap:wrap;gap:8px;padding:16px 0;border-block:1px solid #e2dfd5}
+.ss-guide__nav a{display:inline-flex;align-items:center;min-height:40px;padding:8px 14px;border:1px solid #e2dfd5;border-radius:8px;background:#fff;color:#142238;font-weight:650;font-size:13px;text-decoration:none}
+.ss-guide__nav a:hover{background:#f1e9d8;border-color:#baa476}
+.ss-guide__section{padding-top:52px;scroll-margin-top:110px}
+.ss-guide__heading{max-width:650px;margin-bottom:24px}
+.ss-guide__steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:0;margin:0;list-style:none}
+.ss-guide__steps li{padding:24px 20px;border:1px solid #e2dfd5;border-radius:16px;background:#fff}
+.ss-guide__steps li>span{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:#eddec2;color:#715926;font-size:12px;font-weight:800;margin-bottom:22px}
+.ss-guide__steps p{font-size:14px;margin:0}
+.ss-guide__split{display:grid;grid-template-columns:.8fr 1.2fr;gap:50px}
+.ss-guide__roles{display:grid;gap:14px}
+.ss-guide__card{background:#fff;border:1px solid #e2dfd5;border-radius:16px;padding:24px 28px}
+.ss-guide__card p:last-child{margin:0;font-size:14px}
+.ss-guide__text-link{color:#142238;font-size:14px;font-weight:750;text-underline-offset:4px}
+.ss-guide__personalization{display:grid;grid-template-columns:1fr .9fr;gap:48px;padding:34px;margin-top:52px;border:1px solid #e5dac5;border-radius:18px;background:#f5f0e5}
+.ss-guide__personalization>div p:last-child{margin:0}
+.ss-guide__checklist{padding:24px;background:#fff;border:1px solid #e2dfd5;border-radius:12px}
+.ss-guide__checklist ul{margin:16px 0 20px;padding-left:19px;color:#5b6470;font-size:14px;line-height:1.9}
+.ss-guide__checklist li::marker{color:#947337}
+.ss-guide__faq{display:grid;align-content:start;gap:10px}
+.ss-guide__faq details{border:1px solid #e2dfd5;border-radius:12px;background:#fff}
+.ss-guide__faq summary{position:relative;cursor:pointer;list-style:none;padding:19px 46px 19px 20px;font-size:15px;font-weight:700;line-height:1.45}
+.ss-guide__faq summary::-webkit-details-marker{display:none}
+.ss-guide__faq summary::after{position:absolute;right:20px;top:18px;content:"+";color:#806331;font-size:20px}
+.ss-guide__faq details[open] summary::after{content:"−"}
+.ss-guide__faq p{padding:0 20px 20px;font-size:14px;margin:0}
+.ss-guide__faq a{color:#142238;text-underline-offset:3px}
+.ss-guide__finish{display:flex;align-items:center;justify-content:space-between;gap:36px;padding:32px;margin-top:52px;border:1px solid #e2dfd5;border-top:3px solid #ddc18c;border-radius:18px;background:#fff}
+.ss-guide__finish h2{font-size:28px}
+.ss-guide__finish p:last-child{margin:0;font-size:14px}
+.ss-guide__finish .ss-guide__button{flex-shrink:0}
+.ss-guide a:focus-visible,.ss-guide summary:focus-visible{outline:3px solid #947337;outline-offset:4px}
+@media(max-width:900px){.ss-guide__hero{gap:28px;grid-template-columns:1.1fr .9fr}.ss-guide__steps{grid-template-columns:repeat(2,minmax(0,1fr))}.ss-guide__split{gap:28px;grid-template-columns:.85fr 1.15fr}.ss-guide__personalization{gap:24px;padding:28px}}
+@media(max-width:650px){
+.ss-guide{padding:24px 0 36px}
+.ss-guide__wrap{width:calc(100% - 32px)}
+.ss-guide__hero{grid-template-columns:1fr;padding:8px 0 26px;gap:24px}
+.ss-guide h1{font-size:38px}
+.ss-guide .ss-guide__lead{font-size:15px}
+.ss-guide__actions{gap:10px}
+.ss-guide__actions .ss-guide__button{flex:1 1 180px}
+.ss-guide__photo figcaption{padding:18px 20px}
+.ss-guide__nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.ss-guide__nav a{padding:10px;font-size:12px}
+.ss-guide__section{padding-top:34px}
+.ss-guide__steps{grid-template-columns:1fr;gap:12px}
+.ss-guide__steps li{position:relative;padding:22px 20px 22px 74px}
+.ss-guide__steps li>span{position:absolute;left:20px;top:22px;width:36px;height:36px;margin:0}
+.ss-guide__steps h3{font-size:17px}
+.ss-guide__split{grid-template-columns:1fr;gap:0}
+.ss-guide__personalization{grid-template-columns:1fr;margin-top:34px;padding:24px 20px}
+.ss-guide__checklist{padding:20px}
+.ss-guide__card{padding:22px}
+.ss-guide__finish{align-items:stretch;flex-direction:column;gap:20px;padding:24px;margin-top:34px}
+.ss-guide__finish h2{font-size:26px}
+}
+@media(prefers-reduced-motion:reduce){.ss-guide__button{transition:none}}
+
