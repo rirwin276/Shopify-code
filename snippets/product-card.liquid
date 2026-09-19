@@ -40,7 +40,13 @@
   assign media_height = p.featured_media.height | default: 600
 
   # --- SECOND IMAGE ---
-  assign second_media = p.media[1]
+  assign second_media = nil
+  for candidate_media in p.media
+    unless candidate_media.id == p.featured_media.id or candidate_media.alt contains 'Lifestyle mockup:'
+      assign second_media = candidate_media
+      break
+    endunless
+  endfor
 
   # --- ZONE READER ---
   # --- WHAT THIS LISTING INCLUDES ---

@@ -65,6 +65,15 @@
   endif
 
   assign all_media = product.media
+  # Lifestyle photos belong to the product page, including on hover/carousels.
+  assign card_media = '' | split: ','
+  for media in all_media
+    unless media.alt contains 'Lifestyle mockup:'
+      assign card_item = all_media | where: 'id', media.id
+      assign card_media = card_media | concat: card_item
+    endunless
+  endfor
+  assign all_media = card_media
 
   # For combined listings: make sure to include the featured media of the color variants so that the swatch picker
   # works as expected.
@@ -81,6 +90,9 @@
         endif
 
         assign existing_media = all_media | has: 'id', featured_media.id
+        if featured_media.alt contains 'Lifestyle mockup:'
+          assign existing_media = true
+        endif
         unless existing_media
           assign variant_featured_media = product_option_value.variant.product.media | where: 'id', featured_media.id
           assign all_media = all_media | concat: variant_featured_media
