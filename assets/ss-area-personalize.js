@@ -22,7 +22,7 @@
     var cfg;try{cfg=JSON.parse(root.dataset.config);}catch(e){input.setCustomValidity('This name design could not load. Please reload the page.');return;}
     var entryKey=root.dataset.productId+':'+cfg.area;
     if(!input.value&&enteredNames.has(entryKey))input.value=enteredNames.get(entryKey);
-    var color=root.dataset.initialColor,background=null,base=null,family='',maps={},ready=false,revision=0,drawHelper;
+    var color=root.dataset.initialColor,background=null,base=null,family='',pattern=null,maps={},ready=false,revision=0,drawHelper;
     function valid(){
       var text=input.value.trim();
       var optionalBlank=cfg.required===false&&!text;
@@ -41,8 +41,8 @@
       var area={left:(b.left/100-x)/crop*size,top:(b.top/100-y)/crop*size,width:b.width/100/crop*size,height:b.height/100/crop*size};
       if(base)ctx.drawImage(base,area.left,area.top,area.width,area.height);
       var p=cfg.placement,text=input.value.trim();
-      status.textContent=cfg.label+' detail preview · '+(text?'your artwork and name':cfg.required?'enter your name below':'artwork only — no name');
-      if(text)drawHelper.draw(ctx,text,{left:area.left+p.left*area.width,top:area.top+p.top*area.height,width:p.width*area.width,height:p.height*area.height},family,cfg.color_hex,cfg.outline_color_hex);
+      status.textContent=text?'Check your spelling in the preview.':cfg.required?'Your name will appear in the preview.':'No name added.';
+      if(text)drawHelper.draw(ctx,text,{left:area.left+p.left*area.width,top:area.top+p.top*area.height,width:p.width*area.width,height:p.height*area.height},family,cfg.color_hex,cfg.outline_color_hex,pattern?{image:pattern,size:area.width/4.5,x:area.left,y:area.top}:null);
     }
     function fail(){ready=false;valid();status.textContent='The name preview could not load. Reload this page to review your name before ordering.';}
     function loadColor(){
@@ -71,10 +71,10 @@
     });
     valid();
     Promise.all([
-      shared().then(function(helper){drawHelper=helper;return helper.loadFont(cfg.font,api+cfg.font_url);}),
+      shared().then(function(helper){drawHelper=helper;return Promise.all([helper.loadFont(cfg.font,api+cfg.font_url),helper.loadPattern(cfg.color_tile?api+cfg.color_tile:'')]);}),
       image(cfg.base_print_url),
       fetch(api+'/editor/pro-shirt/'+encodeURIComponent(cfg.model)+'/mockups-public').then(function(r){if(!r.ok)throw new Error('Mockups unavailable');return r.json();})
-    ]).then(function(results){family=results[0];base=results[1];maps=results[2][cfg.area]||{};return loadColor();}).catch(fail);
+    ]).then(function(results){family=results[0][0];pattern=results[0][1];base=results[1];maps=results[2][cfg.area]||{};return loadColor();}).catch(fail);
   }
   function boot(){document.querySelectorAll('[data-ss-area-pers]').forEach(init);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
