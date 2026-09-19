@@ -21,6 +21,13 @@
   assign widths = '240, 352, 832, 1200'
   assign image_sizes = image_sizes | default: 'auto'
   assign single_thumbnail_collection = false
+  assign secondary_media = nil
+  for candidate_media in resource.media offset: 1
+    unless candidate_media.alt contains 'Lifestyle mockup:'
+      assign secondary_media = candidate_media
+      break
+    endunless
+  endfor
   if resource_type == 'collection' and collection_thumbnails != 'multiple'
     assign single_thumbnail_collection = true
   endif
@@ -81,15 +88,15 @@
             data-media-id: featured_image.id,
             style: primary_focal_point_style
         }}
-        {%- if image_hover and resource.media.size > 1 -%}
+        {%- if image_hover and secondary_media != nil -%}
           {% liquid
             assign secondary_focal_point_style = ''
-            if resource.media[1].presentation.focal_point != blank
-              assign secondary_focal_point_style = 'object-position: ' | append: resource.media[1].presentation.focal_point | append: ';'
+            if secondary_media.presentation.focal_point != blank
+              assign secondary_focal_point_style = 'object-position: ' | append: secondary_media.presentation.focal_point | append: ';'
             endif
           %}
           {{
-            resource.media[1]
+            secondary_media
             | image_url: width: image_width
             | image_tag:
               loading: 'lazy',
@@ -97,7 +104,7 @@
               widths: widths,
               sizes: image_sizes,
               transitionToProduct: settings.transition_to_main_product,
-              data-media-id: resource.media[1].id,
+              data-media-id: secondary_media.id,
               style: secondary_focal_point_style
           }}
         {%- endif -%}
