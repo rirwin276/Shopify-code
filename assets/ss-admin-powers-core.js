@@ -160,6 +160,26 @@
   var apEditorClose   = document.getElementById('apEditorClose');
   var _apEditorKeydown = null;
 
+  // Opt-in QA controls exercise the real iframe at phone dimensions. They
+  // are absent from the normal store-admin flow and never reload a design.
+  if (apEditorOverlay && new URLSearchParams(window.location.search).get('editor_preview') === '1') {
+    var previewTools = document.createElement('label');
+    previewTools.style.cssText = 'position:fixed;left:12px;top:12px;z-index:20;background:#fff;color:#142238;padding:10px;border-radius:10px;font:12px sans-serif;box-shadow:0 2px 12px #0003';
+    previewTools.textContent = 'Editor screen ';
+    var previewSize = document.createElement('select');
+    previewSize.setAttribute('aria-label', 'Editor screen size');
+    [['','Desktop'],['375x667','Phone · 375 × 667'],['390x844','Phone · 390 × 844'],['430x932','Phone · 430 × 932'],['812x375','Landscape · 812 × 375']].forEach(function(item) {
+      var option=document.createElement('option');option.value=item[0];option.textContent=item[1];previewSize.appendChild(option);
+    });
+    previewTools.appendChild(previewSize);apEditorOverlay.appendChild(previewTools);
+    previewSize.addEventListener('change', function() {
+      var dialog=apEditorOverlay.querySelector('.ap-editor-dialog'),size=previewSize.value.split('x');
+      if(!previewSize.value){dialog.style.removeProperty('width');dialog.style.removeProperty('height');return;}
+      dialog.style.setProperty('width',size[0]+'px','important');
+      dialog.style.setProperty('height','min('+size[1]+'px, calc(100dvh - 48px))','important');
+    });
+  }
+
   var _apEditorSrcOrigin = '';
   var _apEditorOpenId = '';
   var _apEditorWaitsForReady = false;
