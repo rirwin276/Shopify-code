@@ -1483,7 +1483,9 @@
       // because it is what is being paid for and it implies a back print
       // anyway.
       var includesLabel = '';
-      if(_pbTagsRaw.some(function(t){ return String(t).trim() === 'personalized-back'; })){
+      if(_pbTagsRaw.indexOf('personalized-names') !== -1){
+        includesLabel = _pbTagsRaw.indexOf('personalized-back') !== -1 ? 'Personalized Names + Number' : 'Personalized Names';
+      } else if(_pbTagsRaw.some(function(t){ return String(t).trim() === 'personalized-back'; })){
         includesLabel = 'Name & Number';
       } else if(_pbTagsRaw.some(function(t){ return String(t).indexOf('_front_back') !== -1; })){
         includesLabel = 'Front & Back';

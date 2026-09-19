@@ -25,7 +25,12 @@
 {%- liquid
   assign pro_extra = ''
 
-  if product.tags contains 'personalized-back'
+  if product.tags contains 'personalized-names'
+    assign pro_extra = 'Personalized Names'
+    if product.tags contains 'personalized-back'
+      assign pro_extra = 'Personalized Names + Number'
+    endif
+  elsif product.tags contains 'personalized-back'
     assign pro_extra = 'Name & Number'
   else
     for tag in product.tags
