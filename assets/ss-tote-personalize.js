@@ -522,6 +522,7 @@
       if (!target || !target.closest) return;
       var btn = target.closest('[type="submit"]');
       if (!btn || !form.contains(btn)) return;
+      if (!form.checkValidity()) return;
       var message = warningMessage();
       if (!message) return;
       e.preventDefault();
@@ -536,6 +537,7 @@
     // happened.
     document.addEventListener('submit', function (e) {
       if (confirmed || !form || e.target !== form) return;
+      if (!form.checkValidity()) return;
       var message = warningMessage();
       if (!message) return;
       e.preventDefault();
@@ -746,4 +748,3 @@
     watchForInjectedWidgets();
   }
 })();
-

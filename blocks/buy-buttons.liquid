@@ -90,6 +90,44 @@
           canvas is an approximation; the print file is rendered server-side
           from the same values at fulfillment.
         {%- endcomment -%}
+        {%- assign ss_area_names = product.metafields.custom.area_personalization.value -%}
+        {%- if ss_area_names.layers.size > 0 -%}
+          <div class="ss-area-names">
+            <span class="ss-area-names-kicker">Make it yours</span>
+            <p class="ss-area-names-intro">Add names in the style and position chosen by your store.</p>
+            {%- for name_layer in ss_area_names.layers -%}
+              <details class="ss-name-detail" {% if forloop.first %}open{% endif %}>
+                <summary>{{ name_layer.label | escape }} name <span>{% if name_layer.required %}Required{% else %}Optional{% endif %}</span></summary>
+                <div class="ss-area-pers" data-ss-area-pers
+                  data-config="{{ name_layer | json | escape }}"
+                  data-product-id="{{ product.id }}"
+                  data-initial-color="{{ product.selected_or_first_available_variant.option1 | escape }}">
+                  <p>{{ name_layer.font_label | escape }} · {{ name_layer.label | escape }} print</p>
+                  <canvas width="800" height="800" data-ss-name-canvas aria-label="{{ name_layer.label | escape }} name and artwork preview"></canvas>
+                  <label for="AreaName-{{ product.id }}-{{ name_layer.area }}">{{ name_layer.property_name | escape }} {% if name_layer.required %}<span>(required)</span>{% else %}<span>(optional)</span>{% endif %}</label>
+                  <input id="AreaName-{{ product.id }}-{{ name_layer.area }}" type="text" name="properties[{{ name_layer.property_name | escape }}]"
+                    data-ss-area-name {% if name_layer.required %}required{% endif %} maxlength="{{ name_layer.max_name_len | default: 20 }}"
+                    autocomplete="off" placeholder="{% if name_layer.required %}e.g. Emma{% else %}Leave blank for no name{% endif %}"
+                    pattern="(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[A-Za-zÀ-ÖØ-öø-ÿ '.\-]+">
+                  <p class="ss-area-pers-note">{% unless name_layer.required %}Leave blank to keep the artwork without a name. {% endunless %}Printed as typed, including capitalization. Longer names shrink to fit.</p>
+                  <p data-ss-name-status role="status">Loading preview…</p>
+                </div>
+              </details>
+            {%- endfor -%}
+          </div>
+          <style>
+            .ss-area-names{margin:16px 0;padding:16px;border:1px solid #11100e1a;border-radius:16px;background:#b7a36a0d}
+            .ss-area-names-kicker{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8c7943}
+            .ss-area-names-intro,.ss-area-pers p{font-size:13px;line-height:1.5;margin:5px 0 12px;color:#5f5c56}
+            .ss-name-detail{border-top:1px solid #11100e16}.ss-name-detail summary{cursor:pointer;font-size:14px;font-weight:700;padding:12px 0}
+            .ss-name-detail summary span{float:right;color:#706954;font-weight:400;font-size:12px}
+            .ss-area-pers canvas{display:block;width:100%;max-width:320px;height:auto;aspect-ratio:1;margin:0 auto 12px;background:#f5f1e8;border-radius:12px}
+            .ss-area-pers label{display:block;font-size:12px;font-weight:700;margin:10px 0 5px}.ss-area-pers label span{font-weight:400;color:#706954}
+            .ss-area-pers input{padding:10px 12px;border:1px solid #11100e29;border-radius:10px;font-size:16px;width:100%;box-sizing:border-box}
+            .ss-area-pers .ss-area-pers-note{font-size:11.5px;margin:8px 0}
+            .ss-name-accel-held{display:none!important}
+          </style>
+        {%- endif -%}
         {%- assign ss_pers = product.metafields.custom.personalization.value -%}
         {%- if ss_pers and ss_pers.enabled -%}
           {%- assign ss_pers_model = ss_pers.model | default: 'ec8000' -%}

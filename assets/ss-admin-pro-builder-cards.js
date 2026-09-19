@@ -444,6 +444,7 @@
         categories: p.categories || p.category || null,
         badge: p.badge || 'Custom Product',
         personalize: p.personalize === true,
+        area_personalize: p.area_personalize === true,
         name: p.name || p.id,
         from: p.from || '',
         hint: p.hint || '',
@@ -965,10 +966,11 @@
     detailEl.innerHTML =
       '<div class="ss-modal__scroll">' +
         '<span class="ss-modal__chip">' + esc(b.badge) + '</span>' +
-        (b.personalize ? '<span class="ss-modal__chip ss-modal__chip--pers">\u2726 Name & Number available</span>' : '') +
+        (b.personalize ? '<span class="ss-modal__chip ss-modal__chip--pers">\u2726 ' + (b.area_personalize ? 'Movable names + back Name & Number' : 'Name & Number available') + '</span>' : '') +
         '<div class="ss-modal__title" id="ssBuilderModalTitle">' + esc(b.name) + '</div>' +
         '<p class="ss-modal__desc">' + esc(b.desc) + '</p>' +
         (b.personalize ? '<p class="ss-modal__pers-note">\u2726 <strong>Name &amp; Number:</strong> flip one switch in the builder and every buyer can add their own name and number to the back \u2014 printed just for them, no extra work for you.</p>' : '') +
+        (b.area_personalize ? '<p class="ss-modal__pers-note"><strong>Personalized names:</strong> add a movable name alongside artwork on any enabled print area. Choose a script, playful, or sports font and make buyer entry required or optional. Name & Number reserves its own area.</p>' : '') +
         '<div class="ss-modal__specs">' + specChips + '</div>' +
         '<div class="ss-modal__div"></div>' +
         '<div class="ss-modal__price-head">Retail pricing</div>' +
@@ -1038,8 +1040,8 @@
     if (b.personalize) {
       var pers = document.createElement('span');
       pers.className = 'ss-cat__pers';
-      pers.textContent = '\u2726 Name & Number';
-      pers.title = 'Buyers can add their own name and number to the back';
+      pers.textContent = b.area_personalize ? '\u2726 Personalized names' : '\u2726 Name & Number';
+      pers.title = b.area_personalize ? 'Add required or optional buyer names alongside artwork, plus back Name & Number' : 'Buyers can add their own name and number to the back';
       media.appendChild(pers);
     }
 
