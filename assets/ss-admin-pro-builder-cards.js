@@ -443,6 +443,7 @@
         id: p.id,
         categories: p.categories || p.category || null,
         badge: p.badge || 'Custom Product',
+        personalize: p.personalize === true,
         name: p.name || p.id,
         from: p.from || '',
         hint: p.hint || '',
