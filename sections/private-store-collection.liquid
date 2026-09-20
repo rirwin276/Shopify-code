@@ -569,9 +569,9 @@ document.addEventListener("DOMContentLoaded", function() {
     width: 100%;
     /* The pills are nowrap, so a label wider than its column is CLIPPED, not
        wrapped — on a tablet "Claim this store" came out as "laim this stor".
-       Let these wrap instead. The min-height and centring are untouched, and
-       the vertical padding only takes effect once a label actually needs a
-       second line, so at every width where they already fit nothing moves. */
+       Let these wrap instead. Nothing else changes: no padding and no height,
+       so a label that already fits keeps the exact box it had, and one that
+       did not now wraps inside the pill rather than spilling out of it. */
     white-space: normal;
     text-align: center;
   }
