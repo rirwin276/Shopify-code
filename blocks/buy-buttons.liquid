@@ -110,6 +110,30 @@
                     autocomplete="off" placeholder="{% if name_layer.required %}e.g. Emma{% else %}Leave blank for no name{% endif %}"
                     pattern="(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[A-Za-zÀ-ÖØ-öø-ÿ '.\-]+">
                   <p class="ss-area-pers-note">{% if name_layer.required %}Printed exactly as entered. Longer names are sized to fit.{% else %}Leave blank to keep the design without a name.{% endif %}</p>
+                  {%- comment -%}
+                    Optional second line, stacked under the first INSIDE the
+                    same placed box — the box splits into two bands, so a
+                    second line never squeezes the first out of proportion.
+                    Hidden until asked for, so a buyer who wants one line sees
+                    exactly what they always saw. The property name rides in
+                    the saved layer; listings published before it existed fall
+                    back to the same name with " line 2" appended, which is
+                    what the renderer and Orders look for.
+                  {%- endcomment -%}
+                  {%- assign ss_area_name2_prop = name_layer.property_name_2 -%}
+                  {%- if ss_area_name2_prop == blank -%}
+                    {%- assign ss_area_name2_prop = name_layer.property_name | append: ' line 2' -%}
+                  {%- endif -%}
+                  <button type="button" class="ss-area-addline" data-ss-area-addline>+ Add a second line</button>
+                  <div class="ss-area-line2 ss-area-hidden" data-ss-area-line2-wrap>
+                    <label for="AreaName2-{{ product.id }}-{{ name_layer.area }}">Second line</label>
+                    <input id="AreaName2-{{ product.id }}-{{ name_layer.area }}" type="text" name="properties[{{ ss_area_name2_prop | escape }}]"
+                      aria-label="{{ name_layer.label | escape }} second line (optional)"
+                      data-ss-area-name2 maxlength="{{ name_layer.max_name_len | default: 20 }}"
+                      autocomplete="off" placeholder="e.g. ERA"
+                      pattern="(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[A-Za-zÀ-ÖØ-öø-ÿ '.\-]+">
+                    <button type="button" class="ss-area-removeline" data-ss-area-removeline>Remove second line</button>
+                  </div>
                   <p data-ss-name-status role="status">Loading preview…</p>
                 </div>
               </details>
@@ -126,6 +150,11 @@
             .ss-area-pers label{display:block;font-size:12px;font-weight:700;margin:10px 0 5px}.ss-area-pers label span{font-weight:400;color:#706954}
             .ss-area-pers input{padding:10px 12px;border:1px solid #11100e29;border-radius:10px;font-size:16px;width:100%;box-sizing:border-box}
             .ss-area-pers .ss-area-pers-note{font-size:11.5px;margin:8px 0}
+            .ss-area-hidden{display:none!important}
+            .ss-area-line2{display:block}
+            .ss-area-addline,.ss-area-removeline{display:block;appearance:none;border:0;background:none;padding:8px 0 0;font-size:12px;font-weight:700;color:#8a7736;cursor:pointer;text-decoration:underline}
+            .ss-area-addline:hover,.ss-area-removeline:hover{color:#6d5c26}
+            .ss-area-removeline{font-weight:600;color:rgba(17,16,14,.45)}
             .ss-name-accel-held{display:none!important}
           </style>
         {%- endif -%}

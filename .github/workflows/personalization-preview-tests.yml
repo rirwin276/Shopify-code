@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'assets/ss-tote-personalize.js'
+      - 'assets/ss-area-personalize.js'
       - 'blocks/buy-buttons.liquid'
       - 'tests/js_harness/personalization_outline_harness.js'
       - '.github/workflows/personalization-preview-tests.yml'
@@ -16,4 +17,5 @@ jobs:
         with:
           node-version: '24'
       - run: node --check assets/ss-tote-personalize.js
+      - run: node --check assets/ss-area-personalize.js
       - run: node tests/js_harness/personalization_outline_harness.js

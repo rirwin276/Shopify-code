@@ -19,13 +19,17 @@
     if(root.dataset.ssAreaReady)return;root.dataset.ssAreaReady='1';
     var input=root.querySelector('[data-ss-area-name]'),canvas=root.querySelector('canvas'),status=root.querySelector('[data-ss-name-status]'),form=root.closest('form');
     if(!input||!canvas||!form)return;
+    var input2=root.querySelector('[data-ss-area-name2]'),line2Wrap=root.querySelector('[data-ss-area-line2-wrap]'),
+        addLine=root.querySelector('[data-ss-area-addline]'),removeLine=root.querySelector('[data-ss-area-removeline]');
     var cfg;try{cfg=JSON.parse(root.dataset.config);}catch(e){input.setCustomValidity('This name design could not load. Please reload the page.');return;}
     var entryKey=root.dataset.productId+':'+cfg.area;
     if(!input.value&&enteredNames.has(entryKey))input.value=enteredNames.get(entryKey);
     var color=root.dataset.initialColor,background=null,base=null,family='',pattern=null,maps={},ready=false,revision=0,drawHelper;
     function valid(){
       var text=input.value.trim();
-      var optionalBlank=cfg.required===false&&!text;
+      // A second line sits UNDER the first, so an optional area with only a
+      // second line still needs the first one filled in.
+      var optionalBlank=cfg.required===false&&!text&&!(line2Active()&&input2&&input2.value.trim());
       input.setCustomValidity(optionalBlank?'':!ready?'Please wait for the name preview to load.':
         (!/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(text)?'Enter the name you want printed on this area.':''));
     }
@@ -40,9 +44,9 @@
       ctx.drawImage(background,x*background.width,y*background.height,crop*background.width,crop*background.height,0,0,size,size);
       var area={left:(b.left/100-x)/crop*size,top:(b.top/100-y)/crop*size,width:b.width/100/crop*size,height:b.height/100/crop*size};
       if(base)ctx.drawImage(base,area.left,area.top,area.width,area.height);
-      var p=cfg.placement,text=input.value.trim();
-      status.textContent=text?'Check your spelling in the preview.':cfg.required?'Your name will appear in the preview.':'No name added.';
-      if(text)drawHelper.draw(ctx,text,{left:area.left+p.left*area.width,top:area.top+p.top*area.height,width:p.width*area.width,height:p.height*area.height},family,cfg.color_hex,cfg.outline_color_hex,pattern?{image:pattern,size:area.width/4.5,x:area.left,y:area.top}:null);
+      var p=cfg.placement,lines=nameLines();
+      status.textContent=lines.length?'Check your spelling in the preview.':cfg.required?'Your name will appear in the preview.':'No name added.';
+      if(lines.length)drawHelper.draw(ctx,lines,{left:area.left+p.left*area.width,top:area.top+p.top*area.height,width:p.width*area.width,height:p.height*area.height},family,cfg.color_hex,cfg.outline_color_hex,pattern?{image:pattern,size:area.width/4.5,x:area.left,y:area.top}:null);
     }
     function fail(){ready=false;valid();status.textContent='The name preview could not load. Reload this page to review your name before ordering.';}
     function loadColor(){
@@ -51,7 +55,39 @@
       if(!url){fail();return Promise.resolve();}
       return image(url).then(function(img){if(request!==revision)return;background=img;ready=!!family;valid();draw();}).catch(fail);
     }
-    input.addEventListener('input',function(){input.value=input.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ '.-]/g,'').slice(0,cfg.max_name_len||20);enteredNames.set(entryKey,input.value);valid();draw();});
+    // Lines the buyer has actually filled in. A blank or punctuation-only
+    // second line is simply not a line — the renderer applies the same rule.
+    function nameLines(){
+      var out=[],first=input.value.trim(),second=line2Active()&&input2?input2.value.trim():'';
+      if(/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(first))out.push(first);
+      if(/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(second))out.push(second);
+      return out;
+    }
+    function line2Active(){return !!(line2Wrap&&!line2Wrap.classList.contains('ss-area-hidden'));}
+    function setLine2(open,focus){
+      if(!line2Wrap)return;
+      line2Wrap.classList.toggle('ss-area-hidden',!open);
+      if(addLine)addLine.classList.toggle('ss-area-hidden',open);
+      // Clearing on close keeps a removed line out of the order properties.
+      if(input2&&!open){input2.value='';enteredNames.delete(entryKey+':2');}
+      valid();draw();
+      // Only a tap on "Add a second line" moves focus — restoring a line the
+      // buyer already typed must not yank the page around on load.
+      if(open&&focus&&input2)input2.focus();
+    }
+    function wireName(field,key){
+      if(!field)return;
+      field.addEventListener('input',function(){
+        field.value=field.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ '.-]/g,'').slice(0,cfg.max_name_len||20);
+        enteredNames.set(key,field.value);valid();draw();
+      });
+    }
+    wireName(input,entryKey);wireName(input2,entryKey+':2');
+    if(addLine)addLine.addEventListener('click',function(){setLine2(true,true);});
+    if(removeLine)removeLine.addEventListener('click',function(){setLine2(false);});
+    // A second line the buyer already typed survives a variant re-render.
+    if(input2&&!input2.value&&enteredNames.get(entryKey+':2'))input2.value=enteredNames.get(entryKey+':2');
+    if(input2&&input2.value)setLine2(true);
     function ensureValid(e){
       if(e.type==='click'&&(!e.target.closest||!e.target.closest('[type="submit"]')))return;
       valid();if(!input.checkValidity()){e.preventDefault();e.stopImmediatePropagation();var details=root.closest('details');if(details)details.open=true;input.reportValidity();}
