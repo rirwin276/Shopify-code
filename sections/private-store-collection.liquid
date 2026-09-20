@@ -898,6 +898,34 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  /* Tablet portrait: 769-990, where the card is still a rail but the panel had
+     already gone two-across.
+
+     The rule above turns the panel two-across below 990 because the rule beside
+     it stacks the card, and a full-width card has room for two pills. The card
+     does not actually stack there. assets/storefront-fixed-layouts.css — loaded
+     first by the layout-state section — pins
+
+       .ps-hero-card { grid-template-columns: minmax(0, 1fr) 236px !important }
+
+     with no media query at all, at a specificity (two ids) nothing here can
+     reach. It patches itself back for phones inside its own max-width:768
+     blocks, so 769-990 is the one band where the override stands unanswered:
+     the rail stays 236px wide and the two columns land inside it at 96px each.
+     That is the portrait iPad in the recording — every label wrapped to three
+     lines in a pill the width of a thumbnail, while the same page in landscape
+     (above 990, one column) was clean.
+
+     Rather than fight an !important two ids deep, agree with it: while the card
+     keeps its rail, keep the panel single-column, which is exactly what
+     landscape already does. Bounded at 769 so it cannot overlap the phone block
+     below — phones keep two-across and are untouched. */
+  @media (min-width: 769px) and (max-width: 990px) {
+    #ps-storefront-{{ section.id }} .ps-action-panel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
   @media (max-width: 768px) {
     #ps-storefront-{{ section.id }} {
       padding: 8px 10px 8px;
