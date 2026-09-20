@@ -7,6 +7,7 @@ on:
       - 'assets/ss-area-personalize.js'
       - 'blocks/buy-buttons.liquid'
       - 'tests/js_harness/personalization_outline_harness.js'
+      - 'tests/js_harness/area_preview_mockup_harness.js'
       - '.github/workflows/personalization-preview-tests.yml'
 jobs:
   preview:
@@ -19,3 +20,4 @@ jobs:
       - run: node --check assets/ss-tote-personalize.js
       - run: node --check assets/ss-area-personalize.js
       - run: node tests/js_harness/personalization_outline_harness.js
+      - run: node tests/js_harness/area_preview_mockup_harness.js

@@ -24,7 +24,7 @@
     var cfg;try{cfg=JSON.parse(root.dataset.config);}catch(e){input.setCustomValidity('This name design could not load. Please reload the page.');return;}
     var entryKey=root.dataset.productId+':'+cfg.area;
     if(!input.value&&enteredNames.has(entryKey))input.value=enteredNames.get(entryKey);
-    var color=root.dataset.initialColor,background=null,base=null,family='',pattern=null,maps={},ready=false,revision=0,drawHelper;
+    var color=root.dataset.initialColor,background=null,base=null,family='',pattern=null,maps={},ready=false,revision=0,drawHelper,printed=false;
     function valid(){
       var text=input.value.trim();
       // A second line sits UNDER the first, so an optional area with only a
@@ -43,17 +43,30 @@
       var y=Math.max(0,Math.min(1-crop,(b.top+b.height/2)/100-crop/2));
       ctx.drawImage(background,x*background.width,y*background.height,crop*background.width,crop*background.height,0,0,size,size);
       var area={left:(b.left/100-x)/crop*size,top:(b.top/100-y)/crop*size,width:b.width/100/crop*size,height:b.height/100/crop*size};
-      if(base)ctx.drawImage(base,area.left,area.top,area.width,area.height);
+      // With a printed preview mockup the artwork is already ON the garment,
+      // photographed as it is actually made. Without one, fall back to pasting
+      // the flat print file into the print box — rougher, but it still shows
+      // the buyer what their name sits next to.
+      if(base&&!printed)ctx.drawImage(base,area.left,area.top,area.width,area.height);
       var p=cfg.placement,lines=nameLines();
       status.textContent=lines.length?'Check your spelling in the preview.':cfg.required?'Your name will appear in the preview.':'No name added.';
       if(lines.length)drawHelper.draw(ctx,lines,{left:area.left+p.left*area.width,top:area.top+p.top*area.height,width:p.width*area.width,height:p.height*area.height},family,cfg.color_hex,cfg.outline_color_hex,pattern?{image:pattern,size:area.width/4.5,x:area.left,y:area.top}:null);
     }
     function fail(){ready=false;valid();status.textContent='The name preview could not load. Reload this page to review your name before ordering.';}
+    // The garment photo for this colour: the one with the store's artwork
+    // already printed on it when the build made one, otherwise the blank.
+    function garmentUrl(){
+      var withArt=(cfg.preview_mockups||{})[color];
+      return {url:withArt||maps[color]||'',printed:!!withArt};
+    }
     function loadColor(){
       var request=++revision;ready=false;valid();status.textContent='Loading name preview…';
-      var url=maps[color];
-      if(!url){fail();return Promise.resolve();}
-      return image(url).then(function(img){if(request!==revision)return;background=img;ready=!!family;valid();draw();}).catch(fail);
+      var pick=garmentUrl();
+      if(!pick.url){fail();return Promise.resolve();}
+      return image(pick.url).then(function(img){
+        if(request!==revision)return;
+        background=img;printed=pick.printed;ready=!!family;valid();draw();
+      }).catch(fail);
     }
     // Lines the buyer has actually filled in. A blank or punctuation-only
     // second line is simply not a line — the renderer applies the same rule.
