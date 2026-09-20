@@ -567,6 +567,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   #ps-storefront-{{ section.id }} .ps-action-panel .ps-btn {
     width: 100%;
+    /* The pills are nowrap, so a label wider than its column is CLIPPED, not
+       wrapped — on a tablet "Claim this store" came out as "laim this stor".
+       Let these wrap instead. The min-height and centring are untouched, and
+       the vertical padding only takes effect once a label actually needs a
+       second line, so at every width where they already fit nothing moves. */
+    white-space: normal;
+    text-align: center;
   }
 
   /* Try the admin — gold, so it reads as the second thing to do, not a
