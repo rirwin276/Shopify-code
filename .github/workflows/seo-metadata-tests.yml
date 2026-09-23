@@ -1,0 +1,80 @@
+name: SEO metadata tests
+on:
+  push:
+    branches: [fix/seo-metadata-20260922]
+    paths:
+      - 'scripts/repair_seo_metadata_20260922.py'
+      - 'tests/seo_metadata.cjs'
+      - '.github/workflows/seo-metadata-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'layout/theme.liquid'
+      - 'snippets/meta-tags.liquid'
+      - 'tests/seo_metadata.cjs'
+      - '.github/workflows/seo-metadata-tests.yml'
+permissions:
+  contents: read
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false liquidjs@10.21.1
+      - name: Apply guarded repair on the repair branch only
+        if: github.event_name == 'push' && github.ref == 'refs/heads/fix/seo-metadata-20260922'
+        run: python scripts/repair_seo_metadata_20260922.py
+      - name: Render public and private metadata; check behavioral preservation
+        run: node tests/seo_metadata.cjs
+      - run: git diff --check
+      - name: Save tested SEO assets on the repair branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/fix/seo-metadata-20260922'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add layout/theme.liquid snippets/meta-tags.liquid main_deploy/assets.json preview_deploy/assets.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Repair duplicate SEO metadata and accurate team-store messaging"
+            git push origin HEAD:fix/seo-metadata-20260922
+          fi
+      - name: Read-only public SEO audit (not a deployment)
+        if: always()
+        shell: python
+        run: |
+          import json, urllib.request, urllib.error
+          from html.parser import HTMLParser
+          class Head(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.titles=[]; self.descriptions=[]; self.canonicals=[]; self.robots=[]; self.h1=[]; self.tag=None; self.buf=[]
+              def handle_starttag(self, tag, attrs):
+                  attrs=dict(attrs)
+                  if tag in ('title','h1'): self.tag=tag; self.buf=[]
+                  if tag=='meta' and attrs.get('name')=='description': self.descriptions.append(attrs.get('content'))
+                  if tag=='meta' and attrs.get('name')=='robots': self.robots.append(attrs.get('content'))
+                  if tag=='link' and attrs.get('rel')=='canonical': self.canonicals.append(attrs.get('href'))
+              def handle_data(self, data):
+                  if self.tag: self.buf.append(data)
+              def handle_endtag(self, tag):
+                  if tag==self.tag:
+                      (self.titles if tag=='title' else self.h1).append(' '.join(''.join(self.buf).split())); self.tag=None
+          paths=['/','/pages/private-storefronts','/pages/support','/pages/portal','/blogs/news','/robots.txt','/sitemap.xml']
+          for path in paths:
+              result={'path':path}
+              try:
+                  req=urllib.request.Request('https://stellasageco.com'+path,headers={'User-Agent':'StellaSage-SEO-Verification/1.0'})
+                  with urllib.request.urlopen(req,timeout=20) as response:
+                      result.update(status=response.status,url=response.url,content_type=response.headers.get('Content-Type')); text=response.read(2500000).decode('utf-8','replace')
+                  if 'text/html' in (result['content_type'] or ''):
+                      parsed=Head(); parsed.feed(text)
+                      result.update(titles=parsed.titles,descriptions=parsed.descriptions,canonicals=parsed.canonicals,robots=parsed.robots,h1=parsed.h1)
+                  else: result['sample']=text[:600]
+              except Exception as error: result['error']=str(error)[:250]
+              print('LIVE_SEO '+json.dumps(result))
