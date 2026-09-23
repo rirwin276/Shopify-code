@@ -7,10 +7,17 @@ const root = path.resolve(__dirname, '..');
 const read = p => fs.readFileSync(path.join(root, p), 'utf8');
 const theme = read('layout/theme.liquid');
 const meta = read('snippets/meta-tags.liquid');
-const engine = new Liquid({ root: path.join(root, 'snippets'), extname: '.liquid' });
-engine.registerFilter('json', value => JSON.stringify(value));
-engine.registerFilter('image_url', value => typeof value === 'string' ? value : value.url);
-engine.registerFilter('money_without_currency', value => (Number(value) / 100).toFixed(2));
+// Shopify objects remain available inside render; locally assigned SEO variables
+// do not. Keep that distinction in the test rather than weakening image checks.
+const globalNames = ['request', 'template', 'shop', 'page', 'product', 'blog', 'cart', 'settings', 'page_title', 'page_description', 'page_image', 'canonical_url', 'current_page', 'current_tags'];
+async function render(source, context) {
+  const globals = Object.fromEntries(globalNames.map(name => [name, context[name]]));
+  const engine = new Liquid({ root: path.join(root, 'snippets'), extname: '.liquid', globals });
+  engine.registerFilter('json', value => JSON.stringify(value));
+  engine.registerFilter('image_url', value => typeof value === 'string' ? value : value.url);
+  engine.registerFilter('money_without_currency', value => (Number(value) / 100).toFixed(2));
+  return engine.parseAndRender(source, context);
+}
 const privacyStart = theme.indexOf('{%- liquid\n      assign is_private_store_collection');
 const privacyEnd = theme.indexOf('    {%- comment -%}\n      STELLA & SAGE ANTI-FLASH GUARD');
 const copyStart = theme.indexOf('{%- liquid\n      assign ss_seo_title');
@@ -30,7 +37,7 @@ const matches = (s, re) => [...s.matchAll(re)];
 let count = 0;
 async function check(label, overrides, expected = {}) {
   const context = { ...base, ...overrides };
-  const html = await engine.parseAndRender(source, context);
+  const html = await render(source, context);
   const titles = matches(html, /<title>([\s\S]*?)<\/title>/gi);
   assert.equal(titles.length, 1, `${label}: one title`);
   assert.equal(matches(html, /<meta\s+name="description"[^>]*>/gi).length, 1, `${label}: one description`);
@@ -73,7 +80,7 @@ async function check(label, overrides, expected = {}) {
   await check('obsolete catalog', { request: { page_type: 'page' }, page: { handle: 'stella-sage-shop' }, canonical_url: 'https://stellasageco.com/pages/stella-sage-shop' }, { noindex: true, canonical: 'https://stellasageco.com/' });
   await check('shared private store image', { request: { page_type: 'collection' }, template: { name: 'collection', suffix: 'private-store' }, ss_preview_img: { url: '//cdn.shopify.com/test.png' }, ss_store_entry: { name: 'Fixture Team' } }, { noindex: true, socialImage: 'https://cdn.shopify.com/test.png' });
   await check('absolute HTTPS image is not double prefixed', { page_image: { url: 'https://cdn.shopify.com/test.png' } }, { socialImage: 'https://cdn.shopify.com/test.png' });
-  const password = await engine.parseAndRender(meta, { ...base, request: { page_type: 'password', origin: 'https://stellasageco.com' } });
+  const password = await render(meta, { ...base, request: { page_type: 'password', origin: 'https://stellasageco.com' } });
   assert.equal(matches(password, /<title>/g).length, 1);
   assert.equal(matches(password, /rel="canonical"/g).length, 1);
   assert.equal(matches(password, /name="description"/g).length, 1);
@@ -81,7 +88,7 @@ async function check(label, overrides, expected = {}) {
   console.log('PASS password-layout fallback'); count++;
   const orgBlock = matches(theme, /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g).find(m => m[1].includes('Organization'));
   assert(orgBlock);
-  const org = JSON.parse(await engine.parseAndRender(orgBlock[1], base));
+  const org = JSON.parse(await render(orgBlock[1], base));
   assert(!org.description.includes('fundraising'));
   assert(org.description.includes('Free private team stores'));
   console.log('PASS valid, accurate Organization JSON-LD'); count++;
