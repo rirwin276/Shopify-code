@@ -1,9 +1,10 @@
 name: SEO metadata tests
 on:
   push:
-    branches: [fix/seo-metadata-20260922]
+    branches: [main, fix/seo-metadata-20260922]
     paths:
-      - 'scripts/repair_seo_metadata_20260922.py'
+      - 'layout/theme.liquid'
+      - 'snippets/meta-tags.liquid'
       - 'tests/seo_metadata.cjs'
       - '.github/workflows/seo-metadata-tests.yml'
   pull_request:
@@ -19,32 +20,20 @@ jobs:
   metadata:
     runs-on: ubuntu-latest
     timeout-minutes: 8
-    permissions:
-      contents: write
+    env:
+      SEO_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || 'e89b6eb561918a2dc30e5cb1161551de22e6bc10' }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - run: npm install --no-save --package-lock=false liquidjs@10.21.1
-      - name: Apply guarded repair on the repair branch only
-        if: github.event_name == 'push' && github.ref == 'refs/heads/fix/seo-metadata-20260922'
-        run: python scripts/repair_seo_metadata_20260922.py
       - name: Render public and private metadata; check behavioral preservation
         run: node tests/seo_metadata.cjs
       - run: git diff --check
-      - name: Save tested SEO assets on the repair branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/fix/seo-metadata-20260922'
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add layout/theme.liquid snippets/meta-tags.liquid main_deploy/assets.json preview_deploy/assets.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Repair duplicate SEO metadata and accurate team-store messaging"
-            git push origin HEAD:fix/seo-metadata-20260922
-          fi
       - name: Read-only public SEO audit (not a deployment)
         if: always()
         shell: python
@@ -69,7 +58,7 @@ jobs:
           for path in paths:
               result={'path':path}
               try:
-                  req=urllib.request.Request('https://stellasageco.com'+path,headers={'User-Agent':'StellaSage-SEO-Verification/1.0'})
+                  req=urllib.request.Request('https://stellasageco.com'+path,headers={'User-Agent':'StellaSage-SEO-Verification/1.0','Cache-Control':'no-cache'})
                   with urllib.request.urlopen(req,timeout=20) as response:
                       result.update(status=response.status,url=response.url,content_type=response.headers.get('Content-Type')); text=response.read(2500000).decode('utf-8','replace')
                   if 'text/html' in (result['content_type'] or ''):
