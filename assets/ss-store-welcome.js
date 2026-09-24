@@ -7,7 +7,11 @@
   var cfg = window.SSAP || {};
   // Keep the same welcome state through demo -> claim on this device.
   var key = 'ss-store-welcome-v1:' + (cfg.shopHandle || cfg.collectionHandle || '');
-  try { entry.hidden = localStorage.getItem(key) === 'read'; } catch (_) {}
+  try {
+    entry.hidden = localStorage.getItem(key) === 'read';
+    var savedNote = document.querySelector('.ss-store-welcome');
+    if (entry.hidden && savedNote) savedNote.open = false;
+  } catch (_) {}
   function read() {
     entry.hidden = true;
     try { localStorage.setItem(key, 'read'); } catch (_) {}
@@ -24,3 +28,4 @@
   });
   if (tab.getAttribute('aria-selected') === 'true') read();
 })();
+
