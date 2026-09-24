@@ -220,7 +220,16 @@
       var x = boxLeft + (boxW - width) / 2 + left;
       var y = top + (m.actualBoundingBoxAscent || size * 0.74) + radius;
       ctx.lineJoin = 'round'; ctx.strokeStyle = outlineHex; ctx.lineWidth = radius * 2;
-      if (radius) ctx.strokeText(text, x, y); ctx.fillText(text, x, y);
+      if (colorHex === '#00000000') {
+        // Cut the center out on a separate layer, preserving the garment photo.
+        var hollow = document.createElement('canvas'); hollow.width=ctx.canvas.width; hollow.height=ctx.canvas.height;
+        var ink=hollow.getContext('2d'); ink.setTransform(ctx.getTransform());
+        ink.font=ctx.font; ink.textAlign=ctx.textAlign; ink.textBaseline=ctx.textBaseline;
+        ink.lineJoin='round'; ink.strokeStyle=outlineHex; ink.lineWidth=radius*2;
+        if(radius)ink.strokeText(text,x,y);
+        ink.globalCompositeOperation='destination-out'; ink.fillStyle='#000'; ink.fillText(text,x,y);
+        ctx.save(); ctx.setTransform(1,0,0,1,0,0); ctx.drawImage(hollow,0,0); ctx.restore();
+      } else { if (radius) ctx.strokeText(text, x, y); ctx.fillText(text, x, y); }
     }
 
     // Mirror of personalization.py :: nn_layout. Allocates the vertical bands
