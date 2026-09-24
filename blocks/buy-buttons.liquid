@@ -297,6 +297,11 @@
         {%- if block_settings.gift_card_form and product.gift_card? -%}
           {%- render 'gift-card-recipient-form', product: product, form: form, section: section, block: block -%}
         {%- endif -%}
+        {%- unless product.gift_card? -%}
+          <p class="ss-print-color-notice" style="font-size:13px;line-height:1.5;margin:12px 0;">
+            <strong>Print &amp; color note:</strong> Printed colors, especially black, may appear lighter or darker than the mockup. Fabric and garment color affect the finished appearance, and black ink may not match the garment’s black. Printing or manufacturing defects are still covered by our support policy.
+          </p>
+        {%- endunless -%}
         <div
           class="product-form-buttons spacing-style{% if block_settings.stacking %} product-form-buttons--stacked{% endif %}"
           style="{% render 'spacing-style', settings: block_settings %}"
