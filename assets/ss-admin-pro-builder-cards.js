@@ -49,7 +49,7 @@
       hint: 'Front or front + back printing',
       route: '/editor/pro-shirt/bc3413',
       gallery: [IMG.bc3413],
-      desc: 'The BC3413 is a cult-favorite unisex tri-blend tee known for its super-soft hand feel and flattering drape. Made from a premium cotton-poly-rayon blend, it holds vibrant prints beautifully and has the kind of lived-in quality your customers will reach for every day.',
+      desc: 'The BC3413 is a soft unisex tri-blend tee with a flattering drape and a comfortable, lived-in feel. Its cotton-poly-rayon blend pairs well with designs that suit a softer, vintage print finish.',
       specs: ['52% Cotton · 25% Polyester · 23% Rayon', 'Ultra-lightweight 3.8 oz/yd²', 'Retail fit · Side-seamed · Tearaway label'],
       sizes: 'S · M · L · XL · 2XL · 3XL',
       colors: 'Choose up to 2 garment colors per listing',
@@ -336,6 +336,23 @@
     hat39165: ['hats']
   };
   var activeCategory = 'all';
+
+  function productTips(builder) {
+    var id = String(builder.id || '').toLowerCase();
+    var text = [builder.name, builder.badge].concat(builder.specs || []).join(' ').toLowerCase();
+    var tips = [];
+    if (/zip/.test(text)) tips.push('Keep artwork and lettering clear of the zipper. Use the printable areas shown in the builder.');
+    else if (/hoodie|hooded/.test(text)) tips.push('Keep front artwork above the pocket. The hood can cover the highest part of a back design.');
+    else if (/tank|racerback/.test(text)) tips.push('This cut has a narrower print area. Keep lettering and important details inside the builder guides.');
+    else if (/hat|cap/.test(text)) tips.push('Simple, bold artwork works best in the smaller front print area. Avoid tiny lettering and fine details.');
+    else if (/tote/.test(text)) tips.push('Center important details inside the printable area, clear of the handles and seams.');
+    else tips.push('Check the size chart for this style. Artwork may be scaled down on smaller garment sizes.');
+    if (id === 'bc3413' || id === 'nl6733') tips.push('DTG prints on this blended fabric have a softer, vintage finish.');
+    else if (id === 'hat39165') tips.push('This hat uses DTFlex printing, not embroidery. The print may feel firmer at first.');
+    else tips.push('Print color and texture can vary with the fabric. Black ink may look lighter, especially on dark garments.');
+    if (/youth/.test(text)) tips.push('Use the youth size chart rather than matching an adult size by its letter.');
+    return tips;
+  }
 
   function builderCategories(builder) {
     var raw = builder && (builder.categories || builder.category);
@@ -756,6 +773,8 @@
     '}',
 
     /* Spec chips */
+    '.ss-modal__tips{margin-top:16px;padding:12px 14px;border:1px solid #b7a36a55;border-radius:12px;background:#b7a36a0d;color:#39342a;font-size:12px;line-height:1.5;}',
+    '.ss-modal__tips strong{font-size:13px;color:#17150f;}.ss-modal__tips ul{margin:7px 0 0;padding-left:18px;}.ss-modal__tips li+li{margin-top:5px;}',
     '.ss-modal__specs{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;}',
     '.ss-modal__spec{',
       'font-size:11px;font-weight:700;',
@@ -972,6 +991,7 @@
         (b.personalize ? '<p class="ss-modal__pers-note">\u2726 <strong>Name &amp; Number:</strong> flip one switch in the builder and every buyer can add their own name and number to the back \u2014 printed just for them, no extra work for you.</p>' : '') +
         (b.area_personalize ? '<p class="ss-modal__pers-note"><strong>Personalized names:</strong> add a movable name alongside artwork on any enabled print area. Choose a script, playful, or sports font and make buyer entry required or optional. Name & Number reserves its own area.</p>' : '') +
         '<div class="ss-modal__specs">' + specChips + '</div>' +
+        '<aside class="ss-modal__tips" aria-label="Things to know"><strong>Things to know</strong><ul>' + productTips(b).map(function(tip){return '<li>' + esc(tip) + '</li>';}).join('') + '</ul></aside>' +
         '<div class="ss-modal__div"></div>' +
         '<div class="ss-modal__price-head">Retail pricing</div>' +
         '<div class="ss-modal__price-card">' + priceRows + '</div>' +
