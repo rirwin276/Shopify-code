@@ -530,6 +530,16 @@
     {%- endcomment -%}
     {% render 'storefront-paint-report' %}
     <script src="{{ 'ss-anonymous-demo-conversion.js' | asset_url }}" defer></script>
+    {%- if customer -%}
+      {%- assign ss_can_message = false -%}
+      {%- for tag in customer.tags -%}
+        {%- if tag == 'super-admin' or tag contains 'storefront-admin--' or tag contains 'b2b-admin-' -%}{%- assign ss_can_message = true -%}{%- endif -%}
+      {%- endfor -%}
+      {%- if ss_can_message -%}
+        {{ 'ss-store-messages.css' | asset_url | stylesheet_tag }}
+        <script src="{{ 'ss-store-messages.js' | asset_url }}" defer></script>
+      {%- endif -%}
+    {%- endif -%}
   </body>
 </html>
 {% comment %}
@@ -544,3 +554,4 @@ Changes:
     contains '/account' and ss_is_auth_page == false -%}"
   position: 1135..1265
 {% endcomment %}
+

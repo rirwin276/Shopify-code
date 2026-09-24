@@ -963,7 +963,10 @@
     </div>
   </header>
 
+  {{ 'ss-store-messages.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'ss-store-messages.js' | asset_url }}" defer></script>
   <div class="gm-page">
+    <section class="ss-msg-inbox-entry"><div><h2>Store messages</h2><p>Questions, product feedback, and a personal reply from Stella &amp; Sage.</p></div><button type="button" data-ss-open-inbox>Open inbox</button></section>
     <div class="gm-card" id="newStoreBanner" style="display:none;">
       <h2 class="gm-banner-title" id="newStoreTitle"></h2>
       <div class="gm-banner-list" id="newStoreList"></div>
@@ -2424,3 +2427,4 @@
 
 </body>
 </html>
+
