@@ -35,3 +35,17 @@ test('product action links product context without silently sending',async()=>{
 test('inbox switches stores and retains unsent drafts independently',async()=>{
  const {dom,w}=setup({inbox:true});w.document.querySelector('[data-ss-open-inbox]').click();await tick();let choices=w.document.querySelectorAll('.ss-msg-thread');choices[0].click();await tick();w.document.querySelector('textarea').value='Draft A';choices=w.document.querySelectorAll('.ss-msg-thread');choices[1].click();await tick();assert.equal(w.document.querySelector('textarea').value,'');w.document.querySelectorAll('.ss-msg-thread')[0].click();await tick();assert.equal(w.document.querySelector('textarea').value,'Draft A');w.dispatchEvent(new w.Event('pagehide'));dom.window.close();
 });
+
+// Evaluate the real responsive rules at phone/tablet/desktop widths. jsdom does
+// not lay out pixels; this verifies breakpoint selection, pane visibility and
+// touch-control rules rather than claiming screenshot coverage.
+for(const width of [320,390,820,1440])test('responsive inbox rules at '+width+'px',()=>{
+ const css=fs.readFileSync(path.join(__dirname,'../assets/ss-store-messages.css'),'utf8');
+ const parse=new JSDOM('<style>'+css+'</style>');
+ function applies(condition){const max=condition.match(/max-width:\s*(\d+)px/),min=condition.match(/min-width:\s*(\d+)px/);if(condition.includes('prefers-reduced-motion'))return false;return (!max||width<=+max[1])&&(!min||width>=+min[1]);}
+ function flatten(rules){return [...rules].map(r=>r.type===4?(applies(r.conditionText)?flatten(r.cssRules):''):r.cssText).join('\n');}
+ const selected=flatten(parse.window.document.styleSheets[0].cssRules);const dom=new JSDOM('<style>'+selected+'</style><div class="ss-messages"><div class="ss-msg-shell" data-mode="inbox"><aside class="ss-msg-sidebar"></aside><section class="ss-msg-conversation"><button class="ss-msg-back">Back</button><form class="ss-msg-compose"><textarea></textarea><button class="ss-msg-send">Send</button></form></section></div></div>');const w=dom.window,shell=w.document.querySelector('.ss-msg-shell'),get=s=>w.getComputedStyle(w.document.querySelector(s));
+ assert.equal(get('.ss-msg-conversation').display,width<=700?'none':'flex');
+ assert.equal(get('.ss-msg-back').display,width<=700?'block':'none');shell.classList.add('has-thread');assert.equal(get('.ss-msg-conversation').display,'flex');assert.equal(get('.ss-msg-sidebar').display,width<=700?'none':'flex');assert.equal(get('textarea').fontSize,'16px');assert.equal(get('.ss-msg-send').minHeight,'44px');
+ parse.window.close();dom.window.close();
+});
