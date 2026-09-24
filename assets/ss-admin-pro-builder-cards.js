@@ -339,7 +339,7 @@
 
   function productTips(builder) {
     var id = String(builder.id || '').toLowerCase();
-    var text = [builder.name, builder.badge].concat(builder.specs || []).join(' ').toLowerCase();
+    var text = [builder.name, builder.badge, builder.hint].concat(builder.specs || []).join(' ').toLowerCase();
     var tips = [];
     if (/zip/.test(text)) tips.push('Keep artwork and lettering clear of the zipper. Use the printable areas shown in the builder.');
     else if (/hoodie|hooded/.test(text)) tips.push('Keep front artwork above the pocket. The hood can cover the highest part of a back design.');
@@ -349,7 +349,9 @@
     else tips.push('Check the size chart for this style. Artwork may be scaled down on smaller garment sizes.');
     if (id === 'bc3413' || id === 'nl6733') tips.push('DTG prints on this blended fabric have a softer, vintage finish.');
     else if (id === 'hat39165') tips.push('This hat uses DTFlex printing, not embroidery. The print may feel firmer at first.');
+    else if (/dtflex|\bdtf\b/.test(text)) tips.push('DTFlex has a smooth transferred finish. Fine details need enough thickness, and large solid designs can feel firmer.');
     else tips.push('Print color and texture can vary with the fabric. Black ink may look lighter, especially on dark garments.');
+    if (/eu sizing/.test(text)) tips.push('This style uses EU sizing. Check its size chart before choosing a size.');
     if (/youth/.test(text)) tips.push('Use the youth size chart rather than matching an adult size by its letter.');
     return tips;
   }
