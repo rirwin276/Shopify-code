@@ -83,7 +83,7 @@
       this.shell.classList.add('has-thread');this.form.hidden=true;this.history.replaceChildren(node('p','ss-msg-empty','Loading your conversation…'));this.list();
       try { const data=await api('/store/'+encodeURIComponent(handle)); if(seq!==this.epoch)return;this.messages=data.messages;this.hasOlder=data.has_older;this.staff=data.staff;
         this.root.querySelector('.ss-msg-header h3').textContent=data.staff?data.store.name:'Stella & Sage';
-        this.root.querySelector('.ss-msg-header p').textContent=data.staff?'Private conversation with this store’s admins':data.store.name+' · We’re here to help';
+        this.root.querySelector('.ss-msg-header p').textContent=data.staff?'Private conversation with this store’s admins':data.store.name+' · Shared with your store admins';
         this.root.querySelector('.ss-msg-note').textContent=data.staff?'All admins of this store can see this conversation.':'Your message goes to our small team. A real person will reply here as soon as we can.';
         this.text.placeholder=data.staff?'Write to this store’s admins…':'Ask a question about your store…';this.form.hidden=false;this.render(true);this.read();
       } catch(err){if(seq!==this.epoch)return;this.history.replaceChildren(node('p','ss-msg-empty',err.message));const retry=node('button','ss-msg-older','Try again');retry.type='button';retry.onclick=()=>this.open(handle);this.history.appendChild(retry);}
@@ -112,7 +112,7 @@
       if(this.busy||!this.handle)return;if(!this.text.value.trim()&&!this.image){this.status.textContent='Write a message or attach a screenshot.';this.text.focus();return;}
       this.busy=true;const handle=this.handle;const button=this.root.querySelector('.ss-msg-send');button.disabled=true;button.textContent='Sending…';this.text.disabled=true;this.root.querySelector('[data-attach]').disabled=true;this.status.textContent='';
       this.nonce=this.nonce||crypto.randomUUID();const payload={text:this.text.value.trim(),image:this.image,product:this.product?this.product.handle:'',nonce:this.nonce};
-      try{const data=await api('/store/'+encodeURIComponent(handle),payload);if(!this.messages.some(m=>m.id===data.message.id))this.messages.push(data.message);this.text.value='';this.image='';this.product=null;this.file.value='';this.nonce=null;this.drafts.delete(handle);this.context();this.render(true);this.status.textContent='Message sent. We’ll reply here as soon as we can.';await this.read();await refresh();}
+      try{const data=await api('/store/'+encodeURIComponent(handle),payload);if(!this.messages.some(m=>m.id===data.message.id))this.messages.push(data.message);this.text.value='';this.image='';this.product=null;this.file.value='';this.nonce=null;this.drafts.delete(handle);this.context();this.render(true);this.status.textContent=this.staff?'Message sent to this store’s admins.':'Message sent. We’ll reply here as soon as we can.';await this.read();await refresh();}
       catch(err){this.status.textContent=err.message;this.draft();}
       finally{this.busy=false;button.disabled=false;button.textContent='Send message';this.text.disabled=false;this.root.querySelector('[data-attach]').disabled=false;this.text.focus();}
     }
