@@ -75,6 +75,7 @@
 
 {{ 'ss-admin-powers.css' | asset_url | stylesheet_tag }}
 {{ 'ss-admin-workspace.css' | asset_url | stylesheet_tag }}
+{{ 'ss-store-welcome.css' | asset_url | stylesheet_tag }}
 
 
 {%- if customer == nil and is_prospect_demo_candidate == false -%}
@@ -668,6 +669,11 @@
     </div>
   </div>
 
+  <button type="button" class="ss-welcome-entry" data-ss-welcome-open>
+    <span><strong>A welcome from Ryan</strong><span>A quick hello from the people behind your store.</span></span>
+    <span class="ss-welcome-entry-link">Read welcome →</span>
+  </button>
+
   <!-- MAIN DASHBOARD CARD WITH TABS -->
   <div class="ap-main-card">
 
@@ -677,21 +683,22 @@
       <div class="ap-main-tabs" role="tablist">
         <button class="ap-main-tab-btn active" id="apTabBtnProducts" data-main-tab="apPanelProducts" role="tab" aria-selected="true" aria-controls="apPanelProducts"><span class="ap-tab-icon">📦</span><span class="ap-tab-label">Products</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnAddProducts" data-main-tab="apPanelAddProducts" role="tab" aria-selected="false" aria-controls="apPanelAddProducts"><span class="ap-tab-icon">✨</span><span class="ap-tab-label">Add Products</span></button>
-        {%- unless is_prospect_demo_candidate -%}
         <button class="ap-main-tab-btn" id="apTabBtnMessages" data-main-tab="apPanelMessages" role="tab" aria-selected="false" aria-controls="apPanelMessages"><span class="ap-tab-icon" aria-hidden="true">✉</span><span class="ap-tab-label">Messages</span></button>
-        {%- endunless -%}
         <button class="ap-main-tab-btn" id="apTabBtnMembers" data-main-tab="apPanelMembers" role="tab" aria-selected="false" aria-controls="apPanelMembers"><span class="ap-tab-icon">👥</span><span class="ap-tab-label">Members</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnSettings" data-main-tab="apPanelSettings" role="tab" aria-selected="false" aria-controls="apPanelSettings"><span class="ap-tab-icon">⚙️</span><span class="ap-tab-label">Settings</span></button>
         <button class="ap-main-tab-btn" id="apTabBtnDanger" data-main-tab="apPanelDanger" role="tab" aria-selected="false" aria-controls="apPanelDanger"><span class="ap-tab-icon">⚙</span><span class="ap-tab-label">Store controls</span></button>
       </div>
     </div>
 
-    {%- unless is_prospect_demo_candidate -%}
     <div id="apPanelMessages" class="ap-main-panel" role="tabpanel" aria-labelledby="apTabBtnMessages">
-      <div class="ap-panel-head"><div><span class="ap-panel-kicker">A real person, here to help</span><h2>Messages with Stella &amp; Sage</h2><p>Questions about your artwork or store? Leave our small team a message. Replies appear here when we’re able to respond.</p></div></div>
-      <div data-ss-message-workspace></div>
+      <div class="ap-panel-head"><div><span class="ap-panel-kicker">A real person, here to help</span><h2>Messages with Stella &amp; Sage</h2></div></div>
+      {% render 'ss-store-welcome', is_demo: is_prospect_demo_candidate %}
+      {%- if is_prospect_demo_candidate -%}
+        <p class="ss-welcome-claim-note">You can explore your demo at your own pace. Claim your store when you’re ready to keep it and send us a message.</p>
+      {%- else -%}
+        <div data-ss-message-workspace></div>
+      {%- endif -%}
     </div>
-    {%- endunless -%}
 
     <!-- PRODUCTS PANEL -->
     <div id="apPanelProducts" class="ap-main-panel active" role="tabpanel" aria-labelledby="apTabBtnProducts">
@@ -946,6 +953,7 @@
 {%- endif -%}
 <script src="{{ 'ss-admin-powers-core.js' | asset_url }}" defer></script>
 <script src="{{ 'ss-admin-workspace.js' | asset_url }}" defer></script>
+<script src="{{ 'ss-store-welcome.js' | asset_url }}" defer></script>
 {%- unless is_prospect_demo_candidate -%}
   <script src="{{ 'ss-admin-fundraiser.js' | asset_url }}" defer></script>
 {%- endunless -%}
