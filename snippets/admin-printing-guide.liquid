@@ -1,0 +1,31 @@
+{{ 'ss-printing-guide.css' | asset_url | stylesheet_tag }}
+<button class="ap-print-guide-link" id="apPrintGuideOpen" type="button" aria-haspopup="dialog" aria-controls="apPrintGuide">
+  <span><strong>Printing: what to know</strong><small>Colors, fabric feel &amp; care · 2-minute read</small></span>
+  <span aria-hidden="true">Read guide ↗</span>
+</button>
+<dialog id="apPrintGuide" class="ap-print-guide" aria-labelledby="apPrintGuideTitle" aria-describedby="apPrintGuideIntro">
+  <header class="ap-print-guide-head">
+    <div><span class="ap-print-guide-kicker">Stella &amp; Sage · Product studio</span><h2 id="apPrintGuideTitle">Printing: what to know</h2></div>
+    <button type="button" id="apPrintGuideClose" aria-label="Close printing guide" hidden>×</button>
+  </header>
+  <div class="ap-print-guide-content" tabindex="0" aria-label="Printing guide contents">
+    <p id="apPrintGuideIntro">A quick guide before you create products for your store. Please read it once; you can find it again above the products on the Add tab.</p>
+    <section class="ap-print-guide-black"><h3>Black ink may look lighter</h3><p>Printed black can look grayish or lighter than the fabric, especially on black, vintage-black, and charcoal garments. This can happen with both DTG and DTFlex. A white layer beneath the color can affect the result, so black ink may not blend into a black shirt the way the mockup suggests.</p><p><strong>For clearer lettering:</strong> use an outline that stands out from the shirt. An outline improves readability; it does not make the black fill match the fabric.</p></section>
+    <section><h3>The mockup is a preview</h3><p>Screen colors are a guide, not an exact ink match. Fabric color, texture, and the printing process affect the finished appearance. Check every garment color you offer, and consider ordering a sample before sharing a new design.</p></section>
+    <section><h3>DTG · Ink printed onto the garment</h3><p>DTG offers a soft, breathable feel. On colored or dark garments, a white underbase may affect the colors. Fades, shadows, and partly transparent artwork can look grainy or lighter than expected. A temporary pretreatment mark or mild vinegar-like smell can occur and typically clears after washing.</p></section>
+    <section><h3>DTFlex · A print transferred with heat</h3><p>DTFlex produces a defined print that sits on the fabric. It can feel firmer initially and soften after a few washes; large solid areas can feel less breathable. Small traces of the white backing may be visible. Use solid artwork with clear edges—tiny dots, thin lines, and fades to transparency may not hold up or reproduce well.</p></section>
+    <section><h3>Help your print last</h3><p>Follow the garment’s care label. Wash prints inside out in cold water and avoid ironing directly on the design. Hot washing can damage DTFlex prints; iron from the reverse side if needed.</p></section>
+    <p class="ap-print-guide-sources">Adapted from Printful’s guidance:
+      <a href="https://help.printful.com/hc/en-us/articles/50264096966289-Why-does-my-design-look-different-from-what-I-intended" target="_blank" rel="noopener">DTG appearance</a>,
+      <a href="https://help.printful.com/hc/en-us/articles/50264342999313-What-is-DTFlex-printing-and-how-does-it-work" target="_blank" rel="noopener">DTFlex</a>,
+      <a href="https://help.printful.com/hc/en-us/articles/50264395400337-Disclaimers-for-Printing-Techniques" target="_blank" rel="noopener">printing notes</a>, and
+      <a href="https://www.printful.com/ca/blog/preparing-dtf-print-file" target="_blank" rel="noopener">artwork tips</a>.
+    </p>
+  </div>
+  <footer class="ap-print-guide-footer">
+    <label id="apPrintGuideAckLabel"><input type="checkbox" id="apPrintGuideAck"> <span>I’ve read the guide and understand that printed colors and texture can differ from the mockup.</span></label>
+    <p id="apPrintGuideStatus" role="status" aria-live="polite"></p>
+    <button id="apPrintGuideContinue" type="button" disabled>I’ve read it — continue</button>
+  </footer>
+</dialog>
+<script src="{{ 'ss-printing-guide.js' | asset_url }}" defer></script>

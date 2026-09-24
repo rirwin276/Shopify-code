@@ -215,6 +215,7 @@
     SSAP.editorSecret = {% if is_prospect_demo_candidate %}""{% else %}{{ editor_secret | json }}{% endif %};
     SSAP.shopLogoSrc = {{ ap_shop_logo_src | json }};
     SSAP.joinLink = {{ join_link | json }};
+    SSAP.printGuideRead = {% if customer.tags contains 'ss-print-guide-v1-read' %}true{% else %}false{% endif %};
     SSAP.customerId = {% if customer %}{{ customer.id | json }}{% else %}null{% endif %};
     SSAP.customerEmail = {% if customer %}{{ customer.email | json }}{% else %}null{% endif %};
     SSAP.dashboardUrl = {{ dashboard_url | json }};
@@ -727,6 +728,8 @@
           <p>Choose your next piece. Preview the details and pricing, then make it your own.</p>
         </div>
       </div>
+
+      {% render 'admin-printing-guide' %}
 
       <section class="ap-product-box ap-product-box--builder">
         <div class="ap-product-box-head">
