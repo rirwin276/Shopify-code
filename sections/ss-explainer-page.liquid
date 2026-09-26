@@ -1,12 +1,7 @@
-{% comment %}How it works: server-rendered guide with existing signed-in request routing.{% endcomment %}
+{% comment %}How it works: send visitors to the request form, which supports guest previews and signed-in builds.{% endcomment %}
 {% assign form_page_url = '/pages/request-storefront-form' %}
 {% assign dashboard_url = '/pages/portal' %}
-{% if customer %}
-  {% assign request_cta_url = form_page_url %}
-{% else %}
-  {% assign encoded_return = form_page_url | url_encode %}
-  {% assign request_cta_url = routes.storefront_login_url | append: '?return_to=' | append: encoded_return %}
-{% endif %}
+{% assign request_cta_url = form_page_url %}
 {{ 'ss-guide-pages.css' | asset_url | stylesheet_tag }}
 
 <section class="ss-guide" data-ss-exp>
