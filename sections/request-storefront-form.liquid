@@ -9,7 +9,7 @@
 {% assign anonymous_preview_api_base_url = section.settings.anonymous_preview_api_base_url | default: "https://anonymous-demo-preview-production.up.railway.app" %}
 
 {% capture encoded_form_return %}{{ request.path | url_encode }}{% endcapture %}
-{% assign login_url = routes.account_login_url | append: '?return_url=' | append: encoded_form_return %}
+{% assign login_url = '/customer_authentication/login?return_to=' | append: encoded_form_return %}
 
 {{ 'ss-wow.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'ss-wow.js' | asset_url }}" defer></script>
@@ -23,7 +23,7 @@
   {% unless customer %}
     <div class="sf-entry-choice ss-reveal" role="note">
       <div><strong>Ready to create your store?</strong><span>Sign in to build it directly in your account. Or try a preview below without signing in.</span></div>
-      <a href="{{ login_url }}">Sign in or create account</a>
+      <a href="{{ login_url | escape }}">Sign in or create account</a>
     </div>
   {% endunless %}
     <div class="sf-form-wrap ss-reveal">
