@@ -1,0 +1,63 @@
+name: Storefront journey tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/variant-picker.js'
+      - 'assets/ss-prospect-admin-demo.js'
+      - 'assets/ss-request-form-v2.js'
+      - 'assets/ss-anonymous-*.js'
+      - 'layout/theme.liquid'
+      - 'sections/**'
+      - 'snippets/**'
+      - 'templates/**'
+      - 'tests/*auth*.test.cjs'
+      - 'tests/anonymous-request-form.test.cjs'
+      - 'tests/anonymous-private-preview.test.cjs'
+      - 'tests/footer-policy-link.test.cjs'
+      - 'tests/prospect-product-context.test.cjs'
+      - 'tests/variant-picker-preview.test.cjs'
+      - 'tests/preview-transitions.test.cjs'
+      - '.github/workflows/storefront-journey-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'assets/variant-picker.js'
+      - 'assets/ss-prospect-admin-demo.js'
+      - 'assets/ss-request-form-v2.js'
+      - 'assets/ss-anonymous-*.js'
+      - 'layout/theme.liquid'
+      - 'sections/**'
+      - 'snippets/**'
+      - 'templates/**'
+      - 'tests/*auth*.test.cjs'
+      - 'tests/anonymous-request-form.test.cjs'
+      - 'tests/anonymous-private-preview.test.cjs'
+      - 'tests/footer-policy-link.test.cjs'
+      - 'tests/prospect-product-context.test.cjs'
+      - 'tests/variant-picker-preview.test.cjs'
+      - 'tests/preview-transitions.test.cjs'
+      - '.github/workflows/storefront-journey-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  storefront-journeys:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --no-save jsdom@30.0.1 liquidjs@10.29.0
+      - run: >-
+          node --test
+          tests/storefront-auth-return.test.cjs
+          tests/footer-policy-link.test.cjs
+          tests/anonymous-request-form.test.cjs
+          tests/anonymous-private-preview.test.cjs
+          tests/preview-transitions.test.cjs
+          tests/prospect-product-context.test.cjs
+          tests/variant-picker-preview.test.cjs
