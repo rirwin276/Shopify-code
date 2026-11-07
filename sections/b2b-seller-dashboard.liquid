@@ -32,7 +32,7 @@
   <script>
     (function(){
       var returnUrl = encodeURIComponent("{{ login_redirect_path }}");
-      window.location.href = "{{ routes.storefront_login_url }}?return_to=" + returnUrl;
+      window.location.href = "/customer_authentication/login?return_to=" + returnUrl;
     })();
   </script>
 

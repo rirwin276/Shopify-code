@@ -15,12 +15,17 @@
     - access_tag (single line text) optional
 {%- endcomment -%}
 
-{%- assign login_path = section.settings.login_path | default: '/account/login' -%}
+{%- assign login_path = section.settings.login_path | default: '/customer_authentication/login' -%}
+{%- if login_path == '/account/login' -%}
+  {%- assign login_path = '/customer_authentication/login' -%}
+{%- endif -%}
 {%- assign encoded_portal_path = '/pages/portal' | url_encode -%}
 {%- assign login_redirect = login_path -%}
-{%- if login_path contains '/account/login' -%}
+{%- if login_path contains '/account/login' or login_path contains '/customer_authentication/login' -%}
   {%- unless login_path contains 'return_to=' -%}
-    {%- assign login_redirect = login_path | append: '?return_to=' | append: encoded_portal_path -%}
+    {%- assign login_separator = '?' -%}
+    {%- if login_path contains '?' -%}{%- assign login_separator = '&' -%}{%- endif -%}
+    {%- assign login_redirect = login_path | append: login_separator | append: 'return_to=' | append: encoded_portal_path -%}
   {%- endunless -%}
 {%- endif -%}
 
@@ -157,7 +162,7 @@
       "type": "text",
       "id": "login_path",
       "label": "Login redirect path",
-      "default": "/account/login"
+      "default": "/customer_authentication/login"
     },
     {
       "type": "richtext",
