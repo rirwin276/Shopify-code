@@ -9,7 +9,8 @@
   var root = document.querySelector('.ap-wrap--prospect-demo');
   var claimUrl = cfg.joinLink || ('/pages/join-store?shop=' + encodeURIComponent(handle));
   var apiBase = '/apps/ss/relay/prospect/' + encodeURIComponent(handle);
-  var previewQuery = '?preview=' + encodeURIComponent(cfg.previewToken || '1');
+  var previewQuery = '?preview=' + encodeURIComponent(cfg.previewToken || '1') +
+    '&sh=' + encodeURIComponent(handle);
   var buildWatchActive = false;
   var demo = window.SSProspectDemo = {
     ready: false,

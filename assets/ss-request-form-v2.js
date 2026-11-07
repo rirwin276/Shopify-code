@@ -55,7 +55,7 @@
   }
 
   function wireRequestLogin() {
-    var loginHref = '/account/login?return_to=' + encodeURIComponent('/pages/request-storefront-form');
+    var loginHref = '/customer_authentication/login?return_to=' + encodeURIComponent('/pages/request-storefront-form');
     qsa('[data-storefront-request-form] .sf-auth-actions a.sf-btn--solid').forEach(function (link) {
       link.setAttribute('href', loginHref);
       link.removeAttribute('onclick');

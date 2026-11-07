@@ -16,7 +16,7 @@
           "type": "custom-liquid",
           "name": "t:names.custom_liquid",
           "settings": {
-            "custom_liquid": "{% unless customer %}\n  {% assign return_to = '/pages/request-storefront-form' %}\n\n  <div style=\"max-width:600px;margin:60px auto;text-align:center;\">\n    <h2>You must be signed in to request a storefront</h2>\n    <p>Create an account or sign in to continue.</p>\n\n    <a\n      href=\"/account/login?return_url={{ return_to | url_encode }}\"\n      style=\"display:inline-block;margin-top:20px;padding:12px 20px;border-radius:999px;background:#0b0b0b;color:#fff;font-weight:900;text-decoration:none;\"\n    >\n      Sign in\n    </a>\n  </div>\n{% else %}\n  {%- comment -%} Logged in: show nothing here (form displays below / elsewhere) {%- endcomment -%}\n{% endunless %}"
+            "custom_liquid": "{% unless customer %}\n  {% assign return_to = '/pages/request-storefront-form' %}\n\n  <div style=\"max-width:600px;margin:60px auto;text-align:center;\">\n    <h2>You must be signed in to request a storefront</h2>\n    <p>Create an account or sign in to continue.</p>\n\n    <a\n      href=\"/customer_authentication/login?return_to={{ return_to | url_encode }}\"\n      style=\"display:inline-block;margin-top:20px;padding:12px 20px;border-radius:999px;background:#0b0b0b;color:#fff;font-weight:900;text-decoration:none;\"\n    >\n      Sign in\n    </a>\n  </div>\n{% else %}\n  {%- comment -%} Logged in: show nothing here (form displays below / elsewhere) {%- endcomment -%}\n{% endunless %}"
           },
           "blocks": {}
         }

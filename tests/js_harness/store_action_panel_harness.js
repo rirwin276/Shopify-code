@@ -136,7 +136,8 @@ const LANDSCAPE = [1024, 1180, 1280, 1366, 1440];
   }
 
   const browser = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium', args: ['--no-sandbox'],
+    args: ['--no-sandbox'],
+    ...(process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {}),
   });
 
   for (const [label, { scope, buttons }] of Object.entries(SCENARIOS)) {

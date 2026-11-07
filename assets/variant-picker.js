@@ -1,7 +1,7 @@
 import { Component } from '@theme/component';
 import { VariantSelectedEvent, VariantUpdateEvent } from '@theme/events';
 import { morph } from '@theme/morph';
-import { requestYieldCallback, getViewParameterValue } from '@theme/utilities';
+import { getViewParameterValue } from '@theme/utilities';
 
 /**
  * @typedef {object} VariantPickerRefs
@@ -70,30 +70,7 @@ export default class VariantPicker extends Component {
     const newUrl = selectedOption.dataset.connectedProductUrl;
     const loadsNewProduct = isOnProductPage && !!newUrl && newUrl !== currentUrl;
 
-    this.fetchUpdatedSection(this.buildRequestUrl(selectedOption), loadsNewProduct);
-
-    const url = new URL(window.location.href);
-
-    const variantId = selectedOption.dataset.variantId || null;
-
-    if (isOnProductPage) {
-      if (variantId) {
-        url.searchParams.set('variant', variantId);
-      } else {
-        url.searchParams.delete('variant');
-      }
-    }
-
-    // Change the path if the option is connected to another product via combined listing.
-    if (loadsNewProduct) {
-      url.pathname = newUrl;
-    }
-
-    if (url.href !== window.location.href) {
-      requestYieldCallback(() => {
-        history.replaceState({}, '', url.toString());
-      });
-    }
+    this.fetchUpdatedSection(this.buildRequestUrl(selectedOption), loadsNewProduct, isOnProductPage);
   }
 
   /**
@@ -184,47 +161,66 @@ export default class VariantPicker extends Component {
   buildRequestUrl(selectedOption, source = null, sourceSelectedOptionsValues = []) {
     // this productUrl and pendingRequestUrl will be useful for the support of combined listing. It is used when a user changes variant quickly and those products are using separate URLs (combined listing).
     // We create a new URL and abort the previous fetch request if it's still pending.
-    let productUrl = selectedOption.dataset.connectedProductUrl || this.#pendingRequestUrl || this.dataset.productUrl;
+    const productUrl = selectedOption.dataset.connectedProductUrl || this.#pendingRequestUrl || this.dataset.productUrl;
     this.#pendingRequestUrl = productUrl;
-    const params = [];
+    const requestUrl = new URL(productUrl || window.location.pathname, window.location.origin);
+    const currentUrl = new URL(window.location.href);
+    const params = requestUrl.searchParams;
     const viewParamValue = getViewParameterValue();
 
     // preserve view parameter, if it exists, for alternative product view testing
-    if (viewParamValue) params.push(`view=${viewParamValue}`);
+    if (viewParamValue) params.set('view', viewParamValue);
+
+    // Guest previews are authorized by their existing URL context. Anchor
+    // rewriting cannot preserve that context for these section fetches.
+    if (requestUrl.origin === currentUrl.origin && /\/products\/[^/]+\/?$/.test(requestUrl.pathname)) {
+      for (const name of ['preview', 'sh', 'shop']) {
+        const value = currentUrl.searchParams.get(name);
+        if (value && !params.has(name)) params.set(name, value);
+      }
+    }
 
     if (this.selectedOptionsValues.length && !source) {
-      params.push(`option_values=${this.selectedOptionsValues.join(',')}`);
+      params.set('option_values', this.selectedOptionsValues.join(','));
+      params.delete('variant');
     } else if (source === 'product-card') {
       if (this.selectedOptionsValues.length) {
-        params.push(`option_values=${sourceSelectedOptionsValues.join(',')}`);
+        params.set('option_values', sourceSelectedOptionsValues.join(','));
       } else {
-        params.push(`option_values=${selectedOption.dataset.optionValueId}`);
+        params.set('option_values', selectedOption.dataset.optionValueId || '');
       }
+      params.delete('variant');
     }
 
     // If variant-picker is a child of quick-add-component or swatches-variant-picker-component, we need to append section_id=section-rendering-product-card to the URL
     if (this.closest('quick-add-component') || this.closest('swatches-variant-picker-component')) {
-      if (productUrl?.includes('?')) {
-        productUrl = productUrl.split('?')[0];
-      }
-      return `${productUrl}?section_id=section-rendering-product-card&${params.join('&')}`;
+      params.set('section_id', 'section-rendering-product-card');
     }
-    return `${productUrl}?${params.join('&')}`;
+    return requestUrl.toString();
   }
 
   /**
    * Fetches the updated section.
    * @param {string} requestUrl - The request URL.
    * @param {boolean} shouldMorphMain - If the entire main content should be morphed. By default, only the variant picker is morphed.
+   * @param {boolean} shouldUpdateUrl - Whether this is the main product page picker.
    */
-  fetchUpdatedSection(requestUrl, shouldMorphMain = false) {
+  fetchUpdatedSection(requestUrl, shouldMorphMain = false, shouldUpdateUrl = false) {
     // We use this to abort the previous fetch request if it's still pending.
     this.#abortController?.abort();
-    this.#abortController = new AbortController();
+    const controller = new AbortController();
+    this.#abortController = controller;
 
-    fetch(requestUrl, { signal: this.#abortController.signal })
-      .then((response) => response.text())
+    fetch(requestUrl, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error('Unable to load the selected variant.');
+        return response.text();
+      })
       .then((responseText) => {
+        // An older response body can finish after abort or after a newer
+        // selection. It must not replace the current picker, media, or URL.
+        if (controller.signal.aborted || this.#abortController !== controller) return;
+
         this.#pendingRequestUrl = undefined;
         const html = new DOMParser().parseFromString(responseText, 'text/html');
         // Defer is only useful for the initial rendering of the page. Remove it here.
@@ -232,22 +228,37 @@ export default class VariantPicker extends Component {
 
         const textContent = html.querySelector(`variant-picker script[type="application/json"]`)?.textContent;
         if (!textContent) return;
+        const variant = JSON.parse(textContent);
+        let newProduct;
 
         if (shouldMorphMain) {
           this.updateMain(html);
         } else {
-          const newProduct = this.updateVariantPicker(html);
+          newProduct = this.updateVariantPicker(html);
+        }
 
-          // We grab the variant object from the response and dispatch an event with it.
-          if (this.selectedOptionId) {
-            this.dispatchEvent(
-              new VariantUpdateEvent(JSON.parse(textContent), this.selectedOptionId, {
-                html,
-                productId: this.dataset.productId ?? '',
-                newProduct,
-              })
-            );
+        // Option attributes can still describe the previous color/size while
+        // requests overlap. The successful response resolves the combination.
+        if (shouldUpdateUrl) {
+          const url = new URL(window.location.href);
+          if (variant?.id) {
+            url.searchParams.set('variant', variant.id);
+          } else {
+            url.searchParams.delete('variant');
           }
+          if (shouldMorphMain) url.pathname = new URL(requestUrl, window.location.href).pathname;
+          if (url.href !== window.location.href) history.replaceState({}, '', url.toString());
+        }
+
+        // We grab the variant object from the response and dispatch an event with it.
+        if (!shouldMorphMain && this.selectedOptionId) {
+          this.dispatchEvent(
+            new VariantUpdateEvent(variant, this.selectedOptionId, {
+              html,
+              productId: this.dataset.productId ?? '',
+              newProduct,
+            })
+          );
         }
       })
       .catch((error) => {

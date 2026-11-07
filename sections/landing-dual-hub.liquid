@@ -12,7 +12,7 @@
 {%- assign dashboard_url = section.settings.dashboard_url | default: '/pages/portal' -%}
 {%- assign request_url = section.settings.request_url | default: '/pages/private-storefronts' -%}
 {%- assign mo_type = section.settings.metaobject_type | default: 'storefront' | strip -%}
-{%- capture login_url -%}{{ routes.storefront_login_url }}?return_to={{ dashboard_url | url_encode }}{%- endcapture -%}
+{%- capture login_url -%}/customer_authentication/login?return_to={{ dashboard_url | url_encode }}{%- endcapture -%}
 
 {%- comment -%}Logged-in: parse storefront tags & metaobjects, same core logic as previous homepage.{%- endcomment -%}
 {%- assign has_storefront = false -%}
