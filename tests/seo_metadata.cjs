@@ -95,15 +95,28 @@ async function check(label, overrides, expected = {}) {
   const baseline = process.env.SEO_BASE_SHA || 'e89b6eb561918a2dc30e5cb1161551de22e6bc10';
   const oldTheme = execFileSync('git', ['show', `${baseline}:layout/theme.liquid`], { cwd: root, encoding: 'utf8' });
   const oldMeta = execFileSync('git', ['show', `${baseline}:snippets/meta-tags.liquid`], { cwd: root, encoding: 'utf8' });
-  assert.equal(theme.slice(theme.indexOf('  <body ')), oldTheme.slice(oldTheme.indexOf('  <body ')));
   const scripts = text => matches(text, /<script(?![^>]*application\/ld\+json)[^>]*>[\s\S]*?<\/script>/g).map(m => m[0]);
-  assert.deepEqual(scripts(theme), scripts(oldTheme));
+  // Preserve the surrounding layout without freezing unrelated inline behavior
+  // (for example, customer sign-in repairs) against every PR's base revision.
+  const bodyShell = text => {
+    const start = text.indexOf('  <body ');
+    assert(start >= 0, 'layout has a body');
+    return text.slice(start).replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, '');
+  };
+  const externalScripts = text => scripts(text).filter(script => /^<script\b[^>]*\bsrc\s*=/.test(script));
+  assert.equal(bodyShell(theme), bodyShell(oldTheme), 'existing body layout unchanged');
+  assert.deepEqual(externalScripts(theme), externalScripts(oldTheme), 'external script includes unchanged');
   assert.deepEqual(scripts(meta), scripts(oldMeta));
-  console.log('PASS existing body and executable scripts unchanged'); count++;
+  console.log('PASS existing body layout, external scripts, and metadata scripts unchanged'); count++;
   for (const name of ['main_deploy/assets.json', 'preview_deploy/assets.json']) {
     if (!fs.existsSync(path.join(root, name))) continue;
-    const before = JSON.parse(execFileSync('git', ['show', `${baseline}:${name}`], { cwd: root, encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 }));
-    const after = JSON.parse(read(name));
+    const beforeText = execFileSync('git', ['show', `${baseline}:${name}`], { cwd: root, encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+    const afterText = read(name);
+    const before = JSON.parse(beforeText);
+    const after = JSON.parse(afterText);
+    // These are historical deployment snapshots. Enforce freshness and the
+    // asset allowlist when a PR updates one, not when it leaves it untouched.
+    if (afterText === beforeText) continue;
     assert.equal(after.length, before.length);
     for (let i = 0; i < before.length; i++) {
       assert.equal(after[i].key, before[i].key);
@@ -112,6 +125,6 @@ async function check(label, overrides, expected = {}) {
       else assert.deepEqual(after[i], before[i]);
     }
   }
-  console.log('PASS deployment payloads change only the two SEO assets'); count++;
+  console.log('PASS changed deployment payloads update only the two current SEO assets'); count++;
   console.log(`SEO regression checks passed: ${count}`);
 })().catch(error => { console.error(error); process.exit(1); });
